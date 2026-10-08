@@ -14,3 +14,7 @@ P1.1 GREEN: installed consumer 1/1, 24 frames with final depth/lwir/radar. Core 
 Ruling: redact only the owner approval’s absolute private worktree path to satisfy existing public-leak gate; original approval remains in commit 1445f18 and original digest is retained. Authorization meaning unchanged; cost is requiring Git history for verbatim original.
 
 P1.1 committed 947b72d. P1.2 RED missing contracts/OpenAPI; GREEN 4 strict contract tests, 1 schema/export test, installed consumer 1/1 (62.179s). Full resolved dependencies audited before installation; no known vulnerabilities.
+
+P1.2 committed e5335ec. P1.3 implements isolated file/UVC/RTSP and clocks/calibration. GREEN: source 4, clock 4, actual detector pipeline 2, real local RTSP 1. Initial timeout/closed-queue/RTSP failures retained in p13 evidence; hardware compatibility unqualified. Remaining resource/adversarial checks continue.
+Ruling: generic OpenCV timestamps cannot be qualified exposure timestamps; those real pixel paths execute inference but withdraw current evidence. Cost: no current safety detections through these generic drivers until a qualified capture clock adapter exists.
+Ruling: native virtualization reports unavailable; use QEMU TCG inside an isolated local tool container to boot a separate Linux guest. This is emulated Linux, not native ARM hardware performance.
