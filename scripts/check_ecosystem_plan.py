@@ -220,6 +220,29 @@ def validate(root, plan=None):
             if row["id"] == phases["current_phase"]
             else "planned"
         )
+        if expected == "planned" and row.get("status") == "in_progress":
+            work = [
+                value
+                for key, value in phases.get("software_work", {}).items()
+                if re.fullmatch(r"P" + str(row["id"]) + r"\.\d+", key)
+                and isinstance(value, dict)
+                and value.get("status") == "in_progress"
+                and value.get("implemented")
+                and value.get("pending")
+            ]
+            require(work, "parallel phase needs explicit implemented/pending work")
+            require(
+                all(rows[n]["implementation_complete"] for n in row["depends_on"]),
+                "parallel phase dependencies incomplete",
+            )
+            for item in work:
+                proof = read_json(plan / safe_relative(item.get("evidence", "absent.json")))
+                require(
+                    proof.get("hardware_qualified") is False
+                    and proof.get("field_qualified") is False,
+                    "parallel software evidence must not claim physical qualification",
+                )
+            expected = "in_progress"
         require(row.get("status") == expected, "unexpected phase status")
     require(
         phases.get("local_commit_status") == "committed"
@@ -459,6 +482,18 @@ def self_test(root):
         ),
         "phase escalation": lambda p: mutate_json(
             p / "PHASES.json", lambda d: d.update(current_phase=6)
+        ),
+        "parallel phase missing evidence": lambda p: mutate_json(
+            p / "PHASES.json",
+            lambda d: d["software_work"]["P3.1"].update(evidence="absent.json"),
+        ),
+        "parallel phase unreported work": lambda p: mutate_json(
+            p / "PHASES.json",
+            lambda d: d["software_work"].pop("P3.1"),
+        ),
+        "parallel phase unmet dependency": lambda p: mutate_json(
+            p / "PHASES.json",
+            lambda d: d["phases"][3].update(depends_on=[1, 2]),
         ),
         "tampered autonomy": lambda p: (p / "LATEST-OWNER-AUTONOMY.md").write_text("forged"),
         "missing autonomy": lambda p: mutate_json(

@@ -40,4 +40,4 @@ Run `python scripts/check_ecosystem_plan.py --self-test` and `python scripts/ver
 
 [APPLIANCE-RUNTIME](APPLIANCE-RUNTIME.md) specifies A01–A09; [HOME-CAMERA-COMPATIBILITY](HOME-CAMERA-COMPATIBILITY.md) covers smart-camera/NVR paths. Original Phase 0 wording and negative evidence remain in Git history and the historical snapshot. Automatic software advancement now follows the later owner directive; no release gate or physical qualification is waived. The [Phase 1 completion snapshot](evidence/phase1/phase1-completion-snapshot.json) retains the earlier stop state.
 
-P2 implementation: [sensor packet/replay contracts and pinned sources](P2-SENSOR-ADAPTERS.md).
+P2/P3 implementation: [sensor packet/replay contracts and pinned sources](P2-SENSOR-ADAPTERS.md), [installed ROS sidecar](../../../integrations/edge/ros2/README.md), and [executed ROS software evidence](evidence/phase2/ros2.json). Registration, nonvisible semantic providers and physical qualification remain pending.

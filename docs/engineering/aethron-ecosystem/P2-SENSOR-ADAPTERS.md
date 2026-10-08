@@ -1,6 +1,6 @@
 # P2.1 sensor packet and replay implementation
 
-This checkpoint implements raw sensor decoding and replay inside the installed `aethron_edge.sensors` package. It is partial P2.1. Real vendor SDK acquisition, ROS node installation, nonvisible semantic models, qualified clock mapping and physical calibration remain pending. Nothing here promotes synthetic or recorded input into current live support.
+This checkpoint implements raw sensor decoding and replay inside the installed `aethron_edge.sensors` package. It is partial P2.1. The optional ROS Jazzy node now runs against installed wheels and real DDS; vendor-specific acquisition, nonvisible semantic models, qualified clock mapping and physical calibration remain pending. Nothing here promotes synthetic or recorded input into current live support.
 
 ## Implemented contract
 
@@ -41,4 +41,6 @@ Tests exercise byte order, padding, depth scale, nonfinite points/depth, organiz
 
 ## Next implementation and qualification
 
-Implement a read-only ROS Image/CameraInfo/PointCloud2 ingress bridge and its installed replay tests, preserving incoming frame/clock provenance and invalidating calibration when dimensions/mount/frame change. Pin the actual ROS dependency build and distinguish software message fixtures from a running ROS node. Then connect licensed nonvisible pixels/packets to evaluated modality-specific models; raw radar points do not themselves establish pedestrian or UAV classes. Physical acquisition/clock, optics, scale, extrinsics, darkness/weather, power, thermal and SKU/firmware gates stay pending until measured.
+The [installed ROS bridge](../../../integrations/edge/ros2/README.md) implements Image/CameraInfo/PointCloud2 subscriptions, explicit clock mapping, pending-frame bounds, calibration invalidation, loss handling and headless status. Its actual Jazzy/DDS software tuple and retained failures are in [ROS evidence](evidence/phase2/ros2.json). The initial CameraInfo contract accepts only zero-distortion monocular identity rectification. Implement validated distortion/rig registration and supervisor/model-provider integration next. Then connect licensed nonvisible pixels/packets to evaluated modality-specific models; raw radar points do not themselves establish pedestrian or UAV classes. Physical acquisition/clock, optics, scale, extrinsics, darkness/weather, power, thermal and SKU/firmware gates stay pending until measured.
+
+ROS provenance: [pinned SDK source records](evidence/phase2/ros2-provenance.json), [ROS clock design](https://design.ros2.org/articles/clock_and_time.html), and [official runner matrix](https://docs.github.com/en/actions/reference/runners/github-hosted-runners) were read on 2026-10-08. ROS time may pause/jump; host receipt is not exposure time. The new ARM64 workflow is prepared, not remotely executed.

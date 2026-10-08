@@ -79,7 +79,7 @@ def run(wheelhouse: Path, output: Path):
             stdout=subprocess.DEVNULL,
         )
         # Exercise new raw sensor contracts from installed wheels, outside checkout.
-        for test_name in ("test_sensor_packets.py", "test_sensor_replay.py"):
+        for test_name in ("test_sensor_packets.py", "test_sensor_replay.py", "test_sensor_ros2.py"):
             shutil.copyfile(ROOT / "tests/integration" / test_name, work / test_name)
         subprocess.run(
             [

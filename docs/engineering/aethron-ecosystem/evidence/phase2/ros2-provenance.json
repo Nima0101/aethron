@@ -1,0 +1,27 @@
+[
+  {
+    "url": "https://raw.githubusercontent.com/ros2/common_interfaces/a941f14bb318d8d904505ed935ccbb97f24a70a4/sensor_msgs/msg/CameraInfo.msg",
+    "sha256": "1fced83678f5f2708aff8540987594692452de9f0b43905ce3bfba689226f3aa",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/ros2/common_interfaces/a941f14bb318d8d904505ed935ccbb97f24a70a4/sensor_msgs/msg/RegionOfInterest.msg",
+    "sha256": "9c07010ab5ffddd1202876a778b44c99cafa780bc0503041c3fd935870a14c6a",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/ros2/rclpy/4e607c09d624debc39a4ae5405680c06d87fac35/rclpy/rclpy/qos.py",
+    "sha256": "0fba9cda7e15dd40f3ed32a0b3d8e60ef9060040e201e886aa1cebb2a61745f6",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/ros2/rclpy/4e607c09d624debc39a4ae5405680c06d87fac35/rclpy/rclpy/node.py",
+    "sha256": "8b7fe0ea64e0de12cc1d5d01ebf56c202fa6e153251eb71dfff93e35eb5b3c80",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/ros2/rclpy/4e607c09d624debc39a4ae5405680c06d87fac35/rclpy/package.xml",
+    "sha256": "6367e8f5f30e81867b246a8750ee900d7276f1f52253ba5140c188e360e6cb0f",
+    "retrieved": "2026-10-08"
+  }
+]

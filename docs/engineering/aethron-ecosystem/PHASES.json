@@ -66,7 +66,7 @@
     {
       "id": 3,
       "title": "Platform, vehicle and UAS integration",
-      "status": "planned",
+      "status": "in_progress",
       "depends_on": [
         1
       ],
@@ -241,15 +241,32 @@
       "implemented": [
         "bounded_raw_image_and_pointcloud_decoders",
         "rectified_pinhole_geometry",
-        "recorded_clock_binary_replay"
+        "recorded_clock_binary_replay",
+        "installed_ros2_jazzy_image_camera_info_pointcloud_subscriber",
+        "explicit_expiring_clock_mapping",
+        "bounded_headless_ros_status_and_shutdown"
       ],
       "pending": [
-        "installed_ros2_vendor_bridge",
         "licensed_real_nonvisible_packet_replay",
-        "live_clock_calibration_admission"
+        "live_clock_calibration_admission",
+        "distortion_and_rig_extrinsic_registration",
+        "supervisor_and_nonvisible_model_provider_integration"
       ],
-      "evidence": "evidence/phase2/sensors.json"
+      "evidence": "evidence/phase2/sensors.json",
+      "ros_evidence": "evidence/phase2/ros2.json"
     },
-    "next_task": "P2.1_read_only_ros2_bridge_and_calibration_tests"
+    "next_task": "P2.1_calibrated_rig_registration_and_provider_bridge",
+    "P3.1": {
+      "status": "in_progress",
+      "implemented": [
+        "installed_ros2_dds_ingress_software_tuple"
+      ],
+      "pending": [
+        "read_only_mavlink_telemetry",
+        "pinned_px4_ardupilot_sitl",
+        "vendor_camera_api_tuples"
+      ],
+      "evidence": "evidence/phase2/ros2.json"
+    }
   }
 }
