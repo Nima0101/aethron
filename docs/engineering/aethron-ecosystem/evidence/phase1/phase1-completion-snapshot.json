@@ -1,13 +1,13 @@
 {
-  "schema_version": 3,
+  "schema_version": 2,
   "project": "AETHRON",
   "as_of": "2026-10-08",
   "baseline_sha": "59fda946771d4ac8c9d1b52eeb3d948215325e4c",
   "branch": "feat/aethron-vehicle-uav-preparation-20261008",
-  "current_phase": 2,
+  "current_phase": 1,
   "phase1_authorized": true,
-  "auto_advance": true,
-  "publication_authorized": true,
+  "auto_advance": false,
+  "publication_authorized": false,
   "product_complete": false,
   "phases": [
     {
@@ -48,7 +48,7 @@
     {
       "id": 2,
       "title": "Nonvisible models and sensor adapters",
-      "status": "in_progress",
+      "status": "planned",
       "depends_on": [
         1
       ],
@@ -207,48 +207,5 @@
     "certified": false,
     "hosted_ci_executed": false,
     "candidate_evidence": "evidence/phase1/acceptance.json"
-  },
-  "autonomy": {
-    "authorized": true,
-    "path": "LATEST-OWNER-AUTONOMY.md",
-    "sha256": "ac5e865b2c01339cc423c6111b5f73852c1d34a68d55b947750b929b0c8c88bf",
-    "issued": "2026-10-08",
-    "software_phases": [
-      2,
-      3,
-      4,
-      5
-    ],
-    "routine_publication_requires_gates": true,
-    "hardware_deployment_authorized": false,
-    "actuation_authorized": false
-  },
-  "delivery": {
-    "status": "not_published",
-    "source_revision": "f40fbd1e7b282fe4328b2d677c5e4335c020f227",
-    "required_checks": "pending",
-    "hosted_ci": "pending",
-    "branch_rules": "observed_none_2026-10-08",
-    "pages": "pending_verified_publication",
-    "checked_main_revision": "46e8828151ce17a7342d7dba6ce72963f540bc7b",
-    "pages_workflow": ".github/workflows/browser-camera.yml",
-    "pages_trigger": "workflow_dispatch_on_validated_main"
-  },
-  "software_work": {
-    "P2.1": {
-      "status": "in_progress",
-      "implemented": [
-        "bounded_raw_image_and_pointcloud_decoders",
-        "rectified_pinhole_geometry",
-        "recorded_clock_binary_replay"
-      ],
-      "pending": [
-        "installed_ros2_vendor_bridge",
-        "licensed_real_nonvisible_packet_replay",
-        "live_clock_calibration_admission"
-      ],
-      "evidence": "evidence/phase2/sensors.json"
-    },
-    "next_task": "P2.1_read_only_ros2_bridge_and_calibration_tests"
   }
 }

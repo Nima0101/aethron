@@ -1,4 +1,10 @@
-# Phase 1 handoff — software candidate complete
+# Current handoff — autonomous P2 implementation
+
+The later [owner autonomy directive](LATEST-OWNER-AUTONOMY.md) is now adopted. Continue software milestones and gate-dependent routine publication without repeated approval. [NEXT](NEXT.md) gives the next executable task; [sensor progress](P2-SENSOR-ADAPTERS.md) describes this checkpoint. P2.1 is partial, not complete; no hardware, semantic nonvisible model or hosted publication claim has been added.
+
+The remainder is the historical Phase 1 handoff at `f40fbd1`; its stop/authorization language describes that earlier checkpoint, not current authority. Its tests, hashes and failures remain historical evidence.
+
+## Historical Phase 1 handoff — software candidate complete
 
 Phase 1 is authorized. P1.1–P1.7 passed their software-candidate gates, including the real 3,600.66-second second-boot soak. The [acceptance record](evidence/phase1/acceptance.json) binds the exact source and artifacts. No push, merge, public release, deployment, hardware actuation or Phase 2 work occurred.
 

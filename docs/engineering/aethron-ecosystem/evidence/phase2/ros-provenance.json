@@ -1,0 +1,22 @@
+[
+  {
+    "url": "https://raw.githubusercontent.com/ros2/common_interfaces/a941f14bb318d8d904505ed935ccbb97f24a70a4/sensor_msgs/msg/Image.msg",
+    "sha256": "575cd3434771916c2b551db8ac484522ecef1d6105196e043a305887d2730704",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/ros2/common_interfaces/a941f14bb318d8d904505ed935ccbb97f24a70a4/sensor_msgs/msg/PointCloud2.msg",
+    "sha256": "22699bfd6c68be148363a2e889408833a5a37d3464ea20032d1c757336b80f2a",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/ros2/common_interfaces/a941f14bb318d8d904505ed935ccbb97f24a70a4/sensor_msgs/msg/PointField.msg",
+    "sha256": "6e6d5d51d2e464d3074b44b112f219e67fcdc0b280260d93f8cefd9710ec972e",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/ros2/common_interfaces/a941f14bb318d8d904505ed935ccbb97f24a70a4/sensor_msgs/package.xml",
+    "sha256": "00cc932b8a1d2a9064c621bfacab56428a5175afe37269da38ba09361e8a4a5a",
+    "retrieved": "2026-10-08"
+  }
+]

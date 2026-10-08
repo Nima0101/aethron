@@ -1,4 +1,8 @@
-# Phase 1 execution ledger
+# Execution ledger
+
+Current authority: [LATEST-OWNER-AUTONOMY](LATEST-OWNER-AUTONOMY.md), adopted after Phase 1 completion. Software P2–P5 and routine gate-dependent publication are authorized. Historical entries below retain the earlier scope.
+
+## Historical Phase 1
 
 Plan: IMPLEMENTATION-BACKLOG.md. Start: 1445f1879d63eb37f4bf8c367e53db74a95b1fe6. Owner authorization is recorded in PHASE1-START-AUTHORIZATION.md. No publication or Phase 2 authorization.
 
@@ -50,3 +54,17 @@ Candidate runtime committed at d90ae95. Full integration 48/48 passed in 101.578
 The final runtime's separate native Linux offline-update check passed signed version-2 exec, interrupted-stage preservation, rollback rejection and service-account update-store replacement denial. It emitted one shutdown semaphore warning; retained in offline-update.json. The real guest also completed its update transaction and continues the full hour gate.
 
 Final signed guest passed: first boot 120.33s with processing, actual reboot, second boot 3,600.66s, worker crash/recovery before update, signed version-2 activation/exec, rollback rejection and clean test poweroff. Runtime/image template/wheel hashes match d90ae95 and the reproducible installed candidate. The actual second boot ran 3,600.66 seconds. Sampled synthetic processing latency: p50 8.513ms, p95 14.057ms, p99 17.034ms, max 87.603ms. Observed service cgroup peak: 123,715,584 bytes (about 118MiB); status record at most 347 bytes; journal 1,048,576 bytes. The report retains 89 mailbox overwrites, 208 busy-write rejections and 72 expired status samples; no uninterrupted-availability or zero-drop claim is made. Capture gaps are inapplicable to the synthetic source, and abrupt death can lose unpublished diagnostic increments. Phase 1 is recorded complete as software only; no publication, hardware qualification or Phase 2 advancement.
+
+## Autonomous P2 checkpoint — 2026-10-08
+
+Authority migration RED: previous validator rejected schema/current-phase change. GREEN: schema 3 retains Phase 1 completion snapshot and original approval hashes, binds latest directive, and adds tampered/missing authority, hardware/actuation escalation and unverified-publication counterexamples (23 total). No old failure was removed.
+
+P2.1a packet RED: six missing-module assertions. GREEN: six raw raster/cloud/geometry tests. P2.1b replay RED: five missing-module assertions. GREEN: five bounded corruption/clock/source tests. Adversarial RED additionally exposed giant-int geometry overflow, malformed points and unacknowledged calibration changes; fixes use explicit validation and recording discontinuity, with 13 sensor tests passing. The full integration/package results are recorded separately in P2 evidence.
+
+Ruling: raw sensor APIs live in the existing separately installed `aethron_edge.sensors` package; the backlog's proposed separate modality directory trees would duplicate transport/validation at this stage. Scope is retained. No semantic class or live-evidence promotion is inferred from raw packets. Real vendor SDK/ROS integration and nonvisible models remain next work.
+
+Read-only GitHub checks: main remains 46e8828151ce17a7342d7dba6ce72963f540bc7b; authenticated repository access is available. Classic protection reports not protected and rulesets list is empty. Workflows enumerated; hosted CI and Pages/publication remain pending. No push/merge/deploy executed in this checkpoint.
+
+Required fuzz: legacy 43,021 cases / 60.709s and temporal 172,683 cases / 60.302s, zero unexpected exceptions. Sensor replay corruption test additionally executes 2,000 deterministic mutations. Bandit sensor scope: zero findings. The first full integration run failed its existing 8-second zero-viewer startup assertion during concurrent builds (61 tests, one failure); the exact test passed unchanged in isolation (5.703s). Keep this as unresolved load sensitivity rather than claiming proven causation or changing the assertion. Sequential full-suite and fresh wheel checks follow.
+
+Sequential final GREEN: 62 integration tests / 240.478s; installed sensor tests 14/14 outside checkout; authenticated HTTP/SSE consumer and zero-viewer processing pass. Two builds produce identical edge wheel `6dca68d35f870aefb2ec970e92cf044212751a75a1e867010b1541c17abbaef4`; core wheel remains `be3dd8e3e8bcf437d72d65e384c560eb18d4b22baf522849b965d3d720c1d73f`. P2.1 remains partial. Committed clean-clone reproduction follows this source checkpoint.

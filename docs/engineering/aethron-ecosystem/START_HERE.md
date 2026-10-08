@@ -1,8 +1,8 @@
 # AETHRON ecosystem — implementation entry point
 
-**Phase 1 P1.1–P1.7 is complete as a locally tested software candidate.** The [acceptance record](evidence/phase1/acceptance.json) binds the reviewed source, installed artifacts and completed one-hour Linux boot test. The [recorded approval](PHASE1-START-AUTHORIZATION.md) supersedes the historical Phase 0 stop text. Phase 0 committed at `58a2a9d`; the approved public-main merge is `8d0da0e`; approval is `1445f18`. No Phase 2, push, merge, deployment or public release is authorized in this session.
+**Phase 1 P1.1–P1.7 is complete as a locally tested software candidate.** The [acceptance record](evidence/phase1/acceptance.json) binds the reviewed source, installed artifacts and completed one-hour Linux boot test. The [recorded approval](PHASE1-START-AUTHORIZATION.md) supersedes the historical Phase 0 stop text. Phase 0 committed at `58a2a9d`; the approved public-main merge is `8d0da0e`; approval is `1445f18`. The later [owner autonomy directive](LATEST-OWNER-AUTONOMY.md) authorizes continuous software work through P2–P5 and routine publication after legitimate release gates. P2.1 sensor implementation is now underway; hardware and actuation remain outside that authorization.
 
-Start with [current state](STATE.md), [phase boundary](NEXT.md), [machine status](PHASES.json) and [handoff](HANDOFF.md). For actual commands use [edge installation](../../usage-edge.md) and [installed appliance](../../usage-appliance.md). Read the [execution ledger](EXECUTION.md) for regressions and retained failures. Project-owned software is GPL-3.0-only, with separately negotiated commercial licensing; third-party terms remain distinct.
+Start with [current state](STATE.md), [next executable task](NEXT.md), [machine status](PHASES.json) and [handoff](HANDOFF.md). For actual commands use [edge installation](../../usage-edge.md) and [installed appliance](../../usage-appliance.md). Read the [execution ledger](EXECUTION.md) for regressions and retained failures. Project-owned software is GPL-3.0-only, with separately negotiated commercial licensing; third-party terms remain distinct.
 
 ## Normal operation
 
@@ -38,4 +38,6 @@ Baseline: `59fda946771d4ac8c9d1b52eeb3d948215325e4c`, branch `feat/aethron-vehic
 
 Run `python scripts/check_ecosystem_plan.py --self-test` and `python scripts/verify.py` for planning/governance integrity. Actual package, source, installed HTTP/SSE and boot-image checks are documented in [TEST-EVIDENCE](TEST-EVIDENCE.md) and [CI-RELEASE](CI-RELEASE.md). Green planning checks are not product qualification.
 
-[APPLIANCE-RUNTIME](APPLIANCE-RUNTIME.md) specifies A01–A09; [HOME-CAMERA-COMPATIBILITY](HOME-CAMERA-COMPATIBILITY.md) covers smart-camera/NVR paths. Original Phase 0 wording and negative evidence remain in Git history and the historical snapshot. Current status never grants automatic phase advancement.
+[APPLIANCE-RUNTIME](APPLIANCE-RUNTIME.md) specifies A01–A09; [HOME-CAMERA-COMPATIBILITY](HOME-CAMERA-COMPATIBILITY.md) covers smart-camera/NVR paths. Original Phase 0 wording and negative evidence remain in Git history and the historical snapshot. Automatic software advancement now follows the later owner directive; no release gate or physical qualification is waived. The [Phase 1 completion snapshot](evidence/phase1/phase1-completion-snapshot.json) retains the earlier stop state.
+
+P2 implementation: [sensor packet/replay contracts and pinned sources](P2-SENSOR-ADAPTERS.md).

@@ -88,3 +88,10 @@ A fresh installed pixel/SSE check timed out under concurrent load at its unchang
 Read [REVIEW](REVIEW.md) for the retained Queue/stop-token/permission counterexamples and remaining limits. Physical sensor clock calibration, zero-visible accuracy, power/thermal behavior, independent local hardware indication, field safety and external certification remain unqualified.
 
 The actual second boot ran 3,600.66 seconds. Sampled synthetic processing latency: p50 8.513ms, p95 14.057ms, p99 17.034ms, max 87.603ms. Observed service cgroup peak: 123,715,584 bytes (about 118MiB); status record at most 347 bytes; journal 1,048,576 bytes. The report retains 89 mailbox overwrites, 208 busy-write rejections and 72 expired status samples; no uninterrupted-availability or zero-drop claim is made. Capture gaps are inapplicable to the synthetic source, and abrupt death can lose unpublished diagnostic increments.
+
+
+## Autonomous P2 sensor checkpoint
+
+[Sensor evidence](evidence/phase2/sensors.json) records bounded raw raster/cloud, rectified geometry and binary replay tests, with original synthetic inputs. The final sequential integration suite passed 62 tests in 240.478s. The earlier concurrent run failed one existing startup wait (61 tests); the unchanged isolated test passed. Both outcomes are retained, with no assertion/deadline change. Fourteen sensor tests include 2,000 corruption mutations. Plan integrity passes 23 negative probes; repository verification and Ruff pass. Both required fuzzers ran over 60 seconds with no unexpected exceptions; scoped [security review](evidence/phase2/security-review.json) records Bandit and limits.
+
+These results add software contracts, not sensor SDK/node installation, calibrated nonvisible semantics, hardware qualification or a public release. New wheel and clean-clone results are bound in the P2 record, separately from immutable Phase 1 evidence. See [sensor contracts/provenance](P2-SENSOR-ADAPTERS.md) and [current authority](LATEST-OWNER-AUTONOMY.md).

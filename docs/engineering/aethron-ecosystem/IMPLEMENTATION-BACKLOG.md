@@ -1,6 +1,6 @@
 # AETHRON ecosystem implementation plan
 
-> Phase 1 was authorized and implemented. The original task checklists below are retained as the execution specification, not the current progress ledger. Use [PHASES](PHASES.json), [TEST-EVIDENCE](TEST-EVIDENCE.md) and [HANDOFF](HANDOFF.md) for executed acceptance and limits. P2–P5 remain future work; no subagents.
+> Phase 1 was authorized and implemented. The original task checklists below are retained as the execution specification, not the current progress ledger. Use [PHASES](PHASES.json), [TEST-EVIDENCE](TEST-EVIDENCE.md) and [HANDOFF](HANDOFF.md) for executed acceptance and limits. P2–P5 software work is now authorized by LATEST-OWNER-AUTONOMY.md; P2.1 is underway, with no subagents.
 
 **Goal:** deliver installable, genuinely exercised local perception integrations, then expand to exact-device vehicle/UAS/nonvisible deployments with evidence-qualified claims.
 
@@ -26,7 +26,7 @@ No public push/merge/release/deployment/hardware actuation under this phase plan
 
 ## Dependency and priority map
 
-Critical Phase 1 path: P1.1 → P1.2 → P1.3 → P1.4 → P1.5 → P1.6 → P1.7. Each task ends with tests and one cohesive local commit. P2 model/data work can proceed independently of unavailable rigs once authorized, but its public claims wait for later gates. Effort estimates below are engineering ranges in focused person-days, not schedules or promises; review after each task. No cloud/GPU rental or hardware procurement is authorized by this plan.
+Critical Phase 1 path: P1.1 → P1.2 → P1.3 → P1.4 → P1.5 → P1.6 → P1.7. Each task ends with tests and one cohesive local commit. P2 model/data work can proceed independently of unavailable rigs under the latest authorization, but its public claims wait for later gates. Effort estimates below are engineering ranges in focused person-days, not schedules or promises; review after each task. No cloud/GPU rental or hardware procurement is authorized by this plan.
 
 ### P1.1 — Installable edge package and existing-core consumer (1–2 days)
 
@@ -119,7 +119,7 @@ Consumes complete installed stack; produces source-bound evidence for A/B on act
 
 ## Supported versus not yet supported
 
-Existing support is precisely [BASELINE](BASELINE.md): a local research runtime and its demonstrated paths. P1 implementation and evidence are recorded in PHASES and HANDOFF; the original unchecked planning checklist is retained below. P2–P5 remain unimplemented in this lane. Intended platform availability is not support. Broader vehicle/drone/sensor scope is preserved in these tasks, with shared contracts and recipes; phased implementation changes sequencing, not the owner's goal. Do not declare the entire ecosystem finished when only P1 is delivered.
+Existing support is precisely [BASELINE](BASELINE.md): a local research runtime and its demonstrated paths. P1 implementation and evidence are recorded in PHASES and HANDOFF; the original unchecked planning checklist is retained below. P2.1 raw packet/replay primitives are implemented in `integrations/edge/aethron_edge/sensors/`; remaining P2–P5 work is tracked in NEXT and PHASES. Intended platform availability is not support. Broader vehicle/drone/sensor scope is preserved in these tasks, with shared contracts and recipes; phased implementation changes sequencing, not the owner's goal. Do not declare the entire ecosystem finished when only P1 is delivered.
 
 ## P1.7 — Mandatory standalone appliance boot and offline acceptance (4–7 days)
 

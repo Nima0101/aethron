@@ -1,9 +1,10 @@
-# Phase 1 complete — stop boundary
+# Next executable work — autonomous software delivery
 
-P1.1–P1.7 are complete as a software candidate on the executed matrix. The owner’s existing START authorization was used; no additional approval was requested. Read [HANDOFF](HANDOFF.md), [acceptance](evidence/phase1/acceptance.json), [test evidence](TEST-EVIDENCE.md) and [appliance coverage](APPLIANCE-EVIDENCE.md).
+The [latest owner directive](LATEST-OWNER-AUTONOMY.md) supersedes the earlier Phase 1 stop/publication prohibition. P1.1–P1.7 remain complete on their recorded software matrix. Continue without another approval request, with no subagents or edits to the separate native iOS lane.
 
-No automatic next phase or publication is authorized. Stop implementation here. Preserve the local candidate, test artifacts, negative evidence and owner-authored untracked autonomy note.
+1. Complete P2.1 sensor integration: use the new bounded packet/replay primitives in a read-only ROS 2 Image/CameraInfo/PointCloud2 bridge, with explicit clock mapping, calibration invalidation, loss tests and installed consumers. Research/pin actual SDK interfaces and licensing before adding vendor-specific drivers. Keep recorded clocks distinct from trusted live acquisition.
+2. Execute independent P2.2 rights/split/model evaluation and P3 platform/telemetry tasks when their dependencies permit. Preserve the fixed aircraft misses/false positives and frozen protocol. Do not turn raw thermal counts or radar points into invented class detections.
+3. Prepare software-accessible P4 qualification capture/validation tooling. Physical rig/domain/certification gates stay pending. P5 hardware control remains excluded; only admissible non-actuating software work can proceed.
+4. Run repository, installed package, security, artifact reproduction and relevant matrix checks. Then push/review via normal GitHub CI and merge only when legitimate prerequisites pass; verify the established Pages path after publication. Package release still requires rights/signature/reproducibility conditions. Never bypass a failing gate.
 
-Future owner-authorized work can select P2 sensor/model expansion, P3 native/vendor/vehicle/UAS integration, hosted/native OS validation or P4 exact-rig qualification from [the backlog](IMPLEMENTATION-BACKLOG.md). Physical nonvisible optics, capture clocks, OEM access, power/thermal behavior, independent hardware indicators and field safety remain unqualified. Native Swift/SwiftUI remains in its separate owner’s lane.
-
-Do not push, merge, deploy, publish a release, operate hardware or start Phase 2 from this handoff. The Linux test image is SIL instrumentation; normal target integration uses the persistent service without the reboot/poweroff probe.
+[Sensor contracts](P2-SENSOR-ADAPTERS.md), [machine status](PHASES.json), [execution ledger](EXECUTION.md) and [backlog](IMPLEMENTATION-BACKLOG.md) identify completed and pending work. Missing physical hardware does not block software adapters or replay/SITL. Current work is not globally qualified or publicly delivered.

@@ -1,4 +1,4 @@
-"""Offline Phase 0 planning integrity; never a product qualification check."""
+"""Offline plan/authorization/evidence integrity; never physical qualification."""
 
 import argparse
 import hashlib
@@ -13,6 +13,8 @@ from urllib.parse import unquote, urlsplit
 AREA = Path("docs/engineering/aethron-ecosystem")
 REQUIRED = {
     "START_HERE.md",
+    "LATEST-OWNER-AUTONOMY.md",
+    "P2-SENSOR-ADAPTERS.md",
     "STATE.md",
     "NEXT.md",
     "PHASES.json",
@@ -109,15 +111,65 @@ def validate(root, plan=None):
         read_json(path)
     phases = read_json(plan / "PHASES.json")
     require(
-        phases.get("schema_version") == 2 and phases.get("project") == "AETHRON",
+        phases.get("schema_version") == 3 and phases.get("project") == "AETHRON",
         "invalid phase schema/project",
     )
     require(
-        type(phases.get("current_phase")) is int and phases["current_phase"] == 1,
-        "only explicitly approved Phase 1 is permitted",
+        type(phases.get("current_phase")) is int and 2 <= phases["current_phase"] <= 5,
+        "autonomy covers software phases 2..5",
     )
-    for flag in ("auto_advance", "publication_authorized", "product_complete"):
-        require(phases.get(flag) is False, "unsafe phase flag: " + flag)
+    require(phases.get("product_complete") is False, "unqualified product completion")
+    autonomy = phases.get("autonomy", {})
+    require(autonomy.get("authorized") is True, "autonomy approval missing")
+    require(autonomy.get("path") == "LATEST-OWNER-AUTONOMY.md", "autonomy path missing")
+    require(
+        autonomy.get("sha256") == "ac5e865b2c01339cc423c6111b5f73852c1d34a68d55b947750b929b0c8c88bf"
+        and hashlib.sha256((plan / autonomy["path"]).read_bytes()).hexdigest()
+        == autonomy["sha256"],
+        "autonomy directive changed",
+    )
+    require(
+        phases.get("auto_advance") is True
+        and phases.get("publication_authorized") is True
+        and autonomy.get("software_phases") == [2, 3, 4, 5]
+        and autonomy.get("routine_publication_requires_gates") is True
+        and autonomy.get("hardware_deployment_authorized") is False
+        and autonomy.get("actuation_authorized") is False,
+        "autonomy scope or safety boundary changed",
+    )
+    require(
+        hashlib.sha256(
+            (plan / "evidence/phase1/phase1-completion-snapshot.json").read_bytes()
+        ).hexdigest()
+        == "70cddab413c875c25af2e078693793a27ab2f6b4e11fecacd98c092eb259256a",
+        "Phase 1 completion history changed",
+    )
+    previous = read_json(plan / "evidence/phase1/phase1-completion-snapshot.json")
+    require(
+        previous.get("current_phase") == 1
+        and previous.get("auto_advance") is False
+        and previous.get("publication_authorized") is False
+        and previous.get("phase1_acceptance", {}).get("software_candidate_complete") is True,
+        "Phase 1 historical boundary must remain preserved",
+    )
+    delivery = phases.get("delivery", {})
+    require(
+        delivery.get("status") in {"not_published", "in_progress", "published"},
+        "invalid delivery status",
+    )
+    if delivery["status"] == "published":
+        proof = read_json(plan / safe_relative(delivery["evidence"]))
+        require(
+            proof.get("required_checks_passed") is True
+            and proof.get("branch_rules_satisfied") is True
+            and re.fullmatch(r"[a-f0-9]{40}", proof.get("main_revision", ""))
+            and proof.get("hosted_run_urls")
+            and all(
+                url.startswith("https://github.com/Nima0101/aethron/actions/runs/")
+                for url in proof["hosted_run_urls"]
+            ),
+            "publication needs verified checks, branch rules and actual hosted runs",
+        )
     approval = phases.get("authorization", {})
     require(phases.get("phase1_authorized") is True, "owner approval flag missing")
     require(approval.get("path") == "PHASE1-START-AUTHORIZATION.md", "approval path missing")
@@ -164,6 +216,8 @@ def validate(root, plan=None):
             if row["id"] == 0
             else ("candidate_complete" if complete else "in_progress")
             if row["id"] == 1
+            else "in_progress"
+            if row["id"] == phases["current_phase"]
             else "planned"
         )
         require(row.get("status") == expected, "unexpected phase status")
@@ -404,7 +458,21 @@ def self_test(root):
             "forged approval"
         ),
         "phase escalation": lambda p: mutate_json(
-            p / "PHASES.json", lambda d: d.update(current_phase=2)
+            p / "PHASES.json", lambda d: d.update(current_phase=6)
+        ),
+        "tampered autonomy": lambda p: (p / "LATEST-OWNER-AUTONOMY.md").write_text("forged"),
+        "missing autonomy": lambda p: mutate_json(
+            p / "PHASES.json", lambda d: d["autonomy"].update(authorized=False)
+        ),
+        "actuator escalation": lambda p: mutate_json(
+            p / "PHASES.json", lambda d: d["autonomy"].update(actuation_authorized=True)
+        ),
+        "hardware deployment escalation": lambda p: mutate_json(
+            p / "PHASES.json", lambda d: d["autonomy"].update(hardware_deployment_authorized=True)
+        ),
+        "unverified publication": lambda p: mutate_json(
+            p / "PHASES.json",
+            lambda d: d["delivery"].update(status="published", evidence="absent.json"),
         ),
         "missing candidate evidence": lambda p: mutate_json(
             p / "PHASES.json",

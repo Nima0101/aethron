@@ -78,6 +78,26 @@ def run(wheelhouse: Path, output: Path):
             env=env,
             stdout=subprocess.DEVNULL,
         )
+        # Exercise new raw sensor contracts from installed wheels, outside checkout.
+        for test_name in ("test_sensor_packets.py", "test_sensor_replay.py"):
+            shutil.copyfile(ROOT / "tests/integration" / test_name, work / test_name)
+        subprocess.run(
+            [
+                str(python),
+                "-I",
+                "-m",
+                "unittest",
+                "discover",
+                "-s",
+                str(work),
+                "-p",
+                "test_sensor*.py",
+            ],
+            cwd=work,
+            env=env,
+            check=True,
+            timeout=30,
+        )
         shutil.copyfile(ROOT / "examples/temporal-blackout.jsonl", work / "fixture.jsonl")
         shutil.copyfile(ROOT / "examples/clients/observe.py", work / "observe.py")
         token = work / "token"
@@ -166,6 +186,7 @@ def run(wheelhouse: Path, output: Path):
             "wheels": hashes,
             "byte_identical": True,
             "installed_consumer": True,
+            "installed_sensor_contracts": True,
             "consumer_events": 3,
             "zero_viewer_continued": True,
             "platform": sys.platform,
