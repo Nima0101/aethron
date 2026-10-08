@@ -2,7 +2,7 @@
 
 **Keep supported objects visible through sensor loss. Make uncertainty explicit.**
 
-**Licensing:** [GPLv3 open-source edition](LICENSE) · [Alternative commercial agreements](COMMERCIAL-LICENSING.md) for rights-controlled code. GPL itself also permits commercial use; [licensing details](LICENSING.md).
+**Licensing:** [GPLv3 open-source edition](LICENSE) · [Commercial pricing from €199/year](COMMERCIAL-LICENSING.md) · [Founding partner terms](COMMERCIAL-LICENSING.md#founding-commercial-partner--first-25-signed-customers) · [Contract and licensing conditions](LICENSING.md). GPL itself also permits commercial use. [View the public price page](https://nima0101.github.io/aethron/commercial.html).
 
 ![Animated replay of actual recorded camera frames and detector output, including documented misses and false positives](docs/assets/recorded-failure.gif)
 
