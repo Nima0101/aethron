@@ -28,7 +28,7 @@
     {
       "id": 1,
       "title": "Supervised offline appliance and installable edge candidate",
-      "status": "in_progress",
+      "status": "candidate_complete",
       "depends_on": [
         0
       ],
@@ -43,7 +43,7 @@
         "P1.6",
         "P1.7"
       ],
-      "implementation_complete": false
+      "implementation_complete": true
     },
     {
       "id": 2,
@@ -116,10 +116,10 @@
   "local_commit_status": "committed",
   "phase0_acceptance_complete": true,
   "appliance_runtime": {
-    "status": "implementation_in_progress",
+    "status": "candidate",
     "owner_requirement": "OWNER-NEXT-APPLIANCE-RUNTIME.md",
     "implementation_task": "P1.7",
-    "implementation_complete": false,
+    "implementation_complete": true,
     "acceptance_gates": [
       "A01",
       "A02",
@@ -193,18 +193,19 @@
       ]
     },
     "P1.7": {
-      "status": "implemented_validation_in_progress",
+      "status": "passed",
       "evidence": [
-        "evidence/phase1/p17.json"
+        "evidence/phase1/p17.json",
+        "evidence/phase1/boot.json"
       ]
     }
   },
   "phase1_acceptance": {
-    "software_candidate_complete": false,
+    "software_candidate_complete": true,
     "hardware_qualified": false,
     "field_qualified": false,
     "certified": false,
     "hosted_ci_executed": false,
-    "candidate_evidence": null
+    "candidate_evidence": "evidence/phase1/acceptance.json"
   }
 }

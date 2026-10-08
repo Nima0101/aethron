@@ -1,0 +1,46 @@
+{
+  "software_candidate_complete": true,
+  "source_revision": "d90ae953f6431fd9d460e440432ac72825b8d250",
+  "as_of": "2026-10-08",
+  "boot_evidence": "evidence/phase1/boot.json",
+  "image_evidence": "evidence/phase1/boot-image-manifest.json",
+  "hardware_qualified": false,
+  "field_qualified": false,
+  "certified": false,
+  "hosted_ci_executed": false,
+  "publication_performed": false,
+  "phase2_started": false,
+  "milestones": {
+    "P1.1": "passed_software_candidate",
+    "P1.2": "passed_software_candidate",
+    "P1.3": "passed_software_candidate",
+    "P1.4": "passed_software_candidate",
+    "P1.5": "passed_software_candidate",
+    "P1.6": "passed_software_candidate",
+    "P1.7": "passed_software_candidate"
+  },
+  "checks": [
+    "integration.json",
+    "package.json",
+    "installed-pixels.json",
+    "node-consumer.json",
+    "containers.json",
+    "clean-edge-final.json",
+    "clean-core-final.json",
+    "offline-update.json",
+    "temporal-fuzz.json",
+    "legacy-fuzz.json",
+    "sbom-validation.json",
+    "security-review.json",
+    "visual-repair.json",
+    "final-checks.json"
+  ],
+  "limitations": [
+    "Synthetic proposal boot soak; actual pixels exercised separately",
+    "Generic capture exposure clocks unqualified: current UNKNOWN",
+    "Physical UVC/OEM/zero-visible/power/thermal/field safety unqualified",
+    "Native Windows/macOS Intel and hosted CI not executed",
+    "Retained installed-client timeout and shutdown semaphore warning; no hard-real-time or zero-leak claim",
+    "Retained aircraft misses and adverse latency evidence"
+  ]
+}

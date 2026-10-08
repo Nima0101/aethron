@@ -1,6 +1,6 @@
 # Appliance acceptance scope
 
-Source candidate: `d90ae953f6431fd9d460e440432ac72825b8d250`. The final one-hour guest result is pending. This table maps implemented software to A01–A09 without promoting simulation to hardware evidence. [PHASES](PHASES.json) remains the acceptance authority.
+Source candidate: `d90ae953f6431fd9d460e440432ac72825b8d250`. The [final guest result](evidence/phase1/boot.json) passed the real boot/reboot, worker recovery, offline update and one-hour second-boot gate. This table maps implemented software to A01–A09 without promoting simulation to hardware evidence. [PHASES](PHASES.json) remains the acceptance authority.
 
 | Gate | Executed software path | Physical / external work still required |
 |---|---|---|
@@ -23,3 +23,7 @@ The service runs synthetic multimodal proposals through the production superviso
 The image constrains service memory/tasks and journal growth. A limit provides containment, not evidence that all native allocations are safe or that deadline/memory qualification is complete. No physical wattage or temperature is measured. Startup and update timings are functional availability measurements; the frozen 100ms current-evidence expiry is never extended to match them.
 
 The VM still runs on a development host and a Docker-contained QEMU process. Its guest has the independent installed lifecycle required for software-in-loop acceptance; it is not proof that a physical appliance has been installed. Local test signing keys are not release credentials. No hardware or actuator was operated.
+
+## Measured final run
+
+The actual second boot ran 3,600.66 seconds. Sampled synthetic processing latency: p50 8.513ms, p95 14.057ms, p99 17.034ms, max 87.603ms. Observed service cgroup peak: 123,715,584 bytes (about 118MiB); status record at most 347 bytes; journal 1,048,576 bytes. The report retains 89 mailbox overwrites, 208 busy-write rejections and 72 expired status samples; no uninterrupted-availability or zero-drop claim is made. Capture gaps are inapplicable to the synthetic source, and abrupt death can lose unpublished diagnostic increments.

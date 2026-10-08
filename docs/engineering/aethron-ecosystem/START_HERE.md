@@ -1,8 +1,8 @@
 # AETHRON ecosystem — implementation entry point
 
-**Phase 1 P1.1–P1.7 is authorized and implemented; final candidate validation is in progress.** The [recorded approval](PHASE1-START-AUTHORIZATION.md) supersedes the historical Phase 0 stop text. Phase 0 committed at `58a2a9d`; the approved public-main merge is `8d0da0e`; approval is `1445f18`. No Phase 2, push, merge, deployment or public release is authorized in this session.
+**Phase 1 P1.1–P1.7 is complete as a locally tested software candidate.** The [acceptance record](evidence/phase1/acceptance.json) binds the reviewed source, installed artifacts and completed one-hour Linux boot test. The [recorded approval](PHASE1-START-AUTHORIZATION.md) supersedes the historical Phase 0 stop text. Phase 0 committed at `58a2a9d`; the approved public-main merge is `8d0da0e`; approval is `1445f18`. No Phase 2, push, merge, deployment or public release is authorized in this session.
 
-Start with [current state](STATE.md), [remaining actions](NEXT.md), [machine status](PHASES.json) and [handoff](HANDOFF.md). For actual commands use [edge installation](../../usage-edge.md) and [installed appliance](../../usage-appliance.md). Read the [execution ledger](EXECUTION.md) for regressions and retained failures. Project-owned software is GPL-3.0-only, with separately negotiated commercial licensing; third-party terms remain distinct.
+Start with [current state](STATE.md), [phase boundary](NEXT.md), [machine status](PHASES.json) and [handoff](HANDOFF.md). For actual commands use [edge installation](../../usage-edge.md) and [installed appliance](../../usage-appliance.md). Read the [execution ledger](EXECUTION.md) for regressions and retained failures. Project-owned software is GPL-3.0-only, with separately negotiated commercial licensing; third-party terms remain distinct.
 
 ## Normal operation
 

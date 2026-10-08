@@ -40,7 +40,7 @@
     "counterexample": "update-parent-counterexample.json",
     "mitigation": "root-owned /var/lib/aethron-updates, outside service-writable status parent; read-only under service sandbox",
     "native_linux_permission_and_selected_exec": "passed",
-    "final_vm": "in_progress"
+    "final_vm": "passed; boot.json"
   },
   "residuals": [
     "Native Windows job-object and filesystem ACL execution pending",

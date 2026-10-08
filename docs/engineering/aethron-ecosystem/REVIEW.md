@@ -13,7 +13,7 @@ Single-author review on 2026-10-08. The owner prohibited delegation; this is not
 | Updates | Signed complete bundle, copied-byte verification, inactive staging, atomic active pointer and version floor; real selected version-2 exec. Service cannot rename root-owned update store under root-owned parent. | Root/OS compromise, secure boot and hardware-backed anti-rollback are not covered. Release signing/key operations are not authorized. |
 | Resource handling | Bounded frame/mailbox/event slots; systemd cgroup and log limits; independent worker recovery; stale evidence is withdrawn. | Native codecs may allocate before dimension rejection. Software scheduling/storage are not hard real time; status fsync can delay availability. |
 | Distribution | Reproducible wheels, external installed consumers, actual Linux arm64/amd64 containers, clean-clone quickstart/source artifacts, SBOM and locked dependency audit. | Hosted workflow and unexecuted native matrix cells remain pending. OS image reproducibility is inventory/hash provenance, not byte-identical OS builds. |
-| Appliance | Dedicated-account systemd image, verified boot artifacts, no guest NIC/login/provisioner, boot/reboot, worker failure, offline update and local status. | Final hour gate is recorded separately; no physical power/thermal/indicator/OEM qualification follows from a VM. |
+| Appliance | Dedicated-account systemd image, verified boot artifacts, no guest NIC/login/provisioner, boot/reboot, worker failure, offline update and local status. | Final hour gate passed and is recorded separately; no physical power/thermal/indicator/OEM qualification follows from a VM. |
 
 ## Review corrections retained
 

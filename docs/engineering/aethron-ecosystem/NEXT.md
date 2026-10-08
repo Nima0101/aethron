@@ -1,10 +1,9 @@
-# Remaining Phase 1 work
+# Phase 1 complete — stop boundary
 
-Owner START is already recorded; no additional confirmation is needed to finish P1.1–P1.7.
+P1.1–P1.7 are complete as a software candidate on the executed matrix. The owner’s existing START authorization was used; no additional approval was requested. Read [HANDOFF](HANDOFF.md), [acceptance](evidence/phase1/acceptance.json), [test evidence](TEST-EVIDENCE.md) and [appliance coverage](APPLIANCE-EVIDENCE.md).
 
-1. Complete the signed Linux guest's required one-hour second boot with measured latency/drop/memory/status data, worker fault recovery and selected-slot offline update. First boot passed; earlier failed/incomplete traces remain retained.
-2. Record P1.7/A01–A09 software results and final candidate acceptance; preserve all physical/native/hosted qualification gaps. P1.1–P1.6 and committed-source clean-clone reproduction have passed.
-3. Run final artifact/governance/plan checks and commit the evidence-bound handoff locally.
-4. Stop. Do not push, merge, deploy, release or start Phase 2.
+No automatic next phase or publication is authorized. Stop implementation here. Preserve the local candidate, test artifacts, negative evidence and owner-authored untracked autonomy note.
 
-Continue only in the assigned feature worktree, with no subagents and no contact or edits to native iOS work. [Execution ledger](EXECUTION.md), [backlog](IMPLEMENTATION-BACKLOG.md), [appliance gates](APPLIANCE-RUNTIME.md) and [test evidence](TEST-EVIDENCE.md) define acceptance. Scope remains the explicit chat authorization even if a separate local note proposes broader later autonomy.
+Future owner-authorized work can select P2 sensor/model expansion, P3 native/vendor/vehicle/UAS integration, hosted/native OS validation or P4 exact-rig qualification from [the backlog](IMPLEMENTATION-BACKLOG.md). Physical nonvisible optics, capture clocks, OEM access, power/thermal behavior, independent hardware indicators and field safety remain unqualified. Native Swift/SwiftUI remains in its separate owner’s lane.
+
+Do not push, merge, deploy, publish a release, operate hardware or start Phase 2 from this handoff. The Linux test image is SIL instrumentation; normal target integration uses the persistent service without the reboot/poweroff probe.

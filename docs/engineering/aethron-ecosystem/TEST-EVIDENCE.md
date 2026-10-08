@@ -56,7 +56,7 @@ Software-level acceptance uses real service-manager VM boot plus recorded/virtua
 
 ## Executed Phase 1 candidate checks — 2026-10-08
 
-Implementation source: `d90ae953f6431fd9d460e440432ac72825b8d250`. This is a local software candidate. The final appliance gate is still in progress until the acceptance record closes it. Earlier checkpoint JSON files retain the original code/artifact hashes; the records below identify the newer artifacts.
+Implementation source: `d90ae953f6431fd9d460e440432ac72825b8d250`. This is a local software candidate. The [acceptance record](evidence/phase1/acceptance.json) closes the completed appliance gate. Earlier checkpoint JSON files retain the original code/artifact hashes; the records below identify the newer artifacts.
 
 | Milestone | Actual implementation and executed evidence | Qualification boundary |
 |---|---|---|
@@ -66,7 +66,7 @@ Implementation source: `d90ae953f6431fd9d460e440432ac72825b8d250`. This is a loc
 | P1.4 | Real authenticated local HTTP/SSE processes, ownership/auth/Host/Origin/bounds, supervisor-owned zero-viewer processing, crash and update tests | Local loopback software; no remote TLS deployment claim |
 | P1.5 | External Python client and packed Node TypeScript client, expiry/enum rejection tests, [Node result](evidence/phase1/node-consumer.json), native fixture handoff | Node executed; browser and native Swift/Kotlin integration pending |
 | P1.6 | [48 integration tests](evidence/phase1/integration.json), reproducible wheels, both [CPU containers](evidence/phase1/containers.json), [SBOM](evidence/phase1/edge-sbom.json), [security review](evidence/phase1/security-review.json), fuzz and visual reproduction | Actual runner matrix below; hosted workflow has not run |
-| P1.7 | Dedicated-account signed Linux image, real offline boot/reboot and worker/update harness, local status and operator guides | Final hour gate in progress; physical A01–A09 qualifications remain pending |
+| P1.7 | Dedicated-account signed Linux image, real offline boot/reboot and worker/update harness, local status and operator guides | [Final hour gate passed](evidence/phase1/boot.json); physical A01–A09 qualifications remain pending |
 
 Commands executed include `scripts/verify.py`, `scripts/check_ecosystem_plan.py --self-test` (18 negative probes), `unittest discover -s tests/integration`, TypeScript `npm test`, `scripts/edge_package_check.py`, `scripts/edge_pixel_service_e2e.py`, `scripts/edge_container_check.py`, `scripts/edge_node_e2e.py`, `scripts/edge_inventory.py`, both required core fuzzers, `scripts/verify_visuals.py`, `scripts/edge_reproduce.py` and `scripts/reproduce.py`. Use the installed project environment and documented fixture/tool downloads. Builds and external consumers do not use a product release registry.
 
@@ -77,12 +77,14 @@ Commands executed include `scripts/verify.py`, `scripts/check_ecosystem_plan.py 
 | macOS ARM64, CPython 3.13.15 | Full edge suite; actual OpenCV file/local RTSP; installed wheel/server/Python/Node; clean-clone and deterministic artifacts | Physical camera, Core ML, native Mac appliance integration |
 | Linux ARM64 container on Docker VM | Installed HTTP/SSE, no network/read-only root/capability restrictions; signed update permission/exec boundary | Physical Linux camera/NPU/GPU |
 | Linux AMD64 container, emulated on ARM host | Installed HTTP/SSE and zero-viewer processing | Native x86 timing and hardware |
-| Linux ARM64 QEMU TCG guest | Real kernel/systemd boot, local synthetic source, no NIC/login/viewer, fault and offline update; hour gate tracked separately | No physical standalone computer, power, thermal or optical claim |
+| Linux ARM64 QEMU TCG guest | Real kernel/systemd boot, local synthetic source, no NIC/login/viewer, fault and offline update; one-hour gate passed | No physical standalone computer, power, thermal or optical claim |
 | Windows x64/ARM64; macOS Intel; other Python/OS matrix cells | CI specifications/code paths only | Not executed; never counted as pass |
 | Hosted GitHub Actions | Dedicated nonpublishing workflow prepared | No hosted run was triggered |
 
 The frozen aircraft evaluation still contains 20 fixed-wing aircraft misses and 721 temporal false positives (0 true positives). These are not UAV-specific validation. Earlier adverse latency tails remain in the baseline, including the recorded 42,225 ms pixel-path maximum. Faster later core-only measurements do not replace those failures.
 
-A fresh installed pixel/SSE check timed out under concurrent load at its unchanged 20-second client bound; its local log is retained and a focused repeat is recorded separately. The candidate makes no hard real-time availability guarantee. Cold VM startup also exceeded the original 45-second observation window; the negative gate remained failed, and the final image uses a 120-second first-boot check plus the unchanged 3,600-second second boot.
+A fresh installed pixel/SSE check timed out under concurrent load at its unchanged 20-second client bound; its local log is retained and the unchanged focused repeat passed both file and RTSP paths, as recorded in installed-pixels.json. The candidate makes no hard real-time availability guarantee. Cold VM startup also exceeded the original 45-second observation window; the negative gate remained failed, and the final image uses a 120-second first-boot check plus the unchanged 3,600-second second boot.
 
 Read [REVIEW](REVIEW.md) for the retained Queue/stop-token/permission counterexamples and remaining limits. Physical sensor clock calibration, zero-visible accuracy, power/thermal behavior, independent local hardware indication, field safety and external certification remain unqualified.
+
+The actual second boot ran 3,600.66 seconds. Sampled synthetic processing latency: p50 8.513ms, p95 14.057ms, p99 17.034ms, max 87.603ms. Observed service cgroup peak: 123,715,584 bytes (about 118MiB); status record at most 347 bytes; journal 1,048,576 bytes. The report retains 89 mailbox overwrites, 208 busy-write rejections and 72 expired status samples; no uninterrupted-availability or zero-drop claim is made. Capture gaps are inapplicable to the synthetic source, and abrupt death can lose unpublished diagnostic increments.
