@@ -1,7 +1,7 @@
 {
   "date": "2026-10-08",
   "source_base": "354b1b44f00ed5a49b7c3ae6ef779c338d54359e",
-  "status": "local_software_candidate_passed_committed_reproduction_pending",
+  "status": "local_software_and_committed_reproduction_passed",
   "hardware_qualified": false,
   "field_qualified": false,
   "semantic_model_qualified": false,
@@ -161,5 +161,7 @@
         "aethron/vision/__init__.py": "2e051811883c745faf9abe9d2e076396186a187c7807fbbf087dbe5d54c085a2"
       }
     }
-  }
+  },
+  "source_revision": "58addca8182d6b77749c105e1bf9dc4b9a346093",
+  "clean_reproduction": "provider-clean.json"
 }
