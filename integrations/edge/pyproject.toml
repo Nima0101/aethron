@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools==84.0.0", "wheel==0.48.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aethron-edge"
+version = "0.1.0"
+description = "AETHRON local supervised perception integration runtime"
+requires-python = ">=3.11"
+license = "GPL-3.0-only"
+dependencies = ["aethron==0.2.0"]
+
+[project.scripts]
+aethron-edge = "aethron_edge.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["aethron_edge*"]

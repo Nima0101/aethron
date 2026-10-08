@@ -109,15 +109,32 @@ def validate(root, plan=None):
         read_json(path)
     phases = read_json(plan / "PHASES.json")
     require(
-        phases.get("schema_version") == 1 and phases.get("project") == "AETHRON",
+        phases.get("schema_version") == 2 and phases.get("project") == "AETHRON",
         "invalid phase schema/project",
     )
     require(
-        type(phases.get("current_phase")) is int and phases["current_phase"] == 0,
-        "Phase 0 checker cannot authorize another phase",
+        type(phases.get("current_phase")) is int and phases["current_phase"] == 1,
+        "only explicitly approved Phase 1 is permitted",
     )
-    for flag in ("phase1_authorized", "auto_advance", "publication_authorized", "product_complete"):
+    for flag in ("auto_advance", "publication_authorized", "product_complete"):
         require(phases.get(flag) is False, "unsafe phase flag: " + flag)
+    approval = phases.get("authorization", {})
+    require(phases.get("phase1_authorized") is True, "owner approval flag missing")
+    require(approval.get("path") == "PHASE1-START-AUTHORIZATION.md", "approval path missing")
+    require(
+        approval.get("commit") == "1445f1879d63eb37f4bf8c367e53db74a95b1fe6",
+        "approval commit mismatch",
+    )
+    require(
+        hashlib.sha256((plan / approval["path"]).read_bytes()).hexdigest()
+        == approval.get("sha256"),
+        "approval digest mismatch",
+    )
+    history = read_json(plan / "evidence/phase1/phase0-snapshot.json")
+    require(
+        history.get("phase1_authorized") is False and history.get("current_phase") == 0,
+        "historical unauthorized state must be preserved",
+    )
     require(re.fullmatch(r"[a-f0-9]{40}", phases.get("baseline_sha", "")), "invalid baseline SHA")
     date.fromisoformat(phases["as_of"])
     rows = phases.get("phases", [])
@@ -131,17 +148,11 @@ def validate(root, plan=None):
             all(type(n) is int and 0 <= n < row["id"] for n in row["depends_on"]),
             "invalid/cyclic dependency",
         )
-        expected = (
-            "prepared_commit_blocked"
-            if row["id"] == 0
-            else "awaiting_owner"
-            if row["id"] == 1
-            else "planned"
-        )
+        expected = "complete" if row["id"] == 0 else "in_progress" if row["id"] == 1 else "planned"
         require(row.get("status") == expected, "unexpected phase status")
     require(
-        phases.get("local_commit_status") == "blocked_by_sandbox"
-        and phases.get("phase0_acceptance_complete") is False,
+        phases.get("local_commit_status") == "committed"
+        and phases.get("phase0_acceptance_complete") is True,
         "commit limitation must remain explicit until verified resolution",
     )
     require(
@@ -314,7 +325,13 @@ def self_test(root):
             p / "versions.json", lambda d: d["pins"][7].update(source_ids=["S999"])
         ),
         "unauthorized phase": lambda p: mutate_json(
-            p / "PHASES.json", lambda d: d.update(phase1_authorized=True)
+            p / "PHASES.json", lambda d: d.update(phase1_authorized=False)
+        ),
+        "tampered approval": lambda p: (p / "PHASE1-START-AUTHORIZATION.md").write_text(
+            "forged approval"
+        ),
+        "phase escalation": lambda p: mutate_json(
+            p / "PHASES.json", lambda d: d.update(current_phase=2)
         ),
         "cyclic dependency": lambda p: mutate_json(
             p / "PHASES.json", lambda d: d["phases"][1].update(depends_on=[1])

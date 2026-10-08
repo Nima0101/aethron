@@ -1,3 +1,5 @@
+> **Current supersession, 2026-10-08:** Phase 0 committed at `58a2a9d`; approved merge `8d0da0e`; [owner START](PHASE1-START-AUTHORIZATION.md) at `1445f18`. Phase 1 P1.1–P1.7 is now in progress. [Current machine state](PHASES.json) and [execution ledger](EXECUTION.md) supersede the historical Phase 0 text below. No push, deployment or Phase 2 is authorized. Project-owned code uses GPL-3.0-only with separate commercial licensing.
+
 # AETHRON ecosystem — Phase 0 blueprint
 
 Status: **Phase 0 blueprint prepared; local commit blocked; Phase 1 NOT AUTHORIZED.** Prepared 2026-10-08. This area specifies an installable, cross-platform perception ecosystem for individuals, integrators and enterprises. Product work starts only when the owner explicitly says START. Nothing here certifies a vehicle, drone, sensor or safety function.

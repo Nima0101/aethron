@@ -1,11 +1,11 @@
 {
-  "schema_version": 2,
+  "schema_version": 1,
   "project": "AETHRON",
   "as_of": "2026-10-08",
   "baseline_sha": "59fda946771d4ac8c9d1b52eeb3d948215325e4c",
   "branch": "feat/aethron-vehicle-uav-preparation-20261008",
-  "current_phase": 1,
-  "phase1_authorized": true,
+  "current_phase": 0,
+  "phase1_authorized": false,
   "auto_advance": false,
   "publication_authorized": false,
   "product_complete": false,
@@ -13,7 +13,7 @@
     {
       "id": 0,
       "title": "Research, blueprint and planning preflight",
-      "status": "complete",
+      "status": "prepared_commit_blocked",
       "depends_on": [],
       "owner": "phase0_single_planner",
       "gates": [
@@ -28,7 +28,7 @@
     {
       "id": 1,
       "title": "Supervised offline appliance and installable edge candidate",
-      "status": "in_progress",
+      "status": "awaiting_owner",
       "depends_on": [
         0
       ],
@@ -113,8 +113,8 @@
       "implementation_complete": false
     }
   ],
-  "local_commit_status": "committed",
-  "phase0_acceptance_complete": true,
+  "local_commit_status": "blocked_by_sandbox",
+  "phase0_acceptance_complete": false,
   "appliance_runtime": {
     "status": "spec_only",
     "owner_requirement": "OWNER-NEXT-APPLIANCE-RUNTIME.md",
@@ -139,43 +139,5 @@
     ],
     "requires_optional_client": false,
     "requires_wan": false
-  },
-  "authorization": {
-    "path": "PHASE1-START-AUTHORIZATION.md",
-    "sha256": "5a24ec181e9bbf9e623ff8d01b0916ec2e684d53f9431f6542eca5453fc3c903",
-    "commit": "1445f1879d63eb37f4bf8c367e53db74a95b1fe6",
-    "original_sha256": "22fbe32cc849230aad8357b4055f872faca8192d7d457e949a763b0ec456433a"
-  },
-  "milestones": {
-    "P1.1": {
-      "status": "passed",
-      "evidence": [
-        "evidence/phase1/p11.json"
-      ]
-    },
-    "P1.2": {
-      "status": "in_progress",
-      "evidence": []
-    },
-    "P1.3": {
-      "status": "pending",
-      "evidence": []
-    },
-    "P1.4": {
-      "status": "pending",
-      "evidence": []
-    },
-    "P1.5": {
-      "status": "pending",
-      "evidence": []
-    },
-    "P1.6": {
-      "status": "pending",
-      "evidence": []
-    },
-    "P1.7": {
-      "status": "pending",
-      "evidence": []
-    }
   }
 }

@@ -1,3 +1,5 @@
+> **Current supersession, 2026-10-08:** Phase 0 committed at `58a2a9d`; approved merge `8d0da0e`; [owner START](PHASE1-START-AUTHORIZATION.md) at `1445f18`. Phase 1 P1.1–P1.7 is now in progress. [Current machine state](PHASES.json) and [execution ledger](EXECUTION.md) supersede the historical Phase 0 text below. No push, deployment or Phase 2 is authorized. Project-owned code uses GPL-3.0-only with separate commercial licensing.
+
 # State — 2026-10-08
 
 Phase 0: research, architecture and workflow preparation delivered; validation recorded in [HANDOFF](HANDOFF.md). The requested local commit is blocked by sandbox access to linked worktree Git metadata, so full Phase 0 acceptance is not marked complete. Phase 1: awaiting explicit owner START; no product features implemented by this phase. Hosted execution, publication, deployments and hardware operation: not performed.

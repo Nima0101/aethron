@@ -7,7 +7,7 @@ Authorization is **limited to Phase 1 (P1.1–P1.7)** as prepared in [the execut
 ## Execution boundary
 
 - **Codex model:** GPT-6 Astra, High. Resume existing planning thread `01a11b35-29c0-74e2-ba67-21074d0dcb28`; no subagents.
-- **Assigned branch/worktree:** `feat/aethron-vehicle-uav-preparation-20261008` in `/Users/nimakhaki/OpenSource-Flagship-DevFabric-20261007/aethron-vehicle-uav-preparation-20261008`.
+- **Assigned branch/worktree:** `feat/aethron-vehicle-uav-preparation-20261008` in `<owner-assigned-parent>/aethron-vehicle-uav-preparation-20261008`.
 - Phase 0 was actually committed at `58a2a9d` and integrated with public main `46e8828` in local merge `8d0da0e`. Preserve the updated **GPL-3.0-only / separate commercial licensing** documents and public pricing page. Those files are already present in this branch.
 - The unrelated native iOS Codex session remains active in a separate worktree. Never modify, stop, send messages to or rewrite its Swift/Xcode files, PID, logs, branches, caches or runtime. No common output directories.
 - No merge, remote push, public release, online deployment, third-party paid subscription, hardware control, vehicle actuation or UAV command is authorized. No phase 2–5 automatic advancement.
