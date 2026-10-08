@@ -20,3 +20,8 @@ Ruling: generic OpenCV timestamps cannot be qualified exposure timestamps; those
 Ruling: native virtualization reports unavailable; use QEMU TCG inside an isolated local tool container to boot a separate Linux guest. This is emulated Linux, not native ARM hardware performance.
 
 P1.3 checkpoint 2739360. P1.4 GREEN: real process HTTP/SSE 4, security 2; lifecycle 3 and signed updates 3 implemented early to verify supervisor startup integrity. RED regressions fixed: malformed bearer, configured startup recommendation, worker cleanup blocking watchdog. Appliance boot/soak qualification still pending.
+
+P1.4 checkpoint f4db8ce. P1.5 RED missing client module and TypeScript build; GREEN Python 2, TypeScript 2; real fresh installed server and external Python SSE client received 3 events, zero-viewer processing continued, both wheels reproducible.
+P1.6 inherited visual mismatch reproduced, PNG delta confined to (26,27)-(478,51); rebuilt derived perception media only. Original/model/data/official-logo freezes unchanged; retained visual-repair.json and Phase 0 negative evidence.
+Ruling: repository verifier now covers integrations/packaging/contracts and excludes generated npm/build trees; original failure was a third-party README link in ignored node_modules. Project leak checks remain active.
+P1.7 first emulated Linux boot/reboot succeeded; initial soak probe failed at missing guest pgrep. Replaced with /proc enumeration; negative serial retained. Revised signed guest is now running a fresh full boot/soak.

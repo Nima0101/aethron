@@ -1,0 +1,25 @@
+{
+  "parent": "f4db8ce",
+  "python_client_tests": 2,
+  "typescript_client_tests": 2,
+  "typescript": "5.9.3",
+  "ajv": "8.20.0",
+  "npm_audit": "0 vulnerabilities at install; lock records dependencies",
+  "installed_http_sse_consumer": {
+    "wheels": {
+      "aethron-0.2.0-py3-none-any.whl": "be3dd8e3e8bcf437d72d65e384c560eb18d4b22baf522849b965d3d720c1d73f",
+      "aethron_edge-0.1.0-py3-none-any.whl": "bcb59b4f5d5466a1cdb11f802c5dcb334401b042feee0cbe31ef3021fe3abd30"
+    },
+    "byte_identical": true,
+    "installed_consumer": true,
+    "consumer_events": 3,
+    "zero_viewer_continued": true,
+    "platform": "darwin",
+    "python": "3.13.15"
+  },
+  "limitations": [
+    "Remote transit not qualified: clients label delayed and keep current UNKNOWN",
+    "No native iOS sources or caches touched",
+    "Browser delivery/CORS hosting not claimed; fetch client tested under Node"
+  ]
+}

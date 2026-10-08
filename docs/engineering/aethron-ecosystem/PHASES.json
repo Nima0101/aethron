@@ -172,15 +172,17 @@
       ]
     },
     "P1.5": {
+      "status": "implemented_validation_in_progress",
+      "evidence": [
+        "evidence/phase1/p15.json"
+      ]
+    },
+    "P1.6": {
       "status": "in_progress",
       "evidence": []
     },
-    "P1.6": {
-      "status": "pending",
-      "evidence": []
-    },
     "P1.7": {
-      "status": "pending",
+      "status": "in_progress",
       "evidence": []
     }
   }

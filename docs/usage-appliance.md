@@ -1,0 +1,13 @@
+# AETHRON appliance candidate
+
+An appliance is permanently installed compute, sensors, wiring and protected power. After commissioning, its OS starts AETHRON; a phone, laptop, provisioning USB host, WAN, cloud account or license server does not sustain processing. CLI tools remain maintenance interfaces.
+
+The Linux candidate supplies a dedicated-account systemd unit, signed local manifests, offline integrity verification, bounded worker restart, local status, authenticated optional viewers and transactional update directories. The installer targets an explicit filesystem root and never starts a service on the development Mac. Package/image creation must create the `aethron` account and grant only the selected sensor permissions; do not grant blanket device access. The reference guest uses synthetic replay and no device grants.
+
+Read the local indicator: startup or expired status means UNKNOWN; running means the process is active, not that a scene is safe. Fault means maintenance is required. A local status JSON file expires after two seconds and contains no imagery, boxes, IDs or credentials. A product enclosure needs an independently supervised physical indicator; a dead software process cannot light its own fault lamp. Hardware indicator/power/thermal qualification remains pending.
+
+Provision signed artifacts and trust root locally; remove the setup tool, close all viewers, disconnect WAN and reboot. The Linux unit starts from local storage without `network-online.target`. No model is automatically downloaded. Sensor/model/timing failure withdraws evidence; it never requests vehicle or drone actuation. Restart attempts are bounded to five in sixty seconds, then latched for maintenance. The OS separately limits service restarts.
+
+For offline updates, use `UpdateStore.stage_update`, `activate` and `recover` as a local administrator against a protected store and pinned Ed25519 public key. Only signed, hash-matching, compatible files are staged. Activation atomically records the active slot and minimum version; revoked older versions are not restored. Corrupt active content yields fault. Interrupted staging leaves the active slot intact. Factory reset erases the store and must also erase provisioning credentials before recommissioning. Test-only signing keys are never production trust roots.
+
+The boot/soak test is an emulated Linux system using a real kernel and systemd, no virtual NIC and no login/viewer dependency. Its evidence is software-in-loop, not automotive power, flight endurance, thermal performance or zero-visible hardware accuracy. Consult the [current phase evidence](engineering/aethron-ecosystem/PHASES.json) before assigning support claims.
