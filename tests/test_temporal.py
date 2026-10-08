@@ -5,13 +5,13 @@ import math
 import random
 import unittest
 
-from rescuesense import evaluate
-from rescuesense.schema import parse
-from rescuesense.temporal import Session
-from rescuesense.temporal.fixtures import detection, encode, frame, sensor, sequences
-from rescuesense.temporal.math import Axis, assignment, translation
-from rescuesense.temporal.pixels import detect_pgm
-from rescuesense.temporal.replay import replay
+from aethron import evaluate
+from aethron.schema import parse
+from aethron.temporal import Session
+from aethron.temporal.fixtures import detection, encode, frame, sensor, sequences
+from aethron.temporal.math import Axis, assignment, translation
+from aethron.temporal.pixels import detect_pgm
+from aethron.temporal.replay import replay
 
 
 class Temporal(unittest.TestCase):
@@ -211,7 +211,7 @@ class Temporal(unittest.TestCase):
             detect_pgm(b"P5\n999 999\n255\n")
 
     def test_image_camera_registration_and_flat_negative(self):
-        from rescuesense.temporal.registration import estimate_translation
+        from aethron.temporal.registration import estimate_translation
 
         rng = random.Random(3409)
         w, h = 160, 160
@@ -239,7 +239,7 @@ class Temporal(unittest.TestCase):
         self.assertEqual(stalled["tracks"][0]["sources"], [])
 
     def test_tiny_finite_geometry_does_not_crash_or_round_to_zero(self):
-        from rescuesense.temporal.math import iou
+        from aethron.temporal.math import iou
 
         tiny = detection(0, y=0, w=1e-300, h=1e-300)
         self.assertEqual(iou(tiny["box"], tiny["box"]), 0)

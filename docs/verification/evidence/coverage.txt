@@ -1,15 +1,15 @@
 Name                             Stmts   Miss  Cover   Missing
 --------------------------------------------------------------
-rescuesense/__init__.py              3      0   100%
-rescuesense/__main__.py             35     35     0%   3-48
-rescuesense/actions.py               4      0   100%
-rescuesense/adapters.py             28      0   100%
-rescuesense/core.py                 52      0   100%
-rescuesense/demo.py                 24     24     0%   3-85
-rescuesense/features.py             62      2    97%   23-24
-rescuesense/models/__init__.py       0      0   100%
-rescuesense/render.py               21      0   100%
-rescuesense/schema.py              105      0   100%
-rescuesense/schema_v2.py            31      0   100%
+aethron/__init__.py              3      0   100%
+aethron/__main__.py             35     35     0%   3-48
+aethron/actions.py               4      0   100%
+aethron/adapters.py             28      0   100%
+aethron/core.py                 52      0   100%
+aethron/demo.py                 24     24     0%   3-85
+aethron/features.py             62      2    97%   23-24
+aethron/models/__init__.py       0      0   100%
+aethron/render.py               21      0   100%
+aethron/schema.py              105      0   100%
+aethron/schema_v2.py            31      0   100%
 --------------------------------------------------------------
 TOTAL                              365     61    83%

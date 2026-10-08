@@ -8,8 +8,8 @@ import hashlib
 import json
 import random
 
-from rescuesense import evaluate
-from rescuesense.demo import scenarios
+from aethron import evaluate
+from aethron.demo import scenarios
 
 
 def corpus():

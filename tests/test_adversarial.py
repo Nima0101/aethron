@@ -59,7 +59,7 @@ class AdversarialTests(unittest.TestCase):
 
     def test_missing_values_and_deep_duplicate_json(self):
         self.assertEqual(claim(evaluate(request(observation(values=[]))))["state"], "UNKNOWN")
-        from rescuesense import evaluate as run
+        from aethron import evaluate as run
 
         data = (
             json.dumps(scene(person()))
@@ -81,7 +81,7 @@ class AdversarialTests(unittest.TestCase):
 
     def test_optimized_python_still_rejects_invalid_input(self):
         p = subprocess.run(
-            [sys.executable, "-O", "-m", "rescuesense", "evaluate", "-"],
+            [sys.executable, "-O", "-m", "aethron", "evaluate", "-"],
             input=b'{"identity":"secret"}',
             capture_output=True,
             check=False,
@@ -130,8 +130,8 @@ class AdversarialTests(unittest.TestCase):
         self.assertEqual(claim(out)["confidence"], "medium")
 
     def test_v2_adapter_round_trip(self):
-        from rescuesense import evaluate as run
-        from rescuesense.adapters import envelope, person_cue
+        from aethron import evaluate as run
+        from aethron.adapters import envelope, person_cue
 
         obs = person_cue(
             "thermal_person", 0.95, at_ms=1000, calibration_until_ms=2000, rect=[10, 10, 20, 30]

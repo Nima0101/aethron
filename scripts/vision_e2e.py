@@ -15,15 +15,15 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from temporal_evaluate import metrics  # noqa: E402
 
-from rescuesense.temporal.fixtures import encode, frame  # noqa: E402
-from rescuesense.temporal.pixels import decode_pgm  # noqa: E402
-from rescuesense.temporal.registration import estimate_translation  # noqa: E402
-from rescuesense.temporal.replay import replay  # noqa: E402
-from rescuesense.vision.yolox import MODEL_SHA256, RGBDetector  # noqa: E402
+from aethron.temporal.fixtures import encode, frame  # noqa: E402
+from aethron.temporal.pixels import decode_pgm  # noqa: E402
+from aethron.temporal.registration import estimate_translation  # noqa: E402
+from aethron.temporal.replay import replay  # noqa: E402
+from aethron.vision.yolox import MODEL_SHA256, RGBDetector  # noqa: E402
 
 
 def run():
-    backend = os.environ.get("RESCUESENSE_VISION_BACKEND", "opencv")
+    backend = os.environ.get("AETHRON_VISION_BACKEND", "opencv")
     start_load = time.perf_counter()
     detector = RGBDetector(ROOT / "build/models/yolox.onnx", backend=backend)
     model_load_ms = round((time.perf_counter() - start_load) * 1000, 3)

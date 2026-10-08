@@ -1,5 +1,5 @@
 # Reproduce the perception visuals
-The README GIF is an original drawn synthetic scene plus actual temporal CLI outputs. It is not rendered fake detector output: `scripts/temporal_visuals.py` constructs explicit synthetic inputs, runs the real `python -m rescuesense replay` process, and overlays its returned boxes/scores/states. It does not prove pixel detection or hardware.48 frames advance by100ms; GIF playback uses150ms per frame. Daylight, RGB blackout, short occlusion, reacquisition, translation compensation and total loss are included. All-support loss becomes UNKNOWN, then empty UNKNOWN after expiry.
+The README GIF is an original drawn synthetic scene plus actual temporal CLI outputs. It is not rendered fake detector output: `scripts/temporal_visuals.py` constructs explicit synthetic inputs, runs the real `python -m aethron replay` process, and overlays its returned boxes/scores/states. It does not prove pixel detection or hardware.48 frames advance by100ms; GIF playback uses150ms per frame. Daylight, RGB blackout, short occlusion, reacquisition, translation compensation and total loss are included. All-support loss becomes UNKNOWN, then empty UNKNOWN after expiry.
 
 With pinned development requirements installed:
 

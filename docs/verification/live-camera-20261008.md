@@ -6,7 +6,7 @@
 - Model integrity: six locally bundled browser model files passed SHA-256 verification before the web build.
 - npm production dependency audit: zero reported known vulnerabilities after importing only TFJS core/converter/CPU/WebGL packages instead of the full metapackage.
 - Existing core verification: 66 unit tests passed and the 100-frame 32-object synthetic benchmark passed at p95 8.875 ms on the local host. This is not browser inference latency.
-- Public repository: [Nima0101/rescuesense](https://github.com/Nima0101/rescuesense), public snapshot intentionally uses a GitHub noreply identity to preserve commit email privacy.
-- GitHub Pages: [RescueSense Camera](https://nima0101.github.io/rescuesense/), browser build and deploy workflow successfully completed. HTML, service worker and model index returned HTTP 200.
+- Public repository: [Nima0101/aethron](https://github.com/Nima0101/aethron), public snapshot intentionally uses a GitHub noreply identity to preserve commit email privacy.
+- GitHub Pages: [AETHRON Camera](https://nima0101.github.io/aethron/), browser build and deploy workflow successfully completed. HTML, service worker and model index returned HTTP 200.
 
 **Unqualified:** physical iPhone/Android Safari, mobile GPU throughput, offline restart behavior, UVC or RTSP from actual vehicle/drone cameras, model calibration, small aircraft recall, night/thermal sensing, certified automotive/UAS safety integration and independent conformity assessment. The 20/20 recorded aircraft misses from previous evaluations remain a known failure and no operational rescue approval has been issued.

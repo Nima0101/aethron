@@ -1,4 +1,4 @@
-# RescueSense Safety Amendment v2 — transient human boxes + darkness continuity
+# AETHRON Safety Amendment v2 — transient human boxes + darkness continuity
 
 This amendment corrects one over-broad rule from the frozen v1 safety constitution.
 

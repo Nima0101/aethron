@@ -11,7 +11,7 @@ from .schema import MAX_BYTES
 
 def main():
     parser = argparse.ArgumentParser(
-        description="RescueSense reference runtime; no live hardware claim"
+        description="AETHRON reference runtime; no live hardware claim"
     )
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("demo", help="run explicitly synthetic safety scenarios")

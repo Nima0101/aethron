@@ -1,4 +1,4 @@
-# RescueSense active instructions — capability v3
+# AETHRON active instructions — capability v3
 Read docs/safety/amendment-v3.md, docs/architecture/protocol-v3.md and docs/verification/matrix-v3.md first. All earlier freezes remain immutable; AGENTS v1/v2 are preserved byte-for-byte in docs/engineering/history. Owner v3 explicitly supersedes blanket temporal-state prohibitions. Original governance otherwise applies.
 No sub-agents. Temporary scene-local geometric tracks are permitted for immediate safety/rescue. Never implement biometric identity, appearance embeddings, durable person IDs, cross-camera/location re-identification, long-term person history, threat scoring, target designation, autonomous following/pursuit or weapon integration. Through-obstruction remains the separate coarse v2 interface, never v3 precise tracks.
 Respect frozen time/resource/uncertainty bounds. Darkness removes RGB support, not valid non-visible support. Predictions are uncertain, never new evidence. All-support loss means UNKNOWN and defensive recommendation. No field-calibrated accuracy, physical range, power, platform or production claim without exact evidence.

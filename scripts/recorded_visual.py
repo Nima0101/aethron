@@ -53,7 +53,7 @@ def run():
             )
         draw.text(
             (24, 614),
-            "Amazon Airborne Object Tracking / CDLA-Permissive-1.0 / resized excerpt; RescueSense overlays",
+            "Amazon Airborne Object Tracking / CDLA-Permissive-1.0 / resized excerpt; AETHRON overlays",
             font=ImageFont.load_default(size=15),
             fill="#c0d6df",
         )

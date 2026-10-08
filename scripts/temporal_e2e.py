@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def run():
-    args = [sys.executable, "-m", "rescuesense", "replay", "examples/temporal-blackout.jsonl"]
+    args = [sys.executable, "-m", "aethron", "replay", "examples/temporal-blackout.jsonl"]
     a = subprocess.run(args, cwd=ROOT, capture_output=True, check=True)
     b = subprocess.run(args, cwd=ROOT, capture_output=True, check=True)
     assert a.stdout == b.stdout
@@ -19,7 +19,7 @@ def run():
     assert len({r["tracks"][0]["id"] for r in rows}) == 1
     assert rows[-1]["tracks"][0]["sources"] == ["depth", "lwir", "radar"]
     assert rows[-1]["recommendation"]["action"] == "STOP"
-    with tempfile.TemporaryDirectory(prefix="rescuesense-replay-") as directory:
+    with tempfile.TemporaryDirectory(prefix="aethron-replay-") as directory:
         path = Path(directory) / "invalid.jsonl"
         path.write_bytes(
             (ROOT / "examples/temporal-blackout.jsonl").read_bytes() + b'{"secret":"DO_NOT_ECHO"}\n'

@@ -37,7 +37,7 @@ class V2Tests(unittest.TestCase):
         self.assertEqual(b["confidence_semantics"], "uncalibrated_score")
 
     def test_4_expiry_has_no_reusable_identity(self):
-        from rescuesense.render import render
+        from aethron.render import render
 
         doc = scene(person("thermal_person"))
         self.assertLessEqual(evaluate(doc)["valid_until_ms"], 1200)

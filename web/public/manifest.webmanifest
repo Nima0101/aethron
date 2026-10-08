@@ -1,6 +1,6 @@
 {
-  "name": "RescueSense Camera",
-  "short_name": "RescueSense",
+  "name": "AETHRON Camera",
+  "short_name": "AETHRON",
   "description": "Local camera perception research preview",
   "start_url": "./",
   "scope": "./",

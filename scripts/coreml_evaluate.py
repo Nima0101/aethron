@@ -16,9 +16,9 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from rescuesense.temporal.math import iou  # noqa: E402
-from rescuesense.temporal.pixels import decode_pgm  # noqa: E402
-from rescuesense.vision.yolox import MODEL_SHA256, RGBDetector  # noqa: E402
+from aethron.temporal.math import iou  # noqa: E402
+from aethron.temporal.pixels import decode_pgm  # noqa: E402
+from aethron.vision.yolox import MODEL_SHA256, RGBDetector  # noqa: E402
 
 
 def p95(values):

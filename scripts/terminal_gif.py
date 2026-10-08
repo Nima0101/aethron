@@ -18,7 +18,7 @@ def run():
         r = row["result"]
         frame = Image.new("RGB", (1060, 620), "#10212b")
         draw = ImageDraw.Draw(frame)
-        draw.text((30, 24), "RescueSense | captured CLI output replay", font=font, fill="#eaf1eb")
+        draw.text((30, 24), "AETHRON | captured CLI output replay", font=font, fill="#eaf1eb")
         draw.text(
             (30, 60),
             "SYNTHETIC DATA | slowed playback | no live hardware",

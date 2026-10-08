@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from rescuesense.vision.yolox import MODEL_BYTES, MODEL_SHA256  # noqa: E402
+from aethron.vision.yolox import MODEL_BYTES, MODEL_SHA256  # noqa: E402
 
 URL = "https://media.githubusercontent.com/media/opencv/opencv_zoo/main/models/object_detection_yolox/object_detection_yolox_2022nov.onnx"
 

@@ -5,8 +5,8 @@
     "docs/engineering/amendment-001-darkness.md": "f49ec29b47b628be83c4b3489260f80f98a49e85ec076336d7ccf71cc6373e84",
     "docs/architecture/darkness-capabilities.md": "02751af7220cdc0fd8adf39c8419b36143563a1cdb8ebab0d4821975b0ba09c6",
     "docs/verification/darkness-matrix.md": "48c3b27a3901cfeffdb0440d914b4180aa8fd15ce7904794cc54638b16752ecc",
-    "docs/research-landscape.md": "e79e04c60bb24033ded864515a5e9bffd13d05041c3cd991c7d114ec3b16c82c",
-    "docs/architecture/protocol.md": "a3da2f9ea6c720344b8cc3f8d8b4e51048b58aab24e70703821836fd8a734058",
+    "docs/research-landscape.md": "c27f3b257bc6cb0d777a03547bd1595c1685d068d810a92b285098c68fa8a85c",
+    "docs/architecture/protocol.md": "c180818edf7fcf763ef2bf5d9f850ba1c290a3d9896d5029473f5ebc42a8eff2",
     "docs/decisions/0001-portable-boundary.md": "4e25b1781358af57753f6d19e29ab09d80a029c987970b985e44337784b27785"
   }
 }

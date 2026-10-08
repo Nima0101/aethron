@@ -4,8 +4,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from rescuesense import evaluate
-from rescuesense.adapters import coarse_cue, depth_patch, envelope, thermal_patch
+from aethron import evaluate
+from aethron.adapters import coarse_cue, depth_patch, envelope, thermal_patch
 
 hot = thermal_patch([80], at_ms=1000, calibration_until_ms=2000)
 depth = depth_patch([1], at_ms=1000, calibration_until_ms=2000)

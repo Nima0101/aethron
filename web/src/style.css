@@ -1,7 +1,7 @@
 :root{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#eef7fc;background:#0a141e;font-synthesis:none}
 *{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#203d4d 0%,#0a141e 55%)}button{font:inherit;cursor:pointer}
 #app{max-width:1030px;margin:auto;padding:0 24px}.topbar{height:92px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #30404b}
-.identity{display:flex;gap:12px;align-items:center}.logo{width:47px;height:47px;border:1px solid #5b8190;border-radius:14px;display:grid;place-items:center;font-weight:800;font-size:24px;color:#e3fcfa}.logo span{color:#66e2bc}
+.identity{display:flex;gap:12px;align-items:center}.logo{width:47px;height:47px;border:1px solid #5b8190;border-radius:14px;display:grid;place-items:center;font-weight:800;font-size:24px;color:#e3fcfa}.logo{object-fit:cover;background:#fff}
 .identity strong,.identity small{display:block}.identity strong{font-size:18px;letter-spacing:-.5px}.identity small{color:#a5bcc8;font-size:10px;letter-spacing:2px;margin-top:5px;font-weight:700}
 .health{font-size:11px;font-weight:800;letter-spacing:1.3px;background:#2b3845;padding:10px 15px;border-radius:24px;border:1px solid #586a77}
 .health.ready{background:#154b40;color:#adf4d9;border-color:#1c7e68}.health.busy{background:#413721;color:#ffdda0;border-color:#6c5732}.health.stale{background:#53392b;color:#ffb99c;border-color:#8a5640}

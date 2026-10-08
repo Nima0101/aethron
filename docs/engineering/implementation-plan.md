@@ -1,4 +1,4 @@
-# RescueSense implementation plan
+# AETHRON implementation plan
 Goal: complete the allowed reference software and all independent verification, release and presentation work; expose exact hardware blockers.
 Architecture: protocol.md defines the closed boundary. schema.py validates bytes; features.py extracts eligible rules; core.py fuses; actions.py recommends; render.py renders expiring coarse outputs; adapters.py minimizes reference inputs. CLI evaluates one bounded file. No sub-agents; owner authorized autonomous execution.
 Stack: Python 3.9+ stdlib runtime. Development tools isolated locally.

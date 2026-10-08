@@ -1,4 +1,4 @@
-const CACHE = 'rescuesense-camera-v1';
+const CACHE = 'aethron-camera-v1';
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(['./','./index.html','./manifest.webmanifest','./icon.svg'])));
   self.skipWaiting();

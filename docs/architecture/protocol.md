@@ -1,4 +1,4 @@
-# RescueSense protocol 1 — frozen specification
+# AETHRON protocol 1 — frozen specification
 Python 3.9+ standard-library core, CLI and Python API. Runtime has zero third-party packages, no network, persistent history, raw camera/radar interface or actuator API. All API evaluation enters through validated JSON bytes, even in-process adapters.
 
 Input: a single JSON object, maximum 65536 bytes, nesting 8, at most 28 observations. Exact fields: version=1, now_ms integer 0..2^53-1000, clock=monotonic, lighting=daylight/low_light/near_dark/zero_visible, evidence=synthetic/external_unverified, authorized_obstruction boolean, contract=warn/vehicle_stop/drone_hover/drone_land/drone_retreat, zones unique subset of near/sector_a/sector_b/sector_c (1..4), observations list. External observations never become verified-live.

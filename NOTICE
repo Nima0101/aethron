@@ -1,8 +1,8 @@
-RescueSense
+AETHRON
 Copyright 2026 Nima Khaki
 Original software, deterministic model, synthetic fixtures and vector artwork.
 AI-assisted engineering is disclosed in docs/engineering/ai-assisted-engineering.md.
 
 Optional model attribution: OpenCV Zoo YOLOX-S and YOLOX authors; Apache-2.0 model license in docs/models/YOLOX-LICENSE.txt. Weights fetched separately with a fixed SHA-256.
 Recorded evaluation data: Amazon Airborne Object Tracking dataset, CDLA-Permissive-1.0. Derived25-frame resized excerpt; source URLs/hashes and license in data/aot.
-RGB smoke photographs: NASA public-domain image and Stefan van der Walt's CC0 cat image, distributed via scikit-image; details in data/rgb-smoke/README.md. Derived overlays are actual RescueSense execution output. No third-party endorsement.
+RGB smoke photographs: NASA public-domain image and Stefan van der Walt's CC0 cat image, distributed via scikit-image; details in data/rgb-smoke/README.md. Derived overlays are actual AETHRON execution output. No third-party endorsement.

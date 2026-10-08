@@ -6,10 +6,10 @@ Core check: `python3 scripts/verify.py` (Python 3.9+, standard library). Tests i
 Full candidate checks:
 
 ```sh
-.venv/bin/ruff check rescuesense tests scripts
-.venv/bin/ruff format --check rescuesense tests scripts
-.venv/bin/bandit -r rescuesense
-.venv/bin/coverage run --source=rescuesense -m unittest discover -s tests
+.venv/bin/ruff check aethron tests scripts
+.venv/bin/ruff format --check aethron tests scripts
+.venv/bin/bandit -r aethron
+.venv/bin/coverage run --source=aethron -m unittest discover -s tests
 .venv/bin/coverage report -m
 .venv/bin/pip-audit --cache-dir build/audit-cache --disable-pip --no-deps -r requirements-dev.txt
 python3 scripts/fuzz.py

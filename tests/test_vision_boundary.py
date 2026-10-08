@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from rescuesense.vision.yolox import RGBDetector, safe_class
+from aethron.vision.yolox import RGBDetector, safe_class
 
 
 class VisionBoundary(unittest.TestCase):

@@ -1,19 +1,19 @@
 # Primary-source research — 2026-10-08
 Sources were opened or searched before architecture freeze. No novelty, certification or full standards-conformance assertion. Paid standards text was not available; scope pages are not a compliance audit.
 
-| Domain / primary source | Finding informing RescueSense |
+| Domain / primary source | Finding informing AETHRON |
 |---|---|
 | [FLIR Lepton](https://www.flir.com/products/lepton/) | Radiometry depends on model, range and calibration. Use thermal anomaly language, explicit saturation and no RGB dependency. Thermal is not through-wall person imaging. |
 | [RealSense depth quality testing](https://www.intel.com/content/dam/support/us/en/documents/emerging-technologies/intel-realsense-technology/RealSense_DepthQualityTesting.pdf) | Lighting, texture, reflectivity and technology change depth quality. Active/passive depth must not share a blanket darkness claim. |
-| [TI presence demo](https://software-dl.ti.com/ra-processors/esd/MMWAVE-L-SDK/05_03_00_02/exports/docs/api_guide_xwrL14xx/MOTION_AND_PRESENCE_DETECTION_DEMO.html) | Existing radar stacks provide broader outputs. RescueSense accepts minimized authorized zones only; no point cloud, tracking or vital signs. Hardware-specific obstruction behavior remains unproven. |
+| [TI presence demo](https://software-dl.ti.com/ra-processors/esd/MMWAVE-L-SDK/05_03_00_02/exports/docs/api_guide_xwrL14xx/MOTION_AND_PRESENCE_DETECTION_DEMO.html) | Existing radar stacks provide broader outputs. AETHRON accepts minimized authorized zones only; no point cloud, tracking or vital signs. Hardware-specific obstruction behavior remains unproven. |
 | [Apple scene depth](https://developer.apple.com/documentation/arkit/displaying-a-point-cloud-using-scene-depth) | Depth support needs runtime capability checks and suitable devices. No iPhone-wide LiDAR claim. |
 | [ARCore depth guide](https://developers.google.com/ar/develop/java/depth/developer-guide) | Depth mode must be checked/enabled; device support differs. No Android-wide darkness guarantee. |
 | [ISO 21448:2022](https://www.iso.org/standard/77490.html) | Functional insufficiency and foreseeable misuse matter separately from implementation bugs. Site lists revision work; no certification claimed. |
 | [EASA open category](https://www.easa.europa.eu/en/domains/drones-air-mobility/operating-drone/open-category-low-risk-civil-drones) | Drone operation has operational constraints beyond software. No autonomous flight authority granted by this library. |
 | [NIST Privacy Framework](https://www.nist.gov/privacy-framework) | Manage risks to individuals throughout data processing; minimization is not anonymity proof. |
-| [ROS 2 message_filters](https://github.com/ros2/message_filters) | Established synchronization primitives exist. RescueSense uses a bounded supplied batch and explicit skew rejection rather than hidden alignment/history. |
+| [ROS 2 message_filters](https://github.com/ros2/message_filters) | Established synchronization primitives exist. AETHRON uses a bounded supplied batch and explicit skew rejection rather than hidden alignment/history. |
 | [LiteRT](https://developers.google.com/edge/litert) | Established on-device inference runtime; no reason to create another engine. No safe licensed human detector/data pair has been qualified here, so the core consumes minimized cues and ships only transparent deterministic rule artifacts. |
-| [Autoware](https://github.com/autowarefoundation/autoware) | Full autonomous driving perception/control is a serious existing stack. RescueSense's narrow value is privacy/failure contracts and reproducible integration verification, not a replacement autonomy system. |
+| [Autoware](https://github.com/autowarefoundation/autoware) | Full autonomous driving perception/control is a serious existing stack. AETHRON's narrow value is privacy/failure contracts and reproducible integration verification, not a replacement autonomy system. |
 | [PX4 collision prevention](https://docs.px4.io/main/en/computer_vision/collision_prevention) | Control integration depends on freshness, coverage and controller behavior. Keep recommendations separate and require watchdog/hardware-in-loop validation. |
 
 Searches covered thermal accuracy/emissivity, mmWave occupancy, depth lighting, mobile depth APIs, SOTIF, drone operational safety, sensor synchronization, edge inference and open-source perception. Some documentation fetches (Autoware design page, ROS tutorial) failed; canonical repositories were inspected instead. No implementation source was copied. Model/data integration is a rule model plus original synthetic vectors, not a substitute for physical detection validation.

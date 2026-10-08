@@ -13,7 +13,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from rescuesense.vision.yolox import RGBDetector  # noqa: E402
+from aethron.vision.yolox import RGBDetector  # noqa: E402
 
 
 def run():

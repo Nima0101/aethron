@@ -14,21 +14,21 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from rescuesense.temporal import Session  # noqa: E402 - source-checkout entry point
-from rescuesense.temporal.fixtures import (  # noqa: E402 - source-checkout entry point
+from aethron.temporal import Session  # noqa: E402 - source-checkout entry point
+from aethron.temporal.fixtures import (  # noqa: E402 - source-checkout entry point
     detection,
     encode,
     frame,
 )
-from rescuesense.temporal.fusion import observations  # noqa: E402 - source-checkout entry point
-from rescuesense.temporal.math import (  # noqa: E402 - source-checkout entry point
+from aethron.temporal.fusion import observations  # noqa: E402 - source-checkout entry point
+from aethron.temporal.math import (  # noqa: E402 - source-checkout entry point
     assignment,
     centre,
     iou,
 )
-from rescuesense.temporal.pixels import detect_pgm  # noqa: E402 - source-checkout entry point
-from rescuesense.temporal.registration import estimate_translation  # noqa: E402
-from rescuesense.temporal.replay import replay  # noqa: E402 - source-checkout entry point
+from aethron.temporal.pixels import detect_pgm  # noqa: E402 - source-checkout entry point
+from aethron.temporal.registration import estimate_translation  # noqa: E402
+from aethron.temporal.replay import replay  # noqa: E402 - source-checkout entry point
 
 
 class Greedy:
@@ -233,7 +233,7 @@ def run(outdir, include_recorded=True):
         "protocol": "matrix-v3.md frozen T09/T10/T13",
         "runtime_sha256": {
             str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in (ROOT / "rescuesense").rglob("*.py")
+            for p in (ROOT / "aethron").rglob("*.py")
         },
         "evaluation_script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "python": platform.python_version(),

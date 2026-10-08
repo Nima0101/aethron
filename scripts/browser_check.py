@@ -16,7 +16,7 @@ def launch_browser(playwright):
     Fallback applies only when the expected executable is missing, not when
     Chromium starts but fails (sandbox, permissions, version incompatibility).
     """
-    selected = os.environ.get("RESCUESENSE_BROWSER")
+    selected = os.environ.get("AETHRON_BROWSER")
     if selected:
         return playwright.chromium.launch(executable_path=selected), selected
     try:

@@ -1,6 +1,6 @@
-# RescueSense Capability Amendment v3 — temporal perception, night operation, tracking and E2E evidence
+# AETHRON Capability Amendment v3 — temporal perception, night operation, tracking and E2E evidence
 
-This amendment expands RescueSense from frame-local detection into a real temporal perception system.
+This amendment expands AETHRON from frame-local detection into a real temporal perception system.
 
 It is based on the owner request plus current external prior-art research, including Visage Technologies' 2026 UAV Detection PoC.
 

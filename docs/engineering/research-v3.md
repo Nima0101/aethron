@@ -1,7 +1,7 @@
 # v3 primary-source review — 2026-10-08
 Research separates commercial assertions from mechanisms we can test. No third-party reference images are redistributed and no endorsement is implied.
 
-| Primary source | Finding and RescueSense decision |
+| Primary source | Finding and AETHRON decision |
 |---|---|
 | [Visage UAV PoC](https://visagetechnologies.com/blog/uav-detection/) (28 April2026) | Thermal small-object detection, L2/IoU association, motion filtering and compensation are useful hypotheses. Solar loading, small pixel footprints and missing monocular depth are explicit limitations. Their range, detector threshold and performance assertions are not ours. SUAVE-600 v3 licensing could not be independently established. |
 | [Visage Edge AI](https://visagetechnologies.com/edge-ai/), [Autonomy](https://visagetechnologies.com/autonomy-2/), [functional/AI safety](https://visagetechnologies.com/functional-and-ai-safety-for-off-highway-and-industrial-vehicles/), [off-highway perception](https://visagetechnologies.com/off-highway/) | Hardware-specific optimization and operating-domain validation are appropriate; no vendor production assertion transfers to our software. Some direct fetches failed; indexed page contents were accessible. |

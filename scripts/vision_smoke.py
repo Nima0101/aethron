@@ -10,9 +10,9 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from rescuesense.temporal.fixtures import encode, frame  # noqa: E402
-from rescuesense.temporal.replay import replay  # noqa: E402
-from rescuesense.vision.yolox import RGBDetector  # noqa: E402
+from aethron.temporal.fixtures import encode, frame  # noqa: E402
+from aethron.temporal.replay import replay  # noqa: E402
+from aethron.vision.yolox import RGBDetector  # noqa: E402
 
 
 def run():

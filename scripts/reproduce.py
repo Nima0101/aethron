@@ -16,7 +16,7 @@ def call(args, cwd, **kw):
 
 
 def run():
-    with tempfile.TemporaryDirectory(prefix="rescuesense-clean-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="aethron-clean-") as temporary:
         root = Path(temporary)
         clone = root / "source"
         call(["git", "clone", "--no-local", str(ROOT), str(clone)], ROOT, capture_output=True)
@@ -28,10 +28,10 @@ def run():
             check=False,
         )
         with (root / "demo.jsonl").open("w") as stream:
-            call([sys.executable, "-m", "rescuesense", "demo"], clone, stdout=stream)
+            call([sys.executable, "-m", "aethron", "demo"], clone, stdout=stream)
         with (root / "result.json").open("w") as stream:
             call(
-                [sys.executable, "-m", "rescuesense", "evaluate", "examples/person-blackout.json"],
+                [sys.executable, "-m", "aethron", "evaluate", "examples/person-blackout.json"],
                 clone,
                 stdout=stream,
             )
@@ -40,7 +40,7 @@ def run():
                 [
                     sys.executable,
                     "-m",
-                    "rescuesense",
+                    "aethron",
                     "render",
                     "examples/person-blackout.json",
                     "--now-ms",
@@ -49,7 +49,7 @@ def run():
                 clone,
                 stdout=stream,
             )
-        probe = clone / "rescuesense" / "untracked_release_probe.py"
+        probe = clone / "aethron" / "untracked_release_probe.py"
         probe.write_text("# An untracked runtime change must block release.\n", encoding="utf-8")
         refused = subprocess.run(
             [sys.executable, "scripts/release.py", str(root / "refused")],
@@ -68,7 +68,7 @@ def run():
         call(
             [
                 sys.executable,
-                str(a / "rescuesense.pyz"),
+                str(a / "aethron.pyz"),
                 "evaluate",
                 str(clone / "examples/person-blackout.json"),
             ],
@@ -78,14 +78,14 @@ def run():
         # zipimport consumer from outside the checkout, no PYTHONPATH dependency.
         env = dict(os.environ)
         env.pop("PYTHONPATH", None)
-        code = 'import sys;sys.path.insert(0,sys.argv[1]);from rescuesense import evaluate;from pathlib import Path;r=evaluate(Path(sys.argv[2]).read_bytes());assert r["recommendation"]["action"]=="STOP"'
+        code = 'import sys;sys.path.insert(0,sys.argv[1]);from aethron import evaluate;from pathlib import Path;r=evaluate(Path(sys.argv[2]).read_bytes());assert r["recommendation"]["action"]=="STOP"'
         call(
             [
                 sys.executable,
                 "-I",
                 "-c",
                 code,
-                str(a / "rescuesense.pyz"),
+                str(a / "aethron.pyz"),
                 str(clone / "examples/person-blackout.json"),
             ],
             root,

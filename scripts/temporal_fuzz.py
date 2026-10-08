@@ -9,15 +9,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from rescuesense.temporal import Session  # noqa: E402
-from rescuesense.temporal.fixtures import detection, encode, frame  # noqa: E402
-from rescuesense.temporal.pixels import decode_pgm  # noqa: E402
+from aethron.temporal import Session  # noqa: E402
+from aethron.temporal.fixtures import detection, encode, frame  # noqa: E402
+from aethron.temporal.pixels import decode_pgm  # noqa: E402
 
 
 def run():
     source_hashes = {
         str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
-        for p in (ROOT / "rescuesense").rglob("*.py")
+        for p in (ROOT / "aethron").rglob("*.py")
     }
     rng = random.Random(981640)
     s = Session()
@@ -47,7 +47,7 @@ def run():
     s.close()
     assert source_hashes == {
         str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
-        for p in (ROOT / "rescuesense").rglob("*.py")
+        for p in (ROOT / "aethron").rglob("*.py")
     }, "source changed during fuzz"
     report = {
         "seed": 981640,

@@ -11,7 +11,7 @@ from test_core import observation, request
 class IntegrationTests(unittest.TestCase):
     def test_cli_bounded_error_and_evaluation(self):
         p = subprocess.run(
-            [sys.executable, "-m", "rescuesense", "evaluate", "-"],
+            [sys.executable, "-m", "aethron", "evaluate", "-"],
             input=json.dumps(request(observation())).encode(),
             capture_output=True,
             check=False,
@@ -19,7 +19,7 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(p.returncode, 0, p.stderr.decode())
         self.assertEqual(json.loads(p.stdout)["claims"][2]["kind"], "hot")
         p = subprocess.run(
-            [sys.executable, "-m", "rescuesense", "evaluate", "-"],
+            [sys.executable, "-m", "aethron", "evaluate", "-"],
             input=b'{"secret":"private"}',
             capture_output=True,
             check=False,
@@ -30,7 +30,7 @@ class IntegrationTests(unittest.TestCase):
     def test_cli_svg_is_utf8_even_when_console_encoding_is_ascii(self):
         doc = request(observation(nonhuman=True, rect=[10, 20, 30, 40]))
         p = subprocess.run(
-            [sys.executable, "-m", "rescuesense", "render", "-", "--now-ms", "1000"],
+            [sys.executable, "-m", "aethron", "render", "-", "--now-ms", "1000"],
             input=json.dumps(doc).encode(),
             capture_output=True,
             check=False,
@@ -43,7 +43,7 @@ class IntegrationTests(unittest.TestCase):
         )
 
     def test_renderer_expires_rectangles_and_never_draws_people(self):
-        from rescuesense.render import render
+        from aethron.render import render
 
         data = json.dumps(
             request(observation(nonhuman=True, rect=[10, 20, 30, 40]), observation("rgb", [0.95]))
@@ -59,7 +59,7 @@ class IntegrationTests(unittest.TestCase):
             render(data, 999)
 
     def test_adapter_minimizes_patch_to_nonhuman_box(self):
-        from rescuesense.adapters import coarse_cue, depth_patch, thermal_patch
+        from aethron.adapters import coarse_cue, depth_patch, thermal_patch
 
         a = thermal_patch(
             [80, 90], at_ms=1000, calibration_until_ms=2000, rect=[0, 0, 20, 20], nonhuman=True
@@ -77,7 +77,7 @@ class IntegrationTests(unittest.TestCase):
 
     def test_demo_cases_have_expected_failure_behavior(self):
         p = subprocess.run(
-            [sys.executable, "-m", "rescuesense", "demo"],
+            [sys.executable, "-m", "aethron", "demo"],
             capture_output=True,
             text=True,
             check=False,

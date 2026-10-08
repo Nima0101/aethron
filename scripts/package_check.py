@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def run():
-    with tempfile.TemporaryDirectory(prefix="rescuesense-wheel-") as directory:
+    with tempfile.TemporaryDirectory(prefix="aethron-wheel-") as directory:
         temp = Path(directory)
         env = dict(os.environ, SOURCE_DATE_EPOCH="1767225600")
         for name in ("a", "b"):
@@ -43,7 +43,7 @@ def run():
             stdout=subprocess.DEVNULL,
         )
         result = subprocess.run(
-            [str(python), "-I", "-m", "rescuesense", "demo"],
+            [str(python), "-I", "-m", "aethron", "demo"],
             cwd=temp,
             check=True,
             capture_output=True,
@@ -61,7 +61,7 @@ def run():
                 str(python),
                 "-I",
                 "-m",
-                "rescuesense",
+                "aethron",
                 "replay",
                 str(ROOT / "examples/temporal-blackout.jsonl"),
             ],

@@ -1,5 +1,5 @@
 # Security and safety
-RescueSense is an offline reference runtime with no listening service, telemetry or actuator connection. Inputs are bounded and schemas closed. Public output contains no biometric identity, person key or trajectory. Protocol 2 permits a short-lived direct human envelope for immediate safety. Through-obstruction stays coarse.
+AETHRON is an offline reference runtime with no listening service, telemetry or actuator connection. Inputs are bounded and schemas closed. Public output contains no biometric identity, person key or trajectory. Protocol 2 permits a short-lived direct human envelope for immediate safety. Through-obstruction stays coarse.
 
 Report vulnerabilities privately using the hosting platform's private vulnerability reporting when enabled. Until publication, provide a minimal synthetic reproduction directly to the maintainer; there is no monitored public security endpoint yet. Do not put sensitive sensor data into an issue. No guaranteed response SLA or independent audit is claimed.
 

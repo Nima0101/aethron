@@ -35,7 +35,7 @@ def run():
             assert hashlib.sha256((ROOT / actual).read_bytes()).hexdigest() == digest, (
                 "freeze mismatch: " + name
             )
-    for p in ROOT.joinpath("rescuesense").rglob("*.py"):
+    for p in ROOT.joinpath("aethron").rglob("*.py"):
         assert not re.search(r"\b(?:TO" + "DO|FIX" + "ME)\b", p.read_text(encoding="utf-8")), p.name
         tree = ast.parse(p.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
@@ -53,7 +53,7 @@ def run():
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
                 assert node.func.id not in {"eval", "exec", "compile"}, p.name
     # Scan only intended product files; never inspect local credentials/environment.
-    for folder in ["rescuesense", "tests", "scripts", "docs", "examples", "data", ".github", ""]:
+    for folder in ["aethron", "tests", "scripts", "docs", "examples", "data", ".github", ""]:
         for p in ROOT.joinpath(folder).rglob("*") if folder else ROOT.iterdir():
             if not p.is_file() or "__pycache__" in p.parts:
                 continue

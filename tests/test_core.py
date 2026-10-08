@@ -37,8 +37,8 @@ def request(*obs, **kw):
 
 
 def evaluate(doc):
-    assert importlib.util.find_spec("rescuesense.core") is not None, "bounded runtime missing"
-    from rescuesense.core import evaluate as run
+    assert importlib.util.find_spec("aethron.core") is not None, "bounded runtime missing"
+    from aethron.core import evaluate as run
 
     return run(json.dumps(doc).encode())
 
@@ -237,7 +237,7 @@ class CoreTests(unittest.TestCase):
                 evaluate(doc)
 
     def test_parser_malformed(self):
-        from rescuesense.core import evaluate as run
+        from aethron.core import evaluate as run
 
         for data in [
             b'{"version":1,"version":1}',
@@ -251,7 +251,7 @@ class CoreTests(unittest.TestCase):
                 run(data)
 
     def test_model_tamper_is_fail_closed(self):
-        from rescuesense.core import evaluate as run
+        from aethron.core import evaluate as run
 
         out = run(json.dumps(request(observation())).encode(), model_bytes=b"{}")
         self.assertEqual(claim(out)["state"], "UNKNOWN")

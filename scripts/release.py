@@ -28,15 +28,15 @@ def build(destination):
     buffer = io.BytesIO()
     with tarfile.open(fileobj=buffer, mode="w", format=tarfile.USTAR_FORMAT) as archive:
         for name, data in blobs.items():
-            info = tarfile.TarInfo("rescuesense-0.2.0/" + name)
+            info = tarfile.TarInfo("aethron-0.2.0/" + name)
             info.size = len(data)
             info.mode = 0o644
             info.mtime = 0
             archive.addfile(info, io.BytesIO(data))
-    (out / "rescuesense-0.2.0-source.tar.gz").write_bytes(gzip.compress(buffer.getvalue(), mtime=0))
-    with zipfile.ZipFile(out / "rescuesense.pyz", "w", compression=zipfile.ZIP_STORED) as archive:
-        app = {n: data for n, data in blobs.items() if n.startswith("rescuesense/")}
-        app["__main__.py"] = b"from rescuesense.__main__ import main\nraise SystemExit(main())\n"
+    (out / "aethron-0.2.0-source.tar.gz").write_bytes(gzip.compress(buffer.getvalue(), mtime=0))
+    with zipfile.ZipFile(out / "aethron.pyz", "w", compression=zipfile.ZIP_STORED) as archive:
+        app = {n: data for n, data in blobs.items() if n.startswith("aethron/")}
+        app["__main__.py"] = b"from aethron.__main__ import main\nraise SystemExit(main())\n"
         app["LICENSE"] = blobs["LICENSE"]
         app["NOTICE"] = blobs["NOTICE"]
         for name, data in sorted(app.items()):
@@ -53,7 +53,7 @@ def build(destination):
         "metadata": {
             "component": {
                 "type": "application",
-                "name": "rescuesense",
+                "name": "aethron",
                 "version": "0.2.0",
                 "licenses": [{"license": {"id": "Apache-2.0"}}],
             }
@@ -83,15 +83,15 @@ def build(destination):
         "dependencies": [],
         "properties": [
             {
-                "name": "rescuesense:optional-vision",
+                "name": "aethron:optional-vision",
                 "value": "numpy2.3.5;opencv-python-headless4.13.0.92; separately installed, not in zipapp",
             },
             {
-                "name": "rescuesense:optional-coreml",
+                "name": "aethron:optional-coreml",
                 "value": "onnxruntime1.30.0;flatbuffers25.12.19;protobuf7.36.2; separate macOS Apple Silicon opt-in, not bundled",
             },
             {
-                "name": "rescuesense:optional-model-sha256",
+                "name": "aethron:optional-model-sha256",
                 "value": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
             },
         ],
@@ -107,7 +107,7 @@ def build(destination):
         "builder": "scripts/release.py",
         "evidence": "local unsigned candidate; not hosted attestation",
         "runtime_dependencies": "Python 3.9+ standard library",
-        "model_sha256": manifest["rescuesense/models/rules.json"],
+        "model_sha256": manifest["aethron/models/rules.json"],
         "data_manifests": {n: h for n, h in manifest.items() if n.endswith("freeze.json")},
     }
     (out / "provenance.json").write_text(

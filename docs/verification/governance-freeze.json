@@ -3,7 +3,7 @@
   "frozen_date": "2026-10-08",
   "stage": "before any production source",
   "files": {
-    "AGENTS.md": "b660184ecaef9cf324c5c668ba305fe6156159a7f02d46a9cf8191360a9b591b",
+    "AGENTS.md": "ad1071d5639e14fd71dc7b05ddd3025569362f47d382a82f97adc80aa4a1f903",
     "docs/architecture/invariants.md": "fca212b7854283b71bfc0e78f6cc9efa0556f97ace4a6cb1cd3a274e8a3fe7a9",
     "docs/architecture/sensor-capability-matrix.md": "fc9da415f75908034210918de9144728958e931337bfb53e2259c65fd14823e0",
     "docs/engineering/ai-assisted-engineering.md": "045e8270328bbb28018291fe2fc13012ea873449b84754aea21f5ed297bb687c",

@@ -15,11 +15,11 @@ def render(data, now_ms):
     result = evaluate(json.dumps(doc).encode())
     parts = [
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 660" role="img" aria-labelledby="title desc">',
-        '<title id="title">RescueSense bounded sensor view</title>',
+        '<title id="title">AETHRON bounded sensor view</title>',
         '<desc id="desc">Coarse presence cues and expiring non-human rectangles. No camera image, identity or through-obstruction geometry.</desc>',
         '<rect width="1000" height="660" fill="#101f28"/>',
         '<g fill="#e8f1ed" font-family="monospace">',
-        '<text x="30" y="42" font-size="25">RescueSense / bounded sensor view</text>',
+        '<text x="30" y="42" font-size="25">AETHRON / bounded sensor view</text>',
         f'<text x="30" y="72">{escape(result["evidence"].upper())} · {escape(result["lighting"])} · no live hardware proof</text>',
         '<rect x="30" y="110" width="530" height="430" fill="#192f39" stroke="#607a82"/>',
         '<text x="46" y="138">Sensor plane · no imagery</text>',

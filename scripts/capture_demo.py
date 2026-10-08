@@ -11,14 +11,14 @@ sys.path.insert(0, str(ROOT))
 
 
 def capture():
-    from rescuesense.demo import scenarios
-    from rescuesense.render import render
+    from aethron.demo import scenarios
+    from aethron.render import render
 
     assets = ROOT / "docs/assets"
     assets.mkdir(exist_ok=True)
     start = time.monotonic()
     process = subprocess.Popen(
-        [sys.executable, "-u", "-m", "rescuesense", "demo"],
+        [sys.executable, "-u", "-m", "aethron", "demo"],
         cwd=ROOT,
         stdout=subprocess.PIPE,
         text=True,
@@ -34,7 +34,7 @@ def capture():
         "version": 2,
         "width": 120,
         "height": 32,
-        "title": "RescueSense synthetic CLI execution",
+        "title": "AETHRON synthetic CLI execution",
         "env": {"TERM": "xterm-256color"},
     }
     (assets / "demo.cast").write_text(

@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/assets/wordmark.svg" alt="RescueSense — useful safety evidence, explicit uncertainty" width="100%"></p>
+<p align="center"><img src="docs/assets/aethron-wordmark.svg" alt="AETHRON — useful safety evidence, explicit uncertainty" width="100%"></p>
 
 **Keep supported objects visible through sensor loss. Make uncertainty explicit.**
 
@@ -6,7 +6,7 @@
 
 *Recorded camera replay, not a successful aircraft-detection test: tiny aircraft were missed and false positives remain. [Full evaluation](#recorded-failures-are-part-of-the-evidence).*
 
-RescueSense is a local multi-sensor perception toolkit for rescue and collision-avoidance research. It combines registered detections, temporary geometric tracks, short-horizon motion estimates and bounded defensive recommendations. Daylight RGB can give way to valid LWIR, radar or depth evidence without discarding the object.
+AETHRON is a local multi-sensor perception toolkit for rescue and collision-avoidance research. It combines registered detections, temporary geometric tracks, short-horizon motion estimates and bounded defensive recommendations. Daylight RGB can give way to valid LWIR, radar or depth evidence without discarding the object.
 
 **Safety boundary:** scene-local human boxes and temporary tracks are allowed; biometric identity, durable person IDs, cross-camera/location re-identification, long-term histories, threat scoring, target designation, following/pursuit and weapons are prohibited. Through-obstruction human sensing remains **coarse zone presence only**. [Public v3 amendment](docs/safety/amendment-v3.md).
 
@@ -14,7 +14,7 @@ RescueSense is a local multi-sensor perception toolkit for rescue and collision-
 
 ## Live camera preview: iPhone, laptop and compatible video streams
 
-An additional self-contained [browser camera app](web/) supports device-camera permission, front/rear switching, on-device COCO-SSD object detection and installable HTTPS web hosting. The model is bundled with the site, so camera images remain local and it can work offline again after successful caching. **The public HTTPS camera preview is live at [RescueSense Camera](https://nima0101.github.io/rescuesense/), but it has not yet been tested on a physical iPhone.** A CPU-worker compatibility mode preserves responsive controls even when local inference is slow.
+An additional self-contained [browser camera app](web/) supports device-camera permission, front/rear switching, on-device COCO-SSD object detection and installable HTTPS web hosting. The model is bundled with the site, so camera images remain local and it can work offline again after successful caching. **The public HTTPS camera preview is live at [AETHRON Camera](https://nima0101.github.io/aethron/), but it has not yet been tested on a physical iPhone.** A CPU-worker compatibility mode preserves responsive controls even when local inference is slow.
 
 ```sh
 cd web && npm ci && npm run dev
@@ -24,7 +24,7 @@ Open http://localhost:5173 on the laptop. To use iPhone or Android from anywhere
 
 ## Run a useful replay
 
-![Actual RescueSense temporal output over original synthetic sensor scenes](docs/assets/perception.gif)
+![Actual AETHRON temporal output over original synthetic sensor scenes](docs/assets/perception.gif)
 
 Original synthetic scene, **actual CLI output**. The slowed replay shows daylight → zero visible light → short occlusion → reacquisition → all-sensor loss. Rectangles carry class, uncalibrated support score, state and freshness. Dashed geometry is an uncertain prediction. No live hardware is depicted. [Input/output and reproduction](docs/demo-v3.md).
 
@@ -32,7 +32,7 @@ Python 3.9+; no runtime dependencies for the core. From this checkout:
 
 ```sh
 python3 scripts/verify.py
-python3 -m rescuesense replay examples/temporal-blackout.jsonl
+python3 -m aethron replay examples/temporal-blackout.jsonl
 python3 scripts/temporal_evaluate.py --out build/v3-registered
 ```
 
@@ -75,14 +75,14 @@ The default OpenCV backend is unchanged. On macOS Apple Silicon, the same SHA-25
 ```sh
 .venv/bin/python -m pip install -r requirements-coreml.txt
 .venv/bin/python scripts/coreml_evaluate.py
-RESCUESENSE_VISION_BACKEND=coreml .venv/bin/python scripts/vision_e2e.py
+AETHRON_VISION_BACKEND=coreml .venv/bin/python scripts/vision_e2e.py
 ```
 
 The comparison preserves original detection thresholds and checks class, box and score agreement against the OpenCV backend on licensed stills and recorded AOT frames. It records initial compilation and steady-state latency separately. First-frame startup and host scheduling can exceed the live 100 ms freshness limit. Stale inferences must not be interpreted as fresh sensor observations.
 
 For real UI/timer verification, run `.venv/bin/python scripts/browser_check.py`. On macOS the browser checker can use a previously installed Chromium headless-shell revision when the exact Playwright revision is missing. Real launch/test failures still fail.
 
-The RGB model's recorded integration checks and provenance remain reproducible in [the vision verification scripts](scripts/vision_smoke.py) and [model card](docs/models/v3-model-card.md). For an interactive camera demonstration, open [RescueSense Camera](https://nima0101.github.io/rescuesense/).
+The RGB model's recorded integration checks and provenance remain reproducible in [the vision verification scripts](scripts/vision_smoke.py) and [model card](docs/models/v3-model-card.md). For an interactive camera demonstration, open [AETHRON Camera](https://nima0101.github.io/aethron/).
 
 ## Recorded failures are part of the evidence
 
@@ -96,7 +96,7 @@ LWIR/RGB-T/radar/depth semantic adapters and zero-light fusion are implemented a
 python3 scripts/temporal_fuzz.py
 python3 scripts/reproduce.py
 python3 scripts/release.py
-python3 dist/rescuesense.pyz replay examples/temporal-blackout.jsonl
+python3 dist/aethron.pyz replay examples/temporal-blackout.jsonl
 ```
 
 Release checks require committed, clean source. Artifacts include a deterministic source archive and Python zipapp, SHA-256 sums, CycloneDX SBOM and unsigned local provenance. Optional vision dependencies/model are separately inventoried. Hosted CI and signed releases may be claimed only after actual remote runs. [Release procedure](docs/releasing-v3.md) · [Visual reproduction](docs/demo-v3.md).

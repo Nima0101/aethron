@@ -2,7 +2,7 @@
   "version": 1,
   "scope": "original rule model and retained synthetic corpora, no learned training",
   "files": {
-    "rescuesense/models/rules.json": "0c1dad9a888f1f1e3513d0c2c983a7d240563b7945224efc0690f94dc676fee6",
+    "aethron/models/rules.json": "0c1dad9a888f1f1e3513d0c2c983a7d240563b7945224efc0690f94dc676fee6",
     "examples/evaluation.jsonl": "4757b8e443fb3c216ec362dfdb7a4afa838cd86c78c8abdba9e7746e4514c1bb",
     "examples/evaluation-v1.jsonl": "406507abbd4977b14b11f2adbc854b6561cb9bb38eaa734447127e81f17f5f20",
     "docs/verification/evaluation-protocol.md": "de6ae9fc640c2dc51cbe6d3049c5239eb86f1f183fe8584467da41f89c9916bd",

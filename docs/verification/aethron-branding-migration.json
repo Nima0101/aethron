@@ -1,0 +1,67 @@
+{
+  "kind": "aethron_brand_migration_v1",
+  "date": "2026-10-08",
+  "note": "Pure brand/import-path migration. Prior hashes remain preserved below and in Git history. This is not a safety test rerun or new certification. Frozen numerical thresholds, annotations and weight files were not edited deliberately.",
+  "entries": [
+    {
+      "manifest": "amendment-v2-freeze.json",
+      "file": "docs/engineering/history/AGENTS.v2.md",
+      "prior_sha256": "0f5abe74f83f798b5f92edc20c07817df6c4431d9790fc8dbe8e389ef5f08780",
+      "rebranded_sha256": "77e31cb4c9c62131cac058c9fefe0803fbedc964beb61a55a159f0d239b9c8d9"
+    },
+    {
+      "manifest": "amendment-v2-freeze.json",
+      "file": "docs/safety/amendment-v2.md",
+      "prior_sha256": "7263204438801e09035681fa86d4e823b67ff8eb97a362ec62b448293a04fc44",
+      "rebranded_sha256": "a17b89be9bcda9ac19fa2a5d3eb1e05d73617558967084f3af6283dcc33a5ef8"
+    },
+    {
+      "manifest": "amendment-v3-freeze.json",
+      "file": "AGENTS.md",
+      "prior_sha256": "e2298fb81e7bb7011c84f9f8aa3be8dac7855a6dd19e07a4160a1710eca188e6",
+      "rebranded_sha256": "e59a274d9a5e66b8aa5ca9572a2d3f22c8bfbce52424d31c3ecbfe55683bdda7"
+    },
+    {
+      "manifest": "amendment-v3-freeze.json",
+      "file": "docs/safety/amendment-v3.md",
+      "prior_sha256": "62a0edb4dfe680256e0cedb3008f04be925491ac80d435f8a130c4826fe53088",
+      "rebranded_sha256": "e83eb438d6fd0d80afab7c9d5c98340de8cdd1aa488af69e54395cdd8454de8b"
+    },
+    {
+      "manifest": "amendment-v3-freeze.json",
+      "file": "docs/engineering/research-v3.md",
+      "prior_sha256": "b7fef4de92a449aafeead97c000b3ad9b4b6d5bd655d581638cfbf2f572f9db6",
+      "rebranded_sha256": "73dc02bad977a7ce84b7b53457f3f95f0ce6ba2bd5996d61de32ce236042e317"
+    },
+    {
+      "manifest": "architecture-freeze.json",
+      "file": "docs/research-landscape.md",
+      "prior_sha256": "e79e04c60bb24033ded864515a5e9bffd13d05041c3cd991c7d114ec3b16c82c",
+      "rebranded_sha256": "c27f3b257bc6cb0d777a03547bd1595c1685d068d810a92b285098c68fa8a85c"
+    },
+    {
+      "manifest": "architecture-freeze.json",
+      "file": "docs/architecture/protocol.md",
+      "prior_sha256": "a3da2f9ea6c720344b8cc3f8d8b4e51048b58aab24e70703821836fd8a734058",
+      "rebranded_sha256": "c180818edf7fcf763ef2bf5d9f850ba1c290a3d9896d5029473f5ebc42a8eff2"
+    },
+    {
+      "manifest": "governance-freeze.json",
+      "file": "docs/engineering/history/AGENTS.v1.md",
+      "prior_sha256": "b660184ecaef9cf324c5c668ba305fe6156159a7f02d46a9cf8191360a9b591b",
+      "rebranded_sha256": "ad1071d5639e14fd71dc7b05ddd3025569362f47d382a82f97adc80aa4a1f903"
+    },
+    {
+      "manifest": "rgb-model-freeze.json",
+      "file": "docs/decisions/0006-pinned-rgb-detector.md",
+      "prior_sha256": "5e73f2c808cc6553a9bfde0f5b9b4ff4cd7068d6e7c2cf266a7f670057531863",
+      "rebranded_sha256": "50f3d851f7c1a5648f3a5d5a0ad9137b81d40c6f91101e76a3efd0ea545d06bc"
+    },
+    {
+      "manifest": "rgb-smoke-freeze.json",
+      "file": "data/rgb-smoke/README.md",
+      "prior_sha256": "3a33d63ce1ba20870fc9337a67edc57b76ae19f8241dd93158c8c090829f827f",
+      "rebranded_sha256": "0e077bf98b970c61b7cbaf2a897c59198257f0f5289e5ab1e97fc771003f41e2"
+    }
+  ]
+}

@@ -3,7 +3,7 @@ requires = ["setuptools==84.0.0", "wheel==0.48.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "rescuesense"
+name = "aethron"
 version = "0.2.0"
 description = "Bounded rescue perception and safety integration reference runtime"
 requires-python = ">=3.9"
@@ -16,13 +16,13 @@ readme = "README.md"
 vision = ["numpy==2.3.5", "opencv-python-headless==4.13.0.92"]
 
 [project.scripts]
-rescuesense = "rescuesense.__main__:main"
+aethron = "aethron.__main__:main"
 
 [tool.setuptools.packages.find]
-include = ["rescuesense*"]
+include = ["aethron*"]
 
 [tool.setuptools.package-data]
-"rescuesense.models" = ["*.json"]
+"aethron.models" = ["*.json"]
 
 [tool.ruff]
 target-version = "py39"

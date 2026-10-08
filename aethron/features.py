@@ -11,7 +11,7 @@ MODEL_SHA256 = "0c1dad9a888f1f1e3513d0c2c983a7d240563b7945224efc0690f94dc676fee6
 def load_model(data=None):
     try:
         if data is None:
-            with resources.files("rescuesense.models").joinpath("rules.json").open("rb") as stream:
+            with resources.files("aethron.models").joinpath("rules.json").open("rb") as stream:
                 data = stream.read(2049)
         if (
             type(data) is bytes

@@ -5,8 +5,8 @@
     "AGENTS.md": "docs/engineering/history/AGENTS.v1.md"
   },
   "files": {
-    "AGENTS.md": "0f5abe74f83f798b5f92edc20c07817df6c4431d9790fc8dbe8e389ef5f08780",
-    "docs/safety/amendment-v2.md": "7263204438801e09035681fa86d4e823b67ff8eb97a362ec62b448293a04fc44",
+    "AGENTS.md": "77e31cb4c9c62131cac058c9fefe0803fbedc964beb61a55a159f0d239b9c8d9",
+    "docs/safety/amendment-v2.md": "a17b89be9bcda9ac19fa2a5d3eb1e05d73617558967084f3af6283dcc33a5ef8",
     "docs/decisions/0002-human-safety-cues.md": "70fba36387163a39bcadf5999153ea37d28aa48880db186e525918b612f12d42",
     "docs/architecture/protocol-v2.md": "b0f54d8bf113fbe32abbca2c0b74f78c67230eaa4764fd998dcd09443ed654a6",
     "docs/architecture/capabilities-v2.md": "f70b0e9f62733939815f113203ea8457bd8ef1d1697411aa97cf35d68de07275",

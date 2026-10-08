@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from rescuesense.temporal.fixtures import detection, encode, frame, sensor  # noqa: E402
+from aethron.temporal.fixtures import detection, encode, frame, sensor  # noqa: E402
 
 COLORS = {
     "person": "#72efab",
@@ -160,7 +160,7 @@ def overlay(image, result, *, sx=1.0, sy=1.0, offset=0):
 def compose(row, result):
     image = Image.new("RGB", (1280, 660), "#0c151b")
     draw = ImageDraw.Draw(image)
-    draw.text((26, 20), "RescueSense / scene-local perception", font=BIG, fill="#e5f3f5")
+    draw.text((26, 20), "AETHRON / scene-local perception", font=BIG, fill="#e5f3f5")
     draw.text(
         (26, 58),
         "SYNTHETIC SENSOR INPUT  /  ACTUAL CLI TRACKER OUTPUT  /  NO LIVE HARDWARE",
@@ -216,11 +216,11 @@ def compose(row, result):
 def run(outdir):
     outdir.mkdir(parents=True, exist_ok=True)
     rows = inputs()
-    with tempfile.TemporaryDirectory(prefix="rescuesense-visual-") as temp:
+    with tempfile.TemporaryDirectory(prefix="aethron-visual-") as temp:
         file = Path(temp) / "input.jsonl"
         file.write_bytes(b"\n".join(encode(r["frame"]) for r in rows) + b"\n")
         process = subprocess.run(
-            [sys.executable, "-m", "rescuesense", "replay", str(file)],
+            [sys.executable, "-m", "aethron", "replay", str(file)],
             cwd=ROOT,
             capture_output=True,
             check=True,
@@ -247,7 +247,7 @@ def run(outdir):
         disposal=2,
     )
     (outdir / "perception.html").write_text(
-        """<!doctype html><meta charset="utf-8"><title>RescueSense recorded synthetic execution</title><style>body{background:#0c151b;color:#e5f3f5;font:18px system-ui;max-width:1280px;margin:32px auto}img{max-width:100%}a{color:#8ff3fa}</style><h1>Scene-local perception</h1><p>Original synthetic scene; overlays from actual RescueSense CLI. Playback is slowed to 150 ms per 100 ms input frame. No live sensor claim.</p><img src="perception.gif" alt="Daylight to zero-visible-light, short occlusion, then all-sensor loss"><p><a href="perception-output.json">Actual outputs</a> · <a href="perception-input.jsonl">Reproduce the inputs</a></p>"""
+        """<!doctype html><meta charset="utf-8"><title>AETHRON recorded synthetic execution</title><style>body{background:#0c151b;color:#e5f3f5;font:18px system-ui;max-width:1280px;margin:32px auto}img{max-width:100%}a{color:#8ff3fa}</style><h1>Scene-local perception</h1><p>Original synthetic scene; overlays from actual AETHRON CLI. Playback is slowed to 150 ms per 100 ms input frame. No live sensor claim.</p><img src="perception.gif" alt="Daylight to zero-visible-light, short occlusion, then all-sensor loss"><p><a href="perception-output.json">Actual outputs</a> · <a href="perception-input.jsonl">Reproduce the inputs</a></p>"""
     )
     manifest = {
         p.name: hashlib.sha256(p.read_bytes()).hexdigest()

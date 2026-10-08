@@ -8,8 +8,8 @@ import json
 import random
 import time
 
-from rescuesense import evaluate
-from rescuesense.demo import scenarios
+from aethron import evaluate
+from aethron.demo import scenarios
 
 
 def run(seconds=60):

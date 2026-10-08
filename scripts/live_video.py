@@ -21,7 +21,7 @@ def source_value(value):
 def run(source, backend, max_frames=0):
     import cv2
 
-    from rescuesense.vision.yolox import MODEL_SHA256, RGBDetector
+    from aethron.vision.yolox import MODEL_SHA256, RGBDetector
 
     capture = cv2.VideoCapture(source_value(source))
     if not capture.isOpened():
@@ -49,7 +49,7 @@ def run(source, backend, max_frames=0):
             inference_ms = (time.monotonic() - model_start) * 1000
             elapsed_ms = (time.monotonic() - grabbed_at) * 1000
             response = {
-                "kind": "rescuesense_video_observation_v1",
+                "kind": "aethron_video_observation_v1",
                 "frame": index,
                 "source": "camera_or_recorded_video",
                 "model_sha256": MODEL_SHA256,
