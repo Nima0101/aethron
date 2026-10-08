@@ -225,8 +225,8 @@
   },
   "delivery": {
     "status": "not_published",
-    "source_revision": "bc2ffe4b6fca49e90d265ea5cffc8bea2485647d",
-    "required_checks": "pending_publication_prerequisites_and_hosted_ci",
+    "source_revision": "05afd8a46711de317b2db733b9bb73962a4dfbb5",
+    "required_checks": "pending_browser_execution_candidate_review_and_hosted_ci",
     "hosted_ci": "pending",
     "branch_rules": "observed_none_2026-10-08",
     "pages": "pending_verified_publication",
@@ -234,7 +234,8 @@
     "pages_workflow": ".github/workflows/browser-camera.yml",
     "pages_trigger": "workflow_dispatch_on_validated_main",
     "latency_evidence": "evidence/phase2/performance.json",
-    "latest_local_reproduction": "evidence/phase2/ros-clean.json"
+    "latest_local_reproduction": "evidence/phase2/registration-clean.json",
+    "publication_preflight": "evidence/phase2/publication-preflight.json"
   },
   "software_work": {
     "P2.1": {

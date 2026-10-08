@@ -1,6 +1,6 @@
 {
   "parent_revision": "38e8bb43aeccb9e1be1b936cc95866efb47261fe",
-  "status": "software_candidate_passed_clean_clone_pending",
+  "status": "software_candidate_passed",
   "hardware_qualified": false,
   "field_qualified": false,
   "hosted_ci_executed": false,
@@ -46,7 +46,9 @@
     "plan_negative_probes": 26,
     "registration_review_tests": 11,
     "review_addition": "An independent perturbed-pose check was added after the 92-test suite; focused 11-test registration run passed. Installed clean-clone follow-up includes it.",
-    "repository_verify": "73 root tests plus frozen hashes, dataset, consumer and temporal CLI passed"
+    "repository_verify": "73 root tests plus frozen hashes, dataset, consumer and temporal CLI passed",
+    "clean_installed_sensor_tests": 39,
+    "clean_installed_rectification_tests": 6
   },
   "security": {
     "errors": [],
@@ -275,5 +277,7 @@
       "aethron/vision/yolox.py": "d2a6ca09b670bc569ad79e025240908fa7252c8c9dcbb76a5b93c83e2ac3bec4",
       "aethron/vision/__init__.py": "2e051811883c745faf9abe9d2e076396186a187c7807fbbf087dbe5d54c085a2"
     }
-  }
+  },
+  "source_revision": "05afd8a46711de317b2db733b9bb73962a4dfbb5",
+  "clean_reproduction_evidence": "registration-clean.json"
 }

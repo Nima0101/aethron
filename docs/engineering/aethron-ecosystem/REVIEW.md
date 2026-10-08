@@ -43,3 +43,8 @@ Review found and regression-tested calibration and clock expiry between receptio
 ## Registration/rectification self-review
 
 The author reviewed the transform direction, metre/radian/pixel units, right-handed rotation validation, interval projection denominator, explicit uncertainty/lifetime and native input bounds. Tests use hand-derived body/optical axes and Brown-Conrady coordinates, not production code to construct expected answers. Clock rewind closes the binding; malformed or expired input returns fixed faults, and no geometry is stored as object history. Sparse correction uses a conservative positive-Jacobian condition plus forward residual verification. No new dependencies, semantic classes, actuation, identity fields or live-evidence promotion were added. The existing identity-only semantic gate remains intact until a provider actually applies this geometry. Independent assurance and physical calibration remain pending; this is author self-review under the no-subagents instruction.
+
+
+## Resource/inventory self-review
+
+The resource fix changes only traversal through the standard-library package API and missing-resource handling; SHA-256/size admission of the frozen model is unchanged. Real ZIP fixtures reproduce the hosted Windows nested-path failure, with local 3.9/3.13 execution explicitly distinguished from native Windows. Candidate inventory separates owned wheels from dependency cache, checks distribution Name/Version metadata and rejects conflicting aliases or ambiguous candidates. No package version, licence, model, frozen threshold, logo or native iOS file changed. Fresh browser launch denial is retained, and no independent reviewer or hosted candidate success is claimed.

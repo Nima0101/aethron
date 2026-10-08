@@ -2,6 +2,8 @@
 
 The later [owner autonomy directive](LATEST-OWNER-AUTONOMY.md) is now adopted. Continue software milestones and gate-dependent routine publication without repeated approval. [NEXT](NEXT.md) gives the next executable task; [sensor progress](P2-SENSOR-ADAPTERS.md) describes this checkpoint. P2.1 is partial, not complete; no hardware, semantic nonvisible model or hosted publication claim has been added.
 
+Latest local release-preparation evidence is [recorded here](evidence/phase2/publication-preflight.json), with [clean geometry reproduction](evidence/phase2/registration-clean.json). Resource-loader and candidate-SBOM fixes are software changes; browser permission and native Windows hosted confirmation remain open gates. Continue the calibrated provider task without waiting for hardware or another phase approval.
+
 The remainder is the historical Phase 1 handoff at `f40fbd1`; its stop/authorization language describes that earlier checkpoint, not current authority. Its tests, hashes and failures remain historical evidence.
 
 ## Historical Phase 1 handoff — software candidate complete

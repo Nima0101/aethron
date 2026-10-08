@@ -1,0 +1,183 @@
+{
+  "date": "2026-10-08",
+  "source_base": "05afd8a46711de317b2db733b9bb73962a4dfbb5",
+  "status": "local_fixes_passed_committed_reproduction_pending",
+  "public_push_performed": false,
+  "hardware_qualified": false,
+  "field_qualified": false,
+  "main": {
+    "sha": "46e8828151ce17a7342d7dba6ce72963f540bc7b",
+    "ci_url": "https://github.com/Nima0101/aethron/actions/runs/37776688164",
+    "ci_conclusion": "failure",
+    "failures": [
+      "development: stale generated visuals",
+      "core Windows Python3.9: nested ZIP model path separator"
+    ],
+    "candidate_hosted_ci": "not_executed",
+    "classic_protection": false,
+    "rulesets": []
+  },
+  "browser": {
+    "passed": false,
+    "ui_assertions_executed": false,
+    "reason": "Chromium MachPortRendezvousServer bootstrap_check_in Permission denied (1100), SIGTRAP before assertions",
+    "platform": "Darwin arm64 sandbox",
+    "tool_wheels": [
+      {
+        "file": "playwright-1.63.0-py3-none-macosx_11_0_arm64.whl",
+        "sha256": "fd1aa00631d44d55e56e0975bf3f3f285fac4a9fd2813183f0c12a488f1a1b24",
+        "source": "https://pypi.org/pypi/playwright/1.63.0/json"
+      },
+      {
+        "file": "pyee-13.0.1-py3-none-any.whl",
+        "sha256": "af2f8fede4171ef667dfded53f96e2ed0d6e6bd7ee3bb46437f77e3b57689228",
+        "source": "https://pypi.org/pypi/pyee/13.0.1/json"
+      },
+      {
+        "file": "greenlet-3.5.6-cp313-cp313-macosx_11_0_universal2.whl",
+        "sha256": "f96f0e30b5a95c7631b12bfe214cbc90ec8fe8cfa36920596c10514a65743519",
+        "source": "https://pypi.org/pypi/greenlet/3.5.6/json"
+      }
+    ],
+    "bypass_performed": false
+  },
+  "visuals": {
+    "byte_identical": true,
+    "frozen_assets_changed": false
+  },
+  "resource_regression": {
+    "red": {
+      "failures": 1,
+      "errors": 1
+    },
+    "green_tests": 2,
+    "local_python": [
+      "3.9",
+      "3.13"
+    ],
+    "native_windows_executed": false,
+    "model_bytes_changed": false
+  },
+  "inventory": {
+    "regression_tests": 3,
+    "rejects": [
+      "old same-version dependency wheel as candidate",
+      "missing candidate",
+      "ambiguous candidate",
+      "wrong version",
+      "conflicting normalized lock aliases"
+    ],
+    "final_sbom": {
+      "valid": true,
+      "schema_sha256": "3e92dddbc30cf7f6a02b80f0942b1a4cfd4fb1c26f1dfc4310afa9d613cafb93",
+      "sbom_sha256": "c3b685c0674331ed048486d5ca13babf0b339b1fe94d98712f1608a0147b5d8e",
+      "installed_candidate_hashes_match": true
+    }
+  },
+  "checks": {
+    "core_tests": 75,
+    "core_seconds": 17.816,
+    "integration_before_resource_fix": {
+      "tests": 96,
+      "seconds": 106.503
+    },
+    "plan_negative_probes": 26,
+    "scoped_bandit_findings": 0,
+    "integration_after_resource_fix": {
+      "tests": 96,
+      "seconds": 94.774
+    },
+    "fuzz": {
+      "legacy": {
+        "accepted": 17924,
+        "cases": 87007,
+        "seconds": 60.01233437517658,
+        "seed": 54777,
+        "unexpected_exceptions": 0
+      },
+      "temporal": {
+        "seed": 981640,
+        "cases": 269581,
+        "seconds": 60.017,
+        "unexpected_exceptions": 0,
+        "source_sha256": {
+          "aethron/render.py": "9231a04b312d74281192d9f097ccfc8d7fd58fc20f2d8d45e36748f831647b44",
+          "aethron/actions.py": "e449088fa6850f3dc11f782cc656817ab571e2d94cbc4ebb33869706e7537a2a",
+          "aethron/__init__.py": "8ea373fbd458d5b53b6a5285584c61d14f1541e96d7a05c29f0508011b766fa7",
+          "aethron/schema_v2.py": "d529ca9797dcf0cf4d7126c93c9ea233edea77cda55faecc3ba7a2559ec7f3ab",
+          "aethron/features.py": "f1b77e8f37e5c4724f9fb264ff32483659c5c5e0e804c95b1757a0c22e30c5d1",
+          "aethron/core.py": "c5ef2d70c7ac5065b5a95836eba588fd44a78a6bceb97883ec0d0b5ac2a1619a",
+          "aethron/demo.py": "c6b1539f1fcd91970d71aee2dd8923a584df2f1332adb9f083de18e14277983e",
+          "aethron/__main__.py": "94eb2aa08c590456d8d1f6de520b0f268cab48c671325688ae9f6ae4b6ec7a66",
+          "aethron/schema.py": "ca28412601bf05a155ad55e59070f811af2c67dd374e2b2baeb9b54d8e4ccc43",
+          "aethron/adapters.py": "856030c21738c200df3758eda4194ddde5f56c1d6feca57b0c0965f06e9a0481",
+          "aethron/temporal/registration.py": "cd6b8955a7ebc8c762da3af5f28d83ff2a7a2a5f097a5e3d1177867fc53aa7c5",
+          "aethron/temporal/pixels.py": "314583c5a9d34f005f1c9b5fb9c739183de39894c38dcff8cdc7e899406e13cb",
+          "aethron/temporal/session.py": "e702043f6d20611cae0037ad041198976b730b23407b87df042e7e7c91574560",
+          "aethron/temporal/__init__.py": "8dac6e681e96fa0a78affbddc6c76962d221a7e66f6e8bc0828e40d9b9494087",
+          "aethron/temporal/replay.py": "37863819e5c3a99aefbe0d3a7df17ac7dae09c33ed01b76d8af0697b133344e0",
+          "aethron/temporal/fusion.py": "c9f6df323f40ac0f0cf9f06d9f3a642fb3ab5113d30cded90aae3d3d5d8fa770",
+          "aethron/temporal/math.py": "f9a634fea08a7e20bf4e730671f6eed729c4827193d439f5ab29fa3f708d2b9e",
+          "aethron/temporal/fixtures.py": "d18cbd884805e335d803638b2a311bd6fc90b5764c3db9c6eb194270490d19b5",
+          "aethron/temporal/schema.py": "2602ad7523623f326876b5723ef4869049b2b2bb095c9f03e531345f4e568350",
+          "aethron/models/__init__.py": "61e3d91134abfff53054811740f54dd21cc6e531087e506302a0bf650728e25d",
+          "aethron/vision/yolox.py": "d2a6ca09b670bc569ad79e025240908fa7252c8c9dcbb76a5b93c83e2ac3bec4",
+          "aethron/vision/__init__.py": "2e051811883c745faf9abe9d2e076396186a187c7807fbbf087dbe5d54c085a2"
+        }
+      }
+    }
+  },
+  "name_search": {
+    "repository": "https://github.com/Nima0101/aethron",
+    "neighbors_query": "https://api.github.com/search/repositories?q=aethron+in:name",
+    "results": 37,
+    "examples": [
+      "AethronLabs/aethron-platform",
+      "nikshith-y/Aethron"
+    ],
+    "exclusive_name_claim": false,
+    "trademark_clearance": false
+  },
+  "remaining": [
+    "fresh permitted browser execution",
+    "native Windows3.9 hosted regression confirmation",
+    "consolidated candidate S01-S15 publication review",
+    "candidate hosted CI",
+    "provider/model and remaining P2-P5 software work"
+  ],
+  "log_sha256": {
+    "main-ci.json": "b61c93ba7e289df41cc1ef1a883aaab0145deea28383487560c5ec48b3ee9955",
+    "main-ci-jobs.json": "088103f355d0f1c7cf9fcc8e8eab785c00b8b430efcca7e7ccccc854abac5d2c",
+    "main-ci-failed.log": "25b8aa9248018b2a0c50a78c2a9a4ce910738431d923499370fe9c21c06c27ba",
+    "browser.log": "30b3766fdc78d9e1d8e16dfa84a44db564f16ab59795e610087e722b7af1962c",
+    "visuals.log": "f8eb269813f2a7908f2ec5f3cd9bee60d13fb38d89622a0ad932037cd6749b9a",
+    "resource-red.log": "8fd096382df57c34c5b63bce055052791da7d43988ec9f6b6fcd5f5ad389066a",
+    "resource-green.log": "8e66c214dcb1f28194da5c6fd82fea10df5cd94049012b679954cebbb88c2960",
+    "resource-python39.log": "a7402e6076a8af080a05b60da16359cbae331329169c1fa7ac0d9aa3ec99ae59",
+    "inventory-red.log": "3ea1f67da8105b22d10de5348a5511934954369cd1846fca99723ed42f5579dc",
+    "inventory-alias-red.log": "49652ba5819919126f6da13a507f18e41b50eb6e4ca39cb953898acffc26fb5f",
+    "inventory-conflict-red.log": "9534a1a825a5a1433679d99da886c8a64c4893b48067ea653bd817a9302f79e9",
+    "integration-release.log": "63e1335aae997a3e70512f4c582b90606e4bc34c5e503a42cc405507dbc81d5f",
+    "verify-resource.log": "7bad5ebf44bbcb9f2c826cc843535e0cdfe51af1c9c210d959a363c0f2143532",
+    "plan-resource.log": "1376b3ed60200f3d006f0ce5592df3b56e7608363fbbf8d61e70489c78649c85",
+    "security-resource.json": "7d288e14288dadacac592c9ca53304a21becfd000e742a65f3411e7391180191",
+    "integration-resource.log": "e4b9ca3aac9aff6d3b3bb7da15aa0d0c241d373ec491bf4064c8fca8c23708f1",
+    "resource-package.log": "247f7a48bba391b507d7b191a446c938b5e1a67e180840e42d71b46c66a641c6",
+    "resource-sbom.json": "c3b685c0674331ed048486d5ca13babf0b339b1fe94d98712f1608a0147b5d8e",
+    "resource-sbom-validation.json": "dc59c78594ee8857d1f49e35f3e137007c49573ee4682cd3dd12e2f2cb9215d8"
+  },
+  "installed_candidate": {
+    "wheels": {
+      "aethron-0.2.0-py3-none-any.whl": "726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e",
+      "aethron_edge-0.1.0-py3-none-any.whl": "8fddc0557864a1b0b511812cddd12f364a708147d954e148d4a9822842c4ac74"
+    },
+    "byte_identical": true,
+    "installed_consumer": true,
+    "installed_sensor_contracts": true,
+    "installed_rectification": true,
+    "consumer_events": 3,
+    "zero_viewer_continued": true,
+    "platform": "darwin",
+    "python": "3.13.15"
+  }
+}

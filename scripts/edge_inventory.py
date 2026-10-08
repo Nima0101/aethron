@@ -10,21 +10,33 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def run():
-    names = {"aethron": "0.2.0", "aethron-edge": "0.1.0"}
-    for lock in ("requirements-server.lock", "requirements-vision.lock"):
-        for name, version in re.findall(
-            r"^([a-zA-Z0-9_-]+)==([^\s]+)", (ROOT / "integrations/edge" / lock).read_text(), re.M
-        ):
-            names[name] = version
+def wheel_components(candidate: Path, dependencies: Path, names):
+    normalized = {}
+    for name, version in names.items():
+        key = re.sub(r"[-_.]+", "-", name.lower())
+        if key in normalized and normalized[key] != version:
+            raise ValueError("conflicting_expected_versions")
+        normalized[key] = version
+    names = normalized
     metadata = {}
-    wheels = list((ROOT / "build/ecosystem-phase1/wheelhouse").glob("*.whl"))
-    wheels += list((ROOT / "build/ecosystem-phase1/package/a").glob("*.whl"))
-    for wheel in wheels:
-        with zipfile.ZipFile(wheel) as archive:
-            entry = next(n for n in archive.namelist() if n.endswith(".dist-info/METADATA"))
-            value = email.message_from_bytes(archive.read(entry))
-            metadata[value["Name"].lower().replace("_", "-")] = (value, wheel)
+    owned = {"aethron", "aethron-edge"}
+    for folder, project_owned in ((candidate, True), (dependencies, False)):
+        for wheel in sorted(folder.glob("*.whl")):
+            with zipfile.ZipFile(wheel) as archive:
+                entries = [n for n in archive.namelist() if n.endswith(".dist-info/METADATA")]
+                if len(entries) != 1:
+                    raise ValueError("ambiguous_wheel_metadata")
+                value = email.message_from_bytes(archive.read(entries[0]))
+            if len(value.get_all("Name", [])) != 1 or len(value.get_all("Version", [])) != 1:
+                raise ValueError("ambiguous_distribution_identity")
+            name = re.sub(r"[-_.]+", "-", value["Name"].lower())
+            if name not in names or (name in owned) != project_owned:
+                continue
+            if name in metadata:
+                raise ValueError("ambiguous_wheel_candidate: " + name)
+            metadata[name] = (value, wheel)
+    if set(metadata) != set(names):
+        raise ValueError("missing_expected_wheel")
     components = []
     for name, version in sorted(names.items()):
         distribution, wheel = metadata[name.lower().replace("_", "-")]
@@ -52,6 +64,17 @@ def run():
         if licenses:
             component["licenses"] = licenses
         components.append(component)
+    return components
+
+
+def run(candidate: Path, dependencies: Path, output: Path):
+    names = {"aethron": "0.2.0", "aethron-edge": "0.1.0"}
+    for lock in ("requirements-server.lock", "requirements-vision.lock"):
+        for name, version in re.findall(
+            r"^([a-zA-Z0-9_-]+)==([^\s]+)", (ROOT / "integrations/edge" / lock).read_text(), re.M
+        ):
+            names[name] = version
+    components = wheel_components(candidate, dependencies, names)
     model = ROOT / "build/models/yolox.onnx"
     components.append(
         {
@@ -66,10 +89,19 @@ def run():
         }
     )
     bom = {"bomFormat": "CycloneDX", "specVersion": "1.6", "version": 1, "components": components}
-    output = ROOT / "build/ecosystem-phase1/edge-sbom.json"
+    output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(bom, indent=2, sort_keys=True) + "\n")
     print(f"Inventoried {len(components)} runtime components; no hardware qualification")
 
 
 if __name__ == "__main__":
-    run()
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--wheels", type=Path, default=ROOT / "build/ecosystem-phase1/package/a")
+    parser.add_argument(
+        "--wheelhouse", type=Path, default=ROOT / "build/ecosystem-phase1/wheelhouse"
+    )
+    parser.add_argument("--out", type=Path, default=ROOT / "build/ecosystem-phase1/edge-sbom.json")
+    args = parser.parse_args()
+    run(args.wheels, args.wheelhouse, args.out)
