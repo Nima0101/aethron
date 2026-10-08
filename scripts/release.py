@@ -55,7 +55,7 @@ def build(destination):
                 "type": "application",
                 "name": "aethron",
                 "version": "0.2.0",
-                "licenses": [{"license": {"id": "Apache-2.0"}}],
+                "licenses": [{"license": {"id": "GPL-3.0-only"}}],
             }
         },
         "components": [

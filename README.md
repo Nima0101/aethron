@@ -2,6 +2,8 @@
 
 **Keep supported objects visible through sensor loss. Make uncertainty explicit.**
 
+**Licensing:** [GPLv3 open-source edition](LICENSE) · [Alternative commercial agreements](COMMERCIAL-LICENSING.md) for rights-controlled code. GPL itself also permits commercial use; [licensing details](LICENSING.md).
+
 ![Animated replay of actual recorded camera frames and detector output, including documented misses and false positives](docs/assets/recorded-failure.gif)
 
 *Recorded camera replay, not a successful aircraft-detection test: tiny aircraft were missed and false positives remain. [Full evaluation](#recorded-failures-are-part-of-the-evidence).*
@@ -103,4 +105,4 @@ Release checks require committed, clean source. Artifacts include a deterministi
 
 Protocols1/2 and their earlier evidence remain available. Versioned owner amendments preserve the original freezes rather than rewriting history. [AGENTS](AGENTS.md) · [Governance](GOVERNANCE.md) · [Research](docs/engineering/research-v3.md) · [Architecture decisions](docs/decisions/0004-temporal-perception-v3.md).
 
-Created by [Nima Khaki](https://github.com/Nima0101), with disclosed single-agent AI-assisted engineering. [Apache-2.0 source](LICENSE); bundled datasets have their own documented terms. [Notice](NOTICE). No certification, independent audit or field adoption is claimed.
+Created by [Nima Khaki](https://github.com/Nima0101), with disclosed single-agent AI-assisted engineering. [GPL-3.0-only community source](LICENSE) with [separate commercial licensing](COMMERCIAL-LICENSING.md) for controlled rights; bundled data and third-party models retain their own terms. [Full licensing policy](LICENSING.md) · [Notice](NOTICE). No certification, independent audit or field adoption is claimed.
