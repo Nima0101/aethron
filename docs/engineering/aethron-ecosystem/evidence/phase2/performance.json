@@ -1,0 +1,128 @@
+{
+  "source_revision": "dd2328ee398b3d8177635914644a3ba326ab5386",
+  "frozen_protocol": "matrix-v3.md frozen T09/T10/T13",
+  "runtime_sha256": {
+    "aethron/__init__.py": "8ea373fbd458d5b53b6a5285584c61d14f1541e96d7a05c29f0508011b766fa7",
+    "aethron/__main__.py": "94eb2aa08c590456d8d1f6de520b0f268cab48c671325688ae9f6ae4b6ec7a66",
+    "aethron/actions.py": "e449088fa6850f3dc11f782cc656817ab571e2d94cbc4ebb33869706e7537a2a",
+    "aethron/adapters.py": "856030c21738c200df3758eda4194ddde5f56c1d6feca57b0c0965f06e9a0481",
+    "aethron/core.py": "c5ef2d70c7ac5065b5a95836eba588fd44a78a6bceb97883ec0d0b5ac2a1619a",
+    "aethron/demo.py": "c6b1539f1fcd91970d71aee2dd8923a584df2f1332adb9f083de18e14277983e",
+    "aethron/features.py": "fae7de40ec3af1c3a47ae919628b7339a83ebd783b882e3e66bdcf5868c9dd3c",
+    "aethron/models/__init__.py": "61e3d91134abfff53054811740f54dd21cc6e531087e506302a0bf650728e25d",
+    "aethron/render.py": "9231a04b312d74281192d9f097ccfc8d7fd58fc20f2d8d45e36748f831647b44",
+    "aethron/schema.py": "ca28412601bf05a155ad55e59070f811af2c67dd374e2b2baeb9b54d8e4ccc43",
+    "aethron/schema_v2.py": "d529ca9797dcf0cf4d7126c93c9ea233edea77cda55faecc3ba7a2559ec7f3ab",
+    "aethron/temporal/__init__.py": "8dac6e681e96fa0a78affbddc6c76962d221a7e66f6e8bc0828e40d9b9494087",
+    "aethron/temporal/fixtures.py": "d18cbd884805e335d803638b2a311bd6fc90b5764c3db9c6eb194270490d19b5",
+    "aethron/temporal/fusion.py": "c9f6df323f40ac0f0cf9f06d9f3a642fb3ab5113d30cded90aae3d3d5d8fa770",
+    "aethron/temporal/math.py": "f9a634fea08a7e20bf4e730671f6eed729c4827193d439f5ab29fa3f708d2b9e",
+    "aethron/temporal/pixels.py": "314583c5a9d34f005f1c9b5fb9c739183de39894c38dcff8cdc7e899406e13cb",
+    "aethron/temporal/registration.py": "cd6b8955a7ebc8c762da3af5f28d83ff2a7a2a5f097a5e3d1177867fc53aa7c5",
+    "aethron/temporal/replay.py": "37863819e5c3a99aefbe0d3a7df17ac7dae09c33ed01b76d8af0697b133344e0",
+    "aethron/temporal/schema.py": "2602ad7523623f326876b5723ef4869049b2b2bb095c9f03e531345f4e568350",
+    "aethron/temporal/session.py": "e702043f6d20611cae0037ad041198976b730b23407b87df042e7e7c91574560",
+    "aethron/vision/__init__.py": "2e051811883c745faf9abe9d2e076396186a187c7807fbbf087dbe5d54c085a2",
+    "aethron/vision/yolox.py": "d2a6ca09b670bc569ad79e025240908fa7252c8c9dcbb76a5b93c83e2ac3bec4"
+  },
+  "evaluation_script_sha256": "862af9ccd543865efd0871fe256f8c169502a947f8759d388f2f2eeda43f1b1f",
+  "measurements": [
+    {
+      "platform": "Darwin arm64",
+      "python": "3.13.15",
+      "benchmark": {
+        "cpu_p95_ms_diagnostic_only": 10.213,
+        "frames": 100,
+        "max_ms": 272.08,
+        "memory_budget_bytes": 33554432,
+        "objects": 32,
+        "p50_ms": 25.646,
+        "p95_budget_ms": 100,
+        "p95_ms": 118.711,
+        "passed": false,
+        "peak_bytes": 120260
+      },
+      "log_sha256": "51740fef17025010feb9b62023ef9a6f3e2a85a46cc632b7399b0c8f5c6aa0f9"
+    },
+    {
+      "platform": "Darwin arm64",
+      "python": "3.13.15",
+      "benchmark": {
+        "cpu_p95_ms_diagnostic_only": 12.673,
+        "frames": 100,
+        "max_ms": 226.727,
+        "memory_budget_bytes": 33554432,
+        "objects": 32,
+        "p50_ms": 29.14,
+        "p95_budget_ms": 100,
+        "p95_ms": 129.476,
+        "passed": false,
+        "peak_bytes": 117625
+      },
+      "log_sha256": "81a2ec752be697ae049780bcc46e30bb3db7dbeb876d61450b77837ac0ec7bbf"
+    },
+    {
+      "platform": "Linux aarch64",
+      "python": "3.13.15",
+      "benchmark": {
+        "cpu_p95_ms_diagnostic_only": 1.502,
+        "frames": 100,
+        "max_ms": 1.632,
+        "memory_budget_bytes": 33554432,
+        "objects": 32,
+        "p50_ms": 1.425,
+        "p95_budget_ms": 100,
+        "p95_ms": 1.501,
+        "passed": true,
+        "peak_bytes": 117176
+      },
+      "log_sha256": "b304d04fc115d982bc2e948b228f3e9e520285b912bfe55d47263bc811671dba"
+    }
+  ],
+  "recorded_aircraft": {
+    "frames": 25,
+    "greedy_iou": {
+      "centre_rmse_normalized": null,
+      "false_negatives": 20,
+      "false_positives": 629,
+      "fragmentations": 0,
+      "id_switches": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "true_positives": 0,
+      "uncertain_predictions_not_counted_as_detections": 0
+    },
+    "motion": "Translation adapter measured; invalid frames withdraw motion",
+    "physical_or_semantic_qualification": false,
+    "pixel_detector_latency_ms": {
+      "max": 7272.633,
+      "p50": 4862.308
+    },
+    "source": "AOT evaluation-only excerpt; fixed-wing aircraft, not UAV",
+    "temporal": {
+      "centre_rmse_normalized": null,
+      "false_negatives": 20,
+      "false_positives": 721,
+      "fragmentations": 0,
+      "id_switches": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "true_positives": 0,
+      "uncertain_predictions_not_counted_as_detections": 70
+    },
+    "valid_registration_frames": 20
+  },
+  "diagnosis": "Wall/CPU divergence and separate Linux pass suggest host scheduling/toolchain effects; exact cause not established. Own Mac process nice was 5; no priority or other process changed.",
+  "linux_execution": {
+    "image": "sha256:e7e39dbe3240bfad3cacdd4a9a55b34325a1ceec7d1b4390318623c814e8711a",
+    "platform": "linux/arm64",
+    "network": "none",
+    "read_only": true,
+    "cpus": 2,
+    "memory_mib": 256,
+    "pids_limit": 64,
+    "code": "Exact current core and frozen evaluation mounted read-only",
+    "qualification": "Docker Linux VM software diagnostic, not physical edge hardware"
+  },
+  "publication_hold": "Native macOS frozen latency gate failed twice; separate Linux result does not replace failures"
+}

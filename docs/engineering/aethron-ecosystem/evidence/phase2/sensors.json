@@ -40,7 +40,13 @@
     "verify.log": "39f78519c52848416609f2ae86a00a38626830a1d5fec21281b7a8aac7181165",
     "plan-final.log": "5c96b2601508df69cab3ba3ce8a003d6a41ef837e2187803d5da01071297a005",
     "ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
-    "package-final.log": "28490aa255e1ce70db10834d7e00cd61174f10e82f6a7feb43e119305a53baec"
+    "package-final.log": "28490aa255e1ce70db10834d7e00cd61174f10e82f6a7feb43e119305a53baec",
+    "clean-verify.log": "e2ced1f33c56b4a6c361bb5a8db0f9e73b6f59732afa90304cdf33e350cd1cc6",
+    "clean-plan.log": "5c96b2601508df69cab3ba3ce8a003d6a41ef837e2187803d5da01071297a005",
+    "clean-edge.log": "14bd61267f15a91ddf30f4d99080cbad675c87d1648347965a71eff355237e3c",
+    "clean-reproduce.log": "51740fef17025010feb9b62023ef9a6f3e2a85a46cc632b7399b0c8f5c6aa0f9",
+    "temporal-retry.log": "81a2ec752be697ae049780bcc46e30bb3db7dbeb876d61450b77837ac0ec7bbf",
+    "temporal-linux.log": "b304d04fc115d982bc2e948b228f3e9e520285b912bfe55d47263bc811671dba"
   },
   "packaging": {
     "wheels": {
@@ -55,5 +61,32 @@
     "platform": "darwin",
     "python": "3.13.15"
   },
-  "clean_clone": "pending_committed_source"
+  "clean_clone": {
+    "revision": "dd2328ee398b3d8177635914644a3ba326ab5386",
+    "checks": {
+      "clean-verify": 0,
+      "clean-plan": 0,
+      "clean-edge": 0,
+      "clean-reproduce": 1
+    }
+  },
+  "source_revision": "dd2328ee398b3d8177635914644a3ba326ab5386",
+  "artifact_reproduction": {
+    "artifact_sha256": {
+      "SHA256SUMS": "878e133ceb8b1477f542a8561c5b8eb2b954ba3b77a45f08cc603d210ad51044",
+      "aethron-0.2.0-source.tar.gz": "743a58d3ddc4fb1c6bbdc38be903575966a645d0ae5d3ebd7a35b267192ca434",
+      "aethron.pyz": "5ac2bab6f070c716e05ec5fcdbc8762b0d2f83d2841ad2ba2be91d7ed7f51a35",
+      "provenance.json": "8e94386eca7aa9bc9884b8f808f0b8380091706b3317c654bda5a4555d1a7ba6",
+      "sbom.cdx.json": "c3cdcb3d54e872681e95ad3f7cb4d0f0847dc49adb0dc9926da2110d1b222d54",
+      "source-manifest.json": "97523df29ca25ce1bf2af9ca4438d3c3a13071a7611f11b72d19d82fb7be7723"
+    },
+    "byte_identical_builds": true,
+    "clean_clone": true,
+    "evaluation_gate_passed": false,
+    "isolated_zipapp_consumer": true,
+    "quickstart": false,
+    "source_revision": "dd2328ee398b3d8177635914644a3ba326ab5386"
+  },
+  "performance_evidence": "performance.json",
+  "publication_ready": false
 }
