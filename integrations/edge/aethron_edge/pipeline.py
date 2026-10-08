@@ -12,6 +12,7 @@ from aethron.temporal.session import Session
 
 from .calibration import CalibrationRecord
 from .config import Profile
+from .mailbox import Mailbox
 from .sources.base import SourceConfig, SourceFault
 from .timebase import MappedFrame
 
@@ -189,7 +190,7 @@ class RuntimePipeline:
         self.core.close()
         self.core = self._new_core()
         ctx = mp.get_context("spawn")
-        self.channel = ctx.Queue(maxsize=1)
+        self.channel = Mailbox(ctx)
         self.stop = ctx.Event()
         self.process = ctx.Process(target=_worker, args=(self.profile, self.channel, self.stop))
         self.process.start()
@@ -229,8 +230,6 @@ class RuntimePipeline:
                 self.process.join(timeout=1)
             self.process.close()
             self.process = None
-            self.channel.close()
-            self.channel.cancel_join_thread()
 
     def close(self):
         self.stop_worker()

@@ -25,3 +25,5 @@ P1.4 checkpoint f4db8ce. P1.5 RED missing client module and TypeScript build; GR
 P1.6 inherited visual mismatch reproduced, PNG delta confined to (26,27)-(478,51); rebuilt derived perception media only. Original/model/data/official-logo freezes unchanged; retained visual-repair.json and Phase 0 negative evidence.
 Ruling: repository verifier now covers integrations/packaging/contracts and excludes generated npm/build trees; original failure was a third-party README link in ignored node_modules. Project leak checks remain active.
 P1.7 first emulated Linux boot/reboot succeeded; initial soak probe failed at missing guest pgrep. Replaced with /proc enumeration; negative serial retained. Revised signed guest is now running a fresh full boot/soak.
+
+P1.5 checkpoint 04f6dec. P1.7 VM exposed SIGKILL/Queue partial-message stall at 120s: count stuck at 1371. Kept negative evidence, replaced multiprocessing Queue with bounded shared-memory mailbox; killed-writer regression and lifecycle tests pass. Full emulated boot/soak restarted for this code. No stale result is represented as current.
