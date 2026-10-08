@@ -41,3 +41,11 @@ Publication and production qualification are distinct: a labeled research packag
 ## Required appliance CI/release lane
 
 P1.7 adds a pinned Linux boot-VM image lane: install candidate service/image, enable normal boot, remove provisioning channel, disable WAN, reboot without login and inspect independent local evidence. Repeat with no API subscribers and worker/model/config faults; simulate interrupted updates and disk-full. Execute actual native amd64/arm64 appliance consumers when runners are available; emulated boot validates semantics but not hardware timing/power. Include signed-image manifest verification, service-unit syntax, local notifier, bounded restart and offline update/recovery outputs. No current workflow runs this future product gate. A required unavailable boot runner is pending, not a green skip.
+
+## Implemented Phase 1 candidate workflow
+
+The separate [edge workflow](../../../.github/workflows/aethron-edge-candidate.yml) now builds installed candidates on prepared Linux/macOS/Windows Python 3.11/3.13 lanes, runs contract/source/service/update tests, installs actual pixel clients and retains evidence. Its optional explicit `boot_soak` dispatch builds the signed Linux image and runs the real boot/reboot/offline update/one-hour harness. Contents permission is read-only; no publish/deploy step exists. It is checked in but **has not run on GitHub**.
+
+Executed locally: native macOS ARM Python 3.13.15 package/service/source clients; Linux ARM64 and emulated AMD64 container HTTP/SSE with WAN disabled; signed Linux ARM64 QEMU guest boot/update/soak (final run tracked in PHASES). Native Windows, Windows ARM, macOS Intel, other Python matrix versions and hardware/GPU cells remain pending. The container result does not supply native hardware performance evidence.
+
+The local `edge_reproduce.py` and existing `reproduce.py` checks ran against committed `c7c6c2d`, including refusal of untracked release source, clean-clone verification, exact quickstart, installed consumers and two byte-identical builds. See [edge](evidence/phase1/clean-edge.json) and [core/source](evidence/phase1/clean-core.json). Local source archives and signed test images are artifacts, not published releases or hosted attestations.

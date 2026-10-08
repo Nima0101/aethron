@@ -45,3 +45,20 @@ class MailboxSafety(unittest.TestCase):
             mailbox.get_nowait()
         with self.assertRaises(ValueError):
             mailbox.put_nowait({"data": b"x" * 65537})
+
+    def test_drops_distinguish_overwrite_and_busy_rejection(self):
+        import queue
+
+        mailbox = Mailbox(mp.get_context("spawn"))
+        mailbox.put_nowait({"data": b"old"})
+        mailbox.put_nowait({"data": b"new"})
+        self.assertEqual(mailbox.overwritten.value, 1)
+        self.assertEqual(mailbox.rejected.value, 0)
+        mailbox.lock.acquire()
+        try:
+            with self.assertRaises(queue.Full):
+                mailbox.put_nowait({"data": b"busy"})
+        finally:
+            mailbox.lock.release()
+        self.assertEqual(mailbox.rejected.value, 1)
+        self.assertEqual(mailbox.get_nowait()["data"], b"new")

@@ -84,6 +84,7 @@ class ApplianceSupervisor:
                 replacement = RuntimePipeline(pipeline.profile)
                 replacement.processed = pipeline.processed
                 replacement.inferences = pipeline.inferences
+                replacement.prior_drops = pipeline.drop_counts()
                 replacement.start()
             with self.lock:
                 if replacement is not None:
@@ -107,6 +108,10 @@ class ApplianceSupervisor:
             "uptime_ms": max(0, (now_ns - self.started_ns) // 1_000_000),
             "processed": sum(p.processed for p in self.pipelines.values()),
             "inferences": sum(p.inferences for p in self.pipelines.values()),
+            "drops": {
+                key: sum(p.drop_counts()[key] for p in self.pipelines.values())
+                for key in ("capture_sequence_gaps", "mailbox_overwritten", "mailbox_rejected")
+            },
             "fault_count": len(self.faults),
             "restarts": sum(len(q) for q in self.restarts.values()),
             "last_processing_ms": max(

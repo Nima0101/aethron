@@ -26,6 +26,10 @@ def inspect_evidence(serial: Path):
         and results[2]["worker_fault_injected"]
         and results[2].get("processing_resumed_after_fault")
         and results[2].get("updated_runtime_processing")
+        and all(
+            type(results[2].get("drops", {}).get(key)) is int and results[2]["drops"][key] >= 0
+            for key in ("capture_sequence_gaps", "mailbox_overwritten", "mailbox_rejected")
+        )
     )
     return {
         "status": "passed" if passed else "failed",

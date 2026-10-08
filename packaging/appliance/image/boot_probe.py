@@ -37,7 +37,9 @@ def run():
     processed_at_fault = None
     rss = []
     max_status_bytes = 0
-    duration = 45 if boot == 1 else 3600
+    drop_totals = {}
+    drop_previous = {}
+    duration = 120 if boot == 1 else 3600
     emit({"event": "boot", "boot": boot, "network": "no_virtual_nic", "login": False, "viewers": 0})
     while time.monotonic() - start < duration:
         time.sleep(1)
@@ -45,6 +47,13 @@ def run():
             status = json.loads(Path("/var/lib/aethron/status.json").read_text())
             if status["status_expires_ms"] < time.monotonic_ns() // 1_000_000:
                 failures.append("status_expired")
+            for name, count in status["drops"].items():
+                # Service restart resets counters; add each incarnation's deltas.
+                prior = drop_previous.get(name, 0)
+                drop_totals[name] = drop_totals.get(name, 0) + (
+                    count - prior if count >= prior else count
+                )
+                drop_previous[name] = count
             samples.append(status["last_processing_ms"])
             processed.append(status["processed"])
             max_status_bytes = max(
@@ -82,9 +91,10 @@ def run():
                 )
                 update_task_start = time.monotonic()
             if update_task is not None and not updated:
-                update_log.flush()
-                update_log.seek(0)
-                lines = update_log.read(65536).splitlines()
+                # Read through a separate descriptor: seeking on the inherited
+                # output descriptor could race the child writer's file offset.
+                with (root / "update.log").open() as observed_log:
+                    lines = observed_log.read(65536).splitlines()
                 for line in lines:
                     try:
                         row = json.loads(line)
@@ -127,7 +137,7 @@ def run():
                 if updated_pid != "0":
                     args = Path("/proc/" + updated_pid + "/cmdline").read_bytes()
                     if (
-                        b"/updates/2-" in args
+                        b"/aethron-updates/2-" in args
                         and status["processed"] > 10
                         and status["emitted_ms"] >= update_started_ms
                     ):
@@ -163,6 +173,8 @@ def run():
             "p99": quantile(0.99),
             "max": max(samples, default=None),
         },
+        "drops": drop_totals,
+        "drop_scope": "observed aggregate deltas; capture not applicable to synthetic proposals; kill-time unpublished gaps may be unknown",
         "status_unavailable_samples": failures.count("status_unavailable"),
         "status_expired_samples": failures.count("status_expired"),
         "worker_fault_injected": injected,

@@ -1,7 +1,7 @@
 {
   "wheels": {
     "aethron-0.2.0-py3-none-any.whl": "be3dd8e3e8bcf437d72d65e384c560eb18d4b22baf522849b965d3d720c1d73f",
-    "aethron_edge-0.1.0-py3-none-any.whl": "9e018b5034b1027515597b7b63eda04879dfe18d0fa6a78840476e53cceebedf"
+    "aethron_edge-0.1.0-py3-none-any.whl": "49fda684a90da9667ff1717ece3a9a3b631b33fda43a72ea952ce129f621d905"
   },
   "byte_identical": true,
   "installed_consumer": true,

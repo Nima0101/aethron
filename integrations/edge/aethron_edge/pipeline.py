@@ -66,14 +66,9 @@ def _latest(channel, message):
     try:
         channel.put_nowait(message)
     except queue.Full:
-        try:
-            channel.get_nowait()
-        except queue.Empty:
-            return
-        try:
-            channel.put_nowait(message)
-        except queue.Full:
-            pass
+        # A busy reader/writer drops this new message. Never consume the previous
+        # unread value here: overwrite and rejection counters stay unambiguous.
+        pass
 
 
 def _worker(profile, channel, stop, group, decoder_lock, descendant):
@@ -139,6 +134,7 @@ def _worker(profile, channel, stop, group, decoder_lock, descendant):
                         "reason": "source_lost",
                         "latency_ms": 0,
                         "inference_count": inference_count,
+                        "capture_drops": source.drops,
                     },
                 )
                 return
@@ -166,6 +162,7 @@ def _worker(profile, channel, stop, group, decoder_lock, descendant):
                     "proposal_count": len(proposals),
                     "inference_count": inference_count,
                     "registration_valid": bool(ego and ego["valid"]),
+                    "capture_drops": source.drops,
                 },
             )
     except Exception:
@@ -187,6 +184,12 @@ class RuntimePipeline:
         self.proposal_count = 0
         self.inferences = 0
         self.worker_inferences = 0
+        self.capture_drops = 0
+        self.prior_drops = {
+            "capture_sequence_gaps": 0,
+            "mailbox_overwritten": 0,
+            "mailbox_rejected": 0,
+        }
         self.last_message_ns = 0
         self.last_result = None
 
@@ -249,6 +252,7 @@ class RuntimePipeline:
         if message["data"] is not None:
             self.last_latency_ms = max(0, now_ns / 1e6 - json.loads(message["data"])["at_ms"])
         self.proposal_count = message.get("proposal_count", 0)
+        self.capture_drops = max(self.capture_drops, message.get("capture_drops", 0))
         observed = message.get("inference_count", self.worker_inferences)
         self.inferences += max(0, observed - self.worker_inferences)
         self.worker_inferences = observed
@@ -270,6 +274,16 @@ class RuntimePipeline:
             return copy.deepcopy(result)
         self.last_result = self.core.watchdog(now_ms=now)
         return copy.deepcopy(self.last_result)
+
+    def drop_counts(self):
+        channel = getattr(self, "channel", None)
+        return {
+            "capture_sequence_gaps": self.prior_drops["capture_sequence_gaps"] + self.capture_drops,
+            "mailbox_overwritten": self.prior_drops["mailbox_overwritten"]
+            + (channel.overwritten.value if channel else 0),
+            "mailbox_rejected": self.prior_drops["mailbox_rejected"]
+            + (channel.rejected.value if channel else 0),
+        }
 
     def stop_worker(self):
         self.last_result = None

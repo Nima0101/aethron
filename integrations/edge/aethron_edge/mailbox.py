@@ -31,6 +31,9 @@ class Mailbox:
     def __init__(self, context):
         self.slot = context.RawArray("B", 65536)
         self.length = context.RawValue("i", 0)
+        # One producer writes these aggregate diagnostics; readers never wait.
+        self.overwritten = context.RawValue("Q", 0)
+        self.rejected = context.RawValue("Q", 0)
         self.lock = context.Lock()
 
     def put_nowait(self, message):
@@ -41,8 +44,11 @@ class Mailbox:
         if len(data) > 65536:
             raise ValueError("message_limit")
         if not self.lock.acquire(False):
+            self.rejected.value += 1
             raise queue.Full()
         try:
+            if self.length.value:
+                self.overwritten.value += 1
             memoryview(self.slot).cast("B")[: len(data)] = data
             self.length.value = len(data)
         finally:

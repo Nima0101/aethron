@@ -11,6 +11,17 @@ def run():
     subprocess.run(
         ["/opt/aethron/venv/bin/python", "-B", "/opt/aethron-sil/update_probe.py"], check=True
     )
+    # The service UID must not be able to rename the protected update store,
+    # replace active.json or lower its minimum-version record.
+    forbidden = "from pathlib import Path; Path('/var/lib/aethron-updates').rename('/var/lib/aethron/hijack')"
+    denied = subprocess.run(
+        ["/opt/aethron/venv/bin/python", "-c", forbidden],
+        user="aethron",
+        group="aethron",
+        capture_output=True,
+        check=False,
+    )
+    assert denied.returncode != 0 and b"PermissionError" in denied.stderr
     env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
     server = subprocess.Popen(
         [
@@ -22,7 +33,7 @@ def run():
             "--config",
             "/opt/aethron/appliance.json",
             "--update-store",
-            "/var/lib/aethron/updates",
+            "/var/lib/aethron-updates",
         ],
         user="aethron",
         group="aethron",
@@ -36,13 +47,14 @@ def run():
             try:
                 status = json.loads(Path("/var/lib/aethron/status.json").read_text())
                 args = Path(f"/proc/{server.pid}/cmdline").read_bytes()
-                if b"/updates/2-" in args and status["processed"] > 3:
+                if b"/aethron-updates/2-" in args and status["processed"] > 3:
                     print(
                         json.dumps(
                             {
                                 "selected_runtime_exec": True,
                                 "version": 2,
                                 "offline_processing": True,
+                                "service_cannot_replace_update_store": True,
                                 "hardware_qualified": False,
                             }
                         )

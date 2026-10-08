@@ -10,7 +10,7 @@ from aethron_edge.runtime.updates import UpdateStore
 
 def run():
     key = Path("/etc/aethron/trust.pub")
-    store = UpdateStore(Path("/var/lib/aethron/updates"), key)
+    store = UpdateStore(Path("/var/lib/aethron-updates"), key)
     print(json.dumps({"stage": "stage_initial"}), flush=True)
     old = store.stage_update(Path("/opt/aethron"))
     print(json.dumps({"stage": "activate_initial"}), flush=True)

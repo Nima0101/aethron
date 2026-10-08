@@ -2,14 +2,23 @@
 
 Normal installed appliances boot automatically; see [appliance operation](usage-appliance.md). The commands here are developer/service tools. The candidate has no public package release or hardware qualification.
 
-Build both local wheels using pinned repository build dependencies. Resolve the hash-locked server dependencies into a platform-specific wheelhouse, then install offline in a new environment:
+Use CPython 3.11 or newer (3.13.15 was executed here) in a project-local virtual environment. On Unix, activate with `. .venv/bin/activate`; on Windows use `.venv\Scripts\Activate.ps1`. These explicit setup steps may download build tools/dependencies; steady-state runtime does not require the network.
 
 ```sh
-python -m pip install --no-index --find-links wheelhouse --require-hashes -r integrations/edge/requirements-server.lock
-python -m pip install --no-index --find-links wheelhouse 'aethron-edge[server]==0.1.0'
+python -m venv .venv
+# Activate the environment using the command for your OS before continuing.
+python -m pip install build==1.6.1 setuptools==84.0.0 wheel==0.48.0
+python -m pip download --require-hashes -r integrations/edge/requirements-server.lock -d build/ecosystem-phase1/wheelhouse
+python scripts/edge_package_check.py
+python -m pip install --no-index --find-links build/ecosystem-phase1/wheelhouse --require-hashes -r integrations/edge/requirements-server.lock
+python -m pip install --no-index --find-links build/ecosystem-phase1/package/a 'aethron-edge[server]==0.1.0'
 aethron-edge doctor --config examples/edge-replay.json
 aethron-edge replay --config examples/edge-replay.json
 ```
+
+The package check builds both wheels twice and executes an isolated installed HTTP/SSE consumer outside the checkout. It fails on unequal builds or a nonworking consumer. The locked server/client closure includes HTTPX for the Python observation example; the base wheel alone is sufficient for import/doctor/replay but does not install every optional client/vision dependency.
+
+For the actual pixel paths, explicitly download/install `integrations/edge/requirements-vision.lock` with `--require-hashes` and fetch the pinned test model using `python scripts/fetch_rgb_model.py`. To run the test RTSP server, install test-only `imageio-ffmpeg==0.6.0` and run `python scripts/edge_fetch_test_tools.py`. Then `python scripts/edge_pixel_service_e2e.py` exercises installed file and RTSP inference/service/client paths. No runtime command fetches model weights automatically.
 
 `doctor` opens no sensor, downloads no model and makes no qualification claim. Replay produces a bounded, explicitly labeled report. For a local service, provision a 32-byte random hex token in an owner-only file and configure named profiles, credentials and a local status file. `aethron_edge.runtime.provisioning.create_token(Path(...))` creates the token without printing it. Example configuration:
 

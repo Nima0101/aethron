@@ -1,0 +1,52 @@
+{
+  "scope": "Single-author scoped review; not independent assurance or native-code/OS audit",
+  "bandit": [
+    {
+      "id": "B606",
+      "severity": "LOW",
+      "path": "integrations/edge/aethron_edge/cli.py",
+      "line": 46
+    },
+    {
+      "id": "B404",
+      "severity": "LOW",
+      "path": "integrations/edge/aethron_edge/runtime/updates.py",
+      "line": 8
+    },
+    {
+      "id": "B607",
+      "severity": "LOW",
+      "path": "integrations/edge/aethron_edge/runtime/updates.py",
+      "line": 52
+    },
+    {
+      "id": "B603",
+      "severity": "LOW",
+      "path": "integrations/edge/aethron_edge/runtime/updates.py",
+      "line": 52
+    }
+  ],
+  "bandit_dispositions": {
+    "B606": "execv selects only a fully verified local signed runtime slot; no shell or network-selected executable",
+    "B404/B603": "OpenSSL verification uses a fixed argument vector, bounded timeout and fixed error response",
+    "B607": "Appliance unit fixes PATH to its verified venv and OS bin directories; interactive administrative PATH is a trusted local boundary"
+  },
+  "dependency_audit": {
+    "known_vulnerabilities": 0,
+    "scope": "Full locked server/client/vision closure on 2026-10-08",
+    "report_sha256": "c5583125cdb5fb8f04383a50cb577228dde9ca65c85568c3a483292bf902d8b4"
+  },
+  "update_store": {
+    "counterexample": "update-parent-counterexample.json",
+    "mitigation": "root-owned /var/lib/aethron-updates, outside service-writable status parent; read-only under service sandbox",
+    "native_linux_permission_and_selected_exec": "passed",
+    "final_vm": "in_progress"
+  },
+  "residuals": [
+    "Native Windows job-object and filesystem ACL execution pending",
+    "Generic decoder timestamps and hardware clocks unqualified",
+    "OS/kernel/native-code compromise and root trust replacement outside this software assurance",
+    "SIL is not secure boot, certified driving or field-safe perception",
+    "Local Node/Python consumers executed; browser/TLS deployment not qualified"
+  ]
+}

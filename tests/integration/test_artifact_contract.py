@@ -23,9 +23,22 @@ class ArtifactGate(unittest.TestCase):
                 "worker_fault_injected": True,
                 "processing_resumed_after_fault": True,
                 "updated_runtime_processing": True,
+                "drops": {
+                    "capture_sequence_gaps": 0,
+                    "mailbox_overwritten": 4,
+                    "mailbox_rejected": 1,
+                },
             }
             for changed in (
                 {"seconds": 3599},
+                {"drops": {}},
+                {
+                    "drops": {
+                        "capture_sequence_gaps": -1,
+                        "mailbox_overwritten": 0,
+                        "mailbox_rejected": 0,
+                    }
+                },
                 {"processing_resumed_after_fault": False},
                 {"worker_fault_injected": False},
                 {"updated_runtime_processing": False},

@@ -239,7 +239,11 @@ def validate(root, plan=None):
             and second.get("processing_continued") is True
             and second.get("worker_fault_injected") is True
             and second.get("processing_resumed_after_fault") is True
-            and second.get("updated_runtime_processing") is True,
+            and second.get("updated_runtime_processing") is True
+            and all(
+                type(second.get("drops", {}).get(key)) is int and second["drops"][key] >= 0
+                for key in ("capture_sequence_gaps", "mailbox_overwritten", "mailbox_rejected")
+            ),
             "boot/soak/update evidence does not close P1.7",
         )
 

@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "tests": 48,
+  "seconds": 101.578,
+  "command": "PYTHONPATH=integrations/edge python -m unittest discover -s tests/integration",
+  "python": "3.13.15",
+  "platform": "macOS arm64",
+  "runtime_wheel_sha256": "49fda684a90da9667ff1717ece3a9a3b631b33fda43a72ea952ce129f621d905",
+  "log_sha256": "24f3653897ef0f4d069c055810f25c9df1a611adeccef980ee8d6d5e02042a7d",
+  "additional_artifact_drop_gate": "passed after meaningful failing check",
+  "qualification": "software only"
+}

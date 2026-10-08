@@ -77,6 +77,48 @@
       "finding": "Retained earlier Linux boot/crash-recovery counterexample; see EXECUTION ledger",
       "status": "retained_failure",
       "public_raw_log": false
+    },
+    {
+      "local_log": "drop-metrics-red.log",
+      "sha256": "6bd2af1193e8010428a8b91e6c075cdd55fc743837222bc05109bdf494141460",
+      "finding": "Missing dropped-message instrumentation reproduced before implementation",
+      "status": "retained_negative_or_incomplete",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "drop-gate-red.log",
+      "sha256": "8963708a131733f7db97402d16960125bfd2e1adb33ede0e6b0861b15ff750fa",
+      "finding": "Boot acceptance initially accepted missing drop measurements; negative test fixed",
+      "status": "retained_negative_or_incomplete",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "boot-measured/serial.log",
+      "sha256": "934fde2d83f0490e91d361078d52fdec14b8475fbe2042a7400f63dcbf100c9f",
+      "finding": "45-second first-boot window ended before processing under load; processing gate failed, retained",
+      "status": "retained_negative_or_incomplete",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "boot-protected/serial.log",
+      "sha256": "323c34dd687afff7a76a363d0c8c5476392808ee5381bcc0c20ec5a08a66fec8",
+      "finding": "Incomplete protected-store run superseded to add required drop telemetry",
+      "status": "retained_negative_or_incomplete",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "boot-final/serial.log",
+      "sha256": "c9b9036115a9dde0b232542191441074cce3c83a3e045d44854a56134b5ac96e",
+      "finding": "Incomplete version-2 runtime run superseded by update-store permission fix",
+      "status": "retained_negative_or_incomplete",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "boot-acceptance-before-build-complete.log",
+      "sha256": "89dcc6ffc6ec0c242207db32926af1edc4c238f18d966cce2f9be305c2cc8958",
+      "finding": "Harness rejected image before builder finished writing signed manifest; rerun only after successful builder completion",
+      "status": "retained_negative_or_incomplete",
+      "public_raw_log": false
     }
   ]
 }
