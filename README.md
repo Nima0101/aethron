@@ -78,15 +78,13 @@ The comparison preserves original detection thresholds and checks class, box and
 
 For real UI/timer verification, run `.venv/bin/python scripts/browser_check.py`. On macOS the browser checker can use a previously installed Chromium headless-shell revision when the exact Playwright revision is missing. Real launch/test failures still fail.
 
-![Actual person and animal model output on licensed photographs](docs/assets/rgb-model-execution.png)
-
-Two positive **integration smoke tests**, not field accuracy: NASA public-domain photograph and Stefan van der Walt's CC0 cat photograph. No identity is inferred. [Image rights/provenance](data/rgb-smoke/README.md) · [Model card](docs/models/v3-model-card.md).
+The RGB model's recorded integration checks and provenance remain reproducible in [the vision verification scripts](scripts/vision_smoke.py) and [model card](docs/models/v3-model-card.md). For an interactive camera demonstration, open [RescueSense Camera](https://nima0101.github.io/rescuesense/).
 
 ## Recorded failures are part of the evidence
 
-![Actual recorded-frame proposals with failed aircraft detection disclosed](docs/assets/recorded-failure.png)
+![Animated replay of actual recorded camera frames and detector output, including documented misses and false positives](docs/assets/recorded-failure.gif)
 
-The frozen AOT excerpt contains tiny **fixed-wing aircraft**, not verified drones. The classical detector missed all20 annotations and produced721 false positives after registration/tracking. YOLOX missed the same20 with no false positives. Neither qualifies this system for airborne detection. Source pixels, transformations, licenses and hashes are included; labels never enter inference. [Dataset](data/aot/README.md) · [Recorded replay GIF](docs/assets/recorded-failure.gif).
+The frozen AOT excerpt contains tiny **fixed-wing aircraft**, not verified drones. The classical detector missed all20 annotations and produced721 false positives after registration/tracking. YOLOX missed the same20 with no false positives. Neither qualifies this system for airborne detection. Source pixels, transformations, licenses and hashes are included; labels never enter inference. [Dataset](data/aot/README.md) · [Replay methodology](docs/demo-v3.md).
 
 LWIR/RGB-T/radar/depth semantic adapters and zero-light fusion are implemented and synthetically tested. Representative physical thermal data, trained thermal/UAV weights, calibrated uncertainty, power/range/latency and device/controller validation remain explicit qualification gaps. No phone, vehicle, drone or sensor is declared production-supported. [Capability matrix](docs/architecture/capabilities-v3.md) · [Hardware evidence](docs/verification/hardware.md).
 
