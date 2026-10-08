@@ -1,5 +1,9 @@
 # Current state — 2026-10-08
 
+Latest verified source: `ce5294d924ccb6bff52cc56cba4b6df017c99e16`. [Clean reproduction](evidence/phase2/resource-clean.json) passed source/ZIP artifacts, isolated consumers, 39 installed sensor tests, six OpenCV rectification tests, HTTP/SSE and zero-viewer continuation. The frozen temporal gate passed at p95 9.225ms. Core wheel `726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e`; edge wheel `8fddc0557864a1b0b511812cddd12f364a708147d954e148d4a9822842c4ac74`. Actual wheel ZIP import also passed on local Python 3.9.6. Browser sandbox permission, native Windows hosted confirmation and other publication prerequisites remain pending. No public push occurred. Next executable coding task is calibrated raw-sensor provider admission/connection; P2/P3 and hardware qualification remain incomplete.
+
+## Earlier checkpoints (historical status)
+
 Phase 0 is committed and complete. Phase 1 is expressly authorized; P1.1–P1.7 implementation exists on `feat/aethron-vehicle-uav-preparation-20261008`. P1.1–P1.7 software-candidate gates passed on the executed matrix, including the actual one-hour Linux boot/update soak. Reviewed runtime commit: `d90ae953f6431fd9d460e440432ac72825b8d250`. [PHASES](PHASES.json) and [EXECUTION](EXECUTION.md) carry machine status and checkpoint history. The later [owner autonomy directive](LATEST-OWNER-AUTONOMY.md) authorizes continuous software P2–P5 and gate-dependent routine publication. P2 is in progress; product completion remains false.
 
 Implemented: separate GPL-3.0-only `aethron-edge` wheel/CLI, strict OpenAPI/contracts, file/UVC/RTSP source ABI, monotonic capture admission/calibration, pinned detector replay, independent supervisor, scoped local HTTP/SSE, Python/TypeScript clients, signed offline runtime/update slots, systemd boot image and actual Linux VM harness. The normal appliance does not depend on a viewer, provisioning host or WAN.

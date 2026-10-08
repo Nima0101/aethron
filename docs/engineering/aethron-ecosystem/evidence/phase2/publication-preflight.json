@@ -1,7 +1,7 @@
 {
   "date": "2026-10-08",
   "source_base": "05afd8a46711de317b2db733b9bb73962a4dfbb5",
-  "status": "local_fixes_passed_committed_reproduction_pending",
+  "status": "local_fixes_and_clean_reproduction_passed_publication_pending",
   "public_push_performed": false,
   "hardware_qualified": false,
   "field_qualified": false,
@@ -56,7 +56,8 @@
       "3.13"
     ],
     "native_windows_executed": false,
-    "model_bytes_changed": false
+    "model_bytes_changed": false,
+    "local_actual_wheel_zipimport_python39": "passed"
   },
   "inventory": {
     "regression_tests": 3,
@@ -125,7 +126,9 @@
           "aethron/vision/__init__.py": "2e051811883c745faf9abe9d2e076396186a187c7807fbbf087dbe5d54c085a2"
         }
       }
-    }
+    },
+    "full_core_bandit_findings": 0,
+    "full_ruff_and_format": "passed"
   },
   "name_search": {
     "repository": "https://github.com/Nima0101/aethron",
@@ -164,7 +167,8 @@
     "integration-resource.log": "e4b9ca3aac9aff6d3b3bb7da15aa0d0c241d373ec491bf4064c8fca8c23708f1",
     "resource-package.log": "247f7a48bba391b507d7b191a446c938b5e1a67e180840e42d71b46c66a641c6",
     "resource-sbom.json": "c3b685c0674331ed048486d5ca13babf0b339b1fe94d98712f1608a0147b5d8e",
-    "resource-sbom-validation.json": "dc59c78594ee8857d1f49e35f3e137007c49573ee4682cd3dd12e2f2cb9215d8"
+    "resource-sbom-validation.json": "dc59c78594ee8857d1f49e35f3e137007c49573ee4682cd3dd12e2f2cb9215d8",
+    "security-core.json": "38181617c1ad34cb85f5aadc8f4ab7d73afeef0dfd520c93da1c9374cddeb3bf"
   },
   "installed_candidate": {
     "wheels": {
@@ -179,5 +183,7 @@
     "zero_viewer_continued": true,
     "platform": "darwin",
     "python": "3.13.15"
-  }
+  },
+  "source_revision": "ce5294d924ccb6bff52cc56cba4b6df017c99e16",
+  "clean_reproduction": "resource-clean.json"
 }

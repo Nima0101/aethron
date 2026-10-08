@@ -1,5 +1,8 @@
 # Current handoff — autonomous P2 implementation
 
+Latest verified source: `ce5294d924ccb6bff52cc56cba4b6df017c99e16`. [Clean reproduction](evidence/phase2/resource-clean.json) passed source/ZIP artifacts, isolated consumers, 39 installed sensor tests, six OpenCV rectification tests, HTTP/SSE and zero-viewer continuation. The frozen temporal gate passed at p95 9.225ms. Core wheel `726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e`; edge wheel `8fddc0557864a1b0b511812cddd12f364a708147d954e148d4a9822842c4ac74`. Actual wheel ZIP import also passed on local Python 3.9.6. Browser sandbox permission, native Windows hosted confirmation and other publication prerequisites remain pending. No public push occurred. Next executable coding task is calibrated raw-sensor provider admission/connection; P2/P3 and hardware qualification remain incomplete.
+
+
 The later [owner autonomy directive](LATEST-OWNER-AUTONOMY.md) is now adopted. Continue software milestones and gate-dependent routine publication without repeated approval. [NEXT](NEXT.md) gives the next executable task; [sensor progress](P2-SENSOR-ADAPTERS.md) describes this checkpoint. P2.1 is partial, not complete; no hardware, semantic nonvisible model or hosted publication claim has been added.
 
 Latest local release-preparation evidence is [recorded here](evidence/phase2/publication-preflight.json), with [clean geometry reproduction](evidence/phase2/registration-clean.json). Resource-loader and candidate-SBOM fixes are software changes; browser permission and native Windows hosted confirmation remain open gates. Continue the calibrated provider task without waiting for hardware or another phase approval.
