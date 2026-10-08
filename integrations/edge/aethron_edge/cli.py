@@ -11,7 +11,7 @@ from .protocol import replay_bytes
 
 def main():
     parser = argparse.ArgumentParser(prog="aethron-edge")
-    parser.add_argument("command", choices=["doctor", "replay", "export-openapi"])
+    parser.add_argument("command", choices=["doctor", "replay", "export-openapi", "run", "serve"])
     parser.add_argument("--config", type=Path)
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
@@ -25,6 +25,22 @@ def main():
         return
     if args.config is None:
         parser.error("--config required")
+    if args.command in ("run", "serve"):
+        from .config import load_config
+        from .service.app import serve
+
+        try:
+            config = load_config(args.config)
+            if config.runtime_mode == "appliance":
+                from .runtime.updates import verify_bundle
+
+                if not config.integrity_bundle or not config.trust_root:
+                    raise ValueError("integrity_required")
+                verify_bundle(Path(config.integrity_bundle), Path(config.trust_root))
+            serve(config)
+        except (ValueError, OSError):
+            parser.exit(2, "startup_failed\n")
+        return
     try:
         config = json.loads(args.config.read_text())
         if config.get("version") != 1:

@@ -161,7 +161,7 @@ def validate(root, plan=None):
     )
     appliance = phases.get("appliance_runtime", {})
     require(
-        appliance.get("status") == "spec_only"
+        appliance.get("status") in {"spec_only", "implementation_in_progress", "candidate"}
         and appliance.get("implementation_complete") is False
         and appliance.get("requires_optional_client") is False
         and appliance.get("requires_wan") is False,
@@ -173,6 +173,15 @@ def validate(root, plan=None):
         and "P1.7" in rows[1]["gates"],
         "standalone boot/offline acceptance gates missing",
     )
+
+    milestones = phases.get("milestones", {})
+    require(set(milestones) == {f"P1.{n}" for n in range(1, 8)}, "missing implementation milestone")
+    for milestone in milestones.values():
+        require(milestone.get("status") in {"pending", "in_progress", "implemented_validation_in_progress", "passed", "blocked"}, "invalid milestone status")
+        if milestone["status"] in {"passed", "implemented_validation_in_progress"}:
+            require(milestone.get("evidence"), "milestone evidence missing")
+        for evidence_path in milestone.get("evidence", []):
+            require((plan / safe_relative(evidence_path)).is_file(), "missing milestone evidence")
 
     provenance = read_json(plan / "provenance.json")
     require(provenance.get("schema_version") == 1, "invalid provenance schema")
@@ -333,6 +342,7 @@ def self_test(root):
         "phase escalation": lambda p: mutate_json(
             p / "PHASES.json", lambda d: d.update(current_phase=2)
         ),
+        "missing milestone evidence": lambda p: mutate_json(p / "PHASES.json", lambda d: d["milestones"]["P1.1"].update(evidence=[])),
         "cyclic dependency": lambda p: mutate_json(
             p / "PHASES.json", lambda d: d["phases"][1].update(depends_on=[1])
         ),

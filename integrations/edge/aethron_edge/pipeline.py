@@ -159,7 +159,7 @@ def _worker(profile, channel, stop):
 class RuntimePipeline:
     def __init__(self, profile: Profile):
         self.profile = profile
-        self.core = Session()
+        self.core = self._new_core()
         self.process = None
         self.reason = "source_lost"
         self.processed = 0
@@ -167,10 +167,27 @@ class RuntimePipeline:
         self.proposal_count = 0
         self.last_message_ns = 0
 
+    def _new_core(self):
+        core = Session()
+        now = time.monotonic_ns() // 1_000_000
+        empty = {
+            "version": 3,
+            "at_ms": now,
+            "lighting": self.profile.lighting,
+            "evidence": "external_unverified",
+            "mode": "direct",
+            "contract": self.profile.contract,
+            "scene_break": True,
+            "sensors": [],
+            "ego": {"dx": 0, "dy": 0, "variance": 0.05, "valid": False},
+        }
+        core.step(json.dumps(empty).encode(), now_ms=now)
+        return core
+
     def start(self):
         self.stop_worker()
         self.core.close()
-        self.core = Session()
+        self.core = self._new_core()
         ctx = mp.get_context("spawn")
         self.channel = ctx.Queue(maxsize=1)
         self.stop = ctx.Event()
@@ -190,6 +207,8 @@ class RuntimePipeline:
         self.last_message_ns = now_ns
         self.reason = message["reason"]
         self.last_latency_ms = message["latency_ms"]
+        if message["data"] is not None:
+            self.last_latency_ms = max(0, now_ns / 1e6 - json.loads(message["data"])["at_ms"])
         self.proposal_count = message.get("proposal_count", 0)
         if message["data"] is not None:
             return self.core.step(message["data"], now_ms=now_ns // 1_000_000)

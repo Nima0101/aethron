@@ -116,7 +116,7 @@
   "local_commit_status": "committed",
   "phase0_acceptance_complete": true,
   "appliance_runtime": {
-    "status": "spec_only",
+    "status": "implementation_in_progress",
     "owner_requirement": "OWNER-NEXT-APPLIANCE-RUNTIME.md",
     "implementation_task": "P1.7",
     "implementation_complete": false,
@@ -166,11 +166,13 @@
       ]
     },
     "P1.4": {
-      "status": "in_progress",
-      "evidence": []
+      "status": "implemented_validation_in_progress",
+      "evidence": [
+        "evidence/phase1/p14.json"
+      ]
     },
     "P1.5": {
-      "status": "pending",
+      "status": "in_progress",
       "evidence": []
     },
     "P1.6": {

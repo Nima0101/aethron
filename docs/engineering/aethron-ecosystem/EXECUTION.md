@@ -18,3 +18,5 @@ P1.1 committed 947b72d. P1.2 RED missing contracts/OpenAPI; GREEN 4 strict contr
 P1.2 committed e5335ec. P1.3 implements isolated file/UVC/RTSP and clocks/calibration. GREEN: source 4, clock 4, actual detector pipeline 2, real local RTSP 1. Initial timeout/closed-queue/RTSP failures retained in p13 evidence; hardware compatibility unqualified. Remaining resource/adversarial checks continue.
 Ruling: generic OpenCV timestamps cannot be qualified exposure timestamps; those real pixel paths execute inference but withdraw current evidence. Cost: no current safety detections through these generic drivers until a qualified capture clock adapter exists.
 Ruling: native virtualization reports unavailable; use QEMU TCG inside an isolated local tool container to boot a separate Linux guest. This is emulated Linux, not native ARM hardware performance.
+
+P1.3 checkpoint 2739360. P1.4 GREEN: real process HTTP/SSE 4, security 2; lifecycle 3 and signed updates 3 implemented early to verify supervisor startup integrity. RED regressions fixed: malformed bearer, configured startup recommendation, worker cleanup blocking watchdog. Appliance boot/soak qualification still pending.
