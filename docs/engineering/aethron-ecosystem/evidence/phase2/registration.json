@@ -1,0 +1,279 @@
+{
+  "parent_revision": "38e8bb43aeccb9e1be1b936cc95866efb47261fe",
+  "status": "software_candidate_passed_clean_clone_pending",
+  "hardware_qualified": false,
+  "field_qualified": false,
+  "hosted_ci_executed": false,
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/ros-infrastructure/rep/11ca24a41f31480dfb9562ba99f2a5b93d3ebda5/rep-0103.rst",
+      "sha256": "bf397ddcab96cc1d10d8f5893960cb1d5e50154dd96462433a5ac342237a0c20",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "url": "https://docs.opencv.org/4.13.0/d9/d0c/group__calib3d.html",
+      "retrieved": "2026-10-08",
+      "retrieval": "web reader succeeded; direct urllib retrieval returned HTTP 403; no document-byte hash claimed",
+      "decisions": "Source-to-camera R,t; pinhole convention; five Brown-Conrady coefficients; undistortPointsIter termination and inverse residual check"
+    }
+  ],
+  "limitations": [
+    "declared bounds, not measured calibration",
+    "no semantic model or appliance provider connection",
+    "no full-image, stereo or fisheye rectifier",
+    "ROS CameraInfo remains conservative until explicit adapter integration"
+  ],
+  "retained_failures": [
+    "Eight missing registration module assertions before implementation",
+    "Five missing rectification module assertions before implementation",
+    "Identity rectification exact float equality failed at 19.99999999999997 vs 20; numeric assertion corrected to 1e-10 pixel, no frozen gate changed",
+    "OpenCV direct urllib fetch returned HTTP 403; official versioned web-reader retrieval succeeded",
+    "Installed HTTP consumer passed but shutdown emitted one resource_tracker semaphore warning; not claimed leak-free"
+  ],
+  "checks": {
+    "registration_tests": 10,
+    "rectification_tests": 6,
+    "adversarial_geometry_cases": 2000,
+    "integration": {
+      "tests": 92,
+      "seconds": 159.362,
+      "passed": true
+    },
+    "installed_sensor_tests": 38,
+    "installed_rectification_tests": 6,
+    "installed_ros_tests": 42,
+    "installed_ros_seconds": 0.918,
+    "plan_negative_probes": 26,
+    "registration_review_tests": 11,
+    "review_addition": "An independent perturbed-pose check was added after the 92-test suite; focused 11-test registration run passed. Installed clean-clone follow-up includes it.",
+    "repository_verify": "73 root tests plus frozen hashes, dataset, consumer and temporal CLI passed"
+  },
+  "security": {
+    "errors": [],
+    "generated_at": "2026-10-08T19:43:08Z",
+    "metrics": {
+      "./integrations/edge/aethron_edge/sensors/rectification.py": {
+        "CONFIDENCE.HIGH": 0,
+        "CONFIDENCE.LOW": 0,
+        "CONFIDENCE.MEDIUM": 0,
+        "CONFIDENCE.UNDEFINED": 0,
+        "SEVERITY.HIGH": 0,
+        "SEVERITY.LOW": 0,
+        "SEVERITY.MEDIUM": 0,
+        "SEVERITY.UNDEFINED": 0,
+        "loc": 104,
+        "nosec": 0,
+        "skipped_tests": 0
+      },
+      "./integrations/edge/aethron_edge/sensors/registration.py": {
+        "CONFIDENCE.HIGH": 0,
+        "CONFIDENCE.LOW": 0,
+        "CONFIDENCE.MEDIUM": 0,
+        "CONFIDENCE.UNDEFINED": 0,
+        "SEVERITY.HIGH": 0,
+        "SEVERITY.LOW": 0,
+        "SEVERITY.MEDIUM": 0,
+        "SEVERITY.UNDEFINED": 0,
+        "loc": 216,
+        "nosec": 0,
+        "skipped_tests": 0
+      },
+      "_totals": {
+        "CONFIDENCE.HIGH": 0,
+        "CONFIDENCE.LOW": 0,
+        "CONFIDENCE.MEDIUM": 0,
+        "CONFIDENCE.UNDEFINED": 0,
+        "SEVERITY.HIGH": 0,
+        "SEVERITY.LOW": 0,
+        "SEVERITY.MEDIUM": 0,
+        "SEVERITY.UNDEFINED": 0,
+        "loc": 320,
+        "nosec": 0,
+        "skipped_tests": 0
+      }
+    },
+    "results": []
+  },
+  "logs": {
+    "red.log": {
+      "sha256": "8ca6fdade97c004aec1028eba026fbb2ea9dad0ab66d377cbe498bde9cee156a",
+      "bytes": 22433
+    },
+    "green.log": {
+      "sha256": "3f42717fdf3612bd492890332333a098a875fbc3be06d6452a3f2cac6ab8c845",
+      "bytes": 1514
+    },
+    "rectification-red.log": {
+      "sha256": "4e47f049df79e197c5ffcbdf2a1e23c10d6c57f52b56a1e326f52b47a5c45989",
+      "bytes": 6906
+    },
+    "rectification-green.log": {
+      "sha256": "971f85d4b73d4675c1b91bd0e66ebb10aa90d47509d663197f84364998ea4441",
+      "bytes": 1914
+    },
+    "rectification-e2e.log": {
+      "sha256": "95269814922da4dfe5566c07752a72cc8641e66ff8f40a52d48edd8eccfe4233",
+      "bytes": 1008
+    },
+    "registration-adversarial.log": {
+      "sha256": "e74e2b792a956e590867b3a4bf9c71c60106c9c5b87b7c14c84631e1101eabd3",
+      "bytes": 1853
+    },
+    "ruff.log": {
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "bytes": 19
+    },
+    "format.log": {
+      "sha256": "cbf904f92d0c089ca66e45970eb6a69574fe7b4ee91d4caa1a94cf9e781ef67c",
+      "bytes": 27
+    },
+    "integration.log": {
+      "sha256": "8deefd17badfc493d603e62500e6cf6fc8bc395f2cbf58b46e78bc40cca3546e",
+      "bytes": 14133
+    },
+    "package.log": {
+      "sha256": "e4fb13e70050e6f43747af26bb8b226bcf49aaccea487daee24b7463c89618ef",
+      "bytes": 2664
+    },
+    "package/server.log": {
+      "sha256": "3209475841eedf11218d70131fbc4ec97fff9ec0287b3d2f95e50e0e227e5380",
+      "bytes": 275
+    },
+    "ros/dds.log": {
+      "sha256": "a79a03a8608b24cc604c4722ec165352433da1c479810c596cff063bbea1a9b7",
+      "bytes": 9338
+    },
+    "preflight.log": {
+      "sha256": "1376b3ed60200f3d006f0ce5592df3b56e7608363fbbf8d61e70489c78649c85",
+      "bytes": 1016
+    },
+    "benchmark.json": {
+      "sha256": "087063022e6170f4859b6ef4a7dde2901e3884572821af4237008a48cd3253e1",
+      "bytes": 369
+    },
+    "verify.log": {
+      "sha256": "bccde50aaeb4d074eb075548b7cf07697910185b564fa7cec0954bcca0257b08",
+      "bytes": 1663
+    },
+    "registration-review.log": {
+      "sha256": "9e3dfafde3cc089aeb066056438c1fcb19951b5398ac2b25e0a4024f8c669110",
+      "bytes": 2016
+    },
+    "preflight-final.log": {
+      "sha256": "1376b3ed60200f3d006f0ce5592df3b56e7608363fbbf8d61e70489c78649c85",
+      "bytes": 1016
+    },
+    "fuzz-legacy.json": {
+      "sha256": "a55eac509ac5d03fcb14b312a6f6d83f60df5c096920564c4d4d3c3d36f2c51d",
+      "bytes": 109
+    }
+  },
+  "package": {
+    "wheels": {
+      "aethron-0.2.0-py3-none-any.whl": "be3dd8e3e8bcf437d72d65e384c560eb18d4b22baf522849b965d3d720c1d73f",
+      "aethron_edge-0.1.0-py3-none-any.whl": "8fddc0557864a1b0b511812cddd12f364a708147d954e148d4a9822842c4ac74"
+    },
+    "byte_identical": true,
+    "installed_consumer": true,
+    "installed_sensor_contracts": true,
+    "installed_rectification": true,
+    "consumer_events": 3,
+    "zero_viewer_continued": true,
+    "platform": "darwin",
+    "python": "3.13.15"
+  },
+  "ros": {
+    "hardware_qualified": false,
+    "installed_ros_dds": true,
+    "network": "none",
+    "packages": {
+      "rclpy": "7.1.12",
+      "rmw_fastrtps_cpp": "8.4.4",
+      "sensor_msgs": "5.3.8"
+    },
+    "payloads": "original synthetic Image/CameraInfo/PointCloud2",
+    "python": "3.12.3",
+    "scene_state": "UNKNOWN",
+    "uid": 10001,
+    "wheels": {
+      "candidate/aethron-0.2.0-py3-none-any.whl": "be3dd8e3e8bcf437d72d65e384c560eb18d4b22baf522849b965d3d720c1d73f",
+      "candidate/aethron_edge-0.1.0-py3-none-any.whl": "8fddc0557864a1b0b511812cddd12f364a708147d954e148d4a9822842c4ac74",
+      "dependencies/annotated_types-0.8.0-py3-none-any.whl": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0",
+      "dependencies/pip-26.2-py3-none-any.whl": "931c303696af6fa3417112103b1cad26890e5a07eccb5b99783700e33f2b8aad",
+      "dependencies/pydantic-2.13.5-py3-none-any.whl": "346a034f080da3755d8e9cb5e00e8b07de1d39e4f6e2c87d8ab7cafa0b269a73",
+      "dependencies/pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl": "4fdc8b93a41521988916eeaa271173fcca7fa0803d62f87675aac8dcec1c8e29",
+      "dependencies/typing_extensions-4.16.0-py3-none-any.whl": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+      "dependencies/typing_inspection-0.4.4-py3-none-any.whl": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147"
+    },
+    "image": "ros@sha256:8f687fdf084482819aa7dab48c3887331edd0d3687b219951fdb66c418316ab1",
+    "platform": "linux/arm64"
+  },
+  "benchmark": {
+    "fixture": "64 copies of original analytical distorted ray (.2,.1), k1=.1",
+    "unrectified_error_px": 0.447213595499958,
+    "rectified_error_px": 4.372437753431357e-11,
+    "iterations": 100,
+    "p50_ms": 5.392333,
+    "p95_ms": 25.637709,
+    "max_ms": 77.500833,
+    "opencv": "4.13.0",
+    "hardware_qualification": false,
+    "latency_gate": "diagnostic only, not inference or hardware latency"
+  },
+  "vision_dependency_audit": {
+    "dependencies": [
+      {
+        "name": "numpy",
+        "version": "2.3.5",
+        "vulns": []
+      },
+      {
+        "name": "opencv-python-headless",
+        "version": "4.13.0.92",
+        "vulns": []
+      }
+    ],
+    "fixes": []
+  },
+  "source_sha256": {
+    "integrations/edge/aethron_edge/sensors/registration.py": "a92f53196ed22d5265c1d7c39e6e484752dab986338b399e54da8c98f3911597",
+    "integrations/edge/aethron_edge/sensors/rectification.py": "886c603971cf11f0d1345803bc10b41c226568bdb6ab4e16ef1bf13fdf3d2d64"
+  },
+  "fuzz_legacy": {
+    "accepted": 10263,
+    "cases": 49863,
+    "seconds": 60.00016354210675,
+    "seed": 54777,
+    "unexpected_exceptions": 0
+  },
+  "fuzz_temporal": {
+    "seed": 981640,
+    "cases": 238386,
+    "seconds": 61.515,
+    "unexpected_exceptions": 0,
+    "source_sha256": {
+      "aethron/render.py": "9231a04b312d74281192d9f097ccfc8d7fd58fc20f2d8d45e36748f831647b44",
+      "aethron/actions.py": "e449088fa6850f3dc11f782cc656817ab571e2d94cbc4ebb33869706e7537a2a",
+      "aethron/__init__.py": "8ea373fbd458d5b53b6a5285584c61d14f1541e96d7a05c29f0508011b766fa7",
+      "aethron/schema_v2.py": "d529ca9797dcf0cf4d7126c93c9ea233edea77cda55faecc3ba7a2559ec7f3ab",
+      "aethron/features.py": "fae7de40ec3af1c3a47ae919628b7339a83ebd783b882e3e66bdcf5868c9dd3c",
+      "aethron/core.py": "c5ef2d70c7ac5065b5a95836eba588fd44a78a6bceb97883ec0d0b5ac2a1619a",
+      "aethron/demo.py": "c6b1539f1fcd91970d71aee2dd8923a584df2f1332adb9f083de18e14277983e",
+      "aethron/__main__.py": "94eb2aa08c590456d8d1f6de520b0f268cab48c671325688ae9f6ae4b6ec7a66",
+      "aethron/schema.py": "ca28412601bf05a155ad55e59070f811af2c67dd374e2b2baeb9b54d8e4ccc43",
+      "aethron/adapters.py": "856030c21738c200df3758eda4194ddde5f56c1d6feca57b0c0965f06e9a0481",
+      "aethron/temporal/registration.py": "cd6b8955a7ebc8c762da3af5f28d83ff2a7a2a5f097a5e3d1177867fc53aa7c5",
+      "aethron/temporal/pixels.py": "314583c5a9d34f005f1c9b5fb9c739183de39894c38dcff8cdc7e899406e13cb",
+      "aethron/temporal/session.py": "e702043f6d20611cae0037ad041198976b730b23407b87df042e7e7c91574560",
+      "aethron/temporal/__init__.py": "8dac6e681e96fa0a78affbddc6c76962d221a7e66f6e8bc0828e40d9b9494087",
+      "aethron/temporal/replay.py": "37863819e5c3a99aefbe0d3a7df17ac7dae09c33ed01b76d8af0697b133344e0",
+      "aethron/temporal/fusion.py": "c9f6df323f40ac0f0cf9f06d9f3a642fb3ab5113d30cded90aae3d3d5d8fa770",
+      "aethron/temporal/math.py": "f9a634fea08a7e20bf4e730671f6eed729c4827193d439f5ab29fa3f708d2b9e",
+      "aethron/temporal/fixtures.py": "d18cbd884805e335d803638b2a311bd6fc90b5764c3db9c6eb194270490d19b5",
+      "aethron/temporal/schema.py": "2602ad7523623f326876b5723ef4869049b2b2bb095c9f03e531345f4e568350",
+      "aethron/models/__init__.py": "61e3d91134abfff53054811740f54dd21cc6e531087e506302a0bf650728e25d",
+      "aethron/vision/yolox.py": "d2a6ca09b670bc569ad79e025240908fa7252c8c9dcbb76a5b93c83e2ac3bec4",
+      "aethron/vision/__init__.py": "2e051811883c745faf9abe9d2e076396186a187c7807fbbf087dbe5d54c085a2"
+    }
+  }
+}

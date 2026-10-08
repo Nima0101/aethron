@@ -24,7 +24,12 @@ def run(wheels, dependencies, out):
     target = bundle / "tests"
     target.mkdir(exist_ok=True)
     shutil.copyfile(ROOT / "tests/ros2/test_dds.py", target / "test_dds.py")
-    for name in ("test_sensor_packets.py", "test_sensor_replay.py", "test_sensor_ros2.py"):
+    for name in (
+        "test_sensor_packets.py",
+        "test_sensor_replay.py",
+        "test_sensor_ros2.py",
+        "test_sensor_registration.py",
+    ):
         shutil.copyfile(ROOT / "tests/integration" / name, target / name)
     shutil.copyfile(ROOT / "integrations/edge/ros2/requirements.lock", bundle / "requirements.lock")
     shutil.copyfile(

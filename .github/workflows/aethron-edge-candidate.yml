@@ -55,7 +55,7 @@ jobs:
       - name: Portable contracts, real sources, service and update gates
         run: |
           python -m unittest discover -s tests/integration -v
-          python scripts/edge_package_check.py
+          python scripts/edge_package_check.py --vision
           python scripts/edge_pixel_service_e2e.py
           python scripts/edge_inventory.py
       - name: Frozen core and planning integrity
