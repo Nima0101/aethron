@@ -14,7 +14,7 @@ Original synthetic scene, **actual CLI output**. The slowed replay shows dayligh
 
 ## Live camera preview: iPhone, laptop and compatible video streams
 
-An additional self-contained [browser camera app](web/) supports device-camera permission, front/rear switching, on-device COCO-SSD object detection and installable HTTPS web hosting. The model is bundled with the site, so camera images remain local and it can work offline again after successful caching. **It has not been deployed publicly or tested on a physical iPhone yet.** A CPU-worker compatibility mode preserves responsive controls even when local inference is slow.
+An additional self-contained [browser camera app](web/) supports device-camera permission, front/rear switching, on-device COCO-SSD object detection and installable HTTPS web hosting. The model is bundled with the site, so camera images remain local and it can work offline again after successful caching. **The public HTTPS camera preview is live at [RescueSense Camera](https://nima0101.github.io/rescuesense/), but it has not yet been tested on a physical iPhone.** A CPU-worker compatibility mode preserves responsive controls even when local inference is slow.
 
 ```sh
 cd web && npm ci && npm run dev
