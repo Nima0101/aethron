@@ -91,6 +91,38 @@ class Updates(unittest.TestCase):
         (self.root / "installed" / "interrupted.pending").mkdir()
         self.assertEqual(self.store.recover()["version"], 1)
 
+    def test_appliance_config_must_be_in_verified_bundle(self):
+        from types import SimpleNamespace
+
+        from aethron_edge.runtime.updates import verify_configuration
+
+        bundle = self.bundle(1)
+        config = SimpleNamespace(
+            integrity_bundle=str(bundle), trust_root=str(self.public), profiles=[]
+        )
+        self.assertEqual(verify_configuration(config, bundle / "model.bin")["version"], 1)
+        outside = self.root / "external-config.json"
+        outside.write_text("{}")
+        with self.assertRaises(ValueError):
+            verify_configuration(config, outside)
+
+    def test_offline_boot_slot_selection_and_corrupt_active_fault(self):
+        from aethron_edge.runtime.updates import selected_runtime
+
+        self.assertIsNone(selected_runtime(self.store.root, self.public))
+        bundle = self.bundle(1)
+        self.store.activate(self.store.stage_update(bundle))
+        # A valid signed data bundle is insufficient: runtime entry/config required.
+        with self.assertRaises(ValueError):
+            selected_runtime(self.store.root, self.public)
+        (self.store.root / "active.json").write_text("bad")
+        with self.assertRaises(ValueError):
+            selected_runtime(self.store.root, self.public)
+
+    def test_boolean_manifest_version_rejected(self):
+        with self.assertRaises(ValueError):
+            self.store.stage_update(self.bundle(1, schema_version=True))
+
     def test_symlink_escape_and_factory_reset(self):
         path = self.bundle(1)
         (path / "model.bin").unlink()

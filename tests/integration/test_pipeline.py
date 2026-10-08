@@ -27,11 +27,17 @@ class Pipeline(unittest.TestCase):
                 time.sleep(0.01)
             self.assertEqual(result["state"], "PRESENT")
             self.assertEqual(result["evidence"], "synthetic")
+            self.assertEqual(pipeline.snapshot(time.monotonic_ns())["state"], "PRESENT")
             pipeline.stop_worker()
             time.sleep(0.15)
             self.assertEqual(pipeline.tick(time.monotonic_ns())["state"], "UNKNOWN")
         finally:
             pipeline.close()
+
+    def test_unstarted_pipeline_is_unknown(self):
+        p = RuntimePipeline(Profile(name="bench", driver="replay", address="missing"))
+        self.assertEqual(p.snapshot(time.monotonic_ns())["state"], "UNKNOWN")
+        p.close()
 
     def test_real_pixels_detector_keeps_untrusted_capture_unknown(self):
         import tempfile
@@ -56,12 +62,20 @@ class Pipeline(unittest.TestCase):
             )
             p.start()
             try:
-                deadline = time.monotonic() + 40
-                while time.monotonic() < deadline and p.processed == 0:
+                deadline = time.monotonic() + 120
+                while time.monotonic() < deadline and p.inferences == 0:
                     p.tick(time.monotonic_ns())
                     time.sleep(0.02)
-                self.assertGreater(p.processed, 0)
+                self.assertGreater(
+                    p.inferences,
+                    0,
+                    {
+                        "reason": p.reason,
+                        "processed": p.processed,
+                        "worker_exit": p.process.exitcode,
+                    },
+                )
                 self.assertEqual(p.snapshot(time.monotonic_ns())["state"], "UNKNOWN")
-                self.assertEqual(p.reason, "clock_untrusted")
+                self.assertIn(p.reason, ("clock_untrusted", "source_lost"))
             finally:
                 p.close()

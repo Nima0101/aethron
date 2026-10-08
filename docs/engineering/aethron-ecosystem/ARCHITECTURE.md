@@ -1,3 +1,5 @@
+> **Phase 1 implementation update:** The blueprint below remains the specification. Actual implemented and executed coverage is tracked in [PHASES](PHASES.json) and [EXECUTION](EXECUTION.md); installation instructions are in [the edge guide](../../usage-edge.md) and [appliance guide](../../usage-appliance.md). Historical “SPEC ONLY” wording does not supersede those evidence records. Physical compatibility, field accuracy and certification remain unqualified.
+
 # Architecture — SPEC ONLY additions around the frozen core
 
 ## Selected approach and alternatives
@@ -58,7 +60,7 @@ CPU provides the reproducible fallback lane only when explicitly selected. ONNX 
 
 ## Deployment modes
 
-In-process offline library; single-user local edge daemon; private enterprise edge gateway with authenticated viewers; robot companion; ground-station observation; native application using conformance-compatible embedded logic. Cloud may manage signed packages and aggregate opt-in device health; it is not the required safety loop. No raw imagery upload by default. Enterprises can ship independent adapters without embedding proprietary source in the Apache core, but process separation alone does not resolve every SDK/license obligation.
+In-process offline library; single-user local edge daemon; private enterprise edge gateway with authenticated viewers; robot companion; ground-station observation; native application using conformance-compatible embedded logic. Cloud may manage signed packages and aggregate opt-in device health; it is not the required safety loop. No raw imagery upload by default. Project-owned code is GPL-3.0-only with separately negotiated commercial licensing. Enterprise adapter distribution must satisfy the chosen license and third-party SDK terms; process separation alone does not resolve copyleft or SDK obligations.
 
 ## Resource/failure policy
 

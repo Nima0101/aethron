@@ -385,3 +385,15 @@ Service restart/watchdog semantics inform planned boot package. Actual distro bu
 [systemd execution isolation](https://github.com/systemd/systemd/blob/v255/man/systemd.exec.xml) — v255 reference. Retrieved 2026-10-08; access: `read`.
 
 Service privilege/filesystem/device isolation is profile-specific; required camera/device access must remain explicit. No unit installed in Phase 0.
+
+## S65
+
+[Windows job objects](https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects) — Windows 8+/Server 2012+ nested jobs; page 2025-07-14. Retrieved 2026-10-08; access: `read`.
+
+Worker-local unnamed job with kill-on-close contains descendant processes; no breakaway or unrelated host process enumeration. Native Windows execution remains pending.
+
+## S66
+
+[Windows extended job limits](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information) — Win32 JOBOBJECT_EXTENDED_LIMIT_INFORMATION. Retrieved 2026-10-08; access: `read`.
+
+SDK ABI reference for ctypes wrapper outside the frozen core; target Windows CI must execute the crash regression before declaring support.

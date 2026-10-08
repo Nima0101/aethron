@@ -47,7 +47,16 @@ class Sources(unittest.TestCase):
                 driver="file", address=str(path), backend="ffmpeg", calibration_id="test"
             )
             for _ in range(2):
-                source.open(cfg)
+                info = source.open(cfg)
+                self.assertEqual(
+                    (info.width, info.height, info.encoding),
+                    (64, 48, "rgb8"),
+                    {
+                        "metadata": list(source.metadata),
+                        "alive": source.alive,
+                        "exitcode": source.process.exitcode,
+                    },
+                )
                 frame = source.read(time.monotonic_ns() + 5_000_000_000)
                 self.assertNotIsInstance(frame, SourceFault)
                 self.assertEqual((frame.width, frame.height, len(frame.pixels)), (64, 48, 9216))
@@ -65,6 +74,30 @@ class Sources(unittest.TestCase):
         ]:
             with self.assertRaises(ValueError):
                 source.open(cfg)
+
+    def test_corrupt_and_oversized_media_fail_without_fresh_frame(self):
+        import cv2
+        import numpy as np
+
+        with tempfile.TemporaryDirectory() as directory:
+            corrupt = Path(directory) / "corrupt.avi"
+            corrupt.write_bytes(b"not an encoded frame")
+            oversized = Path(directory) / "oversized.avi"
+            writer = cv2.VideoWriter(
+                str(oversized), cv2.VideoWriter_fourcc(*"MJPG"), 10, (1922, 1080)
+            )
+            self.assertTrue(writer.isOpened())
+            writer.write(np.zeros((1080, 1922, 3), dtype=np.uint8))
+            writer.release()
+            for path in (corrupt, oversized):
+                source = FileSource()
+                try:
+                    source.open(SourceConfig("file", str(path), "ffmpeg", "unqualified"))
+                    self.assertIsInstance(
+                        source.read(time.monotonic_ns() + 2_000_000_000), SourceFault
+                    )
+                finally:
+                    source.close()
 
     def test_missing_file_fails_with_fixed_fault(self):
         source = FileSource()

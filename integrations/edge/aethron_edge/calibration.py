@@ -29,6 +29,8 @@ class CalibrationRecord:
             and (frame.width, frame.height) == (self.width, self.height)
             and mount_id == self.mount_id
             and now_ms <= self.valid_until_ms
-            and len(self.transform) == 9
+            # Only already registered normalized coordinates are supported here.
+            # A nonidentity transform needs an explicit tested projection adapter.
+            and self.transform == (1, 0, 0, 0, 1, 0, 0, 0, 1)
             and 0 <= self.residual <= 0.05
         )

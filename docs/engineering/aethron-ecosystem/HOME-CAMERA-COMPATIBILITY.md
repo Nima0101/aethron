@@ -1,3 +1,5 @@
+> **Phase 1 implementation update:** The blueprint below remains the specification. Actual implemented and executed coverage is tracked in [PHASES](PHASES.json) and [EXECUTION](EXECUTION.md); installation instructions are in [the edge guide](../../usage-edge.md) and [appliance guide](../../usage-appliance.md). Historical “SPEC ONLY” wording does not supersede those evidence records. Physical compatibility, field accuracy and certification remain unqualified.
+
 # Home/smart-camera and fixed hub recipe — SPEC ONLY
 
 Normal installation is an authorized package on capable camera hardware or a permanently running NVR/NAS/edge hub with local camera feeds. A cloud-only camera with no authorized local stream is not supported by inference; documented RTSP/ONVIF/vendor local export or an independently selected camera is required. Internal sensor wiring, PoE and local LAN are part of the installed system; WAN and a logged-in phone are not.

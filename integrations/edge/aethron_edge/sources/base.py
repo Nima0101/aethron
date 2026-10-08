@@ -6,6 +6,8 @@ import time
 from dataclasses import dataclass, field
 from urllib.parse import urlsplit
 
+from ..mailbox import StopToken
+
 MAX_RAW = 1920 * 1080 * 3
 
 
@@ -24,6 +26,9 @@ class SourceInfo:
     modality: str = "rgb"
     timestamp_origin: str = "unqualified"
     qualification_ref: str | None = None
+    width: int | None = None
+    height: int | None = None
+    encoding: str = "rgb8"
 
 
 @dataclass(frozen=True)
@@ -115,7 +120,9 @@ def _decode(config, slot, metadata, lock, stop):
 class CaptureSource:
     driver = ""
 
-    def __init__(self, decoder=_decode):
+    def __init__(self, decoder=_decode, *, decoder_lock=None, descendant=None):
+        self.descendant = descendant
+        self.decoder_lock = decoder_lock
         self.decoder = decoder
         self.process = None
         self.config = None
@@ -150,18 +157,38 @@ class CaptureSource:
         ctx = mp.get_context("spawn")
         self.slot = ctx.RawArray("B", MAX_RAW)
         self.metadata = ctx.RawArray("q", 4)
-        self.lock = ctx.Lock()
-        self.stop = ctx.Event()
+        self.lock = self.decoder_lock if self.decoder_lock is not None else ctx.Lock()
+        self.stop = StopToken(ctx)
         self.process = ctx.Process(
             target=self.decoder,
             args=(config, self.slot, self.metadata, self.lock, self.stop),
             daemon=True,
         )
         self.process.start()
+        if self.descendant is not None:
+            self.descendant.value = self.process.pid
+        # Separate bounded startup/negotiation from the caller's frame deadline.
+        # A failed open still returns a source fault on read; no implicit backend fallback.
+        negotiated_width = negotiated_height = None
+        deadline = time.monotonic() + 30
+        while time.monotonic() < deadline and self.alive:
+            if self.lock.acquire(False):
+                try:
+                    sequence, w, h, _ = self.metadata[:]
+                    if sequence > 0:
+                        negotiated_width, negotiated_height = w, h
+                        break
+                    if sequence < 0:
+                        break
+                finally:
+                    self.lock.release()
+            time.sleep(0.005)
         return SourceInfo(
             self.driver,
             config.backend,
             timestamp_origin="recorded_media" if self.driver == "file" else "unqualified",
+            width=negotiated_width,
+            height=negotiated_height,
         )
 
     def read(self, deadline_ns: int) -> FrameEnvelope | SourceFault:
@@ -207,3 +234,5 @@ class CaptureSource:
                 self.process.join(timeout=0.5)
             self.process.close()
             self.process = None
+            if self.descendant is not None:
+                self.descendant.value = 0

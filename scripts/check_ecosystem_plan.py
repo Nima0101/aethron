@@ -137,18 +137,35 @@ def validate(root, plan=None):
     )
     require(re.fullmatch(r"[a-f0-9]{40}", phases.get("baseline_sha", "")), "invalid baseline SHA")
     date.fromisoformat(phases["as_of"])
+    acceptance = phases.get("phase1_acceptance", {})
+    complete = acceptance.get("software_candidate_complete")
+    require(type(complete) is bool, "candidate completion flag missing")
+    for flag in ("hardware_qualified", "field_qualified", "certified", "hosted_ci_executed"):
+        require(acceptance.get(flag) is False, "unexecuted qualification claim: " + flag)
+    candidate_path = acceptance.get("candidate_evidence")
+    if candidate_path is not None:
+        require((plan / safe_relative(candidate_path)).is_file(), "missing candidate evidence")
     rows = phases.get("phases", [])
     require([r.get("id") for r in rows] == list(range(6)), "phase IDs must be 0..5")
     for row in rows:
         require(type(row["id"]) is int, "invalid phase ID type")
-        require(row.get("implementation_complete") is False, "product work not complete")
+        require(
+            row.get("implementation_complete") is (complete and row["id"] == 1),
+            "implementation flag inconsistent with candidate evidence",
+        )
         require(row.get("owner") and row.get("gates"), "phase owner/gates missing")
         require(isinstance(row.get("depends_on"), list), "phase dependencies missing")
         require(
             all(type(n) is int and 0 <= n < row["id"] for n in row["depends_on"]),
             "invalid/cyclic dependency",
         )
-        expected = "complete" if row["id"] == 0 else "in_progress" if row["id"] == 1 else "planned"
+        expected = (
+            "complete"
+            if row["id"] == 0
+            else ("candidate_complete" if complete else "in_progress")
+            if row["id"] == 1
+            else "planned"
+        )
         require(row.get("status") == expected, "unexpected phase status")
     require(
         phases.get("local_commit_status") == "committed"
@@ -162,7 +179,7 @@ def validate(root, plan=None):
     appliance = phases.get("appliance_runtime", {})
     require(
         appliance.get("status") in {"spec_only", "implementation_in_progress", "candidate"}
-        and appliance.get("implementation_complete") is False
+        and appliance.get("implementation_complete") is complete
         and appliance.get("requires_optional_client") is False
         and appliance.get("requires_wan") is False,
         "standalone appliance must remain specified and client/WAN independent",
@@ -177,11 +194,54 @@ def validate(root, plan=None):
     milestones = phases.get("milestones", {})
     require(set(milestones) == {f"P1.{n}" for n in range(1, 8)}, "missing implementation milestone")
     for milestone in milestones.values():
-        require(milestone.get("status") in {"pending", "in_progress", "implemented_validation_in_progress", "passed", "blocked"}, "invalid milestone status")
+        require(
+            milestone.get("status")
+            in {
+                "pending",
+                "in_progress",
+                "implemented_validation_in_progress",
+                "passed",
+                "blocked",
+            },
+            "invalid milestone status",
+        )
         if milestone["status"] in {"passed", "implemented_validation_in_progress"}:
             require(milestone.get("evidence"), "milestone evidence missing")
         for evidence_path in milestone.get("evidence", []):
             require((plan / safe_relative(evidence_path)).is_file(), "missing milestone evidence")
+
+    if complete:
+        require(
+            all(m["status"] == "passed" for m in milestones.values()),
+            "candidate has unfinished milestone",
+        )
+        require(candidate_path is not None, "candidate evidence required")
+        candidate = read_json(plan / safe_relative(candidate_path))
+        require(
+            candidate.get("software_candidate_complete") is True, "candidate evidence incomplete"
+        )
+        require(
+            re.fullmatch(r"[a-f0-9]{40}", candidate.get("source_revision", "")),
+            "candidate source revision missing",
+        )
+        boot = read_json(plan / safe_relative(candidate["boot_evidence"]))
+        require(
+            boot.get("status") == "passed" and boot.get("hardware_qualified") is False,
+            "boot evidence incomplete or overclaimed",
+        )
+        results = {
+            row.get("boot"): row for row in boot.get("events", []) if row.get("event") == "result"
+        }
+        second = results.get(2, {})
+        require(
+            results.get(1, {}).get("processing_continued") is True
+            and second.get("seconds", 0) >= 3600
+            and second.get("processing_continued") is True
+            and second.get("worker_fault_injected") is True
+            and second.get("processing_resumed_after_fault") is True
+            and second.get("updated_runtime_processing") is True,
+            "boot/soak/update evidence does not close P1.7",
+        )
 
     provenance = read_json(plan / "provenance.json")
     require(provenance.get("schema_version") == 1, "invalid provenance schema")
@@ -342,7 +402,23 @@ def self_test(root):
         "phase escalation": lambda p: mutate_json(
             p / "PHASES.json", lambda d: d.update(current_phase=2)
         ),
-        "missing milestone evidence": lambda p: mutate_json(p / "PHASES.json", lambda d: d["milestones"]["P1.1"].update(evidence=[])),
+        "missing candidate evidence": lambda p: mutate_json(
+            p / "PHASES.json",
+            lambda d: d["phase1_acceptance"].update(candidate_evidence="absent.json"),
+        ),
+        "false hardware qualification": lambda p: mutate_json(
+            p / "PHASES.json", lambda d: d["phase1_acceptance"].update(hardware_qualified=True)
+        ),
+        "premature candidate": lambda p: mutate_json(
+            p / "PHASES.json",
+            lambda d: (
+                d["phase1_acceptance"].update(software_candidate_complete=True),
+                d["milestones"]["P1.7"].update(status="in_progress"),
+            ),
+        ),
+        "missing milestone evidence": lambda p: mutate_json(
+            p / "PHASES.json", lambda d: d["milestones"]["P1.1"].update(evidence=[])
+        ),
         "cyclic dependency": lambda p: mutate_json(
             p / "PHASES.json", lambda d: d["phases"][1].update(depends_on=[1])
         ),

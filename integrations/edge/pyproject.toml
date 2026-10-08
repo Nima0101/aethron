@@ -8,6 +8,8 @@ version = "0.1.0"
 description = "AETHRON local supervised perception integration runtime"
 requires-python = ">=3.11"
 license = "GPL-3.0-only"
+license-files = ["LICENSE"]
+readme = "README.md"
 dependencies = ["aethron==0.2.0", "pydantic==2.13.5"]
 
 [project.optional-dependencies]

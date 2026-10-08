@@ -1,0 +1,22 @@
+[
+  {
+    "installed_http_sse": true,
+    "events": 3,
+    "offline": true,
+    "zero_viewer_processing": true,
+    "hardware_qualified": false,
+    "platform": "linux/arm64",
+    "image": "sha256:ed0edcb03904f976405bf97498954b7726ce14495267b0f01c6aee82d2b54ce4",
+    "execution": "Docker Linux VM; amd64 emulated on this ARM host"
+  },
+  {
+    "installed_http_sse": true,
+    "events": 3,
+    "offline": true,
+    "zero_viewer_processing": true,
+    "hardware_qualified": false,
+    "platform": "linux/amd64",
+    "image": "sha256:ed0edcb03904f976405bf97498954b7726ce14495267b0f01c6aee82d2b54ce4",
+    "execution": "Docker Linux VM; amd64 emulated on this ARM host"
+  }
+]

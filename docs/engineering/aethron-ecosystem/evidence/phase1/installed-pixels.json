@@ -1,0 +1,22 @@
+[
+  {
+    "driver": "file",
+    "installed": true,
+    "inferences": 1,
+    "events": 3,
+    "current_state": "UNKNOWN",
+    "time_to_observed_inference_s": 37.44998754095286,
+    "exposure_clock_qualified": false,
+    "hardware_qualified": false
+  },
+  {
+    "driver": "rtsp",
+    "installed": true,
+    "inferences": 1,
+    "events": 3,
+    "current_state": "UNKNOWN",
+    "time_to_observed_inference_s": 15.906901916954666,
+    "exposure_clock_qualified": false,
+    "hardware_qualified": false
+  }
+]

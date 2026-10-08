@@ -36,6 +36,11 @@ class ClockBoundary(unittest.TestCase):
                 CaptureClock().map_capture(self.frame(**changes), now), SourceFault
             )
 
+    def test_boolean_capture_clock_is_not_an_integer_clock(self):
+        self.assertIsInstance(
+            CaptureClock().map_capture(self.frame(capture_ns=True, receive_ns=1), 1), SourceFault
+        )
+
     def test_duplicate_and_clock_reset_withdraw_linkage(self):
         clock = CaptureClock()
         clock.map_capture(self.frame(), 1_000_000_000)
@@ -50,6 +55,11 @@ class ClockBoundary(unittest.TestCase):
         self.assertFalse(c.valid_for(self.frame(width=3), 1500, "mount-a"))
         self.assertFalse(c.valid_for(self.frame(), 1500, "mount-b"))
         self.assertFalse(c.valid_for(self.frame(), 2001, "mount-a"))
+
+    def test_unapplied_or_nonfinite_transform_is_rejected(self):
+        for transform in ((1, 0, 0.1, 0, 1, 0, 0, 0, 1), (float("nan"),) * 9):
+            c = CalibrationRecord("bench", 2, 2, 2000, "mount-a", transform, 0.001)
+            self.assertFalse(c.valid_for(self.frame(), 1500, "mount-a"))
 
     def test_skew_bounds_include_both_uncertainties(self):
         self.assertTrue(CaptureClock.compatible(0, 0, 50_000_000, 0))

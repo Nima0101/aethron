@@ -32,6 +32,21 @@ class ClientExpiry(unittest.TestCase):
         self.assertEqual(value.view(now_ns=0)["label"], "expired")
         self.assertIsNone(value.scene)
 
+    def test_unterminated_event_is_bounded_before_line_buffering(self):
+        from aethron_edge.client import bounded_lines
+
+        chunks = iter([b"data: "] + [b"x" * 4096] * 20)
+        with self.assertRaises(ValueError):
+            list(bounded_lines(chunks))
+        self.assertEqual(list(bounded_lines(iter([b"data: {}\n\n"]))), ["data: {}", ""])
+
+    def test_missing_wire_version_is_not_defaulted(self):
+        value = Observation()
+        bad = self.envelope()
+        del bad["api_version"]
+        with self.assertRaises(ValueError):
+            value.accept(bad)
+
     def test_unknown_enum_and_clock_suspension_fail_closed(self):
         value = Observation()
         bad = self.envelope()

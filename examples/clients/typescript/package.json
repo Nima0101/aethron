@@ -1,1 +1,23 @@
-{"name":"aethron-edge-client-example","version":"0.1.0","private":true,"type":"module","license":"GPL-3.0-only","scripts":{"build":"tsc -p tsconfig.json","test":"npm run build && node --test test.mjs"},"dependencies":{"ajv":"8.20.0"},"devDependencies":{"typescript":"5.9.3"}}
+{
+  "name": "aethron-edge-client-example",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test test.mjs"
+  },
+  "dependencies": {
+    "ajv": "8.20.0"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  },
+  "main": "./dist/client.js",
+  "exports": "./dist/client.js",
+  "types": "./dist/client.d.ts",
+  "files": [
+    "dist"
+  ]
+}

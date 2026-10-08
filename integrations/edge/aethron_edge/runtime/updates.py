@@ -36,7 +36,9 @@ def verify_bundle(path: Path, public_key: Path):
         if set(manifest) != {"schema_version", "version", "config_version", "files"}:
             raise ValueError()
         if (
-            manifest["schema_version"] != 1
+            type(manifest["schema_version"]) is not int
+            or manifest["schema_version"] != 1
+            or type(manifest["config_version"]) is not int
             or manifest["config_version"] != 1
             or type(manifest["version"]) is not int
             or not 1 <= manifest["version"] <= 2**31 - 1
@@ -91,6 +93,28 @@ def verify_bundle(path: Path, public_key: Path):
         raise ValueError("invalid_bundle") from None
 
 
+def verify_configuration(config, config_path: Path):
+    """Bind the actual config and file/model inputs to the verified manifest."""
+    if not config.integrity_bundle or not config.trust_root:
+        raise ValueError("integrity_required")
+    root = Path(config.integrity_bundle).resolve()
+    manifest = verify_bundle(root, Path(config.trust_root))
+    inputs = [config_path]
+    for profile in config.profiles:
+        if profile.driver in ("replay", "file"):
+            inputs.append(Path(profile.address))
+        if profile.model:
+            inputs.append(Path(profile.model))
+    for path in inputs:
+        try:
+            name = str(path.resolve().relative_to(root))
+        except ValueError:
+            raise ValueError("unsigned_configuration_input") from None
+        if name not in manifest["files"]:
+            raise ValueError("unsigned_configuration_input")
+    return manifest
+
+
 @dataclass(frozen=True)
 class VerifiedCandidate:
     path: Path
@@ -114,6 +138,7 @@ class UpdateStore:
                 destination = temporary / name
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(bundle / name, destination)
+                destination.chmod((bundle / name).stat().st_mode & 0o755)
                 with destination.open("rb") as stream:
                     os.fsync(stream.fileno())
             verify_bundle(temporary, self.public_key)
@@ -186,3 +211,17 @@ class UpdateStore:
             if path.is_dir() and not path.is_symlink():
                 shutil.rmtree(path)
         self._sync()
+
+
+def selected_runtime(store: Path, public_key: Path):
+    """Select a fully verified inactive-slot installation on the next boot."""
+    state = UpdateStore(store, public_key).recover()
+    if state["state"] == "unprovisioned":
+        return None
+    if state["state"] != "ready":
+        raise ValueError("update_store_fault")
+    root = Path(state["path"])
+    python, config = root / "venv/bin/python", root / "appliance.json"
+    if not python.is_file() or not os.access(python, os.X_OK) or not config.is_file():
+        raise ValueError("incomplete_runtime_slot")
+    return python, config

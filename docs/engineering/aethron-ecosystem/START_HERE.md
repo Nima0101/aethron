@@ -1,12 +1,14 @@
-> **Current supersession, 2026-10-08:** Phase 0 committed at `58a2a9d`; approved merge `8d0da0e`; [owner START](PHASE1-START-AUTHORIZATION.md) at `1445f18`. Phase 1 P1.1–P1.7 is now in progress. [Current machine state](PHASES.json) and [execution ledger](EXECUTION.md) supersede the historical Phase 0 text below. No push, deployment or Phase 2 is authorized. Project-owned code uses GPL-3.0-only with separate commercial licensing.
+# AETHRON ecosystem — implementation entry point
 
-# AETHRON ecosystem — Phase 0 blueprint
+**Phase 1 P1.1–P1.7 is authorized and implemented; final candidate validation is in progress.** The [recorded approval](PHASE1-START-AUTHORIZATION.md) supersedes the historical Phase 0 stop text. Phase 0 committed at `58a2a9d`; the approved public-main merge is `8d0da0e`; approval is `1445f18`. No Phase 2, push, merge, deployment or public release is authorized in this session.
 
-Status: **Phase 0 blueprint prepared; local commit blocked; Phase 1 NOT AUTHORIZED.** Prepared 2026-10-08. This area specifies an installable, cross-platform perception ecosystem for individuals, integrators and enterprises. Product work starts only when the owner explicitly says START. Nothing here certifies a vehicle, drone, sensor or safety function.
+Start with [current state](STATE.md), [remaining actions](NEXT.md), [machine status](PHASES.json) and [handoff](HANDOFF.md). For actual commands use [edge installation](../../usage-edge.md) and [installed appliance](../../usage-appliance.md). Read the [execution ledger](EXECUTION.md) for regressions and retained failures. Project-owned software is GPL-3.0-only, with separately negotiated commercial licensing; third-party terms remain distinct.
 
-## Mandatory owner requirement — unattended, untethered operation
+## Normal operation
 
-**The primary AETHRON product is a permanently installed, autonomous edge/embedded runtime, not a laptop- or phone-tethered camera demo.** After one-time provisioning, it must start automatically on host power-up and provide local perception, local API/status and recovery with no internet, cloud service, installer, terminal, external laptop/phone or user USB tether. Read [OWNER-NEXT-APPLIANCE-RUNTIME.md](OWNER-NEXT-APPLIANCE-RUNTIME.md) first, then the prioritized requirements in [NEXT.md](NEXT.md). Plan concrete OEM, sealed vehicle retrofit, onboard drone and smart-camera/NVR deployment models and explicit post-provision offline/reboot acceptance tests. Built-in or fixed-installed sensors, compute and power remain physically necessary. This is a required Phase 0 plan extension; **Phase 1 implementation still needs explicit owner approval**.
+The consumer product is an independently installed appliance: provision once, then power on into local supervised processing and status. No routine user terminal, laptop/phone tether, provisioning USB, WAN, Supabase, Coolify or licensing heartbeat is required. The Linux image and systemd service implement this software lifecycle. Permanent compute, sensors, protected power and approved mounting remain necessary. Native iOS belongs to its separate owner and is untouched.
+
+The boot test uses synthetic multimodal proposals. File/RTSP pixels and virtual UVC exercise actual source boundaries separately. Generic OpenCV capture has unqualified exposure time and cannot establish current safety evidence. Physical zero-visible sensing, OEM camera access, electrical/thermal behavior and safety certification remain unqualified. Local status is informational, never a SAFE assertion.
 
 ## Read in order
 
@@ -30,12 +32,10 @@ Baseline: `59fda946771d4ac8c9d1b52eeb3d948215325e4c`, branch `feat/aethron-vehic
 - Start with local HTTP plus SSE, a strict OpenAPI 3.1.1 contract and explicit plugin allowlist. Add ROS 2 at the robotics boundary; defer gRPC until measured copy/throughput requirements justify it.
 - RGB is daylight-only in v3. True zero-visible operation needs valid LWIR/NIR/radar/depth evidence, suitable optics, clock/calibration provenance and representative evaluation.
 - Factory cameras are not universally accessible. OBD-II/CAN and phone projection do not grant camera access. Keep generic retrofit recipes useful across powertrains and body classes.
-- All product pathways in this plan are **SPEC ONLY unless BASELINE explicitly identifies existing behavior**. Qualification is per software artifact, adapter, device tuple and operational domain.
+- Use PHASES and the Phase 1 handoff for executed capabilities. Research documents retain the broader roadmap; exact hardware and field qualification remain separate.
 
-## Phase 0 executable checks
+## Verification and phase boundary
 
-From the repository root: `python3 scripts/check_ecosystem_plan.py --self-test`, then `python3 scripts/verify.py`. The dedicated preflight validates planning integrity only. It does not start a server, install a driver, touch hardware, publish packages or prove production behavior. See [handoff](HANDOFF.md) for actual local checks and limitations.
+Run `python scripts/check_ecosystem_plan.py --self-test` and `python scripts/verify.py` for planning/governance integrity. Actual package, source, installed HTTP/SSE and boot-image checks are documented in [TEST-EVIDENCE](TEST-EVIDENCE.md) and [CI-RELEASE](CI-RELEASE.md). Green planning checks are not product qualification.
 
-## Standalone runtime plan now integrated
-
-Read [APPLIANCE-RUNTIME](APPLIANCE-RUNTIME.md) for supervisor ownership, boot/update/recovery and A01–A09 acceptance; [HOME-CAMERA-COMPATIBILITY](HOME-CAMERA-COMPATIBILITY.md) adds smart-camera/NVR deployment. Phase 1 now includes P1.7 boot-image/offline acceptance. These are SPEC ONLY; no auto-start service has been installed here.
+[APPLIANCE-RUNTIME](APPLIANCE-RUNTIME.md) specifies A01–A09; [HOME-CAMERA-COMPATIBILITY](HOME-CAMERA-COMPATIBILITY.md) covers smart-camera/NVR paths. Original Phase 0 wording and negative evidence remain in Git history and the historical snapshot. Current status never grants automatic phase advancement.

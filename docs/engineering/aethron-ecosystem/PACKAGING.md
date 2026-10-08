@@ -1,3 +1,5 @@
+> **Phase 1 implementation update:** The blueprint below remains the specification. Actual implemented and executed coverage is tracked in [PHASES](PHASES.json) and [EXECUTION](EXECUTION.md); installation instructions are in [the edge guide](../../usage-edge.md) and [appliance guide](../../usage-appliance.md). Historical “SPEC ONLY” wording does not supersede those evidence records. Physical compatibility, field accuracy and certification remain unqualified.
+
 # Packaging and installation plan
 
 ## Current versus proposed
@@ -36,7 +38,7 @@ For a device profile, grant only the selected device node and necessary group, n
 
 Source archive, wheel, sdist, zipapp and OCI images need checksums, dependency/model/data SBOMs, license notices and provenance bound to source SHA. Verify two builds where reproducibility is claimed; native/GPU nondeterminism must be reported, not suppressed. Registry names/package ownership are unresolved until verified under owner authorization. Use trusted publishing/OIDC only in a separately approved release workflow; Phase 0 workflow has read-only permissions and no publication job.
 
-Apache source does not license third-party weights, datasets, video codecs, firmware or vendor SDK redistribution. Keep proprietary adapters in optional packages installed by the authorized user; review GPL/LGPL/AGPL and patent obligations per actual build. GStreamer/FFmpeg plugin selection changes licensing. Do not redistribute SDK archives under the core license. No `curl | sh`, unauthenticated model URL, floating `latest` tag or fallback extra package index in released recipes.
+The GPL-3.0-only community license and separate commercial terms do not license third-party weights, datasets, video codecs, firmware or vendor SDK redistribution. Keep proprietary adapters in optional packages installed by the authorized user; review GPL/LGPL/AGPL and patent obligations per actual build. GStreamer/FFmpeg plugin selection changes licensing. Do not redistribute SDK archives under the core license. No `curl | sh`, unauthenticated model URL, floating `latest` tag or fallback extra package index in released recipes.
 
 Semver tracks public Python/API stability; model changes also require evidence-version changes even if function signatures match. During 0.x, announce breaking minor releases and provide one prior tested contract adapter; do not mutate frozen protocol v3. Support lifetime/security fixes are release policy commitments to establish before 1.0, not promises made by this plan.
 

@@ -68,5 +68,9 @@ def load_config(path: Path) -> ApplianceConfig:
             p.model = str((path.parent / p.model).resolve())
     for c in config.credentials:
         c.token_file = str((path.parent / c.token_file).resolve())
+    for field in ("integrity_bundle", "trust_root"):
+        value = getattr(config, field)
+        if value:
+            setattr(config, field, str((path.parent / value).resolve()))
     config.status_file = str((path.parent / config.status_file).resolve())
     return config

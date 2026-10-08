@@ -24,3 +24,5 @@ File/RTSP profiles select `ffmpeg`; UVC profiles select the actual OS backend (`
 The API accepts only configured source-profile names. It has no arbitrary URL/file/model/command endpoint. Default loopback still requires authentication; cross-origin requests and token URLs are rejected. Remote binding is deliberately not exposed in this candidate: a separately configured authenticated TLS proxy can consume the protected local interface after its deployment is reviewed. No plaintext LAN listener is silently enabled.
 
 GPL-3.0-only community licensing and separately negotiated commercial terms apply to project-owned code. Models, datasets and dependencies retain their own licenses. No online license heartbeat is required.
+
+For explicit offline pixel evaluation, `aethron_edge.pixel_replay.replay_images(image_paths, model_path)` decodes each supplied licensed image, runs the pinned detector, estimates background registration and returns a strict replay report through the unchanged core. Its clock and identity registration are explicitly virtual; it cannot qualify exposure latency or a physical rig. No annotations are supplied to inference.

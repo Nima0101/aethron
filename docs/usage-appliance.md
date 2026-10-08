@@ -1,13 +1,52 @@
-# AETHRON appliance candidate
+# Installed AETHRON appliance candidate
 
-An appliance is permanently installed compute, sensors, wiring and protected power. After commissioning, its OS starts AETHRON; a phone, laptop, provisioning USB host, WAN, cloud account or license server does not sustain processing. CLI tools remain maintenance interfaces.
+The Linux appliance starts a supervisor-owned local pipeline at boot. Once provisioned, it needs local compute, sensors and power; it does not need a phone, laptop, user login, WAN, account or licensing server. Optional HTTP clients only observe. Closing a client does not stop processing.
 
-The Linux candidate supplies a dedicated-account systemd unit, signed local manifests, offline integrity verification, bounded worker restart, local status, authenticated optional viewers and transactional update directories. The installer targets an explicit filesystem root and never starts a service on the development Mac. Package/image creation must create the `aethron` account and grant only the selected sensor permissions; do not grant blanket device access. The reference guest uses synthetic replay and no device grants.
+This is a **software candidate**, not a qualified vehicle, drone or zero-visible-light product. The boot test uses synthetic multimodal proposals. Real file/RTSP decode and pinned RGB inference have separate tests. Generic OpenCV sources lack a qualified exposure clock and therefore cannot supply current safety evidence. RGB alone cannot see in zero visible light.
 
-Read the local indicator: startup or expired status means UNKNOWN; running means the process is active, not that a scene is safe. Fault means maintenance is required. A local status JSON file expires after two seconds and contains no imagery, boxes, IDs or credentials. A product enclosure needs an independently supervised physical indicator; a dead software process cannot light its own fault lamp. Hardware indicator/power/thermal qualification remains pending.
+## Build and exercise the actual boot image
 
-Provision signed artifacts and trust root locally; remove the setup tool, close all viewers, disconnect WAN and reboot. The Linux unit starts from local storage without `network-online.target`. No model is automatically downloaded. Sensor/model/timing failure withdraws evidence; it never requests vehicle or drone actuation. Restart attempts are bounded to five in sixty seconds, then latched for maintenance. The OS separately limits service restarts.
+Run from this checkout using the project-local Python environment and Docker. The commands create local artifacts only. Budget approximately 3 GB disk headroom and over an hour for the soak. Nothing installs a service on the build host. The builder refuses to overwrite an existing boot image so negative evidence survives.
 
-For offline updates, use `UpdateStore.stage_update`, `activate` and `recover` as a local administrator against a protected store and pinned Ed25519 public key. Only signed, hash-matching, compatible files are staged. Activation atomically records the active slot and minimum version; revoked older versions are not restored. Corrupt active content yields fault. Interrupted staging leaves the active slot intact. Factory reset erases the store and must also erase provisioning credentials before recommissioning. Test-only signing keys are never production trust roots.
+```sh
+python scripts/edge_package_check.py
+mkdir -p build/ecosystem-phase1
+umask 077
+openssl genpkey -algorithm ED25519 -out build/ecosystem-phase1/test-only-signing.pem
+python packaging/appliance/image/prepare.py \
+  --out build/ecosystem-phase1/boot-candidate \
+  --wheels build/ecosystem-phase1/package/a \
+  --test-key build/ecosystem-phase1/test-only-signing.pem
+python scripts/appliance_boot_e2e.py --image build/ecosystem-phase1/boot-candidate
+```
 
-The boot/soak test is an emulated Linux system using a real kernel and systemd, no virtual NIC and no login/viewer dependency. Its evidence is software-in-loop, not automotive power, flight endurance, thermal performance or zero-visible hardware accuracy. Consult the [current phase evidence](engineering/aethron-ecosystem/PHASES.json) before assigning support claims.
+Install the hash-locked dependencies and build tools first as described in [edge usage](usage-edge.md). A developer may reuse an already verified local tool image with `--tool-image aethron-phase1-vm-tools:local`; the exact Docker image ID, package inventory and template/wheel hashes are retained. Debian top-level packages and base digest are pinned. The full resolved OS inventory is evidence, not a promise of byte-identical OS images: filesystem UUID/timestamps and package repositories require an archived build environment for that stronger claim. The Python wheels have a separate two-build byte-equality gate.
+
+The builder signs both the runtime bundle and the kernel/initrd/root-filesystem manifest with the supplied **test-only** key. The VM harness verifies that manifest before boot. No private signing key is copied into the image. These local test keys are not production trust roots or secure-boot certification. Protect a future release key separately. Root/admin replacement of the test trust root is outside this SIL threat boundary.
+
+The guest has no virtual NIC, shared guest directory, forwarded port, SSH or login session. systemd enables `aethron.service` under a dedicated `aethron` account. The guest-local test probe observes aggregate status on serial, reboots once, kills an inference worker and runs a one-hour second-boot soak. The probe is test instrumentation, not a user provisioning dependency. `result.json`, `serial.log`, `image-manifest.json` and `dpkg.txt` provide evidence. Boot mutates the filesystem; prepare a fresh image for another signed boot run.
+
+## One-time installation and normal use
+
+For a target Linux image, the root-directory installer accepts an explicitly signed complete bundle:
+
+```sh
+python packaging/appliance/install.py --root build/target-root \
+  --bundle build/verified-bundle --trust-root build/release-trust.pub
+```
+
+It verifies before and after copying and enables the boot unit. The image/package integration must create the dedicated `aethron` account and writable `/var/lib/aethron`; the provided image builder does this. This offline root-directory tool does not silently alter the Mac, create foreign user accounts, start services or qualify arbitrary devices. The signed bundle must contain the runtime at `/opt/aethron/venv`, `appliance.json`, fixed source profiles and every required local model/fixture. Select only authorized devices and narrowly required OS device groups. Never grant access to factory camera buses merely because a connector fits.
+
+At power-on the pipeline starts without a viewer. Local `/var/lib/aethron/status.json` is a bounded atomic informational status record with an expiry, aggregate counters and no images or track IDs. A stale/missing status means unavailable, never SAFE. The candidate provides this local software notifier; physical LED/audio/display wiring and independent process-death indication require per-device integration and qualification. `running` means the supervisor is running, not that perception is qualified. No frames or tracks survive reboot.
+
+Provision local API credentials with the library `runtime.provisioning.provision_token`; store them with owner-only permissions. The API binds loopback. An explicitly administered TLS relay can serve a remote viewer; this candidate does not enable remote unauthenticated binding. Source profiles cannot be supplied through HTTP. Local camera RTSP credentials belong in restricted configuration, never public logs or URL query bearer tokens.
+
+## Offline maintenance and recovery
+
+`runtime.updates.UpdateStore` verifies Ed25519 manifests, stages an inactive version directory, re-verifies copied bytes, fsyncs and atomically replaces its active record. `recover()` verifies the active slot; corruption produces `fault`. Earlier versions below the active minimum are rejected. Incomplete staging never overwrites the active slot. `factory_reset()` is a local admin operation; also rotate/remove provisioning credentials with the provisioning module and recommission sensors before use.
+
+The version-directory update API is callable by an authorized offline installer. The boot unit passes `--update-store /var/lib/aethron/updates`: startup verifies the initial bootstrap, verifies the selected slot and execs that slot’s Python/runtime/config. Activation takes effect at the next controlled service restart; it never replaces executing code in place. The signed config uses `integrity_bundle: "."`, and local file/model inputs must belong to the signed bundle. The VM stages an actual second runtime offline, rejects rollback, restarts the service and checks that the selected executable resumes processing. Preserve execute permissions and restrict the active slots to root ownership and read/execute access for the `aethron` group. Production A/B OS switching, secure boot, hardware-backed anti-rollback, revocation distribution and OEM update frameworks remain later platform work; do not advertise those as already deployed.
+
+Missing sensors, invalid time, invalid calibration or model failure withdraw current evidence. The supervisor makes at most five restart attempts in 60 seconds, then latches a fault. Service-manager restarts have a separate five/60-second limit. Maintenance may resolve the cause and restart explicitly; no fault authorizes hardware movement. Preserve diagnostic evidence before resetting.
+
+Read the relevant normal-user recipe: [OEM embedded](appliance/oem-embedded.md), [vehicle retrofit](appliance/vehicle-retrofit.md), [drone companion](appliance/drone-companion.md), [home hub](appliance/home-hub.md). Exact hardware power, thermal, mounting, zero-visible sensing and field safety gates remain unqualified.

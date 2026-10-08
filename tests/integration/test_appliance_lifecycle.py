@@ -1,4 +1,5 @@
 import tempfile
+import threading
 import time
 import unittest
 from pathlib import Path
@@ -36,14 +37,28 @@ class Lifecycle(unittest.TestCase):
                 p.last_message_ns = 0
                 original_stop = p.stop_worker
 
+                release = threading.Event()
+                entered = threading.Event()
+                returned = threading.Event()
+
                 def slow_stop():
-                    time.sleep(0.1)
+                    entered.set()
+                    release.wait(10)
                     original_stop()
 
-                with patch.object(p, "stop_worker", side_effect=slow_stop):
-                    start = time.monotonic()
+                def tick():
                     runtime.tick(time.monotonic_ns())
-                    self.assertLess(time.monotonic() - start, 0.05)
+                    returned.set()
+
+                with patch.object(p, "stop_worker", side_effect=slow_stop):
+                    caller = threading.Thread(target=tick)
+                    caller.start()
+                    try:
+                        self.assertTrue(entered.wait(5))
+                        self.assertTrue(returned.wait(2), "watchdog waited for blocked cleanup")
+                    finally:
+                        release.set()
+                        caller.join(timeout=5)
             finally:
                 runtime.shutdown()
 
@@ -73,8 +88,9 @@ class Lifecycle(unittest.TestCase):
                     "aethron_edge.runtime.supervisor.publish_status",
                     side_effect=OSError("disk full"),
                 ):
-                    runtime.last_status = 0
-                    runtime.tick(time.monotonic_ns())
+                    with runtime.lock:
+                        runtime.last_status = 0
+                        runtime.tick(time.monotonic_ns())
                 self.assertIn("status_storage", runtime.faults)
                 self.assertGreater(runtime.pipelines["bench"].processed, 2)
             finally:
@@ -98,8 +114,11 @@ class Lifecycle(unittest.TestCase):
             runtime = ApplianceSupervisor()
             runtime.boot(config)
             try:
-                deadline = time.monotonic() + 25
-                while time.monotonic() < deadline and "broken" not in runtime.faults:
+                deadline = time.monotonic() + 55
+                while time.monotonic() < deadline and (
+                    "broken" not in runtime.faults
+                    or runtime.pipelines["broken"].process is not None
+                ):
                     time.sleep(0.05)
                 self.assertIn("broken", runtime.faults)
                 self.assertEqual(len(runtime.restarts["broken"]), 5)

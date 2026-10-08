@@ -1,5 +1,6 @@
 import secrets
 import threading
+import time
 
 from ..contracts import Clock, SceneEnvelope, SessionHandle, V3Snapshot
 
@@ -42,11 +43,12 @@ class Sessions:
             row = self.get(token, principal)
             result = self.supervisor.snapshot(row["profile"])
             row["sequence"] += 1
+            emitted_ms = time.monotonic_ns() // 1_000_000
             lease = (
                 min(
                     [100]
                     + [
-                        max(0, t["expires_at_ms"] - result["at_ms"])
+                        max(0, t["expires_at_ms"] - emitted_ms)
                         for t in result["tracks"]
                         if t["status"] == "PRESENT"
                     ]
@@ -55,11 +57,11 @@ class Sessions:
                 else 0
             )
             return SceneEnvelope(
+                api_version="1",
+                kind="scene",
                 sequence=row["sequence"],
                 session=token,
-                clock=Clock(
-                    domain="edge_monotonic", emitted_ms=result["at_ms"], valid_for_ms=lease
-                ),
+                clock=Clock(domain="edge_monotonic", emitted_ms=emitted_ms, valid_for_ms=lease),
                 result=V3Snapshot.model_validate(result),
             )
 

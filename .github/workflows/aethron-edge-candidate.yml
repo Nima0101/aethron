@@ -1,0 +1,106 @@
+name: AETHRON edge candidate
+on:
+  pull_request:
+    paths:
+      - 'integrations/edge/**'
+      - 'contracts/**'
+      - 'examples/clients/**'
+      - 'tests/integration/**'
+      - 'scripts/edge_*.py'
+      - 'packaging/appliance/**'
+      - '.github/workflows/aethron-edge-candidate.yml'
+  workflow_dispatch:
+    inputs:
+      boot_soak:
+        description: 'Run the signed Linux boot/reboot/offline update and one-hour SIL soak'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  installed-software:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2025]
+        python: ['3.11.13', '3.13.15']
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install exact build tools and hash-locked dependencies
+        run: |
+          python -m pip install build==1.6.1 setuptools==84.0.0 wheel==0.48.0
+          python -m pip download --require-hashes -r integrations/edge/requirements-server.lock -r integrations/edge/requirements-vision.lock -d build/ecosystem-phase1/wheelhouse
+          python -m pip install --no-index --find-links build/ecosystem-phase1/wheelhouse --require-hashes -r integrations/edge/requirements-server.lock -r integrations/edge/requirements-vision.lock
+          python -m pip install --no-build-isolation -e . -e integrations/edge
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22"
+      - name: Typed client contracts
+        working-directory: examples/clients/typescript
+        run: |
+          npm ci --ignore-scripts
+          npm test
+      - name: Explicit test fixture tools and pinned model
+        run: |
+          python -m pip install imageio-ffmpeg==0.6.0
+          python scripts/edge_fetch_test_tools.py
+          python scripts/fetch_rgb_model.py
+      - name: Portable contracts, real sources, service and update gates
+        run: |
+          python -m unittest discover -s tests/integration -v
+          python scripts/edge_package_check.py
+          python scripts/edge_pixel_service_e2e.py
+          python scripts/edge_inventory.py
+      - name: Frozen core and planning integrity
+        run: |
+          python scripts/verify.py
+          python scripts/check_ecosystem_plan.py --self-test
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: edge-${{ matrix.os }}-${{ matrix.python }}
+          path: |
+            build/ecosystem-phase1/package/result.json
+            build/ecosystem-phase1/installed-pixels.json
+            build/ecosystem-phase1/edge-sbom.json
+          if-no-files-found: error
+
+  signed-boot-soak:
+    if: github.event_name == 'workflow_dispatch' && inputs.boot_soak
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13.15'
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130
+      - name: Build installed candidate and signed local test image
+        run: |
+          python -m pip install build==1.6.1 setuptools==84.0.0 wheel==0.48.0
+          python -m pip download --require-hashes -r integrations/edge/requirements-server.lock -d build/ecosystem-phase1/wheelhouse
+          python scripts/edge_package_check.py
+          umask 077
+          openssl genpkey -algorithm ED25519 -out build/ecosystem-phase1/test-only-signing.pem
+          python packaging/appliance/image/prepare.py --out build/ecosystem-phase1/boot-candidate --wheels build/ecosystem-phase1/package/a --test-key build/ecosystem-phase1/test-only-signing.pem
+      - name: Actual service-manager boot and offline soak
+        run: python scripts/appliance_boot_e2e.py --image build/ecosystem-phase1/boot-candidate
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: linux-boot-sil-evidence
+          path: |
+            build/ecosystem-phase1/boot-candidate/result.json
+            build/ecosystem-phase1/boot-candidate/serial.log
+            build/ecosystem-phase1/boot-candidate/image-manifest.json
+            build/ecosystem-phase1/boot-candidate/dpkg.txt
+          if-no-files-found: error

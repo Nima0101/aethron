@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response, StreamingResponse
+from starlette.exceptions import HTTPException
 
 from ..config import strict_json
 from ..contracts import Capabilities, Error, SessionRequest
@@ -17,7 +18,9 @@ from .sessions import ServiceError, Sessions
 
 
 def error(status, code):
-    return JSONResponse(Error(error=code).model_dump(), status_code=status)
+    return JSONResponse(
+        Error(api_version="1", error=code, retryable=False).model_dump(), status_code=status
+    )
 
 
 class Boundary:
@@ -78,6 +81,13 @@ def create_app(config):
     app.add_middleware(Boundary, auth=auth, port=config.port)
     app.openapi = document
 
+    @app.exception_handler(HTTPException)
+    async def route_error(request, exc):
+        return error(
+            404 if exc.status_code == 404 else 422,
+            "not_found" if exc.status_code == 404 else "invalid_request",
+        )
+
     @app.exception_handler(ServiceError)
     async def service_error(request, exc):
         return error(exc.status, exc.error)
@@ -91,9 +101,14 @@ def create_app(config):
         if "observe" not in request.state.principal.scopes:
             return error(403, "forbidden")
         return Capabilities(
+            api_version="1",
+            core_version="0.2.0",
+            edge_version="0.1.0",
+            protocol=3,
             runtime_mode=config.runtime_mode,
             drivers=sorted({p.driver for p in config.profiles}),
-            provider="explicit_profile",
+            provider=",".join(sorted({p.provider for p in config.profiles if p.driver != "replay"}))
+            or "replay_virtual",
             qualification_refs=[],
         )
 

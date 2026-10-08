@@ -2,6 +2,29 @@
 
 import json
 import queue
+import time
+
+
+class StopToken:
+    """One-way shared byte; no condition-variable acknowledgement from a dead process."""
+
+    def __init__(self, context):
+        self.flag = context.RawValue("B", 0)
+
+    def set(self):
+        self.flag.value = 1
+
+    def is_set(self):
+        return bool(self.flag.value)
+
+    def wait(self, seconds):
+        deadline = time.monotonic() + seconds
+        while not self.is_set():
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return False
+            time.sleep(min(0.01, remaining))
+        return True
 
 
 class Mailbox:

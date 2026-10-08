@@ -1,1 +1,19 @@
-{"compilerOptions":{"target":"ES2022","module":"NodeNext","moduleResolution":"NodeNext","strict":true,"resolveJsonModule":true,"outDir":"dist","lib":["ES2022","DOM"]},"include":["src/**/*.ts","src/**/*.json"]}
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "resolveJsonModule": true,
+    "outDir": "dist",
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "declaration": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.json"
+  ]
+}

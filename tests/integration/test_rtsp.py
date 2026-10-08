@@ -1,5 +1,6 @@
 """Actual local RTSP/RTP decode; server and publisher are test infrastructure only."""
 
+import os
 import socket
 import subprocess
 import tempfile
@@ -27,9 +28,20 @@ class RTSPIntegration(unittest.TestCase):
             )
             log = (ROOT / "build/ecosystem-phase1/rtsp-tools.log").open("w")
             server = subprocess.Popen(
-                [str(ROOT / "build/ecosystem-phase1/tools/mediamtx"), str(config)],
+                [
+                    str(
+                        ROOT
+                        / (
+                            "build/ecosystem-phase1/tools/mediamtx.exe"
+                            if os.name == "nt"
+                            else "build/ecosystem-phase1/tools/mediamtx"
+                        )
+                    ),
+                    str(config),
+                ],
                 stdout=log,
                 stderr=log,
+                cwd=directory,
             )
             publisher = None
             source = RTSPSource()

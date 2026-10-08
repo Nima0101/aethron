@@ -1,0 +1,10 @@
+{
+  "status": "implemented_validation_in_progress",
+  "wheel_evidence": "package.json",
+  "container_evidence": "containers.json",
+  "sbom_evidence": "edge-sbom.json",
+  "clean_clone": "pending on committed candidate",
+  "hosted_ci": "not_run",
+  "native_windows": "not_run",
+  "native_macos_x86_64": "not_run"
+}

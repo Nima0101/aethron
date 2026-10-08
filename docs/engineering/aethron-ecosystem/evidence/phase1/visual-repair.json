@@ -1,0 +1,84 @@
+{
+  "cause": "Inherited raster title predates AETHRON branding generator; all PNG differences confined to title region; data/output/HTML unchanged",
+  "files": [
+    {
+      "file": "perception-day.png",
+      "old_sha256": "392c49586217458efc4af2afe3c77a619720b4acf8dd18b792023699bad80353",
+      "new_sha256": "4ffbeec9427540ba155f816fa79c1b279e5c32bf4f54d323f9c281ed6e9dae05",
+      "identical": false,
+      "difference_bbox": [
+        26,
+        27,
+        478,
+        51
+      ]
+    },
+    {
+      "file": "perception-input.jsonl",
+      "old_sha256": "f19bb394da470e14ac02f88384a92640aa559a86c6a2700b3b783769d413c409",
+      "new_sha256": "f19bb394da470e14ac02f88384a92640aa559a86c6a2700b3b783769d413c409",
+      "identical": true
+    },
+    {
+      "file": "perception-manifest.json",
+      "old_sha256": "ed08972112d7d3a251b59341d95ad0286e862cc93535b423120033928e9a0d46",
+      "new_sha256": "84e691b26ca1faaea33b5cbf94e7193fab534980b0036dffcdc284dba5d79ae7",
+      "identical": false
+    },
+    {
+      "file": "perception-night.png",
+      "old_sha256": "3e3702eb03b4ae929232ab85ce840d9b6298503e70aa714f9a8dbf07170f0ef0",
+      "new_sha256": "9511e477d0e96034dd09d3915579a9f18587867779e06754eae79aebd17d9eaa",
+      "identical": false,
+      "difference_bbox": [
+        26,
+        27,
+        478,
+        51
+      ]
+    },
+    {
+      "file": "perception-occlusion.png",
+      "old_sha256": "68bc5e09f738b36ae45029f3fef7490c808ffd6728da38ab49ffdfd290c29097",
+      "new_sha256": "30ca832e868cab3be3a154e75b6d7db32771b08d1034580d18f1cfc7db3c4ed6",
+      "identical": false,
+      "difference_bbox": [
+        26,
+        27,
+        478,
+        51
+      ]
+    },
+    {
+      "file": "perception-output.json",
+      "old_sha256": "9a8eb8b50002e46dbf1f994139a8573e82815ffd5cb7622d06d3a2d5e2c1041a",
+      "new_sha256": "9a8eb8b50002e46dbf1f994139a8573e82815ffd5cb7622d06d3a2d5e2c1041a",
+      "identical": true
+    },
+    {
+      "file": "perception-unknown.png",
+      "old_sha256": "7a10965094e3205d163ed21e07165859415b2e28a2693b1cf371d745e8a11c5c",
+      "new_sha256": "f21f5243b38ac734d279f0d6fdb3ece69cf8e769231b1e30ff305f712794f3c4",
+      "identical": false,
+      "difference_bbox": [
+        26,
+        27,
+        478,
+        51
+      ]
+    },
+    {
+      "file": "perception.gif",
+      "old_sha256": "e6ff52d401f76b60e3e57a56640f9fe8fa011731e0e35a901dc6124e1be3252c",
+      "new_sha256": "7da2189630eb60538ad87ff7aa1670babd43be313196e3705e5bfdde8c55a28e",
+      "identical": false
+    },
+    {
+      "file": "perception.html",
+      "old_sha256": "8d644952a5a566ddecd02e5941923d022966a840d9fa9436a267ee9d60ae7788",
+      "new_sha256": "8d644952a5a566ddecd02e5941923d022966a840d9fa9436a267ee9d60ae7788",
+      "identical": true
+    }
+  ],
+  "official_logo_changed": false
+}

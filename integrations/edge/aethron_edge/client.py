@@ -41,6 +41,23 @@ class Observation:
         }
 
 
+def bounded_lines(chunks, limit=65536):
+    pending = bytearray()
+    for chunk in chunks:
+        # Callers request bounded transport chunks; reject unbounded custom input.
+        if len(chunk) > limit:
+            raise ValueError("event_limit")
+        for part in chunk.splitlines(keepends=True):
+            if len(pending) + len(part) > limit:
+                raise ValueError("event_limit")
+            pending.extend(part)
+            if pending.endswith(b"\n"):
+                yield bytes(pending).rstrip(b"\r\n").decode("utf-8")
+                pending.clear()
+    if pending:
+        raise ValueError("incomplete_event")
+
+
 def observe(url, token, profile, contract="warn", limit=None):
     import httpx
 
@@ -57,7 +74,7 @@ def observe(url, token, profile, contract="warn", limit=None):
             with client.stream("GET", f"/api/v1/sessions/{handle}/events") as stream:
                 stream.raise_for_status()
                 count = 0
-                for line in stream.iter_lines():
+                for line in bounded_lines(stream.iter_bytes(chunk_size=1024)):
                     if len(line) > 65536:
                         raise ValueError("event_limit")
                     if line.startswith("data: "):

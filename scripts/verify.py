@@ -52,10 +52,32 @@ def run():
                 ), p.name
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
                 assert node.func.id not in {"eval", "exec", "compile"}, p.name
+    # Generated dependency trees are excluded only when untracked. A tracked
+    # product file cannot evade the leak gate by using a generated directory name.
+    tracked = set(
+        subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode("utf-8").split("\0")
+    )
     # Scan only intended product files; never inspect local credentials/environment.
-    for folder in ["aethron", "tests", "scripts", "docs", "examples", "data", ".github", ""]:
+    for folder in [
+        "aethron",
+        "integrations",
+        "packaging",
+        "contracts",
+        "tests",
+        "scripts",
+        "docs",
+        "examples",
+        "data",
+        ".github",
+        "",
+    ]:
         for p in ROOT.joinpath(folder).rglob("*") if folder else ROOT.iterdir():
-            if not p.is_file() or "__pycache__" in p.parts:
+            if not p.is_file():
+                continue
+            relative = p.relative_to(ROOT)
+            if {"__pycache__", "node_modules", "build"}.intersection(relative.parts) and str(
+                relative
+            ) not in tracked:
                 continue
             if p.suffix not in {
                 ".py",

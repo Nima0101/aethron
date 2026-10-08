@@ -85,8 +85,8 @@ class Clock(Closed):
 
 
 class SceneEnvelope(Closed):
-    api_version: Literal["1"] = "1"
-    kind: Literal["scene"] = "scene"
+    api_version: Literal["1"]
+    kind: Literal["scene"]
     sequence: Count
     session: Annotated[str, Field(pattern=r"^[a-f0-9]{32,64}$")]
     clock: Clock
@@ -94,7 +94,7 @@ class SceneEnvelope(Closed):
 
 
 class HealthEvent(Closed):
-    api_version: Literal["1"] = "1"
+    api_version: Literal["1"]
     kind: Literal["health", "gap"]
     sequence: Count
     session: str
@@ -107,12 +107,12 @@ class HealthEvent(Closed):
         "stream_gap",
         "closed",
     ]
-    scene_state: Literal["UNKNOWN"] = "UNKNOWN"
+    scene_state: Literal["UNKNOWN"]
     retryable: bool
 
 
 class Error(Closed):
-    api_version: Literal["1"] = "1"
+    api_version: Literal["1"]
     error: Literal[
         "invalid_request",
         "unauthorized",
@@ -121,14 +121,14 @@ class Error(Closed):
         "source_unavailable",
         "not_found",
     ]
-    retryable: bool = False
+    retryable: bool
 
 
 class Capabilities(Closed):
-    api_version: Literal["1"] = "1"
-    core_version: Literal["0.2.0"] = "0.2.0"
-    edge_version: Literal["0.1.0"] = "0.1.0"
-    protocol: Literal[3] = 3
+    api_version: Literal["1"]
+    core_version: Literal["0.2.0"]
+    edge_version: Literal["0.1.0"]
+    protocol: Literal[3]
     runtime_mode: Literal["appliance", "interactive", "replay"]
     drivers: list[str]
     provider: str

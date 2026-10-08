@@ -1,36 +1,11 @@
-> **Current supersession, 2026-10-08:** Phase 0 committed at `58a2a9d`; approved merge `8d0da0e`; [owner START](PHASE1-START-AUTHORIZATION.md) at `1445f18`. Phase 1 P1.1–P1.7 is now in progress. [Current machine state](PHASES.json) and [execution ledger](EXECUTION.md) supersede the historical Phase 0 text below. No push, deployment or Phase 2 is authorized. Project-owned code uses GPL-3.0-only with separate commercial licensing.
+# Current state — 2026-10-08
 
-# State — 2026-10-08
+Phase 0 is committed and complete. Phase 1 is expressly authorized; P1.1–P1.7 implementation exists on `feat/aethron-vehicle-uav-preparation-20261008`. Final installed-source, multiarch container, clean-clone and one-hour boot/update-soak verification is in progress. [PHASES](PHASES.json) and [EXECUTION](EXECUTION.md) carry machine status and checkpoint history. Phase 2–5 remain planned and unauthorized here.
 
-Phase 0: research, architecture and workflow preparation delivered; validation recorded in [HANDOFF](HANDOFF.md). The requested local commit is blocked by sandbox access to linked worktree Git metadata, so full Phase 0 acceptance is not marked complete. Phase 1: awaiting explicit owner START; no product features implemented by this phase. Hosted execution, publication, deployments and hardware operation: not performed.
+Implemented: separate GPL-3.0-only `aethron-edge` wheel/CLI, strict OpenAPI/contracts, file/UVC/RTSP source ABI, monotonic capture admission/calibration, pinned detector replay, independent supervisor, scoped local HTTP/SSE, Python/TypeScript clients, signed offline runtime/update slots, systemd boot image and actual Linux VM harness. The normal appliance does not depend on a viewer, provisioning host or WAN.
 
-## Baseline and claims
+Evidence already obtained includes installed consumers outside checkout, byte-identical wheels, real file/RTSP decode and pixels, strict/security/lifecycle/update tests, frozen governance checks and retained aircraft misses. The current running VM tests software boot/reboot, crash recovery, offline signed update and one-hour soak. It is not a physical sensor rig.
 
-[BASELINE](BASELINE.md) binds inherited capabilities and fresh local checks to the starting SHA. The Python package/import/CLI, bounded v3 tracker, strict parser, synthetic multisensor adapters, YOLOX integration, optional Core ML and camera PWA already exist. A sensor-shaped JSON adapter is not a tested physical sensor driver. No general HTTP service, enterprise SDK suite, generic OEM video bridge or qualified automotive/UAS installation is established here.
+Unqualified: exact OEM/device/firmware tuples, physical UVC, zero-visible optics/accuracy, power/thermal/environmental behavior, real-world safety and certification. Windows/macOS Intel/hosted matrix cells remain pending until executed. The native iOS worktree, sources, caches and processes are outside this lane and untouched.
 
-The historical status file predates later branding/PWA publication; use its runtime evidence with its source SHA, and read its dated remediation. Do not repeat its old “no remote/live platform” statement as current global truth. The public URLs were inspected in Phase 0; deployment provenance and physical phone behavior were not independently qualified.
-
-## Ownership lanes
-
-| Lane | Accountable role | Boundary |
-|---|---|---|
-| Governance and phase authorization | Owner | Accept scope, approve phase starts and separately authorize publication |
-| Core, transport, packaging, portable tests | Future Phase 1 single implementer | This feature branch/worktree only; no agents |
-| Native iOS | Existing separate Swift/SwiftUI owner | Interface consumer; no edits/build/cache work here |
-| Android and desktop clients | Later platform implementer | Conformance fixtures first, actual installation proof next |
-| Vehicle and UAS adapters | Later integration implementer | Authorized sources, observe/assist before qualified control |
-| Sensor/model evaluation | Dataset custodian and evaluator roles | Freeze partitions and metrics before tuning |
-| Physical qualification | Device owner and competent test team | Exact hardware/firmware/environment and controlled trials |
-| Independent assurance | External reviewer/certifier when applicable | Same-author review does not fill this role |
-
-Roles are assignments to be made at the relevant phase, not claims of staffed teams. Parallel lanes describe dependency independence; this session uses no subagents.
-
-## Cadence
-
-Each work session begins with branch/status and authority checks. Each cohesive change records tests, failed attempts and evidence hashes. Each milestone updates PHASES and NEXT; owner reviews at phase boundaries. Compatibility/SDK terms must be rechecked at the beginning of implementation and before every release. Monthly maintenance triage is a proposed post-release cadence, not an operating service.
-
-Progress flags and dependency order are authoritative in [PHASES.json](PHASES.json). Product milestones remain false even when planning preflight passes.
-
-## Owner appliance extension
-
-The owner-added permanent-runtime requirement is preserved verbatim and integrated into [APPLIANCE-RUNTIME](APPLIANCE-RUNTIME.md), all affected contracts/recipes, P1.7 and A01–A09. Plans prioritize auto-boot offline inference independent of optional clients. Implementation/measured appliance progress remains false; no host service/image/hardware was operated. The native iOS lane remains an optional client subject to OS lifecycle.
+Phase 0 documents at commit `58a2a9d` and its [snapshot](evidence/phase1/phase0-snapshot.json) preserve prior commit denial and unauthorized state; those historical facts do not block approved Phase 1. No public operation, external message or hardware/actuator command was performed.

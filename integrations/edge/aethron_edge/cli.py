@@ -3,6 +3,7 @@
 import argparse
 import importlib.metadata
 import json
+import os
 from pathlib import Path
 
 from . import __version__
@@ -14,6 +15,7 @@ def main():
     parser.add_argument("command", choices=["doctor", "replay", "export-openapi", "run", "serve"])
     parser.add_argument("--config", type=Path)
     parser.add_argument("--out", type=Path)
+    parser.add_argument("--update-store", type=Path)
     args = parser.parse_args()
     if args.command == "export-openapi":
         from .openapi import document
@@ -32,11 +34,29 @@ def main():
         try:
             config = load_config(args.config)
             if config.runtime_mode == "appliance":
-                from .runtime.updates import verify_bundle
+                from .runtime.updates import verify_configuration
 
-                if not config.integrity_bundle or not config.trust_root:
-                    raise ValueError("integrity_required")
-                verify_bundle(Path(config.integrity_bundle), Path(config.trust_root))
+                verify_configuration(config, args.config)
+                if args.update_store:
+                    from .runtime.updates import selected_runtime
+
+                    selected = selected_runtime(args.update_store, Path(config.trust_root))
+                    if selected:
+                        python, active_config = selected
+                        os.execv(
+                            str(python),
+                            [
+                                str(python),
+                                "-I",
+                                "-m",
+                                "aethron_edge",
+                                "run",
+                                "--config",
+                                str(active_config),
+                            ],
+                        )
+            elif args.update_store:
+                raise ValueError("appliance_mode_required")
             serve(config)
         except (ValueError, OSError):
             parser.exit(2, "startup_failed\n")

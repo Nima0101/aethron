@@ -105,7 +105,11 @@ class HTTPService(unittest.TestCase):
         )
         self.assertEqual(r.status_code, 422)
         self.assertNotIn("private-sentinel", r.text)
-        self.assertEqual(self.client.post("/api/v1/frames", json={}).status_code, 404)
+        unknown = self.client.post("/api/v1/frames", json={})
+        self.assertEqual(unknown.status_code, 404)
+        self.assertEqual(
+            unknown.json(), {"api_version": "1", "error": "not_found", "retryable": False}
+        )
 
     def test_session_ownership_capacity_and_detach_independence(self):
         handles = []
@@ -135,8 +139,12 @@ class HTTPService(unittest.TestCase):
                 self.client.delete("/api/v1/sessions/" + handle)
         time.sleep(1.1)
         before = json.loads(self.status.read_text())["processed"]
-        time.sleep(1.1)
-        after = json.loads(self.status.read_text())["processed"]
+        deadline = time.monotonic() + 30
+        while time.monotonic() < deadline:
+            after = json.loads(self.status.read_text())["processed"]
+            if after > before:
+                break
+            time.sleep(0.05)
         self.assertGreater(after, before)
 
     def test_raw_replay_validation_and_limit(self):
@@ -151,6 +159,24 @@ class HTTPService(unittest.TestCase):
         r = self.client.post("/api/v1/replays", content=b'{"private":"private-sentinel"}')
         self.assertEqual(r.status_code, 422)
         self.assertNotIn("private-sentinel", r.text)
+
+    def test_slow_subscribers_have_bounded_admission(self):
+        from contextlib import ExitStack
+
+        handle = self.client.post(
+            "/api/v1/sessions", json={"source_profile": "bench", "contract": "warn"}
+        ).json()["session"]
+        try:
+            route = f"/api/v1/sessions/{handle}/events"
+            with ExitStack() as opened:
+                for _ in range(8):
+                    stream = opened.enter_context(self.client.stream("GET", route))
+                    self.assertEqual(stream.status_code, 200)
+                # Deliberately leave eight response bodies unread. No per-reader
+                # history queue exists, and the ninth cannot allocate another slot.
+                self.assertEqual(self.client.get(route).status_code, 429)
+        finally:
+            self.client.delete("/api/v1/sessions/" + handle)
 
     def test_sse_reconnect_starts_with_gap_not_history(self):
         handle = self.client.post(

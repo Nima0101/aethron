@@ -577,6 +577,24 @@
       "access": "read",
       "note": "Service privilege/filesystem/device isolation is profile-specific; required camera/device access must remain explicit. No unit installed in Phase 0.",
       "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S65",
+      "title": "Windows job objects",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects",
+      "version": "Windows 8+/Server 2012+ nested jobs; page 2025-07-14",
+      "access": "read",
+      "note": "Worker-local unnamed job with kill-on-close contains descendant processes; no breakaway or unrelated host process enumeration. Native Windows execution remains pending.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S66",
+      "title": "Windows extended job limits",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information",
+      "version": "Win32 JOBOBJECT_EXTENDED_LIMIT_INFORMATION",
+      "access": "read",
+      "note": "SDK ABI reference for ctypes wrapper outside the frozen core; target Windows CI must execute the crash regression before declaring support.",
+      "retrieved": "2026-10-08"
     }
   ]
 }

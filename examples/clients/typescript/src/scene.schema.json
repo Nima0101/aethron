@@ -5,13 +5,11 @@
       "properties": {
         "api_version": {
           "const": "1",
-          "default": "1",
           "title": "Api Version",
           "type": "string"
         },
         "core_version": {
           "const": "0.2.0",
-          "default": "0.2.0",
           "title": "Core Version",
           "type": "string"
         },
@@ -24,13 +22,11 @@
         },
         "edge_version": {
           "const": "0.1.0",
-          "default": "0.1.0",
           "title": "Edge Version",
           "type": "string"
         },
         "protocol": {
           "const": 3,
-          "default": 3,
           "title": "Protocol",
           "type": "integer"
         },
@@ -56,6 +52,10 @@
         }
       },
       "required": [
+        "api_version",
+        "core_version",
+        "edge_version",
+        "protocol",
         "runtime_mode",
         "drivers",
         "provider",
@@ -98,7 +98,6 @@
       "properties": {
         "api_version": {
           "const": "1",
-          "default": "1",
           "title": "Api Version",
           "type": "string"
         },
@@ -115,13 +114,14 @@
           "type": "string"
         },
         "retryable": {
-          "default": false,
           "title": "Retryable",
           "type": "boolean"
         }
       },
       "required": [
-        "error"
+        "api_version",
+        "error",
+        "retryable"
       ],
       "title": "Error",
       "type": "object"
@@ -131,7 +131,6 @@
       "properties": {
         "api_version": {
           "const": "1",
-          "default": "1",
           "title": "Api Version",
           "type": "string"
         },
@@ -162,7 +161,6 @@
         },
         "scene_state": {
           "const": "UNKNOWN",
-          "default": "UNKNOWN",
           "title": "Scene State",
           "type": "string"
         },
@@ -178,10 +176,12 @@
         }
       },
       "required": [
+        "api_version",
         "kind",
         "sequence",
         "session",
         "reason",
+        "scene_state",
         "retryable"
       ],
       "title": "HealthEvent",
@@ -311,7 +311,6 @@
       "properties": {
         "api_version": {
           "const": "1",
-          "default": "1",
           "title": "Api Version",
           "type": "string"
         },
@@ -320,7 +319,6 @@
         },
         "kind": {
           "const": "scene",
-          "default": "scene",
           "title": "Kind",
           "type": "string"
         },
@@ -340,6 +338,8 @@
         }
       },
       "required": [
+        "api_version",
+        "kind",
         "sequence",
         "session",
         "clock",

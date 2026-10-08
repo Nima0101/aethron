@@ -1,3 +1,5 @@
+> **Phase 1 implementation update:** The blueprint below remains the specification. Actual implemented and executed coverage is tracked in [PHASES](PHASES.json) and [EXECUTION](EXECUTION.md); installation instructions are in [the edge guide](../../usage-edge.md) and [appliance guide](../../usage-appliance.md). Historical “SPEC ONLY” wording does not supersede those evidence records. Physical compatibility, field accuracy and certification remain unqualified.
+
 # OpenAPI plan — not an implemented service
 
 Select OpenAPI **3.1.1** [S29](SOURCES.md#s29), explicitly a stable tooling target rather than a claim about the newest spec. Candidate server stack: FastAPI **0.142.4**, Pydantic **2.13.5**, Uvicorn **0.54.0**, consumer HTTPX **0.28.1**; these were observed in public package metadata on 2026-10-08 [S44](SOURCES.md#s44)–[S47](SOURCES.md#s47). They are not installed/qualified application dependencies in Phase 0. Phase 1 must resolve and audit the complete dependency closure with hashes before adopting them.

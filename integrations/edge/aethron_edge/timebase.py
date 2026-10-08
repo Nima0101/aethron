@@ -20,6 +20,10 @@ class CaptureClock:
 
     def map_capture(self, frame: FrameEnvelope, now_ns: int) -> MappedFrame | SourceFault:
         stamp, error = frame.capture_ns, frame.clock_uncertainty_ns
+        if any(
+            type(value) is not int or value < 0 for value in (stamp, error, frame.sequence, now_ns)
+        ):
+            return SourceFault("clock_untrusted")
         valid = (
             frame.clock_id == "host_monotonic"
             and stamp is not None

@@ -12,7 +12,15 @@ def encode(event):
 
 async def stream(sessions, token, principal):
     yield encode(
-        HealthEvent(kind="gap", sequence=0, session=token, reason="stream_gap", retryable=True)
+        HealthEvent(
+            api_version="1",
+            scene_state="UNKNOWN",
+            kind="gap",
+            sequence=0,
+            session=token,
+            reason="stream_gap",
+            retryable=True,
+        )
     )
     while True:
         yield encode(sessions.snapshot(token, principal))

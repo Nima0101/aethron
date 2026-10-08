@@ -1,3 +1,5 @@
+> **Phase 1 implementation update:** The blueprint below remains the specification. Actual implemented and executed coverage is tracked in [PHASES](PHASES.json) and [EXECUTION](EXECUTION.md); installation instructions are in [the edge guide](../../usage-edge.md) and [appliance guide](../../usage-appliance.md). Historical “SPEC ONLY” wording does not supersede those evidence records. Physical compatibility, field accuracy and certification remain unqualified.
+
 # Permanent appliance runtime — SPEC ONLY
 
 This design implements the [mandatory owner requirement](OWNER-NEXT-APPLIANCE-RUNTIME.md) in the plan. No appliance service/image is implemented or deployed in Phase 0. Normal operation is **provision once → power on → supervised local capture/inference/fusion/status**. A phone/laptop/terminal, external programming-host USB tether, WAN, online account, Supabase, Coolify or licensing heartbeat is not a runtime dependency. Fixed sensor wiring, compute, local camera LAN and protected power remain necessary.

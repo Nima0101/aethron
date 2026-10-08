@@ -178,12 +178,24 @@
       ]
     },
     "P1.6": {
-      "status": "in_progress",
-      "evidence": []
+      "status": "implemented_validation_in_progress",
+      "evidence": [
+        "evidence/phase1/p16.json"
+      ]
     },
     "P1.7": {
-      "status": "in_progress",
-      "evidence": []
+      "status": "implemented_validation_in_progress",
+      "evidence": [
+        "evidence/phase1/p17.json"
+      ]
     }
+  },
+  "phase1_acceptance": {
+    "software_candidate_complete": false,
+    "hardware_qualified": false,
+    "field_qualified": false,
+    "certified": false,
+    "hosted_ci_executed": false,
+    "candidate_evidence": null
   }
 }

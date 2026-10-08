@@ -47,7 +47,9 @@ class ApplianceSupervisor:
                     continue
                 p.tick(now_ns)
                 failed = p.process is not None and (
-                    not p.process.is_alive() or now_ns - p.last_message_ns > 10_000_000_000
+                    not p.process.is_alive()
+                    or now_ns - p.last_message_ns
+                    > (10_000_000_000 if p.profile.driver == "replay" else 60_000_000_000)
                 )
                 if failed and name not in self.faults and now_ns >= self.next_restart[name]:
                     attempts = self.restarts[name]
@@ -72,6 +74,7 @@ class ApplianceSupervisor:
 
     def _recover(self, name, pipeline, *, restart):
         self.recovering.add(name)
+        pipeline.last_result = None
         pipeline.core.close()
 
         def work():
@@ -80,6 +83,7 @@ class ApplianceSupervisor:
             if restart and not self.stop.is_set():
                 replacement = RuntimePipeline(pipeline.profile)
                 replacement.processed = pipeline.processed
+                replacement.inferences = pipeline.inferences
                 replacement.start()
             with self.lock:
                 if replacement is not None:
@@ -95,13 +99,14 @@ class ApplianceSupervisor:
         return {
             "version": 1,
             "mode": self.config.runtime_mode,
-            "state": "fault" if self.faults else "running",
+            "state": "fault" if self.faults else "recovering" if self.recovering else "running",
             "scene_state": "UNKNOWN",
             "qualified": False,
             "emitted_ms": now_ns // 1_000_000,
             "status_expires_ms": now_ns // 1_000_000 + 2000,
             "uptime_ms": max(0, (now_ns - self.started_ns) // 1_000_000),
             "processed": sum(p.processed for p in self.pipelines.values()),
+            "inferences": sum(p.inferences for p in self.pipelines.values()),
             "fault_count": len(self.faults),
             "restarts": sum(len(q) for q in self.restarts.values()),
             "last_processing_ms": max(
