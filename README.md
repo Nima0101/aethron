@@ -2,15 +2,15 @@
 
 **Keep supported objects visible through sensor loss. Make uncertainty explicit.**
 
+![Animated replay of actual recorded camera frames and detector output, including documented misses and false positives](docs/assets/recorded-failure.gif)
+
+*Recorded camera replay, not a successful aircraft-detection test: tiny aircraft were missed and false positives remain. [Full evaluation](#recorded-failures-are-part-of-the-evidence).*
+
 RescueSense is a local multi-sensor perception toolkit for rescue and collision-avoidance research. It combines registered detections, temporary geometric tracks, short-horizon motion estimates and bounded defensive recommendations. Daylight RGB can give way to valid LWIR, radar or depth evidence without discarding the object.
 
 **Safety boundary:** scene-local human boxes and temporary tracks are allowed; biometric identity, durable person IDs, cross-camera/location re-identification, long-term histories, threat scoring, target designation, following/pursuit and weapons are prohibited. Through-obstruction human sensing remains **coarse zone presence only**. [Public v3 amendment](docs/safety/amendment-v3.md).
 
 **Qualification:** locally verified research software, **not production-ready**. Synthetic fusion/tracking passes the frozen software scenarios. Real recorded aircraft evaluation exposes detector failures. Physical thermal/night/UAV sensing, controller safety and hosted platform evidence remain unqualified. Earlier tracker latency failures remain recorded, and CPU RGB inference does not meet the live freshness budget. [Exact results and blockers](docs/verification/status-v3.md).
-
-![Actual RescueSense temporal output over original synthetic sensor scenes](docs/assets/perception.gif)
-
-Original synthetic scene, **actual CLI output**. The slowed replay shows daylight → zero visible light → short occlusion → reacquisition → all-sensor loss. Rectangles carry class, uncalibrated support score, state and freshness. Dashed geometry is an uncertain prediction. No live hardware is depicted. [Input/output and reproduction](docs/demo-v3.md).
 
 ## Live camera preview: iPhone, laptop and compatible video streams
 
@@ -23,6 +23,10 @@ cd web && npm ci && npm run dev
 Open http://localhost:5173 on the laptop. To use iPhone or Android from anywhere, deploy the generated `web/dist` to an HTTPS site; browsers require permission and a secure context. For locally attached/UVC cameras, video files or compatible RTSP sources, `scripts/live_video.py` provides an optional native host adapter with Core ML on supported Macs. Read the [multi-platform camera instructions](docs/usage-live-platforms.md) for commands and safety evidence boundaries.
 
 ## Run a useful replay
+
+![Actual RescueSense temporal output over original synthetic sensor scenes](docs/assets/perception.gif)
+
+Original synthetic scene, **actual CLI output**. The slowed replay shows daylight → zero visible light → short occlusion → reacquisition → all-sensor loss. Rectangles carry class, uncalibrated support score, state and freshness. Dashed geometry is an uncertain prediction. No live hardware is depicted. [Input/output and reproduction](docs/demo-v3.md).
 
 Python 3.9+; no runtime dependencies for the core. From this checkout:
 
@@ -81,8 +85,6 @@ For real UI/timer verification, run `.venv/bin/python scripts/browser_check.py`.
 The RGB model's recorded integration checks and provenance remain reproducible in [the vision verification scripts](scripts/vision_smoke.py) and [model card](docs/models/v3-model-card.md). For an interactive camera demonstration, open [RescueSense Camera](https://nima0101.github.io/rescuesense/).
 
 ## Recorded failures are part of the evidence
-
-![Animated replay of actual recorded camera frames and detector output, including documented misses and false positives](docs/assets/recorded-failure.gif)
 
 The frozen AOT excerpt contains tiny **fixed-wing aircraft**, not verified drones. The classical detector missed all20 annotations and produced721 false positives after registration/tracking. YOLOX missed the same20 with no false positives. Neither qualifies this system for airborne detection. Source pixels, transformations, licenses and hashes are included; labels never enter inference. [Dataset](data/aot/README.md) · [Replay methodology](docs/demo-v3.md).
 
