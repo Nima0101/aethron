@@ -135,3 +135,28 @@ class Rectification(unittest.TestCase):
         self.assertFalse(result.live_evidence)
         with self.assertRaises(ValueError):
             lens.deproject(399.0, 280.0, raster.depth_m(399, 280))
+
+    def test_recorded_provider_applies_lens_before_rigid_transform(self):
+        from aethron_edge.sensors.geometry import Pinhole
+        from aethron_edge.sensors.rectification import LensCalibration
+        from test_sensor_provider import SensorProvider
+
+        fixture = SensorProvider()
+        fixture.setUp()
+        fixture.camera = Pinhole(width=3, height=3, fx=1.6, fy=2.0, cx=1.0, cy=1.0)
+        fixture.rig = fixture.rig.model_copy(
+            update={"camera": Pinhole(width=7, height=7, fx=2.0, fy=2.0, cx=3.0, cy=3.0)}
+        )
+        lens = LensCalibration(
+            camera=fixture.camera,
+            output_camera=fixture.camera,
+            distortion=(1.0, 0.0, 0.0, 0.0, 0.0),
+            valid_radius=1.0,
+        )
+        provider = fixture.provider(lens=lens)
+        result = provider.recorded(fixture.frame(provider.calibration), [(2, 1)], mount_id="rig_a")
+        # Undistorted x=0.5 -> distorted x=0.625 -> u=2, at axial z=5.
+        # Source x=2.5 m, then rig translation +0.5 m -> target pixel 4.2.
+        self.assertAlmostEqual(result.points[0].camera_xyz_m[0], 3.0, places=8)
+        self.assertAlmostEqual(result.points[0].pixel[0], 4.2, places=8)
+        self.assertFalse(result.live_evidence)

@@ -29,6 +29,7 @@ def run(wheels, dependencies, out):
         "test_sensor_replay.py",
         "test_sensor_ros2.py",
         "test_sensor_registration.py",
+        "test_sensor_provider.py",
     ):
         shutil.copyfile(ROOT / "tests/integration" / name, target / name)
     shutil.copyfile(ROOT / "integrations/edge/ros2/requirements.lock", bundle / "requirements.lock")

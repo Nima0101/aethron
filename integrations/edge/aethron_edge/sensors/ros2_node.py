@@ -82,13 +82,29 @@ class RosSubscriber:
             self.close()
             raise
 
-    def poll(self, *, timeout_sec=0.05):
+    def _spin(self, timeout_sec):
         if type(timeout_sec) not in (int, float) or not 0 <= timeout_sec <= 0.1:
             raise ValueError("invalid_poll_timeout")
         if self.closed:
-            return SourceFault("source_closed")
+            return False
         self.executor.spin_once(timeout_sec=float(timeout_sec))
+        return True
+
+    def poll(self, *, timeout_sec=0.05):
+        if not self._spin(timeout_sec):
+            return SourceFault("source_closed")
         return self.bridge.take(now_ns=time.monotonic_ns())
+
+    def poll_geometry(self, provider, indices, *, mount_id, timeout_sec=0.05):
+        """Consume once through calibration admission, rather than raw poll()."""
+        from .provider import GeometryProvider
+
+        if not isinstance(provider, GeometryProvider):
+            raise ValueError("invalid_provider")
+        if not self._spin(timeout_sec):
+            provider.source_lost()
+            return SourceFault("source_closed")
+        return provider.ros(self.bridge, indices, mount_id=mount_id)
 
     def close(self):
         if not self.closed:

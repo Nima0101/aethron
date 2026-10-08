@@ -158,6 +158,100 @@ class InstalledDDS(unittest.TestCase):
         self.assertTrue(result.scene_break)
         self.assertFalse(result.live_evidence)
 
+    def test_installed_dds_geometry_provider(self):
+        from aethron_edge.sensors.geometry import Pinhole
+        from aethron_edge.sensors.packets import CloudLayout
+        from aethron_edge.sensors.provider import (
+            GeometryProvider,
+            ProviderCalibration,
+            layout_digest,
+        )
+        from aethron_edge.sensors.registration import RigCalibration
+        from aethron_edge.sensors.ros2 import ClockMapping, RosIngress
+        from aethron_edge.sensors.ros2_node import RosSubscriber
+
+        layout = CloudLayout(
+            width=1,
+            height=1,
+            point_step=12,
+            row_step=12,
+            is_bigendian=False,
+            fields=[
+                {"name": n, "offset": i * 4, "datatype": 7, "count": 1}
+                for i, n in enumerate(("x", "y", "z"))
+            ],
+        )
+        rig = RigCalibration(
+            version=1,
+            source_frame="radar/front",
+            target_frame="front_optical",
+            mount_id="rig_a",
+            evidence="synthetic",
+            camera=Pinhole(width=640, height=480, fx=400.0, fy=400.0, cx=320.0, cy=240.0),
+            rotation=(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0),
+            translation_m=(0.5, 0.0, 0.0),
+            translation_error_m=0.01,
+            rotation_error_rad=0.0,
+            reprojection_error_px=0.0,
+        )
+        calibration = ProviderCalibration(
+            source_id="radar_front",
+            modality="radar",
+            rig=rig,
+            source_camera=None,
+            measurement_error_m=0.01,
+            layout_sha256=layout_digest(layout),
+        )
+        provider = GeometryProvider(
+            calibration, mode="ros", clock_id="fixture_boot", valid_for_ns=10_000_000_000
+        )
+        bridge = RosIngress(modality="radar", frame_id="radar/front")
+        subscriber = RosSubscriber(bridge, topic="/aethron_test/registered", context=self.context)
+        try:
+            publisher = self.publisher.create_publisher(
+                PointCloud2, "/aethron_test/registered", self.qos
+            )
+            self.connected(publisher, subscriber)
+            bridge.bind_clock(
+                ClockMapping(
+                    domain="ros_system",
+                    offset_ns=0,
+                    uncertainty_ns=0,
+                    valid_until_ns=time.monotonic_ns() + 5_000_000_000,
+                )
+            )
+            message = PointCloud2()
+            message.header.frame_id = "radar/front"
+            message.width = 1
+            message.height = 1
+            message.point_step = 12
+            message.row_step = 12
+            message.fields = [
+                PointField(name=n, offset=i * 4, datatype=7, count=1)
+                for i, n in enumerate(("x", "y", "z"))
+            ]
+            message.data = array("B", struct.pack("<fff", 0.0, 0.0, 5.0))
+            until = time.monotonic() + 5
+            while time.monotonic() < until:
+                stamp = time.monotonic_ns()
+                message.header.stamp.sec = stamp // 1_000_000_000
+                message.header.stamp.nanosec = stamp % 1_000_000_000
+                publisher.publish(message)
+                result = subscriber.poll_geometry(provider, [0], mount_id="rig_a", timeout_sec=0.01)
+                if hasattr(result, "points"):
+                    break
+            self.assertEqual(result.points[0].pixel, (360.0, 240.0))
+            self.assertFalse(result.live_evidence)
+            self.assertEqual(provider.status()["state"], "UNKNOWN")
+            subscriber.close()
+            self.assertEqual(
+                subscriber.poll_geometry(provider, [0], mount_id="rig_a").reason, "source_closed"
+            )
+            self.assertFalse(provider.status()["geometry_available"])
+        finally:
+            subscriber.close()
+            provider.close()
+
     def test_headless_installed_cli_exits_cleanly_on_sigterm(self):
         import json
         import select

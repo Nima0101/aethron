@@ -15,7 +15,7 @@ from pydantic import Field
 
 from ..sources.base import SourceFault
 from .geometry import Pinhole
-from .packets import Closed, Cloud, Raster, decode_cloud, decode_image
+from .packets import Closed, Cloud, CloudLayout, Raster, decode_cloud, decode_image, layout_digest
 
 AGE_NS = 100_000_000
 MAX_NS = 2**63 - 1
@@ -110,6 +110,7 @@ class RosObservation:
     camera: Pinhole | None
     calibration_digest: str | None
     scene_break: bool
+    layout_sha256: str | None = None
 
     @property
     def live_evidence(self):
@@ -234,13 +235,18 @@ class RosIngress:
                 key: m[key] for key in ("height", "width", "is_bigendian", "point_step", "row_step")
             }
             layout["fields"] = [_fields(f, "name offset datatype count") for f in m["fields"]]
-            return self._accept(decode_cloud(layout, _bytes(m["data"])), stamp, now_ns)
+            return self._accept(
+                decode_cloud(layout, _bytes(m["data"])),
+                stamp,
+                now_ns,
+                layout_digest(CloudLayout.model_validate(layout)),
+            )
         except (ValueError, TypeError, AttributeError, OverflowError):
             self.mapping = None
             self.last_stamp = None
             return self._fault("sensor_invalid")
 
-    def _accept(self, payload, stamp, now):
+    def _accept(self, payload, stamp, now, format_digest=None):
         if self.last_stamp is not None and (stamp <= self.last_stamp or now < self.last_receive):
             self.mapping = None
             self.last_stamp = None
@@ -265,10 +271,11 @@ class RosIngress:
                     self.last_stamp = None
                     return self._fault("clock_discontinuity")
         if isinstance(payload, Raster):
-            if self.last_layout is not None and payload.layout != self.last_layout:
-                self.calibration = None
-                self.pending_break = True
-            self.last_layout = payload.layout
+            format_digest = layout_digest(payload.layout)
+        if self.last_layout is not None and format_digest != self.last_layout:
+            self.calibration = None
+            self.pending_break = True
+        self.last_layout = format_digest
         camera = digest = None
         if isinstance(payload, Raster) and self.calibration is not None:
             candidate, identity, expiry = self.calibration
@@ -290,6 +297,7 @@ class RosIngress:
             camera,
             digest,
             self.pending_break,
+            format_digest,
         )
         if self.latest is not None:
             self.overwritten += 1

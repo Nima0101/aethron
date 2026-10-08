@@ -48,3 +48,8 @@ The author reviewed the transform direction, metre/radian/pixel units, right-han
 ## Resource/inventory self-review
 
 The resource fix changes only traversal through the standard-library package API and missing-resource handling; SHA-256/size admission of the frozen model is unchanged. Real ZIP fixtures reproduce the hosted Windows nested-path failure, with local 3.9/3.13 execution explicitly distinguished from native Windows. Candidate inventory separates owned wheels from dependency cache, checks distribution Name/Version metadata and rejects conflicting aliases or ambiguous candidates. No package version, licence, model, frozen threshold, logo or native iOS file changed. Fresh browser launch denial is retained, and no independent reviewer or hosted candidate success is claimed.
+
+
+## Provider admission self-review
+
+Reviewed source/clock mode separation, canonical bundle/format digests, loss/rewind/mount changes, decoded payload bounds, expiry propagation and native DDS single consumption. Changed cloud counts retain the format identity; changed fields/byte order do not. Geometry has no object labels or identity/history and remains unqualified. Actual lens bypass is rejected by an analytical regression; malformed raster bytes now withdraw rather than raising a struct parser exception. Sparse input remains bounded to 64 unique samples, and the final clock check prevents expired geometry from escaping slow processing. Independent assurance, real clocks/calibration and model/supervisor integration remain pending.

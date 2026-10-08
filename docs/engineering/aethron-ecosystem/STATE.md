@@ -1,5 +1,7 @@
 # Current state — 2026-10-08
 
+Current provider increment: [calibrated raw geometry](SENSOR-PROVIDER.md) now connects binary depth replay and ROS depth/cloud ingress to bounded registration/rectification. The installed DDS consumer uses one packet consumption; changed format/calibration/clock or lost source withdraws geometry. 107 integration tests, 49 installed sensor tests, seven OpenCV tests and 54 installed ROS tests passed. [Provider evidence](evidence/phase2/provider.json) records exact wheel hashes, retained counterexamples and pending gates. Source commit/clean reproduction follows. P2.1/P3.1 remain partial; no semantic model, appliance provider wiring, physical calibration or field safety is claimed.
+
 Latest verified source: `ce5294d924ccb6bff52cc56cba4b6df017c99e16`. [Clean reproduction](evidence/phase2/resource-clean.json) passed source/ZIP artifacts, isolated consumers, 39 installed sensor tests, six OpenCV rectification tests, HTTP/SSE and zero-viewer continuation. The frozen temporal gate passed at p95 9.225ms. Core wheel `726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e`; edge wheel `8fddc0557864a1b0b511812cddd12f364a708147d954e148d4a9822842c4ac74`. Actual wheel ZIP import also passed on local Python 3.9.6. Browser sandbox permission, native Windows hosted confirmation and other publication prerequisites remain pending. No public push occurred. Next executable coding task is calibrated raw-sensor provider admission/connection; P2/P3 and hardware qualification remain incomplete.
 
 ## Earlier checkpoints (historical status)

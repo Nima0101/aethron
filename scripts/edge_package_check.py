@@ -84,6 +84,7 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
             "test_sensor_replay.py",
             "test_sensor_ros2.py",
             "test_sensor_registration.py",
+            "test_sensor_provider.py",
         ):
             shutil.copyfile(ROOT / "tests/integration" / test_name, work / test_name)
         subprocess.run(

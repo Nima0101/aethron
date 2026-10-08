@@ -5,6 +5,8 @@ supply acquisition clocks and calibration separately. No IDs, inferred image
 boxes, temperature conversion or device activation are introduced here.
 """
 
+import hashlib
+import json
 import math
 import struct
 from dataclasses import dataclass, field
@@ -166,3 +168,16 @@ def decode_cloud(layout: dict, data: bytes) -> Cloud:
                 Point((values["x"], values["y"], values["z"]), values.get("radial_velocity"))
             )
     return Cloud(tuple(points), invalid)
+
+
+def layout_digest(layout):
+    """Pin physical sample format; cloud counts/padding are packet metadata."""
+    if not isinstance(layout, (ImageLayout, CloudLayout)):
+        raise ValueError("invalid_layout")
+    fields = layout.model_dump()
+    if isinstance(layout, CloudLayout):
+        for name in ("width", "height", "row_step"):
+            fields.pop(name)
+    return hashlib.sha256(
+        json.dumps(fields, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    ).hexdigest()

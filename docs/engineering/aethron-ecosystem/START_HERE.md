@@ -43,3 +43,5 @@ Run `python scripts/check_ecosystem_plan.py --self-test` and `python scripts/ver
 P2/P3 implementation: [sensor packet/replay contracts and pinned sources](P2-SENSOR-ADAPTERS.md), [installed ROS sidecar](../../../integrations/edge/ros2/README.md), and [executed ROS software evidence](evidence/phase2/ros2.json). Registration, nonvisible semantic providers and physical qualification remain pending.
 
 [Implemented rigid registration and sparse lens rectification](SENSOR-REGISTRATION.md) extend the raw sensor boundary; semantic providers and physical qualification remain pending.
+
+Calibrated raw provider: [implemented contracts and SDK consumer](SENSOR-PROVIDER.md), [checkpoint evidence](evidence/phase2/provider.json). Bounded recorded depth and ROS depth/cloud geometry now apply the rig/lens/clock/format bindings; no semantic model, appliance wiring or hardware qualification is inferred.

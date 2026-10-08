@@ -249,24 +249,28 @@
         "bounded_headless_ros_status_and_shutdown",
         "strict_rigid_sensor_to_optical_registration",
         "expiring_registration_and_declared_error_footprint",
-        "sparse_brown_conrady_rectification_and_depth_deprojection"
+        "sparse_brown_conrady_rectification_and_depth_deprojection",
+        "calibrated_recorded_depth_and_ros_depth_cloud_geometry_provider",
+        "provider_source_mount_format_clock_and_calibration_admission"
       ],
       "pending": [
         "licensed_real_nonvisible_packet_replay",
         "live_clock_calibration_admission",
         "supervisor_and_nonvisible_model_provider_integration",
-        "calibrated_ros_and_supervisor_provider_connection",
+        "calibrated_provider_appliance_worker_and_supervisor_connection",
         "raster_stereo_fisheye_rectification"
       ],
       "evidence": "evidence/phase2/sensors.json",
       "ros_evidence": "evidence/phase2/ros2.json",
-      "registration_evidence": "evidence/phase2/registration.json"
+      "registration_evidence": "evidence/phase2/registration.json",
+      "provider_evidence": "evidence/phase2/provider.json"
     },
-    "next_task": "P2.1_calibrated_sensor_provider_connection",
+    "next_task": "P2.1_provisioned_provider_worker_and_supervisor_connection",
     "P3.1": {
       "status": "in_progress",
       "implemented": [
-        "installed_ros2_dds_ingress_software_tuple"
+        "installed_ros2_dds_ingress_software_tuple",
+        "installed_dds_calibrated_geometry_consumer"
       ],
       "pending": [
         "read_only_mavlink_telemetry",
