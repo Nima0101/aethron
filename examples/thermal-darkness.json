@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "now_ms": 1000,
+  "clock": "monotonic",
+  "lighting": "zero_visible",
+  "evidence": "synthetic",
+  "authorized_obstruction": false,
+  "contract": "warn",
+  "zones": [
+    "near"
+  ],
+  "observations": [
+    {
+      "sensor": "thermal",
+      "zone": "near",
+      "values": [
+        85,
+        90
+      ],
+      "at_ms": 1000,
+      "calibration_until_ms": 2000,
+      "quality": "valid",
+      "nonhuman": true,
+      "rect": [
+        15,
+        25,
+        30,
+        35
+      ],
+      "inference_ms": 0
+    }
+  ]
+}

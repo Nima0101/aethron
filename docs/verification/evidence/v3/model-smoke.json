@@ -1,0 +1,94 @@
+{
+  "person": {
+    "expected_class_present": true,
+    "result": {
+      "version": 3,
+      "at_ms": 0,
+      "evidence": "recorded",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.018998056650161743,
+            0.0424705445766449,
+            0.6981850564479828,
+            0.94223752617836
+          ],
+          "state": "tentative",
+          "status": "PRESENT",
+          "score": 0.921991,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.0001,
+            0.0001
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 100,
+          "sources": [
+            "rgb"
+          ],
+          "range_m": null,
+          "velocity_normalized_per_s": null,
+          "direction_rad": null,
+          "prediction": null
+        }
+      ],
+      "reasons": [],
+      "expires_at_ms": 100,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    }
+  },
+  "animal": {
+    "expected_class_present": true,
+    "result": {
+      "version": 3,
+      "at_ms": 0,
+      "evidence": "recorded",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "animal",
+          "box": [
+            0.004287956559208703,
+            0.0034340922037760417,
+            0.9643912643128119,
+            0.9857093811035156
+          ],
+          "state": "tentative",
+          "status": "PRESENT",
+          "score": 0.904115,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.0001,
+            0.0001
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 100,
+          "sources": [
+            "rgb"
+          ],
+          "range_m": null,
+          "velocity_normalized_per_s": null,
+          "direction_rad": null,
+          "prediction": null
+        }
+      ],
+      "reasons": [],
+      "expires_at_ms": 100,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    }
+  }
+}

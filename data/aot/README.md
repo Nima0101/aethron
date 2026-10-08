@@ -1,0 +1,8 @@
+# Licensed recorded image excerpt
+Amazon Airborne Object Tracking dataset, accessed 2026-10-08 from the [official AWS registry](https://registry.opendata.aws/airborne-object-tracking/). Data license: [CDLA-Permissive-1.0](LICENSE.txt), distinct from the Apache-2.0 source license. Attribution and source information are retained in [manifest.json](manifest.json).
+
+Derived data: first20 annotated frames of the first annotated flight in part1 metadata, plus first5 unannotated frames. Resized full grayscale frames to612×512 using Pillow BOX; no crops selected from annotations. These are real camera recordings of fixed-wing aircraft, not thermal recordings or drone labels. Source image URLs and original/derived SHA-256 are recorded. Metadata came from the first2,000,000 bytes of the official CSV via HTTP range. No accuracy-driven selection; every selected frame is included, including negatives and difficult tiny objects. Evaluation only; not training or field validation. Ground truth is isolated from pixel inference.
+
+The original classical detector processes these pixels before tracker input is constructed. Its false positives and misses are reported, not cleaned up using labels. This small excerpt cannot establish deployment accuracy. No human identity data is required for this experiment.
+
+Evaluation false positives are relative to the dataset's annotated airborne-object task. Background structures are not exhaustively labeled as generic obstacles, so these counts are not a general obstacle-detector accuracy estimate. No annotated aircraft was matched by either tested detector.

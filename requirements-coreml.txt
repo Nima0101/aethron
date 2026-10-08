@@ -1,0 +1,5 @@
+# Optional accelerated Apple Silicon inference. Core ML presence is checked at runtime.
+-r requirements-vision.txt
+onnxruntime==1.30.0
+flatbuffers==25.12.19
+protobuf==7.36.2

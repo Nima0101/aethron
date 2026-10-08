@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-08",
+  "runtime_revision": "9fd150a8d34e7db535393dad287d134529c5087b",
+  "unit_tests": {
+    "count": 66,
+    "skipped": 0,
+    "python": [
+      "3.9.6",
+      "3.13.15"
+    ],
+    "platform": "macOS arm64"
+  },
+  "properties": {
+    "legacy_fusion_cases": 2400,
+    "assignment_and_filter_cases": 2100
+  },
+  "replay": {
+    "actual_cli": true,
+    "deterministic": true,
+    "recorded_pixel_frames": 25,
+    "corrupt_stream_preserves_contract": true
+  },
+  "visuals": {
+    "actual_cli_frames": 48,
+    "inputs": "original synthetic",
+    "byte_reproduced": true,
+    "recorded_failure_capture": true,
+    "model_still_smoke_capture": true,
+    "reference_images_copied_from_visage": false
+  },
+  "data_provenance": {
+    "original_aot_downloads_reproduced": 25,
+    "data_license": "CDLA-Permissive-1.0",
+    "smoke_photos": "NASA public domain; Stefan van der Walt CC0"
+  },
+  "qualification": {
+    "production_ready": false,
+    "publication_ready": false,
+    "live_sensors_exercised": [],
+    "live_controllers_exercised": [],
+    "hosted_ci": "not run",
+    "independent_review": "not performed",
+    "browser": "blocked: Chromium MachPort bootstrap permission denial",
+    "airborne_detector": "not qualified: both detectors miss20 annotated aircraft",
+    "thermal_models_and_physical_zero_light": "not qualified",
+    "latency": "latest clone gate passed70.188ms p95; prior failures retained; deployment stability unproven",
+    "rgb_cpu_inference": "all tested thread profiles exceed100ms; no live deadline qualification"
+  },
+  "packaging": {
+    "clean_clone": true,
+    "two_identical_source_zipapp_builds": true,
+    "two_identical_wheels": true,
+    "isolated_install_and_consumers": true,
+    "local_unsigned_only": true
+  },
+  "coverage": {
+    "percent": 90,
+    "scope": "current unittest process plus actual RGB smoke inference; CLI subprocesses separately E2E tested, not included in this parent coverage"
+  }
+}

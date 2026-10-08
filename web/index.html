@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101d28">
+  <meta name="description" content="RescueSense live camera, local on-device object detection research preview.">
+  <meta http-equiv="Permissions-Policy" content="camera=(self)">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <title>RescueSense | Live Camera</title>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="identity"><div class="logo">R<span>+</span></div><div><strong>RescueSense</strong><small>LIVE CAMERA RESEARCH</small></div></div>
+      <div id="health" class="health" role="status" aria-live="polite">OFFLINE</div>
+    </header>
+    <main>
+      <section class="intro"><div class="eyebrow">LOCAL VISUAL PERCEPTION</div><h1>See what your camera sees.</h1><p>Run on-device detection on an iPhone, Android phone or laptop. No images are uploaded. Results are not safety-certified.</p></section>
+      <section class="viewer" aria-label="Camera preview">
+        <video id="video" autoplay muted playsinline aria-label="Live camera feed"></video>
+        <canvas id="overlay" aria-label="Object detection overlays"></canvas>
+        <div id="empty" class="empty"><div class="viewicon">◎</div><strong>Your camera preview appears here</strong><span>Camera permission is requested only when you press Start.</span></div>
+        <div class="viewerbar"><span id="engine">Model not loaded</span><span id="frame-latency">— ms</span></div>
+      </section>
+      <div class="controls">
+        <button id="start" class="primary" type="button">Start camera</button>
+        <button id="switch" type="button" disabled>Switch camera</button>
+        <button id="stop" type="button" disabled>Stop</button>
+        <button id="compat" type="button">Compatibility CPU</button>
+      </div>
+      <section class="details"><div><h2>Observations <span id="count">0</span></h2><p id="message" role="status" aria-live="polite">Ready. Use HTTPS on mobile or localhost on a laptop.</p></div><ul id="detections" aria-label="Detected objects"></ul></section>
+      <div class="notice"><strong>Safety boundary</strong><p>Experimental detection can miss people, obstacles and aircraft, especially in poor light. No collision avoidance, driving, drone navigation or emergency response decisions. If inference is late, results are marked delayed rather than safe.</p></div>
+    </main>
+    <footer><span>Open-source Research • Device-local inference</span><span>No tracking • No video recording</span></footer>
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

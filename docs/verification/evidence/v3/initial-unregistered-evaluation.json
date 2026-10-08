@@ -1,0 +1,242 @@
+{
+  "benchmark": {
+    "frames": 100,
+    "max_ms": 78.151,
+    "memory_budget_bytes": 33554432,
+    "objects": 32,
+    "p50_ms": 14.314,
+    "p95_budget_ms": 100,
+    "p95_ms": 24.595,
+    "passed": true,
+    "peak_bytes": 118108
+  },
+  "platform": "Darwin arm64",
+  "protocol": "matrix-v3.md frozen T09/T10/T13",
+  "python": "3.13.15",
+  "recorded": {
+    "frames": 25,
+    "greedy_iou": {
+      "centre_rmse_normalized": null,
+      "false_negatives": 20,
+      "false_positives": 629,
+      "fragmentations": 0,
+      "id_switches": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "true_positives": 0,
+      "uncertain_predictions_not_counted_as_detections": 0
+    },
+    "motion": "UNKNOWN: no validated ego registration for this recording",
+    "physical_or_semantic_qualification": false,
+    "pixel_detector_latency_ms": {
+      "max": 1806.468,
+      "p50": 1183.83
+    },
+    "source": "AOT evaluation-only excerpt; fixed-wing aircraft, not UAV",
+    "temporal": {
+      "centre_rmse_normalized": null,
+      "false_negatives": 20,
+      "false_positives": 800,
+      "fragmentations": 0,
+      "id_switches": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "true_positives": 0,
+      "uncertain_predictions_not_counted_as_detections": 0
+    }
+  },
+  "synthetic": {
+    "all_loss": {
+      "greedy_iou": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 16,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 0.333333,
+        "true_positives": 8,
+        "uncertain_predictions_not_counted_as_detections": 0
+      },
+      "temporal": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 16,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 0.333333,
+        "true_positives": 8,
+        "uncertain_predictions_not_counted_as_detections": 5
+      }
+    },
+    "blackout": {
+      "greedy_iou": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 24,
+        "uncertain_predictions_not_counted_as_detections": 0
+      },
+      "temporal": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 24,
+        "uncertain_predictions_not_counted_as_detections": 0
+      }
+    },
+    "camera_pan": {
+      "greedy_iou": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 24,
+        "uncertain_predictions_not_counted_as_detections": 0
+      },
+      "temporal": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 24,
+        "uncertain_predictions_not_counted_as_detections": 0
+      }
+    },
+    "classes": {
+      "greedy_iou": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 11,
+        "uncertain_predictions_not_counted_as_detections": 0
+      },
+      "temporal": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 11,
+        "uncertain_predictions_not_counted_as_detections": 40
+      }
+    },
+    "clean": {
+      "greedy_iou": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 24,
+        "uncertain_predictions_not_counted_as_detections": 0
+      },
+      "temporal": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 24,
+        "uncertain_predictions_not_counted_as_detections": 0
+      }
+    },
+    "crossing": {
+      "greedy_iou": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 2,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 48,
+        "uncertain_predictions_not_counted_as_detections": 0
+      },
+      "temporal": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 0.958333,
+        "true_positives": 46,
+        "uncertain_predictions_not_counted_as_detections": 2
+      }
+    },
+    "fast_uav": {
+      "greedy_iou": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "fragmentations": 2,
+        "id_switches": 20,
+        "precision": 1.0,
+        "recall": 0.875,
+        "true_positives": 21,
+        "uncertain_predictions_not_counted_as_detections": 0
+      },
+      "temporal": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "fragmentations": 2,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 0.875,
+        "true_positives": 21,
+        "uncertain_predictions_not_counted_as_detections": 3
+      }
+    },
+    "occlusion": {
+      "greedy_iou": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "fragmentations": 2,
+        "id_switches": 2,
+        "precision": 1.0,
+        "recall": 0.875,
+        "true_positives": 21,
+        "uncertain_predictions_not_counted_as_detections": 0
+      },
+      "temporal": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "fragmentations": 2,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 0.875,
+        "true_positives": 21,
+        "uncertain_predictions_not_counted_as_detections": 3
+      }
+    }
+  }
+}

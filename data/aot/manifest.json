@@ -1,0 +1,480 @@
+{
+  "source": "Amazon Airborne Object Tracking dataset, accessed 2026-10-08",
+  "registry": "https://registry.opendata.aws/airborne-object-tracking/",
+  "license": "CDLA-Permissive-1.0",
+  "license_url": "https://cdla.dev/permissive-1-0/",
+  "transformation": "First20 annotated frames of first annotated flight; first5 empty frames; grayscale resized BOX to612x512; no label crops. All frames retained. Evaluation only. Fixed-wing aircraft, not UAV labels.",
+  "metadata_prefix_sha256": "d737e14622314b29d1b6be7aa6ea5ee08236844b3dd277bbe6c0d5e28d310588",
+  "frames": [
+    {
+      "file": "000.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826668011352063c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "e7aafa627b1a5d498db9a81c8b5fc92854c1bcbcbe935d77257f9c824adaa014",
+      "sha256": "16d6093afebd51101362c2ca0d0ef21d05ecd19f1b2e1cedd55dd647c6cbc0f0",
+      "frame": 2,
+      "time_ns": 1560848266680113520,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6957516339869281,
+            0.45859375,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "001.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826678166803963c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "9f1da5d63d0f0f667dd48400272cf04ea36cdf0b78a1c09ca1b971c35da637b1",
+      "sha256": "a260f130e2ff40c057da1a963b7e2cb483e925ea4f9add7b52ec84665c4a737c",
+      "frame": 3,
+      "time_ns": 1560848266781668039,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6951797385620915,
+            0.45625,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "002.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826688403947063c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "df54532f328b32e03c3b8e4775a16431eeb38c495b5ed100b50a253e406ca320",
+      "sha256": "bc9d2d084a02f8496668142b4bdd55c203dffa0199fa666091fed4da2395a1e3",
+      "frame": 4,
+      "time_ns": 1560848266884039470,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6919934640522876,
+            0.45654296875,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "003.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826698390725463c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "20f8dd39a5f51d8ebc16f899286a957282c0306d447da0c227f0b326da57903e",
+      "sha256": "58f06edf43f7747cabf82057f355e4d18795110858b026940ed5d75640891d7d",
+      "frame": 5,
+      "time_ns": 1560848266983907254,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6909313725490196,
+            0.45693359375,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "004.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826708477035863c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "ad6ed1ffb5a8753e0f2f93cfcd31a5763b52b3f0b6c0913352ca52ae0a5cbff2",
+      "sha256": "d0757f11241c79472318aaef188ce26970bbbfc7c3956a30927e20f1ec30e32b",
+      "frame": 6,
+      "time_ns": 1560848267084770358,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6887254901960784,
+            0.455859375,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "005.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826718393379963c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "644c0de464d89ba6f19161ec72bad82097b73fcb405387deaf5dde5ca6fcaa94",
+      "sha256": "3d1d31f95633c48af0f1fee873c5115ffaf7d49c2bd199cf101bde8222683fce",
+      "frame": 7,
+      "time_ns": 1560848267183933799,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6870098039215686,
+            0.45654296875,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "006.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826728336042763c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "d7d9c77433764af624c36d33a779bf25c8c26fdd3c95cdc038dd31b83a5590be",
+      "sha256": "b61b5b4db301e04f873e219f9997ec7b5e59cf6d14209d4d4d0d3e1efad5ce24",
+      "frame": 8,
+      "time_ns": 1560848267283360427,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6870915032679739,
+            0.45625,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "007.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826738903125463c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "6af69ba30e28639e5ecca45f4dae83d0e347fe2ad83fe13dc80f213e03eeb23f",
+      "sha256": "d8b543c1475b0ee1d2a165a692a5664d74335bf85b532be3ccefbbe0244ca2e1",
+      "frame": 9,
+      "time_ns": 1560848267389031254,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6865196078431373,
+            0.454296875,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "008.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826748266191863c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "a2e9efed593995a838ff71ca2193bc03aa38a6291c1d27b770ccb1570379bb07",
+      "sha256": "4ec4705d9e5ac8bcc9b1711995ad59fe2f90712cb5447141eb7f1d8e8a920728",
+      "frame": 10,
+      "time_ns": 1560848267482661918,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6866830065359477,
+            0.45546875,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "009.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826758538230763c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "4fa78f59a4b3f1ab6f17071336442b9e9b4657dbd296739030d27100e6aecbcb",
+      "sha256": "96e1435d69335d9a814d24407b53ba7aa3279b5dc27803ceb8c97a523639b5f9",
+      "frame": 11,
+      "time_ns": 1560848267585382307,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6875,
+            0.45517578125,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "010.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826768456153263c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "e4bd06f8e09e0d8899f72e1e043faf7c2cf6cb31d28c62ecf500e89026b056f6",
+      "sha256": "18e0accc3aef167425ff28f8beb4368f1b620ab9f9c93a70cb4062c100677cad",
+      "frame": 12,
+      "time_ns": 1560848267684561532,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6857843137254902,
+            0.45439453125,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "011.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826778228886163c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "53ac24647ee6fe888bfa34f6d759f8e6f13dbd5363398522fc3c83e37ee0db47",
+      "sha256": "f79f0c7f8d42b8e8362b6e3daef4d2c7d007fd90696f880b1bc004773a0df854",
+      "frame": 13,
+      "time_ns": 1560848267782288861,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6862745098039216,
+            0.45517578125,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "012.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826790731466563c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "9bc7feb2336bc52b76d4d2d9fe1eec27a140c9344e031c20ee64f355640882bd",
+      "sha256": "460c74d37de3a7eda0a6111e0e65aa69ff9115a258c3d33c9a1d69fa0f1a444d",
+      "frame": 14,
+      "time_ns": 1560848267907314665,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6848039215686275,
+            0.45400390625,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "013.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826798347045063c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "623c2a7132eeb7e451620a2bb873877478994f57d2d9b3f9b791919855b91dcc",
+      "sha256": "fe861744c38303339211c514caaf6f53d179b2a7784e9a738939333afa0c4e92",
+      "frame": 15,
+      "time_ns": 1560848267983470450,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6851307189542484,
+            0.4541015625,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "014.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826810329629163c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "59d8d45f467bf6fcd4839ca0a540618ac1d3d951a1fb2adc12ad7c4d575c23be",
+      "sha256": "c25488e0eacd344c98d4175aff3a01a7e07635306a2a70d733eaa747f1c9c375",
+      "frame": 16,
+      "time_ns": 1560848268103296291,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.68390522875817,
+            0.45546875,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "015.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826820831139063c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "2777c74516d6b8d0d4b8c0dd2073a0aafb2b1679d301693cba98f8528311e704",
+      "sha256": "54d2f4a957b834ebfca66219c76dd01f5f93415a31eb64b22ce1d0760a4a0d52",
+      "frame": 17,
+      "time_ns": 1560848268208311390,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6818627450980392,
+            0.454296875,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "016.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826828228527663c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "ddecd264ed9bf4bbc24814826e96c4380ccea34e262e04c0c71a9d6a8b988eb9",
+      "sha256": "7e7f3f9ce47ebae3888e1bd3a1bb5041b0d759edc8db4bcdd4ae0ccc1c2c1e97",
+      "frame": 18,
+      "time_ns": 1560848268282285276,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6820261437908496,
+            0.45380859375,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "017.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826838224864063c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "0e1a7bf6300ee1397f5966e43b090c7c3d7691ebeea4925ca7cee1adba01ab5c",
+      "sha256": "97dc6e7b3f0c5a11852300f009f192d1a9ea77e68c50b487d33f0daacc1ba859",
+      "frame": 19,
+      "time_ns": 1560848268382248640,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6804738562091504,
+            0.455078125,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "018.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826848171056263c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "73cac9cd8311d2e1267d36d1a1c5eecd295deec80be90db62cdca2fdea09d362",
+      "sha256": "2721a6c640f490e9ab7ee9d5e2429a0032be0eb5112e1970d627e6d02a10aa56",
+      "frame": 20,
+      "time_ns": 1560848268481710562,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6799019607843138,
+            0.45146484375,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "019.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/63c5597a57b04b448723f1f1844a2b78/156084826858594358063c5597a57b04b448723f1f1844a2b78.png",
+      "source_sha256": "acdf6d3335a82992ef99194f9b40d298972f852ef2be664e9f51604f976993a5",
+      "sha256": "988276516bb49360599b22ccf1bf0ff4838407a1c4fcdd04357e4e87a35ba803",
+      "frame": 21,
+      "time_ns": 1560848268585943580,
+      "sequence": "positive",
+      "truth": [
+        {
+          "id": "aircraft-1",
+          "class": "obstacle",
+          "box": [
+            0.6812908496732026,
+            0.4513671875,
+            0.0024509803921568627,
+            0.0029296875
+          ]
+        }
+      ]
+    },
+    {
+      "file": "020.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/673f29c3e4b4428fa26bc55d812d45d9/1566556045879430639673f29c3e4b4428fa26bc55d812d45d9.png",
+      "source_sha256": "29684a0ec3680095d2e5ed979f3bee78a1061d5fbbc7db3be9f24a16bfd83071",
+      "sha256": "aca47d0de685f793116511aa06a463f2dfbbd2d6b5c11a9a152cc8b049fc1a74",
+      "frame": 3,
+      "time_ns": 1566556045879430639,
+      "sequence": "negative",
+      "truth": []
+    },
+    {
+      "file": "021.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/673f29c3e4b4428fa26bc55d812d45d9/1566556046008821070673f29c3e4b4428fa26bc55d812d45d9.png",
+      "source_sha256": "616d8192315750de48d16218f8dec3c7df204a42091f9d67a57326faa118e494",
+      "sha256": "3888a8c481e09aeb60d6c647a86a2234b6f53d5d3fc64c0676d553a8de535258",
+      "frame": 4,
+      "time_ns": 1566556046008821070,
+      "sequence": "negative",
+      "truth": []
+    },
+    {
+      "file": "022.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/673f29c3e4b4428fa26bc55d812d45d9/1566556046078455533673f29c3e4b4428fa26bc55d812d45d9.png",
+      "source_sha256": "5cfbc8e7b8aad4c6f5c0b4c239f5052492012982590abe8bf8d202f33d04c4d4",
+      "sha256": "4ad31b1f1a2480aeb739ce9e8936bcdfc8553ca77fb624e7671f0a8944716bcc",
+      "frame": 5,
+      "time_ns": 1566556046078455533,
+      "sequence": "negative",
+      "truth": []
+    },
+    {
+      "file": "023.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/673f29c3e4b4428fa26bc55d812d45d9/1566556046185850341673f29c3e4b4428fa26bc55d812d45d9.png",
+      "source_sha256": "81ba420383e4ee0f4c2d691f1d797f1cc4e2b7c40494c8edacea53275b297df8",
+      "sha256": "fce129b20569bfded1b97b0387c05bc17c8c97c07712b499f7d5c5ab226ac039",
+      "frame": 6,
+      "time_ns": 1566556046185850341,
+      "sequence": "negative",
+      "truth": []
+    },
+    {
+      "file": "024.pgm",
+      "url": "https://airborne-obj-detection-challenge-training.s3.amazonaws.com/part1/Images/673f29c3e4b4428fa26bc55d812d45d9/1566556046284871127673f29c3e4b4428fa26bc55d812d45d9.png",
+      "source_sha256": "61cc531a319caf82693331594d1df956a7c977dc4a3fa350cb3987d7c802abc6",
+      "sha256": "5ec5996d3d431e588ad7f9cc4a144ba99c227f6e13dbe42694d0eb97907ad02b",
+      "frame": 7,
+      "time_ns": 1566556046284871127,
+      "sequence": "negative",
+      "truth": []
+    }
+  ]
+}

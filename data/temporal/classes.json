@@ -1,0 +1,607 @@
+[
+  {
+    "frame": {
+      "at_ms": 0,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 0,
+          "calibration_until_ms": 1000,
+          "detections": [
+            {
+              "box": [
+                0.1,
+                0.45,
+                0.04,
+                0.08
+              ],
+              "class": "person",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.1,
+          0.45,
+          0.04,
+          0.08
+        ],
+        "class": "person",
+        "id": "person",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 100,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 100,
+          "calibration_until_ms": 1100,
+          "detections": [
+            {
+              "box": [
+                0.1,
+                0.45,
+                0.04,
+                0.08
+              ],
+              "class": "cyclist",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.1,
+          0.45,
+          0.04,
+          0.08
+        ],
+        "class": "cyclist",
+        "id": "cyclist",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 200,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 200,
+          "calibration_until_ms": 1200,
+          "detections": [
+            {
+              "box": [
+                0.1,
+                0.45,
+                0.04,
+                0.08
+              ],
+              "class": "vehicle",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.1,
+          0.45,
+          0.04,
+          0.08
+        ],
+        "class": "vehicle",
+        "id": "vehicle",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 300,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 300,
+          "calibration_until_ms": 1300,
+          "detections": [
+            {
+              "box": [
+                0.1,
+                0.45,
+                0.04,
+                0.08
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.1,
+          0.45,
+          0.04,
+          0.08
+        ],
+        "class": "uav",
+        "id": "uav",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 400,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 400,
+          "calibration_until_ms": 1400,
+          "detections": [
+            {
+              "box": [
+                0.1,
+                0.45,
+                0.04,
+                0.08
+              ],
+              "class": "animal",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.1,
+          0.45,
+          0.04,
+          0.08
+        ],
+        "class": "animal",
+        "id": "animal",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 500,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 500,
+          "calibration_until_ms": 1500,
+          "detections": [
+            {
+              "box": [
+                0.1,
+                0.45,
+                0.04,
+                0.08
+              ],
+              "class": "obstacle",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.1,
+          0.45,
+          0.04,
+          0.08
+        ],
+        "class": "obstacle",
+        "id": "obstacle",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 600,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 600,
+          "calibration_until_ms": 1600,
+          "detections": [
+            {
+              "box": [
+                0.1,
+                0.45,
+                0.04,
+                0.08
+              ],
+              "class": "equipment",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.1,
+          0.45,
+          0.04,
+          0.08
+        ],
+        "class": "equipment",
+        "id": "equipment",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 700,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 700,
+          "calibration_until_ms": 1700,
+          "detections": [
+            {
+              "box": [
+                0.1,
+                0.45,
+                0.04,
+                0.08
+              ],
+              "class": "hot",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.1,
+          0.45,
+          0.04,
+          0.08
+        ],
+        "class": "hot",
+        "id": "hot",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 800,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 800,
+          "calibration_until_ms": 1800,
+          "detections": [
+            {
+              "box": [
+                0.1,
+                0.45,
+                0.04,
+                0.08
+              ],
+              "class": "cold",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.1,
+          0.45,
+          0.04,
+          0.08
+        ],
+        "class": "cold",
+        "id": "cold",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 900,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 900,
+          "calibration_until_ms": 1900,
+          "detections": [
+            {
+              "box": [
+                0.1,
+                0.45,
+                0.04,
+                0.08
+              ],
+              "class": "fire_like",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.1,
+          0.45,
+          0.04,
+          0.08
+        ],
+        "class": "fire_like",
+        "id": "fire_like",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 1000,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 1000,
+          "calibration_until_ms": 2000,
+          "detections": [
+            {
+              "box": [
+                0.1,
+                0.45,
+                0.04,
+                0.08
+              ],
+              "class": "smoke",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.1,
+          0.45,
+          0.04,
+          0.08
+        ],
+        "class": "smoke",
+        "id": "smoke",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  }
+]

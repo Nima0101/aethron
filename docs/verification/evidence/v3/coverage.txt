@@ -1,0 +1,26 @@
+Name                                   Stmts   Miss  Cover   Missing
+--------------------------------------------------------------------
+rescuesense/__init__.py                    3      0   100%
+rescuesense/__main__.py                   47     47     0%   3-66
+rescuesense/actions.py                     4      0   100%
+rescuesense/adapters.py                   28      0   100%
+rescuesense/core.py                       53      0   100%
+rescuesense/demo.py                       24     24     0%   3-85
+rescuesense/features.py                   62      2    97%   23-24
+rescuesense/models/__init__.py             0      0   100%
+rescuesense/render.py                     21      0   100%
+rescuesense/schema.py                    108      0   100%
+rescuesense/schema_v2.py                  31      0   100%
+rescuesense/temporal/__init__.py           2      0   100%
+rescuesense/temporal/fixtures.py          39      0   100%
+rescuesense/temporal/fusion.py            55      5    91%   21, 31, 54, 72-73
+rescuesense/temporal/math.py              84      1    99%   109
+rescuesense/temporal/pixels.py            50      0   100%
+rescuesense/temporal/registration.py      34      1    97%   12
+rescuesense/temporal/replay.py            39      0   100%
+rescuesense/temporal/schema.py            49      0   100%
+rescuesense/temporal/session.py          147      8    95%   129-130, 134-135, 165-166, 177, 182
+rescuesense/vision/__init__.py             0      0   100%
+rescuesense/vision/yolox.py               76      3    96%   60, 82, 91
+--------------------------------------------------------------------
+TOTAL                                    956     91    90%

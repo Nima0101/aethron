@@ -1,0 +1,2 @@
+# Community conduct
+Treat contributors and affected people respectfully. Harassment, discrimination, threats, disclosure of personal data and pressure to bypass rescue/privacy boundaries are unacceptable. Discuss behavior and evidence, not personal worth. Maintainers may remove unsafe content and restrict participation fairly. Send conduct concerns privately to the maintainer through an available private contact channel; no dedicated reporting service is currently operated.

@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-08",
+  "browser": {
+    "status": "blocked",
+    "tool": "Playwright + installed Chromium headless shell",
+    "failure": "MachPortRendezvousServer bootstrap_check_in Permission denied (1100)",
+    "scope": "real browser rendering, screenshot/video, and timer validation not executed"
+  },
+  "camera_inventory": {
+    "command": "system_profiler SPCameraDataType -json",
+    "devices": [],
+    "scope": "enumeration only; not capture"
+  },
+  "live_sensors_exercised": [],
+  "live_controllers_exercised": [],
+  "usb_inventory": {
+    "command": "system_profiler SPUSBDataType -json",
+    "device_names": [],
+    "scope": "enumeration only; no serial numbers or raw sensing"
+  }
+}

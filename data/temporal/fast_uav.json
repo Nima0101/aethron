@@ -1,0 +1,1283 @@
+[
+  {
+    "frame": {
+      "at_ms": 0,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 0,
+          "calibration_until_ms": 1000,
+          "detections": [
+            {
+              "box": [
+                0.1,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.1,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 100,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 100,
+          "calibration_until_ms": 1100,
+          "detections": [
+            {
+              "box": [
+                0.11800000000000001,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.11800000000000001,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 200,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 200,
+          "calibration_until_ms": 1200,
+          "detections": [
+            {
+              "box": [
+                0.136,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.136,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 300,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 300,
+          "calibration_until_ms": 1300,
+          "detections": [
+            {
+              "box": [
+                0.154,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.154,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 400,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 400,
+          "calibration_until_ms": 1400,
+          "detections": [
+            {
+              "box": [
+                0.172,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.172,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 500,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 500,
+          "calibration_until_ms": 1500,
+          "detections": [
+            {
+              "box": [
+                0.19,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.19,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 600,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 600,
+          "calibration_until_ms": 1600,
+          "detections": [
+            {
+              "box": [
+                0.208,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.208,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 700,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 700,
+          "calibration_until_ms": 1700,
+          "detections": [
+            {
+              "box": [
+                0.226,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.226,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 800,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 800,
+          "calibration_until_ms": 1800,
+          "detections": [],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.244,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 900,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 900,
+          "calibration_until_ms": 1900,
+          "detections": [],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.262,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 1000,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 1000,
+          "calibration_until_ms": 2000,
+          "detections": [
+            {
+              "box": [
+                0.28,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.28,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 1100,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 1100,
+          "calibration_until_ms": 2100,
+          "detections": [
+            {
+              "box": [
+                0.298,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.298,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 1200,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 1200,
+          "calibration_until_ms": 2200,
+          "detections": [
+            {
+              "box": [
+                0.31599999999999995,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.31599999999999995,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 1300,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 1300,
+          "calibration_until_ms": 2300,
+          "detections": [
+            {
+              "box": [
+                0.33399999999999996,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.33399999999999996,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 1400,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 1400,
+          "calibration_until_ms": 2400,
+          "detections": [
+            {
+              "box": [
+                0.352,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.352,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 1500,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 1500,
+          "calibration_until_ms": 2500,
+          "detections": [
+            {
+              "box": [
+                0.37,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.37,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 1600,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 1600,
+          "calibration_until_ms": 2600,
+          "detections": [],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.388,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 1700,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 1700,
+          "calibration_until_ms": 2700,
+          "detections": [
+            {
+              "box": [
+                0.406,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.406,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 1800,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 1800,
+          "calibration_until_ms": 2800,
+          "detections": [
+            {
+              "box": [
+                0.42399999999999993,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.42399999999999993,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 1900,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 1900,
+          "calibration_until_ms": 2900,
+          "detections": [
+            {
+              "box": [
+                0.44199999999999995,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.44199999999999995,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 2000,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 2000,
+          "calibration_until_ms": 3000,
+          "detections": [
+            {
+              "box": [
+                0.45999999999999996,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.45999999999999996,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 2100,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 2100,
+          "calibration_until_ms": 3100,
+          "detections": [
+            {
+              "box": [
+                0.478,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.478,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 2200,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 2200,
+          "calibration_until_ms": 3200,
+          "detections": [
+            {
+              "box": [
+                0.496,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.496,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  },
+  {
+    "frame": {
+      "at_ms": 2300,
+      "contract": "vehicle_stop",
+      "ego": {
+        "dx": 0.0,
+        "dy": 0.0,
+        "valid": true,
+        "variance": 0.0
+      },
+      "evidence": "synthetic",
+      "lighting": "daylight",
+      "mode": "direct",
+      "scene_break": false,
+      "sensors": [
+        {
+          "at_ms": 2300,
+          "calibration_until_ms": 3300,
+          "detections": [
+            {
+              "box": [
+                0.514,
+                0.45,
+                0.012,
+                0.016
+              ],
+              "class": "uav",
+              "range_m": null,
+              "score": 0.9,
+              "variance": 0.0001
+            }
+          ],
+          "kind": "lwir",
+          "quality": "valid",
+          "registered": true
+        }
+      ],
+      "version": 3
+    },
+    "truth": [
+      {
+        "box": [
+          0.514,
+          0.45,
+          0.012,
+          0.016
+        ],
+        "class": "uav",
+        "id": "truth-a",
+        "range_m": null,
+        "score": 0.9,
+        "variance": 0.0001
+      }
+    ]
+  }
+]

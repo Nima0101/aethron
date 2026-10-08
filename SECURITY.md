@@ -1,0 +1,8 @@
+# Security and safety
+RescueSense is an offline reference runtime with no listening service, telemetry or actuator connection. Inputs are bounded and schemas closed. Public output contains no biometric identity, person key or trajectory. Protocol 2 permits a short-lived direct human envelope for immediate safety. Through-obstruction stays coarse.
+
+Report vulnerabilities privately using the hosting platform's private vulnerability reporting when enabled. Until publication, provide a minimal synthetic reproduction directly to the maintainer; there is no monitored public security endpoint yet. Do not put sensitive sensor data into an issue. No guaranteed response SLA or independent audit is claimed.
+
+Untrusted sensor/host assertions can lie about class, exclusion masks, timestamps, lighting, calibration and authorization. Scores are uncalibrated. Coarse occupancy and direct boxes can reveal activity if externally recorded. OS memory is not securely erased; recipients control output retention. Forks can remove restrictions. No process can prove physical truth, consent or legal authority from a JSON flag. Use independent access controls, notice, privacy review and controller watchdogs before physical deployment.
+
+No live deployment is qualified. All controller outputs are recommendations. A STOP/LAND/RETREAT contract is not evidence that the action is physically safe. Never use this package as an unattended collision-avoidance or life-safety controller. See [threat model](docs/safety/threat-model.md), [current protocol](docs/architecture/protocol-v3.md) and [hardware evidence](docs/verification/hardware.md).

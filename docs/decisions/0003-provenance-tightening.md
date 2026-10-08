@@ -1,0 +1,4 @@
+# ADR 0003 — support provenance applies to every protocol
+Same-author adversarial review found that the legacy v1 implementation listed attempted sensors under sources, including blind/dropped inputs. This could mislead a renderer labeling the field as support. Retained failing regression: test_legacy_protocol_never_attributes_blind_sensor_as_support.
+
+Tighten both protocols: sources contains only valid evidence that supports a resolved claim. UNKNOWN claims have no supporting sources; reasons preserve fixed failure codes. Withdrawn contributors cap otherwise high uncalibrated confidence at medium. v1 retains its prohibition on human geometry. No schema shape changes or safety relaxations occur; this makes the owner's honest-darkness-provenance rule universal. Re-capture demos and repeat runtime/security/fuzz/clean-clone/release evidence on the corrected source.

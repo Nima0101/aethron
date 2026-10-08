@@ -1,0 +1,54 @@
+{
+  "cases": 320,
+  "evidence": "synthetic_only",
+  "groups": {
+    "fire_like/daylight": {
+      "FN": 0,
+      "FP": 20,
+      "TN": 20,
+      "TP": 40,
+      "UNKNOWN": 0,
+      "positive_unknown": 0,
+      "total": 80
+    },
+    "person/daylight": {
+      "FN": 5,
+      "FP": 6,
+      "TN": 22,
+      "TP": 22,
+      "UNKNOWN": 5,
+      "positive_unknown": 3,
+      "total": 60
+    },
+    "person/low_light": {
+      "FN": 0,
+      "FP": 0,
+      "TN": 26,
+      "TP": 26,
+      "UNKNOWN": 8,
+      "positive_unknown": 4,
+      "total": 60
+    },
+    "person/near_dark": {
+      "FN": 4,
+      "FP": 6,
+      "TN": 20,
+      "TP": 21,
+      "UNKNOWN": 9,
+      "positive_unknown": 5,
+      "total": 60
+    },
+    "person/zero_visible": {
+      "FN": 0,
+      "FP": 0,
+      "TN": 27,
+      "TP": 26,
+      "UNKNOWN": 7,
+      "positive_unknown": 4,
+      "total": 60
+    }
+  },
+  "limitation": "Synthetic cue software test, not detector accuracy. UNKNOWN positive cases are missed cues. Fire-like is not fire diagnosis.",
+  "sha256": "4757b8e443fb3c216ec362dfdb7a4afa838cd86c78c8abdba9e7746e4514c1bb",
+  "training": "none"
+}

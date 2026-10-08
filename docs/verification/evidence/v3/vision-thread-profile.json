@@ -1,0 +1,33 @@
+{
+  "experiment": "fixed1/2/4 thread comparison; same pinned model and photograph;2 warmup+5 samples",
+  "platform": "Darwin arm64",
+  "python": "3.13.15",
+  "opencv": "4.13.0",
+  "results": [
+    {
+      "threads": 1,
+      "samples": 5,
+      "median_wall_ms": 1855.2354590501636,
+      "max_wall_ms": 1936.0273329075426,
+      "median_cpu_ms": 1833.4130000000002,
+      "detections_identical": true
+    },
+    {
+      "threads": 2,
+      "samples": 5,
+      "median_wall_ms": 651.0315830819309,
+      "max_wall_ms": 962.610166054219,
+      "median_cpu_ms": 1942.6030000000019,
+      "detections_identical": true
+    },
+    {
+      "threads": 4,
+      "samples": 5,
+      "median_wall_ms": 1008.4330830723047,
+      "max_wall_ms": 1537.5699577853084,
+      "median_cpu_ms": 1653.1560000000027,
+      "detections_identical": true
+    }
+  ],
+  "qualification": "Small CPU integration experiment; not a deployment deadline or sensor proof."
+}

@@ -1,0 +1,11 @@
+{
+  "name": "RescueSense Camera",
+  "short_name": "RescueSense",
+  "description": "Local camera perception research preview",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101d28",
+  "theme_color": "#101d28",
+  "icons": [{"src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}]
+}

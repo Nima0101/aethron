@@ -1,0 +1,15 @@
+{
+  "artifact_sha256": {
+    "SHA256SUMS": "b1a3ea013e813cc5e7f5c27b5ff5f6b3ff515eaef867f755945987ac89709bdf",
+    "provenance.json": "bf41fafcb3e42e404f3e41e78a8efb6e184b4e49e44050353e0e4bd21bfbab3a",
+    "rescuesense-0.1.0-source.tar.gz": "43a1b4340c9b62370ffe2e99560ad6daf2058f8d6fb7d527454385195c04ae4d",
+    "rescuesense.pyz": "072e06d59e4fe8bc4f2a054a9a171fb90cffb403858d1cb13e25e02e04d080da",
+    "sbom.cdx.json": "905874a4e52cc63989a55ba6252f2d9bce0cfadad5d1519b7035701e00286018",
+    "source-manifest.json": "155b5f64a310a3a920b3c02e9b0639cb7e01ae6fcd2361ad722c55c9b2cf77b9"
+  },
+  "byte_identical_builds": true,
+  "clean_clone": true,
+  "isolated_zipapp_consumer": true,
+  "quickstart": true,
+  "source_revision": "b526a9cb46295059b3a472b6dda0de5e5b25e567"
+}

@@ -1,0 +1,10 @@
+# Same-author adversarial review
+This is an implementation-owner review, not independent safety assurance.
+
+Boundary review: only bounded JSON bytes enter the public evaluator; v1 and v2 reject unknown/duplicate fields, bool-as-number, non-finites, unsupported sensors and excessive geometry. Current v2 direct and through-obstruction batches are disjoint. Human classification is an explicit minimized upstream assertion, never temperature inference. Box disagreements preserve coarse presence but suppress geometry. Provenance excludes invalid supporters. Result expiry is bounded by observation/calibration lifetimes. No module retains observations or associations; concurrent/re-entry tests exercise isolation. Runtime uses validation branches rather than Python assertions, including under `python -O`.
+
+Model loading verifies fixed SHA-256 before parsing and bounds the file read to 2,049 bytes. Declarative model substitution cannot invoke code. Python runtime/OS and installed package integrity remain trusted; no secure erasure, real-time deadline or physical truth guarantee. Inference timeout reflects an adapter-reported duration; upstream inference and controller watchdogs must enforce actual time budgets.
+
+Reviewed residual risks: lying sensors/hosts, forged calibration/authorization, external accumulation of transient boxes, malicious forks, unvalidated sensor registration, correlated classifier errors, false-positive heat anomalies and blind spots. Confidence is uncalibrated and never multiplied. No free-space/absence result is clearance. Generic obstacle geometry could correspond to a person when upstream non-human exclusion is wrong; independent physical review is indispensable.
+
+Tooling findings: public artifact UTF-8 reads/writes made explicit for cross-platform consistency; LF checkout policy preserves frozen bytes. Browser Mach-port denial blocks actual browser validation; no simulated substitute counts as a pass. Model/data and controller qualification remain separate hardware gates.

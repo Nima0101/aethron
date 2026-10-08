@@ -1,0 +1,1 @@
+{"version":1,"kind":"deterministic_rules","license":"Apache-2.0","thermal_cold_c":0,"thermal_hot_c":60,"thermal_fire_like_c":150,"obstacle_near_m":2,"cue_absent_max":0.2,"cue_present_min":0.8,"confidence_semantics":"uncalibrated_score","training":"none","evidence":"synthetic_only"}

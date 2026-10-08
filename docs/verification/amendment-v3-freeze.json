@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "frozen_before_v3_source": true,
+  "files": {
+    "AGENTS.md": "e2298fb81e7bb7011c84f9f8aa3be8dac7855a6dd19e07a4160a1710eca188e6",
+    "docs/safety/amendment-v3.md": "62a0edb4dfe680256e0cedb3008f04be925491ac80d435f8a130c4826fe53088",
+    "docs/decisions/0004-temporal-perception-v3.md": "cd6677841d8e86ab9db9b07cd6887f532d11ee071ffa2f04dc499d0c22f41064",
+    "docs/architecture/protocol-v3.md": "8c462a89d78ec570a3e22f25b831cb7ae4300777c275966d8380470b39b71fe2",
+    "docs/architecture/capabilities-v3.md": "9b22426b94dce49d256e6255b915f66dcaa454d862188dff742a805a525a14dc",
+    "docs/verification/matrix-v3.md": "e976038c03203e74618c5685ea5e79dad96aa40689bcbc77dffd40e4a80e4393",
+    "docs/engineering/research-v3.md": "b7fef4de92a449aafeead97c000b3ad9b4b6d5bd655d581638cfbf2f572f9db6"
+  }
+}

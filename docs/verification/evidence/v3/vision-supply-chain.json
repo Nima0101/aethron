@@ -1,0 +1,35 @@
+{
+  "scope": "optional vision, excluded from core zipapp",
+  "components": [
+    {
+      "type": "library",
+      "name": "numpy",
+      "version": "2.3.5",
+      "license_files_sha256": {
+        "numpy-2.3.5.dist-info/LICENSE.txt": "d84715000c6b3fd8719b2027238b6f6457cb853b2eb7023821a585949387f7bf",
+        "numpy/_core/include/numpy/random/LICENSE.txt": "fbc539f47d0cf83bc61378080fb873d5c14630126cacbfe754035c3926daa5ec",
+        "numpy/ma/LICENSE": "05f3b88351988ecfad10abe92c0c50e5875c6452d5009a0084cc291551ffcca6",
+        "numpy/random/LICENSE.md": "103166b62b80443afb9eb3488e052ea06be0cff566b908f199e561fde49af19f"
+      }
+    },
+    {
+      "type": "library",
+      "name": "opencv-python-headless",
+      "version": "4.13.0.92",
+      "license_files_sha256": {
+        "cv2/LICENSE-3RD-PARTY.txt": "0e8fac55c2f5bff939c1e7aae1fa2799e1cece5fd0857d8e5fafeb46562aafc9",
+        "cv2/LICENSE.txt": "09d719058e782ac7bc71ba21c944e1136cde2bb957c0e888121f0218d6b5f02c",
+        "cv2/data/haarcascade_license_plate_rus_16stages.xml": "4d1c44bf7a1bc4e204fa25b046ed0acffd7f713cc13fe2958b6977125c60ddea",
+        "opencv_python_headless-4.13.0.92.dist-info/LICENSE-3RD-PARTY.txt": "0e8fac55c2f5bff939c1e7aae1fa2799e1cece5fd0857d8e5fafeb46562aafc9",
+        "opencv_python_headless-4.13.0.92.dist-info/LICENSE.txt": "09d719058e782ac7bc71ba21c944e1136cde2bb957c0e888121f0218d6b5f02c"
+      }
+    }
+  ],
+  "model": {
+    "name": "OpenCV Zoo YOLOX-S",
+    "bytes": 35858002,
+    "sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+    "license": "Apache-2.0"
+  },
+  "runtime_loader": "Exact model hash verified before native ONNX parsing"
+}

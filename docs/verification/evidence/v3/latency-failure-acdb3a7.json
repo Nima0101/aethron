@@ -1,0 +1,14 @@
+{
+  "source_revision": "acdb3a7",
+  "scope": "clean local clone, Python3.13 macOS arm64",
+  "frames": 100,
+  "objects": 32,
+  "p50_ms": 173.902,
+  "p95_ms": 298.116,
+  "max_ms": 326.698,
+  "peak_bytes": 116289,
+  "p95_budget_ms": 100,
+  "memory_budget_bytes": 33554432,
+  "passed": false,
+  "cause": "not established; retained negative measurement"
+}

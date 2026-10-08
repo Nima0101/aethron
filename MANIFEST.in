@@ -1,0 +1,6 @@
+include AGENTS.md NOTICE LICENSE README.md CONTRIBUTING.md SECURITY.md GOVERNANCE.md CHANGELOG.md CODE_OF_CONDUCT.md ROADMAP.md requirements-dev.txt
+recursive-include docs *.md *.json *.svg *.html *.cast *.gif
+recursive-include scripts *.py *.html
+recursive-include examples *.json *.jsonl
+recursive-include tests *.py
+recursive-include .github *.yml *.md

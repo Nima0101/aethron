@@ -1,0 +1,24 @@
+:root{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#eef7fc;background:#0a141e;font-synthesis:none}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#203d4d 0%,#0a141e 55%)}button{font:inherit;cursor:pointer}
+#app{max-width:1030px;margin:auto;padding:0 24px}.topbar{height:92px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #30404b}
+.identity{display:flex;gap:12px;align-items:center}.logo{width:47px;height:47px;border:1px solid #5b8190;border-radius:14px;display:grid;place-items:center;font-weight:800;font-size:24px;color:#e3fcfa}.logo span{color:#66e2bc}
+.identity strong,.identity small{display:block}.identity strong{font-size:18px;letter-spacing:-.5px}.identity small{color:#a5bcc8;font-size:10px;letter-spacing:2px;margin-top:5px;font-weight:700}
+.health{font-size:11px;font-weight:800;letter-spacing:1.3px;background:#2b3845;padding:10px 15px;border-radius:24px;border:1px solid #586a77}
+.health.ready{background:#154b40;color:#adf4d9;border-color:#1c7e68}.health.busy{background:#413721;color:#ffdda0;border-color:#6c5732}.health.stale{background:#53392b;color:#ffb99c;border-color:#8a5640}
+.intro{padding:54px 0 27px}.eyebrow{color:#72ddc2;font-size:11px;letter-spacing:2.3px;font-weight:800}.intro h1{font-size:clamp(30px,5vw,52px);margin:14px 0 13px;letter-spacing:-1.7px;line-height:1.1}.intro p{color:#b2c4cd;font-size:15px;line-height:1.65;max-width:690px;margin:0}
+.viewer{position:relative;height:min(58vw,530px);min-height:300px;background:#071019;border:1px solid #405765;border-radius:20px;overflow:hidden;isolation:isolate}
+.viewer video,.viewer canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.viewer video{background:#03080b}.viewer canvas{pointer-events:none}.empty{position:absolute;inset:0;display:flex;gap:10px;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:20px;color:#b1c8d0;background:radial-gradient(circle,#152b36,#071019 75%)}
+.viewicon{font-size:62px;color:#67dec1;margin-bottom:12px}.empty strong{font-size:18px;color:#edf7f8}.empty span{font-size:13px;line-height:1.5}
+.viewerbar{position:absolute;bottom:0;width:100%;display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#dbeced;padding:13px 17px;background:linear-gradient(transparent,#08151ddd);font-variant-numeric:tabular-nums}
+.controls{display:flex;gap:12px;padding:17px 0;flex-wrap:wrap}.controls button{color:#f2fbfd;background:#203440;border:1px solid #526a77;border-radius:11px;font-size:14px;font-weight:720;min-height:45px;padding:0 22px}
+.controls button.primary{color:#092522;background:#61ddba;border-color:#61ddba}.controls button:disabled{opacity:.45;cursor:not-allowed}
+.controls button:focus-visible{outline:3px solid #ebbe65;outline-offset:3px}
+.details{display:flex;justify-content:space-between;gap:20px;border:1px solid #30434f;background:#101f2a;border-radius:16px;padding:17px 22px;min-height:110px}
+.details h2{font-size:16px;margin:0 0 9px}.details h2 span{display:inline-grid;place-items:center;min-width:23px;height:23px;background:#34545f;border-radius:7px;margin-left:4px}
+.details p{font-size:12px;color:#acc0cb;margin:0;line-height:1.5;max-width:520px}.details ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;align-items:flex-end;gap:7px;max-height:135px;overflow:auto}
+.details li{font-size:12px;color:#def3f2;background:#213947;border-radius:7px;padding:7px 11px;white-space:nowrap}.details li b{color:#83edcc}
+.notice{margin:18px 0;border-left:3px solid #e5ad61;background:#262a2b;padding:13px 18px;border-radius:5px;color:#f1d3af;font-size:13px}
+.notice p{margin:6px 0 0;line-height:1.6;color:#e0c4a9}footer{display:flex;justify-content:space-between;color:#849eaa;font-size:12px;gap:15px;padding:27px 0 35px}
+@media(max-width:600px){#app{padding:0 13px}.topbar{height:76px}.intro{padding:30px 0 23px}.viewer{height:58vh;min-height:280px;max-height:560px}.controls{gap:8px}.controls button{flex:1;padding:0 12px;font-size:13px}.details{flex-direction:column;gap:9px}.details ul{align-items:flex-start}footer{flex-direction:column;gap:6px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important}}

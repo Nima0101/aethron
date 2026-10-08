@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 660" role="img" aria-labelledby="title desc">
+<title id="title">RescueSense bounded sensor view</title>
+<desc id="desc">Coarse presence cues and expiring non-human rectangles. No camera image, identity or through-obstruction geometry.</desc>
+<rect width="1000" height="660" fill="#101f28"/>
+<g fill="#e8f1ed" font-family="monospace">
+<text x="30" y="42" font-size="25">RescueSense / bounded sensor view</text>
+<text x="30" y="72">SYNTHETIC · zero_visible · no live hardware proof</text>
+<rect x="30" y="110" width="530" height="430" fill="#192f39" stroke="#607a82"/>
+<text x="46" y="138">Sensor plane · no imagery</text>
+<text x="580" y="113" font-size="12">near / human_presence: PRESENT</text>
+<g><set attributeName="visibility" to="hidden" begin="0.2s" fill="freeze"/><rect data-detection="human" x="136.0" y="196.0" width="159.0" height="215.0" fill="none" stroke="#ffa861" stroke-width="3"/><text x="136.0" y="188.0" font-size="11">human · medium uncalibrated · thermal_person</text></g>
+<text x="580" y="140" font-size="12">near / occupancy_zone: PRESENT</text>
+<text x="580" y="167" font-size="12">near / thermal_source: UNKNOWN</text>
+<text x="580" y="194" font-size="12">near / obstacle: UNKNOWN</text>
+<text x="30" y="585" font-size="23">STOP · recommendation only</text>
+<text x="30" y="613" font-size="13">UNKNOWN is not clearance. Rectangles expire; static snapshots are not live sensors.</text>
+<text x="30" y="638" font-size="13">No identity or tracking. Independent controller and authorization required.</text>
+</g></svg>

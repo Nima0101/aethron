@@ -1,0 +1,2 @@
+# Synthetic evaluation protocol strengthening v2
+The first evaluation exposed a coverage defect: alternating truth and a four-step lighting cycle placed only negative cases in zero_visible. Preserve v1 corpus/results. Change truth to (i//4)%2==0 so every lighting mode receives 30 positive and 30 negative cases. Keep count, seed, corruption, dropout and all reporting rules unchanged. This strengthens coverage before reporting new results; it does not move a pass threshold or hide the prior negative result. No physical accuracy claim.
