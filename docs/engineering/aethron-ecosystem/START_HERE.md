@@ -45,3 +45,5 @@ P2/P3 implementation: [sensor packet/replay contracts and pinned sources](P2-SEN
 [Implemented rigid registration and sparse lens rectification](SENSOR-REGISTRATION.md) extend the raw sensor boundary; semantic providers and physical qualification remain pending.
 
 Calibrated raw provider: [implemented contracts and SDK consumer](SENSOR-PROVIDER.md), [checkpoint evidence](evidence/phase2/provider.json). Bounded recorded depth and ROS depth/cloud geometry now apply the rig/lens/clock/format bindings; no semantic model, appliance wiring or hardware qualification is inferred.
+
+[Supervised recorded geometry](SENSOR-APPLIANCE.md): implemented signed raw-replay configuration, zero-viewer worker and loss/recovery/status. ROS appliance authority and candidate boot soak remain next; no semantic or physical qualification follows.

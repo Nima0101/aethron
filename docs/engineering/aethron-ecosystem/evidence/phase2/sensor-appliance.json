@@ -1,0 +1,214 @@
+{
+  "date": "2026-10-08",
+  "source_base": "2f0326c7e2e6c22fb075d3b5649bd6a1f8224c38",
+  "status": "implemented_release_verification_pending",
+  "hardware_qualified": false,
+  "field_qualified": false,
+  "semantic_model_qualified": false,
+  "recorded_appliance_provider_connected": true,
+  "ros_appliance_provider_connected": false,
+  "candidate_boot_soak_executed": false,
+  "hosted_ci_executed": false,
+  "tests": {
+    "integration_before_symlink_guard": {
+      "tests": 114,
+      "seconds": 134.133
+    },
+    "final_sensor_source": {
+      "tests": 57,
+      "seconds": 14.469
+    },
+    "installed_linux_arm64": {
+      "tests": 61,
+      "seconds": 2.862
+    },
+    "isolated_signed_service_diagnostic": {
+      "tests": 1,
+      "seconds": 4.963
+    },
+    "core": {
+      "tests": 75,
+      "seconds": 23.968
+    },
+    "plan_negative_probes": 26,
+    "installed_mac_sensor_suite": {
+      "tests": 57,
+      "seconds": 11.825,
+      "passed": true
+    },
+    "installed_mac_http_sse_zero_viewer": true,
+    "broad_regression_before_duration_fix": {
+      "tests": 115,
+      "seconds": 646.471,
+      "failures": 2,
+      "details": [
+        "existing RGB worker exited source_lost with zero inferences",
+        "raw one-pass EOF condition not reached within 10s"
+      ]
+    },
+    "final_worker_regression": {
+      "tests": 8,
+      "seconds": 7.05,
+      "passed": true
+    },
+    "installed_linux_arm64_final": {
+      "tests": 62,
+      "seconds": 2.634,
+      "passed": true
+    }
+  },
+  "security": {
+    "sensor_bandit_findings": 0,
+    "broader_existing_low_findings": 3,
+    "review": "B404/B603/B607 fixed argv OpenSSL, trusted administrator PATH; retained",
+    "sbom_components": 27,
+    "sbom_schema": "CycloneDX 1.6 passed",
+    "ruff": "passed",
+    "final_sbom_sha256": "637850093c94da73df3ac0d32049bb8cb027091ebfa4864a25d212cec63d7c21"
+  },
+  "failures_retained": [
+    "missing provisioning module",
+    "capabilities mislabeled raw geometry as OpenCV",
+    "long recorded gap lacked heartbeats",
+    "config resolution hid final source symlink",
+    "initial installed suite: two assertions then 60s timeout",
+    "installed verbose: signed service no status before 15s startup deadline",
+    "installed diagnostic: 10s EOF condition and 15s signed startup deadline",
+    "prior recorded aircraft and Mac latency failures unchanged",
+    "final installed Mac: optional rectification subprocess exceeded 60s after portable and HTTP/SSE checks passed",
+    "raw processing duration incorrectly reported zero; regression fixed",
+    "broad 115-test Mac run retained RGB acquisition and raw EOF availability failures"
+  ],
+  "diagnosis": "Persistent installed signed service passed unchanged, interpreter 0.144s and CLI import 0.642s; timing variability observed, root cause not established.",
+  "remaining": [
+    "diagnose installed Mac startup/OpenCV delays and complete committed clean reproduction",
+    "ROS per-boot authority and subscriber supervisor wiring",
+    "combined candidate VM boot/reboot/offline/soak",
+    "evaluated nonvisible semantic models and licensed representative recordings",
+    "physical clocks calibration power thermal field certification",
+    "browser and candidate hosted publication gates"
+  ],
+  "runtime_sha256": {
+    "integrations/edge/aethron_edge/config.py": "539cf26e1d0d0e4d7ef9d306ac304ec3d417b224f0882187c391f548ec3d5d02",
+    "integrations/edge/aethron_edge/pipeline.py": "506dfa9c4d9d333c90fab0fa00a4373ee7a4dd372addb5236fda58e7c7e97f84",
+    "integrations/edge/aethron_edge/runtime/supervisor.py": "a577af7bc82cc96673cce21cfbeee767a8889c020bf124bbee9c2d9f72052c39",
+    "integrations/edge/aethron_edge/runtime/updates.py": "37e100db0dadff163377a362d423e752bcbff24dce7919616191744ca3e49dfc",
+    "integrations/edge/aethron_edge/service/app.py": "4372feabf2e409a07156bd499c0638848c2212148da956a3451883858c66494a",
+    "integrations/edge/aethron_edge/sensors/provisioning.py": "2183d2ce08530496c1732f47878ba381ca9cd9e3e69c66c46052918e353024ff",
+    "integrations/edge/aethron_edge/sensors/worker.py": "864b27934e0bf0be7e3ac0edfa63152bc4b62bbbe520633d676d40608f470df9"
+  },
+  "logs_sha256": {
+    "inventory-final.log": "5d804f1e41d257bc086b5baa8b3b6e3ed9fa5cc1ea2f690d1ecfeb2058e9d2d9",
+    "dds-driver.log": "ee51d85448042af0c15b5aa95b67942178bd914fdb3bea8ccb2ca5fc31b8e019",
+    "security.log": "4b116ea109aa74bdab5b4bd00059c98decf9044b2e724e5c1da942dbc821d7ea",
+    "verify.log": "58f264e7f66e0f9da2f5063f4f712676b31004bc58caf9bedb9658badefaa1b9",
+    "plan.log": "1376b3ed60200f3d006f0ce5592df3b56e7608363fbbf8d61e70489c78649c85",
+    "format.log": "ea2969fd741733e33c490fb6696583f5d6e29e16cae5e536952236a31cf615b1",
+    "service-red-provider.log": "fc7cd78dea64bdfa1776dfe01d789759925300fe8e1ef9bf4efc5545f19e08ca",
+    "red.log": "68f7f0fd988dabbaebbaae22a86efdb1948959f9235bdb55295df27590f4c781",
+    "lint.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "temporal-fuzz.log": "c5b745eafdbf28242b4b029381492057f568c299910d252328a79086c80ed9a5",
+    "green.log": "e687a022ec92708722658152ac507ded71350423b2ad9859e74877c0c77e19d1",
+    "worker-final.log": "33d2ee6f10ed7188f68145f896aaaecf5511eb169708e5919cba5ba84e0fb38b",
+    "service-red.log": "76939b195bd6bd7834ab6f7619dac2921eb3e85d974ebdf586e396b2c325b0fb",
+    "startup-diagnostic.log": "09ba58ac8ea9f4a9ef7722da5e727b83631db1f6d1f6895966f2ce2525a61378",
+    "package-verbose.log": "34953cc8cc3eab05c95ee86aee1bd4e26534e270e33af360e2d4ffbe601c914c",
+    "current-build.log": "c97523211ad90be4a00dbb1e7200cb6790a6b62ef4241cd0366c5a3b030c581c",
+    "plan-checkpoint.log": "1376b3ed60200f3d006f0ce5592df3b56e7608363fbbf8d61e70489c78649c85",
+    "duration-red.log": "5c5776946df3cfb2fad69b97d8cd1851c8fd1b6baadc4853e1019590443b3b64",
+    "package-final.log": "176d14a137bdd78610e9a326c54835bb8757a0e200302d59951700f901053244",
+    "integration.log": "fa130f570ea393758686d4593322a28be60a40a175f2b1a560fa903f4312f64e",
+    "final-sensors.log": "98a78963c9a47ea0e6714af2db7cf96c0388c3608eadc538381f09c95fcb9257",
+    "lint-checkpoint.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "plan-final.log": "1376b3ed60200f3d006f0ce5592df3b56e7608363fbbf8d61e70489c78649c85",
+    "lint-final.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "package-diagnostic.log": "e3e9dd493f8711884822fa919b170be31a3f748f63c818d21d66e28c4e508409",
+    "security-sensors.log": "2684b3794df10e20b781f55468da8d19b75d3666af0592b2ca108a3c3fe89937",
+    "gap-red.log": "2330ae0af66c41b808fecb8faa7c30083aa649e18ea82535d054d0d618799b19",
+    "fuzz.log": "4d60eb053be3d7862a22e48156a9d68065bd92a916a95809539045bb8924491d",
+    "lint-last.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "sensors.log": "fd183eccf1c5099b5b8394cd8060e5c150b143170e2581364ac339d9b6df002c",
+    "symlink-red.log": "d17a7b9b7c93643425b0864aaf6598afb08121126b6d3fa7c57da7c6a79ad145",
+    "first-green.log": "23598ed4d4a68e68a7599a8c13f05dd9e25f459bc30904f3e11921c38b224076",
+    "integration-final.log": "47003257fd7ceb165e16b47863df281f14de8fbfcda0ea32ebd27bcdba9c5294",
+    "package.log": "71d12154ab271d988845de316f3f4fe3bc3f7c3d710a47c29c5f0469fa840521",
+    "dds-final/dds.log": "b50dafeeb260118d59017805c0378397247dde3675d076d00c6ee37bca12eace",
+    "security-final.json": "027365c34acc6c1248e6eb8b3a9ba1e1a2015d3b8f73b56fcce43605cd785481",
+    "plan-commit.log": "1376b3ed60200f3d006f0ce5592df3b56e7608363fbbf8d61e70489c78649c85"
+  },
+  "installed_mac_package_complete": false,
+  "verification_continued": "2026-10-09",
+  "installed_dds_before_duration_fix": {
+    "hardware_qualified": false,
+    "installed_ros_dds": true,
+    "network": "none",
+    "packages": {
+      "rclpy": "7.1.12",
+      "rmw_fastrtps_cpp": "8.4.4",
+      "sensor_msgs": "5.3.8"
+    },
+    "payloads": "original synthetic Image/CameraInfo/PointCloud2",
+    "python": "3.12.3",
+    "scene_state": "UNKNOWN",
+    "uid": 10001,
+    "wheels": {
+      "candidate/aethron-0.2.0-py3-none-any.whl": "726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e",
+      "candidate/aethron_edge-0.1.0-py3-none-any.whl": "f53eec60428bf04cc4dbf32b694a13f3972f0ab47890cb83f1faaabd1bda455f",
+      "dependencies/annotated_types-0.8.0-py3-none-any.whl": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0",
+      "dependencies/pip-26.2-py3-none-any.whl": "931c303696af6fa3417112103b1cad26890e5a07eccb5b99783700e33f2b8aad",
+      "dependencies/pydantic-2.13.5-py3-none-any.whl": "346a034f080da3755d8e9cb5e00e8b07de1d39e4f6e2c87d8ab7cafa0b269a73",
+      "dependencies/pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl": "4fdc8b93a41521988916eeaa271173fcca7fa0803d62f87675aac8dcec1c8e29",
+      "dependencies/typing_extensions-4.16.0-py3-none-any.whl": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+      "dependencies/typing_inspection-0.4.4-py3-none-any.whl": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147"
+    },
+    "image": "ros@sha256:8f687fdf084482819aa7dab48c3887331edd0d3687b219951fdb66c418316ab1",
+    "platform": "linux/arm64"
+  },
+  "installed_dds_final": {
+    "hardware_qualified": false,
+    "installed_ros_dds": true,
+    "network": "none",
+    "packages": {
+      "rclpy": "7.1.12",
+      "rmw_fastrtps_cpp": "8.4.4",
+      "sensor_msgs": "5.3.8"
+    },
+    "payloads": "original synthetic Image/CameraInfo/PointCloud2",
+    "python": "3.12.3",
+    "scene_state": "UNKNOWN",
+    "uid": 10001,
+    "wheels": {
+      "candidate/aethron-0.2.0-py3-none-any.whl": "726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e",
+      "candidate/aethron_edge-0.1.0-py3-none-any.whl": "9c00f603725bd0c51ce3a7b0515a222e86cdfad4d41154a59d0eea6e465f921b",
+      "dependencies/annotated_types-0.8.0-py3-none-any.whl": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0",
+      "dependencies/pip-26.2-py3-none-any.whl": "931c303696af6fa3417112103b1cad26890e5a07eccb5b99783700e33f2b8aad",
+      "dependencies/pydantic-2.13.5-py3-none-any.whl": "346a034f080da3755d8e9cb5e00e8b07de1d39e4f6e2c87d8ab7cafa0b269a73",
+      "dependencies/pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl": "4fdc8b93a41521988916eeaa271173fcca7fa0803d62f87675aac8dcec1c8e29",
+      "dependencies/typing_extensions-4.16.0-py3-none-any.whl": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+      "dependencies/typing_inspection-0.4.4-py3-none-any.whl": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147"
+    },
+    "image": "ros@sha256:8f687fdf084482819aa7dab48c3887331edd0d3687b219951fdb66c418316ab1",
+    "platform": "linux/arm64"
+  },
+  "candidate_wheels": {
+    "byte_identical": true,
+    "wheels": {
+      "aethron-0.2.0-py3-none-any.whl": "726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e",
+      "aethron_edge-0.1.0-py3-none-any.whl": "9c00f603725bd0c51ce3a7b0515a222e86cdfad4d41154a59d0eea6e465f921b"
+    },
+    "core": "unchanged wheel from prior two-build candidate"
+  },
+  "mac_component_tests_before_duration_fix": true,
+  "fuzz": {
+    "legacy": {
+      "cases": 65777,
+      "seconds": 60.00388508383185,
+      "unexpected_exceptions": 0
+    },
+    "temporal": {
+      "cases": 191530,
+      "seconds": 60.133,
+      "unexpected_exceptions": 0
+    }
+  }
+}

@@ -49,7 +49,11 @@ class ApplianceSupervisor:
                 failed = p.process is not None and (
                     not p.process.is_alive()
                     or now_ns - p.last_message_ns
-                    > (10_000_000_000 if p.profile.driver == "replay" else 60_000_000_000)
+                    > (
+                        10_000_000_000
+                        if p.profile.driver in {"replay", "sensor-replay"}
+                        else 60_000_000_000
+                    )
                 )
                 if failed and name not in self.faults and now_ns >= self.next_restart[name]:
                     attempts = self.restarts[name]
@@ -75,6 +79,7 @@ class ApplianceSupervisor:
     def _recover(self, name, pipeline, *, restart):
         self.recovering.add(name)
         pipeline.last_result = None
+        pipeline.sensor_expires_ns = 0
         pipeline.core.close()
 
         def work():
@@ -84,6 +89,7 @@ class ApplianceSupervisor:
                 replacement = RuntimePipeline(pipeline.profile)
                 replacement.processed = pipeline.processed
                 replacement.inferences = pipeline.inferences
+                replacement.sensor_batches = pipeline.sensor_batches
                 replacement.prior_drops = pipeline.drop_counts()
                 replacement.start()
             with self.lock:
@@ -108,6 +114,11 @@ class ApplianceSupervisor:
             "uptime_ms": max(0, (now_ns - self.started_ns) // 1_000_000),
             "processed": sum(p.processed for p in self.pipelines.values()),
             "inferences": sum(p.inferences for p in self.pipelines.values()),
+            "sensors": {
+                name: p.sensor_status(now_ns)
+                for name, p in self.pipelines.items()
+                if p.profile.driver == "sensor-replay"
+            },
             "drops": {
                 key: sum(p.drop_counts()[key] for p in self.pipelines.values())
                 for key in ("capture_sequence_gaps", "mailbox_overwritten", "mailbox_rejected")

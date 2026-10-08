@@ -76,6 +76,11 @@ def _worker(profile, channel, stop, group, decoder_lock, descendant):
     source = None
     inference_count = 0
     try:
+        if profile.driver == "sensor-replay":
+            from .sensors.worker import replay_worker
+
+            replay_worker(profile, lambda message: _latest(channel, message), stop)
+            return
         if profile.driver == "replay":
             data = Path(profile.address).read_bytes()
             if len(data) > 20 * 1024 * 1024:
@@ -192,6 +197,11 @@ class RuntimePipeline:
         }
         self.last_message_ns = 0
         self.last_result = None
+        self.sensor_batches = 0
+        self.worker_sensor_batches = 0
+        self.sensor_state = "idle"
+        self.sensor_expires_ns = 0
+        self.sensor_emitted_ns = 0
 
     def _new_core(self):
         core = Session()
@@ -221,7 +231,7 @@ class RuntimePipeline:
         self.descendant = ctx.RawValue("q", 0)
         # Parent owns the decoder semaphore so abrupt worker death cannot orphan
         # its named OS resource until the whole service exits.
-        self.decoder_lock = ctx.Lock() if self.profile.driver != "replay" else None
+        self.decoder_lock = ctx.Lock() if self.profile.driver in {"file", "uvc", "rtsp"} else None
         self.process = ctx.Process(
             target=self.worker,
             args=(
@@ -237,6 +247,7 @@ class RuntimePipeline:
         self.started_ns = time.monotonic_ns()
         self.last_message_ns = self.started_ns
         self.worker_inferences = 0
+        self.worker_sensor_batches = 0
 
     def tick(self, now_ns):
         if self.process is None:
@@ -245,6 +256,13 @@ class RuntimePipeline:
             message = self.channel.get_nowait()
         except (queue.Empty, AttributeError):
             return self.snapshot(now_ns)
+        if self.profile.driver == "sensor-replay":
+            observed_batches = message.get("sensor_batches", self.worker_sensor_batches)
+            self.sensor_batches += max(0, observed_batches - self.worker_sensor_batches)
+            self.worker_sensor_batches = observed_batches
+            self.sensor_state = message.get("sensor_state", "fault")
+            self.sensor_expires_ns = message.get("sensor_expires_ns", 0)
+            self.sensor_emitted_ns = message.get("sensor_emitted_ns", 0)
         self.processed += 1
         self.last_message_ns = now_ns
         self.reason = message["reason"]
@@ -275,6 +293,23 @@ class RuntimePipeline:
         self.last_result = self.core.watchdog(now_ms=now)
         return copy.deepcopy(self.last_result)
 
+    def sensor_status(self, now_ns):
+        available = (
+            self.sensor_state == "processing"
+            and 0 <= now_ns - self.sensor_emitted_ns <= 100_000_000
+            and now_ns <= self.sensor_expires_ns
+            and self.process is not None
+        )
+        return {
+            "state": "stale"
+            if self.sensor_state == "processing" and not available
+            else self.sensor_state,
+            "batches": self.sensor_batches,
+            "available": available,
+            "source_evidence": "recorded",
+            "qualified": False,
+        }
+
     def drop_counts(self):
         channel = getattr(self, "channel", None)
         return {
@@ -287,6 +322,8 @@ class RuntimePipeline:
 
     def stop_worker(self):
         self.last_result = None
+        self.sensor_expires_ns = 0
+        self.sensor_state = "idle"
         if self.process is not None:
             self.stop.set()
             self.process.join(timeout=1)

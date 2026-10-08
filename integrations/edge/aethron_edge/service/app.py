@@ -107,7 +107,15 @@ def create_app(config):
             protocol=3,
             runtime_mode=config.runtime_mode,
             drivers=sorted({p.driver for p in config.profiles}),
-            provider=",".join(sorted({p.provider for p in config.profiles if p.driver != "replay"}))
+            provider=",".join(
+                sorted(
+                    {
+                        "recorded_geometry" if p.driver == "sensor-replay" else p.provider
+                        for p in config.profiles
+                        if p.driver != "replay"
+                    }
+                )
+            )
             or "replay_virtual",
             qualification_refs=[],
         )

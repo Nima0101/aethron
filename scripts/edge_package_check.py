@@ -85,6 +85,8 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
             "test_sensor_ros2.py",
             "test_sensor_registration.py",
             "test_sensor_provider.py",
+            "test_sensor_appliance.py",
+            "test_sensor_service.py",
         ):
             shutil.copyfile(ROOT / "tests/integration" / test_name, work / test_name)
         subprocess.run(
@@ -98,11 +100,12 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                 str(work),
                 "-p",
                 "test_sensor*.py",
+                "-v",
             ],
             cwd=work,
             env=env,
             check=True,
-            timeout=30,
+            timeout=60,
         )
         shutil.copyfile(ROOT / "examples/temporal-blackout.jsonl", work / "fixture.jsonl")
         shutil.copyfile(ROOT / "examples/clients/observe.py", work / "observe.py")

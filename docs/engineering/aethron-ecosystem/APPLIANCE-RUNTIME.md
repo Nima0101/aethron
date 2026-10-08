@@ -74,3 +74,5 @@ All are required design gates; software-in-loop first, exact hardware later. Sim
 | A09 per-class recipe | Execute OEM (when accessible), sealed retrofit, drone companion and home hub recipes on respective evidence lanes | Explicit software versus SKU/field status; normal-user guide needs no manual terminal or connected phone |
 
 Phase 1 closes A01/A02/A03 software simulation/A05/A07/A08 on a real service-manager boot VM and recorded/virtual sources, and provides A04/A06 software reports. It writes A09 concrete recipes. Physical power, real zero-visible accuracy and temperature/range claims wait for Level C/D. An unavailable VM runner is a pending required gate, not an excuse to replace boot with calling `main()` in a unit test.
+
+Current raw geometry increment: [sensor appliance](SENSOR-APPLIANCE.md) implements signed bounded recorded processing in the same supervisor. Its API remains UNKNOWN; the earlier VM soak is not evidence of this new driver’s boot behavior.

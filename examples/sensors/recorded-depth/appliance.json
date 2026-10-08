@@ -1,0 +1,1 @@
+{"version": 1, "status_file": "status.json", "profiles": [{"name": "depth", "driver": "sensor-replay", "address": "depth.aeraw", "sensor_manifest": "sensor.json"}]}

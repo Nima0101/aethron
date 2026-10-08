@@ -1,7 +1,7 @@
 {
   "schema_version": 3,
   "project": "AETHRON",
-  "as_of": "2026-10-08",
+  "as_of": "2026-10-09",
   "baseline_sha": "59fda946771d4ac8c9d1b52eeb3d948215325e4c",
   "branch": "feat/aethron-vehicle-uav-preparation-20261008",
   "current_phase": 2,
@@ -226,7 +226,7 @@
   "delivery": {
     "status": "not_published",
     "source_revision": "58addca8182d6b77749c105e1bf9dc4b9a346093",
-    "required_checks": "pending_browser_execution_candidate_review_and_hosted_ci",
+    "required_checks": "pending_current_installed_mac_clean_reproduction_browser_candidate_review_and_hosted_ci",
     "hosted_ci": "pending",
     "branch_rules": "observed_none_2026-10-08",
     "pages": "pending_verified_publication",
@@ -251,21 +251,26 @@
         "expiring_registration_and_declared_error_footprint",
         "sparse_brown_conrady_rectification_and_depth_deprojection",
         "calibrated_recorded_depth_and_ros_depth_cloud_geometry_provider",
-        "provider_source_mount_format_clock_and_calibration_admission"
+        "provider_source_mount_format_clock_and_calibration_admission",
+        "signed_bounded_recorded_provider_provisioning",
+        "supervisor_owned_recorded_geometry_worker_without_viewers",
+        "parent_expiring_raw_processing_status_and_recorded_only_http_provenance"
       ],
       "pending": [
         "licensed_real_nonvisible_packet_replay",
         "live_clock_calibration_admission",
         "supervisor_and_nonvisible_model_provider_integration",
-        "calibrated_provider_appliance_worker_and_supervisor_connection",
-        "raster_stereo_fisheye_rectification"
+        "raster_stereo_fisheye_rectification",
+        "ros_provider_boot_clock_authority_and_supervisor_connection",
+        "combined_raw_sensor_candidate_boot_offline_reboot_soak"
       ],
       "evidence": "evidence/phase2/sensors.json",
       "ros_evidence": "evidence/phase2/ros2.json",
       "registration_evidence": "evidence/phase2/registration.json",
-      "provider_evidence": "evidence/phase2/provider.json"
+      "provider_evidence": "evidence/phase2/provider.json",
+      "appliance_evidence": "evidence/phase2/sensor-appliance.json"
     },
-    "next_task": "P2.1_provisioned_provider_worker_and_supervisor_connection",
+    "next_task": "P2.1_installed_mac_startup_rectification_diagnosis_then_ros_boot_authority",
     "P3.1": {
       "status": "in_progress",
       "implemented": [

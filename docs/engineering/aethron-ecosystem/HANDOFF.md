@@ -1,4 +1,10 @@
-# Current handoff — autonomous P2 implementation
+# Latest continuation checkpoint — recorded sensor appliance
+
+Implemented [signed raw replay supervision](SENSOR-APPLIANCE.md), configuration/integrity binding, bounded worker, parent expiry and recovery, local diagnostics, real authenticated HTTP/SSE and a synthetic example. [Current state](STATE.md) and [evidence](evidence/phase2/sensor-appliance.json) distinguish executed checks from pending gates. Full Mac installed packaging remains failed/pending after startup/OpenCV timeouts; Linux installed raw/DDS and Mac source/raw/API component checks passed. Do not publish or claim new VM boot/physical qualification.
+
+Next executable task: diagnose installed Mac startup/rectification timing using `build/ecosystem-phase2/sensor-appliance/diagnostic-venv`, complete committed clean reproduction, then ROS per-boot authority/supervisor wiring. This is a continuation checkpoint, not an approval stop. Current worktree HEAD is reported by `git rev-parse HEAD`; historical source `58addca` remains the last fully reproduced checkpoint below.
+
+## Earlier provider checkpoint — historical
 
 Verified source: `58addca8182d6b77749c105e1bf9dc4b9a346093`. [Provider implementation](SENSOR-PROVIDER.md) now connects calibrated raw depth replay and ROS depth/cloud geometry, with clock/source/mount/format/calibration withdrawal and actual installed DDS consumption. [Clean reproduction](evidence/phase2/provider-clean.json) passed identical source/ZIP artifacts, isolated consumers, 49 installed sensor tests, seven OpenCV tests, HTTP/SSE and zero-viewer continuation. The frozen temporal benchmark passed at p95 13.633ms/max73.689ms. Source verification passed 107 integration tests, 75 core tests, 54 installed ROS tests, security/lint, 26 plan negatives and both required fuzz runs. Exact wheels and retained counterexamples are in [provider evidence](evidence/phase2/provider.json).
 
@@ -58,3 +64,5 @@ Committed ROS source `bc2ffe4b6fca49e90d265ea5cffc8bea2485647d` passed clean-clo
 Clean-clone edge installation also passed on that revision: identical core/edge wheel hashes, 28 installed sensor tests, three authenticated SSE events and continued processing after disconnect. Final required fuzz runs: 93,127 legacy cases/60.001s and 247,724 temporal cases/60.236s, zero unexpected exceptions. Local build-space reservation was released; no other-session cache was cleaned.
 
 Current geometry increment implements strict 3D-to-optical rigid registration, declared error footprints, expiring clock/mount bindings and optional sparse lens rectification/deprojection. The full integration suite passed 92 tests in 159.362s; installed matrix results are in [registration evidence](evidence/phase2/registration.json). This remains partial P2.1; no model, ROS CameraInfo promotion, appliance provider or physical qualification is inferred. [NEXT](NEXT.md) identifies the provider connection task.
+
+The final broad Mac regression retained two availability failures (115 tests); eight focused worker tests pass after correcting raw duration reporting. Final installed Linux results and current artifact hashes are in [sensor-appliance evidence](evidence/phase2/sensor-appliance.json). Earlier Mac component results predate the duration diagnostic fix. Full current Mac and committed reproduction remain open.

@@ -101,8 +101,10 @@ def verify_configuration(config, config_path: Path):
     manifest = verify_bundle(root, Path(config.trust_root))
     inputs = [config_path]
     for profile in config.profiles:
-        if profile.driver in ("replay", "file"):
+        if profile.driver in ("replay", "file", "sensor-replay"):
             inputs.append(Path(profile.address))
+        if profile.sensor_manifest:
+            inputs.append(Path(profile.sensor_manifest))
         if profile.model:
             inputs.append(Path(profile.model))
     for path in inputs:
