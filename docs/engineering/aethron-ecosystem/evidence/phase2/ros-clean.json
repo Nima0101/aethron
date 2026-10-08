@@ -1,0 +1,310 @@
+{
+  "source_revision": "bc2ffe4b6fca49e90d265ea5cffc8bea2485647d",
+  "core_reproduction": {
+    "artifact_sha256": {
+      "SHA256SUMS": "0a7a0dae5b51a894abf2041974421f9af17adbf7ffc0b982c61250f1d300fe8b",
+      "aethron-0.2.0-source.tar.gz": "dca2c2b84c5d76fa763e35fac70986d984b34c5acfefb6f69889a0e482108b6d",
+      "aethron.pyz": "5ac2bab6f070c716e05ec5fcdbc8762b0d2f83d2841ad2ba2be91d7ed7f51a35",
+      "provenance.json": "49006955d8d4947069ee9e167c5dc1cc447813e66e4b5cc0ddf373ece9fabec0",
+      "sbom.cdx.json": "c3cdcb3d54e872681e95ad3f7cb4d0f0847dc49adb0dc9926da2110d1b222d54",
+      "source-manifest.json": "686c555d91ce471a43858872710dd3ad301ce5c45cc69914717b65b6a6c05550"
+    },
+    "byte_identical_builds": true,
+    "clean_clone": true,
+    "evaluation_gate_passed": true,
+    "isolated_zipapp_consumer": true,
+    "quickstart": true,
+    "source_revision": "bc2ffe4b6fca49e90d265ea5cffc8bea2485647d"
+  },
+  "full_evaluation": {
+    "benchmark": {
+      "cpu_p95_ms_diagnostic_only": 9.255,
+      "frames": 100,
+      "max_ms": 19.348,
+      "memory_budget_bytes": 33554432,
+      "objects": 32,
+      "p50_ms": 6.616,
+      "p95_budget_ms": 100,
+      "p95_ms": 11.679,
+      "passed": true,
+      "peak_bytes": 119721
+    },
+    "evaluation_script_sha256": "862af9ccd543865efd0871fe256f8c169502a947f8759d388f2f2eeda43f1b1f",
+    "platform": "Darwin arm64",
+    "protocol": "matrix-v3.md frozen T09/T10/T13",
+    "python": "3.13.15",
+    "recorded": {
+      "frames": 25,
+      "greedy_iou": {
+        "centre_rmse_normalized": null,
+        "false_negatives": 20,
+        "false_positives": 629,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "true_positives": 0,
+        "uncertain_predictions_not_counted_as_detections": 0
+      },
+      "motion": "Translation adapter measured; invalid frames withdraw motion",
+      "physical_or_semantic_qualification": false,
+      "pixel_detector_latency_ms": {
+        "max": 14458.422,
+        "p50": 865.8
+      },
+      "source": "AOT evaluation-only excerpt; fixed-wing aircraft, not UAV",
+      "temporal": {
+        "centre_rmse_normalized": null,
+        "false_negatives": 20,
+        "false_positives": 721,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "true_positives": 0,
+        "uncertain_predictions_not_counted_as_detections": 70
+      },
+      "valid_registration_frames": 20
+    },
+    "runtime_sha256": {
+      "aethron/__init__.py": "8ea373fbd458d5b53b6a5285584c61d14f1541e96d7a05c29f0508011b766fa7",
+      "aethron/__main__.py": "94eb2aa08c590456d8d1f6de520b0f268cab48c671325688ae9f6ae4b6ec7a66",
+      "aethron/actions.py": "e449088fa6850f3dc11f782cc656817ab571e2d94cbc4ebb33869706e7537a2a",
+      "aethron/adapters.py": "856030c21738c200df3758eda4194ddde5f56c1d6feca57b0c0965f06e9a0481",
+      "aethron/core.py": "c5ef2d70c7ac5065b5a95836eba588fd44a78a6bceb97883ec0d0b5ac2a1619a",
+      "aethron/demo.py": "c6b1539f1fcd91970d71aee2dd8923a584df2f1332adb9f083de18e14277983e",
+      "aethron/features.py": "fae7de40ec3af1c3a47ae919628b7339a83ebd783b882e3e66bdcf5868c9dd3c",
+      "aethron/models/__init__.py": "61e3d91134abfff53054811740f54dd21cc6e531087e506302a0bf650728e25d",
+      "aethron/render.py": "9231a04b312d74281192d9f097ccfc8d7fd58fc20f2d8d45e36748f831647b44",
+      "aethron/schema.py": "ca28412601bf05a155ad55e59070f811af2c67dd374e2b2baeb9b54d8e4ccc43",
+      "aethron/schema_v2.py": "d529ca9797dcf0cf4d7126c93c9ea233edea77cda55faecc3ba7a2559ec7f3ab",
+      "aethron/temporal/__init__.py": "8dac6e681e96fa0a78affbddc6c76962d221a7e66f6e8bc0828e40d9b9494087",
+      "aethron/temporal/fixtures.py": "d18cbd884805e335d803638b2a311bd6fc90b5764c3db9c6eb194270490d19b5",
+      "aethron/temporal/fusion.py": "c9f6df323f40ac0f0cf9f06d9f3a642fb3ab5113d30cded90aae3d3d5d8fa770",
+      "aethron/temporal/math.py": "f9a634fea08a7e20bf4e730671f6eed729c4827193d439f5ab29fa3f708d2b9e",
+      "aethron/temporal/pixels.py": "314583c5a9d34f005f1c9b5fb9c739183de39894c38dcff8cdc7e899406e13cb",
+      "aethron/temporal/registration.py": "cd6b8955a7ebc8c762da3af5f28d83ff2a7a2a5f097a5e3d1177867fc53aa7c5",
+      "aethron/temporal/replay.py": "37863819e5c3a99aefbe0d3a7df17ac7dae09c33ed01b76d8af0697b133344e0",
+      "aethron/temporal/schema.py": "2602ad7523623f326876b5723ef4869049b2b2bb095c9f03e531345f4e568350",
+      "aethron/temporal/session.py": "e702043f6d20611cae0037ad041198976b730b23407b87df042e7e7c91574560",
+      "aethron/vision/__init__.py": "2e051811883c745faf9abe9d2e076396186a187c7807fbbf087dbe5d54c085a2",
+      "aethron/vision/yolox.py": "d2a6ca09b670bc569ad79e025240908fa7252c8c9dcbb76a5b93c83e2ac3bec4"
+    },
+    "synthetic": {
+      "all_loss": {
+        "greedy_iou": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 16,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 0.333333,
+          "true_positives": 8,
+          "uncertain_predictions_not_counted_as_detections": 0
+        },
+        "temporal": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 16,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 0.333333,
+          "true_positives": 8,
+          "uncertain_predictions_not_counted_as_detections": 5
+        }
+      },
+      "blackout": {
+        "greedy_iou": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 24,
+          "uncertain_predictions_not_counted_as_detections": 0
+        },
+        "temporal": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 24,
+          "uncertain_predictions_not_counted_as_detections": 0
+        }
+      },
+      "camera_pan": {
+        "greedy_iou": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 24,
+          "uncertain_predictions_not_counted_as_detections": 0
+        },
+        "temporal": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 24,
+          "uncertain_predictions_not_counted_as_detections": 0
+        }
+      },
+      "classes": {
+        "greedy_iou": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 11,
+          "uncertain_predictions_not_counted_as_detections": 0
+        },
+        "temporal": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 11,
+          "uncertain_predictions_not_counted_as_detections": 40
+        }
+      },
+      "clean": {
+        "greedy_iou": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 24,
+          "uncertain_predictions_not_counted_as_detections": 0
+        },
+        "temporal": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 24,
+          "uncertain_predictions_not_counted_as_detections": 0
+        }
+      },
+      "crossing": {
+        "greedy_iou": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 2,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 48,
+          "uncertain_predictions_not_counted_as_detections": 0
+        },
+        "temporal": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 2,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 0.958333,
+          "true_positives": 46,
+          "uncertain_predictions_not_counted_as_detections": 2
+        }
+      },
+      "fast_uav": {
+        "greedy_iou": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 3,
+          "false_positives": 0,
+          "fragmentations": 2,
+          "id_switches": 20,
+          "precision": 1.0,
+          "recall": 0.875,
+          "true_positives": 21,
+          "uncertain_predictions_not_counted_as_detections": 0
+        },
+        "temporal": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 3,
+          "false_positives": 0,
+          "fragmentations": 2,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 0.875,
+          "true_positives": 21,
+          "uncertain_predictions_not_counted_as_detections": 3
+        }
+      },
+      "occlusion": {
+        "greedy_iou": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 3,
+          "false_positives": 0,
+          "fragmentations": 2,
+          "id_switches": 2,
+          "precision": 1.0,
+          "recall": 0.875,
+          "true_positives": 21,
+          "uncertain_predictions_not_counted_as_detections": 0
+        },
+        "temporal": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 3,
+          "false_positives": 0,
+          "fragmentations": 2,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 0.875,
+          "true_positives": 21,
+          "uncertain_predictions_not_counted_as_detections": 3
+        }
+      }
+    }
+  },
+  "log_sha256": "87cd4a8c2772d81771da3130fc7ef443d143af2c8fc1d4795a0d74c9a49c1d7a",
+  "historical_failures": "performance.json retains prior native failures; this new passing execution does not erase them",
+  "hardware_qualified": false,
+  "hosted_ci_executed": false,
+  "edge_reproduction": {
+    "wheels": {
+      "aethron-0.2.0-py3-none-any.whl": "be3dd8e3e8bcf437d72d65e384c560eb18d4b22baf522849b965d3d720c1d73f",
+      "aethron_edge-0.1.0-py3-none-any.whl": "fe8d803985a49b02fad559887c582d55fb2faa2cb6fbca246ed4a842a34b1d68"
+    },
+    "byte_identical": true,
+    "installed_consumer": true,
+    "installed_sensor_contracts": true,
+    "consumer_events": 3,
+    "zero_viewer_continued": true,
+    "platform": "darwin",
+    "python": "3.13.15",
+    "source_revision": "bc2ffe4b6fca49e90d265ea5cffc8bea2485647d",
+    "clean_clone": true
+  },
+  "edge_log_sha256": "8a252a4d6974aca779aa28bee9a73fbe024bc6ba39629b26d34b8044eaf008fb",
+  "clean_harness_sha256": "10a3bf591bfda8060d1e0f71131ff4dd4015ab811b1664ab174f8cea94895b15",
+  "clean_harness": "Own temporary --no-local clone of committed HEAD, remove PYTHONPATH, run plan self-test, then scripts/edge_package_check.py with existing offline wheelhouse and distinct output directory"
+}

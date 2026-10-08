@@ -225,15 +225,16 @@
   },
   "delivery": {
     "status": "not_published",
-    "source_revision": "f40fbd1e7b282fe4328b2d677c5e4335c020f227",
-    "required_checks": "held_native_macos_latency",
+    "source_revision": "bc2ffe4b6fca49e90d265ea5cffc8bea2485647d",
+    "required_checks": "pending_publication_prerequisites_and_hosted_ci",
     "hosted_ci": "pending",
     "branch_rules": "observed_none_2026-10-08",
     "pages": "pending_verified_publication",
     "checked_main_revision": "46e8828151ce17a7342d7dba6ce72963f540bc7b",
     "pages_workflow": ".github/workflows/browser-camera.yml",
     "pages_trigger": "workflow_dispatch_on_validated_main",
-    "latency_evidence": "evidence/phase2/performance.json"
+    "latency_evidence": "evidence/phase2/performance.json",
+    "latest_local_reproduction": "evidence/phase2/ros-clean.json"
   },
   "software_work": {
     "P2.1": {

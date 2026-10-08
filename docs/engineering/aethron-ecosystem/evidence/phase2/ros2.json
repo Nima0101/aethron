@@ -1,7 +1,7 @@
 {
   "date": "2026-10-08",
   "parent_revision": "511a47ed529c3dc70d2710061d064c3ad68309d9",
-  "status": "software_candidate_passed_clean_clone_pending",
+  "status": "software_candidate_passed",
   "hardware_qualified": false,
   "field_qualified": false,
   "hosted_ci_executed": false,
@@ -590,5 +590,7 @@
       "aethron/vision/yolox.py": "d2a6ca09b670bc569ad79e025240908fa7252c8c9dcbb76a5b93c83e2ac3bec4",
       "aethron/vision/__init__.py": "2e051811883c745faf9abe9d2e076396186a187c7807fbbf087dbe5d54c085a2"
     }
-  }
+  },
+  "source_revision": "bc2ffe4b6fca49e90d265ea5cffc8bea2485647d",
+  "clean_reproduction_evidence": "ros-clean.json"
 }
