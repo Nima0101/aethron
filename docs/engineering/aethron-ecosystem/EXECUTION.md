@@ -12,3 +12,5 @@ P1.1 RED: installed consumer fails building nonexistent integrations/edge. Full 
 
 P1.1 GREEN: installed consumer 1/1, 24 frames with final depth/lwir/radar. Core wheel built twice byte-identically and external consumer passed. Plan validation 14 negative probes passed.
 Ruling: redact only the owner approval’s absolute private worktree path to satisfy existing public-leak gate; original approval remains in commit 1445f18 and original digest is retained. Authorization meaning unchanged; cost is requiring Git history for verbatim original.
+
+P1.1 committed 947b72d. P1.2 RED missing contracts/OpenAPI; GREEN 4 strict contract tests, 1 schema/export test, installed consumer 1/1 (62.179s). Full resolved dependencies audited before installation; no known vulnerabilities.

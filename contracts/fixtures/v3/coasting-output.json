@@ -1,0 +1,43 @@
+{
+  "at_ms": 101,
+  "evidence": "synthetic",
+  "expires_at_ms": 301,
+  "reasons": [
+    "acquisition_stalled"
+  ],
+  "recommendation": {
+    "action": "STOP",
+    "contract": "vehicle_stop",
+    "reason": "hazard_or_unknown",
+    "requires_independent_controller": true
+  },
+  "state": "UNKNOWN",
+  "tracks": [
+    {
+      "box": [
+        0.1,
+        0.45,
+        0.04,
+        0.08
+      ],
+      "class": "person",
+      "covariance": [
+        0.0001,
+        0.0001
+      ],
+      "direction_rad": null,
+      "expires_at_ms": 301,
+      "freshness_ms": 101,
+      "id": "aa293ae91325385bdb5a07f7:1",
+      "prediction": null,
+      "range_m": null,
+      "score": 0.7182,
+      "score_semantics": "uncalibrated_support",
+      "sources": [],
+      "state": "coasting",
+      "status": "UNKNOWN",
+      "velocity_normalized_per_s": null
+    }
+  ],
+  "version": 3
+}

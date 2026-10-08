@@ -1,0 +1,13 @@
+{
+  "parent": "947b72d",
+  "strict_contract_tests": 4,
+  "openapi_tests": 1,
+  "installed_consumer_tests": 1,
+  "dependency_audit": "dependency-audit.json",
+  "red": "missing contracts and OpenAPI module",
+  "green": "raw-boundary rejection, closed report and scene, schema validates real core outputs, offline external install passed",
+  "limitations": [
+    "No running HTTP service until P1.4",
+    "Lock currently macOS arm64 CPython 3.13; cross-platform hashes added in packaging"
+  ]
+}

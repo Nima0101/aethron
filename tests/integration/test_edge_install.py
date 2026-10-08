@@ -44,6 +44,8 @@ class InstalledEdge(unittest.TestCase):
                     "--no-index",
                     "--find-links",
                     str(temp / "wheels"),
+                    "--find-links",
+                    str(ROOT / "build/ecosystem-phase1/wheelhouse"),
                     "aethron-edge==0.1.0",
                 ],
                 cwd=temp,

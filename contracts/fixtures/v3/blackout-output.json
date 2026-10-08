@@ -1,0 +1,1357 @@
+{
+  "api_version": "1",
+  "runtime_mode": "replay",
+  "frame_count": 24,
+  "results": [
+    {
+      "version": 3,
+      "at_ms": 0,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.1,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "tentative",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.0001,
+            0.0001
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 100,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar",
+            "rgb"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": null,
+          "direction_rad": null,
+          "prediction": null
+        }
+      ],
+      "reasons": [],
+      "expires_at_ms": 100,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 100,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.112,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000096297,
+            0.000096297
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 200,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar",
+            "rgb"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.111123,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.15378,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [],
+      "expires_at_ms": 200,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 200,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.124,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.00008237,
+            0.00008237
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 300,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar",
+            "rgb"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.117665,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.167298,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [],
+      "expires_at_ms": 300,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 300,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.136,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000069743,
+            0.000069743
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 400,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar",
+            "rgb"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.119072,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.179673,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [],
+      "expires_at_ms": 400,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 400,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.14800000000000002,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000060145,
+            0.000060145
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 500,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar",
+            "rgb"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.119552,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.191817,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [],
+      "expires_at_ms": 500,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 500,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.16,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000052979,
+            0.000052979
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 600,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar",
+            "rgb"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.119762,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.203887,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [],
+      "expires_at_ms": 600,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 600,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.17200000000000001,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000047649,
+            0.000047649
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 700,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar",
+            "rgb"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.119869,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.215927,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [],
+      "expires_at_ms": 700,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 700,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.184,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000043729,
+            0.000043729
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 800,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar",
+            "rgb"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.119931,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.227953,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [],
+      "expires_at_ms": 800,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 800,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.196,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.00004091,
+            0.00004091
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 900,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.119968,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.23997,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [
+        "rgb:dark"
+      ],
+      "expires_at_ms": 900,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 900,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.20800000000000002,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000038957,
+            0.000038957
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 1000,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.119991,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.251982,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [
+        "rgb:dark"
+      ],
+      "expires_at_ms": 1000,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 1000,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.22,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000037668,
+            0.000037668
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 1100,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.120005,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.26399,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [
+        "rgb:dark"
+      ],
+      "expires_at_ms": 1100,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 1100,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.232,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000036871,
+            0.000036871
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 1200,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.120014,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.275996,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [
+        "rgb:dark"
+      ],
+      "expires_at_ms": 1200,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 1200,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.24400000000000002,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000036416,
+            0.000036416
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 1300,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.120018,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.288,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [
+        "rgb:dark"
+      ],
+      "expires_at_ms": 1300,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 1300,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.256,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.00003618,
+            0.00003618
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 1400,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.120019,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.300003,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [
+        "rgb:dark"
+      ],
+      "expires_at_ms": 1400,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 1400,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.268,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000036074,
+            0.000036074
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 1500,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.120018,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.312004,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [
+        "rgb:dark"
+      ],
+      "expires_at_ms": 1500,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 1500,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.28,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000036034,
+            0.000036034
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 1600,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.120016,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.324005,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [
+        "rgb:dark"
+      ],
+      "expires_at_ms": 1600,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 1600,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.29200000000000004,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000036024,
+            0.000036024
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 1700,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.120014,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.336005,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [
+        "rgb:dark"
+      ],
+      "expires_at_ms": 1700,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 1700,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.30400000000000005,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000036023,
+            0.000036023
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 1800,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.120011,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.348004,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [
+        "rgb:dark"
+      ],
+      "expires_at_ms": 1800,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 1800,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.316,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000036022,
+            0.000036022
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 1900,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.120008,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.360004,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [
+        "rgb:dark"
+      ],
+      "expires_at_ms": 1900,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 1900,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.328,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.00003602,
+            0.00003602
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 2000,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.120006,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.372003,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [
+        "rgb:dark"
+      ],
+      "expires_at_ms": 2000,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 2000,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.33999999999999997,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000036017,
+            0.000036017
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 2100,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.120004,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.384002,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [
+        "rgb:dark"
+      ],
+      "expires_at_ms": 2100,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 2100,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.352,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000036013,
+            0.000036013
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 2200,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.120002,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.396002,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [
+        "rgb:dark"
+      ],
+      "expires_at_ms": 2200,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 2200,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.364,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000036009,
+            0.000036009
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 2300,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.120001,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.408001,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [
+        "rgb:dark"
+      ],
+      "expires_at_ms": 2300,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    },
+    {
+      "version": 3,
+      "at_ms": 2300,
+      "evidence": "synthetic",
+      "state": "PRESENT",
+      "tracks": [
+        {
+          "id": "replay-1-1",
+          "class": "person",
+          "box": [
+            0.376,
+            0.45,
+            0.04,
+            0.08
+          ],
+          "state": "observed",
+          "status": "PRESENT",
+          "score": 0.9,
+          "score_semantics": "uncalibrated_support",
+          "covariance": [
+            0.000036005,
+            0.000036005
+          ],
+          "freshness_ms": 0,
+          "expires_at_ms": 2400,
+          "sources": [
+            "depth",
+            "lwir",
+            "radar"
+          ],
+          "range_m": 8.0,
+          "velocity_normalized_per_s": [
+            0.12,
+            0.0
+          ],
+          "direction_rad": 0.0,
+          "prediction": {
+            "centre": [
+              0.420001,
+              0.49
+            ],
+            "horizon_ms": 200,
+            "evidence": false
+          }
+        }
+      ],
+      "reasons": [
+        "rgb:dark"
+      ],
+      "expires_at_ms": 2400,
+      "recommendation": {
+        "contract": "vehicle_stop",
+        "action": "STOP",
+        "reason": "hazard_or_unknown",
+        "requires_independent_controller": true
+      }
+    }
+  ]
+}

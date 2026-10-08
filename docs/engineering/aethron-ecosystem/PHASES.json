@@ -154,11 +154,13 @@
       ]
     },
     "P1.2": {
-      "status": "in_progress",
-      "evidence": []
+      "status": "passed",
+      "evidence": [
+        "evidence/phase1/p12.json"
+      ]
     },
     "P1.3": {
-      "status": "pending",
+      "status": "in_progress",
       "evidence": []
     },
     "P1.4": {
