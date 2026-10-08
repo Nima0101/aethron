@@ -119,6 +119,13 @@
       "finding": "Harness rejected image before builder finished writing signed manifest; rerun only after successful builder completion",
       "status": "retained_negative_or_incomplete",
       "public_raw_log": false
+    },
+    {
+      "local_log": "pixels-measured.log",
+      "sha256": "d1e7fa0e3b2b6937c895ad2cc64d4a6de71a77e7705b10bfb740ff698fbbc894",
+      "finding": "Installed pixel client timed out at unchanged 20s bound under concurrent load; focused repeat passed with same code and timeout",
+      "status": "retained_failure",
+      "public_raw_log": false
     }
   ]
 }

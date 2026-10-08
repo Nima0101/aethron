@@ -1,7 +1,8 @@
 {
   "status": "implemented_validation_in_progress",
-  "boot": "final signed image running 1h soak",
+  "boot": "signed boot-acceptance image running required one-hour second boot",
   "native_linux_update": "actual version-2 slot exec, rollback refusal and offline processing passed",
   "hardware_qualified": false,
-  "field_qualified": false
+  "field_qualified": false,
+  "source_revision": "d90ae953f6431fd9d460e440432ac72825b8d250"
 }

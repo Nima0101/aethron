@@ -1,6 +1,6 @@
 # AETHRON ecosystem implementation plan
 
-> For the future single agent: use the executing-plans workflow task by task only after explicit owner START. No subagents. Every unchecked item below is future work.
+> Phase 1 was authorized and implemented. The original task checklists below are retained as the execution specification, not the current progress ledger. Use [PHASES](PHASES.json), [TEST-EVIDENCE](TEST-EVIDENCE.md) and [HANDOFF](HANDOFF.md) for executed acceptance and limits. P2–P5 remain future work; no subagents.
 
 **Goal:** deliver installable, genuinely exercised local perception integrations, then expand to exact-device vehicle/UAS/nonvisible deployments with evidence-qualified claims.
 
@@ -119,7 +119,7 @@ Consumes complete installed stack; produces source-bound evidence for A/B on act
 
 ## Supported versus not yet supported
 
-Existing support is precisely [BASELINE](BASELINE.md): a local research runtime and its demonstrated paths. Every P1–P5 item above is unchecked. Intended platform availability is not support. Broader vehicle/drone/sensor scope is preserved in these tasks, with shared contracts and recipes; phased implementation changes sequencing, not the owner's goal. Do not declare the entire ecosystem finished when only P1 is delivered.
+Existing support is precisely [BASELINE](BASELINE.md): a local research runtime and its demonstrated paths. P1 implementation and evidence are recorded in PHASES and HANDOFF; the original unchecked planning checklist is retained below. P2–P5 remain unimplemented in this lane. Intended platform availability is not support. Broader vehicle/drone/sensor scope is preserved in these tasks, with shared contracts and recipes; phased implementation changes sequencing, not the owner's goal. Do not declare the entire ecosystem finished when only P1 is delivered.
 
 ## P1.7 — Mandatory standalone appliance boot and offline acceptance (4–7 days)
 

@@ -150,37 +150,46 @@
     "P1.1": {
       "status": "passed",
       "evidence": [
-        "evidence/phase1/p11.json"
+        "evidence/phase1/p11.json",
+        "evidence/phase1/integration.json"
       ]
     },
     "P1.2": {
       "status": "passed",
       "evidence": [
-        "evidence/phase1/p12.json"
+        "evidence/phase1/p12.json",
+        "evidence/phase1/integration.json"
       ]
     },
     "P1.3": {
-      "status": "implemented_validation_in_progress",
+      "status": "passed",
       "evidence": [
-        "evidence/phase1/p13.json"
+        "evidence/phase1/p13.json",
+        "evidence/phase1/integration.json",
+        "evidence/phase1/installed-pixels.json"
       ]
     },
     "P1.4": {
-      "status": "implemented_validation_in_progress",
+      "status": "passed",
       "evidence": [
-        "evidence/phase1/p14.json"
+        "evidence/phase1/p14.json",
+        "evidence/phase1/integration.json"
       ]
     },
     "P1.5": {
-      "status": "implemented_validation_in_progress",
+      "status": "passed",
       "evidence": [
-        "evidence/phase1/p15.json"
+        "evidence/phase1/p15.json",
+        "evidence/phase1/integration.json"
       ]
     },
     "P1.6": {
-      "status": "implemented_validation_in_progress",
+      "status": "passed",
       "evidence": [
-        "evidence/phase1/p16.json"
+        "evidence/phase1/p16.json",
+        "evidence/phase1/integration.json",
+        "evidence/phase1/clean-edge-final.json",
+        "evidence/phase1/clean-core-final.json"
       ]
     },
     "P1.7": {

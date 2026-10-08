@@ -1,6 +1,6 @@
 # Current state — 2026-10-08
 
-Phase 0 is committed and complete. Phase 1 is expressly authorized; P1.1–P1.7 implementation exists on `feat/aethron-vehicle-uav-preparation-20261008`. Final installed-source, multiarch container, clean-clone and one-hour boot/update-soak verification is in progress. [PHASES](PHASES.json) and [EXECUTION](EXECUTION.md) carry machine status and checkpoint history. Phase 2–5 remain planned and unauthorized here.
+Phase 0 is committed and complete. Phase 1 is expressly authorized; P1.1–P1.7 implementation exists on `feat/aethron-vehicle-uav-preparation-20261008`. P1.1–P1.6 software-candidate gates passed on the executed matrix. P1.7’s final one-hour boot/update soak is in progress. Reviewed runtime commit: `d90ae953f6431fd9d460e440432ac72825b8d250`. [PHASES](PHASES.json) and [EXECUTION](EXECUTION.md) carry machine status and checkpoint history. Phase 2–5 remain planned and unauthorized here.
 
 Implemented: separate GPL-3.0-only `aethron-edge` wheel/CLI, strict OpenAPI/contracts, file/UVC/RTSP source ABI, monotonic capture admission/calibration, pinned detector replay, independent supervisor, scoped local HTTP/SSE, Python/TypeScript clients, signed offline runtime/update slots, systemd boot image and actual Linux VM harness. The normal appliance does not depend on a viewer, provisioning host or WAN.
 
