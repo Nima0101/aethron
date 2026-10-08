@@ -1,6 +1,7 @@
 AETHRON
 Copyright 2026 Nima Khaki
 Original software, deterministic model, synthetic fixtures and vector artwork.
+Project-owned original software: GPL-3.0-only for the open-source edition; separately negotiated commercial licensing available where the rights holder controls the needed rights. See LICENSING.md and COMMERCIAL-LICENSING.md.
 AI-assisted engineering is disclosed in docs/engineering/ai-assisted-engineering.md.
 
 Optional model attribution: OpenCV Zoo YOLOX-S and YOLOX authors; Apache-2.0 model license in docs/models/YOLOX-LICENSE.txt. Weights fetched separately with a fixed SHA-256.

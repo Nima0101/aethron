@@ -1,0 +1,99 @@
+{
+  "currency": "EUR",
+  "taxes": "Prices exclude applicable VAT/taxes",
+  "effective_date": "2026-10-08",
+  "status": "published_indicative_not_checkout",
+  "community_license": "GPL-3.0-only",
+  "contract_required": true,
+  "automated_checkout_available": false,
+  "software_qualified_for_automotive_or_uas": false,
+  "offline_activation_required": false,
+  "default_annual_term_months": 12,
+  "auto_renewal_default": false,
+  "plan_definitions": [
+    {
+      "id": "community",
+      "name": "Community GPLv3",
+      "annual_price_eur": 0,
+      "developers": null,
+      "product_families": null,
+      "deployments": "per_GPLv3",
+      "per_device_fee_eur": 0,
+      "licence": "GPL-3.0-only"
+    },
+    {
+      "id": "indie",
+      "name": "Indie Commercial",
+      "annual_price_eur": 199,
+      "developers": 1,
+      "product_families": 1,
+      "deployments": "unlimited_named_products",
+      "per_device_fee_eur": 0
+    },
+    {
+      "id": "startup",
+      "name": "Startup Commercial",
+      "annual_price_eur": 499,
+      "developers": 5,
+      "product_families": 1,
+      "deployments": "unlimited_named_products",
+      "per_device_fee_eur": 0,
+      "eligibility": "early_stage_less_than_1m_eur_combined_prior_year_revenue_and_last_12m_external_funding"
+    },
+    {
+      "id": "small_business",
+      "name": "Small Business",
+      "annual_price_eur": 990,
+      "developers": 10,
+      "product_families": 3,
+      "deployments": "unlimited_named_products",
+      "per_device_fee_eur": 0
+    },
+    {
+      "id": "business",
+      "name": "Business",
+      "annual_price_eur": 2490,
+      "developers": 25,
+      "product_families": 5,
+      "deployments": "unlimited_named_products",
+      "per_device_fee_eur": 0
+    },
+    {
+      "id": "oem_enterprise",
+      "name": "OEM / Enterprise",
+      "annual_price_eur": 4900,
+      "starting_price": true,
+      "unit": "per_product_family",
+      "developers": "negotiated",
+      "product_families": "negotiated",
+      "deployments": "negotiated_normally_royalty_free"
+    }
+  ],
+  "founding": {
+    "name": "Founding Commercial Partner",
+    "annual_price_eur": 499,
+    "maximum_customers": 25,
+    "developer_seats": 10,
+    "product_families": 3,
+    "deployments": "unlimited_named_products",
+    "fixed_annual_periods": 3,
+    "signed_order_allocates_slot": true,
+    "renewal_year_four": "then_current_small_business_rate_unless_signed_exception",
+    "slots_claimed": null
+  },
+  "support": {
+    "standard_commercial": "best_effort_included_during_paid_term",
+    "priority_per_month_eur": 99,
+    "priority_new_tickets_per_month": 5,
+    "priority_reply_target_swedish_business_days": 2,
+    "engineering_min_hourly_eur": 125,
+    "engineering_max_hourly_eur": 175,
+    "certified_sla_included": false
+  },
+  "rules": {
+    "perpetual_paid_version_rights": "named_product_and_delivered_version_only_subject_to_agreement",
+    "no_mandatory_online_activation": true,
+    "products_defined_in_signed_order": true,
+    "third_party_licenses_unaffected": true
+  }
+}
