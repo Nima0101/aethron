@@ -1,0 +1,7 @@
+{
+  "wheel": "aethron-0.2.0-py3-none-any.whl",
+  "sha256": "6ba6979621a5b0c6b37537ce575fdc47c9087aaa3bafbc2559f6cb18b527c956",
+  "byte_identical": true,
+  "isolated_install": true,
+  "runtime_dependencies": 0
+}

@@ -1,0 +1,24 @@
+{
+  "public-repo": {
+    "url": "https://api.github.com/repos/Nima0101/aethron/commits/main",
+    "http_status": 200,
+    "bytes": 20744,
+    "sha256": "dcaa65f8191779482460630010d3b9c829dcbdc81fe4c38f6fd5dea6c5f0d536",
+    "retrieved": "2026-10-08",
+    "main_sha": "59fda946771d4ac8c9d1b52eeb3d948215325e4c"
+  },
+  "public-pwa": {
+    "url": "https://nima0101.github.io/aethron/",
+    "http_status": 200,
+    "bytes": 2891,
+    "sha256": "277853976204dbed495d5fd1d1a809f9d19942f338415c37498f1e76c7e0b826",
+    "retrieved": "2026-10-08"
+  },
+  "mavsdk-license": {
+    "url": "https://raw.githubusercontent.com/mavlink/MAVSDK/main/LICENSE.md",
+    "http_status": 200,
+    "bytes": 1499,
+    "sha256": "c9bce02ab9a67875de2b649b9fd09b1a0e6ee11835450428a78465b396ceec68",
+    "retrieved": "2026-10-08"
+  }
+}

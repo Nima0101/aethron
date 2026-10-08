@@ -1,0 +1,54 @@
+[
+  {
+    "file": "perception-day.png",
+    "size": [
+      1280,
+      660
+    ],
+    "pixel_diff_box": [
+      26,
+      27,
+      478,
+      51
+    ]
+  },
+  {
+    "file": "perception-night.png",
+    "size": [
+      1280,
+      660
+    ],
+    "pixel_diff_box": [
+      26,
+      27,
+      478,
+      51
+    ]
+  },
+  {
+    "file": "perception-occlusion.png",
+    "size": [
+      1280,
+      660
+    ],
+    "pixel_diff_box": [
+      26,
+      27,
+      478,
+      51
+    ]
+  },
+  {
+    "file": "perception-unknown.png",
+    "size": [
+      1280,
+      660
+    ],
+    "pixel_diff_box": [
+      26,
+      27,
+      478,
+      51
+    ]
+  }
+]

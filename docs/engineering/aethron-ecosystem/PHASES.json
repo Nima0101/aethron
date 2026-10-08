@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "project": "AETHRON",
+  "as_of": "2026-10-08",
+  "baseline_sha": "59fda946771d4ac8c9d1b52eeb3d948215325e4c",
+  "branch": "feat/aethron-vehicle-uav-preparation-20261008",
+  "current_phase": 0,
+  "phase1_authorized": false,
+  "auto_advance": false,
+  "publication_authorized": false,
+  "product_complete": false,
+  "phases": [
+    {
+      "id": 0,
+      "title": "Research, blueprint and planning preflight",
+      "status": "prepared_commit_blocked",
+      "depends_on": [],
+      "owner": "phase0_single_planner",
+      "gates": [
+        "documents",
+        "preflight",
+        "negative_tests",
+        "baseline_recorded",
+        "local_commit"
+      ],
+      "implementation_complete": false
+    },
+    {
+      "id": 1,
+      "title": "Supervised offline appliance and installable edge candidate",
+      "status": "awaiting_owner",
+      "depends_on": [
+        0
+      ],
+      "owner": "owner_assigned_single_implementer",
+      "gates": [
+        "owner_start",
+        "P1.1",
+        "P1.2",
+        "P1.3",
+        "P1.4",
+        "P1.5",
+        "P1.6",
+        "P1.7"
+      ],
+      "implementation_complete": false
+    },
+    {
+      "id": 2,
+      "title": "Nonvisible models and sensor adapters",
+      "status": "planned",
+      "depends_on": [
+        1
+      ],
+      "owner": "owner_assigned_single_implementer",
+      "gates": [
+        "owner_start",
+        "data_rights",
+        "held_out_freeze",
+        "P2.1",
+        "P2.2",
+        "P2.3"
+      ],
+      "implementation_complete": false
+    },
+    {
+      "id": 3,
+      "title": "Platform, vehicle and UAS integration",
+      "status": "planned",
+      "depends_on": [
+        1
+      ],
+      "owner": "owner_assigned_single_implementer",
+      "gates": [
+        "owner_start",
+        "P3.1",
+        "P3.2",
+        "P3.3",
+        "P3.4"
+      ],
+      "implementation_complete": false
+    },
+    {
+      "id": 4,
+      "title": "Hardware and domain qualification",
+      "status": "planned",
+      "depends_on": [
+        2,
+        3
+      ],
+      "owner": "owner_and_qualification_team",
+      "gates": [
+        "owner_start",
+        "P4.1",
+        "P4.2",
+        "independent_review"
+      ],
+      "implementation_complete": false
+    },
+    {
+      "id": 5,
+      "title": "Optional bounded defensive integration",
+      "status": "planned",
+      "depends_on": [
+        4
+      ],
+      "owner": "owner_and_qualification_team",
+      "gates": [
+        "owner_start",
+        "system_safety_case",
+        "P5"
+      ],
+      "implementation_complete": false
+    }
+  ],
+  "local_commit_status": "blocked_by_sandbox",
+  "phase0_acceptance_complete": false,
+  "appliance_runtime": {
+    "status": "spec_only",
+    "owner_requirement": "OWNER-NEXT-APPLIANCE-RUNTIME.md",
+    "implementation_task": "P1.7",
+    "implementation_complete": false,
+    "acceptance_gates": [
+      "A01",
+      "A02",
+      "A03",
+      "A04",
+      "A05",
+      "A06",
+      "A07",
+      "A08",
+      "A09"
+    ],
+    "deployment_classes": [
+      "oem_embedded",
+      "vehicle_retrofit",
+      "drone_onboard",
+      "home_camera_hub"
+    ],
+    "requires_optional_client": false,
+    "requires_wan": false
+  }
+}

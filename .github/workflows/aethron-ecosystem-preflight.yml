@@ -1,0 +1,31 @@
+name: AETHRON ecosystem planning preflight
+
+on:
+  pull_request:
+    paths:
+      - 'docs/engineering/aethron-ecosystem/**'
+      - 'scripts/check_ecosystem_plan.py'
+      - '.github/workflows/aethron-ecosystem-preflight.yml'
+  push:
+    paths:
+      - 'docs/engineering/aethron-ecosystem/**'
+      - 'scripts/check_ecosystem_plan.py'
+      - '.github/workflows/aethron-ecosystem-preflight.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  planning-integrity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13.15'
+      - name: Validate blueprint and rejection probes
+        run: python scripts/check_ecosystem_plan.py --self-test

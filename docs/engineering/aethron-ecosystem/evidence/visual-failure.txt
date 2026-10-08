@@ -1,0 +1,6 @@
+{"frames": 48, "actual_cli": true, "synthetic_inputs": true, "sha256": {"perception-day.png": "4ffbeec9427540ba155f816fa79c1b279e5c32bf4f54d323f9c281ed6e9dae05", "perception-input.jsonl": "f19bb394da470e14ac02f88384a92640aa559a86c6a2700b3b783769d413c409", "perception-night.png": "9511e477d0e96034dd09d3915579a9f18587867779e06754eae79aebd17d9eaa", "perception-occlusion.png": "30ca832e868cab3be3a154e75b6d7db32771b08d1034580d18f1cfc7db3c4ed6", "perception-output.json": "9a8eb8b50002e46dbf1f994139a8573e82815ffd5cb7622d06d3a2d5e2c1041a", "perception-unknown.png": "f21f5243b38ac734d279f0d6fdb3ece69cf8e769231b1e30ff305f712794f3c4", "perception.gif": "7da2189630eb60538ad87ff7aa1670babd43be313196e3705e5bfdde8c55a28e", "perception.html": "8d644952a5a566ddecd02e5941923d022966a840d9fa9436a267ee9d60ae7788"}}
+Traceback (most recent call last):
+  File "<repository>/scripts/verify_visuals.py", line 19, in <module>
+    assert (produced / name).read_bytes() == (ROOT / "docs/assets" / name).read_bytes(), name
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: perception-day.png

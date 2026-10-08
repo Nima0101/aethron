@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-08",
+  "source_sha": "59fda946771d4ac8c9d1b52eeb3d948215325e4c",
+  "product_qualified": false,
+  "checks": [
+    {
+      "id": "core_verify",
+      "command": "python3 scripts/verify.py",
+      "status": "passed",
+      "limitation": "66 tests plus frozen hashes, public-content/links, legacy dataset, consumer and temporal CLI; local macOS arm64 Python 3.9.6 only."
+    },
+    {
+      "id": "temporal",
+      "command": "python3 scripts/temporal_evaluate.py --out build/ecosystem-phase0/temporal",
+      "status": "passed",
+      "limitation": "Frozen software gate passes; recorded detector still fails accuracy: 20 FN, 721 FP. Core timing excludes image inference."
+    },
+    {
+      "id": "temporal_fuzz",
+      "command": "python3 scripts/temporal_fuzz.py",
+      "status": "passed",
+      "limitation": "44935 cases over at least 60 seconds; bounded fuzz is not exhaustive."
+    },
+    {
+      "id": "legacy_fuzz",
+      "command": "python3 scripts/fuzz.py",
+      "status": "passed",
+      "limitation": "29256 cases over at least 60 seconds; local source only."
+    },
+    {
+      "id": "wheel",
+      "command": "python scripts/package_check.py",
+      "status": "passed",
+      "limitation": "Python 3.13.15 isolated tool venv; two byte-identical wheels and external install; no public-index publication."
+    },
+    {
+      "id": "bandit",
+      "command": "bandit -r aethron -f json",
+      "status": "passed",
+      "limitation": "Zero findings in runtime Python scope; not a full integration/security audit."
+    },
+    {
+      "id": "visual_generate",
+      "command": "python scripts/temporal_visuals.py --out build/ecosystem-phase0/visuals",
+      "status": "passed",
+      "limitation": "Actual synthetic CLI output rendered with Pillow 12.3.0; does not prove a device."
+    },
+    {
+      "id": "visual_reproduce",
+      "command": "python scripts/verify_visuals.py build/ecosystem-phase0/visuals",
+      "status": "failed",
+      "limitation": "AssertionError perception-day.png; all four PNGs/GIF/manifest differ. Input/output JSON and HTML match. Title-region mismatch retained."
+    },
+    {
+      "id": "clean_clone",
+      "command": "python scripts/reproduce.py",
+      "status": "passed",
+      "limitation": "Clean clone of unchanged baseline 59fda94: quickstart, frozen evaluation, isolated zipapp and two identical source/release builds. Uncommitted plan is not included; visual verifier is separate and still failed."
+    },
+    {
+      "id": "hosted",
+      "command": "new planning workflow on GitHub Actions",
+      "status": "not_run",
+      "limitation": "No push or hosted execution authorized."
+    },
+    {
+      "id": "physical",
+      "command": "vehicle/drone/zero-visible sensor rig campaign",
+      "status": "not_run",
+      "limitation": "No hardware operated; no SKU/night/safety qualification."
+    },
+    {
+      "id": "vision_optional",
+      "command": "YOLOX/Core ML live/browser execution",
+      "status": "not_run",
+      "limitation": "Inherited evidence reviewed; optional models/native camera paths not rerun by this planning phase."
+    },
+    {
+      "id": "plan_preflight",
+      "command": "python3 scripts/check_ecosystem_plan.py --self-test",
+      "status": "passed",
+      "limitation": "64 sources and 12 actual rejection probes, including standalone-client independence and appliance gates; planning integrity only."
+    },
+    {
+      "id": "plan_lint",
+      "command": "ruff check scripts/check_ecosystem_plan.py; ruff format --check scripts/check_ecosystem_plan.py",
+      "status": "passed",
+      "limitation": "Only new checker formatted; no repository mass formatting."
+    },
+    {
+      "id": "workflow_yaml",
+      "command": "PyYAML BaseLoader parse and explicit workflow structure assertions",
+      "status": "passed",
+      "limitation": "Local syntax/structure checks, not a hosted Actions run."
+    },
+    {
+      "id": "api_examples",
+      "command": "JSON parse examples and execute v3 example through Session.step(now_ms=1000)",
+      "status": "passed",
+      "limitation": "Synthetic payload only; proposed HTTP envelopes are specification."
+    },
+    {
+      "id": "dependency_audit",
+      "command": "pip-audit --disable-pip --no-deps -r requirements-dev.txt -f json",
+      "status": "passed",
+      "limitation": "Dated advisory result for existing dev requirements; new server candidate stack not adopted/audited."
+    },
+    {
+      "id": "local_commit",
+      "command": "git add docs/engineering/aethron-ecosystem scripts/check_ecosystem_plan.py .github/workflows/aethron-ecosystem-preflight.yml",
+      "status": "failed",
+      "limitation": "Sandbox denied index.lock in shared linked-worktree Git administration. No staging/commit occurred; approval policy offers no escalation."
+    },
+    {
+      "id": "isolated_plan",
+      "command": "anonymous local baseline clone plus explicit planning overlay; run checker --self-test and scripts/verify.py inside clone",
+      "status": "passed",
+      "limitation": "Both exit codes zero; 45 overlay files hash-recorded. This is an uncommitted overlay verification, not a committed release/hosted run."
+    }
+  ]
+}

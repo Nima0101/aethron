@@ -1,0 +1,582 @@
+{
+  "schema_version": 1,
+  "retrieved": "2026-10-08",
+  "sources": [
+    {
+      "id": "S01",
+      "title": "Apple CarPlay",
+      "url": "https://developer.apple.com/carplay/",
+      "version": "rolling, retrieved 2026-10-08",
+      "access": "read",
+      "note": "Supported parked video now exists; category/entitlement and vehicle support still apply. No factory-camera API established.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S02",
+      "title": "Android for Cars",
+      "url": "https://developer.android.com/training/cars",
+      "version": "rolling",
+      "access": "read",
+      "note": "Android Auto projection differs from embedded AAOS; distribution categories and driving/parked restrictions apply. Do not infer camera access.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S03",
+      "title": "Mazda 2019 Mazda3 manual",
+      "url": "https://owners-manual.mazda.com/gen/en/mazda3/mazda3_8hs5ee19i.pdf",
+      "version": "2019 regional manual",
+      "access": "search_excerpt",
+      "note": "Describes vehicle cameras/360 view. Exact Sport trim, market and factory video SDK not established. Large US manual retrieval also failed; do not infer connector pinout.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S04",
+      "title": "SAE diagnostics scope",
+      "url": "https://saemobilus.sae.org/standards/j1979_199607-e-e-diagnostic-test-modes",
+      "version": "J1979_199607 historical scope",
+      "access": "search_excerpt",
+      "note": "Emission-related diagnostic requests/responses are not generic camera transport. Current J1979-2 is a separate revision; this old abstract is not current compliance guidance.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S05",
+      "title": "Android USB host/accessory",
+      "url": "https://developer.android.com/develop/connectivity/usb",
+      "version": "rolling",
+      "access": "search_excerpt",
+      "note": "USB roles and power differ. Host/OTG support does not guarantee a UVC camera is exposed by Camera2.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S06",
+      "title": "NVIDIA GMSL camera framework",
+      "url": "https://docs.nvidia.com/jetson/archives/r36.3/DeveloperGuide/SD/CameraDevelopment/JetsonVirtualChannelWithGmslCameraFramework.html",
+      "version": "Jetson Linux r36.3",
+      "access": "search_excerpt",
+      "note": "Serializer/deserializer, sensor driver and device-tree integration required. A cable adapter cannot unlock proprietary OEM video.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S07",
+      "title": "Raspberry Pi camera software",
+      "url": "https://www.raspberrypi.com/documentation/computers/camera_software.html",
+      "version": "rolling libcamera/rpicam",
+      "access": "search_excerpt",
+      "note": "Use the modern camera stack; validate sensor/OS/driver tuple. Old raspicam recipes are not the selected path.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S08",
+      "title": "V4L2 timestamp flags",
+      "url": "https://www.kernel.org/doc/html/v4.9/media/uapi/v4l/buffer.html",
+      "version": "Linux API v4.9 reference",
+      "access": "search_excerpt",
+      "note": "Timestamp flags identify monotonic timing. Driver timestamp origin and exposure timing still need verification on current kernels.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S09",
+      "title": "TI automotive power protection",
+      "url": "https://www.ti.com/tool/TIDA-01167",
+      "version": "TIDA-01167",
+      "access": "search_excerpt",
+      "note": "Automotive supplies need transient, reverse-polarity, overload and load-dump protection. Reference design is not certification of an AETHRON installation.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S10",
+      "title": "PX4 ROS 2 guide",
+      "url": "https://docs.px4.io/v1.16/en/ros2/user_guide",
+      "version": "PX4 v1.16",
+      "access": "read",
+      "note": "Guide includes Ubuntu 22.04/Humble and Agent v2.4.3. Firmware and px4_msgs definitions must match; simulator clock bridge needs matching Gazebo integration.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S11",
+      "title": "PX4 uXRCE-DDS",
+      "url": "https://docs.px4.io/v1.16/en/middleware/uxrce_dds",
+      "version": "PX4 v1.16 / Agent v2.4.3",
+      "access": "read",
+      "note": "PX4 client v2.x is incompatible with Agent v3.x. Topics/board support depend on firmware configuration.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S12",
+      "title": "ArduPilot companion computers",
+      "url": "https://ardupilot.org/dev/docs/companion-computers.html",
+      "version": "rolling",
+      "access": "read",
+      "note": "Companion communicates MAVLink telemetry with autopilot. Cameras/pixels and command authority require separate integration.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S13",
+      "title": "MAVLink camera protocol",
+      "url": "https://mavlink.io/en/services/camera.html",
+      "version": "Camera Protocol v2",
+      "access": "read",
+      "note": "Stream descriptors identify URI/type/status; MAVLink does not guarantee frame-synchronized video metadata. Pixel transport must be negotiated separately.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S14",
+      "title": "MAVSDK releases",
+      "url": "https://api.github.com/repos/mavlink/MAVSDK/releases/latest",
+      "version": "v4.0.5 observed 2026-10-07",
+      "access": "api",
+      "note": "Upstream release metadata observed, not an AETHRON compatibility test. Pin release/commit and generated language bindings together.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S15",
+      "title": "DJI Mobile SDK products",
+      "url": "https://developer.dji.com/mobile-sdk/",
+      "version": "V5 family",
+      "access": "read",
+      "note": "Product list includes Mini 3/3 Pro/4 Pro, Mavic 3 Enterprise and several Matrice models. Support is per SDK/controller/firmware; not all DJI drones.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S16",
+      "title": "DJI Android V5 release",
+      "url": "https://api.github.com/repos/dji-sdk/Mobile-SDK-Android-V5/releases/latest",
+      "version": "V5.18.0 observed 2026-05-29",
+      "access": "api",
+      "note": "Exact upstream release observed. No equivalent iOS V5 support inferred; detailed features and vendor terms must be checked per tuple.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S17",
+      "title": "DJI Payload SDK",
+      "url": "https://developer.dji.com/doc/payload-sdk-tutorial/en/",
+      "version": "rolling",
+      "access": "empty_dynamic",
+      "note": "Public URL retrieved without readable content. Payload connector/electrical/activation/firmware matrix and redistribution terms remain unresolved; no compatibility commitment.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S18",
+      "title": "Parrot Olympe",
+      "url": "https://developer.parrot.com/docs/olympe/index.html",
+      "version": "8.4.0",
+      "access": "read",
+      "note": "Linux SDK documents ANAFI family video-frame access and Sphinx simulation; prebuilt pip path is x86_64 desktop only. ARM requires separate source-build verification.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S19",
+      "title": "Visage thermal UAV PoC",
+      "url": "https://visagetechnologies.com/blog/uav-detection/",
+      "version": "2026-04-28",
+      "access": "read",
+      "note": "Thermal small-object work discusses FLIT, Kalman/Hungarian, solar loading and SUAVE-600 v3. Qualitative vendor PoC is a hypothesis source, not independently reproducible AETHRON accuracy/range evidence.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S20",
+      "title": "FLIR expanded thermal data",
+      "url": "https://oem.flir.com/en-150/about/news/expanded-teledyne-flir-starter-thermal-dataset-for-adas-and-autonomous-vehicle-testing/",
+      "version": "expanded starter dataset announcement",
+      "access": "search_excerpt",
+      "note": "Thermal training candidate. Free access does not establish redistribution/model-commercialization rights; obtain current dataset agreement before download or bundling.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S21",
+      "title": "KAIST multispectral dataset",
+      "url": "https://multispectral.kaist.ac.kr/",
+      "version": "license/version unresolved",
+      "access": "unavailable",
+      "note": "Primary site inaccessible through research tool. Keep evaluation candidate only; no assumed permissive license or redistribution.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S22",
+      "title": "FLIR thermal limitations",
+      "url": "https://www.flir.com/en-gb/discover/home-outdoor/can-thermal-imaging-see-through-walls/",
+      "version": "rolling",
+      "access": "search_excerpt",
+      "note": "Conventional glass and opaque barriers obstruct LWIR; fog/rain can limit range. Thermal imaging is not precise through-wall perception.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S23",
+      "title": "SWIR imaging physics",
+      "url": "https://www.edmundoptics.com/knowledge-center/application-notes/imaging/what-is-swir/",
+      "version": "rolling",
+      "access": "search_excerpt",
+      "note": "SWIR predominantly uses reflected radiation for ordinary scenes; do not treat it as passive LWIR or assume operation without appropriate illumination.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S24",
+      "title": "TI mmWave sensing",
+      "url": "https://www.ti.com/document-viewer/lit/html/SWRA766/GUID-677A83C2-703F-41D0-911F-158BBDFBA16F",
+      "version": "SWRA766",
+      "access": "search_excerpt",
+      "note": "mmWave offers nonvisible sensing. Vendor robustness statements are not our weather, resolution or class-accuracy qualification.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S25",
+      "title": "ONNX Runtime execution providers",
+      "url": "https://onnxruntime.ai/docs/execution-providers/",
+      "version": "rolling; local pin 1.30.0",
+      "access": "read",
+      "note": "Providers supply hardware-specific execution. Measure supported nodes, fallback, cold start, numerical equivalence and actual host performance.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S26",
+      "title": "YOLOX source",
+      "url": "https://github.com/Megvii-BaseDetection/YOLOX",
+      "version": "upstream main; existing model separately frozen",
+      "access": "read",
+      "note": "Apache-2.0 source candidate; preserve repository model digest. Detector family/license is not a trained thermal/UAV capability.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S27",
+      "title": "ByteTrack source",
+      "url": "https://github.com/FoundationVision/ByteTrack",
+      "version": "ECCV 2022 method / rolling source",
+      "access": "read",
+      "note": "Detection association baseline candidate, including lower-score observations. Preserve geometry-only path and frozen v3 continuation/expiry rules; do not import unrelated re-identification modules.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S28",
+      "title": "TrackEval",
+      "url": "https://github.com/JonathonLuiten/TrackEval",
+      "version": "rolling source",
+      "access": "read",
+      "note": "Reference HOTA evaluator candidate. Pin code before new evaluation; current frozen v3 frame-level metrics remain authoritative.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S29",
+      "title": "OpenAPI",
+      "url": "https://spec.openapis.org/oas/v3.1.1.html",
+      "version": "3.1.1 selected, not claimed latest",
+      "access": "read",
+      "note": "Use JSON Schema-compatible typed HTTP contracts; transport schema cannot enforce trusted clocks or all temporal semantics.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S30",
+      "title": "FastAPI features",
+      "url": "https://fastapi.tiangolo.com/features/",
+      "version": "rolling; candidate 0.142.4",
+      "access": "read",
+      "note": "Typed validation, OpenAPI and ASGI ecosystem justify optional server boundary. Strict raw-byte duplicate/depth validation must precede framework parsing.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S31",
+      "title": "PyPA TestPyPI",
+      "url": "https://packaging.python.org/en/latest/guides/using-testpypi/",
+      "version": "rolling",
+      "access": "read",
+      "note": "Test index is distinct from production PyPI. Avoid dependency confusion via extra-index fallback; local wheel consumer is first gate.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S32",
+      "title": "ROS Image",
+      "url": "https://github.com/ros2/common_interfaces/blob/jazzy/sensor_msgs/msg/Image.msg",
+      "version": "Jazzy branch",
+      "access": "read",
+      "note": "Image carries encoding, dimensions, stride, header/frame information. Pair with CameraInfo and validate timestamps/size.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S33",
+      "title": "ROS CameraInfo",
+      "url": "https://github.com/ros2/common_interfaces/blob/jazzy/sensor_msgs/msg/CameraInfo.msg",
+      "version": "Jazzy branch",
+      "access": "read",
+      "note": "Calibration metadata and optical-frame conventions support adapter transforms; presence alone does not prove calibration validity.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S34",
+      "title": "ISO functional safety",
+      "url": "https://www.iso.org/publication/PUB200262.html",
+      "version": "ISO 26262:2018 family",
+      "access": "search_excerpt",
+      "note": "Conditional road-vehicle E/E functional-safety lifecycle. Public overview is not a clause-level compliance assessment or certificate.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S35",
+      "title": "ISO SOTIF",
+      "url": "https://www.iso.org/standard/77490.html",
+      "version": "ISO 21448:2022",
+      "access": "search_excerpt",
+      "note": "Functional insufficiency and foreseeable misuse require intended-domain validation beyond software correctness.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S36",
+      "title": "ISO/SAE cybersecurity",
+      "url": "https://saemobilus.sae.org/standards/isosae21434-road-vehicles-cybersecurity-engineering",
+      "version": "ISO/SAE 21434:2021",
+      "access": "search_excerpt",
+      "note": "Road-vehicle cybersecurity risk engineering; applicability determined by integrator/system scope.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S37",
+      "title": "UNECE vehicle regulations",
+      "url": "https://unece.org/media/transport/Vehicle-Regulations/press/352397",
+      "version": "UN R155/R156 overview, 2021",
+      "access": "search_excerpt",
+      "note": "Cybersecurity/software-update management regulations concern applicable type approvals; not an automatic requirement/certificate for every local library installation.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S38",
+      "title": "EASA open category",
+      "url": "https://www.easa.europa.eu/en/domains/drones-air-mobility/operating-drone/open-category-low-risk-civil-drones",
+      "version": "rolling",
+      "access": "search_excerpt",
+      "note": "Category/aircraft/operation requirements govern EU trials. Review current national zones and operational authorization; perception is not flight permission.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S39",
+      "title": "Swedish UAS operations",
+      "url": "https://www.transportstyrelsen.se/en/aviation/aircraft/drones-unmanned-aircraft/guide-to-uas-operations-in-sweden/",
+      "version": "rolling",
+      "access": "search_excerpt",
+      "note": "Sweden-specific operations/airspace and imagery dissemination requirements need checking before trials/publication.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S40",
+      "title": "FAA Part 107 operations",
+      "url": "https://www.faa.gov/uas/commercial_operators",
+      "version": "rolling",
+      "access": "search_excerpt",
+      "note": "US commercial remote-pilot, night and airspace conditions apply where relevant; do not use EU assumptions in US deployment.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S41",
+      "title": "FAA Remote ID",
+      "url": "https://www.faa.gov/uas/getting_started/remote_id",
+      "version": "rolling",
+      "access": "search_excerpt",
+      "note": "Registration/Remote ID requirements and exceptions must be assessed for the aircraft and operation. Do not disable required broadcasts.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S42",
+      "title": "EDPB video privacy",
+      "url": "https://www.edpb.europa.eu/documents/guideline/guidelines-32019-on-processing-of-personal-data-through-video-devices_en",
+      "version": "Guidelines 3/2019",
+      "access": "search_excerpt",
+      "note": "Lawful basis, necessity, transparency and retention apply even without biometric identity. Consent is not automatically the only or sufficient lawful basis.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S43",
+      "title": "Tesla Fleet API",
+      "url": "https://developer.tesla.com/docs/fleet-api",
+      "version": "rolling",
+      "access": "empty_dynamic",
+      "note": "Primary URL yielded no readable API detail in tool. OEM-authorized API pathway remains possible, but no raw factory-camera endpoint or permission is established here.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S44",
+      "title": "FastAPI package metadata",
+      "url": "https://pypi.org/pypi/fastapi/json",
+      "version": "0.142.4",
+      "access": "api",
+      "note": "Version candidate observed on research date; not installed, security-audited or qualified by Phase 0.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S45",
+      "title": "Uvicorn package metadata",
+      "url": "https://pypi.org/pypi/uvicorn/json",
+      "version": "0.54.0",
+      "access": "api",
+      "note": "Candidate ASGI server version; dependency closure/platform wheel compatibility must be locked and tested in Phase 1.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S46",
+      "title": "Pydantic package metadata",
+      "url": "https://pypi.org/pypi/pydantic/json",
+      "version": "2.13.5",
+      "access": "api",
+      "note": "Candidate strict envelope models; not a replacement for frozen byte parser.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S47",
+      "title": "HTTPX package metadata",
+      "url": "https://pypi.org/pypi/httpx/json",
+      "version": "0.28.1",
+      "access": "api",
+      "note": "Candidate external consumer/test client, not a core dependency.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S48",
+      "title": "Visage Edge AI",
+      "url": "https://visagetechnologies.com/edge-ai/",
+      "version": "rolling",
+      "access": "unavailable",
+      "note": "Linked from PoC; web tool fetch failed. No performance or deployment claim derived from unavailable contents.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S49",
+      "title": "Visage AI safety",
+      "url": "https://visagetechnologies.com/ai-safety/",
+      "version": "rolling",
+      "access": "unavailable",
+      "note": "Linked from PoC; web tool fetch failed. No certification or assurance inferred.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S50",
+      "title": "Visage autonomy",
+      "url": "https://visagetechnologies.com/autonomy/",
+      "version": "rolling",
+      "access": "unavailable",
+      "note": "Linked from PoC; web tool fetch failed. AETHRON safety floor overrides vendor capability breadth.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S51",
+      "title": "Dist-Tracker / FLIT paper",
+      "url": "https://openaccess.thecvf.com/content/CVPR2025W/Anti-UAV/papers/Wang_Dist-Tracker_A_Small_Object-aware_Detector_and_Tracker_for_UAV_Tracking_CVPRW_2025_paper.pdf",
+      "version": "CVPR Workshops 2025",
+      "access": "search_excerpt",
+      "note": "Publisher excerpt describes L2/IoU association for small objects. Full PDF retrieval returned 403; do not assume uninspected implementation details or transfer results.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S52",
+      "title": "Anti-UAV challenge data",
+      "url": "https://anti-uav.github.io/dataset/",
+      "version": "4th challenge",
+      "access": "read",
+      "note": "Primary challenge describes thermal crossover, dynamic backgrounds, scale and multiple-UAV sequences. Data access terms must be distinguished from repository code license.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S53",
+      "title": "Anti-UAV repository license",
+      "url": "https://github.com/ZhaoJ9014/Anti-UAV/blob/master/LICENSE",
+      "version": "MIT repository license",
+      "access": "read",
+      "note": "MIT code license observed; verify terms of each separately hosted data archive before redistributing images or trained artifacts.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S54",
+      "title": "Electrical loads",
+      "url": "https://www.iso.org/standard/76119.html",
+      "version": "ISO 16750-2:2023",
+      "access": "search_excerpt",
+      "note": "Road-vehicle electrical-load scope explicitly excludes motorcycle/moped environmental testing and does not cover EMC; do not apply indiscriminately.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S55",
+      "title": "Laser safety",
+      "url": "https://webstore.iec.ch/en/publication/3587",
+      "version": "IEC 60825-1:2014",
+      "access": "search_excerpt",
+      "note": "Laser product classification/requirements potentially apply to LiDAR/active sensors. Final assembled product needs assessment; module label alone is insufficient.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S56",
+      "title": "Lamp/LED photobiological safety",
+      "url": "https://webstore.iec.ch/en/publication/7076",
+      "version": "IEC 62471:2006",
+      "access": "search_excerpt",
+      "note": "Optical lamp/LED safety scope differs from lasers. Assessment needed for active NIR installation and exposure geometry.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S57",
+      "title": "OpenCV Kalman primitive",
+      "url": "https://docs.opencv.org/3.1.0/dd/d6a/classcv_1_1KalmanFilter.html",
+      "version": "3.1.0 API reference, historical",
+      "access": "search_excerpt",
+      "note": "Standard Kalman primitive illustrates library alternative; does not establish current 4.13 numerical/ABI equivalence to frozen core.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S58",
+      "title": "MAVSDK license",
+      "url": "https://raw.githubusercontent.com/mavlink/MAVSDK/main/LICENSE.md",
+      "version": "rolling license retrieved directly",
+      "access": "read",
+      "note": "BSD three-clause text retrieved and hashed locally; capture exact release license when redistributing dependencies.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S59",
+      "title": "Public AETHRON main",
+      "url": "https://api.github.com/repos/Nima0101/aethron/commits/main",
+      "version": "59fda946771d4ac8c9d1b52eeb3d948215325e4c",
+      "access": "api",
+      "note": "Direct anonymous HTTP retrieval confirmed baseline main SHA; no repository mutation.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S60",
+      "title": "Public AETHRON Camera",
+      "url": "https://nima0101.github.io/aethron/",
+      "version": "HTML SHA-256 in baseline evidence",
+      "access": "read",
+      "note": "Direct HTTP 200 AETHRON HTML response; no browser/device-camera, service-worker, offline-cache or inference execution claimed.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S61",
+      "title": "Apple background capture interruption",
+      "url": "https://developer.apple.com/documentation/avfoundation/avcapturesession/interruptionreason/videodevicenotavailableinbackground",
+      "version": "rolling",
+      "access": "search_excerpt",
+      "note": "Apple documents camera interruption in background. No generic unattended auto-boot camera app entitlement is inferred; supported special platform contexts require exact API/entitlement review.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S62",
+      "title": "Android foreground camera services",
+      "url": "https://developer.android.com/develop/background-work/services/fgs/service-types",
+      "version": "Android 14+ service types / rolling",
+      "access": "read",
+      "note": "Camera while-in-use permission constrains background and BOOT_COMPLETED launches, with documented exceptions. Do not claim arbitrary camera auto-start on consumer phones.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S63",
+      "title": "systemd service reference",
+      "url": "https://github.com/systemd/systemd/blob/v255/man/systemd.service.xml",
+      "version": "v255 reference",
+      "access": "read",
+      "note": "Service restart/watchdog semantics inform planned boot package. Actual distro build must be pinned and tested; process watchdog does not substitute for scene freshness.",
+      "retrieved": "2026-10-08"
+    },
+    {
+      "id": "S64",
+      "title": "systemd execution isolation",
+      "url": "https://github.com/systemd/systemd/blob/v255/man/systemd.exec.xml",
+      "version": "v255 reference",
+      "access": "read",
+      "note": "Service privilege/filesystem/device isolation is profile-specific; required camera/device access must remain explicit. No unit installed in Phase 0.",
+      "retrieved": "2026-10-08"
+    }
+  ]
+}
