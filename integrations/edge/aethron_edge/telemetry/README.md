@@ -58,6 +58,24 @@ not automatically enabled by appliance configuration. Synthetic wire/loopback
 tests do not qualify a PX4/ArduPilot firmware tuple or actual SITL execution.
 See the [v1 contract and technology decision](../../../../docs/architecture/mavlink-datagram-v1.md).
 
+### Finite console diagnostic
+
+With the optional SDK installed, an already configured loopback simulator/router
+feed can be inspected for up to30seconds:
+
+```sh
+python -m aethron_edge.telemetry.diagnostic_v1 --port 14560 --duration-ms 5000
+```
+
+This unsigned-only diagnostic emits JSON lines with aggregate state/reason and
+sample count. It never exports coordinates, orientation, source IDs, timestamps
+or packet bytes, and never sends packets. Signed packets are rejected; provisioned
+signed consumers use the library interface below. Port0 selects an ephemeral
+port reported by the initial `listening` record. Normal completion emits UNKNOWN
+with reason `closed`. The duration and1500-poll cap bound admission/output;
+scheduling and stdout backpressure can delay process exit. See the
+[diagnostic v1 contract](../../../../docs/architecture/mavlink-diagnostic-v1.md).
+
 ## Contract and failure behavior
 
 - The fixed system/component tuple is a routing filter, **not authentication**. Unsigned samples always carry `external_unverified`, `authenticated=False`, `capture_ns=None`; status always has `perception_eligible=False`. `PassiveTelemetry` refuses signed traffic; the separate opt-in `SignedTelemetry` interface below requires provisioned trust and a replay journal.
