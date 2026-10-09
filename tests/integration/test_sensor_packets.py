@@ -120,6 +120,7 @@ class SensorPackets(unittest.TestCase):
             cloud = api.decode_cloud(spec, data)
             self.assertEqual(len(cloud.points), 1)
             self.assertEqual(cloud.invalid_points, 1)
+            self.assertEqual(cloud.sample_points, (cloud.points[0], None))
             self.assertEqual(cloud.points[0].xyz_m, (1, 2, 3))
             self.assertEqual(cloud.points[0].radial_velocity_mps, -4)
 

@@ -15,6 +15,7 @@ RestartSec=2s
 TimeoutStopSec=10s
 KillMode=control-group
 StateDirectory=aethron
+StateDirectoryMode=0700
 RuntimeDirectory=aethron
 UMask=0077
 Environment=PATH=/opt/aethron/venv/bin:/usr/bin:/bin

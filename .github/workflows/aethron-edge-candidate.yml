@@ -99,8 +99,10 @@ jobs:
         with:
           name: linux-boot-sil-evidence
           path: |
-            build/ecosystem-phase1/boot-candidate/result.json
-            build/ecosystem-phase1/boot-candidate/serial.log
+            build/ecosystem-phase1/boot-candidate/runs/*/result.json
+            build/ecosystem-phase1/boot-candidate/runs/*/serial.log
+            build/ecosystem-phase1/boot-candidate/runs/*/request.json
+            build/ecosystem-phase1/boot-candidate/runs/*/overlay-create.log
             build/ecosystem-phase1/boot-candidate/image-manifest.json
             build/ecosystem-phase1/boot-candidate/dpkg.txt
           if-no-files-found: error

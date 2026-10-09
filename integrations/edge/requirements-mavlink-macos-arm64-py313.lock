@@ -1,0 +1,5 @@
+# Optional observation adapter's tested SDK closure; CPython 3.13 macOS ARM64.
+# Official PyPI file hashes retrieved 2026-10-09. Other platforms need their own lock/evidence.
+pymavlink==2.4.50 --hash=sha256:e91b89a5aa6f0d2e0bb5e57a7b8e132e31564fdc4119410e442a04dd9e966c21
+fastcrc==0.5.0 --hash=sha256:e91dbe76f93f4b60328d1ca81c58832210d6e0db369981e99e278fee37ddb8ce
+lxml==6.1.3 --hash=sha256:3a48093cdb058a93af842ede9703520e810b05dcd0fc6d7190a06376c3bfb6bd

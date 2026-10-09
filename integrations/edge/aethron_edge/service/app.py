@@ -62,20 +62,24 @@ class Boundary:
             return
 
 
-def create_app(config):
+def create_app(config, *, supervisor=None):
     auth = Auth(config.credentials)
-    supervisor = ApplianceSupervisor()
+    owns_runtime = supervisor is None
+    if owns_runtime:
+        supervisor = ApplianceSupervisor()
     sessions = Sessions(supervisor)
     subscribers = 0
     replay_gate = asyncio.Semaphore(1)
 
     @asynccontextmanager
     async def lifespan(app):
-        supervisor.boot(config)
         try:
+            if owns_runtime:
+                supervisor.boot(config)
             yield
         finally:
-            supervisor.shutdown()
+            if owns_runtime:
+                supervisor.shutdown()
 
     app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
     app.add_middleware(Boundary, auth=auth, port=config.port)
@@ -110,7 +114,11 @@ def create_app(config):
             provider=",".join(
                 sorted(
                     {
-                        "recorded_geometry" if p.driver == "sensor-replay" else p.provider
+                        "recorded_geometry"
+                        if p.driver == "sensor-replay"
+                        else "ros_geometry"
+                        if p.driver == "sensor-ros"
+                        else p.provider
                         for p in config.profiles
                         if p.driver != "replay"
                     }
@@ -194,11 +202,11 @@ def create_app(config):
     return app
 
 
-def serve(config):
+def serve(config, *, supervisor=None):
     import uvicorn
 
     uvicorn.run(
-        create_app(config),
+        create_app(config, supervisor=supervisor),
         host=config.host,
         port=config.port,
         access_log=False,

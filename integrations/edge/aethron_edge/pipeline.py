@@ -8,6 +8,7 @@ import os
 import queue
 import signal
 import time
+from dataclasses import asdict
 from pathlib import Path
 
 from aethron.temporal.replay import replay
@@ -71,11 +72,20 @@ def _latest(channel, message):
         pass
 
 
-def _worker(profile, channel, stop, group, decoder_lock, descendant):
+def _worker(
+    profile, channel, stop, group, decoder_lock, descendant, ros_grant=None, ros_control=None
+):
     own_descendants(group)
     source = None
     inference_count = 0
     try:
+        if profile.driver == "sensor-ros":
+            from .sensors.ros_worker import ros_worker
+
+            ros_worker(
+                profile, ros_grant, lambda message: _latest(channel, message), stop, ros_control
+            )
+            return
         if profile.driver == "sensor-replay":
             from .sensors.worker import replay_worker
 
@@ -178,9 +188,18 @@ def _worker(profile, channel, stop, group, decoder_lock, descendant):
 
 
 class RuntimePipeline:
-    def __init__(self, profile: Profile, *, worker=_worker):
+    def __init__(self, profile: Profile, *, worker=_worker, ros_grant=None, ros_guard=None):
         self.worker = worker
         self.profile = profile
+        self.ros_grant = ros_grant
+        self.ros_guard = ros_guard
+        if profile.driver == "sensor-ros" and ros_guard is None:
+            from .sensors.ros_authority import ClockGuard, issue_boot_grant, read_ros_manifest
+
+            manifest = read_ros_manifest(profile)
+            if self.ros_grant is None:
+                self.ros_grant = issue_boot_grant(manifest)
+            self.ros_guard = ClockGuard(self.ros_grant, manifest, boot_id=self.ros_grant.boot_id)
         self.core = self._new_core()
         self.process = None
         self.reason = "source_lost"
@@ -226,6 +245,7 @@ class RuntimePipeline:
         self.core = self._new_core()
         ctx = mp.get_context("spawn")
         self.channel = Mailbox(ctx)
+        self.ros_control = Mailbox(ctx) if self.profile.driver == "sensor-ros" else None
         self.stop = StopToken(ctx)
         self.group = ctx.RawValue("q", 0)
         self.descendant = ctx.RawValue("q", 0)
@@ -241,7 +261,8 @@ class RuntimePipeline:
                 self.group,
                 self.decoder_lock,
                 self.descendant,
-            ),
+            )
+            + ((self.ros_grant, self.ros_control) if self.profile.driver == "sensor-ros" else ()),
         )
         self.process.start()
         self.started_ns = time.monotonic_ns()
@@ -252,17 +273,27 @@ class RuntimePipeline:
     def tick(self, now_ns):
         if self.process is None:
             return self.snapshot(now_ns)
+        if self.ros_guard is not None and not self.ros_guard.check():
+            self._revoke_ros()
+            return self.snapshot(now_ns)
         try:
             message = self.channel.get_nowait()
         except (queue.Empty, AttributeError):
             return self.snapshot(now_ns)
-        if self.profile.driver == "sensor-replay":
+        if self.ros_guard is not None:
+            if message.get("sensor_state") == "fault":
+                self._revoke_ros(message.get("sensor_fault"))
+                return self.snapshot(now_ns)
+            if message.get("sensor_generation") != self.ros_grant.generation:
+                return self.snapshot(now_ns)
+        if self.profile.driver in {"sensor-replay", "sensor-ros"}:
             observed_batches = message.get("sensor_batches", self.worker_sensor_batches)
             self.sensor_batches += max(0, observed_batches - self.worker_sensor_batches)
             self.worker_sensor_batches = observed_batches
             self.sensor_state = message.get("sensor_state", "fault")
             self.sensor_expires_ns = message.get("sensor_expires_ns", 0)
             self.sensor_emitted_ns = message.get("sensor_emitted_ns", 0)
+            self._renew_ros(now_ns)
         self.processed += 1
         self.last_message_ns = now_ns
         self.reason = message["reason"]
@@ -279,6 +310,40 @@ class RuntimePipeline:
             return copy.deepcopy(self.last_result)
         self.last_result = None
         return self.snapshot(now_ns)
+
+    def _revoke_ros(self, reason="renewal_rejected"):
+        self.ros_guard.close(reason=reason)
+        self.sensor_state = "fault"
+        self.sensor_expires_ns = 0
+        self.last_result = None
+        _latest(self.ros_control, {"revoke": True})
+
+    def _renew_ros(self, now_ns):
+        guard = self.ros_guard
+        if (
+            guard is None
+            or guard.manifest.renewal == "disabled"
+            or now_ns < self.ros_grant.issued_ns + guard.manifest.valid_for_ns // 2
+            or not self.sensor_status(now_ns)["available"]
+        ):
+            return
+        from .sensors.ros_authority import read_ros_manifest
+
+        try:
+            grant = guard.renew(
+                read_ros_manifest(self.profile),
+                emitted_ns=self.sensor_emitted_ns,
+                expires_ns=self.sensor_expires_ns,
+            )
+            self.ros_grant = grant
+            self.sensor_state = "waiting"
+            self.sensor_expires_ns = 0
+            self.last_result = None
+            # Only parent writes this bounded mailbox. If busy, fail closed rather
+            # than advance authority without a worker transition.
+            self.ros_control.put_nowait({"grant": asdict(grant)})
+        except (ValueError, OSError, queue.Full):
+            self._revoke_ros()
 
     def snapshot(self, now_ns):
         now = now_ns // 1_000_000
@@ -299,6 +364,8 @@ class RuntimePipeline:
             and 0 <= now_ns - self.sensor_emitted_ns <= 100_000_000
             and now_ns <= self.sensor_expires_ns
             and self.process is not None
+            and (self.ros_grant is None or now_ns <= self.ros_grant.valid_until_ns)
+            and (self.ros_guard is None or not self.ros_guard.closed)
         )
         return {
             "state": "stale"
@@ -306,8 +373,18 @@ class RuntimePipeline:
             else self.sensor_state,
             "batches": self.sensor_batches,
             "available": available,
-            "source_evidence": "recorded",
+            "source_evidence": "external_unverified"
+            if self.profile.driver == "sensor-ros"
+            else "recorded",
             "qualified": False,
+            **(
+                {
+                    "authority_generation": self.ros_grant.generation,
+                    "authority_fault": self.ros_guard.fault,
+                }
+                if self.ros_grant
+                else {}
+            ),
         }
 
     def drop_counts(self):
@@ -323,7 +400,7 @@ class RuntimePipeline:
     def stop_worker(self):
         self.last_result = None
         self.sensor_expires_ns = 0
-        self.sensor_state = "idle"
+        self.sensor_state = "fault" if self.ros_guard and self.ros_guard.closed else "idle"
         if self.process is not None:
             self.stop.set()
             self.process.join(timeout=1)

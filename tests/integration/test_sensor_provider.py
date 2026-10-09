@@ -228,6 +228,51 @@ class SensorProvider(unittest.TestCase):
         self.now = 1_051_000_000
         self.assertFalse(p.status()["geometry_available"])
 
+    def test_ros_empty_poll_preserves_only_original_unexpired_geometry(self):
+        p = self.provider(mode="ros")
+        b = self.ingress()
+        result = p.ros(b, [(1, 1)], mount_id="rig_a")
+        self.assertEqual(result.expires_ns, 1_050_000_000)
+        # Repeated matching CameraInfo may refresh its own lease, not old points.
+        b.calibration = (*b.calibration[:2], 1_500_000_000)
+        self.now += 10_000_000
+        self.assertEqual(p.ros(b, [(1, 1)], mount_id="rig_a").reason, "source_waiting")
+        self.assertTrue(p.status()["geometry_available"])
+        self.assertEqual(p.expires, 1_050_000_000)
+        self.now = 1_050_000_001
+        self.assertEqual(p.ros(b, [(1, 1)], mount_id="rig_a").reason, "provider_unavailable")
+        self.assertFalse(p.status()["geometry_available"])
+
+    def test_queued_frame_does_not_inherit_renewed_calibration_lease(self):
+        p = self.provider(mode="ros")
+        b = self.ingress()
+        # The pending image arrived under a lease ending at 1_050_000_000.
+        b.calibration = (*b.calibration[:2], 1_500_000_000)
+        self.now = 1_050_000_001
+        result = p.ros(b, [(1, 1)], mount_id="rig_a")
+        self.assertEqual(getattr(result, "reason", None), "provider_unavailable")
+        self.assertFalse(p.status()["geometry_available"])
+
+    def test_ros_empty_poll_cannot_hide_invalid_or_shortened_authority(self):
+        for cause in ("fault", "clock", "intrinsics", "calibration_expiry", "mount"):
+            with self.subTest(cause=cause):
+                p = self.provider(mode="ros")
+                b = self.ingress()
+                p.ros(b, [(1, 1)], mount_id="rig_a")
+                mount = "rig_a"
+                if cause == "fault":
+                    b.fault = "sensor_invalid"
+                elif cause == "clock":
+                    b.mapping = None
+                elif cause == "intrinsics":
+                    b.calibration = (b.calibration[0], "changed", b.calibration[2])
+                elif cause == "calibration_expiry":
+                    b.calibration = (*b.calibration[:2], self.now - 1)
+                else:
+                    mount = "changed"
+                self.assertEqual(p.ros(b, [(1, 1)], mount_id=mount).reason, "provider_unavailable")
+                self.assertFalse(p.status()["geometry_available"])
+
     def test_missing_mapping_expired_intrinsics_and_cross_mode_do_not_promote(self):
         for cause in ("clock", "calibration", "source"):
             p = self.provider(mode="ros")
@@ -296,6 +341,8 @@ class SensorProvider(unittest.TestCase):
                 "data": struct.pack("<" + "fff" * count, *([0.0, 0.0, 5.0] * count)),
             }
             b.pointcloud(msg, now_ns=self.now)
+            if count == 2:
+                self.assertTrue(p.status()["geometry_available"])
             result = p.ros(b, list(range(count)), mount_id="rig_a")
             self.assertEqual(len(result.points), count)
             self.assertEqual(result.points[0].pixel, (1.2, 1.0))
@@ -339,3 +386,143 @@ class SensorProvider(unittest.TestCase):
             result = provider.recorded(frame, [index], mount_id="rig_a")
             self.assertEqual(result.reason, "provider_unavailable")
             self.assertFalse(provider.status()["geometry_available"])
+
+    def cloud_fixture(self, modality, bigendian, datatype):
+        from aethron_edge.sensors.packets import CloudLayout
+
+        size = 4 if datatype == 7 else 8
+        layout = CloudLayout(
+            width=2,
+            height=2,
+            point_step=4 * size,
+            row_step=9 * size,
+            is_bigendian=bigendian,
+            fields=[
+                {"name": name, "offset": i * size, "datatype": datatype, "count": 1}
+                for i, name in enumerate(("x", "y", "z", "radial_velocity"))
+            ],
+        )
+        cfg = self.config(
+            modality=modality, source_camera=None, layout_sha256=self.api().layout_digest(layout)
+        )
+        provider = self.api().GeometryProvider(
+            cfg,
+            mode="ros",
+            clock_id="boot_a",
+            clock=lambda: self.now,
+            valid_for_ns=500_000_000,
+        )
+        self.addCleanup(provider.close)
+        ingress = RosIngress(modality=modality, frame_id="depth_optical")
+        ingress.bind_clock(
+            ClockMapping(
+                domain="ros_system",
+                offset_ns=0,
+                uncertainty_ns=1_000_000,
+                valid_until_ns=self.now + 50_000_000,
+            )
+        )
+
+        def message(stamp, velocity=2.0):
+            data = bytearray(layout.row_step * layout.height)
+            for i, values in enumerate(
+                (
+                    (float("nan"), 0, 5, 0),
+                    (0, 0, 5, -2),
+                    (0.5, 0, 5, velocity),
+                    (0, float("inf"), 5, 0),
+                )
+            ):
+                struct.pack_into(
+                    (">" if bigendian else "<") + ("4f" if size == 4 else "4d"),
+                    data,
+                    i // 2 * layout.row_step + i % 2 * layout.point_step,
+                    *values,
+                )
+            return {
+                **layout.model_dump(),
+                "header": {
+                    "frame_id": "depth_optical",
+                    "stamp": {"sec": stamp // 1_000_000_000, "nanosec": stamp % 1_000_000_000},
+                },
+                "is_dense": False,
+                "data": bytes(data),
+            }
+
+        return provider, ingress, message
+
+    def test_ros_organized_cloud_selection_and_invalid_velocity_withdrawal(self):
+        for modality in ("radar", "lidar"):
+            for endian in (False, True):
+                for datatype in (7, 8):
+                    with self.subTest(modality=modality, endian=endian, datatype=datatype):
+                        self.now = 1_020_000_000
+                        p, b, message = self.cloud_fixture(modality, endian, datatype)
+                        for velocity, expected in (
+                            (2.0, [(1.0, 0.0, 5.0)]),
+                            (float("nan"), []),
+                            (float("inf"), []),
+                            (2.0, [(1.0, 0.0, 5.0)]),
+                        ):
+                            self.now += 2_000_000
+                            b.pointcloud(message(self.now - 1_000_000, velocity), now_ns=self.now)
+                            result = p.ros(b, [2], mount_id="rig_a")
+                            self.assertEqual([v.camera_xyz_m for v in result.points], expected)
+                            self.assertEqual(result.invalid_samples, 0 if expected else 1)
+                            self.assertEqual(result.source_evidence, "external_unverified")
+                            self.assertFalse(result.live_evidence)
+                            self.assertEqual(
+                                p.status(),
+                                {
+                                    "state": "UNKNOWN",
+                                    "geometry_available": bool(expected),
+                                    "qualified": False,
+                                },
+                            )
+                        self.assertTrue(result.scene_break)
+                        self.assertEqual(p.ros(b, [2], mount_id="rig_a").reason, "source_waiting")
+                        self.now = b.mapping.valid_until_ns + 1
+                        self.assertFalse(p.status()["geometry_available"])
+                        self.assertEqual(
+                            p.ros(b, [2], mount_id="rig_a").reason, "provider_unavailable"
+                        )
+
+    def test_ros_changed_cloud_layout_withdraws_geometry_before_next_poll(self):
+        for modality in ("radar", "lidar"):
+            with self.subTest(modality=modality):
+                self.now = 1_020_000_000
+                p, b, message = self.cloud_fixture(modality, False, 8)
+                b.pointcloud(message(self.now - 1_000_000), now_ns=self.now)
+                self.assertTrue(p.ros(b, [2], mount_id="rig_a").points)
+                self.assertTrue(p.status()["geometry_available"])
+                self.now += 2_000_000
+                changed = message(self.now - 1_000_000)
+                changed["is_bigendian"] = True
+                b.pointcloud(changed, now_ns=self.now)
+                self.assertIsNone(b.fault)
+                # The callback already observed an incompatible physical format.
+                # A status read must not advertise the old geometry until next poll.
+                self.assertFalse(p.status()["geometry_available"])
+                self.assertEqual(p.ros(b, [2], mount_id="rig_a").reason, "provider_unavailable")
+
+    def test_ros_cloud_source_loss_withdraws_previous_geometry(self):
+        for modality in ("radar", "lidar"):
+            for cause in ("clock_rewind", "malformed_packet", "source_lost"):
+                with self.subTest(modality=modality, cause=cause):
+                    self.now = 1_020_000_000
+                    p, b, message = self.cloud_fixture(modality, True, 8)
+                    b.pointcloud(message(self.now - 1_000_000), now_ns=self.now)
+                    self.assertTrue(p.ros(b, [2], mount_id="rig_a").points)
+                    if cause == "clock_rewind":
+                        b.pointcloud(message(self.now - 2_000_000), now_ns=self.now)
+                    elif cause == "malformed_packet":
+                        invalid = message(self.now - 500_000)
+                        invalid["data"] = b"bad"
+                        b.pointcloud(invalid, now_ns=self.now)
+                    else:
+                        p.source_lost()
+                    self.assertEqual(
+                        p.status(),
+                        {"state": "UNKNOWN", "geometry_available": False, "qualified": False},
+                    )
+                    self.assertEqual(p.ros(b, [2], mount_id="rig_a").reason, "provider_unavailable")

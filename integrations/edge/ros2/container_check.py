@@ -40,6 +40,8 @@ def main():
             "--require-hashes",
             "-r",
             str(bundle / "requirements.lock"),
+            "-r",
+            str(bundle / "requirements-vision.lock"),
         ],
         check=True,
         env=env,
@@ -57,6 +59,7 @@ def main():
         check=True,
         env=env,
     )
+    subprocess.run([python, "/bundle/tests/provision_ros_sdk.py"], check=True, env=env)
     subprocess.run(
         [python, "-m", "unittest", "discover", "-s", str(bundle / "tests"), "-v"],
         cwd="/tmp",
@@ -66,9 +69,16 @@ def main():
     )
     report = {
         "installed_ros_dds": True,
+        "isolated_sdk_provisioned": True,
+        "signed_cli_loss_restart_source_rewind": True,
+        "installed_signed_ros_cli_http_sse": True,
+        "installed_raw_fisheye_dds": True,
+        "installed_signed_raw_depth_cli_http_sse": True,
+        "signed_configuration_tamper_denied": True,
         "uid": os.geteuid(),
         "payloads": "original synthetic Image/CameraInfo/PointCloud2",
         "hardware_qualified": False,
+        "diagnostic_instrumentation": os.environ.get("AETHRON_ROS_TEST_DIAGNOSTICS") == "1",
         "scene_state": "UNKNOWN",
         "network": "none",
         "python": sys.version.split()[0],

@@ -7,3 +7,5 @@ The installed appliance owns capture and processing independently of viewers, ph
 See the repository's `docs/usage-edge.md`, `docs/usage-appliance.md` and source-bound Phase 1 evidence before making compatibility claims. Runtime does not fetch models or contact an online licensing service.
 
 The `sensor-replay` profile now runs calibrated raw recordings in the independent appliance supervisor. See [provisioning, bounds and evidence](../../docs/engineering/aethron-ecosystem/SENSOR-APPLIANCE.md). This is recorded geometry with no semantic detections or qualified live source.
+
+Raw radar/LiDAR sample indices refer to original row-major packet positions, including invalid points across organized rows; row padding does not consume an index. Selecting an invalid point yields no geometry; it never selects the next valid point. `Cloud.points` retains the finite-points view, while `Cloud.sample_points` preserves packet slots with `None` for invalid samples. Recorded replay stays recorded and unqualified, including when its configuration and bytes are signed.

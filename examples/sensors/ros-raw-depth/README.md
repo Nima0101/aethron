@@ -1,0 +1,9 @@
+# Synthetic raw-depth ROS appliance profile
+
+Original AETHRON GPL-3.0-only analytical fixture, not physical calibration. Version 3 explicitly declares `image_geometry: raw_distorted`. The raw image topic is `/aethron/depth_raw`; CameraInfo is `/aethron/camera_info`, domain 73. Depth is axial z in millimetres, not radial range. Raw layout is 3×3 `16UC1`, step 6, little-endian; all fixture depths are 5000. Selected pixel (2,1) passes through equidistant correction and the +0.5m rig translation.
+
+Matching CameraInfo must declare `equidistant`, four zero coefficients, source K `[2,0,1, 0,2,1, 0,0,1]`, identity R and P `[2,0,3,0, 0,2,3,0, 0,0,1,0]`. Zero fisheye coefficients still require angular correction. Source dimensions remain 3×3; the declared output plane is 7×7. Cropping, subsampling, skew and stereo offsets are not supported by this example.
+
+Use the [ROS appliance guide](../../../docs/engineering/aethron-ecosystem/ROS-APPLIANCE.md) and signed installer; include both JSON files in the verified configuration bundle. These checked-in files are unsigned. Install the pinned optional vision closure and ROS SDK before provisioning; startup does not download dependencies. A real installation must replace the fixture calibration, topics and clock assumptions with measured configuration and authorized publisher access.
+
+The [installed worker test](../../../tests/integration/test_ros_provisioned_rectification.py) uses actual decoding, correction, clock authority and status processing with deterministic clocks and a DDS transport double. Actual raw-lens DDS, boot, field and physical qualifications remain pending. No light/sensor capability follows from a `zero_visible` label. The default lease expires after ten minutes; `renewal: software_fixture` is available only for synthetic evidence, never automatic physical calibration renewal.

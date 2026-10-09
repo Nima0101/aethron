@@ -8,6 +8,10 @@ import subprocess
 import time
 from pathlib import Path
 
+from ros_boot_probe import RESULT as ROS_RESULT
+from ros_boot_probe import read_boot_result
+from sensor_probe import SensorEvidence
+
 
 def emit(value):
     with open("/dev/ttyAMA0", "w") as serial:
@@ -20,6 +24,20 @@ def run():
     count = root / "boots"
     boot = int(count.read_text()) + 1 if count.exists() else 1
     count.write_text(str(boot))
+    sensors = SensorEvidence(json.loads(Path("/opt/aethron-sil/probe-profiles.json").read_text()))
+    ros = None
+    if Path("/opt/aethron-sil/ros-required").exists():
+        ros = read_boot_result(
+            ROS_RESULT, Path("/proc/sys/kernel/random/boot_id").read_text().strip()
+        )
+    telemetry = None
+    if Path("/opt/aethron-sil/telemetry-required").exists():
+        from telemetry_boot_probe import RESULT as TELEMETRY_RESULT
+        from telemetry_boot_probe import read_boot_result as read_telemetry_result
+
+        telemetry = read_telemetry_result(
+            TELEMETRY_RESULT, Path("/proc/sys/kernel/random/boot_id").read_text().strip()
+        )
     start = time.monotonic()
     samples = []
     processed = []
@@ -45,6 +63,7 @@ def run():
         time.sleep(1)
         try:
             status = json.loads(Path("/var/lib/aethron/status.json").read_text())
+            sensors.observe(status, time.monotonic_ns() // 1_000_000)
             if status["status_expires_ms"] < time.monotonic_ns() // 1_000_000:
                 failures.append("status_expired")
             for name, count in status["drops"].items():
@@ -68,9 +87,14 @@ def run():
                     text=True,
                 ).strip()
                 children = Path("/proc/" + main + "/task/" + main + "/children").read_text().split()
+                killed = 0
+                sensors.mark_fault()
                 for child in children:
                     if b"spawn_main" in Path("/proc/" + child + "/cmdline").read_bytes():
                         os.kill(int(child), signal.SIGKILL)
+                        killed += 1
+                if not killed:
+                    raise RuntimeError("no_owned_worker_injected")
                 processed_at_fault = status["processed"]
                 injected = True
                 emit({"event": "worker_fault_injected", "boot": boot})
@@ -78,6 +102,7 @@ def run():
                 processed_at_fault is not None
                 and not updated
                 and status["processed"] > processed_at_fault + 10
+                and sensors.recovered()
             ):
                 recovered_before_update = True
             if boot > 1 and update_task is None and time.monotonic() - start > 240:
@@ -127,6 +152,7 @@ def run():
                         ["systemctl", "restart", "aethron.service"], check=True, timeout=30
                     )
                     update_started_ms = time.monotonic_ns() // 1_000_000
+                    sensors.mark_update(update_started_ms)
                     updated = True
                     update_log.close()
             if updated and not update_verified:
@@ -140,6 +166,7 @@ def run():
                         b"/aethron-updates/2-" in args
                         and status["processed"] > 10
                         and status["emitted_ms"] >= update_started_ms
+                        and sensors.updated()
                     ):
                         update_verified = True
                         emit({"event": "updated_runtime_processing", "boot": boot, "version": 2})
@@ -182,7 +209,10 @@ def run():
         "updated_runtime_processing": update_verified,
         "processing_resumed_after_fault": recovered_before_update,
         "hardware_qualified": False,
-        "sensor": "synthetic_multimodal_proposals",
+        "sensor": "synthetic_multimodal_proposals_and_recorded_raw_geometry",
+        "ros_lifecycle": ros,
+        "telemetry_boot": telemetry,
+        "sensor_profiles": sensors.result(time.monotonic_ns() // 1_000_000),
         "rss_probe_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
         "service_cgroup_peak_bytes": max(rss, default=None),
         "status_max_bytes": max_status_bytes,

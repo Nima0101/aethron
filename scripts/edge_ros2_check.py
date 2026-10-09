@@ -12,8 +12,10 @@ ROOT = Path(__file__).resolve().parents[1]
 IMAGE = "ros@sha256:8f687fdf084482819aa7dab48c3887331edd0d3687b219951fdb66c418316ab1"
 
 
-def run(wheels, dependencies, out):
-    out.mkdir(parents=True, exist_ok=True)
+def run(wheels, dependencies, out, *, diagnostics=False):
+    # Each run owns fresh evidence: never mix old wheels/tests or leave an old
+    # successful result beside a failed new run. Preserve prior directories.
+    out.mkdir(parents=True, exist_ok=False)
     bundle = out / "bundle"
     bundle.mkdir(exist_ok=True)
     for label, source in (("candidate", wheels), ("dependencies", dependencies)):
@@ -24,6 +26,11 @@ def run(wheels, dependencies, out):
     target = bundle / "tests"
     target.mkdir(exist_ok=True)
     shutil.copyfile(ROOT / "tests/ros2/test_dds.py", target / "test_dds.py")
+    shutil.copyfile(ROOT / "tests/ros2/test_signed_service.py", target / "test_signed_service.py")
+    shutil.copyfile(ROOT / "tests/ros2/ros_timing_probe.py", target / "ros_timing_probe.py")
+    shutil.copyfile(ROOT / "tests/ros2/test_guest_lifecycle.py", target / "test_guest_lifecycle.py")
+    for name in ("ros_fixture.py", "ros_lifecycle_probe.py", "provision_ros_sdk.py"):
+        shutil.copyfile(ROOT / "packaging/appliance/image" / name, target / name)
     for name in (
         "test_sensor_packets.py",
         "test_sensor_replay.py",
@@ -31,9 +38,20 @@ def run(wheels, dependencies, out):
         "test_sensor_registration.py",
         "test_sensor_provider.py",
         "test_sensor_appliance.py",
+        "test_sensor_radar_appliance.py",
+        "test_sensor_ros_authority.py",
+        "test_sensor_ros_appliance.py",
+        "test_ros_lens_rectification.py",
+        "test_ros_provisioned_rectification.py",
+        "test_rectification.py",
+        "test_fisheye_rectification.py",
+        "test_batched_rectification.py",
     ):
         shutil.copyfile(ROOT / "tests/integration" / name, target / name)
     shutil.copyfile(ROOT / "integrations/edge/ros2/requirements.lock", bundle / "requirements.lock")
+    shutil.copyfile(
+        ROOT / "integrations/edge/requirements-vision.lock", bundle / "requirements-vision.lock"
+    )
     shutil.copyfile(
         ROOT / "integrations/edge/ros2/container_check.py", bundle / "container_check.py"
     )
@@ -68,7 +86,7 @@ def run(wheels, dependencies, out):
         "--pids-limit",
         "96",
         "--tmpfs",
-        "/tmp:exec,size=160m",
+        "/tmp:exec,size=256m",
         "-e",
         "ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST",
         "-e",
@@ -79,6 +97,8 @@ def run(wheels, dependencies, out):
         "python3",
         "/bundle/container_check.py",
     ]
+    if diagnostics:
+        command[2:2] = ["-e", "AETHRON_ROS_TEST_DIAGNOSTICS=1"]
     try:
         with (out / "dds.log").open("w") as log:
             completed = subprocess.run(
@@ -110,5 +130,10 @@ if __name__ == "__main__":
     parser.add_argument("--wheels", type=Path, required=True)
     parser.add_argument("--dependencies", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument(
+        "--diagnostics",
+        action="store_true",
+        help="Enable bounded test-only timing probes; not an uninstrumented qualification run",
+    )
     args = parser.parse_args()
-    run(args.wheels, args.dependencies, args.out)
+    run(args.wheels, args.dependencies, args.out, diagnostics=args.diagnostics)

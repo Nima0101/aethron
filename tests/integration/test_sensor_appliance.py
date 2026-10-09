@@ -195,27 +195,40 @@ class SensorAppliance(unittest.TestCase):
         from aethron_edge.sensors.provider import GeometryProvider
         from aethron_edge.sensors.worker import replay_worker
 
-        with tempfile.TemporaryDirectory() as directory:
-            config_path, _, _, _ = fixture(Path(directory))
-            stop = threading.Event()
-            messages = []
-            original = GeometryProvider.recorded
+        # This is duration arithmetic/admission, not a host scheduling benchmark.
+        # A real sleep can overrun AGE_NS and correctly withdraw the geometry.
+        def check(duration_ns, expected):
+            with tempfile.TemporaryDirectory() as directory:
+                config_path, _, _, _ = fixture(Path(directory))
+                stop = threading.Event()
+                messages = []
+                now = [1_000_000_000]
+                original = GeometryProvider.recorded
 
-            def measured(self, *args, **kwargs):
-                time.sleep(0.002)
-                return original(self, *args, **kwargs)
+                def measured(self, *args, **kwargs):
+                    now[0] += duration_ns
+                    return original(self, *args, **kwargs)
 
-            def send(message):
-                if message["sensor_state"] == "processing":
+                def send(message):
                     messages.append(message)
-                if message["sensor_state"] in {"processing", "fault", "ended"}:
                     stop.set()
 
-            with patch.object(GeometryProvider, "recorded", measured):
-                replay_worker(load_config(config_path).profiles[0], send, stop)
-            self.assertEqual(len(messages), 1)
-            self.assertGreater(messages[0]["latency_ms"], 1)
-            self.assertIsNone(messages[0]["data"])
+                with patch(
+                    "aethron_edge.sensors.worker.time.monotonic_ns", side_effect=lambda: now[0]
+                ):
+                    with patch.object(GeometryProvider, "recorded", measured):
+                        replay_worker(load_config(config_path).profiles[0], send, stop)
+                self.assertEqual(len(messages), 1)
+                self.assertEqual(messages[0]["sensor_state"], expected)
+                self.assertEqual(messages[0]["latency_ms"], duration_ns / 1e6)
+                self.assertIsNone(messages[0]["data"])
+                if expected == "fault":
+                    self.assertEqual(messages[0]["sensor_expires_ns"], 0)
+                    self.assertEqual(messages[0]["sensor_batches"], 0)
+
+        for duration_ns, expected in ((2_000_000, "processing"), (100_000_000, "fault")):
+            with self.subTest(duration_ns=duration_ns):
+                check(duration_ns, expected)
 
     def wait_for(self, predicate, timeout=10):
         deadline = time.monotonic() + timeout

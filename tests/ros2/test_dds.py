@@ -1,6 +1,7 @@
 """Real ROS Jazzy DDS with original synthetic payloads, never hardware commands."""
 
 import importlib.util
+import math
 import struct
 import time
 import unittest
@@ -252,6 +253,86 @@ class InstalledDDS(unittest.TestCase):
             subscriber.close()
             provider.close()
 
+    def test_raw_fisheye_dds_correction_metadata_loss_and_expiry(self):
+        from aethron_edge.sensors.provider import GeometryProvider
+        from aethron_edge.sensors.ros2 import ClockMapping, RosIngress
+        from aethron_edge.sensors.ros2_node import RosSubscriber
+        from test_ros_lens_rectification import RosLensBinding
+
+        fixture = RosLensBinding()
+        fixture.setup_path()
+        bridge = RosIngress(
+            modality="depth",
+            frame_id="depth_optical",
+            meters_per_unit=0.001,
+            raw_depth_lens=fixture.lens,
+        )
+        provider = GeometryProvider(
+            fixture.fixture.config(lens=fixture.lens),
+            mode="ros",
+            clock_id="dds_fixture",
+            valid_for_ns=10_000_000_000,
+        )
+        subscriber = RosSubscriber(
+            bridge,
+            topic="/aethron_test/raw_depth",
+            camera_info_topic="/aethron_test/raw_info",
+            context=self.context,
+        )
+        try:
+            images = self.publisher.create_publisher(Image, "/aethron_test/raw_depth", self.qos)
+            infos = self.publisher.create_publisher(CameraInfo, "/aethron_test/raw_info", self.qos)
+            self.connected(images, subscriber)
+            self.connected(infos, subscriber)
+            deadline = time.monotonic_ns() + 5_000_000_000
+            bridge.bind_clock(
+                ClockMapping(
+                    domain="ros_system", offset_ns=0, uncertainty_ns=0, valid_until_ns=deadline
+                )
+            )
+            info = CameraInfo()
+            info.header.frame_id = "depth_optical"
+            for name in ("width", "height", "distortion_model", "d", "k", "r", "p"):
+                setattr(info, name, fixture.info[name])
+            frame = Image()
+            frame.header.frame_id = "depth_optical"
+            frame.width = frame.height = 3
+            frame.step = 6
+            frame.encoding = "16UC1"
+            frame.data = array("B", struct.pack("<9H", *([5000] * 9)))
+
+            def observe():
+                until = time.monotonic() + 5
+                while time.monotonic() < until:
+                    stamp = time.monotonic_ns()
+                    frame.header.stamp.sec = stamp // 1_000_000_000
+                    frame.header.stamp.nanosec = stamp % 1_000_000_000
+                    infos.publish(info)
+                    images.publish(frame)
+                    result = subscriber.poll_geometry(
+                        provider, [(2, 1)], mount_id="rig_a", timeout_sec=0.01
+                    )
+                    if getattr(result, "points", None):
+                        return result
+                self.fail("raw depth geometry not admitted before existing 5s DDS deadline")
+
+            result = observe()
+            self.assertAlmostEqual(result.points[0].camera_xyz_m[0], 5 * math.tan(0.5) + 0.5)
+            self.assertFalse(result.live_evidence)
+            self.assertEqual(result.source_evidence, "external_unverified")
+            self.assertLessEqual(result.expires_ns, deadline)
+            self.assertLessEqual(result.expires_ns, result.capture_ns + 100_000_000)
+            info.d = [0.001, 0.0, 0.0, 0.0]
+            self.deliver(infos, info, subscriber, lambda _: bridge.fault == "calibration_invalid")
+            self.assertFalse(provider.status()["geometry_available"])
+            info.d = [0.0] * 4
+            self.assertTrue(observe().scene_break)
+            time.sleep(0.12)
+            self.assertFalse(provider.status()["geometry_available"])
+        finally:
+            subscriber.close()
+            provider.close()
+
     def test_headless_installed_cli_exits_cleanly_on_sigterm(self):
         import json
         import select
@@ -297,3 +378,172 @@ class InstalledDDS(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class InstalledRosAppliance(unittest.TestCase):
+    def test_renewal_loss_expiry_reaps_without_revival(self):
+        import tempfile
+        from pathlib import Path
+
+        from aethron_edge.config import load_config
+        from aethron_edge.runtime.supervisor import ApplianceSupervisor
+        from test_sensor_ros_appliance import fixture
+        from test_signed_service import publisher
+
+        supervisor = ApplianceSupervisor()
+        with tempfile.TemporaryDirectory() as tmp:
+            path, _ = fixture(
+                Path(tmp), valid_for_ns=4_000_000_000, version=2, renewal="software_fixture"
+            )
+            try:
+                with publisher():
+                    supervisor.boot(load_config(path))
+                    deadline = time.monotonic() + 10
+                    while time.monotonic() < deadline:
+                        with supervisor.lock:
+                            pipeline = supervisor.pipelines["depth"]
+                            if (
+                                pipeline.ros_grant.generation >= 2
+                                and pipeline.sensor_status(time.monotonic_ns())["available"]
+                            ):
+                                break
+                        time.sleep(0.01)
+                    self.assertGreaterEqual(
+                        pipeline.ros_grant.generation,
+                        2,
+                        pipeline.sensor_status(time.monotonic_ns()),
+                    )
+                    self.assertTrue(pipeline.sensor_status(time.monotonic_ns())["available"])
+                    self.assertEqual(supervisor.status(time.monotonic_ns())["restarts"], 0)
+                # No source, viewer or external issuer can keep this grant alive.
+                deadline = time.monotonic() + 6
+                while not pipeline.ros_guard.closed and time.monotonic() < deadline:
+                    time.sleep(0.01)
+                self.assertTrue(pipeline.ros_guard.closed)
+                self.assertFalse(pipeline.sensor_status(time.monotonic_ns())["available"])
+                generation = pipeline.ros_grant.generation
+                with publisher():
+                    deadline = time.monotonic() + 5
+                    while pipeline.process is not None and time.monotonic() < deadline:
+                        time.sleep(0.01)
+                    with supervisor.lock:
+                        self.assertIsNone(pipeline.process)
+                        self.assertIs(supervisor.pipelines["depth"], pipeline)
+                        self.assertIn("depth", supervisor.faults)
+                        self.assertEqual(supervisor.status(time.monotonic_ns())["restarts"], 0)
+                        self.assertEqual(pipeline.ros_grant.generation, generation)
+                        self.assertTrue(pipeline.ros_guard.closed)
+                        self.assertFalse(pipeline.sensor_status(time.monotonic_ns())["available"])
+                        self.assertEqual(
+                            pipeline.sensor_status(time.monotonic_ns())["state"], "fault"
+                        )
+                        self.assertEqual(pipeline.snapshot(time.monotonic_ns())["state"], "UNKNOWN")
+            finally:
+                supervisor.shutdown()
+
+    def test_supervisor_without_viewers_loss_restart_and_bounded_authority(self):
+        import json
+        import tempfile
+        from pathlib import Path
+
+        from aethron_edge.config import load_config
+        from aethron_edge.runtime.supervisor import ApplianceSupervisor
+        from test_sensor_ros_appliance import fixture
+
+        context = Context()
+        context.init(args=[], domain_id=73)
+        publisher = Node(
+            "aethron_appliance_fixture",
+            context=context,
+            enable_rosout=False,
+            start_parameter_services=False,
+        )
+        qos = QoSProfile(
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1,
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            durability=DurabilityPolicy.VOLATILE,
+        )
+        info_pub = publisher.create_publisher(CameraInfo, "/aethron/camera_info", qos)
+        image_pub = publisher.create_publisher(Image, "/aethron/depth", qos)
+        info = CameraInfo()
+        info.header.frame_id = "depth_optical"
+        info.width = info.height = 3
+        info.distortion_model = "plumb_bob"
+        info.d = [0.0] * 5
+        info.k = [2.0, 0.0, 1.0, 0.0, 2.0, 1.0, 0.0, 0.0, 1.0]
+        info.r = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+        info.p = [2.0, 0.0, 1.0, 0.0, 0.0, 2.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+        message = Image()
+        message.header.frame_id = "depth_optical"
+        message.width = message.height = 3
+        message.encoding = "16UC1"
+        message.step = 6
+        message.data = array("B", struct.pack("<9H", *([5000] * 9)))
+        supervisor = ApplianceSupervisor()
+
+        def publish_until(predicate, timeout=10):
+            deadline = time.monotonic() + timeout
+            while time.monotonic() < deadline:
+                # Original software fixture, with explicit system-time timestamps.
+                stamp = time.time_ns() - 5_000_000
+                message.header.stamp.sec = stamp // 1_000_000_000
+                message.header.stamp.nanosec = stamp % 1_000_000_000
+                info_pub.publish(info)
+                image_pub.publish(message)
+                if predicate():
+                    return
+                time.sleep(0.01)
+            self.fail("supervised ROS did not satisfy condition within deadline")
+
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                path, manifest = fixture(Path(tmp))
+                supervisor.boot(load_config(path))
+                publish_until(
+                    lambda: (
+                        supervisor.status(time.monotonic_ns())["sensors"]["depth"]["batches"] >= 3
+                    )
+                )
+                pipeline = supervisor.pipelines["depth"]
+                grant = pipeline.ros_grant
+                self.assertEqual(pipeline.inferences, 0)
+                self.assertEqual(pipeline.snapshot(time.monotonic_ns())["state"], "UNKNOWN")
+                self.assertFalse(supervisor.status(time.monotonic_ns())["qualified"])
+                before = pipeline.sensor_batches
+                time.sleep(0.15)  # No publisher or API viewer; independent parent expiry.
+                self.assertFalse(
+                    supervisor.status(time.monotonic_ns())["sensors"]["depth"]["available"]
+                )
+                publish_until(lambda: supervisor.pipelines["depth"].sensor_batches > before)
+                pipeline.process.terminate()  # Only this test's child, never another session.
+                publish_until(
+                    lambda: (
+                        supervisor.pipelines["depth"] is not pipeline
+                        and supervisor.pipelines["depth"].sensor_batches > before + 1
+                    )
+                )
+                self.assertEqual(supervisor.pipelines["depth"].ros_grant, grant)
+                self.assertEqual(
+                    supervisor.status(time.monotonic_ns())["sensors"]["depth"]["source_evidence"],
+                    "external_unverified",
+                )
+                # Signed/static manifest identity is pinned by boot grant; mutation
+                # on worker replacement cannot mint a new authority.
+                changed = manifest.model_dump(mode="json")
+                changed["timestamp_error_ns"] += 1
+                (Path(tmp) / "sensor.json").write_text(json.dumps(changed))
+                current = supervisor.pipelines["depth"]
+                current.process.terminate()
+                deadline = time.monotonic() + 5
+                while supervisor.pipelines["depth"] is current and time.monotonic() < deadline:
+                    time.sleep(0.01)
+                self.assertIsNot(supervisor.pipelines["depth"], current)
+                time.sleep(0.2)
+                self.assertFalse(
+                    supervisor.status(time.monotonic_ns())["sensors"]["depth"]["available"]
+                )
+        finally:
+            supervisor.shutdown()
+            publisher.destroy_node()
+            context.shutdown()

@@ -86,6 +86,9 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
             "test_sensor_registration.py",
             "test_sensor_provider.py",
             "test_sensor_appliance.py",
+            "test_sensor_radar_appliance.py",
+            "test_sensor_ros_authority.py",
+            "test_sensor_ros_appliance.py",
             "test_sensor_service.py",
         ):
             shutil.copyfile(ROOT / "tests/integration" / test_name, work / test_name)
@@ -211,9 +214,14 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                 timeout=180,
                 stdout=subprocess.DEVNULL,
             )
-            shutil.copyfile(
-                ROOT / "tests/integration/test_rectification.py", work / "test_rectification.py"
-            )
+            for name in (
+                "test_rectification.py",
+                "test_fisheye_rectification.py",
+                "test_batched_rectification.py",
+                "test_ros_lens_rectification.py",
+                "test_ros_provisioned_rectification.py",
+            ):
+                shutil.copyfile(ROOT / "tests/integration" / name, work / name)
             subprocess.run(
                 [
                     str(python),
@@ -224,7 +232,7 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                     "-s",
                     str(work),
                     "-p",
-                    "test_rectification.py",
+                    "test*rectification.py",
                     "-v",
                 ],
                 cwd=work,

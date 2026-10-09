@@ -143,6 +143,8 @@ class Point:
 class Cloud:
     points: tuple[Point, ...]
     invalid_points: int
+    # Packet ordinal positions, including invalid samples; points remains the finite view.
+    sample_points: tuple[Point | None, ...]
 
 
 def decode_cloud(layout: dict, data: bytes) -> Cloud:
@@ -150,6 +152,7 @@ def decode_cloud(layout: dict, data: bytes) -> Cloud:
     if type(data) is not bytes or len(data) != spec.row_step * spec.height:
         raise ValueError("invalid_cloud_bytes")
     points = []
+    samples = []
     invalid = 0
     endian = ">" if spec.is_bigendian else "<"
     for y in range(spec.height):
@@ -163,11 +166,12 @@ def decode_cloud(layout: dict, data: bytes) -> Cloud:
             }
             if not all(math.isfinite(v) for v in values.values()):
                 invalid += 1
+                samples.append(None)
                 continue
-            points.append(
-                Point((values["x"], values["y"], values["z"]), values.get("radial_velocity"))
-            )
-    return Cloud(tuple(points), invalid)
+            point = Point((values["x"], values["y"], values["z"]), values.get("radial_velocity"))
+            points.append(point)
+            samples.append(point)
+    return Cloud(tuple(points), invalid, tuple(samples))
 
 
 def layout_digest(layout):

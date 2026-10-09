@@ -1,3 +1,12 @@
-from .cli import main
+from ._startup_trace import mark
 
-main()
+mark("process_entry")
+
+
+def _run():
+    from .cli import main
+
+    main()
+
+
+_run()

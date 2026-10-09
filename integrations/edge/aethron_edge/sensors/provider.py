@@ -15,7 +15,7 @@ from pydantic import Field, model_validator
 from ..sources.base import SourceFault
 from .geometry import Pinhole
 from .packets import Closed, Cloud, Raster, layout_digest
-from .rectification import LensCalibration
+from .rectification import FisheyeCalibration, LensCalibration
 from .registration import AGE_NS, RegisteredPoint, Registration, RigCalibration, _ns
 from .replay import RecordedFrame
 from .ros2 import RosIngress
@@ -32,7 +32,7 @@ class ProviderCalibration(Closed):
     modality: Literal["depth", "radar", "lidar"]
     rig: RigCalibration
     source_camera: Pinhole | None
-    lens: LensCalibration | None = None
+    lens: LensCalibration | FisheyeCalibration | None = None
     measurement_error_m: float = Field(ge=0, le=10)
     layout_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
 
@@ -115,13 +115,26 @@ class GeometryProvider:
 
     def _context(self):
         b = self.ingress
-        return None if b is None else (b.mapping, b.calibration)
+        # Matching CameraInfo can refresh its lease, but never the expiry of an
+        # already projected result. Packet format changes also invalidate old geometry
+        # before the next provider poll. Identity and current expiry are checked separately.
+        return (
+            None
+            if b is None
+            else (b.mapping, b.last_layout, None if b.calibration is None else b.calibration[:2])
+        )
 
     def status(self):
         try:
             now = self._now()
             available = self.expires is not None and now <= self.expires
             if self.ingress is not None and (self.ingress.fault or self.context != self._context()):
+                available = False
+            if (
+                self.ingress is not None
+                and self.ingress.calibration is not None
+                and now > self.ingress.calibration[2]
+            ):
                 available = False
             if not available:
                 self.source_lost()
@@ -183,6 +196,12 @@ class GeometryProvider:
             observation = ingress.take(now_ns=now)
             if (
                 isinstance(observation, SourceFault)
+                and observation.reason == "source_waiting"
+                and self.status()["geometry_available"]
+            ):
+                return observation  # No duplicate batch or new evidence/expiry.
+            if (
+                isinstance(observation, SourceFault)
                 or ingress.modality != c.modality
                 or observation.frame_id != c.rig.source_frame
                 or observation.capture_ns is None
@@ -199,16 +218,19 @@ class GeometryProvider:
                 raise ValueError("changed_layout")
             expiry = min(self.binding.valid_until, ingress.mapping.valid_until_ns)
             if isinstance(payload, Raster):
-                # ROS currently admits only zero-distortion CameraInfo. A lens
-                # calibration must not silently reinterpret an already rectified image.
+                # The raw-stream lens is configured independently of the message;
+                # never reinterpret an undistorted stream or apply another model.
                 if (
-                    c.lens is not None
+                    observation.raw_depth_lens != c.lens
+                    or ingress.raw_depth_lens != c.lens
                     or observation.camera != c.source_camera
                     or observation.calibration_digest is None
                     or ingress.calibration is None
+                    or observation.calibration_digest != ingress.calibration[1]
+                    or observation.calibration_until_ns is None
                 ):
                     raise ValueError("unavailable_calibration")
-                expiry = min(expiry, ingress.calibration[2])
+                expiry = min(expiry, ingress.calibration[2], observation.calibration_until_ns)
             context = self._context()
             result = self._project(
                 payload,
@@ -264,17 +286,32 @@ class GeometryProvider:
                     selected.append(tuple(index))
                 if len(set(selected)) != len(selected):
                     raise ValueError("duplicate_sample")
-                samples = []
-                for u, v in selected:
-                    depth = payload.depth_m(u, v)
-                    camera = c.lens if c.lens is not None else c.source_camera
-                    samples.append(None if depth is None else camera.deproject(u, v, depth))
+                depths = [payload.depth_m(u, v) for u, v in selected]
+                pixels = [
+                    pixel
+                    for pixel, depth in zip(selected, depths, strict=True)
+                    if depth is not None
+                ]
+                camera = c.source_camera
+                if c.lens is not None:
+                    # One bounded native inversion per frame, preserving selection
+                    # order and unknown depths without submitting them to the solver.
+                    pixels = c.lens.rectify_points(pixels)
+                    camera = c.lens.output_camera
+                rays = iter(pixels)
+                samples = [
+                    None if depth is None else camera.deproject(*next(rays), depth)
+                    for depth in depths
+                ]
             elif isinstance(payload, Cloud) and c.modality in {"radar", "lidar"}:
                 if any(
-                    type(i) is not int or not 0 <= i < len(payload.points) for i in indices
+                    type(i) is not int or not 0 <= i < len(payload.sample_points) for i in indices
                 ) or len(set(indices)) != len(indices):
                     raise ValueError("invalid_indices")
-                samples = [payload.points[i].xyz_m for i in indices]
+                samples = [
+                    None if payload.sample_points[i] is None else payload.sample_points[i].xyz_m
+                    for i in indices
+                ]
             else:
                 raise ValueError("unsupported_geometry")
             points = []

@@ -57,6 +57,32 @@ class RosSensors(unittest.TestCase):
             modality="depth", frame_id="front_optical", meters_per_unit=0.002
         )
 
+    def test_captured_guest_source_step_withdraws_mapped_observation(self):
+        api = self.api()
+        bridge = self.bridge()
+        bridge.bind_clock(
+            api.ClockMapping(
+                domain="ros_system",
+                offset_ns=0,
+                uncertainty_ns=2_000_688,
+                valid_until_ns=5_000_000_000,
+            )
+        )
+        # Captured deltas: receipt+20.404041ms, source+27.894445ms,
+        # resulting age -2.160424ms. Absolute host/source timestamps omitted.
+        initial = 1_000_000_000
+        received = initial + 5_329_980
+        first = bridge.image(image(initial), now_ns=received)
+        self.assertEqual(first.capture_ns, initial)
+        result = bridge.image(image(initial + 27_894_445), now_ns=received + 20_404_041)
+        self.assertEqual(result.reason, "clock_discontinuity")
+        self.assertIsNone(bridge.mapping)
+        self.assertIsNone(bridge.latest)
+        # A later sane frame alone cannot invent a replacement clock mapping.
+        later = bridge.image(image(initial + 40_000_000), now_ns=received + 50_000_000)
+        self.assertIsNone(later.capture_ns)
+        self.assertIsNone(bridge.mapping)
+
     def test_depth_bytes_and_received_clock_do_not_invent_live_support(self):
         b = self.bridge()
         result = b.image(image(), now_ns=2_000_000_000)

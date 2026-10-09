@@ -111,7 +111,11 @@ class SensorService(unittest.TestCase):
                         self.fail(
                             f"no status before startup deadline; exit={process.poll()}; {log.read()}"
                         )
-                    self.assertGreaterEqual(state["sensors"]["depth"]["batches"], 3)
+                    self.assertGreaterEqual(
+                        state["sensors"]["depth"]["batches"],
+                        3,
+                        "sensor startup deadline: " + json.dumps(state, sort_keys=True),
+                    )
                     self.assertEqual(state["inferences"], 0)
 
                     def request(route, *, data=None, method=None, authenticated=True):

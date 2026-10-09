@@ -11,7 +11,9 @@ from .health import publish_status
 
 class ApplianceSupervisor:
     def __init__(self):
+        self.config = None
         self.pipelines = {}
+        self.telemetry = {}
         self.lock = threading.RLock()
         self.stop = threading.Event()
         self.thread = None
@@ -24,12 +26,39 @@ class ApplianceSupervisor:
         self.maintenance = []
 
     def boot(self, config):
+        if self.config is not None or self.stop.is_set():
+            raise ValueError("appliance_already_started")
         self.config = config
         self.started_ns = time.monotonic_ns()
+        if config.telemetry:
+            from ..telemetry.boot_authority import issue_boot_trust
+            from ..telemetry.provisioning import load_boot_policy, load_trust
+            from ..telemetry.worker import TelemetryProfile, TelemetrySupervisor
+
+            for item in config.telemetry:
+                policy = None
+                if item.clock_policy_file is not None:
+                    policy = load_boot_policy(
+                        item.clock_policy_file, system=item.system_id, component=item.component_id
+                    )
+                    trust = issue_boot_trust(item.replay_file, policy)
+                else:
+                    trust = load_trust(
+                        item.credential_file, system=item.system_id, component=item.component_id
+                    )
+                self.telemetry[item.name] = TelemetrySupervisor(
+                    TelemetryProfile(
+                        item.system_id, item.component_id, item.port, item.replay_file
+                    ),
+                    trust,
+                    clock_policy=policy,
+                )
         self.pipelines = {p.name: RuntimePipeline(p) for p in config.profiles}
         self.restarts = {name: deque(maxlen=5) for name in self.pipelines}
         self.next_restart = dict.fromkeys(self.pipelines, 0)
         Path(config.status_file).parent.mkdir(parents=True, exist_ok=True)
+        for telemetry in self.telemetry.values():
+            telemetry.start()
         for pipeline in self.pipelines.values():
             pipeline.start()
         self.thread = threading.Thread(target=self._loop, name="aethron-watchdog", daemon=True)
@@ -46,12 +75,18 @@ class ApplianceSupervisor:
                 if name in self.recovering or name in self.faults:
                     continue
                 p.tick(now_ns)
+                if p.ros_guard is not None and p.ros_guard.closed:
+                    # A revoked boot authority cannot recover through a worker
+                    # restart. Withdraw immediately and reap outside the watchdog.
+                    self.faults.add(name)
+                    self._recover(name, p, restart=False)
+                    continue
                 failed = p.process is not None and (
                     not p.process.is_alive()
                     or now_ns - p.last_message_ns
                     > (
                         10_000_000_000
-                        if p.profile.driver in {"replay", "sensor-replay"}
+                        if p.profile.driver in {"replay", "sensor-replay", "sensor-ros"}
                         else 60_000_000_000
                     )
                 )
@@ -86,7 +121,9 @@ class ApplianceSupervisor:
             pipeline.stop_worker()
             replacement = None
             if restart and not self.stop.is_set():
-                replacement = RuntimePipeline(pipeline.profile)
+                replacement = RuntimePipeline(
+                    pipeline.profile, ros_grant=pipeline.ros_grant, ros_guard=pipeline.ros_guard
+                )
                 replacement.processed = pipeline.processed
                 replacement.inferences = pipeline.inferences
                 replacement.sensor_batches = pipeline.sensor_batches
@@ -103,10 +140,12 @@ class ApplianceSupervisor:
         task.start()
 
     def status(self, now_ns):
+        telemetry = {name: source.snapshot() for name, source in self.telemetry.items()}
+        fault_count = len(self.faults) + sum(s["state"] == "fault" for s in telemetry.values())
         return {
             "version": 1,
             "mode": self.config.runtime_mode,
-            "state": "fault" if self.faults else "recovering" if self.recovering else "running",
+            "state": "fault" if fault_count else "recovering" if self.recovering else "running",
             "scene_state": "UNKNOWN",
             "qualified": False,
             "emitted_ms": now_ns // 1_000_000,
@@ -117,13 +156,14 @@ class ApplianceSupervisor:
             "sensors": {
                 name: p.sensor_status(now_ns)
                 for name, p in self.pipelines.items()
-                if p.profile.driver == "sensor-replay"
+                if p.profile.driver in {"sensor-replay", "sensor-ros"}
             },
+            "telemetry": telemetry,
             "drops": {
                 key: sum(p.drop_counts()[key] for p in self.pipelines.values())
                 for key in ("capture_sequence_gaps", "mailbox_overwritten", "mailbox_rejected")
             },
-            "fault_count": len(self.faults),
+            "fault_count": fault_count,
             "restarts": sum(len(q) for q in self.restarts.values()),
             "last_processing_ms": max(
                 (p.last_latency_ms for p in self.pipelines.values()), default=0
@@ -140,9 +180,13 @@ class ApplianceSupervisor:
             self.thread.join(timeout=2)
         for task in self.maintenance:
             task.join(timeout=4)
+        for source in self.telemetry.values():
+            source.close()
         with self.lock:
             for pipeline in self.pipelines.values():
                 pipeline.close()
+            if self.config is None:
+                return
             result = self.status(time.monotonic_ns())
             result["state"] = "stopped"
             try:

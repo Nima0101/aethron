@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "status_file": "../status.json",
+  "profiles": [
+    {
+      "name": "depth",
+      "driver": "sensor-ros",
+      "address": "/aethron/depth",
+      "sensor_manifest": "sensor.json",
+      "lighting": "zero_visible"
+    }
+  ]
+}

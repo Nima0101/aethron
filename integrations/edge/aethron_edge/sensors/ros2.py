@@ -16,6 +16,7 @@ from pydantic import Field
 from ..sources.base import SourceFault
 from .geometry import Pinhole
 from .packets import Closed, Cloud, CloudLayout, Raster, decode_cloud, decode_image, layout_digest
+from .rectification import FisheyeCalibration, LensCalibration
 
 AGE_NS = 100_000_000
 MAX_NS = 2**63 - 1
@@ -111,6 +112,8 @@ class RosObservation:
     calibration_digest: str | None
     scene_break: bool
     layout_sha256: str | None = None
+    raw_depth_lens: LensCalibration | FisheyeCalibration | None = None
+    calibration_until_ns: int | None = None
 
     @property
     def live_evidence(self):
@@ -120,7 +123,7 @@ class RosObservation:
 class RosIngress:
     """One configured source, one pending raw frame; single executor ownership."""
 
-    def __init__(self, *, modality, frame_id, meters_per_unit=None):
+    def __init__(self, *, modality, frame_id, meters_per_unit=None, raw_depth_lens=None):
         if modality not in {"lwir", "nir", "depth", "radar", "lidar"}:
             raise ValueError("invalid_modality")
         if modality == "depth":
@@ -128,6 +131,12 @@ class RosIngress:
                 raise ValueError("depth_scale_required")
         elif meters_per_unit is not None:
             raise ValueError("unexpected_depth_scale")
+        if raw_depth_lens is not None and (
+            modality != "depth"
+            or not isinstance(raw_depth_lens, (LensCalibration, FisheyeCalibration))
+        ):
+            raise ValueError("invalid_raw_depth_lens")
+        self._raw_depth_lens = raw_depth_lens
         self.modality = modality
         self.frame_id = _frame(frame_id)
         self.scale = meters_per_unit
@@ -141,6 +150,11 @@ class RosIngress:
         self.received = 0
         self.overwritten = 0
         self.fault = None
+
+    @property
+    def raw_depth_lens(self):
+        """Explicit raw-stream configuration, never inferred from CameraInfo."""
+        return self._raw_depth_lens
 
     def bind_clock(self, mapping: ClockMapping):
         if not isinstance(mapping, ClockMapping):
@@ -163,10 +177,20 @@ class RosIngress:
                 message, "header height width distortion_model d k r p binning_x binning_y roi"
             )
             _, frame = _header(m["header"], zero=True)
-            if frame != self.frame_id or m["distortion_model"] not in {"", "plumb_bob"}:
+            lens = self.raw_depth_lens
+            if frame != self.frame_id:
                 raise ValueError("unsupported_camera")
-            if len(m["d"]) not in {0, 5} or any(_vector(m["d"], len(m["d"]))):
-                raise ValueError("distortion_requires_rectification")
+            if lens is None:
+                if m["distortion_model"] not in {"", "plumb_bob"}:
+                    raise ValueError("unsupported_camera")
+                if len(m["d"]) not in {0, 5} or any(_vector(m["d"], len(m["d"]))):
+                    raise ValueError("distortion_requires_rectification")
+            else:
+                model = "equidistant" if isinstance(lens, FisheyeCalibration) else "plumb_bob"
+                if m["distortion_model"] != model or _vector(m["d"], len(lens.distortion)) != list(
+                    lens.distortion
+                ):
+                    raise ValueError("lens_mismatch")
             k, rotation, p = _vector(m["k"], 9), _vector(m["r"], 9), _vector(m["p"], 12)
             if (
                 rotation != [1, 0, 0, 0, 1, 0, 0, 0, 1]
@@ -175,7 +199,13 @@ class RosIngress:
                 or k[6:] != [0, 0, 1]
             ):
                 raise ValueError("unsupported_camera")
-            if p != [k[0], 0, k[2], 0, 0, k[4], k[5], 0, 0, 0, 1, 0]:
+            output = lens.output_camera if lens is not None else None
+            expected_p = (
+                [output.fx, 0, output.cx, 0, 0, output.fy, output.cy, 0, 0, 0, 1, 0]
+                if output is not None
+                else [k[0], 0, k[2], 0, 0, k[4], k[5], 0, 0, 0, 1, 0]
+            )
+            if p != expected_p:
                 raise ValueError("unsupported_projection")
             for name in ("binning_x", "binning_y"):
                 _integer(m[name], high=1)
@@ -187,9 +217,12 @@ class RosIngress:
             camera = Pinhole(
                 width=m["width"], height=m["height"], fx=k[0], fy=k[4], cx=k[2], cy=k[5]
             )
-            digest = hashlib.sha256(
-                json.dumps({"frame": frame, **camera.model_dump()}, sort_keys=True).encode()
-            ).hexdigest()
+            if lens is not None and camera != lens.camera:
+                raise ValueError("lens_mismatch")
+            identity = {"frame": frame, **camera.model_dump()}
+            if lens is not None:
+                identity["raw_depth_lens"] = lens.model_dump()
+            digest = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
             if self.calibration is None or self.calibration[1] != digest:
                 self.latest = None
                 self.pending_break = True
@@ -276,7 +309,7 @@ class RosIngress:
             self.calibration = None
             self.pending_break = True
         self.last_layout = format_digest
-        camera = digest = None
+        camera = digest = calibration_until = None
         if isinstance(payload, Raster) and self.calibration is not None:
             candidate, identity, expiry = self.calibration
             if now <= expiry and (candidate.width, candidate.height) == (
@@ -284,6 +317,7 @@ class RosIngress:
                 payload.layout.height,
             ):
                 camera, digest = candidate, identity
+                calibration_until = expiry
             else:
                 self.calibration = None
                 self.pending_break = True
@@ -298,6 +332,8 @@ class RosIngress:
             digest,
             self.pending_break,
             format_digest,
+            self.raw_depth_lens if camera is not None else None,
+            calibration_until,
         )
         if self.latest is not None:
             self.overwritten += 1
@@ -325,10 +361,24 @@ class RosIngress:
             self.mapping = None
             self.pending_break = True
             result = replace(result, capture_ns=None, uncertainty_ns=0, scene_break=True)
-        if result.camera is not None and (self.calibration is None or now_ns > self.calibration[2]):
-            self.calibration = None
+        if result.camera is not None and (
+            self.calibration is None
+            or now_ns > self.calibration[2]
+            or result.calibration_until_ns is None
+            or now_ns > result.calibration_until_ns
+        ):
+            # An expired queued frame does not revoke a newly renewed calibration.
+            if self.calibration is not None and now_ns > self.calibration[2]:
+                self.calibration = None
             self.pending_break = True
-            result = replace(result, camera=None, calibration_digest=None, scene_break=True)
+            result = replace(
+                result,
+                camera=None,
+                calibration_digest=None,
+                raw_depth_lens=None,
+                calibration_until_ns=None,
+                scene_break=True,
+            )
         return result
 
     def status(self, *, now_ns):

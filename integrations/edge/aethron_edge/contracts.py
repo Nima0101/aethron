@@ -2,12 +2,15 @@
 
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
+
+from .common_types import Closed as Closed
+from .common_types import Contract as Contract
+from .common_types import Principal as Principal
 
 Count = Annotated[int, Field(ge=0, le=2**53 - 1)]
 Finite = Annotated[float, Field(allow_inf_nan=False)]
 Unit = Annotated[Finite, Field(ge=0, le=1)]
-Contract = Literal["warn", "vehicle_stop", "drone_hover", "drone_land", "drone_retreat"]
 Modality = Literal["rgb", "lwir", "radar", "depth", "nir"]
 ObjectClass = Literal[
     "person",
@@ -23,10 +26,6 @@ ObjectClass = Literal[
     "smoke",
 ]
 State = Literal["PRESENT", "UNKNOWN"]
-
-
-class Closed(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True, allow_inf_nan=False)
 
 
 class Prediction(Closed):
@@ -133,11 +132,6 @@ class Capabilities(Closed):
     drivers: list[str]
     provider: str
     qualification_refs: list[str]
-
-
-class Principal(Closed):
-    name: Annotated[str, Field(pattern=r"^[a-z0-9-]{1,48}$")]
-    scopes: list[Literal["observe", "session:manage"]]
 
 
 class SessionRequest(Closed):
