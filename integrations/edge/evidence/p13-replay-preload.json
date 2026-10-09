@@ -1,0 +1,82 @@
+{
+  "qualified": false,
+  "python": "3.13.15",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "input_bytes": 1572864,
+  "input_sha256": "87fa0700434d99aef1c6ae2ebdeedaba619590ca2b796cd9c2a2cc513d84f1f0",
+  "previous": {
+    "cpu_median_ms": 673.222,
+    "wall_median_ms": 2598.952583,
+    "python_traced_peak_bytes": 3342378
+  },
+  "bounded": {
+    "cpu_median_ms": 761.467,
+    "wall_median_ms": 4431.492958,
+    "python_traced_peak_bytes": 349313
+  },
+  "source_sha256": {
+    "integrations/edge/aethron_edge/pipeline.py": "dfe1a7b274508069d11e1c9edd1d671e1e27cd5b50914fabed115711cc75217c",
+    "aethron/temporal/replay.py": "37863819e5c3a99aefbe0d3a7df17ac7dae09c33ed01b76d8af0697b133344e0",
+    "aethron/schema.py": "ca54580ad52105c9592bb28133f36c160d34ddb0004e07d6b61c5f8085d21c60",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "scripts/edge_worker_preload_profile.py": "f1de7cb853dd39818f862778681f2bd6616abe58e723d4fbbcd20a096196a3a4"
+  },
+  "technology_decision": "Retain CPython buffered-line orchestration for the replay preload subcomponent: bounded C-backed reads feed the exact core in-process, discard padding and result accumulation, and preserve a validated snapshot without a second file read; measured allocation reduction justifies this implementation, not a CPU speed claim.",
+  "scope": "P1.3 replay preload only; clock/calibration, acquisition/decoder/inference and process-isolation technology comparisons remain open. P1.3 is not yet fully technology-reviewed.",
+  "alternatives": [
+    {
+      "technology": "Rust std::io BufReader plus Read::take",
+      "source": "https://doc.rust-lang.org/std/io/struct.BufReader.html",
+      "assessment": "Credible bounded native I/O; a direct buffer can enforce the same read ceiling but needs an FFI/process boundary or duplicate core validator to populate the worker. No performance comparison or disqualification of Rust for other P1.3 components is claimed."
+    },
+    {
+      "technology": "CPython io.BufferedReader.readline(size)",
+      "source": "https://docs.python.org/3/library/io.html",
+      "assessment": "Bounded native buffered reads compose with the existing core stream interface and keep one validated snapshot; selected for this preload boundary."
+    },
+    {
+      "technology": "GStreamer appsink/C and Rust bindings",
+      "source": "https://gstreamer.freedesktop.org/documentation/app/appsink.html",
+      "assessment": "Credible acquisition candidate with queue bounds/drop behavior; not an NDJSON protocol validator. Carry into the remaining P1.3 decoder review."
+    }
+  ],
+  "parent": "4a7c3be86c7276e2d2f7c5cd5e3df8ba908d8b46",
+  "checks": {
+    "red": "3 failures: whole-file read prevented bounded consumption/activation/cancellation",
+    "focused": 16,
+    "final_boundary_assertion": 5,
+    "installed": {
+      "core_wheel_sha256": "daeacafc7e70f20bbd0b446f448203b67b0b12ee56e6b3afca6b248d031c9a93",
+      "edge_wheel_sha256": "53a068edfcf783e57569a9e5daca4a397a3494767b803cd314d32d4b09f3055b",
+      "source_bytes_match": true,
+      "outside_checkout": true,
+      "offline_install": true,
+      "temporary_consumer_removed": true
+    },
+    "installed_tests": 16,
+    "lint_format_bandit_yaml": "PASS",
+    "CI": "six installed OS/minor jobs extended with bounded worker/clock/import/expiry checks; new hosted result pending",
+    "profile_initial_failure": "Missing checkout root on PYTHONPATH caused ModuleNotFoundError before measurement; rerun with root plus edge package succeeded"
+  },
+  "resource_proof": {
+    "read_limit_bytes": 65537,
+    "valid_line_limit_bytes": 65536,
+    "valid_frame_limit": 300,
+    "complete_validation_before_publish": true,
+    "301st_frame_and_bad_tail_reject": true,
+    "empty_replay_rejects": true,
+    "cancellation_checked_before_each_read": true
+  },
+  "limitations": [
+    "Synthetic24-frame padded workload on shared Mac; Python-traced allocations are not RSS/native memory bounds.",
+    "CPU median increased in this run; no CPU, hard-latency, hardware or production claim.",
+    "Only import ordering changed in the measurement script after execution; original hash retained and non-import AST equality verified; final hashes recorded separately.",
+    "No frozen thresholds or raw core semantics changed; full candidate qualification remains pending."
+  ],
+  "final_source_sha256": {
+    "integrations/edge/aethron_edge/pipeline.py": "dfe1a7b274508069d11e1c9edd1d671e1e27cd5b50914fabed115711cc75217c",
+    "scripts/edge_worker_preload_profile.py": "3e5b3e383c5259af449d203f0e8842983047dc31fae4c872c7f27f4f8366ccf1",
+    "tests/integration/test_worker_replay_input.py": "0b01de5d388483959fee367f679cf57cf1e700aff1c8bdd49ae23a0a7f7ac28d",
+    ".github/workflows/aethron-edge-contracts.yml": "e793499d66b4a7ae9f49dc9c60be63a4e8601ff6da242543fa80ee3c0fdeb11f"
+  }
+}

@@ -1,7 +1,6 @@
 """Worker-owned acquisition/inference; parent-owned trusted clock and core watchdog."""
 
 import copy
-import io
 import json
 import multiprocessing as mp
 import os
@@ -72,6 +71,29 @@ def _latest(channel, message):
         pass
 
 
+def _load_replay_rows(path, stop):
+    """Validate once from bounded lines; retain parsed frames, never file padding."""
+
+    class Input:
+        line = b""
+
+        def readline(self, size):
+            if stop.is_set():
+                raise ValueError("replay_cancelled")
+            self.line = stream.readline(size)
+            return self.line
+
+    rows = []
+    with Path(path).open("rb") as stream:
+        captured = Input()
+        for _ in replay(captured):
+            # The frozen core has validated this exact line before yielding.
+            rows.append(json.loads(captured.line))
+    if not rows:
+        raise ValueError("empty_replay")
+    return rows
+
+
 def _worker(
     profile, channel, stop, group, decoder_lock, descendant, ros_grant=None, ros_control=None
 ):
@@ -92,11 +114,7 @@ def _worker(
             replay_worker(profile, lambda message: _latest(channel, message), stop)
             return
         if profile.driver == "replay":
-            data = Path(profile.address).read_bytes()
-            if len(data) > 20 * 1024 * 1024:
-                raise ValueError()
-            list(replay(io.BytesIO(data)))  # Validate complete bounded fixture before activation.
-            rows = [json.loads(line) for line in data.splitlines()]
+            rows = _load_replay_rows(profile.address, stop)
             while not stop.is_set():
                 for index, original in enumerate(rows):
                     if stop.is_set():

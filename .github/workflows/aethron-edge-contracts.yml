@@ -6,10 +6,13 @@ on:
       - 'integrations/edge/aethron_edge/contracts.py'
       - 'integrations/edge/aethron_edge/common_types.py'
       - 'integrations/edge/aethron_edge/openapi.py'
+      - 'integrations/edge/aethron_edge/pipeline.py'
       - 'integrations/edge/requirements-server.lock'
       - 'contracts/**'
       - 'tests/integration/test_contract_scalars.py'
       - 'tests/integration/test_openapi.py'
+      - 'tests/integration/test_worker_replay_input.py'
+      - 'scripts/edge_worker_preload_profile.py'
       - 'scripts/edge_contract_profile.py'
       - '.github/workflows/aethron-edge-contracts.yml'
   pull_request:
@@ -60,6 +63,9 @@ jobs:
           python -I -m unittest discover -s tests/integration -p test_edge_contract.py -v
           python -I -m unittest discover -s tests/integration -p test_openapi.py -v
           python -I -m unittest discover -s tests/integration -p test_external_clients.py -v
+      - name: Installed worker preload, clock and expiry checks
+        run: |
+          python -I -c "import sys, unittest; sys.path.insert(0, 'tests/integration'); unittest.main(module=None, argv=['unittest', 'test_worker_replay_input', 'test_clock_pipeline', 'test_worker_imports', 'test_pipeline.Pipeline.test_headless_replay_expires_when_worker_stops', 'test_pipeline.Pipeline.test_unstarted_pipeline_is_unknown', '-v'])"
       - name: Bounded contract validation comparison
         run: python -I scripts/edge_contract_profile.py > build/contract-profile.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
