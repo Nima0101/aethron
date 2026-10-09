@@ -55,6 +55,28 @@ establish byte binding while calibration remains expired; inspect both
 physical qualification remain false. This bounded API opens no files/devices
 and does not reinterpret the original declaration CLI's exit or report fields.
 
+[P15 capture campaigns](campaign-v1.md) compare a bounded preregistered matrix
+with minimized capture declarations. The API retains failed attempts and rejects
+exact duplicate captures; its report binds both the plan and submitted inputs.
+It measures declaration coverage, never physical sample independence or field
+qualification. The included plan and inputs below are synthetic:
+
+```python
+from pathlib import Path
+from qualification.campaign import evaluate
+
+report = evaluate(
+    Path("qualification/plans/synthetic-campaign-v1.json").read_bytes(),
+    [
+        {
+            "case_id": "blackout",
+            "manifest": Path("qualification/rigs/synthetic-v1.json").read_bytes(),
+            "now_ms": 1050,
+        }
+    ],
+)
+```
+
 ## Technology decision and execution plan
 
 Requirements: portable offline execution, bounded untrusted JSON, duplicate-key

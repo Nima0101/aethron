@@ -43,6 +43,22 @@ jobs:
           set -e
           test "$qualification_status" -eq 1
           cmp expired.json qualification/evidence/expired-calibration-report-v1.json
+      - name: Reproduce campaign coverage and rejected duplicate reports
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from qualification.campaign import evaluate
+          root = Path("qualification")
+          plan = (root / "plans/synthetic-campaign-v1.json").read_bytes()
+          row = {"case_id": "blackout", "manifest": (root / "rigs/synthetic-v1.json").read_bytes(), "now_ms": 1050}
+          for name, inputs in (("campaign-report-v1.json", [row]), ("campaign-reused-report-v1.json", [row, row])):
+              first = evaluate(plan, inputs)
+              assert first == evaluate(plan, inputs)
+              raw = json.dumps(first, sort_keys=True, separators=(",", ":")) + "\n"
+              assert raw == (root / "evidence" / name).read_text()
+              assert first["physical_qualification_passed"] is False
+          PY
   static:
     runs-on: ubuntu-latest
     timeout-minutes: 5

@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "scope": "synthetic P15 capture declaration coverage",
+  "platform": "Linux",
+  "python": "3.13.5",
+  "focused_tests": {
+    "total": 31,
+    "new_campaign_tests": 9,
+    "result": "PASS",
+    "retained_red": [
+      "Initial 8 campaign tests failed before implementation",
+      "Capture commitment regression failed before exact input/time binding was added"
+    ]
+  },
+  "static": {
+    "ruff": "0.16.10 lint/format PASS",
+    "bandit": "1.9.4 zero production findings",
+    "workflow": "actionlint PASS"
+  },
+  "reproduction": "complete and reused-capture reports reproduced twice",
+  "source_sha256": {
+    "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+    "qualification/campaign-v1.md": "3cbcb05cb4aaf7372f7f327b64c0348cb1af69d9485531b7c16dddb5d7dafeab",
+    "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+    "qualification/plans/synthetic-campaign-v1.json": "0522b38fcc206d0ee4e55d27387efea9c81ff31de949e3674644e799d9c1373e",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3"
+  },
+  "domain_verified": false,
+  "procedure_verified": false,
+  "physical_qualification_passed": false,
+  "hosted_campaign_pass_claimed": false
+}
