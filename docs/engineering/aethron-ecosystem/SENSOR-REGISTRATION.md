@@ -66,7 +66,7 @@ python scripts/edge_package_check.py --vision --out build/registration-package
 
 The edge CI matrix invokes this path. The ROS installed harness now includes the locked vision closure and numerical tests; full updated pinned-base/hosted execution remains pending. The focused retained-guest runs above are separate evidence. Frozen core, model/dataset hashes, deadlines, recorded aircraft failures and prior latency/startup failures remain unchanged.
 
-## Recorded mono8 raster v1
+## Recorded intensity raster v1
 
 `aethron_edge.sensors.raster_rectification.rectify_mono8_recorded(raster, lens)`
 adds explicit recorded LWIR/NIR `mono8` remapping for either existing lens model.
@@ -92,4 +92,20 @@ uses two bounded byte buffers and no persistent map/cache. This is a work/memory
 bound, not latency qualification. The implementation uses the already documented
 forward Brown-Conrady and OpenCV angular equations without a native solver or new
 dependency. Sparse rectification APIs and their domains remain unchanged. Stereo,
-mono16/depth raster resampling and live raster admission remain pending.
+depth raster resampling and live raster admission remain pending.
+
+`rectify_mono16_recorded(raster, lens)` is the separate mono16 entry point. It
+accepts only LWIR/NIR `mono16` layouts with explicit input byte order and returns
+`RectifiedMono16` version 1: packed **little-endian** unsigned 16-bit counts,
+`encoding="mono16"`, `is_bigendian=False`, and the same one-byte-per-pixel mask.
+`sample(x, y)` returns the original integer in 0–65535 or `None`; zero remains a
+valid intensity count. Byte-order conversion never normalizes, clips, scales,
+or interprets counts as temperature or depth. Padded input rows are supported;
+output has no padding. Each entry point rejects the other encoding and all depth
+encodings. Mono8 v1 output bytes and mask semantics are unchanged.
+
+Mono16 uses the same nearest-neighbour mapping, calibrated-domain checks and
+327680-output-pixel ceiling. At that ceiling, packed data occupies 655360 bytes
+and the validity mask 327680 bytes; constructing immutable results also briefly
+retains the mutable buffers. No map cache, native dependency, timestamp renewal
+or live-evidence authority is introduced.

@@ -138,3 +138,90 @@ class SensorRasterRectification(unittest.TestCase):
         result = self.rectify(raster(30, bytes(range(30))), lens)
         self.assertEqual(result.validity, b"\x01\x00")
         self.assertIsNone(result.sample(1, 0))
+
+
+class SensorMono16Rectification(unittest.TestCase):
+    def rectify(self, frame, lens):
+        api = importlib.import_module("aethron_edge.sensors.raster_rectification")
+        self.assertTrue(
+            callable(getattr(api, "rectify_mono16_recorded", None)), "mono16 API missing"
+        )
+        return api.rectify_mono16_recorded(frame, lens)
+
+    def frame(self, values, *, width=None, big=False, padding=0):
+        width = width or len(values)
+        rows = [values[i : i + width] for i in range(0, len(values), width)]
+        data = b"".join(
+            b"".join(value.to_bytes(2, "big" if big else "little") for value in row)
+            + b"\xa5" * padding
+            for row in rows
+        )
+        return raster(
+            width,
+            data,
+            height=len(rows),
+            step=width * 2 + padding,
+            encoding="mono16",
+            is_bigendian=big,
+        )
+
+    def test_both_source_orders_produce_exact_little_endian_counts(self):
+        values = [0, 255, 256, 32768, 65535, 0x1234]
+        expected = b"".join(value.to_bytes(2, "little") for value in values)
+        for big in (False, True):
+            source = self.frame(values, width=3, big=big, padding=3)
+            result = self.rectify(source, brown(camera(3, 2)))
+            self.assertEqual(result.data, expected)
+            self.assertEqual(result.validity, b"\x01" * 6)
+            self.assertEqual([result.sample(x, y) for y in range(2) for x in range(3)], values)
+            self.assertEqual(
+                (result.version, result.encoding, result.is_bigendian), (1, "mono16", False)
+            )
+            self.assertFalse(result.live_evidence)
+            self.assertEqual(source.data[-3:], b"\xa5" * 3)
+            self.assertNotIn("data=", repr(result))
+
+    def test_radial_and_fisheye_keep_high_counts_and_invalid_zero_distinct(self):
+        source = self.frame([257 * i for i in range(30)], big=True, padding=1)
+        lens = brown(camera(30, fx=2.0), camera(3), (0.5, 0.0, 0.0, 0.0, 0.0), radius=1.0)
+        result = self.rectify(source, lens)
+        self.assertEqual(result.data, b"\x00\x00\x03\x03\x00\x00")
+        self.assertEqual(result.validity, b"\x01\x01\x00")
+        self.assertEqual(result.sample(0, 0), 0)
+        self.assertIsNone(result.sample(2, 0))
+        fisheye = FisheyeCalibration(
+            model="opencv_fisheye_v1",
+            camera=camera(30, fx=20.0),
+            output_camera=camera(2),
+            distortion=(0.0, 0.0, 0.0, 0.0),
+            valid_theta_rad=1.0,
+        )
+        self.assertEqual(self.rectify(source, fisheye).sample(1, 0), 4112)
+        for coordinates in ((True, 0), (-1, 0), (0, 1), (1.0, 0)):
+            with self.assertRaisesRegex(ValueError, "^pixel_outside_frame$"):
+                result.sample(*coordinates)
+
+    def test_exact_budget_and_rejected_depth_encoding_or_malformed_buffer(self):
+        source = self.frame([65535, 1, 256, 32768], width=2)
+        result = self.rectify(source, brown(camera(2, 2), camera(640, 512, fx=640.0, fy=512.0)))
+        self.assertEqual((len(result.data), len(result.validity)), (655360, 327680))
+        self.assertEqual(result.sample(639, 511), 32768)
+        for data, lens in (
+            (source, brown(camera(2, 2), camera(641, 512))),
+            (Raster(source.layout, source.data[:-1]), brown(camera(2, 2))),
+            (raster(2, b"\x01\x02"), brown(camera(2))),
+            (
+                raster(
+                    2,
+                    b"\x01\x00\x02\x00",
+                    step=4,
+                    modality="depth",
+                    encoding="16UC1",
+                    meters_per_unit=0.001,
+                ),
+                brown(camera(2)),
+            ),
+        ):
+            with self.subTest(data=data, lens=lens):
+                with self.assertRaisesRegex(ValueError, "^invalid_raster_rectification$"):
+                    self.rectify(data, lens)
