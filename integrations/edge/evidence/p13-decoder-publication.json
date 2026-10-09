@@ -1,0 +1,87 @@
+{
+  "qualified": false,
+  "python": "3.13.15",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "input_bytes": 6220800,
+  "input_sha256": "77df06e8fef7fcebf11c66e11b4c1468472cdd2ef418b9cba94efcfefdeee3a2",
+  "cpu_ns": {
+    "previous_boxed_copy": [
+      724616000,
+      551800000,
+      639949000,
+      678769000,
+      691647000
+    ],
+    "admitted_buffer_copy": [
+      2063000,
+      3848000,
+      616000,
+      5868000,
+      614000
+    ]
+  },
+  "median_cpu_ns": {
+    "previous_boxed_copy": 678769000,
+    "admitted_buffer_copy": 2063000
+  },
+  "python_traced_peak_bytes": {
+    "previous_boxed_copy": 55987233,
+    "admitted_buffer_copy": 6221429
+  },
+  "producer_copy_cpu_ns": {
+    "ctypes_slice": [
+      805050000,
+      838496000,
+      762588000,
+      794984000,
+      799819000
+    ],
+    "native_buffer": [
+      663000,
+      1791000,
+      501000,
+      402000,
+      355000
+    ]
+  },
+  "producer_copy_median_cpu_ns": {
+    "ctypes_slice": 799819000,
+    "native_buffer": 501000
+  },
+  "source_sha256": {
+    "integrations/edge/aethron_edge/sources/base.py": "0617c1b46c55416ff779189c270c7f5e46cd52a7cc0eaa03328c6800b8bbc319",
+    "scripts/edge_decoder_copy_profile.py": "ea2b24c2d51390f60a8e005b72113ce05d601acb8103953f5e1484c513499027",
+    "tests/integration/test_decoder_publication.py": "3526c013f8972c15f3c75ec27acff22476d6402c203444bbcc340665deb62750",
+    ".github/workflows/aethron-edge-contracts.yml": "8a3d3b48b529c06ac4123c9f9d4c0603d5af146e989ffc1be2e8f33d42408ddf"
+  },
+  "scope": "P1.3 producer shared-memory publication, not complete decoder/backend/clock qualification",
+  "technology_decision": "Use the native CPython writable buffer interface with existing OpenCV isolation: producer byte-copy median CPU799.819ms to0.501ms, exact parity. This replaces per-byte ctypes assignment without a new ABI/runtime; no allocation reduction claimed.",
+  "research": [
+    "https://docs.python.org/3/library/stdtypes.html#memoryview",
+    "https://gstreamer.freedesktop.org/documentation/app/appsink.html",
+    "https://pyav.org/docs/stable/api/video.html"
+  ],
+  "alternatives": "GStreamer appsink provides bounded queue controls and PyAV exposes video frames/planes, but either whole-decoder replacement still needs independent device/timestamp/stride and deployment qualification. This measured boundary improvement does not choose or grandfather the full backend.",
+  "checks": {
+    "red": "4 invalid byte-count cases emitted FrameEnvelope before fix",
+    "focused": "10 PASS",
+    "offline_installed": "10 PASS",
+    "lint_format_bandit_diff": "PASS",
+    "hosted": "Six installed publication tests and producer comparison added to existing edge contracts jobs; pending"
+  },
+  "installed": {
+    "core_wheel_sha256": "daeacafc7e70f20bbd0b446f448203b67b0b12ee56e6b3afca6b248d031c9a93",
+    "edge_wheel_sha256": "69e52062c76a46ab703d1c4d60fb0b2336da74c00da3ceab5d1d04c8d39760e4",
+    "source_bytes_match": true,
+    "outside_checkout": true,
+    "offline_install": true,
+    "temporary_consumer_removed": true
+  },
+  "limitations": [
+    "Injected backend tests exercise real _decode publication/read, not real device/codec behavior. Existing three-OS real-codec jobs also run for the delivery head.",
+    "Previous local file-codec startup failure remains unproven; no unchanged local rerun.",
+    "CPU is diagnostic shared-Mac process time, not end-to-end capture latency or hard real-time qualification.",
+    "Native video conversion and owned byte creation still allocate; only the subsequent shared-buffer assignment changed.",
+    "Exposure trust, lock boundary, sequence/provenance, size limits and source fault codes preserved."
+  ]
+}

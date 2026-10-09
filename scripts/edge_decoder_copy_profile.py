@@ -51,6 +51,19 @@ def main():
         if pixels != expected:
             raise RuntimeError("decoder_copy_parity_failed")
         del pixels
+    # Producer-side copy only; real _decode publication parity is tested separately.
+    write_samples = {"ctypes_slice": [], "native_buffer": []}
+    for batch in range(5):
+        for name in list(write_samples)[:: 1 if batch % 2 else -1]:
+            memoryview(source.slot).cast("B")[:] = bytes(MAX_RAW)
+            start = time.process_time_ns()
+            if name == "ctypes_slice":
+                source.slot[:MAX_RAW] = expected
+            else:
+                memoryview(source.slot).cast("B")[:] = expected
+            write_samples[name].append(time.process_time_ns() - start)
+            if memoryview(source.slot).cast("B") != expected:
+                raise RuntimeError("decoder_write_parity_failed")
     root = Path(__file__).resolve().parents[1]
     print(
         json.dumps(
@@ -63,6 +76,10 @@ def main():
                 "cpu_ns": samples,
                 "median_cpu_ns": {k: statistics.median(v) for k, v in samples.items()},
                 "python_traced_peak_bytes": peaks,
+                "producer_copy_cpu_ns": write_samples,
+                "producer_copy_median_cpu_ns": {
+                    name: statistics.median(values) for name, values in write_samples.items()
+                },
                 "source_sha256": {
                     p: hashlib.sha256((root / p).read_bytes()).hexdigest()
                     for p in (

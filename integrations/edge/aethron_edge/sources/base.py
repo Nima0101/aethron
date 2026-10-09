@@ -102,13 +102,15 @@ def _decode(config, slot, metadata, lock, stop):
                             return
                 return
             h, w, c = pixels.shape
-            if c != 3 or not 0 < w <= 1920 or not 0 < h <= 1080 or pixels.nbytes > MAX_RAW:
+            if c != 3 or not _valid_dimensions(w, h) or pixels.nbytes != w * h * 3:
                 raise ValueError()
             raw = cv2.cvtColor(pixels, cv2.COLOR_BGR2RGB).tobytes()
+            if len(raw) != w * h * 3:
+                raise ValueError()
             sequence += 1
             received = time.monotonic_ns()
             with lock:
-                slot[: len(raw)] = raw
+                memoryview(slot).cast("B")[: len(raw)] = raw
                 metadata[:] = [sequence, w, h, received]
             if config.driver == "file":
                 # Playback cadence is simulation time, not physical exposure.
