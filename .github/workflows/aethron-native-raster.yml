@@ -1,0 +1,56 @@
+name: AETHRON native recorded raster
+on:
+  push:
+    branches: [feat/aethron-code-checkpoint-20261009]
+    paths: ['integrations/native-raster/**', 'integrations/edge/aethron_edge/sensors/**', '.github/workflows/aethron-native-raster.yml']
+  pull_request:
+    paths: ['integrations/native-raster/**', 'integrations/edge/aethron_edge/sensors/**', '.github/workflows/aethron-native-raster.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  installed-parity:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13.15'
+      - name: Install pinned build tools and locked Python dependencies
+        run: |
+          python -m pip install setuptools==84.0.0 wheel==0.48.0
+          python -m pip install --require-hashes -r integrations/edge/requirements-server.lock
+      - name: Build and install platform wheel plus reference
+        shell: bash
+        run: |
+          python -m pip wheel --no-deps --no-build-isolation -w build/native-wheels . ./integrations/edge ./integrations/native-raster
+          python -m pip install --no-index --no-deps build/native-wheels/*.whl
+      - name: Installed parity and bounded benchmark
+        run: |
+          python -I -m unittest discover -s integrations/native-raster/tests -v
+          python -I integrations/native-raster/tests/benchmark.py > build/native-benchmark.json
+      - name: Compile C++20 checks
+        run: |
+          cmake -S integrations/native-raster -B build/native-checks -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build/native-checks --config Debug
+          ctest --test-dir build/native-checks -C Debug --output-on-failure
+      - name: Linux ASan and UBSan
+        if: runner.os == 'Linux'
+        run: |
+          cmake -S integrations/native-raster -B build/native-sanitizers -DAETHRON_SANITIZERS=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build/native-sanitizers
+          ctest --test-dir build/native-sanitizers --output-on-failure
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: success()
+        with:
+          name: native-raster-${{ matrix.os }}
+          path: build/native-benchmark.json
+          retention-days: 7
+          if-no-files-found: error

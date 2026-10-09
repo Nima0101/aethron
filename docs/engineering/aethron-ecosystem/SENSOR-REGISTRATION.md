@@ -140,3 +140,27 @@ The result retains no raw payload, has `source_evidence="recorded"` and
 `live_evidence=False`, and retains the raster's validity mask. Pass frames from
 `read_frames` to retain that reader's stream continuity checks; this per-frame
 operation creates no clock, freshness lease, stream history or live authority.
+
+Inspect selected output pixels offline (counts or JSON `null` for invalid rays):
+
+```sh
+python -m aethron_edge.sensors.intensity_inspect \
+  --recording raw.bin --calibration intensity-calibration.json \
+  --expected-calibration-sha256 "$EXPECTED_CALIBRATION_SHA256" \
+  --pixel 0 0 --pixel 10 20 --max-frames 10
+```
+
+The expected digest must be independently pinned. Limits are 64 MiB input,
+64 KiB calibration, 1–64 selected pixels, and 1–300 frames (default 1) within
+the existing 30-second recorded envelope. Extra frames fail rather than truncate.
+The command emits one JSON document only after complete success; errors return
+exit 2 without partial stdout or input echo. It opens regular local files only,
+does not activate devices, and retains only selected counts plus source metadata
+between frames. All output remains recorded and non-live.
+
+An explicit optional [C++20 Brown backend](../../../integrations/native-raster/README.md)
+is available as a separate platform wheel. It preserves the recorded mono8/mono16
+result contract and uses the unchanged Python validation boundary. Installation
+never switches the default path; fisheye, live/ROS admission and signed provenance
+remain separate. Its exact-build synthetic measurements and limitations are in
+[the native evidence](../../../integrations/native-raster/evidence/macos-arm64.json).

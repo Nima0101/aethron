@@ -86,6 +86,7 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
             "test_sensor_registration.py",
             "test_sensor_raster_rectification.py",
             "test_sensor_intensity_replay.py",
+            "test_sensor_intensity_inspect.py",
             "test_sensor_provider.py",
             "test_sensor_appliance.py",
             "test_sensor_radar_appliance.py",

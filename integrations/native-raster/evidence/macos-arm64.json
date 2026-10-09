@@ -1,0 +1,69 @@
+{
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "python": "3.13.15",
+  "pixels": 327680,
+  "repeats": 5,
+  "parity": true,
+  "output_sha256": "55aa5a8654fc7aa2e717971af4714e6829ead95c48097dd2def779a42e99ed9e",
+  "results": {
+    "python": {
+      "median_wall_ms": 2103.985292,
+      "median_cpu_ms": 1632.935,
+      "wall_ms": [
+        2181.641875,
+        2103.985292,
+        1799.0445,
+        1877.11475,
+        3380.457209
+      ],
+      "python_traced_peak_bytes": null
+    },
+    "cpp20": {
+      "median_wall_ms": 106.287875,
+      "median_cpu_ms": 53.64,
+      "wall_ms": [
+        176.173334,
+        68.699708,
+        128.978959,
+        106.287875,
+        92.392416
+      ],
+      "python_traced_peak_bytes": null
+    }
+  },
+  "qualified": false,
+  "installed": {
+    "wheels": {
+      "aethron_raster_native-0.1.0-cp313-cp313-macosx_26_0_arm64.whl": "e1fc2540521b5d2934e826e73383fade1001e1bd7aeccc8a09ed8f9551b83b22",
+      "aethron_edge-0.1.0-py3-none-any.whl": "3a5f15a2480750345cbec73f53b5a40abb754b3208b28490e7964b568124abcc"
+    },
+    "wheel_sources_exact": true,
+    "outside_checkout": true,
+    "numpy_opencv_blocked": true,
+    "temporary_consumer_removed": true
+  },
+  "sources_sha256": {
+    "aethron_raster_native/__init__.py": "155ec83756ea4719a5fa10480b2ca45516d2af8fbe456e8238f35bb42cd2e810",
+    "aethron_raster_native/binding.cpp": "3f20360009cabf41873914a89c871b9eb4de42452b75c81b4b6cc9de682daca0",
+    "aethron_raster_native/kernel.hpp": "2e5604ae5dffe5ebd86aa3e4ca1ceddb5debf7905dd733a974f8ba897e7dcee8",
+    "pyproject.toml": "aefaee604dfd3bb4519af68fee5d387c1109695599577b6cd19c3fb9f7d3c3cc",
+    "setup.py": "4b7309bb1b58e0ddcf39f25a90c32b9a36c8c9eb958a19752723c281fd04ee2d",
+    "tests/benchmark.py": "ac4cf6b868af24ae8282b7230b4bb7f0a280130d688d58b90c51f0dd4c83de49",
+    "tests/kernel_test.cpp": "37be6b0849adbe23789d0ba0f45300dbec1f623755c2d858727088ade0702856",
+    "tests/test_parity.py": "62a35e65e25c6acfa713427f3efa33932ef95ff11be017daa3e198b956556453"
+  },
+  "parity_tests": 3,
+  "seeded_parity_cases": 150,
+  "sanitizers": "ASan/UBSan PASS: 10000 malformed-dimension probes plus boundary cases",
+  "compiler": "Apple clang 21.0.0 (clang-2100.1.1.101), C++20 -O3 -ffp-contract=off",
+  "buffer_contract": {
+    "data_bytes": 655360,
+    "mask_bytes": 327680,
+    "pixel_loop_heap_allocations": "none by source inspection; not an RSS measurement"
+  },
+  "limitations": [
+    "Local synthetic Mac measurement only; no latency threshold or physical qualification.",
+    "Current final-wheel memory trace not repeated; earlier preliminary-wheel trace retained locally.",
+    "Linux/Windows hosted parity pending; no ROS/OEM or live integration."
+  ]
+}
