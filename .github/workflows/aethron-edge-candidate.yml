@@ -1,5 +1,15 @@
 name: AETHRON edge candidate
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'integrations/edge/**'
+      - 'contracts/**'
+      - 'examples/clients/**'
+      - 'tests/integration/**'
+      - 'scripts/edge_*.py'
+      - 'packaging/appliance/**'
+      - '.github/workflows/aethron-edge-candidate.yml'
   pull_request:
     paths:
       - 'integrations/edge/**'
