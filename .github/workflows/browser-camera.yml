@@ -35,7 +35,7 @@ jobs:
           name: aethron-camera-static-preview
           path: web/dist
   deploy-preview:
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: web
     runs-on: ubuntu-latest
     permissions:
