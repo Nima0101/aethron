@@ -1,0 +1,62 @@
+{
+  "cases_per_candidate": 20,
+  "cpu_ns": {
+    "direct": [
+      759.1,
+      762.1,
+      792.3,
+      781.8,
+      766.7
+    ],
+    "native": [
+      949.1,
+      1111.3,
+      1265.9,
+      1422.2,
+      1226.1
+    ]
+  },
+  "median_cpu_ns": {
+    "direct": 766.7,
+    "native": 1226.1
+  },
+  "probe_sha256": "9d59bea94a06f8017f2a65b701ea271e2f3799bdeee9dd6ecee15c6ae3e14fc0",
+  "qualified": false,
+  "scope": "P1.3 build_v3 scalar admission only; complete clock mapping/backend/process-isolation review remains open.",
+  "technology_decision": "Use direct CPython exact integer admission before conversion: both candidates pass 20 cases, direct median CPU 766.7 ns vs guarded Pydantic/Rust-core 1226.1 ns; no new dependency or native boundary for three scalar checks.",
+  "research": [
+    "https://peps.python.org/pep-0564/",
+    "https://docs.pydantic.dev/latest/api/standard_library_types/#integers",
+    "https://docs.cython.org/en/latest/src/tutorial/pure.html"
+  ],
+  "alternatives": "Guarded Pydantic/Rust-core tested; Cython native compilation is viable but requires a new edge native packaging boundary for a sub-microsecond three-scalar check, without a demonstrated whole-builder benefit. No general runtime ranking or whole-worker decision.",
+  "production_use": "pixel_replay.replay_images invokes build_v3 with offline virtual timestamps; this change does not qualify live acquisition.",
+  "checks": {
+    "initial_red": "17 failures and 7 errors across 3 tests",
+    "first_green_attempt": "18 pass, 1 failure: negative serialized timestamp from exposure zero and uncertainty one; fixed and retained",
+    "focused": "19 PASS",
+    "offline_installed": "19 PASS",
+    "lint_format_bandit": "PASS after import cleanup and replacing probe assert with explicit error",
+    "hosted": "new installed admission and reproducible comparison in six OS/Python jobs; pending"
+  },
+  "installed": {
+    "core_wheel_sha256": "daeacafc7e70f20bbd0b446f448203b67b0b12ee56e6b3afca6b248d031c9a93",
+    "edge_wheel_sha256": "1eaf5772083a8b349c53f046b0ae86f59c229abd71f7ca21b7156ac64f3a3db5",
+    "source_bytes_match": true,
+    "outside_checkout": true,
+    "offline_install": true,
+    "temporary_consumer_removed": true
+  },
+  "source_sha256": {
+    "integrations/edge/aethron_edge/pipeline.py": "745dda029233b64e51d4670882df9d957e38b3cc00f165c06ca675cb0836ad24",
+    "tests/integration/test_builder_clock_admission.py": "582c13e6765b622664a067ec2ca889a650183e8a61e84fc5a3723c30dd694e28",
+    "scripts/edge_builder_clock_profile.py": "9d59bea94a06f8017f2a65b701ea271e2f3799bdeee9dd6ecee15c6ae3e14fc0",
+    ".github/workflows/aethron-edge-contracts.yml": "640bc534aa8207a644a27505bb4fd51962a9fb32af630af0f3e72b974660affa"
+  },
+  "limitations": [
+    "Diagnostic CPU timings on shared Mac; not hard latency, peak RSS or hardware qualification.",
+    "Existing conservative millisecond rounding and inclusive 100 ms age rule unchanged; negative serialized times now rejected.",
+    "Prior local file-codec startup failed twice, while exact fea4eaa hosted three-OS file-codec tests passed. Root cause of local failure remains unproven.",
+    "Full candidate and physical qualification remain separate gates."
+  ]
+}

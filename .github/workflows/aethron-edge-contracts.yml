@@ -17,12 +17,14 @@ on:
       - 'tests/integration/test_openapi.py'
       - 'tests/integration/test_worker_replay_input.py'
       - 'tests/integration/test_clock_pipeline.py'
+      - 'tests/integration/test_builder_clock_admission.py'
       - 'tests/integration/test_calibration_admission.py'
       - 'tests/integration/test_decoder_admission.py'
       - 'tests/integration/test_sources.py'
       - 'scripts/edge_decoder_copy_profile.py'
       - 'scripts/edge_calibration_profile.py'
       - 'scripts/edge_clock_profile.py'
+      - 'scripts/edge_builder_clock_profile.py'
       - 'scripts/probes/clock_compatibility.rs'
       - 'scripts/edge_worker_preload_profile.py'
       - 'scripts/edge_contract_profile.py'
@@ -33,6 +35,7 @@ on:
       - 'contracts/**'
       - 'tests/integration/**'
       - 'scripts/edge_clock_profile.py'
+      - 'scripts/edge_builder_clock_profile.py'
       - 'scripts/edge_calibration_profile.py'
       - 'scripts/edge_decoder_copy_profile.py'
       - 'scripts/probes/clock_compatibility.rs'
@@ -84,6 +87,10 @@ jobs:
           python -I -c "import sys, unittest; sys.path.insert(0, 'tests/integration'); unittest.main(module=None, argv=['unittest', 'test_worker_replay_input', 'test_clock_pipeline', 'test_worker_imports', 'test_pipeline.Pipeline.test_headless_replay_expires_when_worker_stops', 'test_pipeline.Pipeline.test_unstarted_pipeline_is_unknown', '-v'])"
       - name: Bounded contract validation comparison
         run: python -I scripts/edge_contract_profile.py > build/contract-profile.json
+      - name: Installed builder clock admission
+        run: |
+          python -I -m unittest discover -s tests/integration -p test_builder_clock_admission.py -v
+          python -I scripts/edge_builder_clock_profile.py > build/builder-clock-profile.json
       - name: Installed clock scalar proof
         run: python -I scripts/edge_clock_profile.py > build/clock-profile.json
       - name: Installed decoder admission and owned buffer snapshot
@@ -116,6 +123,7 @@ jobs:
             build/calibration-profile.json
             build/decoder-copy-profile.json
             build/clock*profile.json
+            build/builder-clock-profile.json
             build/clock-rust-version.txt
           retention-days: 7
           if-no-files-found: error
