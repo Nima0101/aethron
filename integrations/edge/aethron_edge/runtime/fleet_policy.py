@@ -1,11 +1,13 @@
 """Signed local fleet-policy admission; no transport, installation or actuation."""
 
 import hashlib
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
 from ..config import strict_json
 from ._regular_file import regular_reader
+from .fleet_floors import FleetFloorStore
 from .updates import verify_bundle
 
 _FIELDS = frozenset(
@@ -72,3 +74,37 @@ def load_fleet_policy(
         return FleetPolicy(**{key: item for key, item in value.items() if key != "schema_version"})
     except (OSError, ValueError, TypeError, KeyError, RecursionError):
         raise ValueError("invalid_fleet_policy") from None
+
+
+def admit_fleet_policy(
+    bundle: Path,
+    public_key: Path,
+    *,
+    floor_store: FleetFloorStore,
+    clock: Callable[[], int],
+) -> FleetPolicy:
+    """Commit authenticated floors before returning point-in-time configuration.
+
+    Trusted caller supplies the pinned key, protected store and trusted UTC
+    source. This is not a transferable or lasting deployment authorization.
+    """
+    try:
+        floors = floor_store.read()
+        started = clock()
+        if not _integer(started, floors.minimum_time_s, 2**53 - 1):
+            raise ValueError()
+        policy = load_fleet_policy(
+            bundle, public_key, now_unix_s=started, minimum_version=floors.minimum_version
+        )
+        finished = clock()
+        if (
+            not _integer(finished, started, 2**53 - 1)
+            or not policy.not_before_unix_s <= finished < policy.expires_unix_s
+        ):
+            raise ValueError()
+        # advance rereads both floors under its writer transaction. A competing
+        # admission can invalidate this candidate after signature verification.
+        floor_store.advance(minimum_version=policy.bundle_version, minimum_time_s=finished)
+        return policy
+    except (OSError, ValueError, TypeError, RuntimeError, StopIteration):
+        raise ValueError("invalid_fleet_admission") from None

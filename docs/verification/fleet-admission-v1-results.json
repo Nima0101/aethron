@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "base_commit": "74606ae7133ce0477918c147c2b968df6636f37e",
+  "source_binding": "Candidate file SHA-256; local source-tree checks only",
+  "files": {
+    ".github/workflows/aethron-fleet-policy.yml": "7b0efe80a4c1f46e220feb89261da9b1feb2c645f796f5041c9742e17924070d",
+    "docs/architecture/fleet-admission-v1.md": "affbf90628e32e437519c8df4685d7db1cc894ba2123991f0547e197bfe517da",
+    "integrations/edge/aethron_edge/runtime/fleet_policy.py": "d3a46aa9fa9e8cac7813fe2055f872aba29b1eb26aa8b35c13e32d1c75778e15",
+    "tests/integration/test_fleet_admission.py": "64650f3bb92aa236b280a3fce707343cc26fc8701a909fe81f28fd300b9bb646"
+  },
+  "runtime": "CPython 3.13.5, Linux x86_64, OpenSSL 3.5.6",
+  "verification": {
+    "command": "PYTHONPATH=integrations/edge:build/fleet-linux-deps python3 -m unittest discover -s tests/integration -p 'test_fleet_*.py' -v",
+    "fleet_tests_passed": 53,
+    "admission_tests_passed": 11,
+    "tests_failed": 0,
+    "ruff_0_16_10_check": "PASS",
+    "ruff_format_check": "PASS",
+    "bandit_1_9_4_policy_module": "PASS, no findings",
+    "workflow_yaml_and_private_marker_check": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "retained_negative_evidence": [
+    "RED: callable assertion failed because admit_fleet_policy did not exist.",
+    "First Ruff run found I001 import ordering in the new test; fixed and final lint/format passed."
+  ],
+  "not_run": [
+    "Hosted installed-wheel checks for this candidate",
+    "Full repository suite, fuzz, clean clone or hardware crash tests",
+    "Rollout activation or network fabric"
+  ],
+  "limits": "Point-in-time configuration and committed lower bounds only. No execution authority, same-version content registry, protection against database-backup rollback or hardware durability claim."
+}

@@ -5,6 +5,7 @@ on:
       - 'integrations/edge/**'
       - 'tests/integration/test_fleet_policy.py'
       - 'tests/integration/test_fleet_floors.py'
+      - 'tests/integration/test_fleet_admission.py'
       - '.github/workflows/aethron-fleet-policy.yml'
   workflow_dispatch:
 permissions:
@@ -38,3 +39,4 @@ jobs:
           openssl version
           python -I -m unittest discover -s tests/integration -p test_fleet_policy.py -v
           python -I -m unittest discover -s tests/integration -p test_fleet_floors.py -v
+          python -I -m unittest discover -s tests/integration -p test_fleet_admission.py -v
