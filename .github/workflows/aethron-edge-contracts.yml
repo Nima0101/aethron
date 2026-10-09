@@ -20,6 +20,7 @@ on:
       - 'tests/integration/test_builder_clock_admission.py'
       - 'tests/integration/test_calibration_admission.py'
       - 'tests/integration/test_decoder_admission.py'
+      - 'tests/integration/test_decoder_publication.py'
       - 'tests/integration/test_sources.py'
       - 'scripts/edge_decoder_copy_profile.py'
       - 'scripts/edge_calibration_profile.py'
@@ -96,6 +97,7 @@ jobs:
       - name: Installed decoder admission and owned buffer snapshot
         run: |
           python -I -m unittest discover -s tests/integration -p test_decoder_admission.py -v
+          python -I -m unittest discover -s tests/integration -p test_decoder_publication.py -v
           python -I scripts/edge_decoder_copy_profile.py > build/decoder-copy-profile.json
       - name: Installed real file codec and source faults
         if: matrix.python == '3.13.15'
