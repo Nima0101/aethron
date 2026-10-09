@@ -27,6 +27,7 @@ on:
       - 'tests/integration/test_decoder_admission.py'
       - 'tests/integration/test_decoder_publication.py'
       - 'tests/integration/test_file_decoder_protocols.py'
+      - 'tests/integration/test_decoder_disconnect.py'
       - 'tests/integration/test_sources.py'
       - 'scripts/edge_decoder_copy_profile.py'
       - 'scripts/edge_decoder_backend_profile.py'
@@ -119,6 +120,7 @@ jobs:
         run: |
           python -m pip install --only-binary=:all: --require-hashes -r integrations/edge/requirements-vision.lock
           python -I -m unittest discover -s tests/integration -p test_file_decoder_protocols.py -v
+          python -I -m unittest discover -s tests/integration -p test_decoder_disconnect.py -v
           python -I -m unittest discover -s tests/integration -p test_sources.py -v
       - name: Recorded decoder alternative comparison (not a runtime dependency)
         if: matrix.os == 'ubuntu-24.04' && matrix.python == '3.13.15'
