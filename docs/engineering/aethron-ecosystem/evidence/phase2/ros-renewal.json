@@ -1,0 +1,213 @@
+{
+  "date": "2026-10-09",
+  "source_base": "095202f4b95a9df689d655a3136227e1fe3263e2",
+  "status": "development_checkpoint_not_release_qualified",
+  "source_files": {
+    "integrations/edge/aethron_edge/pipeline.py": "60cc6dd8bd514957699fb4e76785c282c95d1dcc5f0b05df0c99a01ca2cfca56",
+    "integrations/edge/aethron_edge/runtime/supervisor.py": "01247322c010bc62d0fa8f1e80ad934bd6be7072873765bd98b370b5b1233440",
+    "integrations/edge/aethron_edge/sensors/provider.py": "ce2baeeb7f1832af1d406ff7c12517fb558819f9fa06a955b8f13b5df37b64ee",
+    "integrations/edge/aethron_edge/sensors/ros_authority.py": "59a52284e48396b71b81867fe4af5bbd8b3833b9473ca6ebeefd2fc2de388e2b",
+    "integrations/edge/aethron_edge/sensors/ros_worker.py": "65fda98f7b3b83bc7a9580f83aa4395de12230b01485c2b4786cf5335807750f",
+    "tests/integration/test_sensor_provider.py": "3760c52010be6090f90b3a7828080f89db251df4c772186c5ab206da7314eec7",
+    "tests/integration/test_sensor_ros_appliance.py": "7b0d2f671551ed835754bc940dec6feff709bd0fda7c65cece0cea337fa4258c",
+    "tests/integration/test_sensor_ros_authority.py": "1987de82432c559fd39372b020b76f956b01202d5d8fec3c5c5a1622546245a9",
+    "tests/ros2/test_dds.py": "9389e0a1bc06df2c3d940a0a59f3e99b9106c536c06314b4f21caf5209fde997",
+    "tests/ros2/test_signed_service.py": "0ab3c5c1eff15e055dc8dc894c0e4661224967889c111c1756e8a5ec7982049d"
+  },
+  "tested_files": {
+    "tests/integration/test_sensor_provider.py": {
+      "tested_sha256": "3760c52010be6090f90b3a7828080f89db251df4c772186c5ab206da7314eec7",
+      "current_sha256": "3760c52010be6090f90b3a7828080f89db251df4c772186c5ab206da7314eec7"
+    },
+    "tests/integration/test_sensor_ros_appliance.py": {
+      "tested_sha256": "7b0d2f671551ed835754bc940dec6feff709bd0fda7c65cece0cea337fa4258c",
+      "current_sha256": "7b0d2f671551ed835754bc940dec6feff709bd0fda7c65cece0cea337fa4258c"
+    },
+    "tests/integration/test_sensor_ros_authority.py": {
+      "tested_sha256": "1987de82432c559fd39372b020b76f956b01202d5d8fec3c5c5a1622546245a9",
+      "current_sha256": "1987de82432c559fd39372b020b76f956b01202d5d8fec3c5c5a1622546245a9"
+    },
+    "tests/integration/test_sensor_replay.py": {
+      "tested_sha256": "c6f24c2e7b175c60637fe039e3bddf31a6b12557092a57c85ae4f0322f727855",
+      "current_sha256": "c6f24c2e7b175c60637fe039e3bddf31a6b12557092a57c85ae4f0322f727855"
+    },
+    "tests/integration/test_sensor_packets.py": {
+      "tested_sha256": "bb8a420b027a081d3d409ee7f99022e56fde51ec73436f85d2bd1933e4a2f0c3",
+      "current_sha256": "bb8a420b027a081d3d409ee7f99022e56fde51ec73436f85d2bd1933e4a2f0c3"
+    },
+    "tests/ros2/test_dds.py": {
+      "tested_sha256": "9389e0a1bc06df2c3d940a0a59f3e99b9106c536c06314b4f21caf5209fde997",
+      "current_sha256": "9389e0a1bc06df2c3d940a0a59f3e99b9106c536c06314b4f21caf5209fde997"
+    },
+    "tests/integration/test_sensor_appliance.py": {
+      "tested_sha256": "11e7aa831d29092efd6b10a1bdf3e1e281e1b1715eef0c020e25ebefe14e195b",
+      "current_sha256": "11e7aa831d29092efd6b10a1bdf3e1e281e1b1715eef0c020e25ebefe14e195b"
+    },
+    "tests/ros2/test_signed_service.py": {
+      "tested_sha256": "4e5d035e0c36b2ba54df01a4f2c9454ee3862106ef7999e7628eaa1ae27fda4b",
+      "current_sha256": "0ab3c5c1eff15e055dc8dc894c0e4661224967889c111c1756e8a5ec7982049d"
+    },
+    "tests/integration/test_sensor_ros2.py": {
+      "tested_sha256": "2c8f25af2583a5c396dbd9bb6c7a007bb29716f3f1a338bb98eb0b9003e2b53e",
+      "current_sha256": "2c8f25af2583a5c396dbd9bb6c7a007bb29716f3f1a338bb98eb0b9003e2b53e"
+    },
+    "tests/integration/test_sensor_registration.py": {
+      "tested_sha256": "fbfeb5d019290d696551b53ee0073fc3038aa87beba07fa183d38a8ad0fc1cfb",
+      "current_sha256": "fbfeb5d019290d696551b53ee0073fc3038aa87beba07fa183d38a8ad0fc1cfb"
+    }
+  },
+  "test_format_note": "Signed CLI test was formatted after bundle copy; all installed test ASTs exactly match current source. Tested and current byte hashes are both recorded.",
+  "wheel_source_bytes_verified": true,
+  "installed": {
+    "hardware_qualified": false,
+    "installed_ros_dds": true,
+    "installed_signed_ros_cli_http_sse": true,
+    "network": "none",
+    "packages": {
+      "rclpy": "7.1.12",
+      "rmw_fastrtps_cpp": "8.4.4",
+      "sensor_msgs": "5.3.8"
+    },
+    "payloads": "original synthetic Image/CameraInfo/PointCloud2",
+    "python": "3.12.3",
+    "scene_state": "UNKNOWN",
+    "signed_configuration_tamper_denied": true,
+    "uid": 10001,
+    "wheels": {
+      "candidate/aethron-0.2.0-py3-none-any.whl": "726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e",
+      "candidate/aethron_edge-0.1.0-py3-none-any.whl": "4b576ad99a192dc6d223b9b34e2d5918882db55179b95176e83e1c377e013a61",
+      "dependencies/annotated_doc-0.0.5-py3-none-any.whl": "117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101",
+      "dependencies/annotated_types-0.8.0-py3-none-any.whl": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0",
+      "dependencies/anyio-4.15.1-py3-none-any.whl": "6152fdbbf9a77fdec97731721bebf7c4c44f7c29b424b0065826173efc7ed101",
+      "dependencies/attrs-26.1.0-py3-none-any.whl": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+      "dependencies/certifi-2026.7.22-py3-none-any.whl": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775",
+      "dependencies/click-8.5.0-py3-none-any.whl": "255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360",
+      "dependencies/fastapi-0.142.4-py3-none-any.whl": "8a651aa071a9f92c8217cca1d0b044bf9c326f336578be0a728a1a1f22ec52d2",
+      "dependencies/h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+      "dependencies/httpcore-1.0.9-py3-none-any.whl": "2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55",
+      "dependencies/httpx-0.28.1-py3-none-any.whl": "d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad",
+      "dependencies/idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+      "dependencies/jsonschema-4.26.0-py3-none-any.whl": "d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce",
+      "dependencies/jsonschema_specifications-2025.9.1-py3-none-any.whl": "98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe",
+      "dependencies/opentelemetry_api-1.45.1-py3-none-any.whl": "b31553efa588ae44bc306f863c785c5333a9ecc091248c6ee68b4b6c87fdedfb",
+      "dependencies/pip-26.2-py3-none-any.whl": "931c303696af6fa3417112103b1cad26890e5a07eccb5b99783700e33f2b8aad",
+      "dependencies/pydantic-2.13.5-py3-none-any.whl": "346a034f080da3755d8e9cb5e00e8b07de1d39e4f6e2c87d8ab7cafa0b269a73",
+      "dependencies/pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl": "4fdc8b93a41521988916eeaa271173fcca7fa0803d62f87675aac8dcec1c8e29",
+      "dependencies/referencing-0.37.0-py3-none-any.whl": "381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231",
+      "dependencies/rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl": "2693b2728bbcc48d09a981a356954b0c47c53ff25b545856f28a889ea619f69a",
+      "dependencies/starlette-1.7.0-py3-none-any.whl": "67f8e99895493dd2911a03f11314af6ceebeae4e704bb9f43dfc6a9db151c93e",
+      "dependencies/typing_extensions-4.16.0-py3-none-any.whl": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+      "dependencies/typing_inspection-0.4.4-py3-none-any.whl": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147",
+      "dependencies/uvicorn-0.54.0-py3-none-any.whl": "505bdb0f318731d45f1f712071fc781a8981f6847a31c902c9f5e652d4f67faf"
+    },
+    "image": "ros@sha256:8f687fdf084482819aa7dab48c3887331edd0d3687b219951fdb66c418316ab1",
+    "platform": "linux/arm64"
+  },
+  "checks": {
+    "focused_ros": {
+      "tests": 27,
+      "seconds": 0.267,
+      "failures": 0
+    },
+    "provider": {
+      "tests": 12,
+      "seconds": 1.602,
+      "failures": 0
+    },
+    "http": {
+      "tests": 5,
+      "seconds": 9.77,
+      "failures": 0,
+      "note": "Before addition of fixed ROS-only fault category diagnostics; final signed ROS HTTP/SSE path tested in installed lane."
+    },
+    "installed_final": {
+      "tests": 80,
+      "seconds": 23.657,
+      "failures": 0
+    },
+    "isolated_signed_cli": {
+      "tests": 1,
+      "seconds": 10.426,
+      "failures": 0
+    },
+    "combined_ros_appliance_cli": {
+      "tests": 3,
+      "seconds": 21.398,
+      "failures": 0
+    },
+    "static": {
+      "ruff_check": "pass",
+      "ruff_format": "10 changed Python files pass",
+      "scoped_bandit": "pass",
+      "git_diff_check": "pass"
+    },
+    "planning": {
+      "sources": 66,
+      "negative_probes": 51,
+      "result": "pass"
+    }
+  },
+  "red": [
+    "four missing version2/renewal API errors",
+    "parent grant generation remained zero",
+    "empty poll incorrectly returned provider_unavailable",
+    "missing fixed clock fault categories"
+  ],
+  "retained_installed_failures": [
+    {
+      "lane": "installed",
+      "tests": 78,
+      "seconds": 30.017,
+      "failures": 1,
+      "failure": "signed CLI renewed but availability false",
+      "log_sha256": "7d5b3c9e2e52643c62094f294fb59246d6d06c436fdf122b1f8a1087ce44cbb5",
+      "candidate_wheels": {
+        "candidate/aethron-0.2.0-py3-none-any.whl": "726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e",
+        "candidate/aethron_edge-0.1.0-py3-none-any.whl": "efe8b15bfb2024054c8e4a4f12f50a17c18a41627b75248d6f86a66d18c77c19"
+      }
+    },
+    {
+      "lane": "final",
+      "tests": 80,
+      "seconds": 25.086,
+      "failures": 1,
+      "failure": "supervisor renewal stopped after generation 1",
+      "log_sha256": "f227135bb33ee59204e2f164e87a6f4dfe909586ae20401889368e2d9644f099",
+      "candidate_wheels": {
+        "candidate/aethron-0.2.0-py3-none-any.whl": "726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e",
+        "candidate/aethron_edge-0.1.0-py3-none-any.whl": "5593351d55e838c116b55b995b392458c4788482464a1149eb6a12f58d1b1741"
+      }
+    },
+    {
+      "lane": "fault-diagnostic",
+      "tests": 80,
+      "seconds": 28.781,
+      "failures": 1,
+      "failure": "signed CLI observed zero batches",
+      "log_sha256": "76866d4db62f7f2850f268ff95de37c76aa9847ef029b5418fac2c512c62a33d",
+      "candidate_wheels": {
+        "candidate/aethron-0.2.0-py3-none-any.whl": "726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e",
+        "candidate/aethron_edge-0.1.0-py3-none-any.whl": "4b576ad99a192dc6d223b9b34e2d5918882db55179b95176e83e1c377e013a61"
+      }
+    }
+  ],
+  "negative_output": "ros-renewal-failures.txt",
+  "negative_output_sha256": "66ac6470900e7895ad31ed74a11fe5e210a403c18b947012b1a3cd0cd5f17ce7",
+  "availability_root_cause": "Not established for intermittent installed failures. Deterministic CameraInfo-only empty-poll withdrawal was independently fixed. Same final runtime wheel failed one full ROS run and passed another; no repeatability/availability qualification is claimed.",
+  "limits": [
+    "software_fixture renewal only for explicitly synthetic rig provenance",
+    "physical calibration/exposure/remote clocks unqualified",
+    "raw geometry external_unverified; semantic output UNKNOWN",
+    "no actuation, raw history, identity/re-ID or online dependency",
+    "frozen aircraft evidence remains 0TP/20FN/721 temporal FP"
+  ],
+  "pending": [
+    "targeted ROS and Mac availability diagnosis",
+    "combined raw/ROS candidate boot/offline/reboot/soak",
+    "full affected security/packaging/clean reproduction/SBOM qualification",
+    "hosted CI/browser/native Windows/publication",
+    "physical and legal qualification"
+  ],
+  "verification_loop": "FAST DEVELOPMENT; unchanged core wheel/dependency closure reused by exact digest; full candidate/release loop not claimed",
+  "public_operations": false
+}

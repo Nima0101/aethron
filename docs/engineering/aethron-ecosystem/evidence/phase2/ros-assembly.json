@@ -1,0 +1,196 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-09",
+  "source_base": "3ef1445a23bf60c726aaa5f4015cb868d037530a",
+  "kind": "development_checkpoint_not_release_qualified",
+  "source_sha256": {
+    "packaging/appliance/image/prepare.py": "90746cbc29e200a75ff8089921e29634ff466ec2197a19b3f65be2900aa8ae8c",
+    "packaging/appliance/image/ros_lifecycle_probe.py": "a59fb082f45bfdf9603b5c784aff43ff48ede4b949cfcc7e56cfc0a24ae63db5",
+    "packaging/appliance/image/ros_boot_probe.py": "3708017d5140715aa5d7d3e1d5c9fe47974d6416eb21850f7b90c792cbfddd03",
+    "packaging/appliance/image/boot_probe.py": "4ccb6a508d7bfe987cadf3b894dd93aec35acdfaa692adde3e4b91def907de0a",
+    "packaging/appliance/image/Guest.Containerfile": "2e980ec3686c18c9310fbd77cd7d8827707508c16ca02d5ff5b8a9df2b908fa5",
+    "packaging/appliance/image/RosGuest.Containerfile": "2086b41e0da4ce90c0ebd47797c31de63fc35a22214e83d87c42fe7f0049634e",
+    "packaging/appliance/image/aethron-ros-check.service": "579942000e7b1607148bd6cbfa576ffdfc3b30d6ca61ed882eabd27296bbe80b",
+    "scripts/appliance_boot_e2e.py": "8bb396c35857019c2762cf644a55e3902fe4aabe3f9a64ac95565a515e16e5ab",
+    "tests/integration/test_ros_guest_assembly.py": "b651c36e9d31ae55d9fbcb804b2a31ee9cc077926805840d0a37c2ea5900afcc"
+  },
+  "implemented": [
+    "Optional signed Jazzy/Python 3.12 Linux guest assembly with offline hash-locked Python dependencies",
+    "Fixed systemd ROS lifecycle unit separated from continuous raw/proposal appliance",
+    "Current kernel boot ID binding and required independent ROS evidence on both boots",
+    "Complete guest login masks and fixed diagnostic serial errors"
+  ],
+  "checks": {
+    "focused_tests": {
+      "passed": 14,
+      "seconds": 11.244
+    },
+    "ruff": "passed (6 changed Python files, check and format)",
+    "systemd_analyze_verify": "passed (4 units in diagnostic assembled image)",
+    "assembled_offline_cli": "passed source loss, nonrevival, explicit restart, source rewind and restoration",
+    "installed_dds_regression": {
+      "passed": 84,
+      "errors": 1,
+      "seconds": 24.792,
+      "failure": "unexpected_ros_fault:clock_drift",
+      "log": "build/ecosystem-phase2/ros-assembly-regression/dds.log",
+      "sha256": "afeec4f152b04d07628cdb3eed1324c63308a1cc5a02919799879628b733d6bd"
+    },
+    "security": {
+      "bandit_low": 24,
+      "bandit_medium": 0,
+      "bandit_high": 0,
+      "review": "Fixed guest-only systemctl argv (no shell or caller-selected unit); existing explicit subprocess/image tooling warnings retained. This is not full release security qualification."
+    }
+  },
+  "diagnostic": {
+    "clock_offset_change_ns": [
+      7525048,
+      7522798
+    ],
+    "sample_error_ns": [
+      271,
+      3438
+    ],
+    "original_error_ns": 1833,
+    "drift_budget_ns": 1000000,
+    "generation": 17,
+    "batches_before_fault": 1605,
+    "outcome": "latched clock_drift; unavailable",
+    "scope": "Separate bounded instrumented installed-runtime reproduction, not the failing test event itself. Original clock functions and guard decisions preserved. OS adjustment cause unproven."
+  },
+  "artifacts": {
+    "ros-boot-candidate": {
+      "guest_image": "sha256:8cda8a54e7790d25bcdb767924e4d33d99085a9d1531a249521485b72b8554ed",
+      "image_manifest_sha256": "6f838be1b01c839838a6b10b7d2d3f16b024ebd277192e5e07ce7fbce595ef5b",
+      "result": {
+        "status": "failed",
+        "kind": "emulated_linux_boot_sil",
+        "hardware_qualified": false,
+        "required_sensor_profiles": {
+          "raw-depth": "recorded"
+        },
+        "ros_lifecycle_required": true,
+        "events": [
+          {
+            "error_type": "FileNotFoundError",
+            "event": "probe_failed"
+          }
+        ],
+        "serial_sha256": "85fb5c0e643c52db5b994d68317f442f4f110a7aa9acae39c1e1411ae757a15d",
+        "image_before": {
+          "initrd": "951ec9819a86a9c574905ed317372ff910c1cc8e16a7168ad59b3d35fdf6f427",
+          "kernel": "7ea5c4140a8d9b42c9856c3e3c1d6a8f2b75bd7c9f9d2eb7da52af110dc3d41f",
+          "rootfs.raw": "e584c6340967ed4c8b97977b07d623754469d1fcca22510229b7cf6e21282e57"
+        },
+        "elapsed_seconds": 40.661751499865204,
+        "exit_code": 124,
+        "image_manifest_sha256": "6f838be1b01c839838a6b10b7d2d3f16b024ebd277192e5e07ce7fbce595ef5b",
+        "wheels": {
+          "aethron-0.2.0-py3-none-any.whl": "726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e",
+          "aethron_edge-0.1.0-py3-none-any.whl": "ef8aa6aadedbf4db7d676bcc4b6a85046997e4d39a6b054194f4ddcf4e18d5ae"
+        },
+        "tool_image": "sha256:38bf5ebcbeb8cdce889b53c02196f185f8a9862eabbf13c2ae9565581443cc76"
+      },
+      "context": {
+        "raw-depth.json": "9b66705430026faffcc0837448a65ea5e16d01284ebf67a5d3bbb3bc14f78c4f",
+        "probe.service": "5e6171bddea6869aaffce63528b7eca862b376db9c11935b5d71f4c408b78686",
+        "ros-required": "1a3702c3fb2c585e13c0a271066e1685353391ed787ba7929eda3e6304654fdc",
+        "ros-appliance.json": "6bd150883c486ec69f9f5d508ae2b2caf75bc14b838f5456f0780fbd156b6843",
+        "appliance.json": "3a5b16a5780478599ec76bf322c20be5436e8feb38c99be44766972026f28f77",
+        "probe-profiles.json": "545c1d922bdf11f6d0d871a4efaebb845b5608d8996d8c226294e5a4597f9ae8",
+        "provision_ros_sdk.py": "498eaea2c6cba166488aa7c3bcdc93095092198a17a89dbe81ecd5cea3722ba7",
+        "raw-depth.aeraw": "5937e2a4834dbf5c54d40083fb1a8cc219fb71f41276a3b71a1bd6c6864ccb82",
+        "sign_bundle.py": "4011290513f807177212ffa140bfff746512ec3e97739719a7653704fc7e515a",
+        "ros-check.service": "f03919c84d1d9fbad8e79901dd062c06c59401c49ba7f54da634559d5a4f015a",
+        "ros-runtime.service": "ab7f028d8df9572c510ad1a0209b25e167fcd9766f3539bdc0c8609654b702d9",
+        "ros-depth.json": "6862223b6b2cc01616a58aa6d3ce1642b9585cb60c684067a3727fe70cc15030",
+        "Guest.Containerfile": "1217f282423c6ea55bdc79a6c35d0f9cdbe8928303d829ecfa68c60be8ec4261",
+        "sensor_probe.py": "82c969ff14b113017fc4458f34e5ae2035c81b1fafee41d34d6e5f2bf8f09cdd",
+        "aethron.service": "d0c48e4bdd18da1c9549e50ec2ac7e1a8c8b20e35630f152aaf0e5d2acd7b980",
+        "update_probe.py": "898d5e89756305cbf14becdcb8f4034749910fcc34f86043810e70920d5ee4ee",
+        "fixture.jsonl": "79b1ec8be1d44681d91e387371313d53b138a9ca84bcec1cab2b969fb9c09f84",
+        "ros_lifecycle_probe.py": "a59fb082f45bfdf9603b5c784aff43ff48ede4b949cfcc7e56cfc0a24ae63db5",
+        "ros_fixture.py": "5284439c7ed7bfa31f1a94137fbea20b8600cb49aefbdb2f55aa7b532f60a664",
+        "ros_boot_probe.py": "3708017d5140715aa5d7d3e1d5c9fe47974d6416eb21850f7b90c792cbfddd03",
+        "boot_probe.py": "5f8eda32513bcbd27e0d90956f88e3c2391bbd30e89168ae839c1e6f7ccb4817",
+        "requirements.lock": "6b45b0593ba42963c1d1960d39d0fbc49c1defca399186d0baf4a3aff4ea9aec"
+      }
+    },
+    "ros-boot-diagnostic": {
+      "guest_image": "sha256:0ce0fa02fe45be8afac32c43f26cb0f0776d96288fd27442786c7e9103a3c17f",
+      "image_manifest_sha256": "f2fd16241621dca2fa55bc44def81142654a58467b87433fea66a45464bd64dd",
+      "result": {
+        "status": "failed",
+        "kind": "emulated_linux_boot_sil",
+        "hardware_qualified": false,
+        "required_sensor_profiles": {
+          "raw-depth": "recorded"
+        },
+        "ros_lifecycle_required": true,
+        "events": [
+          {
+            "error_type": "FileNotFoundError",
+            "event": "probe_failed"
+          }
+        ],
+        "serial_sha256": "e8377134128cb994e4fd88b1c51194b54dba8c4bab276f07bb8bd0c557596bcd",
+        "image_before": {
+          "initrd": "951ec9819a86a9c574905ed317372ff910c1cc8e16a7168ad59b3d35fdf6f427",
+          "kernel": "7ea5c4140a8d9b42c9856c3e3c1d6a8f2b75bd7c9f9d2eb7da52af110dc3d41f",
+          "rootfs.raw": "2aab878a1b4eb1f9217ca638517afed3a61492654ee710a660b65fcd7b62de95"
+        },
+        "elapsed_seconds": 39.31947958283126,
+        "exit_code": 124,
+        "image_manifest_sha256": "f2fd16241621dca2fa55bc44def81142654a58467b87433fea66a45464bd64dd",
+        "wheels": {
+          "aethron-0.2.0-py3-none-any.whl": "726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e",
+          "aethron_edge-0.1.0-py3-none-any.whl": "ef8aa6aadedbf4db7d676bcc4b6a85046997e4d39a6b054194f4ddcf4e18d5ae"
+        },
+        "tool_image": "sha256:38bf5ebcbeb8cdce889b53c02196f185f8a9862eabbf13c2ae9565581443cc76"
+      },
+      "context": {
+        "raw-depth.json": "9b66705430026faffcc0837448a65ea5e16d01284ebf67a5d3bbb3bc14f78c4f",
+        "probe.service": "5e6171bddea6869aaffce63528b7eca862b376db9c11935b5d71f4c408b78686",
+        "ros-required": "1a3702c3fb2c585e13c0a271066e1685353391ed787ba7929eda3e6304654fdc",
+        "ros-appliance.json": "6bd150883c486ec69f9f5d508ae2b2caf75bc14b838f5456f0780fbd156b6843",
+        "appliance.json": "3a5b16a5780478599ec76bf322c20be5436e8feb38c99be44766972026f28f77",
+        "probe-profiles.json": "545c1d922bdf11f6d0d871a4efaebb845b5608d8996d8c226294e5a4597f9ae8",
+        "provision_ros_sdk.py": "498eaea2c6cba166488aa7c3bcdc93095092198a17a89dbe81ecd5cea3722ba7",
+        "raw-depth.aeraw": "5937e2a4834dbf5c54d40083fb1a8cc219fb71f41276a3b71a1bd6c6864ccb82",
+        "sign_bundle.py": "4011290513f807177212ffa140bfff746512ec3e97739719a7653704fc7e515a",
+        "ros-check.service": "579942000e7b1607148bd6cbfa576ffdfc3b30d6ca61ed882eabd27296bbe80b",
+        "ros-runtime.service": "af34ca4831f96c874ddcc9369776e095ba496c125c15b6575bac808b00ae3131",
+        "ros-depth.json": "6862223b6b2cc01616a58aa6d3ce1642b9585cb60c684067a3727fe70cc15030",
+        "Guest.Containerfile": "b809b7b85cebc4629d5e514326680afe8a7e182fbc5b84eb4026fcf2bd769080",
+        "sensor_probe.py": "82c969ff14b113017fc4458f34e5ae2035c81b1fafee41d34d6e5f2bf8f09cdd",
+        "aethron.service": "d0c48e4bdd18da1c9549e50ec2ac7e1a8c8b20e35630f152aaf0e5d2acd7b980",
+        "update_probe.py": "898d5e89756305cbf14becdcb8f4034749910fcc34f86043810e70920d5ee4ee",
+        "fixture.jsonl": "79b1ec8be1d44681d91e387371313d53b138a9ca84bcec1cab2b969fb9c09f84",
+        "ros_lifecycle_probe.py": "a59fb082f45bfdf9603b5c784aff43ff48ede4b949cfcc7e56cfc0a24ae63db5",
+        "ros_fixture.py": "5284439c7ed7bfa31f1a94137fbea20b8600cb49aefbdb2f55aa7b532f60a664",
+        "ros_boot_probe.py": "3708017d5140715aa5d7d3e1d5c9fe47974d6416eb21850f7b90c792cbfddd03",
+        "boot_probe.py": "4ccb6a508d7bfe987cadf3b894dd93aec35acdfaa692adde3e4b91def907de0a",
+        "requirements.lock": "6b45b0593ba42963c1d1960d39d0fbc49c1defca399186d0baf4a3aff4ea9aec"
+      }
+    }
+  },
+  "logs": {
+    "build/ecosystem-phase2/ros-guest/assembly-red.log": "9a8d5332963b684b7f4e5b5701f24fcd7ddd6e59406218d12d5cc4642e25368e",
+    "build/ecosystem-phase2/ros-guest/console-red.log": "668c33af296e01c2d31ac01236748be219d2710077e231fd9ae408ee2c897cdb",
+    "build/ecosystem-phase2/ros-guest/assembly-tests.log": "f35b153cf2e93c7ffeba94085577313748eeaabb3cb1f2bf152c052f49b4d786",
+    "build/ecosystem-phase2/ros-guest/assembled-cli.log": "f2b03e3f2556ae72b9bdc6605b8f28e44c7108d0127016b01ef686e8b09ce093",
+    "build/ecosystem-phase2/ros-guest/assembly-bandit.json": "00aaf630b0cbd6b782d5ca754bf554a7c168e02c6d40519e27e504bbd9ec35f5",
+    "build/ecosystem-phase2/ros-guest/assembly-build.log": "0d8dec18792030c6addf7d112415719ca72dc8a2436f6f4a83cdf44dab860496",
+    "build/ecosystem-phase2/ros-guest/diagnostic-build.log": "e23b9a56de599b00efd7975b3b463fe5de0c58544cd2b5ed77dc4c2d64bbd8b2",
+    "build/ecosystem-phase2/ros-guest/assembly-clock-diagnostic.log": "236116b72b1a3713ff1ead8324c0c9de864357e024a9f6c4e8ca3596fce49f90"
+  },
+  "unqualified": [
+    "Systemd ROS lifecycle completion: diagnostic boot had fixture_deadline:{} after unchanged 15s initial status observation; no accepted status or persisted status files",
+    "Offline reboot and one-hour raw/ROS soak",
+    "Final extra masks for getty-static and apt/motd timers are source-tested but not rebuilt into the recorded diagnostic image",
+    "Clean reproduction, full candidate/security/platform/hosted/publication gates",
+    "Physical hardware, sensor timing/calibration, zero-visible accuracy and safety"
+  ],
+  "preserved": "Prior clock drift/startup/aircraft/latency evidence unchanged; no threshold, authority, qualification or licensing relaxation."
+}

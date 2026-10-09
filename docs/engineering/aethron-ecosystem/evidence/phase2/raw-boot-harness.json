@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-09",
+  "source_base": "1d1cb4e3ceed41d78d26877c3dc7a3fb92ae040c",
+  "status": "development_checkpoint_not_boot_qualified",
+  "source_files": {
+    "packaging/appliance/image/sensor_probe.py": "82c969ff14b113017fc4458f34e5ae2035c81b1fafee41d34d6e5f2bf8f09cdd",
+    "packaging/appliance/image/boot_probe.py": "56c2ced25a8066db649876e380e80c2ed9a7b56ff8e6feae2f84f9176ef4ce81",
+    "packaging/appliance/image/prepare.py": "9d869bde1b49203262f366a83c94a3e0da324962b8d517a04bcdc3a2e3572bf7",
+    "packaging/appliance/image/Guest.Containerfile": "afc7740c4cd0ef298a1e3d4c9615959e0da3256cde8b93e63f8a25fb79638a03",
+    "packaging/appliance/image/appliance.json": "3a5b16a5780478599ec76bf322c20be5436e8feb38c99be44766972026f28f77",
+    "scripts/appliance_boot_e2e.py": "0af2a55da0d71bf2336f1157aa190e8135c49acad28745fdb73d74d1a0d5e185",
+    "tests/integration/test_artifact_contract.py": "edb4d9e47215ce2c83d994341584a7e1378c653e2aee7daee824f1609011ec21",
+    "tests/integration/test_boot_sensor_evidence.py": "d8b222f0e78999da0ce188760b31bcb71c5ad5a0c8684849837db83c0a324889"
+  },
+  "checks": {
+    "installed_runtime": {
+      "tests": 9,
+      "seconds": 8.173,
+      "passed": true,
+      "python": "3.13.15",
+      "edge_wheel_sha256": "ef8aa6aadedbf4db7d676bcc4b6a85046997e4d39a6b054194f4ddcf4e18d5ae",
+      "scope": "staged two-profile configuration, actual spawned raw-worker loss/recovery, proposal continuation; no HTTP viewer; unit acceptance negatives",
+      "note": "Final test change after run is formatting only."
+    },
+    "isolated_source_recovery": {
+      "tests": 1,
+      "seconds": 19.121,
+      "passed": true
+    },
+    "ruff_check": "pass",
+    "ruff_format": "6 files pass",
+    "bandit_new_sensor_probe": "pass",
+    "bandit_full_touched_harness": "20 low findings, identical count/severity to baseline; existing subprocess imports/calls, no shell interpolation added",
+    "diff_check": "pass"
+  },
+  "retained_failure": "Nine-test source run had one missing processing-observed assertion (30.425s); unchanged isolated runtime test then passed with added status diagnostics. Cause unproven; deadline unchanged. Missing-module and missing-capability RED tests retained separately.",
+  "negative_output": "raw-boot-harness-failures.txt",
+  "negative_sha256": "7d41e712d84b6bdc12f68fd490afc76c3e9756a6b70cd96354ea4b9535cc0586",
+  "logs": {
+    "runtime.log": "9924d4d7f851efd7904b8e39f8f949d46fb8436899fb0a7e7f7fb343236d36c3",
+    "runtime-diagnostic.log": "c6b46dda52fe81c6ede96a1c79171e584f16a65ddff0ab8b8cb1403ed539f451",
+    "installed.log": "a4947a895122f43aa891d35b893d4f7243949158a0a40bd986a7ee651b6c24f6",
+    "static-security.log": "c584caa728c1d1ab75b2cb9b14655f448f996439fa59355833c49c5f786b7e86"
+  },
+  "boot_soak_executed": false,
+  "pending": [
+    "Restore pinned local VM tool/guest images; recorded tool sha256:5f557bedceed76ccd1d28f8db7e58a473906c47aa2b6646a6b7ce05174a477b6 is absent. No host qemu found.",
+    "Build signed current image, actual reboot/offline/1h soak including raw profile and update.",
+    "Separate pinned ROS guest and clock-loss lifecycle coverage.",
+    "Committed clean reproduction and remaining full candidate/release gates."
+  ],
+  "hardware_qualified": false,
+  "public_operations": false
+}

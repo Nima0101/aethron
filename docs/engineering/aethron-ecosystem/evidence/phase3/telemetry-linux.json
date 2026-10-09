@@ -1,0 +1,93 @@
+{
+  "status": "development_software_consumer_only",
+  "baseline_commit": "2317dca8585c564635d782a3568d97b2c51ecf77",
+  "retrieved": "2026-10-09",
+  "sources": [
+    "https://pypi.org/pypi/pymavlink/2.4.50/json",
+    "https://pypi.org/pypi/fastcrc/0.5.0/json",
+    "https://pypi.org/pypi/lxml/6.1.3/json"
+  ],
+  "python_base": "python@sha256:16bf2b5c59a08523519d3c8589deca849285dee1d62a3653e124c3dba340f15e",
+  "consumer_image": "sha256:214ecb88574a5e56ef19e438c8726e9b8a4575fc7a6716ecd3f5db92fc0881f9",
+  "versions": {
+    "python": "3.12.15 (main, Oct  6 2026, 02:08:11) [GCC 14.2.0]",
+    "packages": {
+      "aethron": "0.2.0",
+      "aethron-edge": "0.1.0",
+      "pymavlink": "2.4.50",
+      "fastcrc": "0.5.0",
+      "lxml": "6.1.3"
+    }
+  },
+  "edge_wheel_sha256": "02f2049ec15bddb4785ce6674a231f008ff3d10b217306fcb280cf2c4360d138",
+  "checks": {
+    "staging_red": "Missing stage_mavlink_inputs/option errors retained",
+    "staging": "15 PASS6.199s including prior ROS/raw assembly coverage",
+    "linux_explicit": "2 PASS0.386s; actual kernel boot ID, no mocked identity, real signed localhost UDP, installed appliance and shutdown",
+    "linux_installed_suite": "57 PASS3.602s; -I -B, ResourceWarnings-as-errors",
+    "sandbox": "nonroot UID10000, read-only root, network none, all capabilities dropped, no-new-privileges, bounded tmpfs; synthetic credentials generated only at runtime",
+    "pip_check": "No broken requirements found",
+    "advisories": "No known vulnerabilities for3 locked versions; first audit cache PermissionError retained, rerun with own local cache passed",
+    "static": "Ruff check/format PASS. Raw Bandit nonzero:4 existing LOW subprocess findings,1 new MEDIUM B108 reviewed false-positive; reports preserved, no suppression."
+  },
+  "licenses": {
+    "lxml-6.1.3-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.whl": {
+      "wheel_sha256": "f683dc6300317700025e41d89a43e0276692ded16113a3c43eab704d605c58e5",
+      "notices": {
+        "lxml-6.1.3.dist-info/licenses/": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "lxml-6.1.3.dist-info/licenses/LICENSE.txt": "8fc2b568133516e46845d2147917adeee1648e70ae9ab5ed6c5417afef4ce855",
+        "lxml-6.1.3.dist-info/licenses/LICENSES.txt": "388fa99f3bde4447cd5a4cbb114037be026854db6cfe89e112691c1d8abdcf3c"
+      }
+    },
+    "fastcrc-0.5.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl": {
+      "wheel_sha256": "60d1342ba91795650635acf1e44c0d04bbb14319b5787f413a3303e15778fecc",
+      "notices": {
+        "fastcrc-0.5.0.dist-info/licenses/LICENSE": "4c6a58231eea98df275521cbce32fa84d3a29cd1add08eadfe5489f627ba9a32"
+      }
+    },
+    "pymavlink-2.4.50-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl": {
+      "wheel_sha256": "1ba0b7e86b15b981ed2ddacb30840892b7974e2a60a769fa3b796752b5677e00",
+      "notices": {
+        "pymavlink-2.4.50.dist-info/licenses/": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pymavlink-2.4.50.dist-info/licenses/COPYING": "ea36a5809e925bfeeeced776bea9cfb615d43f9971cbedcd9c92ad5fe714e55c"
+      }
+    }
+  },
+  "limitations": [
+    "Not the signed ROS/systemd image or VM reboot/soak qualification. Previous aethron-phase1-vm-tools:local and own ROS image tags absent; no large replacement build attempted.",
+    "Python3.12.15 consumer differs from prior ROS Python3.12.3 guest; both-bundle verification and complete dependency/native SBOM/release checks pending.",
+    "No automatic trusted clock anchoring/renewal, hardware firmware/SITL or physical safety qualification. Earlier timing/DDS/aircraft negatives remain."
+  ],
+  "reclaimed_bytes": 19173912,
+  "artifacts": {
+    "build/ecosystem-phase3/telemetry-linux/audit-local-cache.log": "79d30422388543b2563e1dde76bb7e7857d7ef0c6fdf05c8c71598633ca07e1e",
+    "build/ecosystem-phase3/telemetry-linux/linux-suite.log": "e7ed59427f8634f43068ff5283906664be57326b46a7a4ff1cddd082191dafb8",
+    "build/ecosystem-phase3/telemetry-linux/staging-final.log": "23d4e69e731e41e2e1f619303e74ae95f9bb611120cbd4a83ff25efa9a770c42",
+    "build/ecosystem-phase3/telemetry-linux/audit.log": "b2ae5a3ec94fe427618a49870bc2e985e175861efb4e4f899512ee72865aeeab",
+    "build/ecosystem-phase3/telemetry-linux/staging-red.log": "50ad069f38ea472e465f909233c94697e518a3c433897e6a494f4616bf4ef714",
+    "build/ecosystem-phase3/telemetry-linux/consumer-build.log": "027496dc3fdeccfe4ca3649309392bab746142b873543b12d244288099ad09c4",
+    "build/ecosystem-phase3/telemetry-linux/staging-green.log": "eee71499144919dc06946968f0001dc4e11c396f9eccbfa3c49ec0a87a0f6775",
+    "build/ecosystem-phase3/telemetry-linux/pip-check.log": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09",
+    "build/ecosystem-phase3/telemetry-linux/linux-runtime.log": "c3d6be13e02e5b45aa866d46085a5abf2192a5b9e665f20a7070d7b45e2ed5ab",
+    "build/ecosystem-phase3/telemetry-linux/audit.json": "04146f0623439777dee9614aac8fa652e47a79b77fc9c72ed500f02bbdc0e889",
+    "build/ecosystem-phase3/telemetry-linux/bandit.json": "fc59f3ae7d68d2cdfbb7ceb8dc9113f197da00d6a45143ea7abbe74f1fec2cc1",
+    "build/ecosystem-phase3/telemetry-linux/python-index.json": "05cda9777409a9c3ffddd94a4c476b79f0769a0b4857f0c7ed9226b6800b0d6f",
+    "build/ecosystem-phase3/telemetry-linux/python-manifest.json": "16bf2b5c59a08523519d3c8589deca849285dee1d62a3653e124c3dba340f15e",
+    "build/ecosystem-phase3/telemetry-linux/runtime-versions.json": "f977037c2388410bbea8a3af9c3090bebf611eacee79e53755bcbeba5c25818f",
+    "build/ecosystem-phase3/telemetry-linux/cleanup-receipt.json": "7f6f825509c6aaf70e7ff847f9d167ec00383b1cd650ebc1c91d74a2bdc739a4",
+    "build/ecosystem-phase3/telemetry-linux/consumer-context/Dockerfile": "2c4e5f257a18389bbc6fb81ddd8067a36d6d17bbf537b5ec75c3fffdb354b8e5",
+    "build/ecosystem-phase3/telemetry-linux/consumer-context/requirements.lock": "47ac6b4365e197bdec0b2f723e3c711553de83a8c039b042d53c9b73f0528a28",
+    "packaging/appliance/image/prepare.py": "77df470c7b8c61d3959b9dcb43d637e0a446d59a30c625395f11c4a0e9589d5e",
+    "tests/mavlink/linux_runtime.py": "28e786b62adc8517b4cd45b01dcd06956fa5f50a263db44b22c9007ad612718b",
+    "tests/integration/test_mavlink_guest_assembly.py": "e14f44fb4eed15b294cd92fa60807c63ee6e21ef44a94a0b913207e83b5229b1",
+    "integrations/edge/requirements-mavlink-linux-arm64-py312.lock": "01292d3f1d4cc775a910c290ba322610f3507e528f6bc4f2af85aa3632441cbc",
+    "build/ecosystem-phase3/telemetry-linux/bandit-baseline.json": "675b2796a14ea4bfd2402c2664a5b26e51c2d13235f09c832c8c2e4f8b9ac890",
+    "build/ecosystem-phase3/telemetry-linux/prepare-baseline.py": "c12fd93200207347c8ffa64fd7f1726a92316c1deb44ceb4dbf1f29b34b799a5"
+  },
+  "security_review": {
+    "baseline": "Same4 subprocess findings on immutable2317dca prepare.py. Local administrator CLI, argv arrays/no shell; full release audit remains pending.",
+    "new_B108": "Line is Docker --tmpfs mount-option literal, not an insecure host file open. Creates bounded32MiB isolated ephemeral container storage; tests use tempfile.TemporaryDirectory (private0700) for synthetic credentials, no shared host /tmp bind or secrets. Reviewed false-positive; not suppressed.",
+    "scope": "Dependency advisory scan covers3 pinned Python SDK versions only, not full OS/native SBOM."
+  },
+  "public_copy_note": "Owner-planning and local publication/disk metadata omitted; software results, failures, source hashes and qualification limits retained."
+}

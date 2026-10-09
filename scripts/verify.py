@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def run():
+    subprocess.run([sys.executable, "scripts/public_links.py", "HEAD"], cwd=ROOT, check=True)
     for manifest in [
         "governance-freeze.json",
         "architecture-freeze.json",
