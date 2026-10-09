@@ -6,6 +6,7 @@ on:
       - 'tests/integration/test_fleet_policy.py'
       - 'tests/integration/test_fleet_floors.py'
       - 'tests/integration/test_fleet_admission.py'
+      - 'tests/integration/test_fleet_rollout.py'
       - '.github/workflows/aethron-fleet-policy.yml'
   workflow_dispatch:
 permissions:
@@ -40,3 +41,4 @@ jobs:
           python -I -m unittest discover -s tests/integration -p test_fleet_policy.py -v
           python -I -m unittest discover -s tests/integration -p test_fleet_floors.py -v
           python -I -m unittest discover -s tests/integration -p test_fleet_admission.py -v
+          python -I -m unittest discover -s tests/integration -p test_fleet_rollout.py -v

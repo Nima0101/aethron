@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "base_commit": "e34e4f02fb7860d366fc786392adb6c06ee726cf",
+  "source_binding": "Candidate SHA-256; local source-tree tests only",
+  "files": {
+    ".github/workflows/aethron-fleet-policy.yml": "8bf6adbeacdde39af84b45ebb35dfd6bdcb3c570bdcc351399bf03526a46f590",
+    "docs/architecture/fleet-rollout-v1.md": "d23c187a3ffaf49c47a3ef43663a95e298a125901acf733c79bbf930d1578b7e",
+    "integrations/edge/aethron_edge/runtime/fleet_rollout.py": "53c3d78723c6d7dbd56d9fcdb12342a8338e443801145f97782d54f790bc08d4",
+    "tests/integration/test_fleet_rollout.py": "14bffb3d4bd05fff968a85d547088f6357ba861497d7d84578f746296f4f015e"
+  },
+  "runtime": "CPython 3.13.5, Linux x86_64",
+  "verification": {
+    "command": "PYTHONPATH=integrations/edge:build/fleet-linux-deps python3 -m unittest discover -s tests/integration -p test_fleet_rollout.py -v",
+    "tests_passed": 10,
+    "tests_failed": 0,
+    "ruff_0_16_10": "lint and format PASS",
+    "bandit_1_9_4": "zero production findings",
+    "workflow_yaml_and_private_marker_scan": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "retained_negative_evidence": [
+    "RED: module presence assertion failed before rollout implementation.",
+    "Policy-pin receipt test exposed the missing policy_sha256 argument (eight subtest TypeErrors) before the receipt interface and comparison were added.",
+    "First Ruff check reported three C408 dict-construction style findings; fixed before final lint/format checks."
+  ],
+  "not_run": [
+    "Hosted installed-wheel CI for the journal",
+    "Full repository suite, fuzz, clean clone or hardware power-loss tests",
+    "Authenticated admission-to-journal adapter or deployment activation"
+  ],
+  "limits": "Trusted local bookkeeping with fixed digests, bounded slots and reported outcomes. No authentication or lasting execution authority; no device/person identities, installer, hardware qualification or backup rollback protection."
+}
