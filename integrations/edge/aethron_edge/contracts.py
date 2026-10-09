@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal
 
-from pydantic import Field
+from pydantic import BeforeValidator, Field, StrictBool, StrictInt, TypeAdapter
 
 from .common_types import Closed as Closed
 from .common_types import Contract as Contract
@@ -27,11 +27,16 @@ ObjectClass = Literal[
 ]
 State = Literal["PRESENT", "UNKNOWN"]
 
+# Literal equality alone accepts 0 as False and 200.0 as 200, even in strict
+# models. Validate the scalar type before matching each frozen numeric constant.
+_integer_constant = BeforeValidator(TypeAdapter(StrictInt).validate_python)
+_boolean_constant = BeforeValidator(TypeAdapter(StrictBool).validate_python)
+
 
 class Prediction(Closed):
     centre: Annotated[list[Unit], Field(min_length=2, max_length=2)]
-    horizon_ms: Literal[200]
-    evidence: Literal[False]
+    horizon_ms: Annotated[Literal[200], _integer_constant]
+    evidence: Annotated[Literal[False], _boolean_constant]
 
 
 class Track(Closed):
@@ -56,11 +61,11 @@ class Recommendation(Closed):
     contract: Contract
     action: Literal["WARN", "STOP", "HOVER", "LAND", "RETREAT"]
     reason: Literal["hazard_or_unknown", "observe"]
-    requires_independent_controller: Literal[True]
+    requires_independent_controller: Annotated[Literal[True], _boolean_constant]
 
 
 class V3Snapshot(Closed):
-    version: Literal[3]
+    version: Annotated[Literal[3], _integer_constant]
     at_ms: Count
     evidence: Literal["synthetic", "recorded", "external_unverified"] | None
     state: State
