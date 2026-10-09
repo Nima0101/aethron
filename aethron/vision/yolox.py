@@ -94,7 +94,11 @@ class RGBDetector:
         canvas[: resized.shape[0], : resized.shape[1]] = resized
         tensor = np.ascontiguousarray(canvas.transpose(2, 0, 1)[None], dtype=np.float32)
         if self.backend == "coreml":
+            require("CoreMLExecutionProvider" in self.ort_session.get_providers())
             raw = self.ort_session.run(None, {self.ort_input_name: tensor})[0]
+            # ORT may recreate a failed session with CPU-only providers. Such a
+            # result cannot satisfy the caller's explicit Core ML selection.
+            require("CoreMLExecutionProvider" in self.ort_session.get_providers())
         else:
             self.net.setInput(tensor)
             try:
