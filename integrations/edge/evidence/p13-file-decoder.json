@@ -1,0 +1,129 @@
+{
+  "qualified": false,
+  "python": "3.13.15",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "isolated_backend_processes": true,
+  "reports": {
+    "opencv": {
+      "cpu_ns": [
+        46260000,
+        37209000,
+        33935000,
+        34834000,
+        40854000
+      ],
+      "versions": {
+        "opencv": "4.13.0"
+      }
+    },
+    "pyav": {
+      "cpu_ns": [
+        93666000,
+        78471000,
+        76825000,
+        54990000,
+        64095000
+      ],
+      "versions": {
+        "pyav": "18.1.0",
+        "pyav_native_libraries": {
+          "libavutil": [
+            60,
+            26,
+            102
+          ],
+          "libavcodec": [
+            62,
+            28,
+            102
+          ],
+          "libavformat": [
+            62,
+            12,
+            102
+          ],
+          "libavdevice": [
+            62,
+            3,
+            102
+          ],
+          "libavfilter": [
+            11,
+            14,
+            102
+          ],
+          "libswscale": [
+            9,
+            5,
+            102
+          ],
+          "libswresample": [
+            6,
+            3,
+            102
+          ]
+        }
+      }
+    }
+  },
+  "frames": 24,
+  "size": [
+    320,
+    240
+  ],
+  "input_sha256": "6fe8bb159785ad38121458c3544d1735134cb687ad52591887a5ee9e62643458",
+  "output_sha256": {
+    "opencv": "7387ddf768da36577cbba14b2b341163442040ba92a05ec64e5a5c11e346a6b8",
+    "pyav": "8d9476fef9196d5061da01908dd8bae30018d27337ce1e6fdb1b93aa6444525e"
+  },
+  "byte_parity": false,
+  "different_channels": 2063440,
+  "max_channel_delta": 2,
+  "median_cpu_ns": {
+    "opencv": 37209000,
+    "pyav": 76825000
+  },
+  "script_sha256": "ea3bc23b59db6fe1b1afc896603a5605b6e91cfe82c741449dab45d47e907278",
+  "source_sha256": {
+    "integrations/edge/aethron_edge/sources/base.py": "8f40ed5a36cdea3c8904ab56fd13a96fd7d37c8c37df431e3a6e193c6c8c0b95",
+    "tests/integration/test_file_decoder_protocols.py": "1805e4ac4f6aaa9806fc3af979f40b229f4b6f9bd48a9d2fbdecb9515c646725",
+    "tests/integration/test_decoder_publication.py": "a5970b5fc127433aca002778a1274549e29218a44b3e1e4c0cb87de962038602",
+    "scripts/edge_decoder_backend_profile.py": "ea3bc23b59db6fe1b1afc896603a5605b6e91cfe82c741449dab45d47e907278",
+    "integrations/edge/requirements-decoder-probe.lock": "9243025b692e4a1d85b5ed459bc1006f7cb61a0f5eff139a4a6c3289afd9322b",
+    ".github/workflows/aethron-edge-contracts.yml": "05b65285e6d2f569b158bf94bebc4bf869473b31d9232477d31f106b777b6211"
+  },
+  "scope": "P1.3 recorded-file decode/protocol boundary; not complete live capture, inference or process-isolation qualification",
+  "technology_decision": "Retain native OpenCV/FFmpeg decoding with Python process control for this recorded-file path: isolated PyAV18.1.0 is slower on the generated fixture and fails exact RGB parity; enforce file-only FFmpeg protocols inside the existing decoder child.",
+  "research": [
+    "https://docs.opencv.org/4.13.0/d6/dea/tutorial_env_reference.html",
+    "https://ffmpeg.org/ffmpeg-protocols.html",
+    "https://pyav.basswood.io/docs/stable/api/_globals.html",
+    "https://pyav.basswood.io/docs/stable/overview/installation.html",
+    "https://gstreamer.freedesktop.org/documentation/app/appsink.html",
+    "https://gstreamer.freedesktop.org/documentation/rust/stable/latest/docs/gstreamer_app/"
+  ],
+  "alternatives": "PyAV was provisioned from hash-verified upstream wheels in isolated scope and tested, not rejected for being absent. Version18.1.0 supports the edge Python3.11 floor;19.0.0 requires3.12. GStreamer C/Rust appsink exposes queue/EOS controls worth evaluating for live streaming; no GStreamer performance/qualification claim is made here.",
+  "checks": {
+    "red": "3 failing cases: direct file-profile HTTP URL and nested playlist contacted loopback; inherited HTTP-only options prevented local decode",
+    "focused": "9 PASS",
+    "offline_installed": "9 PASS outside checkout; wheel Python source bytes verified",
+    "worker_imports": "combined run initially timed out at unchanged30s; isolated retry3 PASS in9.825s; original log retained",
+    "ruff_format_bandit_diff": "PASS",
+    "hosted": "Pending: three-OS actual codec/network-withdrawal checks, isolated Linux PyAV comparison, existing full candidate/security/native jobs"
+  },
+  "installed": {
+    "core_wheel_sha256": "daeacafc7e70f20bbd0b446f448203b67b0b12ee56e6b3afca6b248d031c9a93",
+    "edge_wheel_sha256": "27f63586508e9e2888712e1e99c92f0e7dda246efb9b239f6e5d3d0f079dc024",
+    "source_bytes_match": true,
+    "outside_checkout": true,
+    "offline_install": true,
+    "temporary_consumer_removed": true
+  },
+  "limitations": [
+    "Generated MJPEG decode/RGB CPU timings exclude process startup, hardware and real-time qualification. No memory reduction or universal decoder-speed claim.",
+    "Initial in-process comparison loaded conflicting macOS FFmpeg Objective-C classes; only the later isolated-process report is used for the decision.",
+    "Byte mismatch is a negative candidate result, not an accepted tolerance. Native exposure trust and all frozen age/resource limits are unchanged.",
+    "File protocol restriction is not an OS filesystem sandbox; mounted network filesystems remain subject to provisioning policy.",
+    "Live RTSP/UVC, inference and resource isolation technology review remains open; previous startup/VM/clock failures remain preserved."
+  ]
+}

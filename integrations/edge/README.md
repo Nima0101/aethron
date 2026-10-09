@@ -38,3 +38,10 @@ loaded extension against its packaged Python reference. Clock integers remain
 arbitrary precision. Native compilation does not establish exposure trust, change
 expiry bounds or qualify live capture; the live source still fails closed when
 its clock is untrusted.
+
+Recorded `file` sources resolve their address as a filesystem path and permit
+only FFmpeg's `file` protocol, including when media references a nested resource.
+Inherited `OPENCV_FFMPEG_CAPTURE_OPTIONS` cannot enable network protocols for that
+isolated decoder. Network cameras use the explicit `rtsp` source. This is a
+protocol boundary, not an operating-system filesystem sandbox: a mounted network
+filesystem remains subject to appliance provisioning policy.

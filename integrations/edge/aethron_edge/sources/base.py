@@ -4,6 +4,7 @@ import multiprocessing as mp
 import os
 import time
 from dataclasses import dataclass, field
+from pathlib import Path
 from urllib.parse import urlsplit
 
 from ..mailbox import StopToken
@@ -57,6 +58,10 @@ class FrameEnvelope:
 
 
 def _decode(config, slot, metadata, lock, stop):
+    if config.driver == "file":
+        # This child serves one source. Recorded input must not inherit network
+        # protocols, including URLs reached indirectly through media playlists.
+        os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "protocol_whitelist;file"
     # Native decoder diagnostics may contain camera credentials. Suppress both
     # C-level streams in this worker; parent exposes only fixed fault codes.
     with open(os.devnull, "wb") as sink:
@@ -74,6 +79,8 @@ def _decode(config, slot, metadata, lock, stop):
     cap = None
     try:
         address = int(config.address) if config.driver == "uvc" else config.address
+        if config.driver == "file":
+            address = str(Path(address).resolve())
         cap = cv2.VideoCapture()
         parameters = (
             [cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 3000, cv2.CAP_PROP_READ_TIMEOUT_MSEC, 500]
