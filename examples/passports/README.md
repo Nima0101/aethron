@@ -14,6 +14,12 @@ expected fixed results. They retain failed recorded evidence and rejection cases
 expiry, revoked evidence, policy rollback, forged signatures and signed authority
 escalation. [The structural JSON schema](../../contracts/interop/passport-v1.schema.json)
 and [normative profile](../../docs/architecture/interop/passport-v1.md) define the format.
+Companion schemas cover the [signature envelope](../../contracts/interop/passport-envelope-v1.schema.json)
+and [provisioned trust policy](../../contracts/interop/passport-policy-v1.schema.json).
+They check structure only; full signature, interval, revocation and canonical-wire checks
+remain mandatory. [Schema conformance](../../docs/architecture/interop/schema-conformance-v1.md)
+includes a test-only Python 3.13 toolchain: install `requirements-passport-conformance.txt`
+and run `python -m unittest discover -s tests -p test_passport_schemas.py -v`.
 
 ```python
 import json

@@ -20,12 +20,12 @@
     },
     "passport_id": {
       "type": "string",
-      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}(?![\\s\\S])",
       "maxLength": 64
     },
     "issuer": {
       "type": "string",
-      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}(?![\\s\\S])",
       "maxLength": 64
     },
     "subject_sha256": {
