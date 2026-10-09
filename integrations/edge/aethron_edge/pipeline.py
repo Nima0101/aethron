@@ -32,12 +32,18 @@ def build_v3(
     mount_id="fixed",
     ego=None,
 ) -> bytes:
+    # Validate the original nanosecond values before arithmetic can coerce them.
+    if any(
+        type(value) is not int or value < 0
+        for value in (now_ns, frame.exposure_ns, frame.uncertainty_ns)
+    ):
+        raise ValueError("clock_untrusted")
     f = frame.frame
     if not calibration.valid_for(f, now_ns // 1_000_000, mount_id):
         raise ValueError("calibration_expired")
     # Round exposure earlier, not later; uncertainty consumes the age budget.
     at = (frame.exposure_ns - frame.uncertainty_ns) // 1_000_000
-    if not 0 <= now_ns // 1_000_000 - at <= 100:
+    if at < 0 or not 0 <= now_ns // 1_000_000 - at <= 100:
         raise ValueError("clock_untrusted")
     payload = {
         "version": 3,

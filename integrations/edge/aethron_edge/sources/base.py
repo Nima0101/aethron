@@ -11,6 +11,10 @@ from ..mailbox import StopToken
 MAX_RAW = 1920 * 1080 * 3
 
 
+def _valid_dimensions(width, height):
+    return type(width) is int and type(height) is int and 0 < width <= 1920 and 0 < height <= 1080
+
+
 @dataclass(frozen=True)
 class SourceConfig:
     driver: str
@@ -176,6 +180,9 @@ class CaptureSource:
                 try:
                     sequence, w, h, _ = self.metadata[:]
                     if sequence > 0:
+                        if not _valid_dimensions(w, h):
+                            self.metadata[0] = -2
+                            break
                         negotiated_width, negotiated_height = w, h
                         break
                     if sequence < 0:
@@ -199,7 +206,12 @@ class CaptureSource:
                     if sequence < 0:
                         return SourceFault("source_lost")
                     if sequence > 0:
-                        raw = bytes(self.slot[: w * h * 3])
+                        if not _valid_dimensions(w, h):
+                            self.metadata[0] = -2
+                            return SourceFault("source_lost")
+                        # Copy while holding the lock: no borrowed mutable view escapes,
+                        # and no intermediate per-byte Python list is allocated.
+                        raw = memoryview(self.slot).cast("B")[: w * h * 3].tobytes()
                         self.metadata[0] = 0
                         self.drops += max(0, sequence - self.last_sequence - 1)
                         self.last_sequence = sequence
