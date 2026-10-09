@@ -21,7 +21,7 @@ class Substitution(unittest.TestCase):
         with tempfile.TemporaryDirectory() as root:
             root = Path(root)
             store = UpdateStore(root, root / "unused-public-key")
-            path = root / ("active.json" if reader == "state" else "payload")
+            path = (store.root / "active.json") if reader == "state" else (root / "payload")
             content = b'{"slot":"1-aaaaaaaaaaaaaaaa","minimum_version":1}'
             path.write_bytes(content)
             target = root / "replacement"
