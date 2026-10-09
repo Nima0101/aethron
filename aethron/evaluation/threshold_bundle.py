@@ -2,12 +2,14 @@
 
 import argparse
 import os
+import stat
 import sys
 
 from . import candidates, threshold
 from .splits import (
     MAX_BYTES,
     MAX_TOTAL_BYTES,
+    _file_state,
     _hash,
     _parse,
     _read_document,
@@ -23,6 +25,111 @@ def _write(directory_fd, name, data):
     )
     with os.fdopen(fd, "wb") as stream:
         stream.write(data)
+
+
+def _completion_pins(candidate, model, manifest, protocol):
+    return {
+        "version": 1,
+        "bundle": "experimental_pgm_threshold_bundle_v1",
+        "candidate_sha256": candidate,
+        "model_sha256": model,
+        "manifest_sha256": manifest,
+        "protocol_sha256": protocol,
+        "search_sha256": _digest(threshold.SEARCH_BYTES),
+        "rights_verified": False,
+        "signatures_verified": False,
+        "training_verified": False,
+        "qualified": False,
+    }
+
+
+def _read_at(root_fd, name, limit):
+    fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=root_fd)
+    with os.fdopen(fd, "rb") as stream:
+        before = os.fstat(stream.fileno())
+        _require(stat.S_ISREG(before.st_mode) and 0 < before.st_size <= limit)
+        data = stream.read(limit + 1)
+        current = os.stat(name, dir_fd=root_fd, follow_symlinks=False)
+        _require(
+            _file_state(before) == _file_state(os.fstat(stream.fileno())) == _file_state(current)
+        )
+        _require(len(data) == before.st_size)
+    return data
+
+
+def verify(
+    bundle_dir, *, expected_candidate_sha256, expected_manifest_sha256, expected_protocol_sha256
+):
+    """Verify a relocated, quiescent bundle below a trusted parent; never execute it.
+
+    Completion bytes are checked against caller-supplied pins, not trusted as
+    configuration. These integrity checks do not authenticate the caller's pins.
+    """
+    try:
+        bindings = {
+            "expected_candidate_sha256": expected_candidate_sha256,
+            "expected_manifest_sha256": expected_manifest_sha256,
+            "expected_protocol_sha256": expected_protocol_sha256,
+        }
+        for pin in bindings.values():
+            _hash(pin)
+        root = os.path.normpath(bundle_dir)
+        root_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        try:
+            before = os.fstat(root_fd)
+            data = _read_at(root_fd, "candidate.json", candidates.MAX_CANDIDATE_BYTES)
+            manifest = _read_at(root_fd, "manifest.json", MAX_BYTES)
+            completion = _read_at(root_fd, "pins.json", candidates.MAX_CANDIDATE_BYTES)
+            report = candidates.validate(data, manifest, **bindings)
+            pins = _completion_pins(
+                expected_candidate_sha256,
+                report["artifact_sha256"],
+                expected_manifest_sha256,
+                expected_protocol_sha256,
+            )
+            _require(completion == _encode(pins))
+            report = candidates.verify_artifacts(
+                data, manifest, os.path.join(root, "blobs"), **bindings
+            )
+            blob_fd = os.open("blobs", os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=root_fd)
+            try:
+                total = report["verified_bytes"]
+                size, model = _verify_blob(
+                    blob_fd,
+                    pins["model_sha256"],
+                    min(candidates.MAX_CANDIDATE_BYTES, MAX_TOTAL_BYTES - total),
+                    retain=True,
+                )
+                total += size
+                threshold._model(
+                    model, pins["model_sha256"], expected_manifest_sha256, expected_protocol_sha256
+                )
+                _require(report["preprocessing_sha256"] == _digest(threshold.PREPROCESSING_BYTES))
+                size, _ = _verify_blob(
+                    blob_fd, pins["search_sha256"], min(MAX_BYTES, MAX_TOTAL_BYTES - total)
+                )
+                total += size
+            finally:
+                os.close(blob_fd)
+            _require(_file_state(before) == _file_state(os.stat(root, follow_symlinks=False)))
+        finally:
+            os.close(root_fd)
+        return dict(
+            report,
+            bundle_verified=True,
+            verified_bytes=total,
+            verified_blob_reads=report["verified_blob_reads"] + 2,
+        )
+    except (
+        ValueError,
+        OSError,
+        TypeError,
+        AttributeError,
+        OverflowError,
+        RecursionError,
+        NotImplementedError,
+    ):
+        raise ValueError("invalid_threshold_bundle") from None
 
 
 def export(
@@ -136,19 +243,12 @@ def export(
                     _verify_blob(target_fd, _digest(threshold.SEARCH_BYTES), MAX_BYTES)
                 finally:
                     os.close(target_fd)
-                pins = {
-                    "version": 1,
-                    "bundle": "experimental_pgm_threshold_bundle_v1",
-                    "candidate_sha256": _digest(descriptor),
-                    "model_sha256": expected_model_sha256,
-                    "manifest_sha256": expected_manifest_sha256,
-                    "protocol_sha256": expected_protocol_sha256,
-                    "search_sha256": _digest(threshold.SEARCH_BYTES),
-                    "rights_verified": False,
-                    "signatures_verified": False,
-                    "training_verified": False,
-                    "qualified": False,
-                }
+                pins = _completion_pins(
+                    _digest(descriptor),
+                    expected_model_sha256,
+                    expected_manifest_sha256,
+                    expected_protocol_sha256,
+                )
                 _write(root_fd, ".pins.pending", _encode(pins))
                 os.link(
                     ".pins.pending",

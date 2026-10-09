@@ -107,3 +107,24 @@ Verified dataset loading and export currently require POSIX directory-descriptor
 and no-follow filesystem operations, as does the existing artifact verifier.
 Their integration tests inherit that platform requirement; this is not Windows
 filesystem qualification. No weaker filesystem fallback is used.
+
+To verify a moved bundle without the source dataset directory:
+
+```sh
+python -m aethron.evaluation.threshold_bundle_verify moved-bundle \
+  --candidate-sha256 CANDIDATE --manifest-sha256 MANIFEST \
+  --protocol-sha256 PROTOCOL
+```
+
+Supply those pins from independently trusted configuration, not from the bundle
+being checked. The reader verifies exact canonical completion bytes, all dataset
+and candidate references, the scalar model's frozen bindings and the search
+specification. It does not fit or execute the model. Candidate/completion metadata
+are limited to 16 KiB each; the manifest to 2 MiB. Additional model/search reads
+count toward the existing 256 MiB read budget. Use a quiescent directory below a
+trusted parent; symlinks and nonregular metadata/blob files are rejected. Success
+reports `bundle_verified` and `artifacts_verified`, while rights, signatures,
+training, preprocessing qualification and overall qualification remain false.
+Failure emits only `invalid_threshold_bundle` on stderr with exit code 2 and no
+partial report. Neither export nor verification authenticates pins or approves
+redistribution or execution.
