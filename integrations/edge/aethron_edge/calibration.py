@@ -24,6 +24,26 @@ class CalibrationRecord:
         ).hexdigest()
 
     def valid_for(self, frame: FrameEnvelope, now_ms: int, mount_id: str) -> bool:
+        if any(type(v) is not int or v < 0 for v in (self.valid_until_ms, now_ms)):
+            return False
+        if any(
+            type(v) is not int or v <= 0
+            for v in (self.width, self.height, frame.width, frame.height)
+        ):
+            return False
+        if any(
+            type(v) is not str or not v
+            for v in (self.calibration_id, self.mount_id, frame.calibration_id, mount_id)
+        ):
+            return False
+        if type(self.transform) is not tuple or len(self.transform) != 9:
+            return False
+        # Keep the record itself JSON-serializable; never normalize its digest inputs.
+        if any(type(v) not in (int, float) for v in self.transform) or type(self.residual) not in (
+            int,
+            float,
+        ):
+            return False
         return (
             frame.calibration_id == self.calibration_id
             and (frame.width, frame.height) == (self.width, self.height)

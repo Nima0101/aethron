@@ -8,12 +8,15 @@ on:
       - 'integrations/edge/aethron_edge/openapi.py'
       - 'integrations/edge/aethron_edge/pipeline.py'
       - 'integrations/edge/aethron_edge/timebase.py'
+      - 'integrations/edge/aethron_edge/calibration.py'
       - 'integrations/edge/requirements-server.lock'
       - 'contracts/**'
       - 'tests/integration/test_contract_scalars.py'
       - 'tests/integration/test_openapi.py'
       - 'tests/integration/test_worker_replay_input.py'
       - 'tests/integration/test_clock_pipeline.py'
+      - 'tests/integration/test_calibration_admission.py'
+      - 'scripts/edge_calibration_profile.py'
       - 'scripts/edge_clock_profile.py'
       - 'scripts/probes/clock_compatibility.rs'
       - 'scripts/edge_worker_preload_profile.py'
@@ -25,6 +28,7 @@ on:
       - 'contracts/**'
       - 'tests/integration/**'
       - 'scripts/edge_clock_profile.py'
+      - 'scripts/edge_calibration_profile.py'
       - 'scripts/probes/clock_compatibility.rs'
       - 'scripts/edge_contract_profile.py'
       - '.github/workflows/aethron-edge-contracts.yml'
@@ -76,6 +80,10 @@ jobs:
         run: python -I scripts/edge_contract_profile.py > build/contract-profile.json
       - name: Installed clock scalar proof
         run: python -I scripts/edge_clock_profile.py > build/clock-profile.json
+      - name: Installed calibration admission and technology comparison
+        run: |
+          python -I -m unittest discover -s tests/integration -p test_calibration_admission.py -v
+          python -I scripts/edge_calibration_profile.py --conformance-tests tests/integration > build/calibration-profile.json
       - name: Checked native clock comparison probe (not a deployed runtime)
         if: matrix.os == 'ubuntu-24.04' && matrix.python == '3.13.15'
         run: |
@@ -90,6 +98,7 @@ jobs:
           name: contracts-${{ matrix.os }}-${{ matrix.python }}
           path: |
             build/contract-profile.json
+            build/calibration-profile.json
             build/clock*profile.json
             build/clock-rust-version.txt
           retention-days: 7
