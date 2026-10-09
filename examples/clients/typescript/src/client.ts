@@ -1,10 +1,7 @@
-import {Ajv2020} from 'ajv/dist/2020.js';
-import schema from './scene.schema.json' with {type: 'json'};
+import validators from './validators.cjs';
 import type {HealthEvent, SceneEnvelope} from './types.js';
 
-const validator = new Ajv2020({strict: true});
-const validate = validator.compile(schema);
-const validateHealth = validator.compile({...schema, $ref: '#/$defs/HealthEvent'});
+const {validateScene: validate, validateHealth} = validators;
 
 export class Observation {
   private scene: SceneEnvelope | null = null;

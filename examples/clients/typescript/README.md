@@ -1,12 +1,21 @@
 # AETHRON TypeScript observation example
 
-This local package is an executed Node client example, not a published enterprise SDK. It uses the generated OpenAPI types plus strict AJV runtime validation. Node 22+ is the prepared CI target; run the locked package tests before using another runtime.
+This local package is an executed Node client example, not a published enterprise SDK. It uses generated OpenAPI types plus strict AJV validation generated at build time. Node 22+ is the prepared CI target; run the locked package tests before using another runtime.
 
 ```sh
 npm ci --ignore-scripts
 npm test
 npm pack
 ```
+
+The build generates `dist/validators.cjs` from the unchanged versioned schema.
+Runtime imports do not compile schemas or use string code generation. AJV remains
+a pinned runtime dependency for its generated Unicode-length helper. The test
+suite compares generated admission decisions with the previous compiler across
+a bounded mutation corpus and checks loading with string compilation disabled.
+`node audit-validation.mjs` runs a small sequential startup/validation comparison;
+its timings are observations on the current host, not platform guarantees. See
+the [technology reassessment](../../../docs/engineering/aethron-ecosystem/P33-TECHNOLOGY-AUDIT-V2.md).
 
 Install the resulting `.tgz` in an external Node project. Load an owner-only token file locally; do not put it in a URL or persistent browser storage:
 
