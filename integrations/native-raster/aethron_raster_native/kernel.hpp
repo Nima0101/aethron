@@ -33,8 +33,8 @@ inline bool remap(const Brown& c, std::span<const std::uint8_t> source,
     for (int i=9; i<14; ++i) if (std::abs(p[i]) > 2) return false;
     // Lens invertibility is checked by the unchanged Python reference validator.
     // This internal kernel independently checks memory/numeric bounds, not admission.
-    std::fill(data.begin(),data.end(),0);
-    std::fill(mask.begin(),mask.end(),0);
+    std::fill(data.begin(),data.end(),std::uint8_t{0});
+    std::fill(mask.begin(),mask.end(),std::uint8_t{0});
     const bool identity = c.width==c.out_width && c.height==c.out_height &&
         p[0]==p[4] && p[1]==p[5] && p[2]==p[6] && p[3]==p[7] &&
         p[9]==0 && p[10]==0 && p[11]==0 && p[12]==0 && p[13]==0;
