@@ -65,3 +65,36 @@ class ClockBoundary(unittest.TestCase):
         self.assertTrue(CaptureClock.compatible(0, 0, 50_000_000, 0))
         self.assertFalse(CaptureClock.compatible(0, 1, 50_000_000, 0))
         self.assertFalse(CaptureClock.compatible(0, 0, 51_000_000, 0))
+
+    def test_skew_rejects_malformed_scalars_without_coercion(self):
+        class IntegerSubclass(int):
+            pass
+
+        for value in (
+            True,
+            False,
+            -1,
+            0.0,
+            0.5,
+            float("nan"),
+            float("inf"),
+            float("-inf"),
+            None,
+            "0",
+            IntegerSubclass(0),
+        ):
+            for index in range(4):
+                with self.subTest(value=value, index=index):
+                    args = [0, 0, 0, 0]
+                    args[index] = value
+                    self.assertIs(CaptureClock.compatible(*args), False)
+
+    def test_skew_preserves_nanosecond_boundary_at_large_epochs(self):
+        for base in (0, 2**53, 2**64 - 1, 2**128, 10**100):
+            for delta in (-1, 0, 1):
+                a, b = base, base + 40_000_000 + delta
+                with self.subTest(base=base, delta=delta):
+                    self.assertIs(CaptureClock.compatible(a, 4_000_000, b, 6_000_000), delta <= 0)
+                    self.assertIs(CaptureClock.compatible(b, 6_000_000, a, 4_000_000), delta <= 0)
+        for error in (2**64 - 1, 2**64, 2**128):
+            self.assertFalse(CaptureClock.compatible(0, error, 0, error))

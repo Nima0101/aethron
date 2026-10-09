@@ -7,11 +7,15 @@ on:
       - 'integrations/edge/aethron_edge/common_types.py'
       - 'integrations/edge/aethron_edge/openapi.py'
       - 'integrations/edge/aethron_edge/pipeline.py'
+      - 'integrations/edge/aethron_edge/timebase.py'
       - 'integrations/edge/requirements-server.lock'
       - 'contracts/**'
       - 'tests/integration/test_contract_scalars.py'
       - 'tests/integration/test_openapi.py'
       - 'tests/integration/test_worker_replay_input.py'
+      - 'tests/integration/test_clock_pipeline.py'
+      - 'scripts/edge_clock_profile.py'
+      - 'scripts/probes/clock_compatibility.rs'
       - 'scripts/edge_worker_preload_profile.py'
       - 'scripts/edge_contract_profile.py'
       - '.github/workflows/aethron-edge-contracts.yml'
@@ -20,6 +24,8 @@ on:
       - 'integrations/edge/**'
       - 'contracts/**'
       - 'tests/integration/**'
+      - 'scripts/edge_clock_profile.py'
+      - 'scripts/probes/clock_compatibility.rs'
       - 'scripts/edge_contract_profile.py'
       - '.github/workflows/aethron-edge-contracts.yml'
   workflow_dispatch:
@@ -68,9 +74,23 @@ jobs:
           python -I -c "import sys, unittest; sys.path.insert(0, 'tests/integration'); unittest.main(module=None, argv=['unittest', 'test_worker_replay_input', 'test_clock_pipeline', 'test_worker_imports', 'test_pipeline.Pipeline.test_headless_replay_expires_when_worker_stops', 'test_pipeline.Pipeline.test_unstarted_pipeline_is_unknown', '-v'])"
       - name: Bounded contract validation comparison
         run: python -I scripts/edge_contract_profile.py > build/contract-profile.json
+      - name: Installed clock scalar proof
+        run: python -I scripts/edge_clock_profile.py > build/clock-profile.json
+      - name: Checked native clock comparison probe (not a deployed runtime)
+        if: matrix.os == 'ubuntu-24.04' && matrix.python == '3.13.15'
+        run: |
+          rustup toolchain install 1.98.1 --profile minimal
+          rustc +1.98.1 --version > build/clock-rust-version.txt
+          rustc +1.98.1 --edition=2021 --test -D warnings scripts/probes/clock_compatibility.rs -o build/clock-test
+          build/clock-test
+          rustc +1.98.1 --edition=2021 --crate-type cdylib -O -D warnings scripts/probes/clock_compatibility.rs -o build/clock.so
+          python -I scripts/edge_clock_profile.py --native-library build/clock.so > build/clock-native-profile.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: contracts-${{ matrix.os }}-${{ matrix.python }}
-          path: build/contract-profile.json
+          path: |
+            build/contract-profile.json
+            build/clock*profile.json
+            build/clock-rust-version.txt
           retention-days: 7
           if-no-files-found: error

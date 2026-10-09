@@ -44,4 +44,6 @@ class CaptureClock:
 
     @staticmethod
     def compatible(a_ns, a_error, b_ns, b_error):
-        return a_error >= 0 and b_error >= 0 and abs(a_ns - b_ns) + a_error + b_error <= 50_000_000
+        if any(type(value) is not int or value < 0 for value in (a_ns, a_error, b_ns, b_error)):
+            return False
+        return abs(a_ns - b_ns) + a_error + b_error <= 50_000_000
