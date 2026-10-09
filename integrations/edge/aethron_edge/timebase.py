@@ -35,9 +35,10 @@ class CaptureClock:
             and self.clock_id in (None, frame.clock_id)
         )
         self.clock_id = frame.clock_id
-        self.last_sequence = frame.sequence
+        # Rejected out-of-order input must not make a previous sample admissible again.
+        self.last_sequence = max(self.last_sequence, frame.sequence)
         if stamp is not None:
-            self.last_capture = stamp
+            self.last_capture = max(self.last_capture, stamp)
         if not valid:
             return SourceFault("clock_untrusted")
         return MappedFrame(frame, stamp, error)
