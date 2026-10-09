@@ -145,6 +145,12 @@ class Registration:
     def __init__(self, calibration, *, now_ns, valid_for_ns, clock_id):
         if not isinstance(calibration, RigCalibration):
             raise ValueError("invalid_calibration")
+        try:
+            # Frozen models can still be created by unchecked model_copy or
+            # model_construct. Rebuild nested fields before granting a binding.
+            calibration = RigCalibration.model_validate(calibration.model_dump(warnings=False))
+        except (ValueError, TypeError, AttributeError, RecursionError, OverflowError):
+            raise ValueError("invalid_calibration") from None
         _ns(now_ns)
         _ns(valid_for_ns)
         if not 0 < valid_for_ns <= 600_000_000_000 or now_ns + valid_for_ns > MAX_NS:
