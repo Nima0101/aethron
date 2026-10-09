@@ -1,11 +1,14 @@
 """Original perception views from actual CLI outputs; inputs explicitly synthetic or licensed recorded."""
 
 import argparse
+import binascii
 import hashlib
 import json
+import struct
 import subprocess
 import sys
 import tempfile
+import zlib
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -24,6 +27,42 @@ COLORS = {
 FONT = ImageFont.load_default(size=15)
 SMALL = ImageFont.load_default(size=12)
 BIG = ImageFont.load_default(size=26)
+
+
+def png_bytes(image):
+    """Lossless RGB PNG with fixed stored blocks, independent of zlib compressors.
+
+    Larger files are intentional: byte reproduction must also hold between
+    standard zlib and zlib-ng builds of Pillow. Checksums use no compression.
+    """
+    if image.mode != "RGB":
+        raise ValueError("canonical visual PNG requires RGB")
+    width, height = image.size
+    pixels = image.tobytes()
+    stride = width * 3
+    raw = b"".join(b"\x00" + pixels[i : i + stride] for i in range(0, len(pixels), stride))
+    stream = bytearray(b"\x78\x01")
+    for start in range(0, len(raw), 65535):
+        block = raw[start : start + 65535]
+        stream.append(int(start + len(block) == len(raw)))
+        stream.extend(struct.pack("<HH", len(block), len(block) ^ 65535))
+        stream.extend(block)
+    stream.extend(struct.pack(">I", zlib.adler32(raw)))
+
+    def chunk(kind, data):
+        return (
+            struct.pack(">I", len(data))
+            + kind
+            + data
+            + struct.pack(">I", binascii.crc32(kind + data))
+        )
+
+    return (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0))
+        + chunk(b"IDAT", bytes(stream))
+        + chunk(b"IEND", b"")
+    )
 
 
 def inputs():
@@ -233,10 +272,8 @@ def run(outdir):
         b"\n".join(encode(r["frame"]) for r in rows) + b"\n"
     )
     frames = [compose(row, result) for row, result in zip(rows, results)]
-    frames[8].save(outdir / "perception-day.png")
-    frames[23].save(outdir / "perception-night.png")
-    frames[26].save(outdir / "perception-occlusion.png")
-    frames[43].save(outdir / "perception-unknown.png")
+    for index, name in ((8, "day"), (23, "night"), (26, "occlusion"), (43, "unknown")):
+        (outdir / f"perception-{name}.png").write_bytes(png_bytes(frames[index]))
     frames[0].save(
         outdir / "perception.gif",
         save_all=True,
