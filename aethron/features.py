@@ -11,7 +11,14 @@ MODEL_SHA256 = "0c1dad9a888f1f1e3513d0c2c983a7d240563b7945224efc0690f94dc676fee6
 def load_model(data=None):
     try:
         if data is None:
-            with resources.files("aethron.models").joinpath("rules.json").open("rb") as stream:
+            # Start at the top-level package: Python 3.9 Windows ZIP readers
+            # can expose backslashes in a nested package's resource prefix.
+            with (
+                resources.files("aethron")
+                .joinpath("models")
+                .joinpath("rules.json")
+                .open("rb") as stream
+            ):
                 data = stream.read(2049)
         if (
             type(data) is bytes
@@ -20,7 +27,7 @@ def load_model(data=None):
         ):
             return json.loads(data)
         return None
-    except (OSError, ModuleNotFoundError):
+    except (OSError, ModuleNotFoundError, KeyError):
         return False
 
 

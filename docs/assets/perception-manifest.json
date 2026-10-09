@@ -1,10 +1,10 @@
 {
-  "perception-day.png": "392c49586217458efc4af2afe3c77a619720b4acf8dd18b792023699bad80353",
+  "perception-day.png": "4ffbeec9427540ba155f816fa79c1b279e5c32bf4f54d323f9c281ed6e9dae05",
   "perception-input.jsonl": "f19bb394da470e14ac02f88384a92640aa559a86c6a2700b3b783769d413c409",
-  "perception-night.png": "3e3702eb03b4ae929232ab85ce840d9b6298503e70aa714f9a8dbf07170f0ef0",
-  "perception-occlusion.png": "68bc5e09f738b36ae45029f3fef7490c808ffd6728da38ab49ffdfd290c29097",
+  "perception-night.png": "9511e477d0e96034dd09d3915579a9f18587867779e06754eae79aebd17d9eaa",
+  "perception-occlusion.png": "30ca832e868cab3be3a154e75b6d7db32771b08d1034580d18f1cfc7db3c4ed6",
   "perception-output.json": "9a8eb8b50002e46dbf1f994139a8573e82815ffd5cb7622d06d3a2d5e2c1041a",
-  "perception-unknown.png": "7a10965094e3205d163ed21e07165859415b2e28a2693b1cf371d745e8a11c5c",
-  "perception.gif": "e6ff52d401f76b60e3e57a56640f9fe8fa011731e0e35a901dc6124e1be3252c",
-  "perception.html": "f26b276fc68e7348bf12be639de3a8ef48f328a35293a1612dc89be2b890f460"
+  "perception-unknown.png": "f21f5243b38ac734d279f0d6fdb3ece69cf8e769231b1e30ff305f712794f3c4",
+  "perception.gif": "7da2189630eb60538ad87ff7aa1670babd43be313196e3705e5bfdde8c55a28e",
+  "perception.html": "8d644952a5a566ddecd02e5941923d022966a840d9fa9436a267ee9d60ae7788"
 }
