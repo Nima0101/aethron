@@ -218,6 +218,11 @@ class CaptureSource:
             if self.lock.acquire(timeout=0.01):
                 try:
                     sequence, w, h, received = self.metadata[:]
+                    if self.driver != "file" and not self.alive:
+                        # A crash or forced exit cannot publish its own loss
+                        # marker. Never drain a dead live decoder's queued slot.
+                        self.metadata[0] = -1
+                        return SourceFault("source_lost")
                     if sequence < 0:
                         return SourceFault("source_lost")
                     if sequence > 0:
