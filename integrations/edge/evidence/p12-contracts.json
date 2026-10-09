@@ -222,5 +222,14 @@
     "msgspec representative conversion/constructor proof is not a full service migration or comparative performance benchmark; Ajv considered from official semantics, not installed or timed.",
     "Installed comparison predates only the diagnostic parity-assert hardening; installed product source bytes match final product.",
     "P1.3-P1.7 technology review and full release qualification remain pending."
-  ]
+  ],
+  "hosted_followup": {
+    "head": "07515400e1495bb0d6c83047a44568dfa1a54813",
+    "run": 37956154105,
+    "result": "4 PASS; macOS/Windows Python3.11.13 failed setup because upstream binaries unavailable; no tests ran in those two jobs",
+    "fix": "Keep Linux3.11.13 and all3OS3.13.15; use upstream3.11.9 for macOS/Windows compatibility only, not a deployment runtime pin. No minor-version or OS coverage removed.",
+    "verification": "Six entries checked against official actions/python-versions manifest for exact platform/architecture; hosted retry pending",
+    "manifest_url": "https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json",
+    "workflow_sha256": "725cd64c0fb626a352bc1a011132bbb55338cd729a93937b47e93c99487b560f"
+  }
 }
