@@ -41,7 +41,7 @@ jobs:
       - run: python -m build --no-isolation
       - run: python -m playwright install --with-deps chromium
       - run: python scripts/browser_check.py
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: browser-and-packages
           path: |
@@ -62,7 +62,7 @@ jobs:
       - run: python scripts/vision_e2e.py
       - run: python scripts/vision_smoke.py
       - run: python scripts/vision_supply_chain.py
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: recorded-model-evidence
           path: build/vision/
