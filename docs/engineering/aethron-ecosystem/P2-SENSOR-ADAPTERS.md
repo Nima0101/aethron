@@ -15,6 +15,8 @@ Every `RecordedFrame.live_evidence` is false. The existing trusted live-clock/ca
 
 The opt-in [recorded cloud v2 amendment](CLOUD-REPLAY-V2.md) permits variable cloud
 packet dimensions while retaining the v1 behavior above and all resource bounds.
+The [offline cloud inspector](CLOUD-INSPECTION.md) exports bounded selected raw
+samples only after full recording validation and an independently pinned digest.
 
 ## Installed Python example
 

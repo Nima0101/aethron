@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "date": "2026-10-09",
+  "scope": "P2.1 bounded offline raw cloud inspection",
+  "parent": "6d55bff9829d8b2f060768f0c701479868198130",
+  "protected_main_observed": "2d29c3b852936fac9cddf66a55040d1b9a816179",
+  "source_sha256": {
+    "integrations/edge/aethron_edge/sensors/cloud_inspect.py": "2e866dec1201203488d9264687a17d3eeb54bbb44248607c671807be8e94b42b",
+    "tests/integration/test_sensor_cloud_inspect.py": "cbbad97c8fbba799c8b23c1e34cc724d9a46ecbee1f9f639c1f94dbaf0c3d711",
+    "scripts/edge_package_check.py": "5dcf78594137cac45116a77dde888244fd526a5b9e6c133426f703f1f506b56b",
+    "scripts/edge_ros2_check.py": "14d904103bcd0099b7ea97dcd99502dbed8e65ec558add7c58ad67f8976209e7",
+    "integrations/edge/aethron_edge/sensors/recording_io.py": "08e60949edd62432397fb8a8eee9854624897335757801dddda994d6e44f277e",
+    "integrations/edge/aethron_edge/sensors/provisioning.py": "655ef8f8798e373dac9ba46bf7048ff0160320fb312bffb8f2e88920f62c2905"
+  },
+  "environment": {
+    "python": "3.13.15",
+    "platform": "macOS arm64",
+    "new_runtime_dependencies": []
+  },
+  "red": {
+    "tests": 7,
+    "test_and_subtest_failures": 28,
+    "reason": "cloud inspector module missing"
+  },
+  "initial_green": {
+    "tests": 7,
+    "seconds": 3.951,
+    "result": "passed"
+  },
+  "retained_failure": {
+    "command": "PYTHONPATH=integrations/edge python -m unittest discover -s tests/integration -p 'test_sensor_cloud*.py' -v",
+    "tests": 12,
+    "errors": 1,
+    "seconds": 41.033,
+    "test": "test_cli_success_then_late_failure_has_no_partial_output_or_input_echo",
+    "reason": "Success-case CLI subprocess exceeded unchanged 30-second timeout",
+    "context": "Wheel build/install was also in progress; cause not established"
+  },
+  "static": {
+    "ruff_check": "passed",
+    "ruff_format": "passed",
+    "bandit_changed_runtime": "passed",
+    "diff_check": "passed"
+  },
+  "limits": [
+    "Synthetic fixtures only",
+    "No ROS runtime, hardware, calibration or live qualification",
+    "All output remains unregistered recorded UNKNOWN",
+    "No guaranteed startup or processing latency",
+    "Earlier failures and frozen thresholds retained"
+  ],
+  "publication": {
+    "status": "draft_review_candidate",
+    "merge_release": "blocked pending exact-head qualification and review",
+    "known_open_failures": [
+      "Prior frozen T10 p95 143.527 ms exceeds 100 ms",
+      "Retained initial 30-second CLI timeout",
+      "Installed signed radar replay deadline failure reproduced before the I/O split"
+    ],
+    "prior_temporal_report": "cloud-replay-v2-temporal.json",
+    "thresholds_changed": false
+  },
+  "deferred": [
+    "Full DDS and platform matrix",
+    "Broad fuzz",
+    "Clean-clone matrix",
+    "Full artifact reproduction"
+  ],
+  "next_task": "Add bounded offline calibrated cloud projection preserving uncertainty and UNKNOWN",
+  "pre_refactor_installed": {
+    "isolated_python": true,
+    "tests": 12,
+    "seconds": 25.788,
+    "result": "passed",
+    "edge_wheel_sha256": "24e6f8448e30908a71b1b9502fda3bb3a15fd826fa8e29def46899741b49ccf9",
+    "runtime_source_bytes_match_wheel": true
+  },
+  "pre_refactor_startup_probe": {
+    "source": {
+      "returncode": 0,
+      "process_wall_ms": 5899.36,
+      "timing": {
+        "import_wall_ms": 4234.93,
+        "import_cpu_ms": 708.291
+      }
+    },
+    "installed": {
+      "returncode": 0,
+      "process_wall_ms": 16583.692,
+      "timing": {
+        "import_wall_ms": 12841.575,
+        "import_cpu_ms": 808.366
+      }
+    }
+  },
+  "startup_trace_observation": "At 10 seconds, installed probe was in importlib get_data through provisioning and sources.base; diagnostic only, not proof of the original timeout cause",
+  "import_boundary_red": {
+    "tests": 1,
+    "failures": 1,
+    "reason": "Offline inspector imported acquisition/provider/registration/rectification modules"
+  },
+  "final_source": {
+    "cloud_tests": 13,
+    "legacy_replay_tests": 6,
+    "packet_tests": 8,
+    "radar_appliance_tests": 4,
+    "result": "passed",
+    "seeded_corruption_cases": 2000
+  },
+  "final_installed": {
+    "isolated_python": true,
+    "cloud_tests": {
+      "tests": 13,
+      "seconds": 90.993,
+      "result": "passed"
+    },
+    "radar_appliance": {
+      "tests": 4,
+      "passed": 3,
+      "failed": 1,
+      "seconds": 38.466,
+      "failure": "test_signed_cli_replay_ends_unknown_and_rejects_tampering: signed radar replay did not finish",
+      "unchanged_observation_deadline_seconds": 10
+    },
+    "edge_wheel_sha256": "3a8c4b9e3fe52f77ed4e0c0117243603242dfda55aabc4e77a9e5b4173469ec0",
+    "runtime_source_bytes_match_wheel": true
+  },
+  "pre_refactor_radar_reproduction": {
+    "diagnostic_status_wrapper": true,
+    "tests": 1,
+    "seconds": 30.57,
+    "wheel_sha256": "24e6f8448e30908a71b1b9502fda3bb3a15fd826fa8e29def46899741b49ccf9",
+    "result": {
+      "passed": false,
+      "status_changes": [
+        {
+          "state": "idle",
+          "batches": 0,
+          "available": false,
+          "qualified": false,
+          "restarts": 0
+        },
+        {
+          "state": "idle",
+          "batches": 0,
+          "available": false,
+          "qualified": false,
+          "restarts": 1
+        }
+      ]
+    },
+    "conclusion": "The new offline I/O split is not required to reproduce the installed radar deadline failure; startup qualification remains open"
+  },
+  "core_verification": {
+    "command": "python scripts/verify.py",
+    "tests": 218,
+    "skipped": 5,
+    "result": "passed",
+    "scope": "Executed before final offline I/O extraction; final extracted helpers covered by source and installed targeted tests"
+  },
+  "core_runtime_matches_prior_failed_T10": true
+}

@@ -35,6 +35,7 @@ def run(wheels, dependencies, out, *, diagnostics=False):
         "test_sensor_packets.py",
         "test_sensor_replay.py",
         "test_sensor_cloud_replay_v2.py",
+        "test_sensor_cloud_inspect.py",
         "test_sensor_ros2.py",
         "test_sensor_registration.py",
         "test_sensor_provider.py",
