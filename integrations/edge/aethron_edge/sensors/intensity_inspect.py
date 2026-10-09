@@ -1,13 +1,14 @@
 """Bounded offline intensity inspection; stdout is emitted only after complete success."""
 
 import argparse
+import hashlib
 import json
 import re
 from pathlib import Path
 
 from ..config import strict_json
 from .intensity_replay import IntensityCalibration, rectify_recorded_intensity
-from .provisioning import MAX_RECORDING_BYTES, recording_frames, regular_file
+from .recording_io import MAX_RECORDING_BYTES, recording_frames, regular_file
 
 
 class _Parser(argparse.ArgumentParser):
@@ -19,12 +20,14 @@ class _BoundedReader:
     def __init__(self, stream):
         self.stream = stream
         self.total = 0
+        self.digest = hashlib.sha256()
 
     def read(self, size):
         block = self.stream.read(min(size, MAX_RECORDING_BYTES - self.total + 1))
         self.total += len(block)
         if self.total > MAX_RECORDING_BYTES:
             raise ValueError("recording_limit")
+        self.digest.update(block)
         return block
 
 
@@ -33,6 +36,7 @@ def main():
     parser.add_argument("--recording", required=True, type=Path)
     parser.add_argument("--calibration", required=True, type=Path)
     parser.add_argument("--expected-calibration-sha256", required=True)
+    parser.add_argument("--expected-recording-sha256")
     parser.add_argument("--pixel", required=True, action="append", nargs=2, type=int)
     parser.add_argument("--max-frames", type=int, default=1)
     args = parser.parse_args()
@@ -41,6 +45,10 @@ def main():
             not 1 <= args.max_frames <= 300
             or not 1 <= len(args.pixel) <= 64
             or not re.fullmatch(r"[0-9a-f]{64}", args.expected_calibration_sha256)
+            or (
+                args.expected_recording_sha256 is not None
+                and not re.fullmatch(r"[0-9a-f]{64}", args.expected_recording_sha256)
+            )
         ):
             raise ValueError("inspection_limit")
         with regular_file(args.calibration, 65536) as stream:
@@ -56,7 +64,8 @@ def main():
             raise ValueError("invalid_selection")
         frames = []
         with regular_file(args.recording, MAX_RECORDING_BYTES) as stream:
-            for index, frame in enumerate(recording_frames(_BoundedReader(stream))):
+            reader = _BoundedReader(stream)
+            for index, frame in enumerate(recording_frames(reader)):
                 if index >= args.max_frames:
                     raise ValueError("frame_limit")
                 result = rectify_recorded_intensity(
@@ -70,6 +79,11 @@ def main():
                         "counts": [result.raster.sample(x, y) for x, y in args.pixel],
                     }
                 )
+            if (
+                args.expected_recording_sha256 is not None
+                and reader.digest.hexdigest() != args.expected_recording_sha256
+            ):
+                raise ValueError("recording_digest")
         print(
             json.dumps(
                 {

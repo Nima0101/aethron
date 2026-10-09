@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "scope": "P2.1 optional offline intensity recording pin",
+  "protected_main_observed": "0ce84bf52bb53385aafdd5615c87254790f9fba2",
+  "environment": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "python": "3.13.5"
+  },
+  "red": {
+    "tests": 1,
+    "failures": 1,
+    "cause": "The CLI rejected the new expected-recording-sha256 option."
+  },
+  "source": {
+    "tests": 19,
+    "passed": true,
+    "seconds": 45.266,
+    "modules": [
+      "test_sensor_intensity_inspect",
+      "test_sensor_intensity_replay",
+      "test_sensor_raster_rectification"
+    ]
+  },
+  "installed": {
+    "tests": 2,
+    "passed": true,
+    "seconds": 39.568,
+    "isolated_unittest": true,
+    "new_regression_propagates_isolation_to_subprocess": true,
+    "wheels": {
+      "aethron_edge-0.1.0-py3-none-any.whl": "db8e9555b61208b04216222158fff379a2319a3169f6765ef9091383834962f7"
+    }
+  },
+  "checks": {
+    "ruff": "passed",
+    "format": "passed",
+    "bandit_intensity_inspect": "passed",
+    "review": "Digest uses the same bounded read stream as decoding; equality is checked after complete parsing and before stdout; legacy output and bounds unchanged."
+  },
+  "negative_evidence": [
+    "PR #18 exact head 1e4e16d75618853e2bf0bdd911b377d74ea6fe14 remains unmerged: hosted DDS failed before tests on Docker Hub unauthenticated pull limit, followed by absent artifact failure. One failed-job rerun requested, not polled.",
+    "A local GitHub metadata read aborted with pthread_create resource exhaustion. No CI or publication success inferred from it.",
+    "Earlier cloud replay T10 and radar startup failures remain unchanged in their published evidence."
+  ],
+  "limits": [
+    "Focused local checks only; no VM, Docker, broad fuzz or full hosted matrix.",
+    "Digest pin is optional equality checking, not authentication, calibration validity or live evidence.",
+    "No latency or physical qualification."
+  ],
+  "logs": {
+    "red.log": "2147f00d69c63dc8f10324e1e9cb34a94f5a16475e366c1e5d12075293042049",
+    "green.log": "98a78547fb718c006ac7eea31545c0935ed75ad8c691edf8d9e5e88873160380",
+    "targeted.log": "c2779a6fd69b843249e60f91a548b88e382b0e1ca1cee7d87172d6ef3fd0cce1",
+    "installed-tests.log": "e2ffb662b87bf88b5f8e4ae600c9dbf5d80bfa2700d0e21354560d1e6c1ead9d"
+  }
+}
