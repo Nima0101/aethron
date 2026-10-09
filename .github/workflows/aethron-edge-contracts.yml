@@ -28,6 +28,9 @@ on:
       - 'tests/integration/test_decoder_publication.py'
       - 'tests/integration/test_file_decoder_protocols.py'
       - 'tests/integration/test_decoder_disconnect.py'
+      - 'tests/integration/test_capture_worker_exit.py'
+      - 'scripts/edge_rtsp_stall_profile.py'
+      - 'integrations/edge/requirements-rtsp-probe.lock'
       - 'tests/integration/test_sources.py'
       - 'scripts/edge_decoder_copy_profile.py'
       - 'scripts/edge_decoder_backend_profile.py'
@@ -112,6 +115,7 @@ jobs:
         run: python -I scripts/edge_clock_profile.py > build/clock-profile.json
       - name: Installed decoder admission and owned buffer snapshot
         run: |
+          python -I -m unittest discover -s tests/integration -p test_capture_worker_exit.py -v
           python -I -m unittest discover -s tests/integration -p test_decoder_admission.py -v
           python -I -m unittest discover -s tests/integration -p test_decoder_publication.py -v
           python -I scripts/edge_decoder_copy_profile.py > build/decoder-copy-profile.json
@@ -122,6 +126,12 @@ jobs:
           python -I -m unittest discover -s tests/integration -p test_file_decoder_protocols.py -v
           python -I -m unittest discover -s tests/integration -p test_decoder_disconnect.py -v
           python -I -m unittest discover -s tests/integration -p test_sources.py -v
+      - name: Loopback RTSP stalled negotiation comparison (not a runtime dependency)
+        if: matrix.os == 'ubuntu-24.04' && matrix.python == '3.13.15'
+        run: |
+          python -I scripts/edge_rtsp_stall_profile.py --backend opencv > build/rtsp-opencv-stall.json
+          python -m pip install --only-binary=:all: --no-deps --require-hashes -r integrations/edge/requirements-rtsp-probe.lock
+          python -I scripts/edge_rtsp_stall_profile.py --backend gstreamer > build/rtsp-gstreamer-stall.json
       - name: Recorded decoder alternative comparison (not a runtime dependency)
         if: matrix.os == 'ubuntu-24.04' && matrix.python == '3.13.15'
         run: |
@@ -148,6 +158,7 @@ jobs:
             build/calibration-profile.json
             build/decoder-copy-profile.json
             build/decoder-backend-profile.json
+            build/rtsp-*-stall.json
             build/clock*profile.json
             build/capture-clock*profile.json
             build/builder-clock-profile.json

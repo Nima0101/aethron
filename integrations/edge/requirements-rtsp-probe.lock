@@ -1,0 +1,7 @@
+# Official GStreamer 1.28.7 comparison tools; not a product dependency.
+gstreamer-ext-runtime==1.28.7 --hash=sha256:bd4227766ba0c8ba47d83adb969d6bd6f5da65b0a8827ba10cc4e79d54cb35b8
+gstreamer-libs==1.28.7 --hash=sha256:5a181336d80f4be235a2a7a62deed2ef6a47846bad3bd76135bd6600774377af
+gstreamer-plugins-libs==1.28.7 --hash=sha256:3691f3c649b426e82fbad423619c9012e19446db7e09a3b298c4c4ab33434bda
+gstreamer-plugins==1.28.7 --hash=sha256:8d39f567ce15447a884bdbd4c8f2be5f78f2abe125fba1928e80bbb5b22a9e2c
+gstreamer-python==1.28.7 --hash=sha256:dabab46ae4e6484b05a4f795dc11f40411118a051db58c7d18f5cb6ea49b27e6
+gstreamer-cli==1.28.7 --hash=sha256:1b2138761d355cd4c61e854a96a15fc010a732802302c2688459e607bd8c881a

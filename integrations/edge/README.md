@@ -50,3 +50,7 @@ A failed native read from a live source invalidates its unread frame and reports
 `source_lost` without waiting for a consumer. Recorded playback preserves its
 final unread frame before EOF. Neither behavior qualifies physical capture timing
 or makes an untrusted live clock fresh evidence.
+
+Observed live decoder process exit also invalidates its unread slot, including
+crashes that cannot publish a loss marker. Recorded playback can still drain its
+final owned frame after its worker exits.
