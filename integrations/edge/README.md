@@ -38,3 +38,24 @@ loaded extension against its packaged Python reference. Clock integers remain
 arbitrary precision. Native compilation does not establish exposure trust, change
 expiry bounds or qualify live capture; the live source still fails closed when
 its clock is untrusted.
+
+Fleet health has a local, bounded library interface:
+
+```python
+import time
+from aethron_edge.runtime.fleet_health import FleetHealth, encode_local_health
+
+health = FleetHealth(slot_count=1)  # Keep this collector across samples.
+now_ms = time.monotonic_ns() // 1_000_000
+# supervisor is the application's existing ApplianceSupervisor.
+raw = encode_local_health(supervisor.status(now_ms * 1_000_000), now_ms=now_ms)
+health.ingest(0, raw, now_ms=now_ms)
+counts = health.snapshot(now_ms=now_ms)
+```
+
+Output contains only runtime state counts, always `scene_state: UNKNOWN` and
+`qualified: false`. Reports expire within 2000ms; malformed or replayed reports
+withdraw the affected slot. Use only one trusted local monotonic clock domain:
+remote device boot clocks cannot be compared directly. Slot authorization,
+authenticated collection and cross-host clock mapping remain integration work.
+See the [versioned contract and technology decision](../../docs/architecture/fleet-health-v1.md).
