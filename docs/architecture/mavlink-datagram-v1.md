@@ -66,3 +66,21 @@ PyPI metadata for [pymavlink](https://pypi.org/pypi/pymavlink/2.4.50/json),
 [fastcrc](https://pypi.org/pypi/fastcrc/0.5.0/json), and
 [lxml](https://pypi.org/pypi/lxml/6.1.3/json). The closure requires glibc>=2.28.
 Workflow presence is not hosted execution evidence or simulator qualification.
+
+## Snapshot deadline repair — 2026-10-10
+
+The v1 100 ms limit is unchanged. Snapshot processing is now bracketed with the
+same trusted monotonic clock: a decoder result that crosses the batch deadline
+is withdrawn before return, while an invalid or rewound clock latches the wrapper
+closed. An existing decoder rejection remains visible instead of being replaced
+by an expiry reason solely because rejection processing took time.
+
+The requirement is elapsed-time admission after an existing synchronous SDK call,
+not a different wire parser. Python's documented
+[monotonic integer clock](https://docs.python.org/3/library/time.html#time.monotonic_ns)
+supports this check without floating-point conversion or a new dependency. A
+native parser or worker-process migration would still require a check after its
+result arrived and would not repair this boundary by itself. This targeted repair
+keeps the existing SDK ownership contract; it makes no hard-real-time or physical
+capture-age claim. The SDK, host clock and single-owner calling discipline remain
+trusted.

@@ -93,7 +93,20 @@ class DatagramTelemetryV1:
             self._withdraw("datagram_expired")
         if self._reason is not None:
             return TelemetryStatus("UNKNOWN", self._reason)
-        return self._source.snapshot()
+        status = self._source.snapshot()
+        # The decoder may perform authority checks or be descheduled. Recheck
+        # the receipt deadline and clock before exposing its returned samples.
+        now = self._now()
+        if (
+            now is not None
+            and status.state != "UNKNOWN"
+            and self._expires is not None
+            and now > self._expires
+        ):
+            self._withdraw("datagram_expired")
+        if self._reason is not None:
+            return TelemetryStatus("UNKNOWN", self._reason)
+        return status
 
     def close(self) -> None:
         self._closed = True

@@ -53,3 +53,31 @@ reproduction, full fuzz, ROS/DDS execution and actual PX4/ArduPilot SITL were no
 run in this fast loop. The added focused workflow has no hosted result yet.
 Prior timing/aircraft/availability negatives remain unchanged. This checkpoint
 does not qualify hardware, physical freshness, firmware tuples or production.
+
+## Linux snapshot-boundary continuation — 2026-10-10
+
+Retained RED: two new test methods produced four assertion failures on the prior
+adapter. A real SDK-decoded sample returned `OBSERVED_UNVERIFIED` after snapshot
+processing advanced the injected clock beyond 100 ms. Snapshot-time rollback,
+boolean clock and missing clock each also returned an observation before the
+wrapper could detect the fault. These fixtures change only elapsed time around
+the real decoder's public snapshot; they do not substitute fabricated samples.
+
+The wrapper now checks time again after the decoder returns. The exact 100 ms
+boundary remains accepted; 100 ms plus 1 ns withdraws the batch. A subsequent
+fresh batch may recover ordinary expiry, but clock failure stays latched closed.
+A slow unsupported-message rejection retains its original reason.
+
+Focused CPython 3.13.5 Linux results: 33 adapter/passive/diagnostic tests passed
+before adding the slow-rejection regression; the final 18 adapter cases then
+passed. Six selected signing cases listed above also passed. Thus all 40 distinct
+focused cases passed across these runs. Ruff lint/format and scoped Bandit pass.
+No local Docker, simulator, full suite or full fuzz was run. Local RED/GREEN logs
+are retained in the lane's ignored `build/p31-linux/` directory.
+
+Earlier delivered head `f944f8f717e157c06718604d5c5fe4616cb0e53d` passed hosted
+[passive wire](https://github.com/Nima0101/aethron/actions/runs/37999711110/job/114054527608)
+and [offline DDS](https://github.com/Nima0101/aethron/actions/runs/37999711141/job/114054527727).
+Other checks were still queued/running at the continuation snapshot. Those
+results do not qualify this repair or later heads; no all-checks-green or merge
+claim is made.

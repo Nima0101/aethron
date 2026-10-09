@@ -145,6 +145,75 @@ class DatagramTests(unittest.TestCase):
         status = receiver.snapshot()
         self.assertEqual([s.message for s in status.samples], ["LOCAL_POSITION_NED"])
 
+    def test_snapshot_processing_cannot_return_an_expired_batch(self):
+        class DelayedSnapshot(PassiveTelemetry):
+            delay = 0
+
+            def snapshot(source):
+                status = super().snapshot()
+                self.now += source.delay
+                return status
+
+        source = DelayedSnapshot(1, 1, clock=lambda: self.now)
+        receiver = self.api(source, clock=lambda: self.now)
+        self.addCleanup(receiver.close)
+        receiver.ingest(packet())
+        self.now += 90_000_000
+        source.delay = 10_000_000
+        self.assertEqual(receiver.snapshot().state, "OBSERVED_UNVERIFIED")
+        source.delay = 1
+        status = receiver.snapshot()
+        self.assertEqual(status.state, "UNKNOWN")
+        self.assertEqual(status.reason, "datagram_expired")
+        self.assertEqual(status.samples, ())
+        source.delay = 0
+        receiver.ingest(packet(1, 11))
+        self.assertEqual(receiver.snapshot().state, "OBSERVED_UNVERIFIED")
+
+    def test_clock_failure_during_snapshot_withdraws_before_return(self):
+        for invalid in (999_999_999, True, None):
+            with self.subTest(invalid=invalid):
+                self.now = 1_000_000_000
+
+                class ChangedClock(PassiveTelemetry):
+                    change = False
+
+                    def snapshot(source, invalid=invalid):
+                        status = super().snapshot()
+                        if source.change:
+                            self.now = invalid
+                        return status
+
+                source = ChangedClock(1, 1, clock=lambda: self.now)
+                receiver = self.api(source, clock=lambda: self.now)
+                self.addCleanup(receiver.close)
+                receiver.ingest(packet())
+                source.change = True
+                status = receiver.snapshot()
+                self.assertEqual(status.state, "UNKNOWN")
+                self.assertEqual(status.reason, "local_clock_invalid")
+                self.assertEqual(status.samples, ())
+                self.now = 1_000_000_000
+                source.change = False
+                receiver.ingest(packet(1, 11))
+                self.assertEqual(receiver.snapshot().reason, "local_clock_invalid")
+
+    def test_slow_rejection_retains_the_decoder_failure_reason(self):
+        class SlowRejection(PassiveTelemetry):
+            def snapshot(source):
+                status = super().snapshot()
+                self.now += 100_000_001
+                return status
+
+        source = SlowRejection(1, 1, clock=lambda: self.now)
+        receiver = self.api(source, clock=lambda: self.now)
+        self.addCleanup(receiver.close)
+        receiver.ingest(packet(kind="heartbeat"))
+        status = receiver.snapshot()
+        self.assertEqual(status.state, "UNKNOWN")
+        self.assertEqual(status.reason, "unsupported_message")
+        self.assertEqual(status.samples, ())
+
     def test_invalid_clocks_latch_even_if_later_corrected(self):
         for invalid in (True, -1, 1.0, None):
             source = PassiveTelemetry(1, 1, clock=lambda: 1_000_000_000)
