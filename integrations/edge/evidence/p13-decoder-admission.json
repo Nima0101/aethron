@@ -1,0 +1,94 @@
+{
+  "qualified": false,
+  "python": "3.13.15",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "input_bytes": 6220800,
+  "input_sha256": "77df06e8fef7fcebf11c66e11b4c1468472cdd2ef418b9cba94efcfefdeee3a2",
+  "cpu_ns": {
+    "previous_boxed_copy": [
+      662347000,
+      674155000,
+      696273000,
+      680873000,
+      662584000
+    ],
+    "admitted_buffer_copy": [
+      3041000,
+      12667000,
+      502000,
+      14602000,
+      581000
+    ]
+  },
+  "median_cpu_ns": {
+    "previous_boxed_copy": 674155000,
+    "admitted_buffer_copy": 3041000
+  },
+  "python_traced_peak_bytes": {
+    "previous_boxed_copy": 55987233,
+    "admitted_buffer_copy": 6221429
+  },
+  "source_sha256": {
+    "integrations/edge/aethron_edge/sources/base.py": "a741ae0a5e46b9ccc31614ac30a208383ff578577149d3a2955e3485358ed346",
+    "scripts/edge_decoder_copy_profile.py": "3caf31dcc8e1115c6eb0098e8c4252f90e923dc80e760b23784e28cd996af64a"
+  },
+  "technology_decision": "Use the CPython native buffer-protocol copy behind Python parent orchestration: it copies into owned bytes under the existing process lock, avoids per-byte boxed list allocation, and materially improves the measured maximum-frame copy without a new FFI or runtime dependency.",
+  "scope": "P1.3 parent decoder admission and shared-buffer snapshot only. Decoder backend/acquisition, clock mapping, inference and full process-isolation technology review remain open.",
+  "research": [
+    {
+      "url": "https://docs.python.org/3/library/stdtypes.html#memoryview",
+      "assessment": "Buffer views expose contiguous storage without a per-byte Python list; tobytes creates the required owned snapshot. Selected and exercised on the real RawArray ABI."
+    },
+    {
+      "url": "https://gstreamer.freedesktop.org/documentation/app/appsink.html",
+      "assessment": "Credible native acquisition alternative with configurable queue bounds and C/binding interfaces. Replacing the producer does not remove the parent metadata and ownership boundary; backend comparison remains open, not rejected because of toolchain availability."
+    },
+    {
+      "url": "https://pyav.org/docs/stable/api/video.html",
+      "assessment": "Alternative FFmpeg frame/plane binding exposes buffer size and line stride. A migration needs explicit packed-RGB/stride and timing parity; not assumed equivalent or disqualified by installation status."
+    }
+  ],
+  "checks": {
+    "red": "10 failures: 8 invalid geometry cases touched pixels, malformed negotiation advertised dimensions, and maximum-frame allocation exceeded the diagnostic ceiling. Earlier fixture used base CaptureSource rather than FileSource and added one unrelated provenance failure; corrected before implementation.",
+    "new_regressions": 5,
+    "combined": {
+      "tests": 26,
+      "passed": 25,
+      "failed": 1,
+      "seconds": 269.885
+    },
+    "isolated_file_retry": {
+      "tests": 1,
+      "failed": 1,
+      "seconds": 81.806
+    },
+    "unresolved": "test_sources.Sources.test_file_real_decode_eof_close_reopen: expected64x48, gotNone/None; metadata[0,0,0,0], childalive, exitcodeNone. Root cause unproven; two bounded local cycles exhausted; no timeout change or green qualification claim.",
+    "installed_tests": 9,
+    "installed": {
+      "core_wheel_sha256": "daeacafc7e70f20bbd0b446f448203b67b0b12ee56e6b3afca6b248d031c9a93",
+      "edge_wheel_sha256": "17bbd126704bc59d887494fa0810cbf367e56cf89067e92b48453c16e179cefb",
+      "source_bytes_match": true,
+      "outside_checkout": true,
+      "offline_install": true,
+      "temporary_consumer_removed": true
+    },
+    "installed_checker_initial_failure": "Started before wheel build completion; StopIteration, no installed tests ran. Preserved log and retried only after wheel completion.",
+    "lint_format_bandit_yaml": "PASS; initial format-only failure corrected with AST equality proof",
+    "CI": "Six installed admission/copy jobs plus three Python3.13 real-codec source probes with existing hash-locked binary vision dependencies; hosted results pending."
+  },
+  "parent": "847e2cea459ae786591146033548b117c83b1981",
+  "final_source_sha256": {
+    "integrations/edge/aethron_edge/sources/base.py": "2491bf33d8219ad13dd446d697c81f82b06a743d82e79697985a93d8e0c66a28",
+    "scripts/edge_decoder_copy_profile.py": "3caf31dcc8e1115c6eb0098e8c4252f90e923dc80e760b23784e28cd996af64a",
+    "tests/integration/test_decoder_admission.py": "70ab1c091064a0895c895e56b62e4fd4d58a8cb3664dc597da613f9f0532e0ff",
+    ".github/workflows/aethron-edge-contracts.yml": "d25f40bc9b05790fa49b36c726c63e33213150ad07e21ffd443c4a732b501a72"
+  },
+  "formatting_ast_unchanged": true,
+  "reproduce": "PYTHONPATH=integrations/edge python scripts/edge_decoder_copy_profile.py",
+  "limitations": [
+    "Shared Mac CPU measurements vary; traced Python allocations are not RSS or a hard real-time bound.",
+    "Allocation regression ceiling prevents the intermediate list; it is not a changed frozen runtime budget.",
+    "Local real-codec startup remains red; full candidate/release, physical capture and deployment qualification remain pending.",
+    "No changes to 1920x1080 source limits, capture-clock trust, decoder deadlines or provenance semantics."
+  ]
+}

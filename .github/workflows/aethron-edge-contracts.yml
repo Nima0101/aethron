@@ -9,13 +9,18 @@ on:
       - 'integrations/edge/aethron_edge/pipeline.py'
       - 'integrations/edge/aethron_edge/timebase.py'
       - 'integrations/edge/aethron_edge/calibration.py'
+      - 'integrations/edge/aethron_edge/sources/**'
       - 'integrations/edge/requirements-server.lock'
+      - 'integrations/edge/requirements-vision.lock'
       - 'contracts/**'
       - 'tests/integration/test_contract_scalars.py'
       - 'tests/integration/test_openapi.py'
       - 'tests/integration/test_worker_replay_input.py'
       - 'tests/integration/test_clock_pipeline.py'
       - 'tests/integration/test_calibration_admission.py'
+      - 'tests/integration/test_decoder_admission.py'
+      - 'tests/integration/test_sources.py'
+      - 'scripts/edge_decoder_copy_profile.py'
       - 'scripts/edge_calibration_profile.py'
       - 'scripts/edge_clock_profile.py'
       - 'scripts/probes/clock_compatibility.rs'
@@ -29,6 +34,7 @@ on:
       - 'tests/integration/**'
       - 'scripts/edge_clock_profile.py'
       - 'scripts/edge_calibration_profile.py'
+      - 'scripts/edge_decoder_copy_profile.py'
       - 'scripts/probes/clock_compatibility.rs'
       - 'scripts/edge_contract_profile.py'
       - '.github/workflows/aethron-edge-contracts.yml'
@@ -80,6 +86,15 @@ jobs:
         run: python -I scripts/edge_contract_profile.py > build/contract-profile.json
       - name: Installed clock scalar proof
         run: python -I scripts/edge_clock_profile.py > build/clock-profile.json
+      - name: Installed decoder admission and owned buffer snapshot
+        run: |
+          python -I -m unittest discover -s tests/integration -p test_decoder_admission.py -v
+          python -I scripts/edge_decoder_copy_profile.py > build/decoder-copy-profile.json
+      - name: Installed real file codec and source faults
+        if: matrix.python == '3.13.15'
+        run: |
+          python -m pip install --only-binary=:all: --require-hashes -r integrations/edge/requirements-vision.lock
+          python -I -m unittest discover -s tests/integration -p test_sources.py -v
       - name: Installed calibration admission and technology comparison
         run: |
           python -I -m unittest discover -s tests/integration -p test_calibration_admission.py -v
@@ -99,6 +114,7 @@ jobs:
           path: |
             build/contract-profile.json
             build/calibration-profile.json
+            build/decoder-copy-profile.json
             build/clock*profile.json
             build/clock-rust-version.txt
           retention-days: 7
