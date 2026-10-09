@@ -1,0 +1,82 @@
+{
+  "audit_policy_version": 2,
+  "component": "passive MAVLink single-packet decoder",
+  "decision": "PENDING",
+  "runs": [
+    {
+      "run": "initial",
+      "audit_policy_version": 2,
+      "state": "compared",
+      "decision": "PENDING",
+      "scope": "fresh unsigned packet admission only; not lifecycle/signing parity",
+      "corpus_cases": 17,
+      "parity": true,
+      "python": {
+        "samples": 512,
+        "accepted": 92,
+        "p50_ns": 30470,
+        "p95_ns": 130281,
+        "max_ns": 59938459
+      },
+      "c": {
+        "samples": 512,
+        "accepted": 92,
+        "p50_ns": 32,
+        "p95_ns": 336,
+        "max_ns": 20494
+      },
+      "python_version": "3.13.5",
+      "machine": "x86_64",
+      "system": "Linux",
+      "compiler": "cc (Debian 14.2.0-19) 14.2.0",
+      "xml_sha256": "fbac92d0689c9b1bc03b49ebc5cdf989f3fc23026c3c856f7224e4b9af1b5f53",
+      "driver_sha256": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483",
+      "pymavlink": "2.4.50",
+      "limitations": [
+        "512 mixed valid/invalid probes; no hard-real-time claim",
+        "Python constructor excluded; C stack setup included",
+        "C omits state, provenance objects and persistent replay",
+        "No memory, cold-start, signed, UDP or SITL comparison"
+      ]
+    },
+    {
+      "run": "sanitized",
+      "audit_policy_version": 2,
+      "state": "compared",
+      "decision": "PENDING",
+      "scope": "fresh unsigned packet admission only; not lifecycle/signing parity",
+      "corpus_cases": 17,
+      "parity": true,
+      "sanitized_parity": true,
+      "python": {
+        "samples": 512,
+        "accepted": 92,
+        "p50_ns": 19591,
+        "p95_ns": 114877,
+        "max_ns": 524311
+      },
+      "c": {
+        "samples": 512,
+        "accepted": 92,
+        "p50_ns": 34,
+        "p95_ns": 334,
+        "max_ns": 26025
+      },
+      "python_version": "3.13.5",
+      "machine": "x86_64",
+      "system": "Linux",
+      "compiler": "cc (Debian 14.2.0-19) 14.2.0",
+      "xml_sha256": "fbac92d0689c9b1bc03b49ebc5cdf989f3fc23026c3c856f7224e4b9af1b5f53",
+      "driver_sha256": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483",
+      "harness_sha256": "53f82c4b13f75ee6ef9d4378fe81e12be917694deca8724b6bdfce2b6873eadc",
+      "corpus_sha256": "d51999b7a2011a0615f9ead65d0080db8733d5c99cb42225d80e7f2c9b7aebdb",
+      "pymavlink": "2.4.50",
+      "limitations": [
+        "512 mixed valid/invalid probes; no hard-real-time claim",
+        "Python constructor excluded; C stack setup included",
+        "C omits state, provenance objects and persistent replay",
+        "No memory, cold-start, signed, UDP or SITL comparison"
+      ]
+    }
+  ]
+}
