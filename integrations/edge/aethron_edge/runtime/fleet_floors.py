@@ -100,6 +100,19 @@ class FleetFloorStore:
             return self._read(connection)
 
     def advance(self, *, minimum_version: int, minimum_time_s: int) -> FleetFloors:
+        with self.guarded_advance(
+            minimum_version=minimum_version, minimum_time_s=minimum_time_s
+        ) as updated:
+            pass
+        return updated
+
+    @contextmanager
+    def guarded_advance(self, *, minimum_version: int, minimum_time_s: int):
+        """Hold the writer lock around local bookkeeping, committing on exit.
+
+        The yielded floors are provisional. Never perform external execution
+        inside this context or report success before it exits successfully.
+        """
         updated = _values(minimum_version, minimum_time_s)
         with self._connection() as connection:
             connection.execute("BEGIN IMMEDIATE")
@@ -110,5 +123,5 @@ class FleetFloorStore:
                 "UPDATE fleet_floor SET minimum_version=?, minimum_time_s=? WHERE singleton=1",
                 (minimum_version, minimum_time_s),
             )
+            yield updated
             connection.execute("COMMIT")
-        return updated

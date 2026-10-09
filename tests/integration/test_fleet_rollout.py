@@ -4,6 +4,7 @@ import importlib.util
 import sqlite3
 import tempfile
 import unittest
+from contextlib import closing
 from pathlib import Path
 from unittest.mock import patch
 
@@ -175,7 +176,7 @@ class FleetRolloutTests(unittest.TestCase):
         self.assertEqual(target.read_text(), "private")
         self.path.unlink()
         journal = self.create()
-        with sqlite3.connect(self.path) as connection:
+        with closing(sqlite3.connect(self.path)) as connection, connection:
             connection.execute("CREATE TABLE surprise (x)")
         self.reject(journal.snapshot)
 
@@ -199,7 +200,7 @@ class FleetRolloutTests(unittest.TestCase):
 
     def test_maximum_capacity_and_lock_contention_are_bounded(self):
         journal = self.create(slot_count=1024, batch_size=32)
-        with sqlite3.connect(self.path) as writer:
+        with closing(sqlite3.connect(self.path)) as writer, writer:
             writer.execute("BEGIN IMMEDIATE")
             self.reject(journal.claim, expected_revision=0, now_unix_s=1001)
         self.assertEqual(journal.claim(expected_revision=0, now_unix_s=1001), tuple(range(32)))
@@ -207,7 +208,7 @@ class FleetRolloutTests(unittest.TestCase):
 
     def test_deeply_nested_corrupt_payload_uses_fixed_error(self):
         journal = self.create()
-        with sqlite3.connect(self.path) as db:
+        with closing(sqlite3.connect(self.path)) as db, db:
             db.execute("UPDATE rollout SET payload=?", ("[" * 1200 + "]" * 1200,))
         self.reject(journal.snapshot)
 

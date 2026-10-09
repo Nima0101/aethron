@@ -96,3 +96,58 @@ def create_rollout_plan(
         )
     except (OSError, ValueError, TypeError, RuntimeError, StopIteration):
         raise ValueError("invalid_fleet_plan") from None
+
+
+def claim_rollout_wave(
+    bundle: Path,
+    public_key: Path,
+    *,
+    journal: RolloutJournal,
+    floor_store: FleetFloorStore,
+    clock: Callable[[], int],
+    expected_revision: int,
+    provisioning: bool = False,
+) -> tuple[int, ...]:
+    """Reverify before a synthetic reservation; never execute an artifact.
+
+    Return only after both commits. A failed final floor commit can leave
+    unresolved reservations; never automatically retry or erase those slots.
+    """
+    try:
+        if type(provisioning) is not bool:
+            raise ValueError()
+        recorded = journal.snapshot()
+        floors = floor_store.read()
+        started = _time(clock(), max(floors.minimum_time_s, recorded.last_time_s))
+        with tempfile.TemporaryDirectory(prefix="aethron-fleet-claim-") as temporary:
+            snapshot = Path(temporary)
+            pins = _copy_snapshot(Path(bundle), snapshot)
+            policy = load_fleet_policy(
+                snapshot,
+                Path(public_key),
+                now_unix_s=started,
+                minimum_version=floors.minimum_version,
+            )
+            if (
+                pins["fleet-policy.json"] != recorded.policy_sha256
+                or pins["fleet-artifact.bin"] != recorded.artifact_sha256
+                or policy.bundle_version != recorded.version
+                or policy.slot_count != recorded.slot_count
+                or policy.batch_size != recorded.batch_size
+                or policy.not_before_unix_s != recorded.not_before_unix_s
+                or policy.expires_unix_s != recorded.expires_unix_s
+                or (provisioning and not policy.allow_initial_provisioning)
+            ):
+                raise ValueError()
+            verified_at = _time(clock(), started, policy.expires_unix_s - 1)
+        # Consistent lock order: floor writer first, then journal writer.
+        # No public claim is returned from inside this provisional transaction.
+        with floor_store.guarded_advance(
+            minimum_version=policy.bundle_version, minimum_time_s=verified_at
+        ):
+            claimed_at = _time(clock(), verified_at, policy.expires_unix_s - 1)
+            slots = journal.claim(expected_revision=expected_revision, now_unix_s=claimed_at)
+            _time(clock(), claimed_at, policy.expires_unix_s - 1)
+        return slots
+    except (OSError, ValueError, TypeError, RuntimeError, StopIteration):
+        raise ValueError("invalid_fleet_claim") from None
