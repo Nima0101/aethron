@@ -7,8 +7,15 @@ from ..temporal.pixels import decode_pgm
 
 def detect_global_pgm(data):
     """v1: pixels<=127, eight-connected size3..1200, at most32 ordered proposals."""
+    return detect_threshold_pgm(data, 127)
+
+
+def detect_threshold_pgm(data, threshold):
+    """Experimental scalar threshold; preserve the fixed global baseline's geometry."""
+    if type(threshold) is not int or not 0 <= threshold <= 255:
+        raise ValueError("invalid_threshold")
     width, height, pixels = decode_pgm(data)
-    pending = bytearray(value <= 127 for value in pixels)
+    pending = bytearray(value <= threshold for value in pixels)
     components = []
     for seed in range(width * height):
         if not pending[seed]:
