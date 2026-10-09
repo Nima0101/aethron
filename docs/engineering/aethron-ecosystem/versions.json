@@ -1,0 +1,202 @@
+{
+  "schema_version": 1,
+  "pins": [
+    {
+      "name": "core",
+      "version": "0.2.0",
+      "status": "baseline",
+      "retrieved": "2026-10-08",
+      "source_ids": [],
+      "source_path": "pyproject.toml"
+    },
+    {
+      "name": "setuptools",
+      "version": "84.0.0",
+      "status": "baseline",
+      "retrieved": "2026-10-08",
+      "source_ids": [],
+      "source_path": "pyproject.toml"
+    },
+    {
+      "name": "wheel",
+      "version": "0.48.0",
+      "status": "baseline",
+      "retrieved": "2026-10-08",
+      "source_ids": [],
+      "source_path": "pyproject.toml"
+    },
+    {
+      "name": "numpy",
+      "version": "2.3.5",
+      "status": "baseline",
+      "retrieved": "2026-10-08",
+      "source_ids": [],
+      "source_path": "requirements-vision.txt"
+    },
+    {
+      "name": "opencv-python-headless",
+      "version": "4.13.0.92",
+      "status": "baseline",
+      "retrieved": "2026-10-08",
+      "source_ids": [],
+      "source_path": "requirements-vision.txt"
+    },
+    {
+      "name": "onnxruntime",
+      "version": "1.30.0",
+      "status": "baseline",
+      "retrieved": "2026-10-08",
+      "source_ids": [],
+      "source_path": "requirements-coreml.txt"
+    },
+    {
+      "name": "pillow",
+      "version": "12.3.0",
+      "status": "baseline",
+      "retrieved": "2026-10-08",
+      "source_ids": [],
+      "source_path": "requirements-dev.txt"
+    },
+    {
+      "name": "fastapi",
+      "version": "0.142.4",
+      "status": "candidate",
+      "retrieved": "2026-10-08",
+      "source_ids": [
+        "S44"
+      ]
+    },
+    {
+      "name": "uvicorn",
+      "version": "0.54.0",
+      "status": "candidate",
+      "retrieved": "2026-10-08",
+      "source_ids": [
+        "S45"
+      ]
+    },
+    {
+      "name": "pydantic",
+      "version": "2.13.5",
+      "status": "candidate",
+      "retrieved": "2026-10-08",
+      "source_ids": [
+        "S46"
+      ]
+    },
+    {
+      "name": "httpx",
+      "version": "0.28.1",
+      "status": "candidate",
+      "retrieved": "2026-10-08",
+      "source_ids": [
+        "S47"
+      ]
+    },
+    {
+      "name": "openapi",
+      "version": "3.1.1",
+      "status": "selected_reference",
+      "retrieved": "2026-10-08",
+      "source_ids": [
+        "S29"
+      ]
+    },
+    {
+      "name": "px4",
+      "version": "1.16",
+      "status": "selected_reference",
+      "retrieved": "2026-10-08",
+      "source_ids": [
+        "S10"
+      ]
+    },
+    {
+      "name": "micro-xrce-dds-agent",
+      "version": "2.4.3",
+      "status": "selected_reference",
+      "retrieved": "2026-10-08",
+      "source_ids": [
+        "S11"
+      ]
+    },
+    {
+      "name": "mavsdk",
+      "version": "4.0.5",
+      "status": "candidate",
+      "retrieved": "2026-10-08",
+      "source_ids": [
+        "S14"
+      ]
+    },
+    {
+      "name": "dji-mobile-android",
+      "version": "5.18.0",
+      "status": "candidate",
+      "retrieved": "2026-10-08",
+      "source_ids": [
+        "S16"
+      ]
+    },
+    {
+      "name": "parrot-olympe",
+      "version": "8.4.0",
+      "status": "candidate",
+      "retrieved": "2026-10-08",
+      "source_ids": [
+        "S18"
+      ]
+    },
+    {
+      "name": "actions/checkout",
+      "version": "11d5960a326750d5838078e36cf38b85af677262",
+      "status": "workflow",
+      "retrieved": "2026-10-08",
+      "source_ids": [],
+      "source_path": ".github/workflows/ci.yml"
+    },
+    {
+      "name": "actions/setup-python",
+      "version": "a26af69be951a213d495a4c3e4e4022e16d87065",
+      "status": "workflow",
+      "retrieved": "2026-10-08",
+      "source_ids": [],
+      "source_path": ".github/workflows/ci.yml"
+    },
+    {
+      "name": "preflight-python",
+      "version": "3.13.15",
+      "status": "workflow",
+      "retrieved": "2026-10-08",
+      "source_ids": [],
+      "source_path": "docs/verification/status-v3.md"
+    }
+  ],
+  "unresolved": [
+    {
+      "name": "ArduPilot firmware",
+      "gate": "P3.1",
+      "reason": "Select airframe and simulator release then pin commit before execution."
+    },
+    {
+      "name": "ROS middleware/Gazebo/px4_msgs",
+      "gate": "P3.1",
+      "reason": "Resolve exact compatible distro/firmware commit tuple; no floating release recipe."
+    },
+    {
+      "name": "thermal SDK/model/dataset",
+      "gate": "P2.1",
+      "reason": "License/device tuple and original dataset bytes must be acquired and frozen."
+    },
+    {
+      "name": "OpenAPI generator/validator",
+      "gate": "P1.2",
+      "reason": "Select exact tooling then lock full closure before generating clients."
+    },
+    {
+      "name": "container base image",
+      "gate": "P1.6",
+      "reason": "Resolve per-architecture digest for actual build; no fake image digest."
+    }
+  ]
+}

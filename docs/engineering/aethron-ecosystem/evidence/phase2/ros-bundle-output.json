@@ -1,0 +1,78 @@
+{
+  "status": "development_checkpoint_not_release_qualified",
+  "baseline": "c535a66e50c01df17e96943808fdd885d13749e3",
+  "change": "ROS runner refuses existing output directories/symlinks before copying or starting Docker, preserving prior evidence and preventing stale result reuse. Three focused regression tests; no sensor/clock/threshold changes.",
+  "checks": {
+    "red": "2 output-reuse regressions failed before change; runner copied inputs and reached container boundary instead of refusing output.",
+    "focused": "3 output-ownership/log-retention tests PASS0.151s.",
+    "full_installed_original": "121 tests in54.629s:120PASS/1FAIL raw signed CLI source_clock_discontinuity before geometry. No success report emitted.",
+    "full_installed_diagnostic": "121PASS44.784s with test-only bounded sample-age/first-fisheye-call instrumentation. Cold first inversion32.408750ms; no fault reproduced, so no causal conclusion or availability fix claimed.",
+    "static": "Ruff/check/format/diff PASS; Bandit unchanged baseline (4LOW/1MEDIUM), no suppressions."
+  },
+  "runtime": {
+    "image": "sha256:0948787ca5bb2880762df3624d3ca447d75848e3b0d1c473c305704242317659",
+    "canonical_pinned_base": false,
+    "platform": "linux/arm64",
+    "network": "none",
+    "uid": 10001,
+    "read_only": true,
+    "memory_mib": 512,
+    "cpus": 2,
+    "pids": 96,
+    "tmpfs_mib": 256,
+    "suite_timeout_seconds": 60
+  },
+  "wheel_sha256": {
+    "candidate/aethron-0.2.0-py3-none-any.whl": "5bb16bce505a077b524de44f98c71095974668bba8dc6151c60a346c9cef0b3a",
+    "candidate/aethron_edge-0.1.0-py3-none-any.whl": "015c840478c2f7228976de3bd6a5403eca8bc3e13eb9361c559553113bf039ff",
+    "dependencies/annotated_doc-0.0.5-py3-none-any.whl": "117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101",
+    "dependencies/annotated_types-0.8.0-py3-none-any.whl": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0",
+    "dependencies/anyio-4.15.1-py3-none-any.whl": "6152fdbbf9a77fdec97731721bebf7c4c44f7c29b424b0065826173efc7ed101",
+    "dependencies/attrs-26.1.0-py3-none-any.whl": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+    "dependencies/certifi-2026.7.22-py3-none-any.whl": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775",
+    "dependencies/click-8.5.0-py3-none-any.whl": "255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360",
+    "dependencies/fastapi-0.142.4-py3-none-any.whl": "8a651aa071a9f92c8217cca1d0b044bf9c326f336578be0a728a1a1f22ec52d2",
+    "dependencies/h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+    "dependencies/httpcore-1.0.9-py3-none-any.whl": "2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55",
+    "dependencies/httpx-0.28.1-py3-none-any.whl": "d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad",
+    "dependencies/idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+    "dependencies/jsonschema-4.26.0-py3-none-any.whl": "d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce",
+    "dependencies/jsonschema_specifications-2025.9.1-py3-none-any.whl": "98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe",
+    "dependencies/numpy-2.3.5-cp312-cp312-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl": "8b973c57ff8e184109db042c842423ff4f60446239bd585a5131cc47f06f789d",
+    "dependencies/opencv_python_headless-4.13.0.92-cp37-abi3-manylinux_2_28_aarch64.whl": "eb60e36b237b1ebd40a912da5384b348df8ed534f6f644d8e0b4f103e272ba7d",
+    "dependencies/opentelemetry_api-1.45.1-py3-none-any.whl": "b31553efa588ae44bc306f863c785c5333a9ecc091248c6ee68b4b6c87fdedfb",
+    "dependencies/pip-26.2-py3-none-any.whl": "931c303696af6fa3417112103b1cad26890e5a07eccb5b99783700e33f2b8aad",
+    "dependencies/pydantic-2.13.5-py3-none-any.whl": "346a034f080da3755d8e9cb5e00e8b07de1d39e4f6e2c87d8ab7cafa0b269a73",
+    "dependencies/pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl": "4fdc8b93a41521988916eeaa271173fcca7fa0803d62f87675aac8dcec1c8e29",
+    "dependencies/referencing-0.37.0-py3-none-any.whl": "381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231",
+    "dependencies/rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl": "2693b2728bbcc48d09a981a356954b0c47c53ff25b545856f28a889ea619f69a",
+    "dependencies/starlette-1.7.0-py3-none-any.whl": "67f8e99895493dd2911a03f11314af6ceebeae4e704bb9f43dfc6a9db151c93e",
+    "dependencies/typing_extensions-4.16.0-py3-none-any.whl": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+    "dependencies/typing_inspection-0.4.4-py3-none-any.whl": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147",
+    "dependencies/uvicorn-0.54.0-py3-none-any.whl": "505bdb0f318731d45f1f712071fc781a8981f6847a31c902c9f5e652d4f67faf"
+  },
+  "source_sha256": {
+    "scripts/edge_ros2_check.py": "2906bcb4cf33395d88eeae91cd08e4f50a465ab3fd7ba8eb4648178fba739618",
+    "tests/integration/test_ros_check_output.py": "bf6a7fec30e293e7f11d84aed795eec7c98298340106fa7cb25b4d890c9c9685",
+    "integrations/edge/ros2/container_check.py": "9679cb5f2b8d7491a717d8eb9d20bd787eec60a89214cb38437735cd48e84000"
+  },
+  "artifacts": {
+    "build/ecosystem-phase2/ros-batched-bundle/check/dds.log": "d2f5be55e5acdf7d7aa2937283ead28e724bee9bfa1594dd1da36e074c68fab7",
+    "build/ecosystem-phase2/ros-batched-bundle/check/inputs.json": "4c550e8255c291c02f30f4c60b7dd2ce31e33f42eb5b7dd5f8d6de94d325a6bd",
+    "build/ecosystem-phase2/ros-batched-bundle/diagnostic-check/dds.log": "ff8e0710004c44562b20e1b33c34e6e7fbda6c5abcb237535382cf193dd7ebd9",
+    "build/ecosystem-phase2/ros-batched-bundle/diagnostic-check/inputs.json": "329b2c353b078e2ef4933afe0507fdc8ed2455f5fcdff5decea17af7534b0df7",
+    "build/ecosystem-phase2/ros-batched-bundle/diagnostic-check/result.json": "862c21de411ebf7ba9691fb1583d99309c64cb9666ea3ff6faa31340dcf91e78",
+    "build/ecosystem-phase2/ros-batched-bundle/diagnostic/sitecustomize.py": "4bb120af61c412ad6c0783729d9bdaf5ad4580a9aa668540d29f97ae1d09ef88",
+    "build/ecosystem-phase2/ros-batched-bundle/run.py": "6ef17beac71c303bb02ec887df67c3da58606b3ccee08eaff323228fd15133c7",
+    "build/ecosystem-phase2/ros-batched-bundle/run_diagnostic.py": "eb57f4c0daae02c207c859cb6365cd99a7b5d24ab0b94375070975e85cdd1457",
+    "build/ecosystem-phase2/ros-output-guard/red.log": "8bf2cb07f46c38a7fa8e7456d958cf7c56b70d024eecdf85614c26380b189522",
+    "build/ecosystem-phase2/ros-output-guard/green-final.log": "239d017aac6e81c2404ecd4d605174f59f2a595c7353ab14b8d890c222259ca8",
+    "build/ecosystem-phase2/ros-output-guard/bandit.json": "366cfbe83f00fa870a9544055ec4ddca142700139050333f2af81bbdfe1b8092"
+  },
+  "remaining": [
+    "Original source-clock-discontinuity and earlier clock-drift failures remain unresolved; passing instrumented repeat is separate evidence.",
+    "Canonical pinned base, hosted CI, boot/reboot/offline soak and complete release gates remain pending.",
+    "Existing aircraft/latency/DDS/update/VM negatives retained. No new hardware/OEM/zero-light/physical safety qualification."
+  ],
+  "public_copy_note": "Owner-planning and local publication/disk metadata omitted; software results, failures, source hashes and qualification limits retained."
+}

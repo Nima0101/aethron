@@ -1,0 +1,29 @@
+{
+  "dpkg_sha256": "124f499a911c161a504fd0ec8f9a61f60cd9e6af900c5cd159562f0893ccb170",
+  "files": {
+    "initrd": "5a13f7415eea90983df614f2c6601eeba3ca50395d007d4bf3f424f655ce7227",
+    "kernel": "7ea5c4140a8d9b42c9856c3e3c1d6a8f2b75bd7c9f9d2eb7da52af110dc3d41f",
+    "rootfs.raw": "1278133362df9c74f6a0d0648583537fd5b6d05d68c56d6c3005cf40dbe1759c"
+  },
+  "guest_image": "sha256:65c83d57fdabf7415c17286c36745483b3fc63e613645c2c3e00f92b507ea3a1",
+  "hardware_qualified": false,
+  "kind": "test_only_linux_sil",
+  "schema_version": 1,
+  "templates": {
+    "packaging/appliance/image/Guest.Containerfile": "34b05485b881eeb55ea9bc1c00b387772eac65c81eac19184ad39cbd0dd70ccc",
+    "packaging/appliance/image/Tools.Containerfile": "38fa67924be37f2ecc7143ae108f74914dc12b1dd18ca7a4a8eff079f5f61405",
+    "packaging/appliance/image/aethron-sil-probe.service": "20f52022f62dffb06dda8a3c9551e824a55a9a481cf9421edf63ef51c00b9424",
+    "packaging/appliance/image/appliance.json": "24d65b2fc882d64769ccfa6917918f900f15d4c63d6c2aef846aaf2c09c0b0d6",
+    "packaging/appliance/image/boot_probe.py": "f0eacd4c8c386e83381f8840fdbcc16d57e8c17de3014fabbc7857d6d9b5f3db",
+    "packaging/appliance/image/make-root.sh": "da7ba0aa3fe71378dd84253c213565f381867912e3519f0dcc51f01be29180c6",
+    "packaging/appliance/image/prepare.py": "5a8aa14c0710dd27a08cd75769e14856dc2e4c8cfbbee52d764ad4876233b60c",
+    "packaging/appliance/image/sign_bundle.py": "4011290513f807177212ffa140bfff746512ec3e97739719a7653704fc7e515a",
+    "packaging/appliance/image/update_probe.py": "898d5e89756305cbf14becdcb8f4034749910fcc34f86043810e70920d5ee4ee",
+    "packaging/appliance/image/update_runtime_check.py": "cd71ee8a2977b5557463d2f87229f506897d1f4079fa8c3008c9645887333a59"
+  },
+  "tool_image": "sha256:5f557bedceed76ccd1d28f8db7e58a473906c47aa2b6646a6b7ce05174a477b6",
+  "wheels": {
+    "aethron-0.2.0-py3-none-any.whl": "be3dd8e3e8bcf437d72d65e384c560eb18d4b22baf522849b965d3d720c1d73f",
+    "aethron_edge-0.1.0-py3-none-any.whl": "49fda684a90da9667ff1717ece3a9a3b631b33fda43a72ea952ce129f621d905"
+  }
+}

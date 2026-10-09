@@ -1,0 +1,38 @@
+{
+  "fastapi": {
+    "url": "https://pypi.org/pypi/fastapi/json",
+    "version": "0.142.4",
+    "date": null,
+    "retrieved": "2026-10-08"
+  },
+  "uvicorn": {
+    "url": "https://pypi.org/pypi/uvicorn/json",
+    "version": "0.54.0",
+    "date": null,
+    "retrieved": "2026-10-08"
+  },
+  "pydantic": {
+    "url": "https://pypi.org/pypi/pydantic/json",
+    "version": "2.13.5",
+    "date": null,
+    "retrieved": "2026-10-08"
+  },
+  "httpx": {
+    "url": "https://pypi.org/pypi/httpx/json",
+    "version": "0.28.1",
+    "date": null,
+    "retrieved": "2026-10-08"
+  },
+  "dji": {
+    "url": "https://api.github.com/repos/dji-sdk/Mobile-SDK-Android-V5/releases/latest",
+    "version": "V5.18.0",
+    "date": "2026-05-29T07:28:50Z",
+    "retrieved": "2026-10-08"
+  },
+  "mavsdk": {
+    "url": "https://api.github.com/repos/mavlink/MAVSDK/releases/latest",
+    "version": "v4.0.5",
+    "date": "2026-10-07T07:40:51Z",
+    "retrieved": "2026-10-08"
+  }
+}

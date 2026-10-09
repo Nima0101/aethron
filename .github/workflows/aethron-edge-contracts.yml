@@ -1,0 +1,105 @@
+name: AETHRON edge contracts
+on:
+  push:
+    branches: [feat/aethron-code-checkpoint-20261009]
+    paths:
+      - 'integrations/edge/aethron_edge/contracts.py'
+      - 'integrations/edge/aethron_edge/common_types.py'
+      - 'integrations/edge/aethron_edge/openapi.py'
+      - 'integrations/edge/aethron_edge/pipeline.py'
+      - 'integrations/edge/aethron_edge/timebase.py'
+      - 'integrations/edge/aethron_edge/calibration.py'
+      - 'integrations/edge/requirements-server.lock'
+      - 'contracts/**'
+      - 'tests/integration/test_contract_scalars.py'
+      - 'tests/integration/test_openapi.py'
+      - 'tests/integration/test_worker_replay_input.py'
+      - 'tests/integration/test_clock_pipeline.py'
+      - 'tests/integration/test_calibration_admission.py'
+      - 'scripts/edge_calibration_profile.py'
+      - 'scripts/edge_clock_profile.py'
+      - 'scripts/probes/clock_compatibility.rs'
+      - 'scripts/edge_worker_preload_profile.py'
+      - 'scripts/edge_contract_profile.py'
+      - '.github/workflows/aethron-edge-contracts.yml'
+  pull_request:
+    paths:
+      - 'integrations/edge/**'
+      - 'contracts/**'
+      - 'tests/integration/**'
+      - 'scripts/edge_clock_profile.py'
+      - 'scripts/edge_calibration_profile.py'
+      - 'scripts/probes/clock_compatibility.rs'
+      - 'scripts/edge_contract_profile.py'
+      - '.github/workflows/aethron-edge-contracts.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  installed-contracts:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-24.04, python: '3.11.13'}
+          # Upstream 3.11.10+ has no setup-python macOS/Windows binaries.
+          # 3.11.9 is compatibility coverage, not an appliance runtime pin.
+          - {os: macos-15, python: '3.11.9'}
+          - {os: windows-2025, python: '3.11.9'}
+          - {os: ubuntu-24.04, python: '3.13.15'}
+          - {os: macos-15, python: '3.13.15'}
+          - {os: windows-2025, python: '3.13.15'}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Build and install reviewed wheels
+        run: |
+          python -m pip install setuptools==84.0.0 wheel==0.48.0
+          python -m pip install --require-hashes -r integrations/edge/requirements-server.lock
+          python -m pip wheel --no-deps --no-build-isolation --wheel-dir build/contract-wheels . ./integrations/edge
+          python -m pip install --no-index --no-deps --find-links build/contract-wheels aethron==0.2.0 aethron-edge==0.1.0
+      - name: Installed strict contracts and consumer fail-closed checks
+        run: |
+          python -I -m unittest discover -s tests/integration -p test_contract_scalars.py -v
+          python -I -m unittest discover -s tests/integration -p test_edge_contract.py -v
+          python -I -m unittest discover -s tests/integration -p test_openapi.py -v
+          python -I -m unittest discover -s tests/integration -p test_external_clients.py -v
+      - name: Installed worker preload, clock and expiry checks
+        run: |
+          python -I -c "import sys, unittest; sys.path.insert(0, 'tests/integration'); unittest.main(module=None, argv=['unittest', 'test_worker_replay_input', 'test_clock_pipeline', 'test_worker_imports', 'test_pipeline.Pipeline.test_headless_replay_expires_when_worker_stops', 'test_pipeline.Pipeline.test_unstarted_pipeline_is_unknown', '-v'])"
+      - name: Bounded contract validation comparison
+        run: python -I scripts/edge_contract_profile.py > build/contract-profile.json
+      - name: Installed clock scalar proof
+        run: python -I scripts/edge_clock_profile.py > build/clock-profile.json
+      - name: Installed calibration admission and technology comparison
+        run: |
+          python -I -m unittest discover -s tests/integration -p test_calibration_admission.py -v
+          python -I scripts/edge_calibration_profile.py --conformance-tests tests/integration > build/calibration-profile.json
+      - name: Checked native clock comparison probe (not a deployed runtime)
+        if: matrix.os == 'ubuntu-24.04' && matrix.python == '3.13.15'
+        run: |
+          rustup toolchain install 1.98.1 --profile minimal
+          rustc +1.98.1 --version > build/clock-rust-version.txt
+          rustc +1.98.1 --edition=2021 --test -D warnings scripts/probes/clock_compatibility.rs -o build/clock-test
+          build/clock-test
+          rustc +1.98.1 --edition=2021 --crate-type cdylib -O -D warnings scripts/probes/clock_compatibility.rs -o build/clock.so
+          python -I scripts/edge_clock_profile.py --native-library build/clock.so > build/clock-native-profile.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: contracts-${{ matrix.os }}-${{ matrix.python }}
+          path: |
+            build/contract-profile.json
+            build/calibration-profile.json
+            build/clock*profile.json
+            build/clock-rust-version.txt
+          retention-days: 7
+          if-no-files-found: error

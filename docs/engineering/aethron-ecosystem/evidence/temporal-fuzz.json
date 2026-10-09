@@ -1,0 +1,30 @@
+{
+  "seed": 981640,
+  "cases": 44935,
+  "seconds": 61.921,
+  "unexpected_exceptions": 0,
+  "source_sha256": {
+    "aethron/render.py": "9231a04b312d74281192d9f097ccfc8d7fd58fc20f2d8d45e36748f831647b44",
+    "aethron/actions.py": "e449088fa6850f3dc11f782cc656817ab571e2d94cbc4ebb33869706e7537a2a",
+    "aethron/__init__.py": "8ea373fbd458d5b53b6a5285584c61d14f1541e96d7a05c29f0508011b766fa7",
+    "aethron/schema_v2.py": "d529ca9797dcf0cf4d7126c93c9ea233edea77cda55faecc3ba7a2559ec7f3ab",
+    "aethron/features.py": "fae7de40ec3af1c3a47ae919628b7339a83ebd783b882e3e66bdcf5868c9dd3c",
+    "aethron/core.py": "c5ef2d70c7ac5065b5a95836eba588fd44a78a6bceb97883ec0d0b5ac2a1619a",
+    "aethron/demo.py": "c6b1539f1fcd91970d71aee2dd8923a584df2f1332adb9f083de18e14277983e",
+    "aethron/__main__.py": "94eb2aa08c590456d8d1f6de520b0f268cab48c671325688ae9f6ae4b6ec7a66",
+    "aethron/schema.py": "ca28412601bf05a155ad55e59070f811af2c67dd374e2b2baeb9b54d8e4ccc43",
+    "aethron/adapters.py": "856030c21738c200df3758eda4194ddde5f56c1d6feca57b0c0965f06e9a0481",
+    "aethron/temporal/registration.py": "cd6b8955a7ebc8c762da3af5f28d83ff2a7a2a5f097a5e3d1177867fc53aa7c5",
+    "aethron/temporal/pixels.py": "314583c5a9d34f005f1c9b5fb9c739183de39894c38dcff8cdc7e899406e13cb",
+    "aethron/temporal/session.py": "e702043f6d20611cae0037ad041198976b730b23407b87df042e7e7c91574560",
+    "aethron/temporal/__init__.py": "8dac6e681e96fa0a78affbddc6c76962d221a7e66f6e8bc0828e40d9b9494087",
+    "aethron/temporal/replay.py": "37863819e5c3a99aefbe0d3a7df17ac7dae09c33ed01b76d8af0697b133344e0",
+    "aethron/temporal/fusion.py": "c9f6df323f40ac0f0cf9f06d9f3a642fb3ab5113d30cded90aae3d3d5d8fa770",
+    "aethron/temporal/math.py": "f9a634fea08a7e20bf4e730671f6eed729c4827193d439f5ab29fa3f708d2b9e",
+    "aethron/temporal/fixtures.py": "d18cbd884805e335d803638b2a311bd6fc90b5764c3db9c6eb194270490d19b5",
+    "aethron/temporal/schema.py": "2602ad7523623f326876b5723ef4869049b2b2bb095c9f03e531345f4e568350",
+    "aethron/models/__init__.py": "61e3d91134abfff53054811740f54dd21cc6e531087e506302a0bf650728e25d",
+    "aethron/vision/yolox.py": "d2a6ca09b670bc569ad79e025240908fa7252c8c9dcbb76a5b93c83e2ac3bec4",
+    "aethron/vision/__init__.py": "2e051811883c745faf9abe9d2e076396186a187c7807fbbf087dbe5d54c085a2"
+  }
+}

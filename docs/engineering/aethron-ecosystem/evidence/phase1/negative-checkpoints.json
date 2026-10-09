@@ -1,0 +1,131 @@
+{
+  "policy": "Raw local logs remain under ignored build; public summary excludes private paths. Frozen aircraft/latency evidence remains unchanged.",
+  "records": [
+    {
+      "local_log": "integration-frozen-run.log",
+      "sha256": "9b90f0e3e327d8e3e27910427581dd0168b7a2d00257b838ab37112ca08ee987",
+      "finding": "38 tests; one source negotiation failure under contention",
+      "status": "retained_failure",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "integration-repeat-diagnostic.log",
+      "sha256": "d525cf46ba8a728d3dce944306548ba8fc49bc96cc3e7d46848240c1da25c4df",
+      "finding": "38 tests; lifecycle scheduling and cold inference failures",
+      "status": "retained_failure",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "integration-release-candidate.log",
+      "sha256": "9c9e88da3bc9279ecd3325742c211db2f3f0b0c4867276e466df4811d410550f",
+      "finding": "46 tests; viewer counter read before worker readiness",
+      "status": "retained_failure",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "source-malformed.log",
+      "sha256": "e5922936573d245dd81e0d71a62e88b1eb7501078f26593781f4d69161893ee5",
+      "finding": "5 tests; startup metadata still empty while decoder alive",
+      "status": "retained_failure",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "package-final.log",
+      "sha256": "1e50c338d902e252db74a1f472a5b6ca4017786cbfb27388b1b0c940f555ad4a",
+      "finding": "fixed-delay zero-viewer counter comparison failed",
+      "status": "retained_failure",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "worker-tree-green.log",
+      "sha256": "1fab71619921e91afba696c5cf1de1f4ab37e0b98e84812196df545e2cb766d5",
+      "finding": "sandbox rejected own process-group signal; registered-child fallback added",
+      "status": "retained_failure",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "visual-red.log",
+      "sha256": "993650dfa688432cf4dde896cbd3fa691b1cf232ac1e8c88609ffe6913b70b67",
+      "finding": "inherited README title-region artifact mismatch",
+      "status": "retained_failure",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "boot-candidate-run.log",
+      "sha256": "f69a01ccd91f8d5fb6b924dc01c6a2a240a471f9c84d066decaa8429b98bcc00",
+      "finding": "incomplete prior boot/update soak; blocking probe deadline was 180s",
+      "status": "retained_failure",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "boot-vm/serial-first-negative.log",
+      "sha256": "8597df41826cf80177b0084c9da31bf6fbcefeffc2f4b75a6b794c48cc811d99",
+      "finding": "Retained earlier Linux boot/crash-recovery counterexample; see EXECUTION ledger",
+      "status": "retained_failure",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "boot-vm/serial-second-negative.log",
+      "sha256": "fb6daf6fd29eb2c7f31ed0aae14eee641996c6bee42fd2fbd97532b2f95a9dd4",
+      "finding": "Retained earlier Linux boot/crash-recovery counterexample; see EXECUTION ledger",
+      "status": "retained_failure",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "boot-vm/serial-third-negative.log",
+      "sha256": "0d3028c411de50e7ac0ce85d5e0bb242317c982f991b66b5236d5a81c3bae5c2",
+      "finding": "Retained earlier Linux boot/crash-recovery counterexample; see EXECUTION ledger",
+      "status": "retained_failure",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "drop-metrics-red.log",
+      "sha256": "6bd2af1193e8010428a8b91e6c075cdd55fc743837222bc05109bdf494141460",
+      "finding": "Missing dropped-message instrumentation reproduced before implementation",
+      "status": "retained_negative_or_incomplete",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "drop-gate-red.log",
+      "sha256": "8963708a131733f7db97402d16960125bfd2e1adb33ede0e6b0861b15ff750fa",
+      "finding": "Boot acceptance initially accepted missing drop measurements; negative test fixed",
+      "status": "retained_negative_or_incomplete",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "boot-measured/serial.log",
+      "sha256": "934fde2d83f0490e91d361078d52fdec14b8475fbe2042a7400f63dcbf100c9f",
+      "finding": "45-second first-boot window ended before processing under load; processing gate failed, retained",
+      "status": "retained_negative_or_incomplete",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "boot-protected/serial.log",
+      "sha256": "323c34dd687afff7a76a363d0c8c5476392808ee5381bcc0c20ec5a08a66fec8",
+      "finding": "Incomplete protected-store run superseded to add required drop telemetry",
+      "status": "retained_negative_or_incomplete",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "boot-final/serial.log",
+      "sha256": "c9b9036115a9dde0b232542191441074cce3c83a3e045d44854a56134b5ac96e",
+      "finding": "Incomplete version-2 runtime run superseded by update-store permission fix",
+      "status": "retained_negative_or_incomplete",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "boot-acceptance-before-build-complete.log",
+      "sha256": "89dcc6ffc6ec0c242207db32926af1edc4c238f18d966cce2f9be305c2cc8958",
+      "finding": "Harness rejected image before builder finished writing signed manifest; rerun only after successful builder completion",
+      "status": "retained_negative_or_incomplete",
+      "public_raw_log": false
+    },
+    {
+      "local_log": "pixels-measured.log",
+      "sha256": "d1e7fa0e3b2b6937c895ad2cc64d4a6de71a77e7705b10bfb740ff698fbbc894",
+      "finding": "Installed pixel client timed out at unchanged 20s bound under concurrent load; focused repeat passed with same code and timeout",
+      "status": "retained_failure",
+      "public_raw_log": false
+    }
+  ]
+}

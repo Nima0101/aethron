@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-08",
+  "integration_tests": 47,
+  "checks": [
+    {
+      "command": "python -m unittest discover -s tests/integration -v",
+      "status": "passed",
+      "local_log": "integration-final-source.log",
+      "sha256": "b31a8dde80dc7049c54758bea423f279b3e288ec722e21e57ecc2e01e3aa9a39"
+    },
+    {
+      "command": "python -m unittest discover -s tests/integration -p test_worker_tree.py",
+      "status": "passed",
+      "local_log": "worker-tree-final.log",
+      "sha256": "8275a6239e067b1d4a4e0f0e51d4899ed4275dd58d37a8a62788a6a352ae27ff"
+    },
+    {
+      "command": "python -m unittest discover -s tests/integration -p test_pipeline.py",
+      "status": "passed",
+      "local_log": "pipeline-tree-final.log",
+      "sha256": "cdfef8e749477d93407cc2002e717e4cf548ae8fdb55b1a9882edf8bd5511827"
+    },
+    {
+      "command": "python scripts/edge_package_check.py",
+      "status": "passed",
+      "local_log": "package-final-tree.log",
+      "sha256": "fe78215d2ce80c3cc4d2e0b81f8195747472bcfd640591d155bd613c7ad88329"
+    },
+    {
+      "command": "python scripts/edge_node_e2e.py",
+      "status": "passed",
+      "local_log": "node-final.log",
+      "sha256": "b48743ab1f1546e55a31997a349cc576f018ba6c0dec3b6454163b8e4aeb19a8"
+    },
+    {
+      "command": "python scripts/verify.py",
+      "status": "passed",
+      "local_log": "checkpoint-verify.log",
+      "sha256": "51c5d6dc9d5cb55f9176ad9907eae2649fa92112f38fa34c2dc40a667538d943"
+    }
+  ],
+  "qualification": "software only; final boot/clean-clone gate still pending at this checkpoint"
+}

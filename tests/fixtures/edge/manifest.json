@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "fixtures": [
+    {
+      "path": "data/rgb-smoke/person.png",
+      "sha256": "88431cd9653ccd539741b555fb0a46b61558b301d4110412b5bc28b5e3ea6cb5",
+      "license_reference": "data/rgb-smoke/README.md",
+      "usage": "actual file and RTSP pixels; no labels supplied to inference"
+    },
+    {
+      "path": "examples/temporal-blackout.jsonl",
+      "sha256": "79b1ec8be1d44681d91e387371313d53b138a9ca84bcec1cab2b969fb9c09f84",
+      "usage": "synthetic software supervision only"
+    }
+  ]
+}

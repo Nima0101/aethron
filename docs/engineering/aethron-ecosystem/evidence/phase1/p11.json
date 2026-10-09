@@ -1,0 +1,16 @@
+{
+  "source_parent": "1445f1879d63eb37f4bf8c367e53db74a95b1fe6",
+  "installed_consumer": {
+    "red": "missing edge project build failed",
+    "green": "1 test passed; outside-checkout fresh venv, offline wheel install, 24 replay frames, depth/lwir/radar final sources"
+  },
+  "core_package": {
+    "byte_identical": true,
+    "sha256": "be3dd8e3e8bcf437d72d65e384c560eb18d4b22baf522849b965d3d720c1d73f"
+  },
+  "plan_negative_checks": 14,
+  "baseline_verify": {
+    "status": "failed",
+    "reason": "owner approval contained absolute private local path; redacted only the path, preserved original commit and digest"
+  }
+}

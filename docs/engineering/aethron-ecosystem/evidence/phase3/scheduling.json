@@ -1,0 +1,355 @@
+{
+  "status": "development_only_not_readiness_or_release_qualification",
+  "baseline": "5e791a2c189e5138c584b2e42a600f9addfb6b07",
+  "scope": "Wait on owned live child sentinel with unchanged10ms timeout; nonblocking exit check withdraws cached authentication. No priority changes, threshold changes or other-process control.",
+  "checks": {
+    "red": "Live-child wait regression failed before change; stale-liveness/ready-sentinel regression separately failed before snapshot fix.",
+    "focused": "10 PASS0.025s",
+    "mac_before_exit_fix": "100 PASS20.054s",
+    "linux_before_exit_fix": "100 tests:99 PASS/1 crash_restart authentication failure1.956s; retained",
+    "mac_final": "101 PASS19.737s",
+    "linux_final": "101 PASS4.946s",
+    "linux_runtime_final": "4 PASS1.031s; real kernel identity, policy startup, signed localhost, idle revocation and shutdown",
+    "static": "Ruff check/format/diff PASS; Bandit0"
+  },
+  "qualification_limits": [
+    "Historical readiness failures remain. Sender/reader waits still exceeded100ms; supervisor gap also exceeded100ms in2 of3 intermediate after runs. No general Mac availability/real-time guarantee.",
+    "Before/after probes vary in startup/scheduling and are not a controlled statistical performance claim. Camera CPU was small compared with wall pauses; exact host policy causing coarse waits remains unproven.",
+    "No new full release/clean/ROS systemd/VM/reboot/soak/hosted/Windows/physical qualification. Earlier DDS/aircraft/latency evidence unchanged."
+  ],
+  "probe": {
+    "before": [
+      {
+        "camera": false,
+        "reader_samples": 44,
+        "authenticated_reads": 18,
+        "first_auth_ms": 1835.607791,
+        "reader_max_gap_ms": 222.213375,
+        "reader_cpu_ms": 5.882792,
+        "telemetry": {
+          "state": "observed_unverified",
+          "reason": "unmapped_source_clock",
+          "samples": 1,
+          "port": 54794,
+          "authenticated": true,
+          "perception_eligible": false,
+          "restarts": 0,
+          "source_reason": "unmapped_source_clock",
+          "max_poll_ms": 36,
+          "max_decode_ms": 9,
+          "max_commit_ms": 15,
+          "max_delivery_ms": 32,
+          "max_owner_gap_ms": 297,
+          "messages_received": 41,
+          "observed_messages": 34,
+          "expired_on_arrival": 2,
+          "message_age_ms": 24,
+          "message_state": "observed_unverified"
+        },
+        "sender": {
+          "sent": 73,
+          "max_gap_ms": 196.248209,
+          "wall_ms": 7069.956791,
+          "cpu_ms": 34.439875
+        }
+      },
+      {
+        "camera": true,
+        "reader_samples": 49,
+        "authenticated_reads": 12,
+        "first_auth_ms": 1231.258708,
+        "reader_max_gap_ms": 219.820458,
+        "reader_cpu_ms": 4.126833,
+        "telemetry": {
+          "state": "waiting",
+          "reason": "source_waiting",
+          "samples": 0,
+          "port": 58765,
+          "authenticated": false,
+          "perception_eligible": false,
+          "restarts": 0,
+          "source_reason": "receive_expired",
+          "max_poll_ms": 68,
+          "max_decode_ms": 1,
+          "max_commit_ms": 50,
+          "max_delivery_ms": 55,
+          "max_owner_gap_ms": 227,
+          "messages_received": 42,
+          "observed_messages": 30,
+          "expired_on_arrival": 2,
+          "message_age_ms": 26,
+          "message_state": "waiting"
+        },
+        "camera_ticks": {
+          "count": 50,
+          "wall_ms": 76.938379,
+          "cpu_ms": 60.358791
+        },
+        "sender": {
+          "sent": 71,
+          "max_gap_ms": 234.137958,
+          "wall_ms": 7408.300875,
+          "cpu_ms": 36.497125
+        }
+      },
+      {
+        "camera": false,
+        "reader_samples": 49,
+        "authenticated_reads": 9,
+        "first_auth_ms": 1260.719833,
+        "reader_max_gap_ms": 243.536833,
+        "reader_cpu_ms": 5.031958,
+        "telemetry": {
+          "state": "waiting",
+          "reason": "source_waiting",
+          "samples": 0,
+          "port": 49275,
+          "authenticated": false,
+          "perception_eligible": false,
+          "restarts": 0,
+          "source_reason": "unmapped_source_clock",
+          "max_poll_ms": 229,
+          "max_decode_ms": 6,
+          "max_commit_ms": 8,
+          "max_delivery_ms": 233,
+          "max_owner_gap_ms": 333,
+          "messages_received": 41,
+          "observed_messages": 33,
+          "expired_on_arrival": 7,
+          "message_age_ms": 135,
+          "message_state": "observed_unverified"
+        },
+        "sender": {
+          "sent": 68,
+          "max_gap_ms": 271.358375,
+          "wall_ms": 7428.823,
+          "cpu_ms": 28.555166
+        }
+      }
+    ],
+    "after_wait_change_before_exit_fix": [
+      {
+        "camera": false,
+        "reader_samples": 51,
+        "authenticated_reads": 22,
+        "first_auth_ms": 4320.154334,
+        "reader_max_gap_ms": 236.3215,
+        "reader_cpu_ms": 5.18375,
+        "telemetry": {
+          "state": "observed_unverified",
+          "reason": "unmapped_source_clock",
+          "samples": 1,
+          "port": 52169,
+          "authenticated": true,
+          "perception_eligible": false,
+          "restarts": 0,
+          "source_reason": "unmapped_source_clock",
+          "max_poll_ms": 33,
+          "max_decode_ms": 5,
+          "max_commit_ms": 12,
+          "max_delivery_ms": 38,
+          "max_owner_gap_ms": 257,
+          "messages_received": 173,
+          "observed_messages": 143,
+          "expired_on_arrival": 3,
+          "message_age_ms": 28,
+          "message_state": "observed_unverified"
+        },
+        "sender": {
+          "sent": 46,
+          "max_gap_ms": 181.840458,
+          "wall_ms": 4285.053625,
+          "cpu_ms": 31.739458
+        }
+      },
+      {
+        "camera": true,
+        "reader_samples": 50,
+        "authenticated_reads": 19,
+        "first_auth_ms": 3149.807167,
+        "reader_max_gap_ms": 236.025667,
+        "reader_cpu_ms": 3.506958,
+        "telemetry": {
+          "state": "waiting",
+          "reason": "source_waiting",
+          "samples": 0,
+          "port": 60571,
+          "authenticated": false,
+          "perception_eligible": false,
+          "restarts": 0,
+          "source_reason": "receive_expired",
+          "max_poll_ms": 39,
+          "max_decode_ms": 2,
+          "max_commit_ms": 25,
+          "max_delivery_ms": 25,
+          "max_owner_gap_ms": 134,
+          "messages_received": 222,
+          "observed_messages": 171,
+          "expired_on_arrival": 7,
+          "message_age_ms": 22,
+          "message_state": "waiting"
+        },
+        "camera_ticks": {
+          "count": 54,
+          "wall_ms": 161.397956,
+          "cpu_ms": 64.308835
+        },
+        "sender": {
+          "sent": 45,
+          "max_gap_ms": 388.339917,
+          "wall_ms": 5212.332791,
+          "cpu_ms": 26.621417
+        }
+      },
+      {
+        "camera": false,
+        "reader_samples": 49,
+        "authenticated_reads": 25,
+        "first_auth_ms": 1149.315583,
+        "reader_max_gap_ms": 227.924333,
+        "reader_cpu_ms": 3.785458,
+        "telemetry": {
+          "state": "waiting",
+          "reason": "source_waiting",
+          "samples": 0,
+          "port": 52013,
+          "authenticated": false,
+          "perception_eligible": false,
+          "restarts": 0,
+          "source_reason": "receive_expired",
+          "max_poll_ms": 31,
+          "max_decode_ms": 5,
+          "max_commit_ms": 18,
+          "max_delivery_ms": 17,
+          "max_owner_gap_ms": 23,
+          "messages_received": 332,
+          "observed_messages": 276,
+          "expired_on_arrival": 9,
+          "message_age_ms": 26,
+          "message_state": "waiting"
+        },
+        "sender": {
+          "sent": 76,
+          "max_gap_ms": 196.554125,
+          "wall_ms": 7315.672958,
+          "cpu_ms": 44.828083
+        }
+      }
+    ],
+    "canonical_probe_ast_equal_to_executed_source": true,
+    "environment": {
+      "platform": "Darwin",
+      "nice": 5
+    },
+    "waits": [
+      {
+        "wait": "sleep",
+        "min_ms": 42.420375,
+        "max_ms": 219.427208,
+        "mean_ms": 132.5700707,
+        "cpu_ms": 0.430708
+      },
+      {
+        "wait": "event",
+        "min_ms": 118.320292,
+        "max_ms": 216.609583,
+        "mean_ms": 182.4469501,
+        "cpu_ms": 0.933292
+      },
+      {
+        "wait": "select",
+        "min_ms": 77.306625,
+        "max_ms": 218.170959,
+        "mean_ms": 176.5051707,
+        "cpu_ms": 0.511083
+      },
+      {
+        "wait": "socket",
+        "min_ms": 21.0455,
+        "max_ms": 22.939542,
+        "mean_ms": 21.9449752,
+        "cpu_ms": 0.631833
+      },
+      {
+        "wait": "pair-recv",
+        "min_ms": 20.268584,
+        "max_ms": 36.455833,
+        "mean_ms": 24.5567418
+      },
+      {
+        "wait": "pair-select",
+        "min_ms": 48.253708,
+        "max_ms": 200.058542,
+        "mean_ms": 152.3613793
+      },
+      {
+        "wait": "sleep",
+        "min_ms": 104.47825,
+        "max_ms": 217.123291,
+        "mean_ms": 172.4991208
+      },
+      {
+        "wait": "poll",
+        "min_ms": 24.6,
+        "max_ms": 27.975417,
+        "mean_ms": 26.4016459
+      },
+      {
+        "wait": "mp-wait",
+        "min_ms": 21.9955,
+        "max_ms": 25.951125,
+        "mean_ms": 23.871820800000002
+      }
+    ]
+  },
+  "wheel_sha256": "b886e1ca7fd57c26d99fb7d934160a6c74b737f3cb21e3a14d3859fe26de536b",
+  "wheel_python_source_match_count": 50,
+  "linux_image": "sha256:fb76e3a74107e5d4c00fc0a4125a6195f2fabe4246124ca3bd2ce845a63d4412",
+  "intermediate_wait_only_wheel_sha256": "c754cfe0611872bcea545688f2c2a9022750eb5b46ff004f50531b3bc2145773",
+  "sources": [
+    {
+      "url": "https://docs.python.org/3.13/library/multiprocessing.html#multiprocessing.connection.wait",
+      "retrieved": "2026-10-09",
+      "note": "Documented sentinel wait. Installed Python3.13.15 implementation also inspected: PollSelector, unlike select.select primitive."
+    },
+    {
+      "url": "https://developer.apple.com/library/archive/documentation/Performance/Conceptual/power_efficiency_guidelines_osx/PrioritizeWorkAtTheTaskLevel.html",
+      "retrieved": "2026-10-09",
+      "note": "Background context on QoS/timer latency only; no exact policy diagnosis or policy changes performed."
+    }
+  ],
+  "artifacts": {
+    "build/ecosystem-phase3/scheduling/build-fixed.log": "c2a97bc92948283106ac393f87373d5ebbfd92b5e274c29bd4a5f6c1f1bb7c15",
+    "build/ecosystem-phase3/scheduling/build.log": "7a72fe3663459f0d009051d2d0a585dabc6911cd41c2387eb58fce962471e085",
+    "build/ecosystem-phase3/scheduling/exit-green.log": "e00da7e465fbb1b007f5d736308609b32bb1a35656e71b4274a4472930943589",
+    "build/ecosystem-phase3/scheduling/exit-red.log": "7d162c05b552e1c2e6bfeaac5aaf106d26dfc80343e34532fbf820fe8ed8e73f",
+    "build/ecosystem-phase3/scheduling/green.log": "7d21a407289990089a56b09a902b923514e40ba0582069895b9cd2268275e0ff",
+    "build/ecosystem-phase3/scheduling/install-fixed.log": "3969e6b1190d259ac660a8dd27a77bf92327349021e25117724bcc4b32d5d465",
+    "build/ecosystem-phase3/scheduling/install.log": "8c4fbca89dd2817c24ebb074218ef5b18301fc70e35897bb40a1613854c5daba",
+    "build/ecosystem-phase3/scheduling/installed-linux-fixed.log": "269072b002e507962fb0c659b93ab2f064abc11998c0756acfba1a080d186665",
+    "build/ecosystem-phase3/scheduling/installed-linux.log": "6d8d784145d5ed647515c347846c3e615eb589a0ef05fc06807624bd9bf5355a",
+    "build/ecosystem-phase3/scheduling/installed-mac-fixed.log": "603cbdf8d698c8230f1bec0bc6a2782dec0c7617ba47e8d9cc7771404a6695fe",
+    "build/ecosystem-phase3/scheduling/installed-mac.log": "5ec10441da9f5d189ce1fbc6124b2db751fe43cf88b843e5d2f468e1554b3ebf",
+    "build/ecosystem-phase3/scheduling/linux-build-fixed.log": "737f974e76eb7645b8017833abbab4961ca89ae66806cc3ca05a26abcc02b05f",
+    "build/ecosystem-phase3/scheduling/linux-build.log": "a1ef569984e81cc035fbcefb9410838832f4a692a741f2bc8ef0ce147900c7da",
+    "build/ecosystem-phase3/scheduling/linux-runtime-fixed.log": "720d3a2c50640111f93a0d8583df37f6b00f4546661860bce626a27fb6796413",
+    "build/ecosystem-phase3/scheduling/linux-runtime.log": "1579a8d14ab14f3874cba49e664d4b7979415278833c1007c3caff3de480110d",
+    "build/ecosystem-phase3/scheduling/probe-after-errors.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/ecosystem-phase3/scheduling/probe-errors.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/ecosystem-phase3/scheduling/red.log": "abf7f1721c8ca7c01f53238d37854ffb61f598659b9d0ecfb6fc34b89175aa5e",
+    "build/ecosystem-phase3/scheduling/poll-waits.jsonl": "382d73825819a56698ab76c203ffdd0580599d58a9e8c69fab9c800513841191",
+    "build/ecosystem-phase3/scheduling/probe-after.jsonl": "ac3fff7bcc3f0199ddddc37ae91463aee9018450b0a3c839d547d0586770590d",
+    "build/ecosystem-phase3/scheduling/probe.jsonl": "d2f773787e1deafff74828e0917c1d6536561f1b8e63fadfffd0015a0e23041c",
+    "build/ecosystem-phase3/scheduling/socket-waits.jsonl": "a8b5408e44a17ae82d24ccbc2789a76ed0dd24954d67a2b25f77aeec0e91069f",
+    "build/ecosystem-phase3/scheduling/waits.jsonl": "e1be79f478702b96614a965f0fefb0e01e78b9f3a4c5b3c5625a29b7249f4ad3",
+    "build/ecosystem-phase3/scheduling/bandit-fixed.json": "830b08fbc1d9200e8311cb3e64ce58997192cc7cf0789dd79b1db189fb2dc24e",
+    "build/ecosystem-phase3/scheduling/probe.py": "d4b74413f0a727510e8c379ec4bc9d9c23f1984f165697e30ea9c5c1fa90ba16",
+    "build/ecosystem-phase3/scheduling/waits.py": "058158c51132093eee1da9b8e0344df5d77f2b115de5f615a5d8bb344803c002",
+    "build/ecosystem-phase3/scheduling/socket_waits.py": "0585373818d9c824d1a7c87b9ec797d2acbd0b9739646d7968e484a3e9ee4563",
+    "build/ecosystem-phase3/scheduling/poll_waits.py": "e624a407007e5cc2a44c37169d848e82050614b25e9d999702e3da9bd51b6b28",
+    "tests/mavlink/scheduling_probe.py": "8f31ed442763ac43d340bebbc2d2a6ddd37e4758b1e46a225df619d071fe988c",
+    "tests/mavlink/test_worker_diagnostics.py": "0ee075460786b6e04b455027815610d0ce018640c733150d45e231f15154bfaf",
+    "integrations/edge/aethron_edge/telemetry/worker.py": "ef44f9686e2f674f1e8806d9d3be303c85514fbae06c7444ec78777bb544af03"
+  },
+  "public_copy_note": "Owner-planning and local publication/disk metadata omitted; software results, failures, source hashes and qualification limits retained."
+}

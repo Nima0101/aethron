@@ -1,0 +1,92 @@
+{
+  "status": "partial_P2.1",
+  "base_revision": "f40fbd1e7b282fe4328b2d677c5e4335c020f227",
+  "source_sha256": {
+    "integrations/edge/aethron_edge/sensors/__init__.py": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a",
+    "integrations/edge/aethron_edge/sensors/geometry.py": "24dbd7e248990f426d985d05e9add08615621381f4391209a85682102f50d02b",
+    "integrations/edge/aethron_edge/sensors/packets.py": "42c79b7a982bbc68282add93250615bf35d8e8859b9dd72ac1f48ae3807856c1",
+    "integrations/edge/aethron_edge/sensors/replay.py": "d708871540543f650c213591e67bcbff78f94bf535e837f7b212e420fb34d826"
+  },
+  "qualification": "software_synthetic_only",
+  "hardware_qualified": false,
+  "live_evidence": false,
+  "semantic_model_implemented": false,
+  "sensor_tests": 14,
+  "corruption_cases": 2000,
+  "integration": {
+    "tests": 62,
+    "seconds": 240.478,
+    "result": "passed",
+    "execution": "sequential"
+  },
+  "retained_failure": {
+    "tests": 61,
+    "seconds": 227.99,
+    "result": "failed",
+    "test": "test_zero_viewers_processing_and_disk_full_fault",
+    "assertion": "0 not greater than 2 within existing 8-second wait",
+    "context": "integration and package builds ran concurrently",
+    "diagnosis": "Load sensitivity suspected; causation not established",
+    "isolated_unchanged_rerun": "passed in 5.703 seconds"
+  },
+  "log_sha256": {
+    "sensors-red.log": "c73bec45245f331e97b4bf95f2485465525cbfc95af4e3bc2f7e47c6c395f88e",
+    "replay-red.log": "0c4c931c1dd7b1e1c726fb3ba3b95f81aab42b0efdf627d2465d9178c051a321",
+    "adversarial-red.log": "e0e77ca6b39b7bc7d8d49c428c32f5f2f6ddcd964d4033d2496ccee4de2dc869",
+    "sensors-final.log": "40ab5e9e4b6ead058e4dd769e59443af97b39bcdc2c41108ec08fe2d6ffe46c8",
+    "integration.log": "dd8f9c342c19d821440722e6bc8b1b56e2c22ad01f71382fd73f7c8a007db21c",
+    "integration-sequential.log": "77817950f7ed0e55a7ab98ef3b988942447454a9e11dcf828a66ac62b6dcac9c",
+    "lifecycle-isolated.log": "e8055df13c8ead8ae678072267fbf1689204ca4d21395996682909ecb6ba171a",
+    "verify.log": "39f78519c52848416609f2ae86a00a38626830a1d5fec21281b7a8aac7181165",
+    "plan-final.log": "5c96b2601508df69cab3ba3ce8a003d6a41ef837e2187803d5da01071297a005",
+    "ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "package-final.log": "28490aa255e1ce70db10834d7e00cd61174f10e82f6a7feb43e119305a53baec",
+    "clean-verify.log": "e2ced1f33c56b4a6c361bb5a8db0f9e73b6f59732afa90304cdf33e350cd1cc6",
+    "clean-plan.log": "5c96b2601508df69cab3ba3ce8a003d6a41ef837e2187803d5da01071297a005",
+    "clean-edge.log": "14bd61267f15a91ddf30f4d99080cbad675c87d1648347965a71eff355237e3c",
+    "clean-reproduce.log": "51740fef17025010feb9b62023ef9a6f3e2a85a46cc632b7399b0c8f5c6aa0f9",
+    "temporal-retry.log": "81a2ec752be697ae049780bcc46e30bb3db7dbeb876d61450b77837ac0ec7bbf",
+    "temporal-linux.log": "b304d04fc115d982bc2e948b228f3e9e520285b912bfe55d47263bc811671dba"
+  },
+  "packaging": {
+    "wheels": {
+      "aethron-0.2.0-py3-none-any.whl": "be3dd8e3e8bcf437d72d65e384c560eb18d4b22baf522849b965d3d720c1d73f",
+      "aethron_edge-0.1.0-py3-none-any.whl": "6dca68d35f870aefb2ec970e92cf044212751a75a1e867010b1541c17abbaef4"
+    },
+    "byte_identical": true,
+    "installed_consumer": true,
+    "installed_sensor_contracts": true,
+    "consumer_events": 3,
+    "zero_viewer_continued": true,
+    "platform": "darwin",
+    "python": "3.13.15"
+  },
+  "clean_clone": {
+    "revision": "dd2328ee398b3d8177635914644a3ba326ab5386",
+    "checks": {
+      "clean-verify": 0,
+      "clean-plan": 0,
+      "clean-edge": 0,
+      "clean-reproduce": 1
+    }
+  },
+  "source_revision": "dd2328ee398b3d8177635914644a3ba326ab5386",
+  "artifact_reproduction": {
+    "artifact_sha256": {
+      "SHA256SUMS": "878e133ceb8b1477f542a8561c5b8eb2b954ba3b77a45f08cc603d210ad51044",
+      "aethron-0.2.0-source.tar.gz": "743a58d3ddc4fb1c6bbdc38be903575966a645d0ae5d3ebd7a35b267192ca434",
+      "aethron.pyz": "5ac2bab6f070c716e05ec5fcdbc8762b0d2f83d2841ad2ba2be91d7ed7f51a35",
+      "provenance.json": "8e94386eca7aa9bc9884b8f808f0b8380091706b3317c654bda5a4555d1a7ba6",
+      "sbom.cdx.json": "c3cdcb3d54e872681e95ad3f7cb4d0f0847dc49adb0dc9926da2110d1b222d54",
+      "source-manifest.json": "97523df29ca25ce1bf2af9ca4438d3c3a13071a7611f11b72d19d82fb7be7723"
+    },
+    "byte_identical_builds": true,
+    "clean_clone": true,
+    "evaluation_gate_passed": false,
+    "isolated_zipapp_consumer": true,
+    "quickstart": false,
+    "source_revision": "dd2328ee398b3d8177635914644a3ba326ab5386"
+  },
+  "performance_evidence": "performance.json",
+  "publication_ready": false
+}

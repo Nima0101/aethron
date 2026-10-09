@@ -1,0 +1,5 @@
+# Optional MAVLink closure: CPython3.12 Linux ARM64, glibc>=2.17.
+# Official PyPI artifact hashes retrieved2026-10-09; preserve wheel license notices.
+pymavlink==2.4.50 --hash=sha256:1ba0b7e86b15b981ed2ddacb30840892b7974e2a60a769fa3b796752b5677e00
+fastcrc==0.5.0 --hash=sha256:60d1342ba91795650635acf1e44c0d04bbb14319b5787f413a3303e15778fecc
+lxml==6.1.3 --hash=sha256:f683dc6300317700025e41d89a43e0276692ded16113a3c43eab704d605c58e5

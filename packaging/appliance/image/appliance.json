@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "runtime_mode": "appliance",
+  "profiles": [
+    {
+      "name": "sil",
+      "driver": "replay",
+      "address": "fixture.jsonl"
+    },
+    {
+      "name": "raw-depth",
+      "driver": "sensor-replay",
+      "address": "raw-depth.aeraw",
+      "sensor_manifest": "raw-depth.json"
+    }
+  ],
+  "credentials": [],
+  "status_file": "/var/lib/aethron/status.json",
+  "integrity_bundle": ".",
+  "trust_root": "/etc/aethron/trust.pub"
+}

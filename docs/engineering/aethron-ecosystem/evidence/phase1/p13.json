@@ -1,0 +1,19 @@
+{
+  "parent": "e5335ec",
+  "clock_tests": 4,
+  "source_tests": 4,
+  "real_pixel_pipeline_tests": 2,
+  "local_rtsp_tests": 1,
+  "physical_uvc": "not_run; virtual backend only",
+  "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+  "known_limitations": [
+    "Generic OpenCV exposure clocks unqualified; current v3 remains UNKNOWN",
+    "Decoder raw-slot bounds implemented; native codec allocations not claimed bounded by raw slot size",
+    "Linux resource isolation and full adversarial matrix continue in packaging"
+  ],
+  "retained_failures": [
+    "Initial pixel test timed out at 40s; later isolated 2-test run passed in 9.176s",
+    "Closed queue after source stop fixed by explicit stopped state",
+    "RTSP test initially timed out and exposed buffered post-disconnect frames; fixed short GOP in fixture and read timeout, buffers never treated fresh"
+  ]
+}

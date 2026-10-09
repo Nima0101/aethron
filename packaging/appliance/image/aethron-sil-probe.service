@@ -1,0 +1,13 @@
+[Unit]
+Description=AETHRON guest-only offline boot acceptance probe
+After=aethron.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/python /opt/aethron-sil/boot_probe.py
+Restart=no
+StandardOutput=null
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

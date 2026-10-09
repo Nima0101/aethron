@@ -1,0 +1,92 @@
+{
+  "qualified": false,
+  "python": "3.13.15",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "cpu_ns_per_call": {
+    "python": [
+      5350.4,
+      5849.4,
+      5832.1,
+      6768.8,
+      5159.3
+    ],
+    "pydantic_core": [
+      7182.8,
+      6440.9,
+      6439.6,
+      8988.7,
+      9483.0
+    ]
+  },
+  "candidate_conformance_tests": 5,
+  "python_traced_peak_bytes": {
+    "python": 456,
+    "pydantic_core": 304
+  },
+  "median_cpu_ns_per_call": {
+    "python": 5832.1,
+    "pydantic_core": 7182.8
+  },
+  "source_sha256": {
+    "integrations/edge/aethron_edge/calibration.py": "3f51755a700adb4ad6a52503330323d404573bdb5bbb21e50b55dd08cad5d1d6",
+    "scripts/edge_calibration_profile.py": "c1db8da504cc108aa529e30b13198eae55e366951bd3078e6753aa07f81beb9b",
+    "tests/integration/test_calibration_admission.py": "8cd5ed084f59883614b93355f46b298a0bace2f7f34a84df66797f87d1329cbd",
+    ".github/workflows/aethron-edge-contracts.yml": "805dc5195d2a863c0a43bc3b40e5f8657f46aa7e5ff10a4fe8d9bcf2cc418cc7"
+  },
+  "technology_decision": "Retain explicit Python validation for CalibrationRecord admission: fixed field/tuple checks preserve raw JSON-compatible values and digest bytes; a guarded Pydantic/Rust-core candidate passed the same tests but showed no consistent material CPU benefit and requires normalization safeguards.",
+  "scope": "P1.3 calibration admission only; clock mapping and acquisition/decoder/inference/process-isolation technology reviews remain open.",
+  "requirements": [
+    "Nonnegative integer times and positive integer dimensions; matching nonempty calibration/mount identities.",
+    "Only a numeric nine-element identity tuple and finite residual in the unchanged inclusive [0, 0.05] interval.",
+    "Expiry remains inclusive; malformed data must return False before build_v3 emits registered observations; no digest-input coercion."
+  ],
+  "research": [
+    {
+      "url": "https://docs.python.org/3/library/dataclasses.html",
+      "assessment": "Dataclass fields alone do not validate runtime types; explicit admission checks can preserve the existing immutable representation and digest."
+    },
+    {
+      "url": "https://docs.pydantic.dev/latest/concepts/strict_mode/",
+      "assessment": "Compiled strict tuple schemas are a viable alternative. The executed candidate checks metadata natively and adds an exact numeric guard because strict float validation can accept non-JSON numeric objects."
+    },
+    {
+      "url": "https://cuelang.org/docs/concept/how-cue-enables-data-validation/",
+      "assessment": "CUE provides declarative bounds, closed schemas, a CLI and Go API. Investigated independently of installed tools. JSON transport cannot distinguish the existing tuple-only transform from a list (identical serialized bytes), so a process/Go bridge still needs representation checks or a new tagged boundary. Not selected for this in-memory admission gate; no CUE performance claim or general exclusion."
+    }
+  ],
+  "candidate_versions": {
+    "pydantic": "2.13.5",
+    "pydantic_core": "2.46.5"
+  },
+  "reproduce": "PYTHONPATH=.:integrations/edge python scripts/edge_calibration_profile.py --conformance-tests tests/integration",
+  "checks": {
+    "red": "66 incorrect acceptances and 6 exceptions before implementation",
+    "focused_tests": 23,
+    "offline_installed_tests": 13,
+    "candidate_conformance_tests": 5,
+    "lint_format_bandit_yaml": "PASS",
+    "installed": {
+      "core_wheel_sha256": "daeacafc7e70f20bbd0b446f448203b67b0b12ee56e6b3afca6b248d031c9a93",
+      "edge_wheel_sha256": "cdbd7165fa9f5e4ae6a356f69cf9f6ef16e9d01d0032a6f51def51693be4219c",
+      "source_bytes_match": true,
+      "outside_checkout": true,
+      "offline_install": true,
+      "temporary_consumer_removed": true
+    },
+    "hosted": "Six installed OS/Python jobs extended with calibration regression and guarded schema comparison; execution pending."
+  },
+  "negative_candidate_result": "Initial strict schema accepted Decimal residual while unchanged digest raised TypeError. Explicit number guard fixed candidate parity; regression retained.",
+  "parent": "37d3106854cd53637924400ad401c49e7e5d6010",
+  "limitations": [
+    "Shared Mac diagnostic CPU results vary; no hard latency, physical calibration, RSS or deployment qualification claim.",
+    "Tracemalloc excludes native allocations; the candidate traced fewer Python bytes (304 vs 456), not proof of lower total memory.",
+    "One representational/validation boundary was compared, not entire worker architectures or every language.",
+    "Full release qualification and all previous negative gates remain pending."
+  ],
+  "transport_constraint_proof": {
+    "tuple_and_list_identity_serialize_identically": true,
+    "existing_admission_requires_tuple": true,
+    "cue_executable_on_path": false,
+    "toolchain_absence_is_not_selection_reason": true
+  }
+}

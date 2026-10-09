@@ -1,0 +1,56 @@
+{
+  "status": "development_checkpoint_not_release_qualified",
+  "baseline": "9d97975b5038cb61f945c429567199c992d01b1b",
+  "change": "Explicit raw-depth ROS lens binding; exact CameraInfo matching; provider refuses mismatched or double correction. Queued observations retain original calibration expiry across renewal.",
+  "checks": {
+    "red": "7 new lens tests:14 failures from missing raw_depth_lens API. Separate old-path regression:1/13 FAIL because queued image inherited renewed calibration expiry. Initial discovery included imported fixture tests; corrected import, retained both logs.",
+    "mac": "9 lens tests PASS1.187s;75 existing sensor tests PASS11.001s;24 copied installed Brown/fisheye/ROS lens tests PASS1.404s.",
+    "linux": "32 installed schema/ROS/provider tests PASS0.201s under unprivileged/read-only/no-network/no-capabilities container. Numerical OpenCV unavailable; no numerical Linux or actual DDS claim.",
+    "static": "Ruff check/format and diff PASS; targeted Bandit0 findings.",
+    "wheel_source_match": 53
+  },
+  "wheel_sha256": "218c0b22ae9c9a232514f53519f957e7df3e52070fc75c61c59261a2312aac26",
+  "source_sha256": {
+    "integrations/edge/aethron_edge/sensors/ros2.py": "41aece1eff1dd5e6ae77272959354c8a9bcc6465ec10da2da7b747ad97589912",
+    "integrations/edge/aethron_edge/sensors/provider.py": "badfb33b85fe0a55428e736b410e80419ae1b5a900ebfe546f688dadc5d3e86e",
+    "tests/integration/test_ros_lens_rectification.py": "3baffa8810debdefc386b15705b04aa9f18e93f18c0722323bf50ffb7dea45e3",
+    "tests/integration/test_sensor_provider.py": "34adc7026a1fb57866b54af7ab3243f96f0085094d14e562192e3f7ac18b726f",
+    "scripts/edge_package_check.py": "ec34132ada477350bb6ab68d0ccbcdec061109e96f9ae2ced9ecb1d8920d5e92"
+  },
+  "artifacts": {
+    "build/ecosystem-phase2/ros-lens/build.log": "d8b7d1f3e696915fda0a481a757bb484ee9528296e056e75adae7893f65eeec1",
+    "build/ecosystem-phase2/ros-lens/final-green.log": "82a75c29ca94f5645547c3ecf8f14f014000875aea574ecd465112271469372b",
+    "build/ecosystem-phase2/ros-lens/focused-red.log": "8b6b37554c9708f05ea2d2332bd5cc636e4bcdc5f74a5fca44b2c0a85fcef64e",
+    "build/ecosystem-phase2/ros-lens/green.log": "7ddcd0a45e40df8d76fe661bdc7a4f4a4453a1ecaf5bedd4dc9abb4bf022a91e",
+    "build/ecosystem-phase2/ros-lens/install.log": "5caeb504bff380a8bcda894fc2fb1a01bfd93dd8fa923a47ecc4c562b005243a",
+    "build/ecosystem-phase2/ros-lens/isolated-vision.log": "d2f6d1f9c38fb407f4aa5af2ff5e1bd908779b6960cd9e408a1153e3733c1719",
+    "build/ecosystem-phase2/ros-lens/lease-red.log": "382b3d905f16d93fb7b6c7efc318818cfb53bec8eeb767cbcf0061815eea3f31",
+    "build/ecosystem-phase2/ros-lens/linux-contract.log": "3eae59757eca2ce17ce8839846bc7d76cc014de9cf5c900f602d1bd6ecf6620a",
+    "build/ecosystem-phase2/ros-lens/red.log": "518f10408ebbedda0ea5b6caddcbada5bb67e5471afccd94a3d6336925d6ebbf",
+    "build/ecosystem-phase2/ros-lens/sensor-green.log": "5db7fb168042708e1792c9152d3cd96a84a1eb72561e256da8e3fb471a4ee3e3"
+  },
+  "sources": [
+    {
+      "url": "https://github.com/ros2/common_interfaces/blob/jazzy/sensor_msgs/msg/CameraInfo.msg",
+      "retrieved": "2026-10-09",
+      "use": "Raw K, rectified P, coefficient and frame conventions. docs.ros.org denied access; official raw GitHub source read."
+    },
+    {
+      "url": "https://github.com/ros2/common_interfaces/blob/jazzy/sensor_msgs/include/sensor_msgs/distortion_models.hpp",
+      "retrieved": "2026-10-09",
+      "use": "Public distortion model names."
+    },
+    {
+      "url": "https://github.com/ros-perception/vision_opencv/blob/rolling/image_geometry/src/pinhole_camera_model.cpp",
+      "retrieved": "2026-10-09",
+      "use": "Equidistant mapping to OpenCV fisheye; reference semantics only, no rolling dependency. Jazzy URL returned404."
+    }
+  ],
+  "review": "Author self-review (no subagents): compared raw versus output intrinsics, model/coefficients binding, immutable queued lease, revocation and fail-closed optional dependency. No clock, frozen protocol, transform or live-evidence promotion added.",
+  "remaining": [
+    "Version1/2 signed appliance manifests still reject lenses; versioned raw-stream manifest and worker wiring remain next integration work.",
+    "Numerical Linux, actual DDS raw lens path, Windows and full release gates pending.",
+    "Existing frozen aircraft/latency/DDS/update/boot failures preserved; no VM or physical qualification."
+  ],
+  "public_copy_note": "Local disk/private-history publication notes omitted; software results, source hashes and qualification limits retained."
+}

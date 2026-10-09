@@ -1,0 +1,101 @@
+{
+  "date": "2026-10-09",
+  "source_base": "eae08b6767dbfcdaef5c858a128a3cb43066caff",
+  "status": "development_checkpoint_not_release_qualified",
+  "runtime_unchanged": true,
+  "runtime_revision": "eae08b6767dbfcdaef5c858a128a3cb43066caff",
+  "source_files": {
+    "integrations/edge/ros2/container_check.py": "0168d34b42e05d7c999808266294ae38b9114887bdc9f6407b56c7f574a85dc1",
+    "integrations/edge/ros2/requirements.lock": "6b45b0593ba42963c1d1960d39d0fbc49c1defca399186d0baf4a3aff4ea9aec",
+    "scripts/edge_ros2_check.py": "fd26f78676f225b50eff7e7614afa9992f6cdfdd872d8449190d2afa8e1b7186",
+    "tests/ros2/test_signed_service.py": "b910d376f8e8fb56262c70edccf2a1b22d0b278f962dc71012acc6d34fc415f3"
+  },
+  "red": {
+    "tests": 72,
+    "seconds": 7.098,
+    "failures": 1,
+    "reason": "actual signed appliance CLI subprocess failed because ROS installed closure did not include fastapi"
+  },
+  "green": {
+    "tests": 72,
+    "seconds": 8.986,
+    "failures": 0,
+    "coverage": [
+      "real signed appliance CLI startup",
+      "real synthetic localhost DDS publisher and supervisor processing before any viewer",
+      "unauthenticated capabilities rejected 401",
+      "authenticated ros_geometry capabilities",
+      "real SSE gap and three UNKNOWN empty-track zero-lease scenes",
+      "processing continues after viewer deletion",
+      "sensor manifest and signature tampering each rejected before status creation"
+    ]
+  },
+  "installed": {
+    "hardware_qualified": false,
+    "installed_ros_dds": true,
+    "installed_signed_ros_cli_http_sse": true,
+    "network": "none",
+    "packages": {
+      "rclpy": "7.1.12",
+      "rmw_fastrtps_cpp": "8.4.4",
+      "sensor_msgs": "5.3.8"
+    },
+    "payloads": "original synthetic Image/CameraInfo/PointCloud2",
+    "python": "3.12.3",
+    "scene_state": "UNKNOWN",
+    "signed_configuration_tamper_denied": true,
+    "uid": 10001,
+    "wheels": {
+      "candidate/aethron-0.2.0-py3-none-any.whl": "726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e",
+      "candidate/aethron_edge-0.1.0-py3-none-any.whl": "3a473aeb36465ea3bd4a8f0ee1abf4fdf8c4b5d1d4eaa5539abf272137e73957",
+      "dependencies/annotated_doc-0.0.5-py3-none-any.whl": "117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101",
+      "dependencies/annotated_types-0.8.0-py3-none-any.whl": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0",
+      "dependencies/anyio-4.15.1-py3-none-any.whl": "6152fdbbf9a77fdec97731721bebf7c4c44f7c29b424b0065826173efc7ed101",
+      "dependencies/attrs-26.1.0-py3-none-any.whl": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+      "dependencies/certifi-2026.7.22-py3-none-any.whl": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775",
+      "dependencies/click-8.5.0-py3-none-any.whl": "255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360",
+      "dependencies/fastapi-0.142.4-py3-none-any.whl": "8a651aa071a9f92c8217cca1d0b044bf9c326f336578be0a728a1a1f22ec52d2",
+      "dependencies/h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+      "dependencies/httpcore-1.0.9-py3-none-any.whl": "2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55",
+      "dependencies/httpx-0.28.1-py3-none-any.whl": "d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad",
+      "dependencies/idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+      "dependencies/jsonschema-4.26.0-py3-none-any.whl": "d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce",
+      "dependencies/jsonschema_specifications-2025.9.1-py3-none-any.whl": "98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe",
+      "dependencies/opentelemetry_api-1.45.1-py3-none-any.whl": "b31553efa588ae44bc306f863c785c5333a9ecc091248c6ee68b4b6c87fdedfb",
+      "dependencies/pip-26.2-py3-none-any.whl": "931c303696af6fa3417112103b1cad26890e5a07eccb5b99783700e33f2b8aad",
+      "dependencies/pydantic-2.13.5-py3-none-any.whl": "346a034f080da3755d8e9cb5e00e8b07de1d39e4f6e2c87d8ab7cafa0b269a73",
+      "dependencies/pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl": "4fdc8b93a41521988916eeaa271173fcca7fa0803d62f87675aac8dcec1c8e29",
+      "dependencies/referencing-0.37.0-py3-none-any.whl": "381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231",
+      "dependencies/rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl": "2693b2728bbcc48d09a981a356954b0c47c53ff25b545856f28a889ea619f69a",
+      "dependencies/starlette-1.7.0-py3-none-any.whl": "67f8e99895493dd2911a03f11314af6ceebeae4e704bb9f43dfc6a9db151c93e",
+      "dependencies/typing_extensions-4.16.0-py3-none-any.whl": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+      "dependencies/typing_inspection-0.4.4-py3-none-any.whl": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147",
+      "dependencies/uvicorn-0.54.0-py3-none-any.whl": "505bdb0f318731d45f1f712071fc781a8981f6847a31c902c9f5e652d4f67faf"
+    },
+    "image": "ros@sha256:8f687fdf084482819aa7dab48c3887331edd0d3687b219951fdb66c418316ab1",
+    "platform": "linux/arm64"
+  },
+  "verification_loop": "fast_development",
+  "reuse": {
+    "core_wheel_sha256": "726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e",
+    "edge_wheel_sha256": "3a473aeb36465ea3bd4a8f0ee1abf4fdf8c4b5d1d4eaa5539abf272137e73957",
+    "reason": "Exact Python edge runtime bytes checked against existing wheel; no core/runtime/dependency-version changes. ROS harness now installs the existing pinned server closure. New direct installed path executed offline on the same pinned SDK image; full prior release evidence not relabeled current."
+  },
+  "pending": [
+    "continuous ROS authority revalidation/renewal",
+    "retained Mac availability/package failures",
+    "accumulated raw/ROS boot/offline/reboot/soak and full candidate qualification",
+    "browser/native Windows/hosted CI/publication gates",
+    "exact hardware/field/certification/vendor rights"
+  ],
+  "public_operations": false,
+  "hardware_qualified": false,
+  "field_qualified": false,
+  "actuation_authorized": false,
+  "logs": {
+    "build/ecosystem-phase2/ros-cli/red/dds.log": "814b72bd18bd98d81e0562a54f707911b3b89c39580f2001cdc9cf07e1edca7f",
+    "build/ecosystem-phase2/ros-cli/final/dds.log": "14cacabfb0a3f88adfded9d26cc2004e797d851831db29185596981bd16e572b",
+    "build/ecosystem-phase2/ros-cli/dependencies.log": "b7bdd1791aba2fdf247123c8067fd5b66d9e56b593dfd6783d2c2c89b79840bd"
+  },
+  "public_copy_note": "Owner-planning and local publication/disk metadata omitted; software results, failures, source hashes and qualification limits retained."
+}

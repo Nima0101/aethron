@@ -1,0 +1,44 @@
+{
+  "status": "development_checkpoint_not_release_qualified",
+  "baseline": "45bda9401fa5d7e5f3cf29156cca4dda1e4d16f9",
+  "change": "Batch valid selected depth pixels into one native lens inversion; preserve unknown depths/order, per-point axial depth, numerical residual checks and final processing expiry. No schema/clock/threshold change.",
+  "checks": {
+    "red": "New deterministic cost regression failed for Brown and fisheye before implementation: repeated native calls exhausted the original lease.13 imported existing provider tests passed.",
+    "mac": "46 focused tests PASS1.979s.",
+    "linux": "48 installed tests PASS11.153s: numerical/provider/raw-lens/provisioning plus actual raw DDS and signed raw CLI HTTP/SSE/renewal/tamper. No diagnostic override used.",
+    "clock_probe": "Pre-change candidate instrumented combined26 PASS20.965s, no fault reproduced. Bounded test-only sampler probe does not alter clock results/limits. Prior clock_drift failure remains unexplained; no timing fix claimed.",
+    "static": "Ruff/check/format/diff PASS; provider Bandit0 findings;53 wheel sources byte-identical to checkout."
+  },
+  "runtime": {
+    "image": "sha256:0948787ca5bb2880762df3624d3ca447d75848e3b0d1c473c305704242317659",
+    "platform": "linux/arm64",
+    "python": "3.12.3",
+    "network": "none",
+    "uid": 10001,
+    "memory_mib": 512,
+    "cpus": 2,
+    "pids": 96,
+    "tmpfs_mib": 256
+  },
+  "wheel_sha256": "015c840478c2f7228976de3bd6a5403eca8bc3e13eb9361c559553113bf039ff",
+  "source_sha256": {
+    "integrations/edge/aethron_edge/sensors/provider.py": "79216e97e2b0de052ec4a99b0341114dd69a9246c4bb856dc1df789b294a627c",
+    "tests/integration/test_batched_rectification.py": "dd21965bb67af3a6de36fef450395bf2db773676b9b6e7de0b1bd79fbb3e4364",
+    "scripts/edge_package_check.py": "0ed5b02ff0019607100883af70a88349ed9a60c996b9ca44648fd8b5ac7fbc81",
+    "scripts/edge_ros2_check.py": "0a40cbbbe4b218d279c7bb3dc91bca244490fd4020da8074d28fa91ace4319c6"
+  },
+  "artifacts": {
+    "build/ecosystem-phase2/batched-rectification/build.log": "48695c543fc023c135b138b3b76c1c7af2d62e594cff8795c52f7bb30c168966",
+    "build/ecosystem-phase2/batched-rectification/green-expanded.log": "e7df1a90723307eedf0dd84a6cf6cc432409daf03360eeb306f62c4ddd24b4db",
+    "build/ecosystem-phase2/batched-rectification/green.log": "bf8e106aa904d450a7db7bbfb122c4a85e65e445093c12017e370bce26e47563",
+    "build/ecosystem-phase2/batched-rectification/linux-installed.log": "3e0bc49fabd8e8ac637c593b4d2861a79633db26494acb22ce623990460542e0",
+    "build/ecosystem-phase2/batched-rectification/red.log": "9cf8c261a1dd4c98206d82f1b638defedfd97bbb5b02bfa70eab71cbf44db4fd",
+    "build/ecosystem-phase2/clock-drift-probe/combined.log": "3a9691ea231e36811a44f3a883c045727239e266ed02705bd1b67e0b3ac624ff"
+  },
+  "limits": [
+    "Injected40ms native-call cost is deterministic behavior testing, not a measured performance gain. A100ms single-call overrun still withdraws all geometry.",
+    "No full canonical pinned-image/hosted/VM/boot/reboot/soak/release qualification.",
+    "Existing aircraft/latency/DDS/update/readiness/clock-drift negative evidence retained. Physical calibration/accuracy/OEM/actuation/zero-visible claims remain unqualified."
+  ],
+  "public_copy_note": "Local disk/private-history publication notes omitted; software results, source hashes and qualification limits retained."
+}

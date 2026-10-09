@@ -1,0 +1,16 @@
+{
+  "artifact_sha256": {
+    "SHA256SUMS": "c24e8e54fb38d6f60eb2507a66aa692854e028e35b5163726b77427ace34f491",
+    "aethron-0.2.0-source.tar.gz": "b6430a4b9a5d9629d3c49281214acfe13fd27836550050015ce8cdde83ef8a47",
+    "aethron.pyz": "6a58a8dddb567a6a20e7cb89ed8f5b90c5c7208e8de3af1648794ac1e4b4d277",
+    "provenance.json": "bd9d4595fcf55a867cfb91709800f3f03266038f3038144621db422c03483c81",
+    "sbom.cdx.json": "8fcf5bd2c5ff123fd6d0bf3483117a09b2cfbd4f304c1eb0f2780577f37d1750",
+    "source-manifest.json": "270ab0989525ddec04bf7c77b3affcd1efdcd4302942425c7bc3ced9af46e721"
+  },
+  "byte_identical_builds": true,
+  "clean_clone": true,
+  "evaluation_gate_passed": true,
+  "isolated_zipapp_consumer": true,
+  "quickstart": true,
+  "source_revision": "59fda946771d4ac8c9d1b52eeb3d948215325e4c"
+}

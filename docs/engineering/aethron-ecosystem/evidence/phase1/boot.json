@@ -1,0 +1,556 @@
+{
+  "status": "passed",
+  "kind": "emulated_linux_boot_sil",
+  "hardware_qualified": false,
+  "events": [
+    {
+      "boot": 1,
+      "event": "boot",
+      "login": false,
+      "network": "no_virtual_nic",
+      "viewers": 0
+    },
+    {
+      "boot": 1,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 998,
+      "seconds": 93
+    },
+    {
+      "boot": 1,
+      "drop_scope": "observed aggregate deltas; capture not applicable to synthetic proposals; kill-time unpublished gaps may be unknown",
+      "drops": {
+        "capture_sequence_gaps": 0,
+        "mailbox_overwritten": 8,
+        "mailbox_rejected": 5
+      },
+      "event": "result",
+      "hardware_qualified": false,
+      "latency_ms": {
+        "max": 25.749104000002262,
+        "p50": 8.71840000001248,
+        "p95": 15.226991999996244,
+        "p99": 18.431744000001345
+      },
+      "log_bytes": 1048576,
+      "offline_update_activated": false,
+      "processing_continued": true,
+      "processing_resumed_after_fault": false,
+      "rss_probe_kib": 12240,
+      "samples": 87,
+      "seconds": 120.332290224,
+      "sensor": "synthetic_multimodal_proposals",
+      "service_cgroup_peak_bytes": 122118144,
+      "status_expired_samples": 0,
+      "status_max_bytes": 339,
+      "status_unavailable_samples": 32,
+      "updated_runtime_processing": false,
+      "worker_fault_injected": false
+    },
+    {
+      "boot": 2,
+      "event": "boot",
+      "login": false,
+      "network": "no_virtual_nic",
+      "viewers": 0
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 646,
+      "seconds": 60
+    },
+    {
+      "boot": 2,
+      "event": "worker_fault_injected"
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 1778,
+      "seconds": 121
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 2862,
+      "seconds": 181
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 3996,
+      "seconds": 242
+    },
+    {
+      "boot": 2,
+      "event": "update_stage",
+      "stage": "stage_initial"
+    },
+    {
+      "boot": 2,
+      "event": "update_stage",
+      "stage": "activate_initial"
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 5142,
+      "seconds": 302
+    },
+    {
+      "boot": 2,
+      "event": "update_stage",
+      "stage": "stage_second"
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 6279,
+      "seconds": 363
+    },
+    {
+      "boot": 2,
+      "event": "update_stage",
+      "stage": "activate_second"
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 7431,
+      "seconds": 423
+    },
+    {
+      "boot": 2,
+      "elapsed_s": 231.933250992,
+      "event": "offline_update",
+      "interrupted_stage_preserved_active": true,
+      "rollback_rejected": true,
+      "updated": true,
+      "version": 2
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 8392,
+      "seconds": 487
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 8392,
+      "seconds": 555
+    },
+    {
+      "boot": 2,
+      "event": "updated_runtime_processing",
+      "version": 2
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 1009,
+      "seconds": 616
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 2130,
+      "seconds": 676
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 3259,
+      "seconds": 737
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 4389,
+      "seconds": 797
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 5521,
+      "seconds": 858
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 6658,
+      "seconds": 918
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 7792,
+      "seconds": 978
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 8925,
+      "seconds": 1039
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 10059,
+      "seconds": 1100
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 11178,
+      "seconds": 1161
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 12314,
+      "seconds": 1221
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 13450,
+      "seconds": 1281
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 14559,
+      "seconds": 1342
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 15680,
+      "seconds": 1403
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 16837,
+      "seconds": 1463
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 17926,
+      "seconds": 1524
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 19021,
+      "seconds": 1585
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 20157,
+      "seconds": 1646
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 21311,
+      "seconds": 1706
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 22446,
+      "seconds": 1767
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 23584,
+      "seconds": 1827
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 24724,
+      "seconds": 1888
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 25841,
+      "seconds": 1948
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 26996,
+      "seconds": 2008
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 28111,
+      "seconds": 2069
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 29247,
+      "seconds": 2129
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 30387,
+      "seconds": 2189
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 31525,
+      "seconds": 2250
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 32663,
+      "seconds": 2310
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 33802,
+      "seconds": 2370
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 34943,
+      "seconds": 2431
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 36081,
+      "seconds": 2491
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 37224,
+      "seconds": 2552
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 38359,
+      "seconds": 2612
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 39480,
+      "seconds": 2673
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 40559,
+      "seconds": 2735
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 41621,
+      "seconds": 2796
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 42742,
+      "seconds": 2857
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 43874,
+      "seconds": 2917
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 44998,
+      "seconds": 2978
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 46113,
+      "seconds": 3038
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 47246,
+      "seconds": 3099
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 48386,
+      "seconds": 3159
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 49517,
+      "seconds": 3220
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 50657,
+      "seconds": 3280
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 51782,
+      "seconds": 3341
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 52917,
+      "seconds": 3401
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 54029,
+      "seconds": 3462
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 55163,
+      "seconds": 3522
+    },
+    {
+      "boot": 2,
+      "event": "progress",
+      "fault_count": 0,
+      "processed": 56297,
+      "seconds": 3583
+    },
+    {
+      "boot": 2,
+      "drop_scope": "observed aggregate deltas; capture not applicable to synthetic proposals; kill-time unpublished gaps may be unknown",
+      "drops": {
+        "capture_sequence_gaps": 0,
+        "mailbox_overwritten": 89,
+        "mailbox_rejected": 208
+      },
+      "event": "result",
+      "hardware_qualified": false,
+      "latency_ms": {
+        "max": 87.60324800014496,
+        "p50": 8.512687999987975,
+        "p95": 14.056592000182718,
+        "p99": 17.03395199996885
+      },
+      "log_bytes": 1048576,
+      "offline_update_activated": true,
+      "processing_continued": true,
+      "processing_resumed_after_fault": true,
+      "rss_probe_kib": 12524,
+      "samples": 3558,
+      "seconds": 3600.658416112,
+      "sensor": "synthetic_multimodal_proposals",
+      "service_cgroup_peak_bytes": 123715584,
+      "status_expired_samples": 72,
+      "status_max_bytes": 347,
+      "status_unavailable_samples": 0,
+      "updated_runtime_processing": true,
+      "worker_fault_injected": true
+    }
+  ],
+  "serial_sha256": "7cab84bf28057ccec1a641717a77a6c9e04cfd97f81ef2080868f0fd80f09a33",
+  "image_before": {
+    "initrd": "5a13f7415eea90983df614f2c6601eeba3ca50395d007d4bf3f424f655ce7227",
+    "kernel": "7ea5c4140a8d9b42c9856c3e3c1d6a8f2b75bd7c9f9d2eb7da52af110dc3d41f",
+    "rootfs.raw": "1278133362df9c74f6a0d0648583537fd5b6d05d68c56d6c3005cf40dbe1759c"
+  },
+  "elapsed_seconds": 3776.6408644998446,
+  "exit_code": 0,
+  "image_manifest_sha256": "29252619246ca7a7ddd330e62fbb3b2570a73a4aa3ba06125eeceb3fe4153c21",
+  "wheels": {
+    "aethron-0.2.0-py3-none-any.whl": "be3dd8e3e8bcf437d72d65e384c560eb18d4b22baf522849b965d3d720c1d73f",
+    "aethron_edge-0.1.0-py3-none-any.whl": "49fda684a90da9667ff1717ece3a9a3b631b33fda43a72ea952ce129f621d905"
+  },
+  "tool_image": "sha256:5f557bedceed76ccd1d28f8db7e58a473906c47aa2b6646a6b7ce05174a477b6",
+  "source_revision": "d90ae953f6431fd9d460e440432ac72825b8d250"
+}

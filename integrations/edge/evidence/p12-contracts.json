@@ -1,0 +1,235 @@
+{
+  "qualified": false,
+  "python": "3.13.15",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "versions": {
+    "pydantic": "2.13.5",
+    "pydantic_core": "2.46.5",
+    "jsonschema": "4.26.0"
+  },
+  "results": {
+    "frozen_24": {
+      "sha256": "0c3cddd16036e6ebaaae9d353d80ce7fcc53247ca2b1e9e4bca7c8513d798755",
+      "pydantic": {
+        "cpu_median_ms": 1.237,
+        "wall_median_ms": 2.877334,
+        "python_traced_peak_bytes": 75816
+      },
+      "jsonschema": {
+        "cpu_median_ms": 27.097,
+        "wall_median_ms": 79.688542,
+        "python_traced_peak_bytes": 12671
+      }
+    }
+  },
+  "integer_token_constraint": {
+    "typed_rejects_decimal_count": true,
+    "schema_accepts_decimal_count": true
+  },
+  "source_sha256": {
+    "integrations/edge/aethron_edge/contracts.py": "a783f857d3c459d40f3357d876ef9546794a167c71959503171131a1f917dc36",
+    "integrations/edge/aethron_edge/common_types.py": "5a10387000cb160918d558b7022790529461e9d944d6e02747a170ee4b1ea962",
+    "integrations/edge/aethron_edge/openapi.py": "a5e5a0157637107c394813e58e40db0a5d0f51391fee2781042b6b62925e4623",
+    "scripts/edge_contract_profile.py": "6d7a4262ef575155e6c1d84537af05a5bf329ec0ed7ce37e4f5cc0e37c487ada",
+    "contracts/openapi/aethron-edge-v1.json": "4d562382b803e59dac1ab24a7ead52cd2cdbbc9533aa6d9dc68fca9f6e9b0b83",
+    "tests/integration/test_contract_scalars.py": "6ad5546393bbbfdb6ff29a420531687292c3ca0ad69cd1f0d505c5b5bf458b24",
+    ".github/workflows/aethron-edge-contracts.yml": "857b8ba93fff3dc150473e85bff43425d67a77c40d80879a7d2a415ed8fa332e",
+    "docs/usage-edge.md": "71772ac917aadf327309b61fe8ce81116abe37b65e3b30bacd3e2467915c2ba5"
+  },
+  "msgspec_probe": {
+    "version": "0.22.0",
+    "strict_convert_rejects_numeric_false": true,
+    "constructor_accepts_numeric_false": true,
+    "schema": {
+      "$ref": "#/$defs/Candidate",
+      "$defs": {
+        "Candidate": {
+          "title": "Candidate",
+          "type": "object",
+          "properties": {
+            "centre": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "maxItems": 2,
+              "minItems": 2
+            },
+            "horizon_ms": {
+              "enum": [
+                200
+              ]
+            },
+            "evidence": {
+              "enum": [
+                false
+              ]
+            }
+          },
+          "required": [
+            "centre",
+            "horizon_ms",
+            "evidence"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "scope": "representative constant/constructor boundary; not a full migration benchmark"
+  },
+  "decision": "Retain Python declarations with Pydantic 2.13.5/Rust pydantic-core 2.46.5: validating constructors and typed consumer objects plus deterministic OpenAPI, with explicit strict scalar guards; measured schema interpretation costs more CPU and loses integer-token checks; msgspec conversion is strict but construction bypasses validation and would require a new mandatory boundary.",
+  "constraints": [
+    "Offline Linux/macOS/Windows CPython >=3.11; bounded 300-frame/32-track reports; strict scalar and finite value semantics; no input coercion or new scene evidence.",
+    "Runtime typed construction, validation and serialization must share contracts with deterministic OpenAPI; no new transport, service or device runtime."
+  ],
+  "source_parent": "fa7e411c2f8da2fb37faffdde95aab7ed6b4c2e8",
+  "checks": {
+    "red": "13 failing scalar/recursive assertions with strict=True before fix; log retained locally",
+    "targeted_tests": 22,
+    "installed_tests": 22,
+    "installed": {
+      "core_wheel_sha256": "daeacafc7e70f20bbd0b446f448203b67b0b12ee56e6b3afca6b248d031c9a93",
+      "edge_wheel_sha256": "545e4ffb85d64df51dd3850a210828805279d4dc035b8a0d636efd26c6bb7eab",
+      "source_bytes_match": true,
+      "outside_checkout": true,
+      "offline_install": true,
+      "temporary_consumer_removed": true
+    },
+    "openapi": "exact committed document unchanged",
+    "hosted": "pending new installed-contracts matrix",
+    "security": "Initial Bandit B101 in comparison assertion fixed with explicit RuntimeError; no suppression"
+  },
+  "baseline": {
+    "qualified": false,
+    "python": "3.13.15",
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "versions": {
+      "pydantic": "2.13.5",
+      "pydantic_core": "2.46.5",
+      "jsonschema": "4.26.0"
+    },
+    "results": {
+      "recorded_24": {
+        "sha256": "0c3cddd16036e6ebaaae9d353d80ce7fcc53247ca2b1e9e4bca7c8513d798755",
+        "pydantic": {
+          "cpu_median_ms": 0.504,
+          "wall_median_ms": 1.019084,
+          "python_traced_peak_bytes": 75816
+        },
+        "jsonschema": {
+          "cpu_median_ms": 33.942,
+          "wall_median_ms": 61.427584,
+          "python_traced_peak_bytes": 12671
+        }
+      },
+      "synthetic_300x32_shape": {
+        "sha256": "4a2075a76361833d9dded151941d9170e027aaf134306672db62532abfdcf650",
+        "pydantic": {
+          "cpu_median_ms": 130.208,
+          "wall_median_ms": 198.133083,
+          "python_traced_peak_bytes": 15072758
+        },
+        "jsonschema": {
+          "cpu_median_ms": 7222.657,
+          "wall_median_ms": 25059.36975,
+          "python_traced_peak_bytes": 12940
+        }
+      }
+    },
+    "integer_token_constraint": {
+      "typed_rejects_decimal_count": true,
+      "schema_accepts_decimal_count": true
+    },
+    "source_sha256": {
+      "integrations/edge/aethron_edge/contracts.py": "b585b5a439af4378d5df1c7608ac37f379da7b4a442f3ef0a989a79930cd3bdb",
+      "integrations/edge/aethron_edge/common_types.py": "5a10387000cb160918d558b7022790529461e9d944d6e02747a170ee4b1ea962",
+      "integrations/edge/aethron_edge/openapi.py": "a5e5a0157637107c394813e58e40db0a5d0f51391fee2781042b6b62925e4623",
+      "scripts/edge_contract_profile.py": "07044a144b3fedd66fc229ac1cfa71f7be2794afa143d8cca9fee9afebe13e73",
+      "contracts/openapi/aethron-edge-v1.json": "4d562382b803e59dac1ab24a7ead52cd2cdbbc9533aa6d9dc68fca9f6e9b0b83"
+    },
+    "workload_note": "recorded_24 is a historical diagnostic label for the frozen synthetic blackout fixture, not a recorded physical capture."
+  },
+  "installed_profile": {
+    "qualified": false,
+    "python": "3.13.15",
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "versions": {
+      "pydantic": "2.13.5",
+      "pydantic_core": "2.46.5",
+      "jsonschema": "4.26.0"
+    },
+    "results": {
+      "frozen_24": {
+        "sha256": "0c3cddd16036e6ebaaae9d353d80ce7fcc53247ca2b1e9e4bca7c8513d798755",
+        "pydantic": {
+          "cpu_median_ms": 0.636,
+          "wall_median_ms": 0.6375,
+          "python_traced_peak_bytes": 75816
+        },
+        "jsonschema": {
+          "cpu_median_ms": 25.437,
+          "wall_median_ms": 34.332458,
+          "python_traced_peak_bytes": 12718
+        }
+      }
+    },
+    "integer_token_constraint": {
+      "typed_rejects_decimal_count": true,
+      "schema_accepts_decimal_count": true
+    },
+    "source_sha256": {
+      "integrations/edge/aethron_edge/contracts.py": "a783f857d3c459d40f3357d876ef9546794a167c71959503171131a1f917dc36",
+      "integrations/edge/aethron_edge/common_types.py": "5a10387000cb160918d558b7022790529461e9d944d6e02747a170ee4b1ea962",
+      "integrations/edge/aethron_edge/openapi.py": "a5e5a0157637107c394813e58e40db0a5d0f51391fee2781042b6b62925e4623",
+      "scripts/edge_contract_profile.py": "163482152970dbe4a766db87b7b74853401204cb0a999121921ba46ecfb04490",
+      "contracts/openapi/aethron-edge-v1.json": "4d562382b803e59dac1ab24a7ead52cd2cdbbc9533aa6d9dc68fca9f6e9b0b83"
+    }
+  },
+  "research": [
+    {
+      "url": "https://docs.pydantic.dev/latest/concepts/validators/",
+      "finding": "Before validators permit strict type validation before literal matching while retaining generated schemas."
+    },
+    {
+      "url": "https://msgspec.dev/supported-types",
+      "finding": "C extension with typed conversion/JSON and Boolean literals; verified 0.22.0 candidate in an isolated target, not a runtime dependency."
+    },
+    {
+      "url": "https://ajv.js.org/standalone.html",
+      "finding": "JavaScript/TypeScript schema compilation can run without a compiler at runtime; not benchmarked here. Standard JSON Schema integer semantics still require a separate token-preserving decoder for this contract."
+    },
+    {
+      "url": "https://json-schema.org/understanding-json-schema/reference/numeric",
+      "finding": "Integer value semantics do not distinguish integral decimal tokens; executable Draft202012Validator comparison confirms this."
+    },
+    {
+      "url": "https://python-jsonschema.readthedocs.io/en/stable/validate/",
+      "finding": "Independent Draft202012Validator oracle; lower traced allocation but substantially higher CPU in tested reports."
+    }
+  ],
+  "probe_tool": {
+    "url": "https://files.pythonhosted.org/packages/cc/e3/357baa8d2a9164a98dfd7ef9d3a58125df0ed981be909945bdd337be7194/msgspec-0.22.0-cp313-cp313-macosx_11_0_arm64.whl",
+    "sha256": "5aa24eb475d070ecbbe5b21080fc3ce4b0b76c60de25cfe0c9678d8fb44bb42f",
+    "license": "BSD-3-Clause",
+    "requires_python": ">=3.10",
+    "install": "pip install --no-deps --require-hashes --target <isolated-directory> -r <lock containing URL and SHA256>; add directory to PYTHONPATH and run scripts/edge_contract_profile.py --msgspec-probe"
+  },
+  "limitations": [
+    "Three batches on a shared Mac; CPU diagnostics are not hard latency, RSS, native allocation or hardware qualification.",
+    "Maximum workload repeats a track to exercise allowed shape sizes only; original baseline retained, not relabeled as a new implementation result.",
+    "msgspec representative conversion/constructor proof is not a full service migration or comparative performance benchmark; Ajv considered from official semantics, not installed or timed.",
+    "Installed comparison predates only the diagnostic parity-assert hardening; installed product source bytes match final product.",
+    "P1.3-P1.7 technology review and full release qualification remain pending."
+  ],
+  "hosted_followup": {
+    "head": "07515400e1495bb0d6c83047a44568dfa1a54813",
+    "run": 37956154105,
+    "result": "4 PASS; macOS/Windows Python3.11.13 failed setup because upstream binaries unavailable; no tests ran in those two jobs",
+    "fix": "Keep Linux3.11.13 and all3OS3.13.15; use upstream3.11.9 for macOS/Windows compatibility only, not a deployment runtime pin. No minor-version or OS coverage removed.",
+    "verification": "Six entries checked against official actions/python-versions manifest for exact platform/architecture; hosted retry pending",
+    "manifest_url": "https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json",
+    "workflow_sha256": "725cd64c0fb626a352bc1a011132bbb55338cd729a93937b47e93c99487b560f"
+  }
+}

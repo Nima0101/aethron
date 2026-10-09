@@ -1,0 +1,154 @@
+{
+  "kind": "development_checkpoint_not_release_qualified",
+  "source_base": "072eb8acdf46031276a6bd01e2fedda41058764b",
+  "source_sha256": {
+    "packaging/appliance/image/prepare.py": "c12fd93200207347c8ffa64fd7f1726a92316c1deb44ceb4dbf1f29b34b799a5",
+    "packaging/appliance/image/RosGuest.Containerfile": "110dd21870b729e0cc458e68a53656e2fd95a427bae41bec2b71c76e17b036da",
+    "tests/ros2/test_runtime_image.py": "62c0b2f80f66946f8f451c23521d0e1621bd57abefcb121e750e31992bf07b72"
+  },
+  "change": "Remove build-only pip before signing; builder now requires isolated installed-consumer tests before ROS image export. Full verification unchanged.",
+  "signed_file_count_before": 2270,
+  "signed_file_count_after": 1385,
+  "runtime_inventory": {
+    "files": 1385,
+    "signed_bytes": 43768936,
+    "manifest_sha256": "38f89b8fecee6bbb6ed0ec9aefa08dac426ec7b58889791ab4921bf3481fd0c5"
+  },
+  "checks": {
+    "installed_consumer": "3 PASS/1.217s, repeated by real builder 3 PASS/0.988s; both initial/update signatures and all files verified",
+    "installed_signed_lifecycle": "PASS: loss/nonrevival/restart/source-rewind/restoration; no availability qualification",
+    "staging_contracts": "5 PASS",
+    "systemd_units": "4 verify PASS; 8 login/tracing/background timer masks confirmed",
+    "ruff": "PASS",
+    "bandit": "4 LOW subprocess warnings retained, 0 medium/high; fixed argv and source test bind, no shell"
+  },
+  "image_manifest": {
+    "dpkg_sha256": "051e0447d9db928a33049d3ebe156230b43908a8412bdb3b58991d507203d35f",
+    "files": {
+      "initrd": "951ec9819a86a9c574905ed317372ff910c1cc8e16a7168ad59b3d35fdf6f427",
+      "kernel": "7ea5c4140a8d9b42c9856c3e3c1d6a8f2b75bd7c9f9d2eb7da52af110dc3d41f",
+      "rootfs.raw": "2ba01114b16d51138fbe51575d3190844cb7368ea081b08a1539c5c72c432277"
+    },
+    "guest_image": "sha256:a321c184bbf954494b75a58f5230307fc536221e16f71cf333ded43d1be11b9e",
+    "hardware_qualified": false,
+    "kind": "test_only_linux_sil",
+    "ros_dependencies": {
+      "annotated_doc-0.0.5-py3-none-any.whl": "117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101",
+      "annotated_types-0.8.0-py3-none-any.whl": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0",
+      "anyio-4.15.1-py3-none-any.whl": "6152fdbbf9a77fdec97731721bebf7c4c44f7c29b424b0065826173efc7ed101",
+      "attrs-26.1.0-py3-none-any.whl": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+      "certifi-2026.7.22-py3-none-any.whl": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775",
+      "click-8.5.0-py3-none-any.whl": "255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360",
+      "fastapi-0.142.4-py3-none-any.whl": "8a651aa071a9f92c8217cca1d0b044bf9c326f336578be0a728a1a1f22ec52d2",
+      "h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+      "httpcore-1.0.9-py3-none-any.whl": "2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55",
+      "httpx-0.28.1-py3-none-any.whl": "d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad",
+      "idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+      "jsonschema-4.26.0-py3-none-any.whl": "d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce",
+      "jsonschema_specifications-2025.9.1-py3-none-any.whl": "98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe",
+      "opentelemetry_api-1.45.1-py3-none-any.whl": "b31553efa588ae44bc306f863c785c5333a9ecc091248c6ee68b4b6c87fdedfb",
+      "pip-26.2-py3-none-any.whl": "931c303696af6fa3417112103b1cad26890e5a07eccb5b99783700e33f2b8aad",
+      "pydantic-2.13.5-py3-none-any.whl": "346a034f080da3755d8e9cb5e00e8b07de1d39e4f6e2c87d8ab7cafa0b269a73",
+      "pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl": "4fdc8b93a41521988916eeaa271173fcca7fa0803d62f87675aac8dcec1c8e29",
+      "referencing-0.37.0-py3-none-any.whl": "381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231",
+      "rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl": "2693b2728bbcc48d09a981a356954b0c47c53ff25b545856f28a889ea619f69a",
+      "starlette-1.7.0-py3-none-any.whl": "67f8e99895493dd2911a03f11314af6ceebeae4e704bb9f43dfc6a9db151c93e",
+      "typing_extensions-4.16.0-py3-none-any.whl": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+      "typing_inspection-0.4.4-py3-none-any.whl": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147",
+      "uvicorn-0.54.0-py3-none-any.whl": "505bdb0f318731d45f1f712071fc781a8981f6847a31c902c9f5e652d4f67faf"
+    },
+    "ros_lifecycle_required": true,
+    "ros_runtime_consumer_test_sha256": "62c0b2f80f66946f8f451c23521d0e1621bd57abefcb121e750e31992bf07b72",
+    "schema_version": 1,
+    "sensor_profiles": {
+      "raw-depth": "recorded"
+    },
+    "templates": {
+      "packaging/appliance/image/Guest.Containerfile": "2e980ec3686c18c9310fbd77cd7d8827707508c16ca02d5ff5b8a9df2b908fa5",
+      "packaging/appliance/image/RosGuest.Containerfile": "110dd21870b729e0cc458e68a53656e2fd95a427bae41bec2b71c76e17b036da",
+      "packaging/appliance/image/Tools.Containerfile": "38fa67924be37f2ecc7143ae108f74914dc12b1dd18ca7a4a8eff079f5f61405",
+      "packaging/appliance/image/aethron-ros-check.service": "579942000e7b1607148bd6cbfa576ffdfc3b30d6ca61ed882eabd27296bbe80b",
+      "packaging/appliance/image/aethron-sil-probe.service": "20f52022f62dffb06dda8a3c9551e824a55a9a481cf9421edf63ef51c00b9424",
+      "packaging/appliance/image/appliance.json": "3a5b16a5780478599ec76bf322c20be5436e8feb38c99be44766972026f28f77",
+      "packaging/appliance/image/boot_probe.py": "4ccb6a508d7bfe987cadf3b894dd93aec35acdfaa692adde3e4b91def907de0a",
+      "packaging/appliance/image/make-root.sh": "da7ba0aa3fe71378dd84253c213565f381867912e3519f0dcc51f01be29180c6",
+      "packaging/appliance/image/prepare.py": "c12fd93200207347c8ffa64fd7f1726a92316c1deb44ceb4dbf1f29b34b799a5",
+      "packaging/appliance/image/provision_ros_sdk.py": "498eaea2c6cba166488aa7c3bcdc93095092198a17a89dbe81ecd5cea3722ba7",
+      "packaging/appliance/image/ros_boot_probe.py": "3708017d5140715aa5d7d3e1d5c9fe47974d6416eb21850f7b90c792cbfddd03",
+      "packaging/appliance/image/ros_fixture.py": "5284439c7ed7bfa31f1a94137fbea20b8600cb49aefbdb2f55aa7b532f60a664",
+      "packaging/appliance/image/ros_lifecycle_probe.py": "a59fb082f45bfdf9603b5c784aff43ff48ede4b949cfcc7e56cfc0a24ae63db5",
+      "packaging/appliance/image/sensor_probe.py": "82c969ff14b113017fc4458f34e5ae2035c81b1fafee41d34d6e5f2bf8f09cdd",
+      "packaging/appliance/image/sign_bundle.py": "4011290513f807177212ffa140bfff746512ec3e97739719a7653704fc7e515a",
+      "packaging/appliance/image/update_probe.py": "898d5e89756305cbf14becdcb8f4034749910fcc34f86043810e70920d5ee4ee",
+      "packaging/appliance/image/update_runtime_check.py": "cd71ee8a2977b5557463d2f87229f506897d1f4079fa8c3008c9645887333a59"
+    },
+    "tool_image": "sha256:38bf5ebcbeb8cdce889b53c02196f185f8a9862eabbf13c2ae9565581443cc76",
+    "wheels": {
+      "aethron-0.2.0-py3-none-any.whl": "726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e",
+      "aethron_edge-0.1.0-py3-none-any.whl": "ef8aa6aadedbf4db7d676bcc4b6a85046997e4d39a6b054194f4ddcf4e18d5ae"
+    }
+  },
+  "boot_result": {
+    "status": "failed",
+    "kind": "emulated_linux_boot_sil",
+    "hardware_qualified": false,
+    "required_sensor_profiles": {
+      "raw-depth": "recorded"
+    },
+    "ros_lifecycle_required": true,
+    "events": [
+      {
+        "error_type": "FileNotFoundError",
+        "event": "probe_failed"
+      }
+    ],
+    "serial_sha256": "f5941a2d0de7dfb17cf21744895566667bff2b79002a9b2219b2eab50e062f45",
+    "image_before": {
+      "initrd": "951ec9819a86a9c574905ed317372ff910c1cc8e16a7168ad59b3d35fdf6f427",
+      "kernel": "7ea5c4140a8d9b42c9856c3e3c1d6a8f2b75bd7c9f9d2eb7da52af110dc3d41f",
+      "rootfs.raw": "2ba01114b16d51138fbe51575d3190844cb7368ea081b08a1539c5c72c432277"
+    },
+    "image_after": {
+      "initrd": "951ec9819a86a9c574905ed317372ff910c1cc8e16a7168ad59b3d35fdf6f427",
+      "kernel": "7ea5c4140a8d9b42c9856c3e3c1d6a8f2b75bd7c9f9d2eb7da52af110dc3d41f",
+      "rootfs.raw": "2ba01114b16d51138fbe51575d3190844cb7368ea081b08a1539c5c72c432277"
+    },
+    "base_unchanged": true,
+    "overlay_sha256": "3c6a9c54270e95a8a932784cf5c341150a44335e44a6d1292b9055fce72213ba",
+    "elapsed_seconds": 76.32412641681731,
+    "exit_code": 124,
+    "image_manifest_sha256": "0cca851ca99f28e81b0ab718db6242bc74e105a2bff1c62f4b6c7387c9c44446",
+    "wheels": {
+      "aethron-0.2.0-py3-none-any.whl": "726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e",
+      "aethron_edge-0.1.0-py3-none-any.whl": "ef8aa6aadedbf4db7d676bcc4b6a85046997e4d39a6b054194f4ddcf4e18d5ae"
+    },
+    "tool_image": "sha256:38bf5ebcbeb8cdce889b53c02196f185f8a9862eabbf13c2ae9565581443cc76"
+  },
+  "profile": {
+    "qualification": false,
+    "total_profiled_seconds": 14.244,
+    "function_calls": 853055,
+    "verify_bundle_cumulative_seconds_at_cutoff": 3.692,
+    "hash_update_internal_seconds": 0.315,
+    "stat_calls": 4247,
+    "scope": "Partial instrumented diagnostic until unchanged 15s observer stopped service. Imports/schema construction dominate the pre-verification portion; verification unfinished. Not a production benchmark or a completed total-startup measurement.",
+    "base_unchanged": true
+  },
+  "logs_sha256": {
+    "build/ecosystem-phase2/ros-runtime-minimal/build.log": "5b76d7b8d14d39adf15467f4349048e6f3c6d02e0cf78b52368dbf72ccb69a28",
+    "build/ecosystem-phase2/ros-runtime-minimal/consumer.log": "d8eab3ef9378c09af16bb50b130983263872fe5911e4a1c977e9c885696a3bee",
+    "build/ecosystem-phase2/ros-runtime-minimal/lifecycle.log": "ed25a9804a74c0314607143e530a9b54ab2e4a12ecbfaa1508e0d4faa3c356e5",
+    "build/ecosystem-phase2/ros-runtime-minimal/contracts.log": "667d63fb9a39c86ddc64bb7a8a707946e1366a0c8efcf7bb94cfee04965a5940",
+    "build/ecosystem-phase2/ros-runtime-minimal/prepare-bandit.json": "e3413eab1d2fe6f91eab64a2ad1e52ff0c82a3fc635c1f4b058df066c2515f14",
+    "build/ecosystem-phase2/ros-runtime-minimal/masks.log": "13333a73008b7b2da79e1d40e3874f9e065dc69059346b931ac6241702ac375f",
+    "build/ecosystem-phase2/ros-runtime-minimal/image-build.log": "4a552e9e7f931df6a6d078d0cfa9be148a02335874b1476a71249efaa8a4762a",
+    "build/ecosystem-phase2/ros-boot-minimal/runs/first/serial.log": "f5941a2d0de7dfb17cf21744895566667bff2b79002a9b2219b2eab50e062f45",
+    "build/ecosystem-phase2/ros-startup-profile/serial.log": "8e48ddaa59922b33031c011ecb6ed225f36c3edb36201474a6e66053a3cb16d2",
+    "build/ecosystem-phase2/ros-guest/startup-profile.py": "1526c854a0bf7ac8b56c6b3db2868ac1e1c633c090e9345fad8b6f78596394ac"
+  },
+  "pending": [
+    "VM still fails fixture_deadline:{} with no accepted status; pip removal did not fix it",
+    "Offline reboot/one-hour soak and full release/hosted gates",
+    "Existing clock-drift, frozen aircraft and latency negative evidence unchanged"
+  ]
+}

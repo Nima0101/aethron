@@ -1,0 +1,1 @@
+{"version":1,"runtime_mode":"interactive","profiles":[{"name":"bench","driver":"replay","address":"temporal-blackout.jsonl","contract":"warn"}],"credentials":[],"status_file":"../build/ecosystem-phase1/local-status.json"}

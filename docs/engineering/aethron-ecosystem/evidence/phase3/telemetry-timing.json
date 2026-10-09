@@ -1,0 +1,53 @@
+{
+  "status": "development_only_not_qualified",
+  "baseline_commit": "6e1289df7355751a2778664b50442e559c20edf7",
+  "change": "Bounded decode/journal/delivery peak timing; original100ms freshness and durable-before-publish unchanged.",
+  "tests": {
+    "red": "3 errors for missing diagnostics;1 existing rejection pass",
+    "focused_green": "7 PASS/0.067s",
+    "installed": "40 PASS/23.114s; ResourceWarning for unclosed SQLite connections; repair next"
+  },
+  "probes": {
+    "lifecycle": "PASS6.036s;28 ingests; decode max0.975ms, journal max11.259ms, ingest max12.350ms",
+    "crash_restart": "PASS6.792s; surviving child journal max3.588ms. Parent trace contains retained message ages204ms/177ms, independently withdrawn. Largest consume interval includes intentional restart backoff, not pure scheduling latency."
+  },
+  "limitations": [
+    "Prior35/36 installed result, single-packet expiry and10s startup failure remain unresolved. Probe success does not establish their cause.",
+    "Instrumented pre-change probes used baseline installed wheel; killed child has no final timing report.",
+    "No hardware/SITL/full release qualification; no public push."
+  ],
+  "artifacts": {
+    "build/ecosystem-phase3/telemetry-timing/installed.log": "e281b07c8c30f540414a1e1be4d02a30ad6e74e2ca513dbbe498c842fa67372f",
+    "build/ecosystem-phase3/telemetry-timing/red.log": "2fcf4265003e7072d6e01248c9b83f0faa4a338b392269eb47fe48a8603997a3",
+    "build/ecosystem-phase3/telemetry-timing/trace.log": "0b302a342049a4a179d4187467952749d9d0d28384b1e1209413fcf04df5f4e7",
+    "build/ecosystem-phase3/telemetry-timing/probe.log": "8bac4a3568da95f51d298fcdf53385a38bc2543a852f4ab02c6f449e5aadcce2",
+    "build/ecosystem-phase3/telemetry-timing/green.log": "7635901ad44c478a8c0d530c0237b6f6f24be03c346107701d4b3b1006d522ee",
+    "build/ecosystem-phase3/telemetry-timing/install.log": "d3b355ce554c135c1b263731d067fb441d4884fdf576fb52b116748427dc8bbb",
+    "build/ecosystem-phase3/telemetry-timing/build.log": "a22a8e13957873cd093addcc18bcf9871548c068ae8602245a2a903924ed3019",
+    "build/ecosystem-phase3/telemetry-timing/child-11901.json": "ae8b8703815576659246b52f116b4cd44b5e58684b6bb72c28fcc6b933f7d352",
+    "build/ecosystem-phase3/telemetry-timing/child-11035.json": "88c487a5bc0317d102f5c1dc80d8fc84ad9b755a15dcfbf17112491b3bf56227",
+    "build/ecosystem-phase3/telemetry-timing/parent.json": "d56d0783bf272f55ca727ec3a480379ab75ea568d15d142b03eab37347d8e9d9",
+    "build/ecosystem-phase3/telemetry-timing/probe.py": "043adf531e2e0380716655b51a123c00dfe6d88c609d01617bfd7ede7f3dbd16",
+    "build/ecosystem-phase3/telemetry-timing/bandit.json": "f8f5a053b5523c2354280c28dbcde9b886f67467dc3320aef890046e4abd4455",
+    "build/ecosystem-phase3/telemetry-timing/package/aethron_edge-0.1.0-py3-none-any.whl": "863c74d0caca181d9648b7333db346cf5ae3946fcafaec7f62b7629ab82b2485",
+    "integrations/edge/aethron_edge/telemetry/worker.py": "1d0fd409cd6bd0602f03370f6af06ecd8df8a00a1cee5a4d9837dd00e8c3febb"
+  },
+  "connection_cleanup": {
+    "base_commit": "011f259",
+    "change": "Close SQLite connection when PRAGMA initialization raises; explicitly close crash test journal read connection. No changes to transaction durability or acceptance.",
+    "regression": "Real corrupt journal leaves open connection before fix (DatabaseError instead of closed ProgrammingError); after fix3 failure-path tests PASS0.599s.",
+    "installed": "41 PASS10.721s with -W error::ResourceWarning; no warnings/unraisable diagnostics in captured log. Full byte-for-byte wheel/source match.",
+    "lint_security": "Ruff check/format PASS; Bandit telemetry package0 findings.",
+    "limitations": "No attribution of prior availability failures to this leak. Prior failure records retained; full release qualification pending.",
+    "artifacts": {
+      "build/ecosystem-phase3/telemetry-timing/package-cleanup/aethron_edge-0.1.0-py3-none-any.whl": "31885447df40808b5001c4f84d7620eb1ef64e2f7712f595980e6e8b1d24f068",
+      "build/ecosystem-phase3/telemetry-timing/connection-red.log": "af8aa8727d2f6c6947f943b78960a5b687af74268dfbe423540cc658b897e5fe",
+      "build/ecosystem-phase3/telemetry-timing/connection-green.log": "e43e447220bc6cced0fd95ec53ecdb33feedbda63c52e6a9c306861453ee8033",
+      "build/ecosystem-phase3/telemetry-timing/installed-cleanup.log": "e1477c46d6a26c0f8ad127a847ccd8de5161fabab170525657d0624e7d5e1da9",
+      "build/ecosystem-phase3/telemetry-timing/bandit-cleanup.json": "cbbb4cea5261859c2d80914e77b694cb2aceb15d03622ce53b6067df332b50f4",
+      "integrations/edge/aethron_edge/telemetry/signing.py": "71dfdc4d501499e865d12d144dddf6b6698706645ecbae2ca547b0ef18ffee22",
+      "tests/mavlink/test_signing.py": "9eb8be5c71019af3ed125f522238012f16de5d659fc1a92a7ab2560537efecdf",
+      "tests/mavlink/test_worker.py": "14d4454ec8180885856ed1f46ec5aead8ffaa81a6cb06544f349f69a79f11777"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "wheels": {
+    "aethron-0.2.0-py3-none-any.whl": "be3dd8e3e8bcf437d72d65e384c560eb18d4b22baf522849b965d3d720c1d73f",
+    "aethron_edge-0.1.0-py3-none-any.whl": "49fda684a90da9667ff1717ece3a9a3b631b33fda43a72ea952ce129f621d905"
+  },
+  "byte_identical": true,
+  "installed_consumer": true,
+  "consumer_events": 3,
+  "zero_viewer_continued": true,
+  "platform": "darwin",
+  "python": "3.13.15",
+  "source_revision": "d90ae953f6431fd9d460e440432ac72825b8d250",
+  "local_log_sha256": "bba2eee25e0cbdc164492b9498f124bb85790682ff5274108f089bca56a9588e"
+}

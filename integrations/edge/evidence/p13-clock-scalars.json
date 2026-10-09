@@ -1,0 +1,83 @@
+{
+  "qualified": false,
+  "python": "3.13.15",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "parity_cases_per_implementation": 2069,
+  "iterations_per_batch": 30000,
+  "cpu_ns_per_call": {
+    "python": [
+      1698.3,
+      1250.1,
+      1593.7666666666667,
+      2534.8,
+      2207.7
+    ],
+    "rust_ctypes_with_guards": [
+      3929.0333333333333,
+      3628.3333333333335,
+      3700.733333333333,
+      6141.2,
+      6822.8
+    ]
+  },
+  "median_cpu_ns_per_call": {
+    "python": 1698.3,
+    "rust_ctypes_with_guards": 3929.0333333333333
+  },
+  "source_sha256": {
+    "integrations/edge/aethron_edge/timebase.py": "4a93af564e54e0bbab51f16d8842c5f59cbb75ba3f49e3a30bd1eaeb66d151ae",
+    "scripts/edge_clock_profile.py": "0b9d195d527b22edc963587d45f39d5f1684688fd55bd74cbef20e557df28125",
+    "scripts/probes/clock_compatibility.rs": "578c01b8282ee239daa9de62cb154583afb76853b033332fe1eea214b3fdfab8",
+    "tests/integration/test_clock_pipeline.py": "70c7e3074a2cc93a0e20cff8105373800844abeb28526b382e1460ac149f9737",
+    ".github/workflows/aethron-edge-contracts.yml": "1fc7bd2fe14aceb63e7b6be65e2d63f74840bb0817c9c252353051dadb2a712a"
+  },
+  "technology_decision": "Retain Python exact integer arithmetic for the scalar capture-clock compatibility API: the measured checked Rust/ctypes boundary costs more per call, needs guards plus large-integer fallback, and adds native packaging without an observed benefit for this operation.",
+  "scope": "P1.3 clock compatibility only. Full clock mapping, calibration, acquisition/decoder/inference and process isolation review remain open; no whole-P1.3 or release qualification.",
+  "constraints": [
+    "Four nonnegative exact integers; reject Boolean, float, nonfinite, missing and string values without coercion or exceptions.",
+    "Preserve the inclusive 50000000 ns uncertainty-plus-skew ceiling and exact comparisons beyond binary64/u64 epochs.",
+    "Cross-platform offline edge consumer; no external service or new runtime dependency."
+  ],
+  "research": [
+    {
+      "url": "https://peps.python.org/pep-0564/",
+      "finding": "Integer nanoseconds preserve time precision; selected exact integer arithmetic is consistent with that requirement."
+    },
+    {
+      "url": "https://doc.rust-lang.org/std/primitive.u64.html#method.checked_add",
+      "finding": "Checked addition and abs_diff provide a credible no-overflow native gate; measured via explicit C ABI, with input guards and fallback required for existing arbitrary-sized integers."
+    },
+    {
+      "url": "https://docs.python.org/3.13/library/ctypes.html",
+      "finding": "Standard-library FFI supports the no-dependency native comparison; timings include scalar conversion and FFI costs, not just Rust arithmetic."
+    }
+  ],
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01) (Homebrew)",
+  "upstream_rust_manifest_sha256": "a7c8774a5fd8441c997d94c029776cbc5eb111e9d72ab5d256fa69866644347e",
+  "native_build": "rustc --edition=2021 --crate-type cdylib -O -D warnings scripts/probes/clock_compatibility.rs -o LIBRARY",
+  "reproduce": "PYTHONPATH=integrations/edge python scripts/edge_clock_profile.py --native-library LIBRARY",
+  "checks": {
+    "red": "22 incorrect-acceptance failures and 8 TypeErrors in the malformed-input regression before the fix",
+    "focused_tests": 18,
+    "offline_installed_tests": 8,
+    "native_boundary_test": 1,
+    "lint_format_bandit_yaml": "PASS; seeded test-only RNG B311 finding explicitly annotated, no security randomness used",
+    "installed": {
+      "core_wheel_sha256": "daeacafc7e70f20bbd0b446f448203b67b0b12ee56e6b3afca6b248d031c9a93",
+      "edge_wheel_sha256": "836861c39ddbb18f7ebadae1caeccaf5398c618afccfaf1dd839666475c0ac96",
+      "source_bytes_match": true,
+      "outside_checkout": true,
+      "offline_install": true,
+      "temporary_consumer_removed": true
+    },
+    "hosted": "Updated six installed OS/Python jobs; pinned Rust 1.98.1 comparison on Linux 3.13. Hosted execution pending."
+  },
+  "parent": "74073fece4f4379f5e2a0057642473c2db7b8c21",
+  "limitations": [
+    "Diagnostic CPU measurement on a shared Mac, not hard latency or resource qualification.",
+    "No RSS/native memory benchmark; fixed-width Rust arithmetic is allocation-free but Python integers and FFI have runtime costs.",
+    "No general Rust-versus-Python performance conclusion; this tests one scalar FFI boundary, not a native whole-worker architecture.",
+    "CaptureClock.compatible currently has no production call site; this closes its API admission defect, not a claimed active sensor-fusion change.",
+    "Full qualification and all retained unrelated failures remain pending."
+  ]
+}

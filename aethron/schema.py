@@ -3,6 +3,8 @@
 import json
 import math
 
+from ._json_bounds import check as check_bounds
+
 MAX_BYTES = 65536
 MAX_TIME = 2**53 - 1000
 ZONES = ("near", "sector_a", "sector_b", "sector_c")
@@ -45,25 +47,7 @@ def unique_pairs(pairs):
 def parse(data):
     require(type(data) is bytes and len(data) <= MAX_BYTES)
     try:
-        # Bound nesting before JSON allocation, respecting quoted/escaped text.
-        depth = 0
-        quoted = escaped = False
-        for char in data:
-            if quoted:
-                if escaped:
-                    escaped = False
-                elif char == 92:
-                    escaped = True
-                elif char == 34:
-                    quoted = False
-            elif char == 34:
-                quoted = True
-            elif char in (91, 123):
-                depth += 1
-                require(depth <= 8)
-            elif char in (93, 125):
-                depth -= 1
-                require(depth >= 0)
+        require(check_bounds(data))
         obj = json.loads(
             data.decode("utf-8"),
             object_pairs_hook=unique_pairs,

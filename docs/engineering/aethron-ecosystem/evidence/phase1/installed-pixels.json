@@ -1,0 +1,26 @@
+[
+  {
+    "driver": "file",
+    "installed": true,
+    "inferences": 1,
+    "events": 3,
+    "current_state": "UNKNOWN",
+    "time_to_observed_inference_s": 33.582529791863635,
+    "exposure_clock_qualified": false,
+    "hardware_qualified": false,
+    "source_revision": "d90ae953f6431fd9d460e440432ac72825b8d250",
+    "runtime_wheel_sha256": "49fda684a90da9667ff1717ece3a9a3b631b33fda43a72ea952ce129f621d905"
+  },
+  {
+    "driver": "rtsp",
+    "installed": true,
+    "inferences": 1,
+    "events": 3,
+    "current_state": "UNKNOWN",
+    "time_to_observed_inference_s": 15.382407125085592,
+    "exposure_clock_qualified": false,
+    "hardware_qualified": false,
+    "source_revision": "d90ae953f6431fd9d460e440432ac72825b8d250",
+    "runtime_wheel_sha256": "49fda684a90da9667ff1717ece3a9a3b631b33fda43a72ea952ce129f621d905"
+  }
+]

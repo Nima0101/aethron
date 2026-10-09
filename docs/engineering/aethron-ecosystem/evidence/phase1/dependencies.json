@@ -1,0 +1,200 @@
+[
+  {
+    "name": "annotated-doc",
+    "version": "0.0.5",
+    "sha256": "117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101",
+    "wheel": "annotated_doc-0.0.5-py3-none-any.whl",
+    "license": "MIT",
+    "source": "https://pypi.org/pypi/annotated-doc/0.0.5/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "annotated-types",
+    "version": "0.8.0",
+    "sha256": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0",
+    "wheel": "annotated_types-0.8.0-py3-none-any.whl",
+    "license": "MIT",
+    "source": "https://pypi.org/pypi/annotated-types/0.8.0/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "anyio",
+    "version": "4.15.1",
+    "sha256": "6152fdbbf9a77fdec97731721bebf7c4c44f7c29b424b0065826173efc7ed101",
+    "wheel": "anyio-4.15.1-py3-none-any.whl",
+    "license": "MIT",
+    "source": "https://pypi.org/pypi/anyio/4.15.1/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "attrs",
+    "version": "26.1.0",
+    "sha256": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+    "wheel": "attrs-26.1.0-py3-none-any.whl",
+    "license": "MIT",
+    "source": "https://pypi.org/pypi/attrs/26.1.0/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "certifi",
+    "version": "2026.7.22",
+    "sha256": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775",
+    "wheel": "certifi-2026.7.22-py3-none-any.whl",
+    "license": "MPL-2.0",
+    "source": "https://pypi.org/pypi/certifi/2026.7.22/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "click",
+    "version": "8.5.0",
+    "sha256": "255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360",
+    "wheel": "click-8.5.0-py3-none-any.whl",
+    "license": "BSD-3-Clause",
+    "source": "https://pypi.org/pypi/click/8.5.0/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "fastapi",
+    "version": "0.142.4",
+    "sha256": "8a651aa071a9f92c8217cca1d0b044bf9c326f336578be0a728a1a1f22ec52d2",
+    "wheel": "fastapi-0.142.4-py3-none-any.whl",
+    "license": "MIT",
+    "source": "https://pypi.org/pypi/fastapi/0.142.4/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "h11",
+    "version": "0.16.0",
+    "sha256": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+    "wheel": "h11-0.16.0-py3-none-any.whl",
+    "license": "MIT",
+    "source": "https://pypi.org/pypi/h11/0.16.0/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "httpcore",
+    "version": "1.0.9",
+    "sha256": "2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55",
+    "wheel": "httpcore-1.0.9-py3-none-any.whl",
+    "license": "BSD-3-Clause",
+    "source": "https://pypi.org/pypi/httpcore/1.0.9/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "httpx",
+    "version": "0.28.1",
+    "sha256": "d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad",
+    "wheel": "httpx-0.28.1-py3-none-any.whl",
+    "license": "BSD-3-Clause",
+    "source": "https://pypi.org/pypi/httpx/0.28.1/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "idna",
+    "version": "3.20",
+    "sha256": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+    "wheel": "idna-3.20-py3-none-any.whl",
+    "license": "BSD-3-Clause",
+    "source": "https://pypi.org/pypi/idna/3.20/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "jsonschema",
+    "version": "4.26.0",
+    "sha256": "d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce",
+    "wheel": "jsonschema-4.26.0-py3-none-any.whl",
+    "license": "MIT",
+    "source": "https://pypi.org/pypi/jsonschema/4.26.0/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "jsonschema-specifications",
+    "version": "2025.9.1",
+    "sha256": "98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe",
+    "wheel": "jsonschema_specifications-2025.9.1-py3-none-any.whl",
+    "license": "MIT",
+    "source": "https://pypi.org/pypi/jsonschema-specifications/2025.9.1/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "opentelemetry-api",
+    "version": "1.45.1",
+    "sha256": "b31553efa588ae44bc306f863c785c5333a9ecc091248c6ee68b4b6c87fdedfb",
+    "wheel": "opentelemetry_api-1.45.1-py3-none-any.whl",
+    "license": "Apache-2.0",
+    "source": "https://pypi.org/pypi/opentelemetry-api/1.45.1/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "pydantic",
+    "version": "2.13.5",
+    "sha256": "346a034f080da3755d8e9cb5e00e8b07de1d39e4f6e2c87d8ab7cafa0b269a73",
+    "wheel": "pydantic-2.13.5-py3-none-any.whl",
+    "license": "MIT",
+    "source": "https://pypi.org/pypi/pydantic/2.13.5/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "pydantic_core",
+    "version": "2.46.5",
+    "sha256": "f332f0e72a5a0400141f830744e141bf9f97917878dbe968669e8a7fefea78ff",
+    "wheel": "pydantic_core-2.46.5-cp313-cp313-macosx_11_0_arm64.whl",
+    "license": "MIT",
+    "source": "https://pypi.org/pypi/pydantic_core/2.46.5/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "referencing",
+    "version": "0.37.0",
+    "sha256": "381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231",
+    "wheel": "referencing-0.37.0-py3-none-any.whl",
+    "license": "MIT",
+    "source": "https://pypi.org/pypi/referencing/0.37.0/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "rpds-py",
+    "version": "2026.9.1",
+    "sha256": "eba5d173f7d5708b22a93815017a4611873ed54db9f268077c0dd1ed99cfc858",
+    "wheel": "rpds_py-2026.9.1-cp313-cp313-macosx_11_0_arm64.whl",
+    "license": "MIT",
+    "source": "https://pypi.org/pypi/rpds-py/2026.9.1/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "starlette",
+    "version": "1.7.0",
+    "sha256": "67f8e99895493dd2911a03f11314af6ceebeae4e704bb9f43dfc6a9db151c93e",
+    "wheel": "starlette-1.7.0-py3-none-any.whl",
+    "license": "BSD-3-Clause",
+    "source": "https://pypi.org/pypi/starlette/1.7.0/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "typing_extensions",
+    "version": "4.16.0",
+    "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+    "wheel": "typing_extensions-4.16.0-py3-none-any.whl",
+    "license": "PSF-2.0",
+    "source": "https://pypi.org/pypi/typing_extensions/4.16.0/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "typing-inspection",
+    "version": "0.4.4",
+    "sha256": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147",
+    "wheel": "typing_inspection-0.4.4-py3-none-any.whl",
+    "license": "MIT",
+    "source": "https://pypi.org/pypi/typing-inspection/0.4.4/json",
+    "retrieved": "2026-10-08"
+  },
+  {
+    "name": "uvicorn",
+    "version": "0.54.0",
+    "sha256": "505bdb0f318731d45f1f712071fc781a8981f6847a31c902c9f5e652d4f67faf",
+    "wheel": "uvicorn-0.54.0-py3-none-any.whl",
+    "license": "BSD-3-Clause",
+    "source": "https://pypi.org/pypi/uvicorn/0.54.0/json",
+    "retrieved": "2026-10-08"
+  }
+]

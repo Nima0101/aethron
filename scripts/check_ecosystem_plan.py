@@ -1,0 +1,579 @@
+"""Offline plan/authorization/evidence integrity; never physical qualification."""
+
+import argparse
+import hashlib
+import json
+import re
+import shutil
+import tempfile
+from datetime import date
+from pathlib import Path
+from urllib.parse import unquote, urlsplit
+
+AREA = Path("docs/engineering/aethron-ecosystem")
+REQUIRED = {
+    "START_HERE.md",
+    "LATEST-OWNER-AUTONOMY.md",
+    "P2-SENSOR-ADAPTERS.md",
+    "STATE.md",
+    "NEXT.md",
+    "PHASES.json",
+    "BASELINE.md",
+    "RESEARCH.md",
+    "SOURCES.md",
+    "ARCHITECTURE.md",
+    "API-CONTRACT.md",
+    "OPENAPI-PLAN.md",
+    "PACKAGING.md",
+    "VEHICLE-COMPATIBILITY.md",
+    "MAZDA-3-2019.md",
+    "DRONE-COMPATIBILITY.md",
+    "SENSOR-NIGHT.md",
+    "WORKFLOW.md",
+    "CI-RELEASE.md",
+    "TEST-EVIDENCE.md",
+    "THREAT-MODEL.md",
+    "ASSURANCE.md",
+    "IMPLEMENTATION-BACKLOG.md",
+    "PHASE1-EXECUTION-PROMPT.md",
+    "HANDOFF.md",
+    "OWNER-NEXT-APPLIANCE-RUNTIME.md",
+    "APPLIANCE-RUNTIME.md",
+    "HOME-CAMERA-COMPATIBILITY.md",
+    "provenance.json",
+    "versions.json",
+    "baseline-protected.json",
+    "evidence/checks.json",
+}
+
+
+class PlanError(ValueError):
+    """A concrete planning-integrity failure."""
+
+
+def require(condition, message):
+    if not condition:
+        raise PlanError(message)
+
+
+def pairs(items):
+    result = {}
+    for key, value in items:
+        require(key not in result, "duplicate JSON key: " + key)
+        result[key] = value
+    return result
+
+
+def reject_constant(value):
+    raise PlanError("nonfinite JSON: " + value)
+
+
+def read_json(path):
+    try:
+        return json.loads(
+            path.read_text(encoding="utf-8"),
+            object_pairs_hook=pairs,
+            parse_constant=reject_constant,
+        )
+    except (OSError, ValueError) as exc:
+        raise PlanError("invalid JSON: " + path.name) from exc
+
+
+def headings(text):
+    """GitHub-style slugs for this plan's simple Markdown headings."""
+    result = set()
+    counts = {}
+    for line in text.splitlines():
+        match = re.match(r"^#{1,6}\s+(.+?)\s*#*\s*$", line)
+        if match:
+            slug = re.sub(r"[^\w\- ]", "", match[1].lower()).replace(" ", "-")
+            count = counts.get(slug, 0)
+            counts[slug] = count + 1
+            result.add(slug + ("-" + str(count) if count else ""))
+    return result
+
+
+def safe_relative(value):
+    path = Path(value)
+    require(not path.is_absolute() and ".." not in path.parts, "unsafe manifest path")
+    return path
+
+
+def validate(root, plan=None):
+    root = root.resolve()
+    plan = (plan or root / AREA).resolve()
+    for name in sorted(REQUIRED):
+        path = plan / name
+        require(path.is_file() and path.stat().st_size > 0, "missing artifact: " + name)
+
+    # Check every JSON artifact, including retained evidence, not only manifests.
+    for path in sorted(plan.rglob("*.json")):
+        read_json(path)
+    phases = read_json(plan / "PHASES.json")
+    require(
+        phases.get("schema_version") == 3 and phases.get("project") == "AETHRON",
+        "invalid phase schema/project",
+    )
+    require(
+        type(phases.get("current_phase")) is int and 2 <= phases["current_phase"] <= 5,
+        "autonomy covers software phases 2..5",
+    )
+    require(phases.get("product_complete") is False, "unqualified product completion")
+    autonomy = phases.get("autonomy", {})
+    require(autonomy.get("authorized") is True, "autonomy approval missing")
+    require(autonomy.get("path") == "LATEST-OWNER-AUTONOMY.md", "autonomy path missing")
+    require(
+        autonomy.get("sha256") == "ac5e865b2c01339cc423c6111b5f73852c1d34a68d55b947750b929b0c8c88bf"
+        and hashlib.sha256((plan / autonomy["path"]).read_bytes()).hexdigest()
+        == autonomy["sha256"],
+        "autonomy directive changed",
+    )
+    require(
+        phases.get("auto_advance") is True
+        and phases.get("publication_authorized") is True
+        and autonomy.get("software_phases") == [2, 3, 4, 5]
+        and autonomy.get("routine_publication_requires_gates") is True
+        and autonomy.get("hardware_deployment_authorized") is False
+        and autonomy.get("actuation_authorized") is False,
+        "autonomy scope or safety boundary changed",
+    )
+    require(
+        hashlib.sha256(
+            (plan / "evidence/phase1/phase1-completion-snapshot.json").read_bytes()
+        ).hexdigest()
+        == "70cddab413c875c25af2e078693793a27ab2f6b4e11fecacd98c092eb259256a",
+        "Phase 1 completion history changed",
+    )
+    previous = read_json(plan / "evidence/phase1/phase1-completion-snapshot.json")
+    require(
+        previous.get("current_phase") == 1
+        and previous.get("auto_advance") is False
+        and previous.get("publication_authorized") is False
+        and previous.get("phase1_acceptance", {}).get("software_candidate_complete") is True,
+        "Phase 1 historical boundary must remain preserved",
+    )
+    delivery = phases.get("delivery", {})
+    require(
+        delivery.get("status") in {"not_published", "in_progress", "published"},
+        "invalid delivery status",
+    )
+    if delivery["status"] == "published":
+        proof = read_json(plan / safe_relative(delivery["evidence"]))
+        require(
+            proof.get("required_checks_passed") is True
+            and proof.get("branch_rules_satisfied") is True
+            and re.fullmatch(r"[a-f0-9]{40}", proof.get("main_revision", ""))
+            and proof.get("hosted_run_urls")
+            and all(
+                url.startswith("https://github.com/Nima0101/aethron/actions/runs/")
+                for url in proof["hosted_run_urls"]
+            ),
+            "publication needs verified checks, branch rules and actual hosted runs",
+        )
+    approval = phases.get("authorization", {})
+    require(phases.get("phase1_authorized") is True, "owner approval flag missing")
+    require(approval.get("path") == "PHASE1-START-AUTHORIZATION.md", "approval path missing")
+    require(
+        approval.get("commit") == "1445f1879d63eb37f4bf8c367e53db74a95b1fe6",
+        "approval commit mismatch",
+    )
+    require(
+        hashlib.sha256((plan / approval["path"]).read_bytes()).hexdigest()
+        == approval.get("sha256"),
+        "approval digest mismatch",
+    )
+    history = read_json(plan / "evidence/phase1/phase0-snapshot.json")
+    require(
+        history.get("phase1_authorized") is False and history.get("current_phase") == 0,
+        "historical unauthorized state must be preserved",
+    )
+    require(re.fullmatch(r"[a-f0-9]{40}", phases.get("baseline_sha", "")), "invalid baseline SHA")
+    date.fromisoformat(phases["as_of"])
+    acceptance = phases.get("phase1_acceptance", {})
+    complete = acceptance.get("software_candidate_complete")
+    require(type(complete) is bool, "candidate completion flag missing")
+    for flag in ("hardware_qualified", "field_qualified", "certified", "hosted_ci_executed"):
+        require(acceptance.get(flag) is False, "unexecuted qualification claim: " + flag)
+    candidate_path = acceptance.get("candidate_evidence")
+    if candidate_path is not None:
+        require((plan / safe_relative(candidate_path)).is_file(), "missing candidate evidence")
+    rows = phases.get("phases", [])
+    require([r.get("id") for r in rows] == list(range(6)), "phase IDs must be 0..5")
+    for row in rows:
+        require(type(row["id"]) is int, "invalid phase ID type")
+        require(
+            row.get("implementation_complete") is (complete and row["id"] == 1),
+            "implementation flag inconsistent with candidate evidence",
+        )
+        require(row.get("owner") and row.get("gates"), "phase owner/gates missing")
+        require(isinstance(row.get("depends_on"), list), "phase dependencies missing")
+        require(
+            all(type(n) is int and 0 <= n < row["id"] for n in row["depends_on"]),
+            "invalid/cyclic dependency",
+        )
+        expected = (
+            "complete"
+            if row["id"] == 0
+            else ("candidate_complete" if complete else "in_progress")
+            if row["id"] == 1
+            else "in_progress"
+            if row["id"] == phases["current_phase"]
+            else "planned"
+        )
+        if expected == "planned" and row.get("status") == "in_progress":
+            work = [
+                value
+                for key, value in phases.get("software_work", {}).items()
+                if re.fullmatch(r"P" + str(row["id"]) + r"\.\d+", key)
+                and isinstance(value, dict)
+                and value.get("status") == "in_progress"
+                and value.get("implemented")
+                and value.get("pending")
+            ]
+            require(work, "parallel phase needs explicit implemented/pending work")
+            require(
+                all(rows[n]["implementation_complete"] for n in row["depends_on"]),
+                "parallel phase dependencies incomplete",
+            )
+            for item in work:
+                proof = read_json(plan / safe_relative(item.get("evidence", "absent.json")))
+                require(
+                    proof.get("hardware_qualified") is False
+                    and proof.get("field_qualified") is False,
+                    "parallel software evidence must not claim physical qualification",
+                )
+            expected = "in_progress"
+        require(row.get("status") == expected, "unexpected phase status")
+    require(
+        phases.get("local_commit_status") == "committed"
+        and phases.get("phase0_acceptance_complete") is True,
+        "commit limitation must remain explicit until verified resolution",
+    )
+    require(
+        rows[1]["depends_on"] == [0] and "owner_start" in rows[1]["gates"],
+        "Phase 1 approval dependency missing",
+    )
+    appliance = phases.get("appliance_runtime", {})
+    require(
+        appliance.get("status") in {"spec_only", "implementation_in_progress", "candidate"}
+        and appliance.get("implementation_complete") is complete
+        and appliance.get("requires_optional_client") is False
+        and appliance.get("requires_wan") is False,
+        "standalone appliance must remain specified and client/WAN independent",
+    )
+    require(
+        appliance.get("acceptance_gates") == [f"A{n:02d}" for n in range(1, 10)]
+        and appliance.get("implementation_task") == "P1.7"
+        and "P1.7" in rows[1]["gates"],
+        "standalone boot/offline acceptance gates missing",
+    )
+
+    milestones = phases.get("milestones", {})
+    require(set(milestones) == {f"P1.{n}" for n in range(1, 8)}, "missing implementation milestone")
+    for milestone in milestones.values():
+        require(
+            milestone.get("status")
+            in {
+                "pending",
+                "in_progress",
+                "implemented_validation_in_progress",
+                "passed",
+                "blocked",
+            },
+            "invalid milestone status",
+        )
+        if milestone["status"] in {"passed", "implemented_validation_in_progress"}:
+            require(milestone.get("evidence"), "milestone evidence missing")
+        for evidence_path in milestone.get("evidence", []):
+            require((plan / safe_relative(evidence_path)).is_file(), "missing milestone evidence")
+
+    if complete:
+        require(
+            all(m["status"] == "passed" for m in milestones.values()),
+            "candidate has unfinished milestone",
+        )
+        require(candidate_path is not None, "candidate evidence required")
+        candidate = read_json(plan / safe_relative(candidate_path))
+        require(
+            candidate.get("software_candidate_complete") is True, "candidate evidence incomplete"
+        )
+        require(
+            re.fullmatch(r"[a-f0-9]{40}", candidate.get("source_revision", "")),
+            "candidate source revision missing",
+        )
+        boot = read_json(plan / safe_relative(candidate["boot_evidence"]))
+        require(
+            boot.get("status") == "passed" and boot.get("hardware_qualified") is False,
+            "boot evidence incomplete or overclaimed",
+        )
+        results = {
+            row.get("boot"): row for row in boot.get("events", []) if row.get("event") == "result"
+        }
+        second = results.get(2, {})
+        require(
+            results.get(1, {}).get("processing_continued") is True
+            and second.get("seconds", 0) >= 3600
+            and second.get("processing_continued") is True
+            and second.get("worker_fault_injected") is True
+            and second.get("processing_resumed_after_fault") is True
+            and second.get("updated_runtime_processing") is True
+            and all(
+                type(second.get("drops", {}).get(key)) is int and second["drops"][key] >= 0
+                for key in ("capture_sequence_gaps", "mailbox_overwritten", "mailbox_rejected")
+            ),
+            "boot/soak/update evidence does not close P1.7",
+        )
+
+    provenance = read_json(plan / "provenance.json")
+    require(provenance.get("schema_version") == 1, "invalid provenance schema")
+    sources = {}
+    for source in provenance.get("sources", []):
+        sid = source.get("id", "")
+        require(re.fullmatch(r"S[0-9]{2,3}", sid) and sid not in sources, "invalid source ID")
+        require(urlsplit(source.get("url", "")).scheme == "https", "source must use HTTPS")
+        require(urlsplit(source["url"]).netloc, "source hostname missing")
+        date.fromisoformat(source["retrieved"])
+        require(source["retrieved"] <= phases["as_of"], "source retrieved in the future")
+        require(
+            source.get("version") and source.get("note") and source.get("title"),
+            "source provenance incomplete",
+        )
+        require(
+            source.get("access")
+            in {"read", "api", "search_excerpt", "unavailable", "empty_dynamic"},
+            "invalid source access status",
+        )
+        sources[sid] = source
+    require(len(sources) >= 30, "research provenance missing")
+    ledger = (plan / "SOURCES.md").read_text(encoding="utf-8")
+    for sid, source in sources.items():
+        require(
+            "## " + sid + "\n" in ledger and source["url"] in ledger,
+            "source ledger mismatch: " + sid,
+        )
+
+    versions = read_json(plan / "versions.json")
+    require(versions.get("schema_version") == 1, "invalid version schema")
+    names = set()
+    for pin in versions.get("pins", []):
+        name, version = pin.get("name"), pin.get("version", "")
+        require(name and name not in names, "duplicate/missing pin name")
+        names.add(name)
+        require(
+            re.fullmatch(r"(?:[0-9]+\.)+[0-9]+|[a-f0-9]{40}", version),
+            "floating/invalid pin: " + name,
+        )
+        require(
+            pin.get("status") in {"baseline", "candidate", "selected_reference", "workflow"},
+            "invalid pin status",
+        )
+        require(pin.get("source_ids") or pin.get("source_path"), "pin provenance missing")
+        for sid in pin.get("source_ids", []):
+            require(sid in sources, "unknown pin source: " + sid)
+            require(version in sources[sid]["version"], "pin/source version mismatch")
+        if pin.get("source_path"):
+            path = root / safe_relative(pin["source_path"])
+            require(
+                path.is_file() and version in path.read_text(encoding="utf-8"),
+                "local pin provenance mismatch: " + name,
+            )
+    require(
+        {"core", "openapi", "fastapi", "actions/checkout", "actions/setup-python"} <= names,
+        "required pins missing",
+    )
+    for item in versions.get("unresolved", []):
+        require(
+            item.get("name") and item.get("gate") and item.get("reason"),
+            "unresolved version requires a gate and reason",
+        )
+
+    freeze = read_json(plan / "baseline-protected.json")
+    require(
+        freeze.get("source_sha") == phases["baseline_sha"] and freeze.get("files"),
+        "baseline protection missing",
+    )
+    for name, digest in freeze["files"].items():
+        path = root / safe_relative(name)
+        require(re.fullmatch(r"[a-f0-9]{64}", digest), "invalid protected digest")
+        require(
+            path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest() == digest,
+            "protected baseline changed: " + name,
+        )
+
+    for path in sorted(plan.rglob("*.md")):
+        text = path.read_text(encoding="utf-8")
+        for target in re.findall(r"!?\[[^\]]*\]\(([^)]+)\)", text):
+            parsed = urlsplit(target)
+            if parsed.scheme:
+                require(parsed.scheme in {"https", "http", "mailto"}, "unexpected link scheme")
+                continue
+            require(not parsed.path.startswith("/"), "absolute local link")
+            logical = root / AREA / path.relative_to(plan)
+            destination = (logical.parent / unquote(parsed.path)).resolve()
+            require(destination.is_relative_to(root), "link escapes repository")
+            if destination.is_relative_to(root / AREA):
+                destination = plan / destination.relative_to(root / AREA)
+            require(destination.exists(), "broken link: " + path.name + " -> " + target)
+            if parsed.fragment and destination.suffix == ".md":
+                require(
+                    unquote(parsed.fragment) in headings(destination.read_text(encoding="utf-8")),
+                    "broken anchor: " + target,
+                )
+            if parsed.path == "SOURCES.md" and parsed.fragment:
+                require(parsed.fragment.upper() in sources, "unknown citation")
+
+    workflow = root / ".github/workflows/aethron-ecosystem-preflight.yml"
+    require(workflow.is_file(), "missing planning workflow")
+    workflow_text = workflow.read_text(encoding="utf-8")
+    require(
+        "scripts/check_ecosystem_plan.py --self-test" in workflow_text,
+        "workflow must run negative tests",
+    )
+    require(
+        "contents: read" in workflow_text and "persist-credentials: false" in workflow_text,
+        "workflow permissions/credentials not constrained",
+    )
+    for action in re.findall(r"uses:\s*([^\s]+)", workflow_text):
+        require(re.fullmatch(r"[^@]+@[a-f0-9]{40}", action), "unpinned workflow action")
+        name, sha = action.split("@")
+        require(
+            any(p["name"] == name and p["version"] == sha for p in versions["pins"]),
+            "workflow pin provenance missing",
+        )
+    require(
+        not re.search(r"\b(?:write-all|pull_request_target)\b|secrets\.", workflow_text),
+        "unsafe planning workflow privilege",
+    )
+
+    evidence = read_json(plan / "evidence/checks.json")
+    require(evidence.get("source_sha") == phases["baseline_sha"], "baseline evidence SHA mismatch")
+    require(evidence.get("product_qualified") is False, "planning cannot qualify product")
+    for check in evidence.get("checks", []):
+        require(
+            check.get("status") in {"passed", "failed", "not_run", "pending"},
+            "invalid check status",
+        )
+        require(check.get("command") and check.get("limitation"), "evidence context missing")
+    require(
+        any(c.get("status") == "failed" for c in evidence.get("checks", [])),
+        "inherited visual failure must remain recorded",
+    )
+    return len(sources)
+
+
+def self_test(root):
+    mutations = {
+        "missing artifact": lambda p: (p / "SENSOR-NIGHT.md").unlink(),
+        "broken link": lambda p: (p / "NEXT.md").write_text("[bad](absent.md)\n"),
+        "broken anchor": lambda p: (p / "NEXT.md").write_text("[bad](SOURCES.md#s999)\n"),
+        "invalid JSON": lambda p: (p / "PHASES.json").write_text("{broken"),
+        "duplicate JSON": lambda p: (p / "PHASES.json").write_text('{"a":1,"a":2}'),
+        "floating pin": lambda p: mutate_json(
+            p / "versions.json", lambda d: d["pins"][0].update(version="latest")
+        ),
+        "missing provenance": lambda p: mutate_json(
+            p / "versions.json", lambda d: d["pins"][7].update(source_ids=["S999"])
+        ),
+        "unauthorized phase": lambda p: mutate_json(
+            p / "PHASES.json", lambda d: d.update(phase1_authorized=False)
+        ),
+        "tampered approval": lambda p: (p / "PHASE1-START-AUTHORIZATION.md").write_text(
+            "forged approval"
+        ),
+        "phase escalation": lambda p: mutate_json(
+            p / "PHASES.json", lambda d: d.update(current_phase=6)
+        ),
+        "parallel phase missing evidence": lambda p: mutate_json(
+            p / "PHASES.json",
+            lambda d: d["software_work"]["P3.1"].update(evidence="absent.json"),
+        ),
+        "parallel phase unreported work": lambda p: mutate_json(
+            p / "PHASES.json",
+            lambda d: d["software_work"].pop("P3.1"),
+        ),
+        "parallel phase unmet dependency": lambda p: mutate_json(
+            p / "PHASES.json",
+            lambda d: d["phases"][3].update(depends_on=[1, 2]),
+        ),
+        "tampered autonomy": lambda p: (p / "LATEST-OWNER-AUTONOMY.md").write_text("forged"),
+        "missing autonomy": lambda p: mutate_json(
+            p / "PHASES.json", lambda d: d["autonomy"].update(authorized=False)
+        ),
+        "actuator escalation": lambda p: mutate_json(
+            p / "PHASES.json", lambda d: d["autonomy"].update(actuation_authorized=True)
+        ),
+        "hardware deployment escalation": lambda p: mutate_json(
+            p / "PHASES.json", lambda d: d["autonomy"].update(hardware_deployment_authorized=True)
+        ),
+        "unverified publication": lambda p: mutate_json(
+            p / "PHASES.json",
+            lambda d: d["delivery"].update(status="published", evidence="absent.json"),
+        ),
+        "missing candidate evidence": lambda p: mutate_json(
+            p / "PHASES.json",
+            lambda d: d["phase1_acceptance"].update(candidate_evidence="absent.json"),
+        ),
+        "false hardware qualification": lambda p: mutate_json(
+            p / "PHASES.json", lambda d: d["phase1_acceptance"].update(hardware_qualified=True)
+        ),
+        "premature candidate": lambda p: mutate_json(
+            p / "PHASES.json",
+            lambda d: (
+                d["phase1_acceptance"].update(software_candidate_complete=True),
+                d["milestones"]["P1.7"].update(status="in_progress"),
+            ),
+        ),
+        "missing milestone evidence": lambda p: mutate_json(
+            p / "PHASES.json", lambda d: d["milestones"]["P1.1"].update(evidence=[])
+        ),
+        "cyclic dependency": lambda p: mutate_json(
+            p / "PHASES.json", lambda d: d["phases"][1].update(depends_on=[1])
+        ),
+        "altered baseline": lambda p: mutate_json(
+            p / "baseline-protected.json", lambda d: d["files"].update({"AGENTS.md": "0" * 64})
+        ),
+        "companion dependency": lambda p: mutate_json(
+            p / "PHASES.json",
+            lambda d: d["appliance_runtime"].update(requires_optional_client=True),
+        ),
+        "missing appliance gate": lambda p: mutate_json(
+            p / "PHASES.json", lambda d: d["appliance_runtime"].update(acceptance_gates=[])
+        ),
+    }
+    with tempfile.TemporaryDirectory(prefix="aethron-plan-negative-") as temporary:
+        for index, (name, mutate) in enumerate(mutations.items()):
+            plan = Path(temporary) / str(index)
+            shutil.copytree(root / AREA, plan)
+            mutate(plan)
+            try:
+                validate(root, plan)
+            except (PlanError, KeyError, TypeError, ValueError):
+                print("PASS negative: " + name)
+            else:
+                raise PlanError("negative probe incorrectly passed: " + name)
+    return len(mutations)
+
+
+def mutate_json(path, mutation):
+    value = read_json(path)
+    mutation(value)
+    path.write_text(json.dumps(value), encoding="utf-8")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
+    parser.add_argument("--self-test", action="store_true")
+    args = parser.parse_args()
+    try:
+        count = validate(args.root)
+        probes = self_test(args.root) if args.self_test else 0
+    except (PlanError, OSError, KeyError, TypeError, ValueError) as exc:
+        parser.exit(1, "FAIL planning integrity: " + str(exc) + "\n")
+    print(
+        f"PASS planning integrity: {count} sources, {probes} negative probes; NOT product qualification"
+    )
+
+
+if __name__ == "__main__":
+    main()

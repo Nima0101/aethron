@@ -1,0 +1,7 @@
+{
+  "valid": true,
+  "spec_version": "1.6",
+  "schema_source": "https://raw.githubusercontent.com/CycloneDX/specification/1.6/schema/bom-1.6.schema.json",
+  "schema_sha256": "3e92dddbc30cf7f6a02b80f0942b1a4cfd4fb1c26f1dfc4310afa9d613cafb93",
+  "sbom_sha256": "93c2ed1944bdf249ad4f2a0ca22ea7f5521b02a445f922bedd0d40f1b6cc34e6"
+}

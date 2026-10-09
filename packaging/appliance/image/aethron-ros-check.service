@@ -1,0 +1,21 @@
+[Unit]
+Description=AETHRON guest-only synthetic ROS lifecycle check
+After=local-fs.target
+Before=aethron-sil-probe.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/aethron/venv/bin/python -B /opt/aethron-sil/ros_boot_probe.py
+EnvironmentFile=/opt/aethron/venv/ros.env
+Environment=ROS_LOG_DIR=/run/aethron-ros-check/logs
+Environment=PYTHONDONTWRITEBYTECODE=1
+RuntimeDirectory=aethron-ros-check
+RuntimeDirectoryPreserve=yes
+TimeoutStartSec=90
+Restart=no
+UMask=0077
+StandardOutput=null
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,38 @@
+{
+  "status": "development_checkpoint_not_release_qualified",
+  "baseline": "3cd62d3405a631fa7be6cb8732a60260bd9e58a1",
+  "change": "Separate version3 raw-distorted axial-depth manifest with required lens; version1/2 serialization unchanged. Worker wires admitted lens to ingress. Synthetic-only finite renewal and exact manifest/grant binding preserved.",
+  "checks": {
+    "red": "5 tests:1 explicit missing-version assertion failure and2 parser rejection errors in new raw paths;2 legacy/negative tests passed.",
+    "mac": "75 existing sensor tests PASS13.823s;30 vision tests including6 new provisioning/worker tests PASS2.507s. Copied installed vision suite separately executed; log retained.",
+    "linux": "19 installed authority/appliance/schema/optional-vision failure tests PASS0.462s; unprivileged read-only no-network container. No numerical Linux OpenCV claim.",
+    "worker": "Actual manifest file read, grant/guard/provider/ingress/rectifier/status paths; deterministic clocks and DDS transport double. Missing cv2 yields waiting with zero geometry expiry. Does not prove actual DDS or physical timing.",
+    "static": "Ruff/format/diff PASS; targeted Bandit0 findings.",
+    "example": "New synthetic raw-depth profile and manifest admitted through installed load_config/read_ros_manifest.",
+    "wheel_source_match": 53
+  },
+  "wheel_sha256": "88efb21e87dd2ecda1a1e0f1531024faa454dbc389b8bcbad3c762e125012108",
+  "source_sha256": {
+    "integrations/edge/aethron_edge/sensors/ros_authority.py": "d73e8a771328e56a9e9bcf022d396191ac275e6c2b3272da293907e366ee7fce",
+    "integrations/edge/aethron_edge/sensors/ros_worker.py": "8910ce087b96ed34a0000ef0a4767f188b99a83820e6f2ae14eb259bcaa83ab6",
+    "tests/integration/test_ros_provisioned_rectification.py": "f60be786edcfbfc3b612f10f7b6b4e477ffdb8c23e5e56295ef5c3104a1c0669",
+    "scripts/edge_package_check.py": "140e135a779a5bdee647e9933471a835dc47b7121e23dcc7b401fb4a5cb77d75"
+  },
+  "artifacts": {
+    "build/ecosystem-phase2/raw-depth-provisioning/build.log": "e949f08808ace7159c36bdbddf970c17f65efb0f598a21744518ce53b468568e",
+    "build/ecosystem-phase2/raw-depth-provisioning/green.log": "3f4a758a9a94bb32d2fea859c338c5fa36fa89123071845b28b7459df9efafb7",
+    "build/ecosystem-phase2/raw-depth-provisioning/install.log": "620f841d79254c175dade8243b36165ce0ee663d14cc30aa67699e99896e83dd",
+    "build/ecosystem-phase2/raw-depth-provisioning/isolated-vision.log": "90791c9d7593a4d24babd7f458bb70282870c8d36108c2b0703986865fd905cf",
+    "build/ecosystem-phase2/raw-depth-provisioning/linux-contract.log": "828c71a0ecacacb8777ad057ece3dc2c959ed72db6c8dce392bbe2d4c56bd32e",
+    "build/ecosystem-phase2/raw-depth-provisioning/red.log": "64cd36af4a6e247ffe5529ed4b363bb4a63357261d2dfb7345622cb4a22bc640",
+    "build/ecosystem-phase2/raw-depth-provisioning/sensor-green.log": "aa2403cb73bde820372dfdbe59de7779fc09e540a764d81ea3cb91b732bcc78f",
+    "build/ecosystem-phase2/raw-depth-provisioning/vision-green.log": "5d694f9b8d597b2e13492be677b4d61eff30910fbd8022efc45dd233b993d74d"
+  },
+  "review": "Author self-review under no-subagent instruction: checked inherited validators/type admission, legacy hashes, lens inclusion in digest, strict version dispatch, renewal restrictions, worker failure status and no new authority paths.",
+  "remaining": [
+    "Actual raw-lens DDS/CLI/boot/reboot/soak and numerical Linux OpenCV pending; no full release qualification.",
+    "Existing aircraft/latency/DDS/update/VM/readiness failures unchanged.",
+    "Hardware calibration, clock exposure, physical zero-visible/OEM and certification remain external pending."
+  ],
+  "public_copy_note": "Owner-planning and local publication/disk metadata omitted; software results, failures, source hashes and qualification limits retained."
+}

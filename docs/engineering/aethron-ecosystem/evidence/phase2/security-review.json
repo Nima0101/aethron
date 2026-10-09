@@ -1,0 +1,38 @@
+{
+  "scope": "Single-author sensor packet/replay review; not independent assurance",
+  "new_runtime_dependencies": [],
+  "project_license": "GPL-3.0-only",
+  "bandit_findings": 0,
+  "bandit_report_sha256": "4440cb8f27217cafec62ac7d085558bb18cc8044d589d456b74e162a11b8e145",
+  "required_fuzz": [
+    {
+      "name": "core-fuzz.json",
+      "sha256": "aa7978edbc64b7e704353b94e0da3095b3ec1cdd90bc0870a7c29963a57ca282",
+      "cases": 43021,
+      "seconds": 60.709487916203216,
+      "unexpected_exceptions": 0
+    },
+    {
+      "name": "temporal-fuzz.json",
+      "sha256": "210530f26f89c5e937f9497df6ebd5247c965a6c0373a50a925690991356801e",
+      "cases": 172683,
+      "seconds": 60.302,
+      "unexpected_exceptions": 0
+    }
+  ],
+  "reviewed_boundaries": [
+    "No network/device acquisition or actuator path added",
+    "8MiB payload and 16KiB metadata bounds; no unbounded stream reads",
+    "Closed metadata rejects identity and unknown fields",
+    "Recorded provenance cannot be promoted to live support",
+    "Checksums detect corruption, not authenticity",
+    "No thermal counts to temperature/class conversion; no raw points to semantic tracks"
+  ],
+  "residuals": [
+    "Physical capture clocks/calibration/SKU validation pending",
+    "Read-only ROS/vendor acquisition not yet implemented",
+    "Hostile blocking stream needs caller deadline; replay intended for files",
+    "First full-suite startup wait failed under concurrent builds; unchanged isolated test passed; causation unproven",
+    "Existing Phase 1 security review and qualification limits remain applicable"
+  ]
+}

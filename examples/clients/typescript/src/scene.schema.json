@@ -1,0 +1,648 @@
+{
+  "$defs": {
+    "Capabilities": {
+      "additionalProperties": false,
+      "properties": {
+        "api_version": {
+          "const": "1",
+          "title": "Api Version",
+          "type": "string"
+        },
+        "core_version": {
+          "const": "0.2.0",
+          "title": "Core Version",
+          "type": "string"
+        },
+        "drivers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Drivers",
+          "type": "array"
+        },
+        "edge_version": {
+          "const": "0.1.0",
+          "title": "Edge Version",
+          "type": "string"
+        },
+        "protocol": {
+          "const": 3,
+          "title": "Protocol",
+          "type": "integer"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "qualification_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Qualification Refs",
+          "type": "array"
+        },
+        "runtime_mode": {
+          "enum": [
+            "appliance",
+            "interactive",
+            "replay"
+          ],
+          "title": "Runtime Mode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "api_version",
+        "core_version",
+        "edge_version",
+        "protocol",
+        "runtime_mode",
+        "drivers",
+        "provider",
+        "qualification_refs"
+      ],
+      "title": "Capabilities",
+      "type": "object"
+    },
+    "Clock": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "const": "edge_monotonic",
+          "title": "Domain",
+          "type": "string"
+        },
+        "emitted_ms": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Emitted Ms",
+          "type": "integer"
+        },
+        "valid_for_ms": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Valid For Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "domain",
+        "emitted_ms",
+        "valid_for_ms"
+      ],
+      "title": "Clock",
+      "type": "object"
+    },
+    "Error": {
+      "additionalProperties": false,
+      "properties": {
+        "api_version": {
+          "const": "1",
+          "title": "Api Version",
+          "type": "string"
+        },
+        "error": {
+          "enum": [
+            "invalid_request",
+            "unauthorized",
+            "forbidden",
+            "capacity",
+            "source_unavailable",
+            "not_found"
+          ],
+          "title": "Error",
+          "type": "string"
+        },
+        "retryable": {
+          "title": "Retryable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "api_version",
+        "error",
+        "retryable"
+      ],
+      "title": "Error",
+      "type": "object"
+    },
+    "HealthEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "api_version": {
+          "const": "1",
+          "title": "Api Version",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "health",
+            "gap"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "reason": {
+          "enum": [
+            "source_lost",
+            "clock_untrusted",
+            "calibration_expired",
+            "model_error",
+            "overload",
+            "stream_gap",
+            "closed"
+          ],
+          "title": "Reason",
+          "type": "string"
+        },
+        "retryable": {
+          "title": "Retryable",
+          "type": "boolean"
+        },
+        "scene_state": {
+          "const": "UNKNOWN",
+          "title": "Scene State",
+          "type": "string"
+        },
+        "sequence": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session": {
+          "title": "Session",
+          "type": "string"
+        }
+      },
+      "required": [
+        "api_version",
+        "kind",
+        "sequence",
+        "session",
+        "reason",
+        "scene_state",
+        "retryable"
+      ],
+      "title": "HealthEvent",
+      "type": "object"
+    },
+    "Prediction": {
+      "additionalProperties": false,
+      "properties": {
+        "centre": {
+          "items": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Centre",
+          "type": "array"
+        },
+        "evidence": {
+          "const": false,
+          "title": "Evidence",
+          "type": "boolean"
+        },
+        "horizon_ms": {
+          "const": 200,
+          "title": "Horizon Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "centre",
+        "horizon_ms",
+        "evidence"
+      ],
+      "title": "Prediction",
+      "type": "object"
+    },
+    "Recommendation": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "WARN",
+            "STOP",
+            "HOVER",
+            "LAND",
+            "RETREAT"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "contract": {
+          "enum": [
+            "warn",
+            "vehicle_stop",
+            "drone_hover",
+            "drone_land",
+            "drone_retreat"
+          ],
+          "title": "Contract",
+          "type": "string"
+        },
+        "reason": {
+          "enum": [
+            "hazard_or_unknown",
+            "observe"
+          ],
+          "title": "Reason",
+          "type": "string"
+        },
+        "requires_independent_controller": {
+          "const": true,
+          "title": "Requires Independent Controller",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "contract",
+        "action",
+        "reason",
+        "requires_independent_controller"
+      ],
+      "title": "Recommendation",
+      "type": "object"
+    },
+    "ReplayReport": {
+      "additionalProperties": false,
+      "properties": {
+        "api_version": {
+          "const": "1",
+          "title": "Api Version",
+          "type": "string"
+        },
+        "frame_count": {
+          "maximum": 300,
+          "minimum": 1,
+          "title": "Frame Count",
+          "type": "integer"
+        },
+        "results": {
+          "items": {
+            "$ref": "#/$defs/V3Snapshot"
+          },
+          "maxItems": 300,
+          "minItems": 1,
+          "title": "Results",
+          "type": "array"
+        },
+        "runtime_mode": {
+          "const": "replay",
+          "title": "Runtime Mode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "api_version",
+        "runtime_mode",
+        "frame_count",
+        "results"
+      ],
+      "title": "ReplayReport",
+      "type": "object"
+    },
+    "SceneEnvelope": {
+      "additionalProperties": false,
+      "properties": {
+        "api_version": {
+          "const": "1",
+          "title": "Api Version",
+          "type": "string"
+        },
+        "clock": {
+          "$ref": "#/$defs/Clock"
+        },
+        "kind": {
+          "const": "scene",
+          "title": "Kind",
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/$defs/V3Snapshot"
+        },
+        "sequence": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "session": {
+          "pattern": "^[a-f0-9]{32,64}$",
+          "title": "Session",
+          "type": "string"
+        }
+      },
+      "required": [
+        "api_version",
+        "kind",
+        "sequence",
+        "session",
+        "clock",
+        "result"
+      ],
+      "title": "SceneEnvelope",
+      "type": "object"
+    },
+    "SessionHandle": {
+      "additionalProperties": false,
+      "properties": {
+        "session": {
+          "pattern": "^[a-f0-9]{32}$",
+          "title": "Session",
+          "type": "string"
+        },
+        "source_profile": {
+          "title": "Source Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "session",
+        "source_profile"
+      ],
+      "title": "SessionHandle",
+      "type": "object"
+    },
+    "SessionRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "contract": {
+          "enum": [
+            "warn",
+            "vehicle_stop",
+            "drone_hover",
+            "drone_land",
+            "drone_retreat"
+          ],
+          "title": "Contract",
+          "type": "string"
+        },
+        "source_profile": {
+          "pattern": "^[a-z0-9-]{1,48}$",
+          "title": "Source Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_profile",
+        "contract"
+      ],
+      "title": "SessionRequest",
+      "type": "object"
+    },
+    "Track": {
+      "additionalProperties": false,
+      "properties": {
+        "box": {
+          "items": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "maxItems": 4,
+          "minItems": 4,
+          "title": "Box",
+          "type": "array"
+        },
+        "class": {
+          "enum": [
+            "person",
+            "cyclist",
+            "vehicle",
+            "uav",
+            "animal",
+            "obstacle",
+            "equipment",
+            "hot",
+            "cold",
+            "fire_like",
+            "smoke"
+          ],
+          "title": "Class",
+          "type": "string"
+        },
+        "covariance": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Covariance",
+          "type": "array"
+        },
+        "direction_rad": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Direction Rad"
+        },
+        "expires_at_ms": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Expires At Ms",
+          "type": "integer"
+        },
+        "freshness_ms": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Freshness Ms",
+          "type": "integer"
+        },
+        "id": {
+          "maxLength": 64,
+          "title": "Id",
+          "type": "string"
+        },
+        "prediction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Prediction"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "range_m": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "maximum": 500,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Range M"
+        },
+        "score": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Score",
+          "type": "number"
+        },
+        "score_semantics": {
+          "const": "uncalibrated_support",
+          "title": "Score Semantics",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "enum": [
+              "rgb",
+              "lwir",
+              "radar",
+              "depth",
+              "nir"
+            ],
+            "type": "string"
+          },
+          "maxItems": 5,
+          "title": "Sources",
+          "type": "array"
+        },
+        "state": {
+          "enum": [
+            "tentative",
+            "observed",
+            "coasting"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "PRESENT",
+            "UNKNOWN"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "velocity_normalized_per_s": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Velocity Normalized Per S"
+        }
+      },
+      "required": [
+        "id",
+        "class",
+        "box",
+        "state",
+        "status",
+        "score",
+        "score_semantics",
+        "covariance",
+        "freshness_ms",
+        "expires_at_ms",
+        "sources",
+        "range_m",
+        "velocity_normalized_per_s",
+        "direction_rad",
+        "prediction"
+      ],
+      "title": "Track",
+      "type": "object"
+    },
+    "V3Snapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "at_ms": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "At Ms",
+          "type": "integer"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "enum": [
+                "synthetic",
+                "recorded",
+                "external_unverified"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Evidence"
+        },
+        "expires_at_ms": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Expires At Ms",
+          "type": "integer"
+        },
+        "reasons": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 128,
+          "title": "Reasons",
+          "type": "array"
+        },
+        "recommendation": {
+          "$ref": "#/$defs/Recommendation"
+        },
+        "state": {
+          "enum": [
+            "PRESENT",
+            "UNKNOWN"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "tracks": {
+          "items": {
+            "$ref": "#/$defs/Track"
+          },
+          "maxItems": 32,
+          "title": "Tracks",
+          "type": "array"
+        },
+        "version": {
+          "const": 3,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version",
+        "at_ms",
+        "evidence",
+        "state",
+        "tracks",
+        "reasons",
+        "expires_at_ms",
+        "recommendation"
+      ],
+      "title": "V3Snapshot",
+      "type": "object"
+    }
+  },
+  "$ref": "#/$defs/SceneEnvelope"
+}

@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "wheel_evidence": "package.json",
+  "container_evidence": "containers.json",
+  "sbom_evidence": "edge-sbom.json",
+  "clean_clone": [
+    "clean-edge-final.json",
+    "clean-core-final.json"
+  ],
+  "hosted_ci": "not_run",
+  "native_windows": "not_run",
+  "native_macos_x86_64": "not_run",
+  "source_revision": "d90ae953f6431fd9d460e440432ac72825b8d250",
+  "qualification": "software candidate on executed matrix only; hosted/native pending cells remain"
+}

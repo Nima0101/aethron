@@ -1,0 +1,7 @@
+# Synthetic local ROS depth appliance profile
+
+Original AETHRON GPL-3.0-only fixture. `sensor.json` describes the same analytical 3×3 depth layout and +0.5 m rig translation as the recorded-depth example. It opts into same-host system-time **software** headers in ROS domain 73, on `/aethron/depth` and `/aethron/camera_info`. There is no real sensor calibration or trained model.
+
+Use the [ROS appliance guide](../../../docs/engineering/aethron-ecosystem/ROS-APPLIANCE.md) and existing signed installer. Both JSON files must be in the signed configuration bundle. The checked-in unsigned example is rejected by normal appliance CLI boot. The version 1 manifest grants at most ten minutes of software authority, then withdraws. For the explicitly synthetic renewal path, set `"version": 2` and `"renewal": "software_fixture"` in the sensor manifest **before signing**. The guide describes finite epochs, revalidation, revocation and pending physical qualification; the fixture is not a real mount authority.
+
+The executable installed consumer is `tests/ros2/test_dds.py`, driven by `scripts/edge_ros2_check.py` with built wheels and the pinned offline ROS dependency closure. It creates real local synthetic publishers and the supervisor worker; no actuator or camera hardware is opened. See the guide for its exact evidence limits. An actual device must supply separately measured timing, calibration, access rights and exact SDK support.

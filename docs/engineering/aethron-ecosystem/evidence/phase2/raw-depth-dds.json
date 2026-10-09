@@ -1,0 +1,61 @@
+{
+  "status": "development_checkpoint_not_release_qualified",
+  "baseline": "34ae4d8fef195f2b2be06b92e6b6abc341a31410",
+  "change": "Actual synthetic raw-fisheye DDS and signed version3 appliance CLI coverage; hash-locked Linux vision closure added to reusable ROS harness and CI. Candidate child import ordering and initial empty sensor status corrected in test harness.",
+  "checks": {
+    "combined": "26 tests in26.193s:25 PASS; raw signed CLI FAIL with clock_drift and zero batches. Frozen1ms/4s/15s limits unchanged.",
+    "isolated": "Raw signed CLI PASS11.056s including renewal, metadata withdrawal/recovery, authenticated HTTP/SSE, zero-viewer processing and tamper rejection. Does not explain or resolve prior combined timing failure.",
+    "numerical_dds": "Actual raw CameraInfo/Image over DDS: analytical x correction, external_unverified, bounded expiry, mismatched coefficient withdrawal, scene-break recovery and silence expiry PASS.23 numerical/lens/provisioning tests and legacy signed CLI also PASS in combined run.",
+    "harness_errors_retained": [
+      "ROS setup incompatible with shell nounset",
+      "missing system PyYAML in initial disposable venv",
+      "initial sensor status KeyError",
+      "old retained edge shadowed candidate in child PYTHONPATH; traced to old ros_authority rejecting version3"
+    ],
+    "static": "Ruff check/format and AST syntax PASS;53 wheel Python sources byte-match checkout. Bandit has15 unchanged baseline findings (5medium/10low), no suppressions."
+  },
+  "runtime": {
+    "image": "sha256:0948787ca5bb2880762df3624d3ca447d75848e3b0d1c473c305704242317659",
+    "python": "3.12.3",
+    "platform": "linux/arm64",
+    "network": "none",
+    "uid": 10001,
+    "memory_mib": 512,
+    "cpus": 2,
+    "pids": 96,
+    "tmpfs_mib": 256,
+    "read_only": true,
+    "diagnostic_override_in_passing_run": false
+  },
+  "wheel_sha256": "88efb21e87dd2ecda1a1e0f1531024faa454dbc389b8bcbad3c762e125012108",
+  "source_sha256": {
+    "tests/ros2/test_dds.py": "68dc416d8bd197dcf7e843272a412ae0d535dd20336a39294c4613bfdcca2d7f",
+    "tests/ros2/test_signed_service.py": "cb26c6f2eb20ca121d27dc663840288506e948bbc8ef70e91a681ee513708c10",
+    "scripts/edge_ros2_check.py": "adcf14137a0488605ff0d0e3c4f9d4ffb12f2bde98e904494e5a3c94b2555d1f",
+    "integrations/edge/ros2/container_check.py": "9679cb5f2b8d7491a717d8eb9d20bd787eec60a89214cb38437735cd48e84000",
+    ".github/workflows/aethron-ros2-candidate.yml": "4150428e1786287cf0e28249f0ed3ea1e66f4a01bc34d75d498a8055df990c12",
+    "integrations/edge/ros2/requirements.lock": "6b45b0593ba42963c1d1960d39d0fbc49c1defca399186d0baf4a3aff4ea9aec",
+    "integrations/edge/requirements-vision.lock": "797d2b6f677ea8661d9345ee50144087828a505d8ee89328d37b235dd85f9fef"
+  },
+  "vision_wheels": {
+    "numpy-2.3.5-cp312-cp312-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl": "8b973c57ff8e184109db042c842423ff4f60446239bd585a5131cc47f06f789d",
+    "opencv_python_headless-4.13.0.92-cp37-abi3-manylinux_2_28_aarch64.whl": "eb60e36b237b1ebd40a912da5384b348df8ed534f6f644d8e0b4f103e272ba7d"
+  },
+  "artifacts": {
+    "build/ecosystem-phase2/raw-depth-dds/dds-green.log": "5bc84cf7f010a697bc57f24d57d4adbe751b1c8fa759b58153fd8a8c5d879eb0",
+    "build/ecosystem-phase2/raw-depth-dds/dds-second.log": "5523d26f1a58e08a28d9952f213e48716ca5f56a39399881572f39c6784cd856",
+    "build/ecosystem-phase2/raw-depth-dds/download.log": "0fe8497a5c9eeea8f294588f00868537c8ca6d78edc19d5446c32101fdcf54b4",
+    "build/ecosystem-phase2/raw-depth-dds/first-dds.log": "630a2fd3f3929bb8ba3df9a037630ce99002ed2fc041e7d330a295ff624f9e82",
+    "build/ecosystem-phase2/raw-depth-dds/signed-diagnostic.log": "96b7ff7d3fbca79461ca889f5828ae034de1ff14b9e14e0aea04c79a19768a52",
+    "build/ecosystem-phase2/raw-depth-dds/signed-isolated-repeat.log": "bad4ec0a43464089fb5ed3c0e7758e1e5b22b8f001999a86fcd412e5538ce2f8",
+    "build/ecosystem-phase2/raw-depth-dds/signed-isolation.log": "a7c2519c5a59cfb275a90937135e9f3d261398a8dfb119d94094f00665ba9451",
+    "build/ecosystem-phase2/raw-depth-dds/signed-third.log": "e66d26c7a89b81ecfafd98df88c3cae155bcfca5b8fcc6c493434cde17804c68"
+  },
+  "remaining": [
+    "Combined clock-drift failure unresolved; no timing qualification from isolated pass.",
+    "Full updated canonical pinned-image harness not executed: pinned base unavailable locally; retained guest used for focused tests. Hosted CI/boot/reboot/offline soak/full release gates remain pending.",
+    "No hardware, zero-visible-light, OEM, accuracy, safety or actuation qualification.",
+    "All earlier aircraft, latency, DDS, update and VM negatives preserved."
+  ],
+  "public_copy_note": "Owner-planning and local publication/disk metadata omitted; software results, failures, source hashes and qualification limits retained."
+}

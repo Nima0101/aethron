@@ -1,0 +1,166 @@
+{
+  "date": "2026-10-09",
+  "source_base": "8cd9976f798bb1d716824af206ea95d82d130ff4",
+  "status": "development_checkpoint_not_release_qualified",
+  "verification_loop": "FAST DEVELOPMENT; affected full candidate lanes remain pending before publication",
+  "source_files": {
+    "integrations/edge/aethron_edge/common_types.py": "5a10387000cb160918d558b7022790529461e9d944d6e02747a170ee4b1ea962",
+    "integrations/edge/aethron_edge/config.py": "a5064e058e0d673dc8de4b89e56fc7e9a26dc06bb481954dfce21fb3152fe150",
+    "integrations/edge/aethron_edge/contracts.py": "b585b5a439af4378d5df1c7608ac37f379da7b4a442f3ef0a989a79930cd3bdb",
+    "integrations/edge/aethron_edge/pipeline.py": "96beef209388f6821b4dd16500a43d06bd42564e9952ada5e30499fa910281bd",
+    "integrations/edge/aethron_edge/runtime/supervisor.py": "f2364820efd4de23a2edeb9f4cf54697bcfc3edfa68d5a075109ca33ab907a46",
+    "tests/integration/test_sensor_ros_appliance.py": "a6c8b70f5785fdd4ad318007428ce7db1031b864c4119a296e3d054a87dc237f",
+    "tests/integration/test_worker_imports.py": "aa3cd435424a1e0bfaa22ceb62cc66d4a6ca5cf9d156a7787dad66c517b48029",
+    "tests/ros2/test_dds.py": "5cbd5fa5f2f86e54a15423aa3e5dba5b616422e8ee4f78fa3404afa03b92ec7b"
+  },
+  "diagnostic_source": {
+    "head": "8cd9976f798bb1d716824af206ea95d82d130ff4",
+    "edge_wheel_sha256": "4b576ad99a192dc6d223b9b34e2d5918882db55179b95176e83e1c377e013a61",
+    "instrumentation": "Read-only observation wrappers around _sample and ClockGuard.check in parent/worker; unchanged thresholds/algorithm. Uninstrumented probe also revoked.",
+    "probe_source": "availability-clock-probe.txt",
+    "probe_sha256": "4186b9fe0a2a5d7a45879c1a8fb127ec1b9a55159e80af25f222cfa070364e63"
+  },
+  "observed_clock_failure": {
+    "fault": "clock_drift",
+    "offset_change_ns": [
+      6605682,
+      6605556
+    ],
+    "sample_error_ns": [
+      271,
+      396
+    ],
+    "original_sample_error_ns": 3438,
+    "declared_drift_budget_ns": 1000000,
+    "generation": 3,
+    "batches": 267,
+    "elapsed_seconds": 6.771,
+    "interpretation": "Measured wall-minus-monotonic change exceeds original declared budget. Revocation is correct. OS cause and applicability to all earlier intermittent failures are not established.",
+    "other_probes": "Uninstrumented revoked at 26.493s/generation13/1084 batches. Instrumented 35s completed without fault; this is not sustained availability evidence."
+  },
+  "mac_observation": "Faulthandler captured cold imports/Pydantic API model construction before test entry; isolated lifecycle passed 1/4.472s. No fsync-blocking cause was observed. Removing unrelated API schemas reduces work, not proof every earlier availability failure is fixed.",
+  "changes": [
+    "Latch revoked ROS authority as supervisor fault and asynchronously reap without futile crash restarts; preserve sensor fault on cleanup.",
+    "Split common config types from HTTP schemas; public imports and legacy Principal pickle globals remain compatible."
+  ],
+  "schemas": {
+    "before_sha256": "a49e74643e0cbab71b709ca0e64e8cce2f2b889ea9fdbf4d1ec24616d76cdf3f",
+    "after_sha256": "a49e74643e0cbab71b709ca0e64e8cce2f2b889ea9fdbf4d1ec24616d76cdf3f",
+    "identical": true
+  },
+  "checks": {
+    "source_ros": {
+      "tests": 14,
+      "seconds": 2.893,
+      "passed": true
+    },
+    "mac_source_contract_import_lifecycle": {
+      "tests": 9,
+      "seconds": 54.851,
+      "passed": true
+    },
+    "installed_ros": {
+      "tests": 81,
+      "seconds": 24.791,
+      "passed": true
+    },
+    "installed_mac": {
+      "tests": 67,
+      "seconds": 3.796,
+      "passed": true
+    },
+    "wheel_python_bytes_match": true,
+    "static": {
+      "ruff_check": "pass",
+      "ruff_format": "8 files pass",
+      "scoped_bandit": "pass",
+      "git_diff_check": "pass"
+    },
+    "planning": {
+      "sources": 66,
+      "negative_probes": 51,
+      "passed": true
+    }
+  },
+  "installed_ros": {
+    "hardware_qualified": false,
+    "installed_ros_dds": true,
+    "installed_signed_ros_cli_http_sse": true,
+    "network": "none",
+    "packages": {
+      "rclpy": "7.1.12",
+      "rmw_fastrtps_cpp": "8.4.4",
+      "sensor_msgs": "5.3.8"
+    },
+    "payloads": "original synthetic Image/CameraInfo/PointCloud2",
+    "python": "3.12.3",
+    "scene_state": "UNKNOWN",
+    "signed_configuration_tamper_denied": true,
+    "uid": 10001,
+    "wheels": {
+      "candidate/aethron-0.2.0-py3-none-any.whl": "726e4079ed72437958010e0af944d2a85dfab8ce531ba90c35903cf92cf7e04e",
+      "candidate/aethron_edge-0.1.0-py3-none-any.whl": "ef8aa6aadedbf4db7d676bcc4b6a85046997e4d39a6b054194f4ddcf4e18d5ae",
+      "dependencies/annotated_doc-0.0.5-py3-none-any.whl": "117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101",
+      "dependencies/annotated_types-0.8.0-py3-none-any.whl": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0",
+      "dependencies/anyio-4.15.1-py3-none-any.whl": "6152fdbbf9a77fdec97731721bebf7c4c44f7c29b424b0065826173efc7ed101",
+      "dependencies/attrs-26.1.0-py3-none-any.whl": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309",
+      "dependencies/certifi-2026.7.22-py3-none-any.whl": "62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775",
+      "dependencies/click-8.5.0-py3-none-any.whl": "255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360",
+      "dependencies/fastapi-0.142.4-py3-none-any.whl": "8a651aa071a9f92c8217cca1d0b044bf9c326f336578be0a728a1a1f22ec52d2",
+      "dependencies/h11-0.16.0-py3-none-any.whl": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+      "dependencies/httpcore-1.0.9-py3-none-any.whl": "2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55",
+      "dependencies/httpx-0.28.1-py3-none-any.whl": "d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad",
+      "dependencies/idna-3.20-py3-none-any.whl": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+      "dependencies/jsonschema-4.26.0-py3-none-any.whl": "d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce",
+      "dependencies/jsonschema_specifications-2025.9.1-py3-none-any.whl": "98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe",
+      "dependencies/opentelemetry_api-1.45.1-py3-none-any.whl": "b31553efa588ae44bc306f863c785c5333a9ecc091248c6ee68b4b6c87fdedfb",
+      "dependencies/pip-26.2-py3-none-any.whl": "931c303696af6fa3417112103b1cad26890e5a07eccb5b99783700e33f2b8aad",
+      "dependencies/pydantic-2.13.5-py3-none-any.whl": "346a034f080da3755d8e9cb5e00e8b07de1d39e4f6e2c87d8ab7cafa0b269a73",
+      "dependencies/pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl": "4fdc8b93a41521988916eeaa271173fcca7fa0803d62f87675aac8dcec1c8e29",
+      "dependencies/referencing-0.37.0-py3-none-any.whl": "381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231",
+      "dependencies/rpds_py-2026.9.1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl": "2693b2728bbcc48d09a981a356954b0c47c53ff25b545856f28a889ea619f69a",
+      "dependencies/starlette-1.7.0-py3-none-any.whl": "67f8e99895493dd2911a03f11314af6ceebeae4e704bb9f43dfc6a9db151c93e",
+      "dependencies/typing_extensions-4.16.0-py3-none-any.whl": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+      "dependencies/typing_inspection-0.4.4-py3-none-any.whl": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147",
+      "dependencies/uvicorn-0.54.0-py3-none-any.whl": "505bdb0f318731d45f1f712071fc781a8981f6847a31c902c9f5e652d4f67faf"
+    },
+    "image": "ros@sha256:8f687fdf084482819aa7dab48c3887331edd0d3687b219951fdb66c418316ab1",
+    "platform": "linux/arm64"
+  },
+  "retained_red": [
+    "Supervisor stayed running after authority revocation (1 failure).",
+    "Worker import eagerly loaded API schemas (1 failure in 2 tests).",
+    "First Mac installed harness omitted fixture dependencies: 14 ModuleNotFoundError in 16 tests. Copied fixture closure, same wheel then passed 67 tests."
+  ],
+  "logs": {
+    "ros.log": "3a1cbd11a07a4edf1d004ee708e5eeff0752556efedaea51f47a7bed013086c9",
+    "clock.log": "a2ec15864bcb081c3f841e92c6b4024818e6efe3c678164bcf6c9e0377a5e7b5",
+    "clock-long.log": "5ff1b17c6aa0d58dda3bcb3e2c7c8b91d9ce398e9edf43c9496b2755c6673f2f",
+    "mac-lifecycle.log": "e2711d9c8c2d97dc7bf6b0b7bae94ec9a4ed6bd49e78890419576543f22ea37b",
+    "revocation-red.log": "e858fa22619f62feb04747f369166bb53443947bdc5da9a184a217a5550c9b80",
+    "import-red.log": "a0b00a69ed69999e3c3b6a3c89bc5e3f107cc421fdf6985407500a2a0a86aa63",
+    "mac-installed.log": "13057c1004c3689f089c758383dd0fb4bc51edf96a2153e9f4028ce36a751ae3",
+    "revocation-green.log": "78dd9139d83a46aa1d88f5b9535f265aeaf61172cb18a71b239b09cfcc867a27",
+    "mac-green.log": "8bf1028a07688d1efed02e4a116c454d94be3875e5920fe21225ce423f1c7228",
+    "mac-installed-fixed.log": "994860404f146037c1abbfccaffb6e0cd37ba3a53fd6a82c212c858a40bfec97",
+    "installed/dds.log": "0b5f4d052378222113cfd4bb6f62e5a07facb677d609fec3f748ec440426633f"
+  },
+  "retained_diagnostics": {
+    "path": "availability-diagnostics.txt",
+    "sha256": "e1b96b4fa74c7c80b233fbd6faa018f6232f29b4ef0294e9772cd59c6c059130",
+    "local_path_redaction": true
+  },
+  "full_candidate_pending": [
+    "current complete Mac installed package/clean reproduction",
+    "combined raw/ROS boot/offline/reboot/soak",
+    "affected security/reproducibility/SBOM/platform gates",
+    "browser/native Windows/hosted CI/publication"
+  ],
+  "limits": [
+    "No availability guarantee; clock revocation is intentionally permanent for the service boot.",
+    "Physical/remote clocks and mount/exposure calibration unqualified.",
+    "Semantic output UNKNOWN; no actuation or persistent human identities.",
+    "Frozen aircraft evidence 0TP/20FN/721 temporal FP preserved."
+  ],
+  "public_operations": false
+}

@@ -1,0 +1,18 @@
+{
+  "failure": "second Linux VM soak stopped processing after worker SIGKILL at ~120s while status fault_count remained zero",
+  "observed_processed_count": 1371,
+  "observed_stuck_progress_seconds": [
+    123,
+    184,
+    245
+  ],
+  "cause": "multiprocessing Queue is not crash-atomic; a writer interrupted during transport can block its reader despite get_nowait",
+  "repair": "bounded shared-memory mailbox with nonblocking lock; killed lock holder returns Empty; independent watchdog recovers worker",
+  "verification": {
+    "killed_lock_holder_test": "passed",
+    "mailbox_latest_bound_test": "passed",
+    "lifecycle_tests": 3,
+    "fresh_vm_soak": "running"
+  },
+  "first_attempt_failure": "minimal guest lacked pgrep; probe now enumerates its own service children through /proc"
+}

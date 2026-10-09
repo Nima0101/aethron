@@ -1,0 +1,40 @@
+[Unit]
+Description=AETHRON local perception appliance
+After=local-fs.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=aethron
+Group=aethron
+WorkingDirectory=/opt/aethron
+ExecStart=/opt/aethron/venv/bin/aethron-edge run --config /opt/aethron/appliance.json --update-store /var/lib/aethron-updates
+Restart=on-failure
+RestartSec=2s
+TimeoutStopSec=10s
+KillMode=control-group
+StateDirectory=aethron
+StateDirectoryMode=0700
+RuntimeDirectory=aethron
+UMask=0077
+Environment=PATH=/opt/aethron/venv/bin:/usr/bin:/bin
+Environment=PYTHONDONTWRITEBYTECODE=1
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/aethron /run/aethron
+PrivateTmp=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+TasksMax=64
+MemoryMax=768M
+LogRateLimitIntervalSec=60s
+LogRateLimitBurst=20
+StandardOutput=null
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

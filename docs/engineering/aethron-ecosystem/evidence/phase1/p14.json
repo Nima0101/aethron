@@ -1,0 +1,24 @@
+{
+  "parent": "2739360",
+  "http_process_tests": 4,
+  "security_tests": 2,
+  "lifecycle_tests": 3,
+  "signed_update_tests": 3,
+  "red": [
+    "CLI run missing",
+    "Non-ASCII bearer comparison exception",
+    "Startup recommendation was WARN for vehicle_stop",
+    "Slow worker cleanup blocked watchdog 246ms"
+  ],
+  "green": [
+    "Installed source server real HTTP/SSE tests pass",
+    "Bearer rejects malformed encoding",
+    "Startup UNKNOWN preserves configured STOP recommendation",
+    "Worker recovery moved outside watchdog lock; focused and complete lifecycle pass"
+  ],
+  "qualification": {
+    "hardware": false,
+    "boot_vm": "ongoing P1.7",
+    "independent_security_review": false
+  }
+}

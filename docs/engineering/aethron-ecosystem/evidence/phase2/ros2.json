@@ -1,0 +1,596 @@
+{
+  "date": "2026-10-08",
+  "parent_revision": "511a47ed529c3dc70d2710061d064c3ad68309d9",
+  "status": "software_candidate_passed",
+  "hardware_qualified": false,
+  "field_qualified": false,
+  "hosted_ci_executed": false,
+  "scope": "P2.1 partial; optional read-only ROS sensor sidecar, not semantic model integration",
+  "sdk_check_prior_to_clock_expiry_fix": {
+    "hardware_qualified": false,
+    "installed_ros_dds": true,
+    "network": "none",
+    "packages": {
+      "rclpy": "7.1.12",
+      "rmw_fastrtps_cpp": "8.4.4",
+      "sensor_msgs": "5.3.8"
+    },
+    "payloads": "original synthetic Image/CameraInfo/PointCloud2",
+    "python": "3.12.3",
+    "scene_state": "UNKNOWN",
+    "uid": 10001,
+    "wheels": {
+      "candidate/aethron-0.2.0-py3-none-any.whl": "be3dd8e3e8bcf437d72d65e384c560eb18d4b22baf522849b965d3d720c1d73f",
+      "candidate/aethron_edge-0.1.0-py3-none-any.whl": "6ec4ee86ee886d27da483fd022dc6dc602e92906b4da81059f4bec54362798e7",
+      "dependencies/annotated_types-0.8.0-py3-none-any.whl": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0",
+      "dependencies/pip-26.2-py3-none-any.whl": "931c303696af6fa3417112103b1cad26890e5a07eccb5b99783700e33f2b8aad",
+      "dependencies/pydantic-2.13.5-py3-none-any.whl": "346a034f080da3755d8e9cb5e00e8b07de1d39e4f6e2c87d8ab7cafa0b269a73",
+      "dependencies/pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl": "4fdc8b93a41521988916eeaa271173fcca7fa0803d62f87675aac8dcec1c8e29",
+      "dependencies/typing_extensions-4.16.0-py3-none-any.whl": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+      "dependencies/typing_inspection-0.4.4-py3-none-any.whl": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147"
+    },
+    "image": "ros@sha256:8f687fdf084482819aa7dab48c3887331edd0d3687b219951fdb66c418316ab1",
+    "platform": "linux/arm64"
+  },
+  "logs": {
+    "red.log": {
+      "sha256": "3a79736feaf43fcdc1fd435475417a32e4e98a0d3f6a2575fd777762e6ddb5c6",
+      "bytes": 9116
+    },
+    "expiry-red.log": {
+      "sha256": "2e1a29b9c000b1c223ce8f18211d4cc4d2cc5f797aa32068c4365e9a483d40ee",
+      "bytes": 874
+    },
+    "status-red.log": {
+      "sha256": "87fa2a1e74b29732a3aea8f65fa994b4ff27956eb3a2b0f9695d890e2058bcd9",
+      "bytes": 778
+    },
+    "clock-expiry-red.log": {
+      "sha256": "12cf139fa53dfa5a1c7f0544b217a9252e020671d73ace10e721ac029faf46ea",
+      "bytes": 961
+    },
+    "clock-expiry-green.log": {
+      "sha256": "1cbc2ae1ce5606fb07c96c17b4e9bd231edee2b0ede85df4f45f76effcdb885b",
+      "bytes": 2445
+    },
+    "dds-red/dds.log": {
+      "sha256": "7ec722badf784801f807d73e547996b499e775b0e2339214e3b9012d795d5089",
+      "bytes": 2938
+    },
+    "cli-red/dds.log": {
+      "sha256": "60f359097fdc66710181f658d692b200ff356f662ada89f67b5a7b30bd8458d2",
+      "bytes": 2682
+    },
+    "dds-verified/dds.log": {
+      "sha256": "373b7e30b792a26b49931685e59a58536b142febb2987872a57685c57102c12d",
+      "bytes": 173
+    },
+    "dds-verified-retry/dds.log": {
+      "sha256": "50a07e7b56b048a544ea9815834e5e465e22b25a276c47990dcd5357be3a0d53",
+      "bytes": 7421
+    },
+    "package.log": {
+      "sha256": "989755578912b95cab1faa3401cefd458f8f27c8462b0a3068071f1d9c30e484",
+      "bytes": 2947
+    },
+    "package-retry.log": {
+      "sha256": "92bb691e25c1d798f5ef1b00a2f9e65bdb908e389597f14afc51ae9ddb68971e",
+      "bytes": 854
+    },
+    "integration.log": {
+      "sha256": "450d0fb3c74c16e4558babc0bf4c09cd080a7c8d8118c4ad7217d26ac5ad517b",
+      "bytes": 11157
+    },
+    "schema-fuzz.log": {
+      "sha256": "00b5e0888454a8371800e2d80a9f921a9fe0a7045b7cbc3c3c0bd7ead29a3b1f",
+      "bytes": 99
+    },
+    "package-final.log": {
+      "sha256": "91a85660d5ba178fb3117155a64a7e58d9e9e11a39af9771c49c7c622ea42d20",
+      "bytes": 1335
+    },
+    "package-final/server.log": {
+      "sha256": "102804377803eb967a10d6f2318a36990b4aa8b40a6be9ba1ba953cabe20466e",
+      "bytes": 275
+    },
+    "dds-final-source/dds.log": {
+      "sha256": "4a27dce6272bfaab395380f030acf37d9979425e19cbfae92b7d0b976ccff120",
+      "bytes": 7584
+    },
+    "verify.log": {
+      "sha256": "ddc6000b0af7d98b94b40d2783ee927fd8c7c63ccff8333a601f4469a2dd7d76",
+      "bytes": 1663
+    },
+    "ruff-final.log": {
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "bytes": 19
+    },
+    "integration-final.log": {
+      "sha256": "da439e4c7056b489fb032bad6e1ca9afc938606790eb0b33e2411d5bb229f886",
+      "bytes": 12186
+    },
+    "lifecycle-retry.log": {
+      "sha256": "9230f0e869142c96f0be653b3fed7a50bada3001df34d419e336f4c3bbb03bf3",
+      "bytes": 239
+    },
+    "temporal.log": {
+      "sha256": "d97fb00b8d620d164a1db21ded06fe14245f24f1f5af629d919efa4b54025eea",
+      "bytes": 6477
+    },
+    "preflight-final.log": {
+      "sha256": "0fb55c0f8bd5f1bf25d57d400e51bfcc89c2da55b42570b2dda87d3333040a2e",
+      "bytes": 49
+    },
+    "preflight-parallel.log": {
+      "sha256": "1376b3ed60200f3d006f0ce5592df3b56e7608363fbbf8d61e70489c78649c85",
+      "bytes": 1016
+    },
+    "integration-retry.log": {
+      "sha256": "2d71a5c8b6cf16af23ba64812df5c65fbaae2109945e36c3efc2de613ef66fed",
+      "bytes": 11468
+    },
+    "ruff-repository-final.log": {
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+      "bytes": 19
+    },
+    "format-repository-final.log": {
+      "sha256": "4327c987299d88b4f4a357992babe2c2d610c2ee6ae4106455f5eda8158364cc",
+      "bytes": 27
+    },
+    "fuzz-legacy.json": {
+      "sha256": "4371b5e02c2fe2bd1e1dd5d839b2907cece16f7d44d6b8e7e2299002f1ac4ef2",
+      "bytes": 110
+    },
+    "fuzz-temporal.json": {
+      "sha256": "82401c550589b6a85583822368578837e15e508fb614d2d7ccc53caabaf199d4",
+      "bytes": 2180
+    },
+    "preflight-commit.log": {
+      "sha256": "1376b3ed60200f3d006f0ce5592df3b56e7608363fbbf8d61e70489c78649c85",
+      "bytes": 1016
+    }
+  },
+  "retained_failures": [
+    "Missing adapter and subscriber RED assertions",
+    "Expired CameraInfo retained until consumption; regression fixed",
+    "Missing status expiry; regression fixed",
+    "SIGTERM returned -15; graceful shutdown implemented",
+    "Clock mapping expired between reception and consumption; regression fixed",
+    "First installed SSE consumer timed out at 15 seconds; stable final retry passed unchanged client bound, cause unproven",
+    "Pinned ROS image unexpectedly absent; restored exact digest, failure retained",
+    "Packaging retry compared source edited during builds; invalid attempt retained; stable final builds byte-identical",
+    "Stable packaging passed but emitted one shutdown semaphore warning; no zero-leak claim"
+  ],
+  "pending": [
+    "qualified capture clock and physical intrinsics/extrinsics",
+    "nonvisible semantic model evaluation and pipeline registration",
+    "authenticated DDS deployment and vendor firmware/SKU tests",
+    "full held-out night/field qualification",
+    "hosted CI and publication gates"
+  ],
+  "security": {
+    "bandit": {
+      "errors": [],
+      "generated_at": "2026-10-08T19:17:36Z",
+      "metrics": {
+        "./integrations/edge/aethron_edge/sensors/ros2.py": {
+          "CONFIDENCE.HIGH": 0,
+          "CONFIDENCE.LOW": 0,
+          "CONFIDENCE.MEDIUM": 0,
+          "CONFIDENCE.UNDEFINED": 0,
+          "SEVERITY.HIGH": 0,
+          "SEVERITY.LOW": 0,
+          "SEVERITY.MEDIUM": 0,
+          "SEVERITY.UNDEFINED": 0,
+          "loc": 305,
+          "nosec": 0,
+          "skipped_tests": 0
+        },
+        "./integrations/edge/aethron_edge/sensors/ros2_node.py": {
+          "CONFIDENCE.HIGH": 0,
+          "CONFIDENCE.LOW": 0,
+          "CONFIDENCE.MEDIUM": 0,
+          "CONFIDENCE.UNDEFINED": 0,
+          "SEVERITY.HIGH": 0,
+          "SEVERITY.LOW": 0,
+          "SEVERITY.MEDIUM": 0,
+          "SEVERITY.UNDEFINED": 0,
+          "loc": 151,
+          "nosec": 0,
+          "skipped_tests": 0
+        },
+        "_totals": {
+          "CONFIDENCE.HIGH": 0,
+          "CONFIDENCE.LOW": 0,
+          "CONFIDENCE.MEDIUM": 0,
+          "CONFIDENCE.UNDEFINED": 0,
+          "SEVERITY.HIGH": 0,
+          "SEVERITY.LOW": 0,
+          "SEVERITY.MEDIUM": 0,
+          "SEVERITY.UNDEFINED": 0,
+          "loc": 456,
+          "nosec": 0,
+          "skipped_tests": 0
+        }
+      },
+      "results": []
+    },
+    "dependency_audit": {
+      "dependencies": [
+        {
+          "name": "pip",
+          "version": "26.2",
+          "vulns": []
+        },
+        {
+          "name": "annotated-types",
+          "version": "0.8.0",
+          "vulns": []
+        },
+        {
+          "name": "pydantic",
+          "version": "2.13.5",
+          "vulns": []
+        },
+        {
+          "name": "pydantic-core",
+          "version": "2.46.5",
+          "vulns": []
+        },
+        {
+          "name": "typing-extensions",
+          "version": "4.16.0",
+          "vulns": []
+        },
+        {
+          "name": "typing-inspection",
+          "version": "0.4.4",
+          "vulns": []
+        }
+      ],
+      "fixes": []
+    }
+  },
+  "installed_sdk_final": {
+    "hardware_qualified": false,
+    "installed_ros_dds": true,
+    "network": "none",
+    "packages": {
+      "rclpy": "7.1.12",
+      "rmw_fastrtps_cpp": "8.4.4",
+      "sensor_msgs": "5.3.8"
+    },
+    "payloads": "original synthetic Image/CameraInfo/PointCloud2",
+    "python": "3.12.3",
+    "scene_state": "UNKNOWN",
+    "uid": 10001,
+    "wheels": {
+      "candidate/aethron-0.2.0-py3-none-any.whl": "be3dd8e3e8bcf437d72d65e384c560eb18d4b22baf522849b965d3d720c1d73f",
+      "candidate/aethron_edge-0.1.0-py3-none-any.whl": "fe8d803985a49b02fad559887c582d55fb2faa2cb6fbca246ed4a842a34b1d68",
+      "dependencies/annotated_types-0.8.0-py3-none-any.whl": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0",
+      "dependencies/pip-26.2-py3-none-any.whl": "931c303696af6fa3417112103b1cad26890e5a07eccb5b99783700e33f2b8aad",
+      "dependencies/pydantic-2.13.5-py3-none-any.whl": "346a034f080da3755d8e9cb5e00e8b07de1d39e4f6e2c87d8ab7cafa0b269a73",
+      "dependencies/pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl": "4fdc8b93a41521988916eeaa271173fcca7fa0803d62f87675aac8dcec1c8e29",
+      "dependencies/typing_extensions-4.16.0-py3-none-any.whl": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+      "dependencies/typing_inspection-0.4.4-py3-none-any.whl": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147"
+    },
+    "image": "ros@sha256:8f687fdf084482819aa7dab48c3887331edd0d3687b219951fdb66c418316ab1",
+    "platform": "linux/arm64"
+  },
+  "installed_sdk_test_count": 32,
+  "installed_sdk_test_seconds": 0.978,
+  "package_final": {
+    "wheels": {
+      "aethron-0.2.0-py3-none-any.whl": "be3dd8e3e8bcf437d72d65e384c560eb18d4b22baf522849b965d3d720c1d73f",
+      "aethron_edge-0.1.0-py3-none-any.whl": "fe8d803985a49b02fad559887c582d55fb2faa2cb6fbca246ed4a842a34b1d68"
+    },
+    "byte_identical": true,
+    "installed_consumer": true,
+    "installed_sensor_contracts": true,
+    "consumer_events": 3,
+    "zero_viewer_continued": true,
+    "platform": "darwin",
+    "python": "3.13.15"
+  },
+  "installed_mac_sensor_tests": 28,
+  "verification": "scripts/verify.py passed; frozen hashes, root tests, dataset, public consumer, temporal CLI",
+  "source_sha256": {
+    "integrations/edge/aethron_edge/sensors/ros2.py": "959b512f23436747683d2c9d1e7863e6c74eb02c244b290435e3fa957678d244",
+    "integrations/edge/aethron_edge/sensors/ros2_node.py": "f16e58fd50631c24e1e440800c7d32ca542c416ac6a6821608c91be512bd6c92",
+    "integrations/edge/ros2/requirements.lock": "e8a0a6da53a700e86f2d6d0c151df73ab1277ce0a6d58ee97327ab8524d28b9c"
+  },
+  "native_temporal_retry": {
+    "benchmark": {
+      "cpu_p95_ms_diagnostic_only": 9.07,
+      "frames": 100,
+      "max_ms": 13.908,
+      "memory_budget_bytes": 33554432,
+      "objects": 32,
+      "p50_ms": 7.455,
+      "p95_budget_ms": 100,
+      "p95_ms": 9.61,
+      "passed": true,
+      "peak_bytes": 120997
+    },
+    "evaluation_script_sha256": "862af9ccd543865efd0871fe256f8c169502a947f8759d388f2f2eeda43f1b1f",
+    "platform": "Darwin arm64",
+    "protocol": "matrix-v3.md frozen T09/T10/T13",
+    "python": "3.13.15",
+    "runtime_sha256": {
+      "aethron/__init__.py": "8ea373fbd458d5b53b6a5285584c61d14f1541e96d7a05c29f0508011b766fa7",
+      "aethron/__main__.py": "94eb2aa08c590456d8d1f6de520b0f268cab48c671325688ae9f6ae4b6ec7a66",
+      "aethron/actions.py": "e449088fa6850f3dc11f782cc656817ab571e2d94cbc4ebb33869706e7537a2a",
+      "aethron/adapters.py": "856030c21738c200df3758eda4194ddde5f56c1d6feca57b0c0965f06e9a0481",
+      "aethron/core.py": "c5ef2d70c7ac5065b5a95836eba588fd44a78a6bceb97883ec0d0b5ac2a1619a",
+      "aethron/demo.py": "c6b1539f1fcd91970d71aee2dd8923a584df2f1332adb9f083de18e14277983e",
+      "aethron/features.py": "fae7de40ec3af1c3a47ae919628b7339a83ebd783b882e3e66bdcf5868c9dd3c",
+      "aethron/models/__init__.py": "61e3d91134abfff53054811740f54dd21cc6e531087e506302a0bf650728e25d",
+      "aethron/render.py": "9231a04b312d74281192d9f097ccfc8d7fd58fc20f2d8d45e36748f831647b44",
+      "aethron/schema.py": "ca28412601bf05a155ad55e59070f811af2c67dd374e2b2baeb9b54d8e4ccc43",
+      "aethron/schema_v2.py": "d529ca9797dcf0cf4d7126c93c9ea233edea77cda55faecc3ba7a2559ec7f3ab",
+      "aethron/temporal/__init__.py": "8dac6e681e96fa0a78affbddc6c76962d221a7e66f6e8bc0828e40d9b9494087",
+      "aethron/temporal/fixtures.py": "d18cbd884805e335d803638b2a311bd6fc90b5764c3db9c6eb194270490d19b5",
+      "aethron/temporal/fusion.py": "c9f6df323f40ac0f0cf9f06d9f3a642fb3ab5113d30cded90aae3d3d5d8fa770",
+      "aethron/temporal/math.py": "f9a634fea08a7e20bf4e730671f6eed729c4827193d439f5ab29fa3f708d2b9e",
+      "aethron/temporal/pixels.py": "314583c5a9d34f005f1c9b5fb9c739183de39894c38dcff8cdc7e899406e13cb",
+      "aethron/temporal/registration.py": "cd6b8955a7ebc8c762da3af5f28d83ff2a7a2a5f097a5e3d1177867fc53aa7c5",
+      "aethron/temporal/replay.py": "37863819e5c3a99aefbe0d3a7df17ac7dae09c33ed01b76d8af0697b133344e0",
+      "aethron/temporal/schema.py": "2602ad7523623f326876b5723ef4869049b2b2bb095c9f03e531345f4e568350",
+      "aethron/temporal/session.py": "e702043f6d20611cae0037ad041198976b730b23407b87df042e7e7c91574560",
+      "aethron/vision/__init__.py": "2e051811883c745faf9abe9d2e076396186a187c7807fbbf087dbe5d54c085a2",
+      "aethron/vision/yolox.py": "d2a6ca09b670bc569ad79e025240908fa7252c8c9dcbb76a5b93c83e2ac3bec4"
+    },
+    "synthetic": {
+      "all_loss": {
+        "greedy_iou": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 16,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 0.333333,
+          "true_positives": 8,
+          "uncertain_predictions_not_counted_as_detections": 0
+        },
+        "temporal": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 16,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 0.333333,
+          "true_positives": 8,
+          "uncertain_predictions_not_counted_as_detections": 5
+        }
+      },
+      "blackout": {
+        "greedy_iou": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 24,
+          "uncertain_predictions_not_counted_as_detections": 0
+        },
+        "temporal": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 24,
+          "uncertain_predictions_not_counted_as_detections": 0
+        }
+      },
+      "camera_pan": {
+        "greedy_iou": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 24,
+          "uncertain_predictions_not_counted_as_detections": 0
+        },
+        "temporal": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 24,
+          "uncertain_predictions_not_counted_as_detections": 0
+        }
+      },
+      "classes": {
+        "greedy_iou": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 11,
+          "uncertain_predictions_not_counted_as_detections": 0
+        },
+        "temporal": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 11,
+          "uncertain_predictions_not_counted_as_detections": 40
+        }
+      },
+      "clean": {
+        "greedy_iou": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 24,
+          "uncertain_predictions_not_counted_as_detections": 0
+        },
+        "temporal": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 24,
+          "uncertain_predictions_not_counted_as_detections": 0
+        }
+      },
+      "crossing": {
+        "greedy_iou": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 2,
+          "precision": 1.0,
+          "recall": 1.0,
+          "true_positives": 48,
+          "uncertain_predictions_not_counted_as_detections": 0
+        },
+        "temporal": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 2,
+          "false_positives": 0,
+          "fragmentations": 0,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 0.958333,
+          "true_positives": 46,
+          "uncertain_predictions_not_counted_as_detections": 2
+        }
+      },
+      "fast_uav": {
+        "greedy_iou": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 3,
+          "false_positives": 0,
+          "fragmentations": 2,
+          "id_switches": 20,
+          "precision": 1.0,
+          "recall": 0.875,
+          "true_positives": 21,
+          "uncertain_predictions_not_counted_as_detections": 0
+        },
+        "temporal": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 3,
+          "false_positives": 0,
+          "fragmentations": 2,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 0.875,
+          "true_positives": 21,
+          "uncertain_predictions_not_counted_as_detections": 3
+        }
+      },
+      "occlusion": {
+        "greedy_iou": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 3,
+          "false_positives": 0,
+          "fragmentations": 2,
+          "id_switches": 2,
+          "precision": 1.0,
+          "recall": 0.875,
+          "true_positives": 21,
+          "uncertain_predictions_not_counted_as_detections": 0
+        },
+        "temporal": {
+          "centre_rmse_normalized": 0.0,
+          "false_negatives": 3,
+          "false_positives": 0,
+          "fragmentations": 2,
+          "id_switches": 0,
+          "precision": 1.0,
+          "recall": 0.875,
+          "true_positives": 21,
+          "uncertain_predictions_not_counted_as_detections": 3
+        }
+      }
+    }
+  },
+  "retained_integration_failure": {
+    "tests": 76,
+    "seconds": 137.271,
+    "failures": 1,
+    "test": "test_zero_viewers_processing_and_disk_full_fault",
+    "assertion": "1 not greater than 2 within existing 8-second bound",
+    "isolated_unchanged_retry": {
+      "passed": true,
+      "seconds": 1.364
+    },
+    "cause": "not established; no startup or freshness threshold changed"
+  },
+  "integration_final": {
+    "tests": 76,
+    "seconds": 77.111,
+    "result": "passed",
+    "fresh_sequential_retry": true
+  },
+  "plan_negative_probes": 26,
+  "fuzz_legacy": {
+    "accepted": 19221,
+    "cases": 93127,
+    "seconds": 60.000934458104894,
+    "seed": 54777,
+    "unexpected_exceptions": 0
+  },
+  "fuzz_temporal": {
+    "seed": 981640,
+    "cases": 247724,
+    "seconds": 60.236,
+    "unexpected_exceptions": 0,
+    "source_sha256": {
+      "aethron/render.py": "9231a04b312d74281192d9f097ccfc8d7fd58fc20f2d8d45e36748f831647b44",
+      "aethron/actions.py": "e449088fa6850f3dc11f782cc656817ab571e2d94cbc4ebb33869706e7537a2a",
+      "aethron/__init__.py": "8ea373fbd458d5b53b6a5285584c61d14f1541e96d7a05c29f0508011b766fa7",
+      "aethron/schema_v2.py": "d529ca9797dcf0cf4d7126c93c9ea233edea77cda55faecc3ba7a2559ec7f3ab",
+      "aethron/features.py": "fae7de40ec3af1c3a47ae919628b7339a83ebd783b882e3e66bdcf5868c9dd3c",
+      "aethron/core.py": "c5ef2d70c7ac5065b5a95836eba588fd44a78a6bceb97883ec0d0b5ac2a1619a",
+      "aethron/demo.py": "c6b1539f1fcd91970d71aee2dd8923a584df2f1332adb9f083de18e14277983e",
+      "aethron/__main__.py": "94eb2aa08c590456d8d1f6de520b0f268cab48c671325688ae9f6ae4b6ec7a66",
+      "aethron/schema.py": "ca28412601bf05a155ad55e59070f811af2c67dd374e2b2baeb9b54d8e4ccc43",
+      "aethron/adapters.py": "856030c21738c200df3758eda4194ddde5f56c1d6feca57b0c0965f06e9a0481",
+      "aethron/temporal/registration.py": "cd6b8955a7ebc8c762da3af5f28d83ff2a7a2a5f097a5e3d1177867fc53aa7c5",
+      "aethron/temporal/pixels.py": "314583c5a9d34f005f1c9b5fb9c739183de39894c38dcff8cdc7e899406e13cb",
+      "aethron/temporal/session.py": "e702043f6d20611cae0037ad041198976b730b23407b87df042e7e7c91574560",
+      "aethron/temporal/__init__.py": "8dac6e681e96fa0a78affbddc6c76962d221a7e66f6e8bc0828e40d9b9494087",
+      "aethron/temporal/replay.py": "37863819e5c3a99aefbe0d3a7df17ac7dae09c33ed01b76d8af0697b133344e0",
+      "aethron/temporal/fusion.py": "c9f6df323f40ac0f0cf9f06d9f3a642fb3ab5113d30cded90aae3d3d5d8fa770",
+      "aethron/temporal/math.py": "f9a634fea08a7e20bf4e730671f6eed729c4827193d439f5ab29fa3f708d2b9e",
+      "aethron/temporal/fixtures.py": "d18cbd884805e335d803638b2a311bd6fc90b5764c3db9c6eb194270490d19b5",
+      "aethron/temporal/schema.py": "2602ad7523623f326876b5723ef4869049b2b2bb095c9f03e531345f4e568350",
+      "aethron/models/__init__.py": "61e3d91134abfff53054811740f54dd21cc6e531087e506302a0bf650728e25d",
+      "aethron/vision/yolox.py": "d2a6ca09b670bc569ad79e025240908fa7252c8c9dcbb76a5b93c83e2ac3bec4",
+      "aethron/vision/__init__.py": "2e051811883c745faf9abe9d2e076396186a187c7807fbbf087dbe5d54c085a2"
+    }
+  },
+  "source_revision": "bc2ffe4b6fca49e90d265ea5cffc8bea2485647d",
+  "clean_reproduction_evidence": "ros-clean.json"
+}

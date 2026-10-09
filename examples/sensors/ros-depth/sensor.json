@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "mode": "ros",
+  "calibration": {
+    "source_id": "depth_front",
+    "modality": "depth",
+    "rig": {
+      "version": 1,
+      "source_frame": "depth_optical",
+      "target_frame": "front_optical",
+      "mount_id": "rig_a",
+      "evidence": "synthetic",
+      "camera": {
+        "width": 3,
+        "height": 3,
+        "fx": 2.0,
+        "fy": 2.0,
+        "cx": 1.0,
+        "cy": 1.0
+      },
+      "rotation": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "translation_m": [
+        0.5,
+        0.0,
+        0.0
+      ],
+      "translation_error_m": 0.01,
+      "rotation_error_rad": 0.0,
+      "reprojection_error_px": 0.0
+    },
+    "source_camera": {
+      "width": 3,
+      "height": 3,
+      "fx": 2.0,
+      "fy": 2.0,
+      "cx": 1.0,
+      "cy": 1.0
+    },
+    "lens": null,
+    "measurement_error_m": 0.01,
+    "layout_sha256": "395f678ca10e91d0d75179d300b33ad5f724104617b72bead9b83b94113dca17"
+  },
+  "indices": [
+    [
+      1,
+      1
+    ]
+  ],
+  "valid_for_ns": 600000000000,
+  "timestamp_authority": "same_host_system_software",
+  "timestamp_error_ns": 1000000,
+  "clock_drift_budget_ns": 1000000,
+  "topic": "/aethron/depth",
+  "camera_info_topic": "/aethron/camera_info",
+  "domain_id": 73,
+  "meters_per_unit": 0.001
+}

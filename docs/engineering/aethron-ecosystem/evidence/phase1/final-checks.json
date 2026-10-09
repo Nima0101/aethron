@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "runtime_source_revision": "d90ae953f6431fd9d460e440432ac72825b8d250",
+  "checks": [
+    {
+      "command": "python scripts/check_ecosystem_plan.py --self-test",
+      "exit_code": 0,
+      "log_sha256": "d92e83eb4ed2ae223f6e5b67ca375e9e711e57918fd71262d6fa2fcdbbc94776"
+    },
+    {
+      "command": "python scripts/verify.py",
+      "exit_code": 0,
+      "log_sha256": "03aeb6705f58af695f2768e42f59ebe9731215539068e6695a543b0ffceced39"
+    },
+    {
+      "command": "python -m ruff check integrations/edge packaging/appliance scripts/edge_*.py scripts/appliance_boot_e2e.py scripts/check_ecosystem_plan.py tests/integration",
+      "exit_code": 0,
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    }
+  ],
+  "plan_negative_probes": 18,
+  "boot_guest_powered_off": true,
+  "boot_tool_container_removed": true,
+  "hosted_ci_executed": false,
+  "qualification": "software candidate only"
+}

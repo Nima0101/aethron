@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools==84.0.0", "wheel==0.48.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aethron-edge"
+version = "0.1.0"
+description = "AETHRON local supervised perception integration runtime"
+requires-python = ">=3.11"
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
+readme = "README.md"
+dependencies = ["aethron==0.2.0", "pydantic==2.13.5"]
+
+[project.optional-dependencies]
+server = ["fastapi==0.142.4", "uvicorn==0.54.0"]
+vision = ["numpy==2.3.5", "opencv-python-headless==4.13.0.92"]
+mavlink = ["pymavlink==2.4.50", "fastcrc==0.5.0", "lxml==6.1.3"]
+
+[project.scripts]
+aethron-edge = "aethron_edge.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["aethron_edge*"]

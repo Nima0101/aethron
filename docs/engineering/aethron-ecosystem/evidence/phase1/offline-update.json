@@ -1,0 +1,36 @@
+{
+  "status": "passed",
+  "source_revision": "d90ae953f6431fd9d460e440432ac72825b8d250",
+  "runtime_wheel_sha256": "49fda684a90da9667ff1717ece3a9a3b631b33fda43a72ea952ce129f621d905",
+  "execution": "Linux ARM64 Docker container, network disabled",
+  "records": [
+    {
+      "stage": "stage_initial"
+    },
+    {
+      "stage": "activate_initial"
+    },
+    {
+      "stage": "stage_second"
+    },
+    {
+      "stage": "activate_second"
+    },
+    {
+      "updated": true,
+      "version": 2,
+      "rollback_rejected": true,
+      "interrupted_stage_preserved_active": true
+    },
+    {
+      "selected_runtime_exec": true,
+      "version": 2,
+      "offline_processing": true,
+      "service_cannot_replace_update_store": true,
+      "hardware_qualified": false
+    }
+  ],
+  "shutdown_warning": "one multiprocessing semaphore reported for resource-tracker cleanup; no zero-leak claim",
+  "log_sha256": "54d003eb78043a70042d00e2831183290e19fd23ed3290964cfeb4fb435094e8",
+  "hardware_qualified": false
+}
