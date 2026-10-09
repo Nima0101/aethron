@@ -1,0 +1,281 @@
+{
+  "benchmark": {
+    "cpu_p95_ms_diagnostic_only": 12.759,
+    "frames": 100,
+    "max_ms": 158.238,
+    "memory_budget_bytes": 33554432,
+    "objects": 32,
+    "p50_ms": 54.449,
+    "p95_budget_ms": 100,
+    "p95_ms": 143.527,
+    "passed": false,
+    "peak_bytes": 118837
+  },
+  "evaluation_script_sha256": "862af9ccd543865efd0871fe256f8c169502a947f8759d388f2f2eeda43f1b1f",
+  "platform": "Darwin arm64",
+  "protocol": "matrix-v3.md frozen T09/T10/T13",
+  "python": "3.13.15",
+  "recorded": {
+    "frames": 25,
+    "greedy_iou": {
+      "centre_rmse_normalized": null,
+      "false_negatives": 20,
+      "false_positives": 629,
+      "fragmentations": 0,
+      "id_switches": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "true_positives": 0,
+      "uncertain_predictions_not_counted_as_detections": 0
+    },
+    "motion": "Translation adapter measured; invalid frames withdraw motion",
+    "physical_or_semantic_qualification": false,
+    "pixel_detector_latency_ms": {
+      "max": 14983.465,
+      "p50": 5937.468
+    },
+    "source": "AOT evaluation-only excerpt; fixed-wing aircraft, not UAV",
+    "temporal": {
+      "centre_rmse_normalized": null,
+      "false_negatives": 20,
+      "false_positives": 721,
+      "fragmentations": 0,
+      "id_switches": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "true_positives": 0,
+      "uncertain_predictions_not_counted_as_detections": 70
+    },
+    "valid_registration_frames": 20
+  },
+  "runtime_sha256": {
+    "aethron/__init__.py": "8ea373fbd458d5b53b6a5285584c61d14f1541e96d7a05c29f0508011b766fa7",
+    "aethron/__main__.py": "94eb2aa08c590456d8d1f6de520b0f268cab48c671325688ae9f6ae4b6ec7a66",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "aethron/actions.py": "e449088fa6850f3dc11f782cc656817ab571e2d94cbc4ebb33869706e7537a2a",
+    "aethron/adapters.py": "856030c21738c200df3758eda4194ddde5f56c1d6feca57b0c0965f06e9a0481",
+    "aethron/core.py": "c5ef2d70c7ac5065b5a95836eba588fd44a78a6bceb97883ec0d0b5ac2a1619a",
+    "aethron/demo.py": "c6b1539f1fcd91970d71aee2dd8923a584df2f1332adb9f083de18e14277983e",
+    "aethron/evaluation/__init__.py": "42e87ab5f6f08f372c835d774ce613518c2d6814f084602d33212a2fde8ffbcd",
+    "aethron/evaluation/annotations.py": "4318eb8f57a7d69e3738e1e36211633061ecac741e965381123db391e425d858",
+    "aethron/evaluation/baselines.py": "43a1b761ad96b6e012f500dd97b2107833a645d3de4d4afe522e02868aecda0c",
+    "aethron/evaluation/candidates.py": "fca6e04c839e76e9218dcfb11b44cfce81a6d644c472899263d6066ab0605385",
+    "aethron/evaluation/proposals.py": "d407cf5608d5e10fbf3f7f047c9be73b917b6ce376e4446da346b8505fe7ebd6",
+    "aethron/evaluation/splits.py": "0866ae3b1cb8ca12e4acca1d6700d78ae6a4fe8610045f80c0b9abbd506fdbe2",
+    "aethron/evaluation/synthetic.py": "a34b6f5430b8eb9a8ef570db6f305246ae4b0b4858a39645ff2ea10b9b23a512",
+    "aethron/evaluation/threshold.py": "5725f57fd86e79c31ac5ae68419eb92ca917a4cde26892945d36b6673e2e5478",
+    "aethron/evaluation/threshold_bundle.py": "3f594bcfcdf825b3d4a140dd55bc1d72c317df206a751c2822f5dbe224cc63cb",
+    "aethron/evaluation/threshold_bundle_compare.py": "723c99e7a101670d91b43f54034afed486e48b6ccbbc8828b044e15a5c648e16",
+    "aethron/evaluation/threshold_bundle_verify.py": "21faccd356146c86aa4024034c52df296003a03d35a602979eb399ed76c39bab",
+    "aethron/features.py": "f1b77e8f37e5c4724f9fb264ff32483659c5c5e0e804c95b1757a0c22e30c5d1",
+    "aethron/models/__init__.py": "61e3d91134abfff53054811740f54dd21cc6e531087e506302a0bf650728e25d",
+    "aethron/render.py": "9231a04b312d74281192d9f097ccfc8d7fd58fc20f2d8d45e36748f831647b44",
+    "aethron/schema.py": "ca54580ad52105c9592bb28133f36c160d34ddb0004e07d6b61c5f8085d21c60",
+    "aethron/schema_v2.py": "d529ca9797dcf0cf4d7126c93c9ea233edea77cda55faecc3ba7a2559ec7f3ab",
+    "aethron/temporal/__init__.py": "8dac6e681e96fa0a78affbddc6c76962d221a7e66f6e8bc0828e40d9b9494087",
+    "aethron/temporal/fixtures.py": "d18cbd884805e335d803638b2a311bd6fc90b5764c3db9c6eb194270490d19b5",
+    "aethron/temporal/fusion.py": "c9f6df323f40ac0f0cf9f06d9f3a642fb3ab5113d30cded90aae3d3d5d8fa770",
+    "aethron/temporal/math.py": "f9a634fea08a7e20bf4e730671f6eed729c4827193d439f5ab29fa3f708d2b9e",
+    "aethron/temporal/pixels.py": "314583c5a9d34f005f1c9b5fb9c739183de39894c38dcff8cdc7e899406e13cb",
+    "aethron/temporal/registration.py": "cd6b8955a7ebc8c762da3af5f28d83ff2a7a2a5f097a5e3d1177867fc53aa7c5",
+    "aethron/temporal/replay.py": "37863819e5c3a99aefbe0d3a7df17ac7dae09c33ed01b76d8af0697b133344e0",
+    "aethron/temporal/schema.py": "2602ad7523623f326876b5723ef4869049b2b2bb095c9f03e531345f4e568350",
+    "aethron/temporal/session.py": "e702043f6d20611cae0037ad041198976b730b23407b87df042e7e7c91574560",
+    "aethron/vision/__init__.py": "2e051811883c745faf9abe9d2e076396186a187c7807fbbf087dbe5d54c085a2",
+    "aethron/vision/yolox.py": "d2a6ca09b670bc569ad79e025240908fa7252c8c9dcbb76a5b93c83e2ac3bec4"
+  },
+  "synthetic": {
+    "all_loss": {
+      "greedy_iou": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 16,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 0.333333,
+        "true_positives": 8,
+        "uncertain_predictions_not_counted_as_detections": 0
+      },
+      "temporal": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 16,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 0.333333,
+        "true_positives": 8,
+        "uncertain_predictions_not_counted_as_detections": 5
+      }
+    },
+    "blackout": {
+      "greedy_iou": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 24,
+        "uncertain_predictions_not_counted_as_detections": 0
+      },
+      "temporal": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 24,
+        "uncertain_predictions_not_counted_as_detections": 0
+      }
+    },
+    "camera_pan": {
+      "greedy_iou": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 24,
+        "uncertain_predictions_not_counted_as_detections": 0
+      },
+      "temporal": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 24,
+        "uncertain_predictions_not_counted_as_detections": 0
+      }
+    },
+    "classes": {
+      "greedy_iou": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 11,
+        "uncertain_predictions_not_counted_as_detections": 0
+      },
+      "temporal": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 11,
+        "uncertain_predictions_not_counted_as_detections": 40
+      }
+    },
+    "clean": {
+      "greedy_iou": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 24,
+        "uncertain_predictions_not_counted_as_detections": 0
+      },
+      "temporal": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 24,
+        "uncertain_predictions_not_counted_as_detections": 0
+      }
+    },
+    "crossing": {
+      "greedy_iou": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 2,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positives": 48,
+        "uncertain_predictions_not_counted_as_detections": 0
+      },
+      "temporal": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "fragmentations": 0,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 0.958333,
+        "true_positives": 46,
+        "uncertain_predictions_not_counted_as_detections": 2
+      }
+    },
+    "fast_uav": {
+      "greedy_iou": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "fragmentations": 2,
+        "id_switches": 20,
+        "precision": 1.0,
+        "recall": 0.875,
+        "true_positives": 21,
+        "uncertain_predictions_not_counted_as_detections": 0
+      },
+      "temporal": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "fragmentations": 2,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 0.875,
+        "true_positives": 21,
+        "uncertain_predictions_not_counted_as_detections": 3
+      }
+    },
+    "occlusion": {
+      "greedy_iou": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "fragmentations": 2,
+        "id_switches": 2,
+        "precision": 1.0,
+        "recall": 0.875,
+        "true_positives": 21,
+        "uncertain_predictions_not_counted_as_detections": 0
+      },
+      "temporal": {
+        "centre_rmse_normalized": 0.0,
+        "false_negatives": 3,
+        "false_positives": 0,
+        "fragmentations": 2,
+        "id_switches": 0,
+        "precision": 1.0,
+        "recall": 0.875,
+        "true_positives": 21,
+        "uncertain_predictions_not_counted_as_detections": 3
+      }
+    }
+  }
+}

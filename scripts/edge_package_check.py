@@ -82,6 +82,8 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
         for test_name in (
             "test_sensor_packets.py",
             "test_sensor_replay.py",
+            "test_sensor_cloud_replay_v2.py",
+            "test_sensor_cloud_inspect.py",
             "test_sensor_ros2.py",
             "test_sensor_registration.py",
             "test_sensor_raster_rectification.py",

@@ -13,6 +13,11 @@ Replay headers require `version: 1`, source ID, sequence, acquisition nanosecond
 
 Every `RecordedFrame.live_evidence` is false. The existing trusted live-clock/calibration admission is not bypassed. Acquisition time is recorded provenance, not a new host timestamp. A calibration digest names an artifact and does not prove its physical validity. Future semantic output must independently satisfy frozen v3 timing, registration, class/model and uncertainty requirements.
 
+The opt-in [recorded cloud v2 amendment](CLOUD-REPLAY-V2.md) permits variable cloud
+packet dimensions while retaining the v1 behavior above and all resource bounds.
+The [offline cloud inspector](CLOUD-INSPECTION.md) exports bounded selected raw
+samples only after full recording validation and an independently pinned digest.
+
 ## Installed Python example
 
 ```python
