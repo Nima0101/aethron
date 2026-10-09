@@ -7,26 +7,26 @@
   "output_sha256": "55aa5a8654fc7aa2e717971af4714e6829ead95c48097dd2def779a42e99ed9e",
   "results": {
     "python": {
-      "median_wall_ms": 2103.985292,
-      "median_cpu_ms": 1632.935,
+      "median_wall_ms": 6807.6095,
+      "median_cpu_ms": 1459.782,
       "wall_ms": [
-        2181.641875,
-        2103.985292,
-        1799.0445,
-        1877.11475,
-        3380.457209
+        6807.6095,
+        11307.955958,
+        9161.778417,
+        6755.34,
+        4557.896
       ],
       "python_traced_peak_bytes": null
     },
     "cpp20": {
-      "median_wall_ms": 106.287875,
-      "median_cpu_ms": 53.64,
+      "median_wall_ms": 234.546583,
+      "median_cpu_ms": 30.553,
       "wall_ms": [
-        176.173334,
-        68.699708,
-        128.978959,
-        106.287875,
-        92.392416
+        98.48125,
+        137.982041,
+        234.546583,
+        276.43225,
+        439.058667
       ],
       "python_traced_peak_bytes": null
     }
@@ -34,7 +34,7 @@
   "qualified": false,
   "installed": {
     "wheels": {
-      "aethron_raster_native-0.1.0-cp313-cp313-macosx_26_0_arm64.whl": "e1fc2540521b5d2934e826e73383fade1001e1bd7aeccc8a09ed8f9551b83b22",
+      "aethron_raster_native-0.1.0-cp313-cp313-macosx_26_0_arm64.whl": "467b2669b42aa9ec2b071d304f17907fbc275e902a2a47af686eb534cc3269ec",
       "aethron_edge-0.1.0-py3-none-any.whl": "3a5f15a2480750345cbec73f53b5a40abb754b3208b28490e7964b568124abcc"
     },
     "wheel_sources_exact": true,
@@ -47,8 +47,9 @@
     "aethron_raster_native/binding.cpp": "3f20360009cabf41873914a89c871b9eb4de42452b75c81b4b6cc9de682daca0",
     "aethron_raster_native/kernel.hpp": "2e5604ae5dffe5ebd86aa3e4ca1ceddb5debf7905dd733a974f8ba897e7dcee8",
     "pyproject.toml": "aefaee604dfd3bb4519af68fee5d387c1109695599577b6cd19c3fb9f7d3c3cc",
-    "setup.py": "4b7309bb1b58e0ddcf39f25a90c32b9a36c8c9eb958a19752723c281fd04ee2d",
+    "setup.py": "8ba662db0fbed092172090859ae1d208dcb193063a973c37bd37e14151fed3f8",
     "tests/benchmark.py": "ac4cf6b868af24ae8282b7230b4bb7f0a280130d688d58b90c51f0dd4c83de49",
+    "tests/check_header_rebuild.py": "2e51a7b518262e0e98f22a0faacf10e9a918beb79ec8637d238cf06d62a89794",
     "tests/kernel_test.cpp": "37be6b0849adbe23789d0ba0f45300dbec1f623755c2d858727088ade0702856",
     "tests/test_parity.py": "62a35e65e25c6acfa713427f3efa33932ef95ff11be017daa3e198b956556453"
   },
@@ -62,8 +63,15 @@
     "pixel_loop_heap_allocations": "none by source inspection; not an RSS measurement"
   },
   "limitations": [
-    "Local synthetic Mac measurement only; no latency threshold or physical qualification.",
-    "Current final-wheel memory trace not repeated; earlier preliminary-wheel trace retained locally.",
+    "Synthetic Mac measurement under variable host load; CPU and wall samples are diagnostic, no qualified latency threshold.",
+    "No final-wheel memory trace; fixed output buffer bounds are separate from RSS.",
     "Linux/Windows hosted parity pending; no ROS/OEM or live integration."
-  ]
+  ],
+  "header_rebuild": "PASS: deliberately broken changed header fails a cached extension rebuild",
+  "retained_negative_probes": [
+    "Original undeclared header dependency reproduced: changed broken header was ignored; fixed by declaring Extension.depends.",
+    "First clean-copy build probe timed out at 120 seconds; cached regression subsequently reproduced and passed after fix.",
+    "Separate -O2 compiler probe timed out at 45 seconds; cause unproven; -O3 build completed and flags remain unchanged."
+  ],
+  "supersedes": "Prior local wheel evidence did not establish incremental header rebuild correctness; this record binds the recompiled wheel."
 }

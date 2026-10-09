@@ -9,6 +9,7 @@ setup(
         Extension(
             "aethron_raster_native._kernel",
             ["aethron_raster_native/binding.cpp"],
+            depends=["aethron_raster_native/kernel.hpp"],
             language="c++",
             extra_compile_args=["/std:c++20", "/O2", "/fp:strict"]
             if sys.platform == "win32"

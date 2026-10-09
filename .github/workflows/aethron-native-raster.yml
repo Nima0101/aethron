@@ -34,6 +34,7 @@ jobs:
           python -m pip install --no-index --no-deps build/native-wheels/*.whl
       - name: Installed parity and bounded benchmark
         run: |
+          python integrations/native-raster/tests/check_header_rebuild.py
           python -I -m unittest discover -s integrations/native-raster/tests -v
           python -I integrations/native-raster/tests/benchmark.py > build/native-benchmark.json
       - name: Compile C++20 checks
