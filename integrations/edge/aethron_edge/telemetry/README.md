@@ -21,7 +21,42 @@ with UdpTelemetry(source, port=14560) as receiver:
     print(status.state, status.reason)
 ```
 
-An operator-owned local simulator/router must already provide exactly one allowed MAVLink 2 packet per UDP datagram. The socket binds only to `127.0.0.1`; direct serial, WAN, MAVLink 1, multi-packet datagrams and vendor dialects are not implemented. `PassiveTelemetry.ingest(bytes)` also supports explicit in-process wire replay. Poll repeatedly under the caller's supervisor, or configure the signed-only appliance integration described below. PX4/ArduPilot SITL and physical firmware tuples remain untested.
+An operator-owned local simulator/router must already provide exactly one allowed MAVLink 2 packet per UDP datagram for this original API. The socket binds only to `127.0.0.1`; direct serial, WAN, MAVLink 1 and vendor dialects are not implemented. Multi-packet datagrams require the opt-in v1 wrapper below. `PassiveTelemetry.ingest(bytes)` also supports explicit in-process wire replay. Poll repeatedly under the caller's supervisor, or configure the signed-only appliance integration described below. PX4/ArduPilot SITL and physical firmware tuples remain untested.
+
+### Opt-in multi-packet datagrams (v1)
+
+The separate `aethron_edge.telemetry.datagram_v1` API accepts bounded concatenated
+MAVLink 2 packets from an already configured local simulation/router feed:
+
+For Linux x86_64/CPython 3.13 with glibc>=2.28, install the optional wire SDK using
+`python -m pip install --only-binary=:all: --require-hashes -r integrations/edge/requirements-mavlink-linux-x86_64-py313.lock`.
+The core and edge packages must already be available as described above.
+
+```python
+from aethron_edge.telemetry.datagram_v1 import DatagramTelemetryV1, UdpTelemetryV1
+from aethron_edge.telemetry.mavlink import PassiveTelemetry
+
+decoder = PassiveTelemetry(system=1, component=1)
+with UdpTelemetryV1(DatagramTelemetryV1(decoder), port=14560) as receiver:
+    status = receiver.poll()
+```
+
+Pass an explicitly provisioned `SignedTelemetry` instead to retain signed-only
+authentication and persisted replay protection. The wrapper exclusively owns
+its decoder; do not share it with other readers. It checks complete framing
+before decoding, accepts at most 16 packets/4480 bytes, and stops on any rejected
+packet. Heartbeats, commands and other non-allowlisted messages still cause
+UNKNOWN; the caller must supply an already filtered feed. No stream requests or
+other packets are sent. No partial packets are retained across datagrams.
+
+Each framed batch replaces previous samples and has a 100 ms receipt deadline
+including decoding/journal time. Source timing, signing authority and replay
+checks remain in force. A later failure never rolls back committed signing
+counters. Socket queue age and physical capture freshness remain unknown.
+The original single-packet API and appliance worker are unchanged; this API is
+not automatically enabled by appliance configuration. Synthetic wire/loopback
+tests do not qualify a PX4/ArduPilot firmware tuple or actual SITL execution.
+See the [v1 contract and technology decision](../../../../docs/architecture/mavlink-datagram-v1.md).
 
 ## Contract and failure behavior
 
