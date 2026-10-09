@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "base_commit": "0ce84bf52bb53385aafdd5615c87254790f9fba2",
+  "source_binding": "candidate file SHA-256; no committed or hosted claim",
+  "files": {
+    ".github/workflows/aethron-fleet-policy.yml": "2420bd81258e1eafd4c8cffa33a3b93ef4811f246e0d9eb9a9fe32eac620b23e",
+    "docs/architecture/fleet-policy-v1.md": "16951e4aeefd0a59f282af7bc4d073c8f3f2efb85af306cad4323b8e59a88f98",
+    "integrations/edge/aethron_edge/runtime/fleet_policy.py": "ffa2ed3a06131020841a59b53acdaf72baf8614b477ab41ea9a0e5dc21955098",
+    "tests/integration/test_fleet_policy.py": "d39947b85b38b87d56dc2d82a9b3c62ca638d2c3899a822e05809e1f7bc20f9f"
+  },
+  "runtime": "CPython 3.13.5, Linux x86_64, OpenSSL 3.5.6",
+  "verification": {
+    "command": "PYTHONPATH=integrations/edge:build/fleet-linux-deps python3 -m unittest discover -s tests/integration -p test_fleet_policy.py -v",
+    "policy_tests_passed": 13,
+    "policy_tests_failed": 0,
+    "policy_and_health_tests_passed": 28,
+    "ruff_0_16_10_check": "PASS",
+    "ruff_format_check": "PASS",
+    "bandit_1_9_4_module_scan": "PASS, no findings",
+    "workflow_yaml_parse": "PASS",
+    "candidate_private_path_and_key_scan": "PASS"
+  },
+  "retained_negative_evidence": [
+    "RED: importing fleet_policy failed before implementation (ModuleNotFoundError).",
+    "First lint run flagged C408 in the test helper; fixed to a dict literal before final policy tests and lint."
+  ],
+  "not_run": [
+    "Hosted installed-wheel CI",
+    "Full repository matrix/fuzz/clean clone/packaging",
+    "Network fabric, live provisioning or rollout activation"
+  ],
+  "limits": "Local signed policy admission only. Caller supplies trusted UTC and a durable version floor. No TUF/Uptane compliance, hardware compatibility or deployment qualification claim.",
+  "commit_preparation": {
+    "parent_commit": "28528f4323e5b765cc0cc9e946f9814f86bbb8ba",
+    "policy_tests_passed": 13,
+    "policy_tests_failed": 0,
+    "ruff_lint_and_format": "PASS",
+    "bandit_runtime_module": "PASS",
+    "source_hashes_and_workflow_parse": "PASS",
+    "hosted_policy_ci": "not run"
+  }
+}
