@@ -53,3 +53,57 @@ flags false. No sample IDs, paths or label geometry are emitted. The original
 synthetic PGM fixtures exercise software only; related variants do not establish
 independent held-out accuracy. Existing frozen evaluation and runtime limits remain
 unchanged.
+
+For a comparison on the same held-out pixels, replace `evaluate` with `compare`
+in the command above; the required pins and split arguments are identical.
+`threshold.compare` loads and verifies once, then runs the fitted scalar, the
+unchanged local-contrast baseline and the unchanged fixed-127 global baseline,
+in that order. The 64-frame/1,048,576-pixel preflight bound applies to the whole
+selected snapshot, with three detector passes and no fitting.
+
+The comparison envelope is `pgm_threshold_comparison_v1`. Each contained metrics
+report uses schema v2 and includes `metrics_by_provenance`: sorted SHA-256 keys
+of complete canonical provenance declarations, using the existing
+`aethron.provenance.v1` domain separator. Only sources represented in the selected
+split appear. These linkable hashes are not anonymization or verified provenance.
+Per-source failures remain visible even when pooled metrics look better.
+The experiment report retains the candidate, training, preprocessing and search
+bindings, and says `training: pinned_train_threshold`; the two fixed reports
+retain `training: none`. The candidate model remains schema v1. Comparison never
+refits or mutates it, and existing `fit`, `evaluate` and fixed-baseline report
+formats remain unchanged.
+
+Export a portable bundle with explicit model-card and rights document pins:
+
+```sh
+python -m aethron.evaluation.threshold_bundle model.json \
+  --model-sha256 MODEL --manifest manifest.json --manifest-sha256 MANIFEST \
+  --protocol-sha256 PROTOCOL --blob-dir blobs --output-dir new-bundle \
+  --card model-card.json --card-sha256 CARD \
+  --rights rights.txt --rights-sha256 RIGHTS
+```
+
+The destination must be new, below a trusted parent. It contains `candidate.json`
+(the existing opaque candidate v1 descriptor), the exact `manifest.json`, and
+SHA-256-named `blobs/` containing all dataset references, model bytes,
+preprocessing/search specifications and supplied card/rights bytes. Thus the
+generic candidate verifier can check it offline without the original directory.
+No fitting or model execution occurs. Training annotations are not copied or
+attested; their digest remains in the model. Card/rights bytes are pinned opaque
+declarations, not approval of their content or permission to redistribute data.
+
+Metadata documents are nonempty and at most 2 MiB each; dataset blobs retain
+their 64 MiB bound. Copying holds one verified dataset blob at a time. The 256 MiB
+budget counts unique dataset reads plus distinct candidate/specification bytes,
+including candidate roles also referenced by the dataset. Destination verification
+then rereads those bounded files. `pins.json` is published without overwrite only
+after metadata readback, candidate verification and the extra search-specification
+check succeed. This completion marker is not a signature or power-loss durability
+guarantee. Failed exports retain incomplete output for inspection and never reuse
+or recursively delete an existing destination. All qualification and attestation
+flags remain false.
+
+Verified dataset loading and export currently require POSIX directory-descriptor
+and no-follow filesystem operations, as does the existing artifact verifier.
+Their integration tests inherit that platform requirement; this is not Windows
+filesystem qualification. No weaker filesystem fallback is used.

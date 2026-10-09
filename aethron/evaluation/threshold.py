@@ -6,11 +6,11 @@ import json
 import sys
 from fractions import Fraction
 
-from ..temporal.pixels import decode_pgm
+from ..temporal.pixels import decode_pgm, detect_pgm
 from .annotations import PROTOCOL_SHA256, count_matches
 from .annotations import validate as validate_annotations
-from .baselines import detect_threshold_pgm
-from .proposals import _metrics
+from .baselines import detect_global_pgm, detect_threshold_pgm
+from .proposals import _metrics, _provenance_digests, _report
 from .splits import _hash, _keys, _parse, _read_document, _require, load_split
 
 BASELINE = "experimental_pgm_threshold_v1"
@@ -205,10 +205,71 @@ def evaluate(
         raise ValueError("invalid_threshold_experiment") from None
 
 
+def compare(
+    candidate,
+    data,
+    blob_dir,
+    split,
+    *,
+    expected_candidate_sha256,
+    annotations,
+    expected_manifest_sha256,
+    expected_protocol_sha256,
+    expected_annotations_sha256,
+):
+    """Compare three detectors on one held-out snapshot, grouped by provenance."""
+    try:
+        _require(type(split) is str and split in ("validation", "test"))
+        model = _model(
+            candidate, expected_candidate_sha256, expected_manifest_sha256, expected_protocol_sha256
+        )
+        loaded, truth = _load(
+            data,
+            blob_dir,
+            split,
+            annotations,
+            expected_manifest_sha256,
+            expected_protocol_sha256,
+            expected_annotations_sha256,
+        )
+        provenance = _provenance_digests(data)
+        # No file rereads or parameter selection between detectors. Each sees
+        # only the same immutable, verified pixels; labels are used for scoring.
+        detectors = (
+            (BASELINE, lambda pixels: detect_threshold_pgm(pixels, model["threshold"])),
+            ("classical_pgm_obstacle_v1", detect_pgm),
+            ("global_pgm_obstacle_v1", detect_global_pgm),
+        )
+        reports = [
+            _report(loaded, truth, name, detector, expected_annotations_sha256, provenance)
+            for name, detector in detectors
+        ]
+        # Model schema v1 and metrics report schema v2 are separate. The generic
+        # fixed-detector report's no-training description must not label this fit.
+        reports[0].update({key: value for key, value in model.items() if key != "version"})
+        reports[0].update(
+            candidate_sha256=expected_candidate_sha256,
+            training="pinned_train_threshold",
+            training_verified=False,
+            signatures_verified=False,
+        )
+        return {
+            "version": 1,
+            "comparison": "pgm_threshold_comparison_v1",
+            "reports": reports,
+            "rights_verified": False,
+            "signatures_verified": False,
+            "training_verified": False,
+            "qualified": False,
+        }
+    except (ValueError, TypeError, OSError, OverflowError, RecursionError, NotImplementedError):
+        raise ValueError("invalid_threshold_experiment") from None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("fit", "evaluate"):
+    for name in ("fit", "evaluate", "compare"):
         command = commands.add_parser(name)
         command.add_argument("manifest")
         for option in (
@@ -219,7 +280,7 @@ def main():
             "annotations-sha256",
         ):
             command.add_argument("--" + option, required=True)
-        if name == "evaluate":
+        if name != "fit":
             for option in ("split", "candidate", "candidate-sha256"):
                 command.add_argument("--" + option, required=True)
     args = parser.parse_args()
@@ -234,8 +295,9 @@ def main():
         if args.command == "fit":
             output = fit(data, args.blob_dir, **common)
         else:
+            operation = compare if args.command == "compare" else evaluate
             output = _encode(
-                evaluate(
+                operation(
                     _read_document(args.candidate),
                     data,
                     args.blob_dir,

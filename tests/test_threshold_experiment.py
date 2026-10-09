@@ -11,6 +11,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+import test_dataset_artifacts as artifact_fixtures
+
 from aethron.evaluation import synthetic
 from aethron.evaluation.annotations import PROTOCOL_SHA256
 
@@ -23,6 +25,9 @@ def encode(doc):
     return (json.dumps(doc, sort_keys=True, separators=(",", ":")) + "\n").encode()
 
 
+@unittest.skipIf(
+    getattr(artifact_fixtures.DatasetArtifacts, "__unittest_skip__", False), "POSIX required"
+)
 class ThresholdExperiment(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()

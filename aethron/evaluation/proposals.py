@@ -26,6 +26,19 @@ def _metrics(tp, fp, fn):
     }
 
 
+def _provenance_digests(data):
+    """Hash complete declarations from already validated, pinned manifest bytes."""
+    return {
+        row["id"]: hashlib.sha256(
+            b"aethron.provenance.v1\0"
+            + json.dumps(row, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode(
+                "ascii"
+            )
+        ).hexdigest()
+        for row in _parse(data)["provenance"]
+    }
+
+
 def run(
     data,
     blob_dir,
@@ -74,15 +87,7 @@ def run(
     provenance_digests = None
     if per_provenance:
         # Parse the same pinned bytes; load_split already enforced the 128-source bound.
-        provenance_digests = {
-            row["id"]: hashlib.sha256(
-                b"aethron.provenance.v1\0"
-                + json.dumps(row, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode(
-                    "ascii"
-                )
-            ).hexdigest()
-            for row in _parse(data)["provenance"]
-        }
+        provenance_digests = _provenance_digests(data)
     names = tuple(detectors) if baseline == "all" else (baseline,)
     reports = [
         _report(
