@@ -164,3 +164,21 @@ result contract and uses the unchanged Python validation boundary. Installation
 never switches the default path; fisheye, live/ROS admission and signed provenance
 remain separate. Its exact-build synthetic measurements and limitations are in
 [the native evidence](../../../integrations/native-raster/evidence/macos-arm64.json).
+
+### Registration binding validation correction (2026-10-09)
+
+`Registration` now reconstructs and validates the supplied rig, including its
+nested camera, before issuing a process-local binding. Pydantic's
+[`model_copy` and `model_construct`](https://docs.pydantic.dev/latest/api/base_model/)
+can bypass validation even for frozen models. Previously a Python caller could
+bind negative error bounds, an improper rotation or an invalid camera that the
+JSON loader would reject. The constructor now returns only `invalid_calibration`
+for those inputs, without serialization warnings or private input details.
+
+The existing strict schema is the validation authority. Rebuilding from field
+data is necessary because accepting an existing model instance does not ensure
+nested field validation. This bounded rig contains one camera and a fixed-size
+transform; validation runs once per binding, outside the per-point path. No new
+dependency, schema, threshold, calibration authority or hardware claim is added.
+The focused Linux checks and retained environment failure are recorded in
+[binding-validation evidence](evidence/phase2/registration-binding-validation.json).
