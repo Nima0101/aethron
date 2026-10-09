@@ -4,3 +4,5 @@ recursive-include scripts *.py *.html
 recursive-include examples *.json *.jsonl
 recursive-include tests *.py
 recursive-include .github *.yml *.md
+include requirements-native.lock
+recursive-include aethron *.pxd

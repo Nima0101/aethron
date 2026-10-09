@@ -1,0 +1,191 @@
+{
+  "qualified": false,
+  "compiled": true,
+  "python": "3.13.15",
+  "os": "Darwin",
+  "machine": "arm64",
+  "results": {
+    "python_loop": {
+      "guard": {
+        "normal_v3": {
+          "cpu_median_us": 236.2,
+          "wall_median_us": 1957.0125,
+          "python_traced_peak_bytes": 48
+        },
+        "padded_v3": {
+          "cpu_median_us": 14819.05,
+          "wall_median_us": 54206.445799999994,
+          "python_traced_peak_bytes": 48
+        },
+        "dense_structural": {
+          "cpu_median_us": 7833.15,
+          "wall_median_us": 15049.1729,
+          "python_traced_peak_bytes": 48
+        },
+        "escaped_string": {
+          "cpu_median_us": 4136.5,
+          "wall_median_us": 11294.86665,
+          "python_traced_peak_bytes": 48
+        }
+      },
+      "full_parser": {
+        "normal_v3": {
+          "cpu_median_us": 218.2,
+          "wall_median_us": 672.25415,
+          "python_traced_peak_bytes": 6250
+        },
+        "padded_v3": {
+          "cpu_median_us": 15445.75,
+          "wall_median_us": 104608.30625,
+          "python_traced_peak_bytes": 70750
+        }
+      },
+      "replay_24_frames": {
+        "cpu_median_us": 20232.333333333332,
+        "wall_median_us": 75315.04166666667,
+        "python_traced_peak_bytes": 68384
+      },
+      "replay_sha256": "8d53fcc2512ee91455a99f9ba8bf58fe575d7f5c84190cd15713acc4de0f2b29"
+    },
+    "regex_tokens": {
+      "guard": {
+        "normal_v3": {
+          "cpu_median_us": 207.95,
+          "wall_median_us": 1071.2292,
+          "python_traced_peak_bytes": 1817
+        },
+        "padded_v3": {
+          "cpu_median_us": 669.1,
+          "wall_median_us": 1561.1103999999998,
+          "python_traced_peak_bytes": 1817
+        },
+        "dense_structural": {
+          "cpu_median_us": 49876.0,
+          "wall_median_us": 292229.9875,
+          "python_traced_peak_bytes": 1817
+        },
+        "escaped_string": {
+          "cpu_median_us": 48027.45,
+          "wall_median_us": 129265.8125,
+          "python_traced_peak_bytes": 1849
+        }
+      },
+      "full_parser": {
+        "normal_v3": {
+          "cpu_median_us": 236.15,
+          "wall_median_us": 446.1917,
+          "python_traced_peak_bytes": 6135
+        },
+        "padded_v3": {
+          "cpu_median_us": 1449.6,
+          "wall_median_us": 1952.61875,
+          "python_traced_peak_bytes": 70692
+        }
+      },
+      "replay_24_frames": {
+        "cpu_median_us": 20647.666666666668,
+        "wall_median_us": 26323.09733333333,
+        "python_traced_peak_bytes": 68716
+      },
+      "replay_sha256": "8d53fcc2512ee91455a99f9ba8bf58fe575d7f5c84190cd15713acc4de0f2b29"
+    },
+    "installed": {
+      "guard": {
+        "normal_v3": {
+          "cpu_median_us": 2.4,
+          "wall_median_us": 20.30625,
+          "python_traced_peak_bytes": 0
+        },
+        "padded_v3": {
+          "cpu_median_us": 90.85,
+          "wall_median_us": 125.2875,
+          "python_traced_peak_bytes": 0
+        },
+        "dense_structural": {
+          "cpu_median_us": 119.7,
+          "wall_median_us": 337.5646,
+          "python_traced_peak_bytes": 0
+        },
+        "escaped_string": {
+          "cpu_median_us": 112.5,
+          "wall_median_us": 191.86665,
+          "python_traced_peak_bytes": 0
+        }
+      },
+      "full_parser": {
+        "normal_v3": {
+          "cpu_median_us": 86.7,
+          "wall_median_us": 86.78955,
+          "python_traced_peak_bytes": 6135
+        },
+        "padded_v3": {
+          "cpu_median_us": 749.7,
+          "wall_median_us": 750.60835,
+          "python_traced_peak_bytes": 70692
+        }
+      },
+      "replay_24_frames": {
+        "cpu_median_us": 17870.666666666668,
+        "wall_median_us": 40114.125,
+        "python_traced_peak_bytes": 69705
+      },
+      "replay_sha256": "8d53fcc2512ee91455a99f9ba8bf58fe575d7f5c84190cd15713acc4de0f2b29"
+    }
+  },
+  "workload_sha256": {
+    "normal_v3": "3e4332596732c9cb134b6a48d4e44bd4cbc91bd1d04f24bf2867364321535e71",
+    "padded_v3": "c3e22844ae0965b9d2022f2b107e60df78f01ea5bd35adf7938f08a2a6613d9f",
+    "dense_structural": "2c22bc98d50e9061b42676820b6ec2a84b911be683fe3b3701510f85b49cdc32",
+    "escaped_string": "c91e585e33d4b8dc3b026017c9252aa57a709c2bcd89ede8ff0f9250ae2ebacc"
+  },
+  "source_sha256": {
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "aethron/_json_bounds.pxd": "8dffab8da8b2707aac0ee0a2211ec6255641090170c9037bbc0afef8c5589363",
+    "aethron/schema.py": "ca54580ad52105c9592bb28133f36c160d34ddb0004e07d6b61c5f8085d21c60",
+    "setup.py": "3225e55c87758412823021749c2f4219103b77cf2de8ab7ee18199551bd02071",
+    "pyproject.toml": "1e4af4e6394b22c259f3fa17a5a9b7669691c3ceb9f04e6608eb48d7e3be0658",
+    "MANIFEST.in": "defb15cf6a074ccb61250a3bd5e4af1c9971a54240ea747dbd14061d08236a06",
+    "requirements-native.lock": "d1546c8cf63fa4b14d3bfdd2963d7bbcdbf02576bf07fb605161d83ebfc41d71",
+    "tests/test_json_bounds.py": "aea6efd23dddc3e633855b8b49364ac3afa3f1251c665b5516f46c8928308822",
+    "scripts/json_bounds_compare.py": "b4a8ff853e8b89f6bd90d8df35b7c84b1fd964996e2798c774ea441fd3212ffe",
+    ".github/workflows/aethron-native-bounds.yml": "0a18ce94bb7ed59f73a60e95f51580bb0363ce630250f5a289549c64ccb4140c"
+  },
+  "decision": "Choose Cython 3.3.0 compilation of the single-source pre-allocation byte guard for explicit native wheels: lower CPU on all scanned workloads and installed parser/replay parity; retain portable wheels where native artifacts are not qualified. P1.1 qualification and P1.2-P1.7 audit remain pending.",
+  "source_parent": "6f092c140a087d8dc80b55156d7f0f339b2b5d6e",
+  "checks": {
+    "red": "missing _json_bounds import",
+    "portable_core_tests": 53,
+    "compiled_probe_tests": 5,
+    "installed_core_edge_tests": 59,
+    "structural_sequences": 19608,
+    "seeded_byte_sequences": 2000,
+    "installed": {
+      "core_wheel_sha256": "82a1d5472a3431131424ed9e28689fa53d4eb09e8ba9de24f177c31c35c8ddf7",
+      "edge_wheel_sha256": "7d8d6beb1a71aaac4765bef1a405e7ed2cbbb60b31b8d92a7cace8e7e1a49c80",
+      "source_bytes_match": true,
+      "outside_checkout": true,
+      "compiler_imported_at_runtime": false,
+      "temporary_consumer_removed": true
+    },
+    "portable": {
+      "wheel_sha256": "daeacafc7e70f20bbd0b446f448203b67b0b12ee56e6b3afca6b248d031c9a93",
+      "pure": true,
+      "source_match": true
+    },
+    "lint_format_bandit_yaml": "pass",
+    "hosted_native_and_sanitizers": "pending"
+  },
+  "limitations": [
+    "Three timing batches on a shared, variably loaded Mac; no hard latency or field claim.",
+    "Traced peaks are Python allocations, not RSS or a total native memory bound.",
+    "Native ABI/platform wheels require qualification; no automatic live appliance replacement.",
+    "Full parser fuzz/reproduction/clean-clone/release qualification remains pending.",
+    "First prototype compile was started before isolated compiler installation completed and failed with ModuleNotFoundError; rerun after installation succeeded."
+  ],
+  "research": [
+    "https://cython.readthedocs.io/en/latest/src/tutorial/pure.html#magic-attributes-within-the-pxd",
+    "https://docs.python.org/3/library/re.html#re.finditer",
+    "https://serde.rs/deserialize-map.html",
+    "https://pypi.org/project/Cython/3.3.0/"
+  ]
+}

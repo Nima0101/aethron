@@ -22,6 +22,7 @@ aethron = "aethron.__main__:main"
 include = ["aethron*"]
 
 [tool.setuptools.package-data]
+"aethron" = ["_json_bounds.pxd"]
 "aethron.models" = ["*.json"]
 
 [tool.ruff]
