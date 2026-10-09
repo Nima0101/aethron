@@ -18,10 +18,11 @@ class DecoderDisconnect(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "one-frame.avi"
-            writer = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"MJPG"), 20, (64, 48))
+            # Exact RGB bytes require a lossless fixture; MJPEG rounds colors.
+            writer = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"FFV1"), 20, (64, 48))
             self.assertTrue(writer.isOpened())
             try:
-                writer.write(np.full((48, 64, 3), 120, dtype=np.uint8))
+                writer.write(np.full((48, 64, 3), (17, 83, 211), dtype=np.uint8))
             finally:
                 writer.release()
             source = CaptureSource()
@@ -55,7 +56,7 @@ class DecoderDisconnect(unittest.TestCase):
                                     break
                             time.sleep(0.005)
                         frame = source.read(time.monotonic_ns() + 100_000_000)
-                        self.assertEqual(frame.pixels, bytes([120]) * (64 * 48 * 3))
+                        self.assertEqual(frame.pixels, bytes([211, 83, 17]) * (64 * 48))
                         self.assertEqual(frame.evidence, "recorded")
                         worker.join(timeout=1)
                         self.assertFalse(worker.is_alive())

@@ -79,13 +79,14 @@ class FileDecoderProtocols(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "fixture.avi"
-            writer = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"MJPG"), 20, (64, 48))
+            # Exact RGB bytes require a lossless fixture; MJPEG rounds colors.
+            writer = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"FFV1"), 20, (64, 48))
             self.assertTrue(writer.isOpened())
-            writer.write(np.full((48, 64, 3), 120, dtype=np.uint8))
+            writer.write(np.full((48, 64, 3), (17, 83, 211), dtype=np.uint8))
             writer.release()
             with patch.dict(
                 os.environ, {"OPENCV_FFMPEG_CAPTURE_OPTIONS": "protocol_whitelist;http,tcp"}
             ):
                 metadata, slot = self.decode(str(path))
             self.assertEqual(metadata[:3], [1, 64, 48])
-            self.assertEqual(bytes(slot[: 64 * 48 * 3]), bytes([120]) * (64 * 48 * 3))
+            self.assertEqual(bytes(slot[: 64 * 48 * 3]), bytes([211, 83, 17]) * (64 * 48))
