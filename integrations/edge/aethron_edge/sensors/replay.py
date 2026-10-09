@@ -13,13 +13,22 @@ from typing import BinaryIO, Literal
 
 from pydantic import Field, model_validator
 
-from .packets import Closed, Cloud, CloudLayout, ImageLayout, Raster, decode_cloud, decode_image
+from .packets import (
+    Closed,
+    Cloud,
+    CloudLayout,
+    ImageLayout,
+    Raster,
+    decode_cloud,
+    decode_image,
+    layout_digest,
+)
 
 MAX_HEADER = 16384
 
 
 class Header(Closed):
-    version: int = Field(ge=1, le=1)
+    version: int = Field(ge=1, le=2)
     source_id: str = Field(pattern=r"^[a-zA-Z0-9_-]{1,64}$")
     sequence: int = Field(ge=0, le=2**63 - 1)
     acquisition_ns: int = Field(ge=0, le=2**63 - 1)
@@ -33,6 +42,8 @@ class Header(Closed):
 
     @model_validator(mode="after")
     def modality_matches(self):
+        if self.version == 2 and not isinstance(self.layout, CloudLayout):
+            raise ValueError("v2_requires_cloud")
         if isinstance(self.layout, ImageLayout):
             valid = self.modality == self.layout.modality
         else:
@@ -94,11 +105,16 @@ def read_frames(stream: BinaryIO):
         except (UnicodeError, RecursionError) as exc:
             raise ValueError("invalid_header") from exc
         if previous is not None and (
-            header.source_id != previous.source_id
+            header.version != previous.version
+            or header.source_id != previous.source_id
             or header.modality != previous.modality
             or header.coordinate_frame != previous.coordinate_frame
             or header.calibration_sha256 != previous.calibration_sha256
-            or header.layout != previous.layout
+            or (
+                layout_digest(header.layout) != layout_digest(previous.layout)
+                if header.version == 2
+                else header.layout != previous.layout
+            )
             or header.sequence <= previous.sequence
             or header.acquisition_ns < previous.acquisition_ns
         ):
