@@ -45,3 +45,8 @@ Inherited `OPENCV_FFMPEG_CAPTURE_OPTIONS` cannot enable network protocols for th
 isolated decoder. Network cameras use the explicit `rtsp` source. This is a
 protocol boundary, not an operating-system filesystem sandbox: a mounted network
 filesystem remains subject to appliance provisioning policy.
+
+A failed native read from a live source invalidates its unread frame and reports
+`source_lost` without waiting for a consumer. Recorded playback preserves its
+final unread frame before EOF. Neither behavior qualifies physical capture timing
+or makes an untrusted live clock fresh evidence.

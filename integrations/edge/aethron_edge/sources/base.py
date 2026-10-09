@@ -101,7 +101,13 @@ def _decode(config, slot, metadata, lock, stop):
         while not stop.is_set():
             okay, pixels = cap.read()
             if not okay:
-                # Keep the final unread frame available before publishing EOF.
+                if config.driver != "file":
+                    # Live loss invalidates queued pixels immediately. Only
+                    # recorded playback may drain a final frame after EOF.
+                    with lock:
+                        metadata[0] = -1
+                    return
+                # Keep the final recorded frame available before publishing EOF.
                 while not stop.wait(0.01):
                     with lock:
                         if metadata[0] == 0:
