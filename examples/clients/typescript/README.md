@@ -24,6 +24,28 @@ await observe('http://127.0.0.1:8765', token, 'bench', state => {
 
 The named profile uses the `warn` contract in this example. Python's example accepts the other contract names explicitly; application SDKs should preserve the schema enum. `observe()` releases its viewer handle when aborted; the supervisor continues processing. An independent 20ms client timer expires stalled observations. Without a measured transit bound, current state remains UNKNOWN and observations are labeled delayed.
 
+`Observation.accept()` snapshots and validates its input. Mutating that input or a
+returned covariance array cannot change later observations. Explicit local clock
+arguments must be finite, nonnegative milliseconds; fractions are supported.
+Invalid receipt clocks clear the observation and throw `invalid_clock`. Invalid
+or backwards render clocks clear it and return expired/UNKNOWN. A new acceptance
+starts a new local lease; it does not establish transport freshness.
+
+Teardown attempts authenticated session deletion even if the final display
+callback throws or aborts the caller's signal. Deletion uses its own two-second
+timeout and remains best effort when the server cannot be reached.
+
+The display callback is synchronous. If it throws from the watchdog timer,
+`observe()` clears its observation, aborts the event request, and rejects with
+that error after attempting cleanup. It does not call the failed callback again
+or abort the caller's controller.
+
+The stream accepts only schema-valid scene, health, and gap events for the
+session it opened, with strictly increasing sequence numbers. Invalid events
+clear the observation and reject with `invalid_event`; health/gap events clear
+the view without resetting the sequence check. These checks do not prove transit
+freshness, so current state remains UNKNOWN.
+
 The implementation uses authenticated fetch streaming rather than EventSource token URLs. The candidate server rejects Origin headers and cross-origin access; the executed evidence is Node on loopback. Browser deployment needs a separately reviewed same-origin/authenticated TLS integration, and is not claimed from the Node test. No CDN is required.
 
 From the repository root, `scripts/edge_node_e2e.py` installs the packed artifact outside this package and tests it against a real server. The server and Python client instructions are in [edge usage](../../../docs/usage-edge.md).

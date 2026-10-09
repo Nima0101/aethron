@@ -1,30 +1,41 @@
 import {Ajv2020} from 'ajv/dist/2020.js';
 import schema from './scene.schema.json' with {type: 'json'};
-import type {SceneEnvelope} from './types.js';
+import type {HealthEvent, SceneEnvelope} from './types.js';
 
-const validate = new Ajv2020({strict: true}).compile(schema);
+const validator = new Ajv2020({strict: true});
+const validate = validator.compile(schema);
+const validateHealth = validator.compile({...schema, $ref: '#/$defs/HealthEvent'});
 
 export class Observation {
   private scene: SceneEnvelope | null = null;
   private received = 0;
+  private lastViewed = 0;
 
   accept(value: unknown, now = performance.now()): void {
     this.disconnect();
-    if (!validate(value)) throw new Error('invalid_event');
-    this.scene = value as SceneEnvelope;
+    if (!Number.isFinite(now) || now < 0) throw new Error('invalid_clock');
+    // Validate an owned snapshot: callers must not mutate an admitted lease.
+    let snapshot: unknown;
+    try { snapshot = structuredClone(value); }
+    catch { throw new Error('invalid_event'); }
+    if (!validate(snapshot)) throw new Error('invalid_event');
+    this.scene = snapshot as SceneEnvelope;
     this.received = now;
+    this.lastViewed = now;
   }
 
   disconnect(): void { this.scene = null; }
 
   view(now = performance.now()) {
-    if (!this.scene || now < this.received || now - this.received > this.scene.clock.valid_for_ms) {
+    if (!this.scene || !Number.isFinite(now) || now < 0 || now < this.lastViewed ||
+        now - this.received > this.scene.clock.valid_for_ms) {
       this.disconnect();
       return {label: 'expired', current_state: 'UNKNOWN', observed_state: 'UNKNOWN', sources: [], uncertainty: []};
     }
+    this.lastViewed = now;
     return {label: 'delayed_observation', current_state: 'UNKNOWN', observed_state: this.scene.result.state,
       sources: [...new Set(this.scene.result.tracks.flatMap(t => t.sources))],
-      uncertainty: this.scene.result.tracks.map(t => t.covariance)};
+      uncertainty: this.scene.result.tracks.map(t => [...t.covariance])};
   }
 }
 
@@ -38,14 +49,26 @@ export async function observe(base: string, token: string, profile: string,
   const handle: unknown = (await request.json()).session;
   if (typeof handle !== 'string' || !/^[a-f0-9]{32}$/.test(handle)) throw new Error('invalid_session');
   const value = new Observation();
+  const stop = new AbortController();
+  const eventSignal = AbortSignal.any([signal, stop.signal]);
+  let renderFailed = false;
+  let renderError: unknown;
   // Independent render-time expiry, including a stalled response with no next frame.
-  const timer = setInterval(() => display(value.view()), 20);
+  const timer = setInterval(() => {
+    if (renderFailed) return;
+    try { display(value.view()); }
+    catch (error) {
+      renderFailed = true; renderError = error;
+      value.disconnect(); stop.abort();
+    }
+  }, 20);
   try {
-    const response = await fetch(`${base}/api/v1/sessions/${handle}/events`, {headers, signal});
+    const response = await fetch(`${base}/api/v1/sessions/${handle}/events`, {headers, signal: eventSignal});
     if (!response.ok || !response.body) throw new Error('stream_unavailable');
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8', {fatal: true});
     let pending = '';
+    let lastSequence = -1;
     try {
       while (true) {
         const chunk = await reader.read();
@@ -58,14 +81,28 @@ export async function observe(base: string, token: string, profile: string,
           const data = event.split('\n').find(line => line.startsWith('data: '));
           if (!data) throw new Error('invalid_event');
           const message: unknown = JSON.parse(data.slice(6));
-          if ((message as {kind?: string})?.kind === 'scene') value.accept(message);
+          const incoming = message as SceneEnvelope | HealthEvent;
+          if ((!validate(message) && !validateHealth(message)) ||
+              incoming.session !== handle || incoming.sequence <= lastSequence) {
+            value.disconnect();
+            throw new Error('invalid_event');
+          }
+          lastSequence = incoming.sequence;
+          if (incoming.kind === 'scene') value.accept(incoming);
           else value.disconnect();
           display(value.view());
         }
       }
     } finally { await reader.cancel(); }
+    if (renderFailed) throw renderError;
+  } catch (error) {
+    // Surface the renderer failure through the observer promise, not the timer.
+    throw renderFailed ? renderError : error;
   } finally {
-    clearInterval(timer); value.disconnect(); display(value.view());
-    await fetch(`${base}/api/v1/sessions/${handle}`, {method: 'DELETE', headers, signal: AbortSignal.timeout(2000)}).catch(() => {});
+    clearInterval(timer); stop.abort(); value.disconnect();
+    try { if (!renderFailed) display(value.view()); }
+    finally {
+      await fetch(`${base}/api/v1/sessions/${handle}`, {method: 'DELETE', headers, signal: AbortSignal.timeout(2000)}).catch(() => {});
+    }
   }
 }
