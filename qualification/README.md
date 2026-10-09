@@ -40,6 +40,21 @@ positive report. Workflow presence does not establish a hosted pass.
 The [verification record](evidence/verification-v1.md) preserves local results
 and the original negative cases without making physical qualification claims.
 
+For caller-supplied evidence bytes, use the separate
+[artifact byte-binding API](artifacts-v1.md):
+
+```python
+from qualification.artifacts import verify
+
+report = verify(manifest_bytes, {artifact_sha256: artifact_bytes}, now_ms=1050)
+```
+
+The caller supplies every distinct referenced artifact. Matching hashes can
+establish byte binding while calibration remains expired; inspect both
+`artifact_bytes_verified` and `software_checks_passed`. Authentication and
+physical qualification remain false. This bounded API opens no files/devices
+and does not reinterpret the original declaration CLI's exit or report fields.
+
 ## Technology decision and execution plan
 
 Requirements: portable offline execution, bounded untrusted JSON, duplicate-key
