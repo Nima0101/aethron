@@ -15,6 +15,32 @@ import test_sensor_intensity_replay as fixtures
 
 
 class IntensityInspection(unittest.TestCase):
+    def test_offline_inspection_does_not_load_live_provider_or_provisioning(self):
+        import aethron_edge
+
+        env = dict(os.environ, PYTHONPATH=str(Path(aethron_edge.__file__).parent.parent))
+        command = [
+            sys.executable,
+            *(["-I"] if sys.flags.isolated else []),
+            "-c",
+            "import json, sys; import aethron_edge.sensors.intensity_inspect; "
+            "print(json.dumps([n for n in sys.modules if n.startswith("
+            "('aethron_edge.sensors.provider', 'aethron_edge.sensors.provisioning', "
+            "'aethron_edge.runtime'))]))",
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            result = subprocess.run(
+                command,
+                cwd=directory,
+                env=env,
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=False,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout), [])
+
     def test_recording_pin_binds_complete_file_before_any_output(self):
         import aethron_edge
 

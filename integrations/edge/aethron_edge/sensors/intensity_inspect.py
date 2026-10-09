@@ -8,7 +8,7 @@ from pathlib import Path
 
 from ..config import strict_json
 from .intensity_replay import IntensityCalibration, rectify_recorded_intensity
-from .provisioning import MAX_RECORDING_BYTES, recording_frames, regular_file
+from .recording_io import MAX_RECORDING_BYTES, recording_frames, regular_file
 
 
 class _Parser(argparse.ArgumentParser):
