@@ -47,6 +47,8 @@ For a separate evaluation corpus, the [candidate test-separation gate v1](usage-
 
 The optional [structured candidate-card gate v1](usage-candidate-cards-v1.md) requires bounded source, origin, license, intended/forbidden-use, reproducibility and limitation declarations, and matches their artifact/protocol/rights bindings to the candidate. It validates structure only; rights and qualification remain unverified.
 
+The optional [rights-review declaration assessment v1](usage-candidate-rights-v1.md) checks pinned review metadata, operation scope, trusted time inputs and supplied revocations. Its positive result describes an active declaration only; it never grants legal rights, dataset permission or model qualification.
+
 ## Bounded candidate fuzzing
 
 Run `python scripts/dataset_fuzz.py --candidates --cases 300 --seconds 5` with AETHRON available. This separate v3 fuzz report exercises rebound descriptor mutations, wrong candidate pins and tampered opaque artifacts through the real verifier. Every fifth artifact round uses a sparse 64 MiB + 1 byte file to exercise the blob-size rejection without writing that much data. The case-stream marker identifies this sparse-size operation; it is not the oversized file's content digest. Owned fixtures and mutations are restored/removed after the run. Reports contain counts, digests and fixed failure reasons, never payloads or paths. The existing cooperative time/case budgets and source binding apply; setup/cleanup are outside the timed interval. `--candidates` and `--reports` are mutually exclusive; earlier default/report streams are unchanged. This is development coverage, not full fuzz qualification.
