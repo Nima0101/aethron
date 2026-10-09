@@ -1,0 +1,80 @@
+{
+  "qualified": false,
+  "python": "3.13.15",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "native_installed": true,
+  "cases": 124,
+  "trace_sha256": {
+    "python_reference": "f7ead955d6d3a51d0cea4679d6c8e02fc509b9a15cbade48f3760ed34a05810a",
+    "installed": "f7ead955d6d3a51d0cea4679d6c8e02fc509b9a15cbade48f3760ed34a05810a"
+  },
+  "cpu_ns_per_call": {
+    "python_reference": [
+      3963.467741935484,
+      3984.6774193548385,
+      3904.7580645161293,
+      4223.629032258064,
+      3234.2741935483873
+    ],
+    "installed": [
+      2440.483870967742,
+      2367.0967741935483,
+      2334.9193548387098,
+      1765.8870967741937,
+      2442.983870967742
+    ]
+  },
+  "median_cpu_ns_per_call": {
+    "python_reference": 3963.467741935484,
+    "installed": 2367.0967741935483
+  },
+  "source_sha256": {
+    "integrations/edge/aethron_edge/timebase.py": "b43b6c3cb2d115efe6c2f592f20cbd0e121258468c3bbe7ffafb1d3998781013",
+    "integrations/edge/setup.py": "08ae0300bbd10bd682784808856bf8607fc52febce17b430d9e66c0c1677a3e5",
+    "scripts/edge_capture_clock_profile.py": "30f65a5d6e9b538ee7e81171cdeda44ee1ef283b453e7bfacf508beddb404a03",
+    "tests/integration/test_capture_clock_state.py": "f8201bcca2f17133310d413847644da1d295cbb7dfe7ae13ed3ec8235e026e87",
+    ".github/workflows/aethron-edge-contracts.yml": "8b8b93ff689fe756706af31629ab48ad086affaf0303a93582d7b50289ba7e6d"
+  },
+  "scope": "P1.3 stateful CaptureClock admission and optional native wheel; live capture integration/backend/inference remain unreviewed",
+  "technology_decision": "Provide an opt-in Cython 3.3.0 native wheel of the identical clock source: installed state/contract parity passes and CPU median improves; preserve arbitrary-precision semantics and a portable reference without a second handwritten FFI state machine.",
+  "research": [
+    "https://cython.readthedocs.io/en/latest/src/userguide/source_files_and_compilation.html",
+    "https://docs.cython.org/en/latest/src/tutorial/pure.html",
+    "https://docs.python.org/3/library/time.html#time.monotonic_ns",
+    "https://pyo3.rs/main/class.html"
+  ],
+  "alternatives": "Compared interpreted Python with compiled same-source Cython for the whole stateful mapper. Earlier Rust/ctypes scalar evidence p13-clock-scalars.json was slower at that FFI boundary; this does not rule out a future whole Rust service. A handwritten native state representation needs separate parity/ABI maintenance that this source-preserving build avoids.",
+  "checks": {
+    "red": "3 state-regression failures; requiring native on a portable import also fails",
+    "source": "20 PASS",
+    "offline_portable_installed": "20 PASS",
+    "offline_native_installed": "20 PASS; native import required; 124-case full state/output trace matches packaged Python",
+    "ruff_format_bandit_diff": "PASS",
+    "hosted": "Pending: six portable and six native OS/Python configurations plus ASan/UBSan job; candidate/core/security workflows remain required"
+  },
+  "installed": {
+    "portable": {
+      "core_wheel_sha256": "daeacafc7e70f20bbd0b446f448203b67b0b12ee56e6b3afca6b248d031c9a93",
+      "edge_wheel_sha256": "c40345b9eabe56e0fc71e666db9d0086b42c3d46aaa58bf284344367d61806c6",
+      "source_bytes_match": true,
+      "outside_checkout": true,
+      "offline_install": true,
+      "temporary_consumer_removed": true
+    },
+    "native": {
+      "core_wheel_sha256": "daeacafc7e70f20bbd0b446f448203b67b0b12ee56e6b3afca6b248d031c9a93",
+      "edge_wheel_sha256": "a396dd4d4ed0ad3e091d9e02d473b32a00b6a05514c908b00f5b73750629bf63",
+      "source_bytes_match": true,
+      "outside_checkout": true,
+      "offline_install": true,
+      "temporary_consumer_removed": true
+    }
+  },
+  "limitations": [
+    "CPU diagnostics on a shared Mac are not hard-real-time or end-to-end capture qualification; no memory reduction claim.",
+    "The initial healthy-only prototype timing did not show a win; corrected-source mixed-state and installed comparisons did. Samples are retained; no latency threshold changed.",
+    "CaptureClock has no active capture pipeline caller; live generic sources still emit clock_untrusted. This slice does not establish physical exposure trust.",
+    "No clock age, skew, uncertainty, licence, privacy or actuation contract is weakened. Rejected input can no longer lower sequence/capture high-water marks.",
+    "Cross-platform and sanitizer qualification must complete at the delivery head before merge."
+  ]
+}

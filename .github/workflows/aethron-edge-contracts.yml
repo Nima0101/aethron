@@ -8,6 +8,9 @@ on:
       - 'integrations/edge/aethron_edge/openapi.py'
       - 'integrations/edge/aethron_edge/pipeline.py'
       - 'integrations/edge/aethron_edge/timebase.py'
+      - 'integrations/edge/setup.py'
+      - 'integrations/edge/pyproject.toml'
+      - 'requirements-native.lock'
       - 'integrations/edge/aethron_edge/calibration.py'
       - 'integrations/edge/aethron_edge/sources/**'
       - 'integrations/edge/requirements-server.lock'
@@ -17,6 +20,7 @@ on:
       - 'tests/integration/test_openapi.py'
       - 'tests/integration/test_worker_replay_input.py'
       - 'tests/integration/test_clock_pipeline.py'
+      - 'tests/integration/test_capture_clock_state.py'
       - 'tests/integration/test_builder_clock_admission.py'
       - 'tests/integration/test_calibration_admission.py'
       - 'tests/integration/test_decoder_admission.py'
@@ -25,6 +29,7 @@ on:
       - 'scripts/edge_decoder_copy_profile.py'
       - 'scripts/edge_calibration_profile.py'
       - 'scripts/edge_clock_profile.py'
+      - 'scripts/edge_capture_clock_profile.py'
       - 'scripts/edge_builder_clock_profile.py'
       - 'scripts/probes/clock_compatibility.rs'
       - 'scripts/edge_worker_preload_profile.py'
@@ -33,9 +38,11 @@ on:
   pull_request:
     paths:
       - 'integrations/edge/**'
+      - 'requirements-native.lock'
       - 'contracts/**'
       - 'tests/integration/**'
       - 'scripts/edge_clock_profile.py'
+      - 'scripts/edge_capture_clock_profile.py'
       - 'scripts/edge_builder_clock_profile.py'
       - 'scripts/edge_calibration_profile.py'
       - 'scripts/edge_decoder_copy_profile.py'
@@ -92,6 +99,10 @@ jobs:
         run: |
           python -I -m unittest discover -s tests/integration -p test_builder_clock_admission.py -v
           python -I scripts/edge_builder_clock_profile.py > build/builder-clock-profile.json
+      - name: Installed stateful clock admission
+        run: |
+          python -I -m unittest discover -s tests/integration -p test_capture_clock_state.py -v
+          python -I scripts/edge_capture_clock_profile.py > build/capture-clock-profile.json
       - name: Installed clock scalar proof
         run: python -I scripts/edge_clock_profile.py > build/clock-profile.json
       - name: Installed decoder admission and owned buffer snapshot
@@ -125,7 +136,64 @@ jobs:
             build/calibration-profile.json
             build/decoder-copy-profile.json
             build/clock*profile.json
+            build/capture-clock*profile.json
             build/builder-clock-profile.json
             build/clock-rust-version.txt
+          retention-days: 7
+          if-no-files-found: error
+  native-clock:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-24.04, python: '3.11.13', variant: standard}
+          - {os: macos-15, python: '3.11.9', variant: standard}
+          - {os: windows-2025, python: '3.11.9', variant: standard}
+          - {os: ubuntu-24.04, python: '3.13.15', variant: standard}
+          - {os: macos-15, python: '3.13.15', variant: standard}
+          - {os: windows-2025, python: '3.13.15', variant: standard}
+          - {os: ubuntu-24.04, python: '3.13.15', variant: sanitized}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Pinned build and runtime dependencies
+        run: |
+          python -m pip install setuptools==84.0.0 wheel==0.48.0
+          python -m pip install --no-deps --require-hashes -r requirements-native.lock
+          python -m pip install --require-hashes -r integrations/edge/requirements-server.lock
+      - name: Build optional native clock and portable core wheels
+        env:
+          AETHRON_BUILD_NATIVE_CLOCK: '1'
+          CFLAGS: ${{ matrix.variant == 'sanitized' && '-O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer' || '' }}
+          LDFLAGS: ${{ matrix.variant == 'sanitized' && '-fsanitize=address,undefined' || '' }}
+        run: |
+          python -m pip wheel --no-deps --no-build-isolation -w build/native-clock-wheels . ./integrations/edge
+          python -m pip install --no-index --no-deps --find-links build/native-clock-wheels aethron==0.2.0 aethron-edge==0.1.0
+      - name: Installed native and source-reference parity
+        env:
+          VARIANT: ${{ matrix.variant }}
+          ASAN_OPTIONS: 'detect_leaks=0:halt_on_error=1'
+          UBSAN_OPTIONS: 'halt_on_error=1:print_stacktrace=1'
+        run: |
+          if [ "$VARIANT" = sanitized ]; then
+            export LD_PRELOAD="$(gcc -print-file-name=libasan.so)"
+          fi
+          python -I scripts/edge_capture_clock_profile.py --require-native > build/native-clock-profile.json
+          python -I -m unittest discover -s tests/integration -p test_capture_clock_state.py -v
+          python -I -m unittest discover -s tests/integration -p test_clock_pipeline.py -v
+          python -I -m unittest discover -s tests/integration -p test_builder_clock_admission.py -v
+          python -I -m unittest discover -s tests/integration -p test_calibration_admission.py -v
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: native-clock-${{ matrix.os }}-${{ matrix.python }}-${{ matrix.variant }}
+          path: |
+            build/native-clock-profile.json
+            build/native-clock-wheels/*.whl
           retention-days: 7
           if-no-files-found: error

@@ -18,3 +18,23 @@ With the packages installed, `python scripts/edge_replay_profile.py --samples 1`
 compares input allocation and report parity against whole-file ingestion.
 [Measured input-allocation evidence](evidence/p11-replay-input.json) is synthetic;
 the retrospective P1.1 runtime comparison remains incomplete.
+
+An optional native exposure-clock wheel compiles the same `timebase.py` using
+Cython 3.3.0. From the repository root, install the pinned build dependencies,
+then explicitly select the native build:
+
+```sh
+python -m pip install setuptools==84.0.0 wheel==0.48.0
+python -m pip install --no-deps --require-hashes -r requirements-native.lock
+AETHRON_BUILD_NATIVE_CLOCK=1 python -m pip wheel --no-deps --no-build-isolation -w build/native-clock-wheels ./integrations/edge
+```
+
+On PowerShell, set `$env:AETHRON_BUILD_NATIVE_CLOCK='1'` before the wheel command.
+Without this selection, the wheel is portable Python; runtime never compiles or
+downloads a backend. Native wheels require a matching OS, architecture and Python
+ABI. After installing the wheel and its dependencies, run
+`python -I scripts/edge_capture_clock_profile.py --require-native` to verify the
+loaded extension against its packaged Python reference. Clock integers remain
+arbitrary precision. Native compilation does not establish exposure trust, change
+expiry bounds or qualify live capture; the live source still fails closed when
+its clock is untrusted.
