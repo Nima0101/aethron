@@ -45,6 +45,8 @@ A valid declaration does not prove training occurred, that training used only th
 
 For a separate evaluation corpus, the [candidate test-separation gate v1](usage-candidate-holdout-v1.md) binds both manifests and rejects declared test content or acquisition sessions shared with the candidate's training/validation data. This remains a declaration check, with no rights or qualification promotion.
 
+The optional [structured candidate-card gate v1](usage-candidate-cards-v1.md) requires bounded source, origin, license, intended/forbidden-use, reproducibility and limitation declarations, and matches their artifact/protocol/rights bindings to the candidate. It validates structure only; rights and qualification remain unverified.
+
 ## Bounded candidate fuzzing
 
 Run `python scripts/dataset_fuzz.py --candidates --cases 300 --seconds 5` with AETHRON available. This separate v3 fuzz report exercises rebound descriptor mutations, wrong candidate pins and tampered opaque artifacts through the real verifier. Every fifth artifact round uses a sparse 64 MiB + 1 byte file to exercise the blob-size rejection without writing that much data. The case-stream marker identifies this sparse-size operation; it is not the oversized file's content digest. Owned fixtures and mutations are restored/removed after the run. Reports contain counts, digests and fixed failure reasons, never payloads or paths. The existing cooperative time/case budgets and source binding apply; setup/cleanup are outside the timed interval. `--candidates` and `--reports` are mutually exclusive; earlier default/report streams are unchanged. This is development coverage, not full fuzz qualification.
