@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "base_commit": "4934d673cea9aa6246794c4a90a4e5c945b1cd3e",
+  "source_binding": "Candidate file SHA-256; local source-tree evidence only",
+  "files": {
+    ".github/workflows/aethron-fleet-policy.yml": "ed288f0f2d1bdcc3e9411ef24d5622b6194e431250be0a5542b630aa355c3718",
+    "docs/architecture/fleet-plan-v1.md": "589b6af0138dbb70a9c4f853d1b81c8a3eeae0724553843612e35e858315e426",
+    "integrations/edge/aethron_edge/runtime/fleet_plan.py": "9ed3a781636e5a5fdfd0d8bde321ce82f5bf0381a9c5b0da9d7db58750c066b4",
+    "tests/integration/test_fleet_plan.py": "abcf8db7b480f4c30c2e25e3d7fa185cef4934be5594c115ce046e6055c576bc"
+  },
+  "runtime": "CPython 3.13.5, Linux x86_64, OpenSSL 3.5.6",
+  "verification": {
+    "command": "PYTHONPATH=integrations/edge:build/fleet-linux-deps python3 -m unittest discover -s tests/integration -p 'test_fleet_*.py' -q",
+    "fleet_tests_passed": 72,
+    "plan_tests_passed": 9,
+    "tests_failed": 0,
+    "ruff_0_16_10": "lint and format PASS",
+    "bandit_1_9_4": "zero production findings",
+    "workflow_yaml_and_private_marker_scan": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "retained_negative_evidence": [
+    "RED: module presence assertion failed before fleet_plan implementation."
+  ],
+  "not_run": [
+    "Hosted installed-wheel checks for this candidate",
+    "Full repository suite, fuzz, clean clone or large artifact processing",
+    "Actual provisioning, installation, activation or hardware validation"
+  ],
+  "limits": "Two-file partial commits documented: floor advancement is preserved if journal creation subsequently fails. The journal is bound to a verified private snapshot, not to later mutable source bytes. No lasting execution authority, retained artifact cache, initial-provisioning permission or physical qualification."
+}
