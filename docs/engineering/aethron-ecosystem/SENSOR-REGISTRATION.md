@@ -109,3 +109,34 @@ Mono16 uses the same nearest-neighbour mapping, calibrated-domain checks and
 and the validity mask 327680 bytes; constructing immutable results also briefly
 retains the mutable buffers. No map cache, native dependency, timestamp renewal
 or live-evidence authority is introduced.
+
+### Calibration-bound recorded intensity replay v1
+
+`aethron_edge.sensors.intensity_replay.IntensityCalibration` is a separate closed
+recorded-intensity contract: required integer `version=1`, `source_id`,
+`coordinate_frame`, complete `ImageLayout`, and Brown or fisheye `lens`. It
+accepts only LWIR/NIR intensity layouts matching the source camera dimensions
+and the existing output-pixel limit. It does not extend `ProviderCalibration`.
+Its `digest` is SHA-256 of the UTF-8 prefix
+`aethron-recorded-intensity-v1\n` followed by the validated model's JSON with
+sorted keys, compact separators and non-finite numbers forbidden. The layout,
+both cameras, coefficients, lens model/domain and source/frame binding are all
+covered. JSON calibration files can be loaded with `model_validate_json`.
+
+`rectify_recorded_intensity(frame, calibration,
+expected_calibration_sha256=independently_pinned_digest)` verifies equality of
+that pin, the complete calibration digest and the raw replay header's
+`calibration_sha256`. It revalidates Python-constructed frames/calibrations,
+matches source, coordinate frame and layout, and verifies the raw payload hash
+before remapping. The pin must come from a separate expected-calibration record;
+deriving it from the supplied recording defeats mismatch detection. Neither
+checksums nor this pin verify signatures, ownership or physical calibration.
+
+The returned `RecordedIntensity` contains `raster`, `calibration` and
+`source_header`. The latter describes the **original raw recording**, including
+its original payload hash and layout; it is not an output-raster header.
+Acquisition time, uncertainty, sequence and recorded clock domain are preserved.
+The result retains no raw payload, has `source_evidence="recorded"` and
+`live_evidence=False`, and retains the raster's validity mask. Pass frames from
+`read_frames` to retain that reader's stream continuity checks; this per-frame
+operation creates no clock, freshness lease, stream history or live authority.
