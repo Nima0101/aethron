@@ -166,6 +166,24 @@ class ThresholdBundle(unittest.TestCase):
                 self.export()
         self.assertFalse((self.output / "pins.json").exists())
 
+    def test_missing_publication_primitives_reject_before_creating_destination(self):
+        for operation in (os.mkdir, os.link, os.unlink):
+            self.output = self.fixture.root / operation.__name__
+            with (
+                self.subTest(operation=operation.__name__),
+                patch.object(os, "supports_dir_fd", os.supports_dir_fd - {operation}),
+                self.assertRaisesRegex(ValueError, "^invalid_threshold_bundle$"),
+            ):
+                self.export()
+            self.assertFalse(self.output.exists())
+        self.output = self.fixture.root / "link-follow"
+        with (
+            patch.object(os, "supports_follow_symlinks", set()),
+            self.assertRaisesRegex(ValueError, "^invalid_threshold_bundle$"),
+        ):
+            self.export()
+        self.assertFalse(self.output.exists())
+
     def test_export_is_reproducible_and_deduplicates_roles(self):
         first = self.export(card=self.rights, expected_card_sha256=fixtures.digest(self.rights))
         files = {

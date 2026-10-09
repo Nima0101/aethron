@@ -10,6 +10,7 @@ from .splits import (
     MAX_BYTES,
     MAX_TOTAL_BYTES,
     _file_state,
+    _filesystem_supported,
     _hash,
     _parse,
     _read_document,
@@ -221,6 +222,7 @@ def export(
     pins appear only after independent candidate verification of the destination.
     """
     try:
+        _require(_filesystem_supported(write=True))
         threshold._model(
             model, expected_model_sha256, expected_manifest_sha256, expected_protocol_sha256
         )

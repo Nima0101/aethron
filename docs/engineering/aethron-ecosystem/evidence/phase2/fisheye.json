@@ -1,0 +1,50 @@
+{
+  "status": "development_checkpoint_not_release_qualified",
+  "baseline": "3a149639704f42e777a0dceedb2819477c13d0da",
+  "change": "Explicit bounded sparse angular fisheye calibration and axial-depth provider integration. Legacy Brown and no-lens digests unchanged. No raster/stereo or physical qualification.",
+  "checks": {
+    "red": "Pre-change installed wheel: 6 tests, 12 failing subcases; missing fisheye model.",
+    "installed_mac": "8 fisheye PASS 3.588s; 7 Brown PASS 15.538s; 74 sensor PASS 34.663s; isolated copied vision tests 15 PASS 3.720s.",
+    "installed_linux": "15 schema/provider tests PASS 0.167s; unprivileged read-only no-network container. Numerical OpenCV tests NOT run: cv2 absent in retained consumer and ROS images.",
+    "static": "Ruff check/format and git diff check PASS; targeted Bandit zero findings.",
+    "wheel_source_match": 53
+  },
+  "wheel_sha256": "6f529f0551db64c940aa09ea2e5d1009cb984aa60c90879f819339975d48d1d1",
+  "source_sha256": {
+    "integrations/edge/aethron_edge/sensors/rectification.py": "b034b4f5b2e0c5c4bda51f5adfcb4a15193ebe7497ab4099c7887fb57c49f6db",
+    "integrations/edge/aethron_edge/sensors/provider.py": "3f63f4252281b2d36c186b2649272f58f5f6aa0b08b9f15d701e1f11b3a4d6ae",
+    "tests/integration/test_fisheye_rectification.py": "692973475acbd06fe908ad0b390cff8e5582e271477a547c9ab6a497c3f41f9a",
+    "scripts/edge_package_check.py": "2af44d7f66ed23c09ef0dae8e84802e89ebbfb7e16de5087c72d43c58377aaa3"
+  },
+  "artifacts": {
+    "build/ecosystem-phase2/fisheye/build.log": "14bc436216668afc90baa35dd1f6a40e33babc5285ae486fa5dff774df958a45",
+    "build/ecosystem-phase2/fisheye/final-build.log": "0fc299c9f554822c633f5cf15d428ab5f69649ba7568b8372a251f8dc8ed59e7",
+    "build/ecosystem-phase2/fisheye/final-install.log": "96d3177ba5598addb9aa4eb9053fe457e2afbc4fc2c77123343fdcc62216e7be",
+    "build/ecosystem-phase2/fisheye/install.log": "561571fdfb7635fb109b94bf533d00eef9065eeae0b5ce6b0a0d4989c7111f1a",
+    "build/ecosystem-phase2/fisheye/isolated-vision.log": "a9f6737cf61d92d2bc9956d9f85ddeab7ceba7fd2b585dae9aa023c95bcc95f3",
+    "build/ecosystem-phase2/fisheye/linux-contract.log": "0d66f9b74b2b019fb6d5b6c5db06a1423973db3cc1d59f7c1ddb4d74ad21f9ba",
+    "build/ecosystem-phase2/fisheye/mac-final-brown.log": "20bdfae3f23e9c94e0008633815c2512b685a54a21f3a3af80cb2f1f071566cf",
+    "build/ecosystem-phase2/fisheye/mac-final-fisheye.log": "fc52bcc39c2c9ab279db829c47884a743848962446aede1833d00afb0e6fbb83",
+    "build/ecosystem-phase2/fisheye/mac-final-sensors.log": "c37e03bf9dd231cfd2efa4f1066c7b2567600adb000a936d122cd7ead900a0d1",
+    "build/ecosystem-phase2/fisheye/mac-green.log": "c0d0b8e8b66e04c2f395d88768ea37cb2d65fc3e98be5249cf453537ed941a36",
+    "build/ecosystem-phase2/fisheye/red.log": "d9846985ab30d5155867be214f2110940b4ad4f72289ba661fed57e00730f964"
+  },
+  "sources": [
+    {
+      "url": "https://docs.opencv.org/4.13.0/db/d58/group__calib3d__fisheye.html",
+      "retrieved": "2026-10-09",
+      "use": "Angular model and normalized undistortPoints rays."
+    },
+    {
+      "url": "https://github.com/opencv/opencv/blob/4.13.0/modules/calib3d/src/fisheye.cpp",
+      "retrieved": "2026-10-09",
+      "use": "Native angular clipping, Newton derivative and convergence behavior; independently implemented admission/residual checks."
+    }
+  ],
+  "remaining": [
+    "Linux numerical OpenCV, Windows, hosted/full candidate and physical calibration pending.",
+    "Distorted ROS CameraInfo admission, raster/stereo and nonvisible model qualifications remain pending.",
+    "Frozen aircraft, latency, DDS, update and boot failures remain unchanged. No new VM or timing qualification."
+  ],
+  "public_copy_note": "Local disk/private-history publication notes omitted; software results, source hashes and qualification limits retained."
+}
