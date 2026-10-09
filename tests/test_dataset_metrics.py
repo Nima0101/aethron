@@ -43,11 +43,12 @@ class DatasetMetrics(unittest.TestCase):
             ],
         }
 
-    def run_metrics(self, doc=None, raw=None, pin=None):
+    def run_metrics(self, doc=None, raw=None, pin=None, **options):
         raw = json.dumps(self.doc if doc is None else doc).encode() if raw is None else raw
         return self.images.run_baseline(
             annotations=raw,
             expected_annotations_sha256=hashlib.sha256(raw).hexdigest() if pin is None else pin,
+            **options,
         )
 
     def test_real_pixels_match_miss_false_positive_and_empty_truth(self):
@@ -93,6 +94,120 @@ class DatasetMetrics(unittest.TestCase):
                 "recall": None,
             },
         )
+
+    def test_provenance_metrics_expose_imbalanced_source_miss(self):
+        weak = copy.deepcopy(self.fixture.doc["provenance"][0])
+        weak.update(id="private_weak_source", source="private source metadata")
+        self.fixture.doc["provenance"].append(weak)
+        for index in range(3, 12):
+            row = copy.deepcopy(self.fixture.doc["samples"][2])
+            row["id"] = "private_sample_" + str(index)
+            if index == 11:
+                row["provenance_id"] = weak["id"]
+            self.fixture.doc["samples"].append(row)
+            self.images.image(index, fixtures.pgm(180 + index, spot=index != 11))
+            self.doc["samples"].append(
+                {
+                    "sample_id": row["id"],
+                    "artifact_sha256": row["artifact_sha256"],
+                    "boxes": [BOX],
+                }
+            )
+        self.doc["manifest_sha256"] = hashlib.sha256(self.fixture.raw()).hexdigest()
+        legacy = self.run_metrics()
+        result = self.run_metrics(per_provenance=True)
+        self.assertEqual(legacy["version"], 1)
+        self.assertNotIn("metrics_by_provenance", legacy)
+        self.assertEqual(result["version"], 2)
+        self.assertEqual(result["metrics"]["recall"], 0.9)
+        groups = result["metrics_by_provenance"]
+        self.assertEqual(len(groups), 2)
+        self.assertEqual(sorted(g["frames"] for g in groups.values()), [1, 9])
+        missed = next(g for g in groups.values() if g["frames"] == 1)
+        self.assertEqual(
+            missed,
+            {
+                "frames": 1,
+                "true_positives": 0,
+                "false_positives": 0,
+                "false_negatives": 1,
+                "precision": None,
+                "recall": 0.0,
+            },
+        )
+        for key in ("true_positives", "false_positives", "false_negatives"):
+            self.assertEqual(sum(g[key] for g in groups.values()), result["metrics"][key])
+        for digest in groups:
+            self.assertRegex(digest, r"^[0-9a-f]{64}$")
+        self.assertNotIn("private_", json.dumps(result))
+        self.assertNotIn("private source metadata", json.dumps(result))
+        self.assertNotIn(str(self.fixture.root), json.dumps(result))
+        self.assertFalse(result["qualified"])
+        self.assertFalse(result["rights_verified"])
+        result.pop("metrics_by_provenance")
+        result["version"] = 1
+        self.assertEqual(result, legacy)
+        self.fixture.doc["provenance"].reverse()
+        self.fixture.doc["samples"].reverse()
+        self.doc["manifest_sha256"] = hashlib.sha256(self.fixture.raw()).hexdigest()
+        self.assertEqual(self.run_metrics(per_provenance=True)["metrics_by_provenance"], groups)
+        self.doc["samples"][0]["boxes"] = []
+        negative = self.run_metrics(per_provenance=True)
+        self.assertEqual(negative["metrics"]["false_positives"], 1)
+        self.assertEqual(
+            sum(g["false_positives"] for g in negative["metrics_by_provenance"].values()), 1
+        )
+
+    def test_provenance_digest_stable_across_order_and_binds_metadata(self):
+        before = self.run_metrics(per_provenance=True)["metrics_by_provenance"]
+        row = self.fixture.doc["provenance"][0]
+        expected = hashlib.sha256(
+            b"aethron.provenance.v1\0"
+            + json.dumps(row, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode(
+                "ascii"
+            )
+        ).hexdigest()
+        self.assertEqual(list(before), [expected])
+        self.fixture.doc["provenance"][0] = dict(reversed(list(row.items())))
+        self.fixture.doc["samples"].reverse()
+        self.doc["manifest_sha256"] = hashlib.sha256(self.fixture.raw()).hexdigest()
+        self.assertEqual(self.run_metrics(per_provenance=True)["metrics_by_provenance"], before)
+        self.fixture.doc["provenance"][0]["source"] = "changed declaration"
+        self.doc["manifest_sha256"] = hashlib.sha256(self.fixture.raw()).hexdigest()
+        after = self.run_metrics(per_provenance=True)["metrics_by_provenance"]
+        self.assertNotEqual(set(before), set(after))
+
+    def test_provenance_empty_predictions_and_comparison_version(self):
+        self.images.image(2, fixtures.pgm(230))
+        self.doc["manifest_sha256"] = hashlib.sha256(self.fixture.raw()).hexdigest()
+        self.doc["samples"][0].update(
+            artifact_sha256=self.fixture.doc["samples"][2]["artifact_sha256"], boxes=[]
+        )
+        result = self.run_metrics(per_provenance=True, baseline="all")
+        self.assertEqual(result["version"], 2)
+        self.assertEqual(result["comparison"], "pgm_obstacle_baselines_v2")
+        for report in result["reports"]:
+            self.assertEqual(report["version"], 2)
+            (group,) = report["metrics_by_provenance"].values()
+            self.assertEqual(
+                group,
+                {
+                    "frames": 1,
+                    "true_positives": 0,
+                    "false_positives": 0,
+                    "false_negatives": 0,
+                    "precision": None,
+                    "recall": None,
+                },
+            )
+
+    def test_provenance_option_requires_boolean_and_pinned_annotations(self):
+        for value in (1, "true", None, [], {}):
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(ValueError, "^invalid_proposal_input$"):
+                    self.run_metrics(per_provenance=value)
+        with self.assertRaisesRegex(ValueError, "^invalid_proposal_input$"):
+            self.images.run_baseline(per_provenance=True)
 
     def test_wrong_binding_missing_duplicate_or_extra_rows_reject(self):
         bad = []
@@ -306,6 +421,11 @@ class DatasetMetrics(unittest.TestCase):
         result = subprocess.run(command, capture_output=True, text=True, timeout=10, check=False)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(json.loads(result.stdout)["metrics"]["true_positives"], 1)
+        result = subprocess.run(
+            command + ["--per-provenance"], capture_output=True, text=True, timeout=10, check=False
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout), self.run_metrics(per_provenance=True))
         annotation.write_bytes(b"private invalid annotations")
         result = subprocess.run(command, capture_output=True, text=True, timeout=10, check=False)
         self.assertEqual(result.returncode, 2)

@@ -1,6 +1,7 @@
 """Offline comparison of PGM obstacle baselines, not accuracy qualification."""
 
 import argparse
+import hashlib
 import json
 import sys
 
@@ -8,7 +9,7 @@ from ..temporal.pixels import decode_pgm, detect_pgm
 from .annotations import count_matches
 from .annotations import validate as validate_annotations
 from .baselines import detect_global_pgm
-from .splits import _read_document, load_split
+from .splits import _parse, _read_document, load_split
 
 # Offline work budgets, separate from frozen runtime/evaluation thresholds.
 MAX_FRAMES = 300
@@ -35,6 +36,7 @@ def run(
     annotations=None,
     expected_annotations_sha256=None,
     baseline="classical_pgm_obstacle_v1",
+    per_provenance=False,
 ):
     """Verify/load selected bytes and return only a complete aggregate report."""
     detectors = {
@@ -42,6 +44,8 @@ def run(
         "global_pgm_obstacle_v1": detect_global_pgm,
     }
     if type(baseline) is not str or baseline not in (*detectors, "all"):
+        raise ValueError("invalid_proposal_input")
+    if type(per_provenance) is not bool or (per_provenance and annotations is None):
         raise ValueError("invalid_proposal_input")
     loaded = load_split(
         data,
@@ -67,14 +71,31 @@ def run(
                 raise ValueError("pixel_budget")
     except ValueError:
         raise ValueError("invalid_proposal_input") from None
+    provenance_digests = None
+    if per_provenance:
+        # Parse the same pinned bytes; load_split already enforced the 128-source bound.
+        provenance_digests = {
+            row["id"]: hashlib.sha256(
+                b"aethron.provenance.v1\0"
+                + json.dumps(row, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode(
+                    "ascii"
+                )
+            ).hexdigest()
+            for row in _parse(data)["provenance"]
+        }
     names = tuple(detectors) if baseline == "all" else (baseline,)
     reports = [
-        _report(loaded, truth, name, detectors[name], expected_annotations_sha256) for name in names
+        _report(
+            loaded, truth, name, detectors[name], expected_annotations_sha256, provenance_digests
+        )
+        for name in names
     ]
     if baseline == "all":
         return {
-            "version": 1,
-            "comparison": "pgm_obstacle_baselines_v1",
+            "version": 2 if per_provenance else 1,
+            "comparison": "pgm_obstacle_baselines_v2"
+            if per_provenance
+            else "pgm_obstacle_baselines_v1",
             "reports": reports,
             "rights_verified": False,
             "qualified": False,
@@ -82,7 +103,8 @@ def run(
     return reports[0]
 
 
-def _report(loaded, truth, baseline, detector, expected_annotations_sha256):
+def _report(loaded, truth, baseline, detector, expected_annotations_sha256, provenance_digests):
+    by_provenance = {}
     tp = fp = fn = 0
     grouped = {"synthetic": [0, 0, 0], "recorded": [0, 0, 0]}
     try:
@@ -103,10 +125,17 @@ def _report(loaded, truth, baseline, detector, expected_annotations_sha256):
                 totals[0] += matches
                 totals[1] += len(proposals) - matches
                 totals[2] += len(labels) - matches
+                if provenance_digests is not None:
+                    digest = provenance_digests[sample.provenance_id]
+                    source = by_provenance.setdefault(digest, [0, 0, 0, 0])
+                    source[0] += 1
+                    source[1] += matches
+                    source[2] += len(proposals) - matches
+                    source[3] += len(labels) - matches
     except ValueError:
         raise ValueError("invalid_proposal_input") from None
     result = {
-        "version": 1,
+        "version": 2 if provenance_digests is not None else 1,
         "baseline": baseline,
         "manifest_sha256": loaded.manifest_sha256,
         "protocol_sha256": loaded.protocol_sha256,
@@ -131,6 +160,11 @@ def _report(loaded, truth, baseline, detector, expected_annotations_sha256):
                 for kind, totals in grouped.items()
             },
         )
+    if provenance_digests is not None:
+        result["metrics_by_provenance"] = {
+            digest: {"frames": totals[0], **_metrics(*totals[1:])}
+            for digest, totals in sorted(by_provenance.items())
+        }
     return result
 
 
@@ -142,6 +176,11 @@ def main():
     parser.add_argument("--manifest-sha256", required=True)
     parser.add_argument("--protocol-sha256", required=True)
     parser.add_argument("--baseline", default="classical_pgm_obstacle_v1")
+    parser.add_argument(
+        "--per-provenance",
+        action="store_true",
+        help="emit v2 per-provenance metrics (requires pinned annotations)",
+    )
     parser.add_argument("--annotations")
     parser.add_argument("--annotations-sha256")
     args = parser.parse_args()
@@ -157,6 +196,7 @@ def main():
             expected_manifest_sha256=args.manifest_sha256,
             expected_protocol_sha256=args.protocol_sha256,
             baseline=args.baseline,
+            per_provenance=args.per_provenance,
             annotations=annotations,
             expected_annotations_sha256=args.annotations_sha256,
         )
