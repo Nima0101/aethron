@@ -10,6 +10,9 @@ The guard does not validate JSON syntax on its own.
 Build with the project's pinned setuptools/wheel versions and the hash-locked
 build-only compiler:
 
+Use setuptools 82.0.1 on Python 3.9 and setuptools 84.0.0 on Python 3.10+;
+wheel 0.48.0 supports both. These choices are also encoded in `pyproject.toml`.
+
 ```sh
 python -m pip install --no-deps --require-hashes -r requirements-native.lock
 AETHRON_BUILD_NATIVE_BOUNDS=1 python -m pip wheel --no-deps --no-build-isolation -w build/native-wheels .

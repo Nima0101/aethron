@@ -187,5 +187,20 @@
     "https://docs.python.org/3/library/re.html#re.finditer",
     "https://serde.rs/deserialize-map.html",
     "https://pypi.org/project/Cython/3.3.0/"
-  ]
+  ],
+  "build_compatibility_followup": {
+    "tested_source_commit": "01c705032f17f511dd02f65c83cda53d19b716dd",
+    "hosted_run": 37944542038,
+    "python313": "3 OS installed parity PASS",
+    "sanitizers": "Linux ASan/UBSan PASS",
+    "python39": "3 OS FAIL: setuptools84 requires Python>=3.10; Windows continued after pip failure and later lacked bdist_wheel",
+    "fix": "Conditional exact setuptools82.0.1 for Python3.9,84.0.0 for3.10+; dependency step uses fail-fast bash on every OS",
+    "local_checks": "Build markers select exactly one compatible setuptools plus wheel for3.9,3.10,3.13; upstream PyPI Requires-Python checked; YAML/diff PASS",
+    "hosted_retry": "pending",
+    "changed_source_sha256": {
+      "pyproject.toml": "02983462e01d72ed1c82c34a6ce1216236119714b79863998cf1ce005f805bbb",
+      ".github/workflows/aethron-native-bounds.yml": "8efee837507270d63d4b3a40e91e34f5fe9b6edd01e902f291982693b70d426c",
+      "docs/usage-native-bounds.md": "64d56dc365054a7c0756ea9d0579231a78f41d7bbd5d3e3923d7ac1203ba3467"
+    }
+  }
 }
