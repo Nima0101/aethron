@@ -31,7 +31,6 @@ class VisualReproduction(unittest.TestCase):
             "verify_visuals", ROOT / "scripts/verify_visuals.py"
         )
         module = importlib.util.module_from_spec(spec)
-        # Existing verifier runs at import: use the CLI regression first for RED.
         spec.loader.exec_module(module)
         return module
 
