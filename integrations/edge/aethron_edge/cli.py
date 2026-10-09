@@ -142,12 +142,11 @@ def main():
                 "provider": "not_selected",
             }
         else:
-            from .protocol import replay_bytes
+            from .protocol import replay_stream
 
             path = (args.config.parent / config["replay"]).resolve()
             with path.open("rb") as stream:
-                data = stream.read(20 * 1024 * 1024 + 1)
-            result = replay_bytes(data).model_dump(by_alias=True)
+                result = replay_stream(stream).model_dump(by_alias=True)
         print(json.dumps(result, separators=(",", ":"), allow_nan=False))
     except (ValueError, OSError, KeyError):
         parser.exit(2, "invalid_request\n")

@@ -1,0 +1,137 @@
+{
+  "qualified": false,
+  "technology_audit": "P1.1 comparison pending",
+  "workload": "synthetic empty scene, 65536-byte whitespace-padded lines",
+  "input_bytes": 19660800,
+  "python": "3.13.15",
+  "os": "Darwin",
+  "machine": "arm64",
+  "pydantic": "2.13.5",
+  "results": {
+    "whole_file": {
+      "cpu_ms": [
+        10613.499
+      ],
+      "cpu_median_ms": 10613.499,
+      "wall_ms": [
+        43033.521084
+      ],
+      "wall_median_ms": 43033.521084,
+      "python_traced_peak_bytes": 20976774,
+      "report_sha256": "fa280b34b63991f07fa741b706e62e34981cd41f5d79f4be5581309a8f38e552",
+      "frame_count": 300
+    },
+    "bounded_lines": {
+      "cpu_ms": [
+        10813.727
+      ],
+      "cpu_median_ms": 10813.727,
+      "wall_ms": [
+        31026.484709
+      ],
+      "wall_median_ms": 31026.484709,
+      "python_traced_peak_bytes": 742827,
+      "report_sha256": "fa280b34b63991f07fa741b706e62e34981cd41f5d79f4be5581309a8f38e552",
+      "frame_count": 300
+    }
+  },
+  "profile_self_seconds": [
+    {
+      "file": "schema.py",
+      "function": "parse",
+      "calls": 600,
+      "seconds": 24.419268418
+    },
+    {
+      "file": "~",
+      "function": "<method 'readline' of '_io.BufferedReader' objects>",
+      "calls": 301,
+      "seconds": 15.233725111000002
+    },
+    {
+      "file": "~",
+      "function": "<method 'match' of 're.Pattern' objects>",
+      "calls": 1200,
+      "seconds": 1.27902596
+    },
+    {
+      "file": "~",
+      "function": "<method 'decode' of 'bytes' objects>",
+      "calls": 600,
+      "seconds": 0.641941561
+    },
+    {
+      "file": "decoder.py",
+      "function": "__init__",
+      "calls": 600,
+      "seconds": 0.492834665
+    },
+    {
+      "file": "decoder.py",
+      "function": "raw_decode",
+      "calls": 600,
+      "seconds": 0.49045617900000005
+    },
+    {
+      "file": "~",
+      "function": "<built-in method posix.urandom>",
+      "calls": 302,
+      "seconds": 0.477197417
+    },
+    {
+      "file": "__init__.py",
+      "function": "loads",
+      "calls": 600,
+      "seconds": 0.29955454600000003
+    }
+  ],
+  "source_manifest_sha256": "16a2ed6ca7e61a052bed6d2e9dcc5a72673087ef3bf173130b69dfa1046397d7",
+  "changed_source_sha256": {
+    "integrations/edge/aethron_edge/protocol.py": "8748035dfa1a72504db5bdf2bd61c682c441191cf04bfabaff1d538d5f7eaddd",
+    "integrations/edge/aethron_edge/cli.py": "0a58fc3d6bbc00849d8772a2f075322de5a9e1009508d822fc1dccee789a86af",
+    "tests/integration/test_edge_contract.py": "2a42550af98be08c0b35f72609ae95b55fa4ac264d524727101a5b357075bb69",
+    "scripts/edge_replay_profile.py": "40d182a0f3cbbc6df62da8a32d80a0ffdf2ff1f546a4f78ede75b4cbde665d3e",
+    "aethron/schema.py": "ca28412601bf05a155ad55e59070f811af2c67dd374e2b2baeb9b54d8e4ccc43",
+    "aethron/temporal/replay.py": "37863819e5c3a99aefbe0d3a7df17ac7dae09c33ed01b76d8af0697b133344e0"
+  },
+  "source_parent": "417732b",
+  "decision": "Retain CPython stdlib buffered I/O for this wrapper change: bounded-line consumption removes whole-input allocation with exact report parity; parser/runtime selection remains P1.1 pending.",
+  "limitations": [
+    "One timing sample on a shared, variably loaded host; no latency or speedup qualification.",
+    "Python-traced allocation is not RSS.",
+    "Empty synthetic scenes isolate padded-input cost; not representative sensor processing.",
+    "P1.1-P1.7 technology audit is incomplete; historical functional passes are separate."
+  ],
+  "checks": {
+    "red": "CLI whole-file read assertion and missing stream API",
+    "green": "8 focused contract/OpenAPI/pixel tests; 6 final installed contract/CLI tests",
+    "installed": {
+      "wheels": {
+        "aethron-0.2.0-py3-none-any.whl": "2533a67e0e09d9f7e52c3803e2273118d84a9b39570e1155aedcd04bab21ed7b",
+        "aethron_edge-0.1.0-py3-none-any.whl": "7d8d6beb1a71aaac4765bef1a405e7ed2cbbb60b31b8d92a7cace8e7e1a49c80"
+      },
+      "source_bytes_match": true,
+      "outside_checkout": true,
+      "dependencies": "retained pinned environment; not fresh dependency qualification",
+      "temporary_consumer_removed": true
+    },
+    "native_json_counterexample": {
+      "reference": "rejected duplicate clock",
+      "native_json_then_schema": "accepted duplicate clock"
+    }
+  },
+  "research": [
+    {
+      "url": "https://docs.python.org/3/library/io.html",
+      "relevance": "Buffered binary line reader; remove input-sized allocation without another ABI."
+    },
+    {
+      "url": "https://serde.rs/deserialize-map.html",
+      "relevance": "Custom map visitor is a candidate for explicit duplicate-key rejection; native JSON default is not sufficient."
+    },
+    {
+      "url": "https://docs.cython.org/en/latest/src/userguide/memoryviews.html",
+      "relevance": "Typed byte-buffer scan is a candidate for the measured parse-loop hotspot; compiled parity and deployment proof still required."
+    }
+  ]
+}
