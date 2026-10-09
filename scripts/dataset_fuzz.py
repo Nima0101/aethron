@@ -15,7 +15,7 @@ from aethron.evaluation.annotations import validate as validate_annotations
 from aethron.evaluation.baselines import detect_global_pgm
 from aethron.evaluation.candidates import verify_artifacts as verify_candidate
 from aethron.evaluation.proposals import run as run_proposals
-from aethron.evaluation.splits import _read_document, load_split
+from aethron.evaluation.splits import _filesystem_supported, _read_document, load_split
 from aethron.evaluation.splits import validate as validate_manifest
 from aethron.evaluation.synthetic import generate
 
@@ -352,7 +352,8 @@ def _inspect_candidate(target, data, value, context):
 
 def run(*, cases=300, seconds=5, seed=472, reports=False, candidates=False):
     if (
-        type(candidates) is not bool
+        not _filesystem_supported(write=True)
+        or type(candidates) is not bool
         or (candidates and reports)
         or type(reports) is not bool
         or type(cases) is not int

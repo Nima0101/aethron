@@ -9,6 +9,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from aethron.evaluation.splits import _filesystem_supported
 from aethron.evaluation.synthetic import generate
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "dataset_cli_timing.py"
@@ -21,6 +22,7 @@ def harness():
     return module
 
 
+@unittest.skipUnless(_filesystem_supported(write=True), "POSIX dataset fixture operations required")
 class DatasetTiming(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()

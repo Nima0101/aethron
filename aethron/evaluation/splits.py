@@ -264,8 +264,21 @@ def load_split(data, blob_dir, split, *, expected_manifest_sha256, expected_prot
     return LoadedSplit(report["manifest_sha256"], report["protocol_sha256"], split, samples)
 
 
+def _filesystem_supported(*, write=False):
+    """Required primitives only; individual filesystems must still pass every operation."""
+    operations = (os.open, os.stat)
+    if write:
+        operations += (os.mkdir, os.link, os.unlink)
+    return (
+        all(hasattr(os, name) for name in ("O_NOFOLLOW", "O_NONBLOCK", "O_DIRECTORY"))
+        and all(operation in os.supports_dir_fd for operation in operations)
+        and (not write or os.link in os.supports_follow_symlinks)
+    )
+
+
 def _read_document(path):
     """Read one bounded regular document; CLI callers retain their own fixed errors."""
+    _require(_filesystem_supported())
     fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
     with os.fdopen(fd, "rb") as stream:
         _require(stat.S_ISREG(os.fstat(stream.fileno()).st_mode))

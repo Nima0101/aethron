@@ -132,6 +132,74 @@ def verify(
         raise ValueError("invalid_threshold_bundle") from None
 
 
+def compare(
+    bundle_dir,
+    split,
+    *,
+    expected_candidate_sha256,
+    expected_manifest_sha256,
+    expected_protocol_sha256,
+    annotations,
+    expected_annotations_sha256,
+):
+    """Verify the bundle, then compare frozen detectors on independently pinned truth.
+
+    Each verification/evaluation pass retains its existing read bounds. The second
+    pass rechecks hashes and retains one held-out snapshot shared by all detectors.
+    """
+    try:
+        _require(type(split) is str and split in ("validation", "test"))
+        verification = verify(
+            bundle_dir,
+            expected_candidate_sha256=expected_candidate_sha256,
+            expected_manifest_sha256=expected_manifest_sha256,
+            expected_protocol_sha256=expected_protocol_sha256,
+        )
+        root = os.path.normpath(bundle_dir)
+        root_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        try:
+            manifest = _read_at(root_fd, "manifest.json", MAX_BYTES)
+            blob_fd = os.open("blobs", os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=root_fd)
+            try:
+                _, model = _verify_blob(
+                    blob_fd,
+                    verification["artifact_sha256"],
+                    candidates.MAX_CANDIDATE_BYTES,
+                    retain=True,
+                )
+            finally:
+                os.close(blob_fd)
+        finally:
+            os.close(root_fd)
+        comparison = threshold.compare(
+            model,
+            manifest,
+            os.path.join(root, "blobs"),
+            split,
+            expected_candidate_sha256=verification["artifact_sha256"],
+            expected_manifest_sha256=expected_manifest_sha256,
+            expected_protocol_sha256=expected_protocol_sha256,
+            annotations=annotations,
+            expected_annotations_sha256=expected_annotations_sha256,
+        )
+        return {
+            "version": 1,
+            "bundle_verification": verification,
+            "comparison": comparison,
+            "qualified": False,
+        }
+    except (
+        ValueError,
+        OSError,
+        TypeError,
+        AttributeError,
+        OverflowError,
+        RecursionError,
+        NotImplementedError,
+    ):
+        raise ValueError("invalid_threshold_bundle") from None
+
+
 def export(
     model,
     manifest,

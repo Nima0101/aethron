@@ -11,6 +11,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from aethron.evaluation.splits import _filesystem_supported
+
 
 def digest(value):
     return hashlib.sha256(value.encode()).hexdigest()
@@ -160,8 +162,13 @@ class DatasetSplits(unittest.TestCase):
             path.write_text(json.dumps(manifest()))
             command = [sys.executable, "-m", "aethron.evaluation.splits", str(path)]
             ok = subprocess.run(command, capture_output=True, text=True, check=False)
-            self.assertEqual(ok.returncode, 0, ok.stderr)
-            self.assertEqual(json.loads(ok.stdout)["counts"]["test"], 1)
+            if _filesystem_supported():
+                self.assertEqual(ok.returncode, 0, ok.stderr)
+                self.assertEqual(json.loads(ok.stdout)["counts"]["test"], 1)
+            else:
+                self.assertEqual(ok.returncode, 2)
+                self.assertEqual(ok.stdout, "")
+                self.assertEqual(ok.stderr.strip(), "invalid_split_manifest")
             path.write_text('{"private": "secret-fixture"}')
             bad = subprocess.run(command, capture_output=True, text=True, check=False)
             self.assertEqual(bad.returncode, 2)

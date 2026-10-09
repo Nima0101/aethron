@@ -7,7 +7,7 @@ import os
 import sys
 
 from .annotations import PROTOCOL_BYTES, PROTOCOL_SHA256
-from .splits import SPLITS
+from .splits import SPLITS, _filesystem_supported
 
 
 def _json(value):
@@ -120,6 +120,8 @@ def _write(directory_fd, name, data):
 def generate(output_dir):
     """Create a NEW directory under a trusted parent; publish only complete pins."""
     try:
+        if not _filesystem_supported(write=True):
+            raise ValueError("invalid_fixture_output")
         blobs, manifest, annotations, pins = _dataset()
         os.mkdir(output_dir, 0o700)  # Even empty existing directories are rejected.
         root_fd = os.open(output_dir, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)

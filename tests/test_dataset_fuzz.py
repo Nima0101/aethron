@@ -9,9 +9,12 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from aethron.evaluation.splits import _filesystem_supported
+
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "dataset_fuzz.py"
 
 
+@unittest.skipUnless(_filesystem_supported(write=True), "POSIX dataset fixture operations required")
 class DatasetFuzz(unittest.TestCase):
     def api(self):
         self.assertTrue(SCRIPT.is_file(), "dataset fuzz harness is missing")

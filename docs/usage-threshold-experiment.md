@@ -128,3 +128,22 @@ training, preprocessing qualification and overall qualification remain false.
 Failure emits only `invalid_threshold_bundle` on stderr with exit code 2 and no
 partial report. Neither export nor verification authenticates pins or approves
 redistribution or execution.
+
+To compare that bundle against both existing fixed baselines on held-out labels:
+
+```sh
+python -m aethron.evaluation.threshold_bundle_compare moved-bundle \
+  --candidate-sha256 CANDIDATE --manifest-sha256 MANIFEST \
+  --protocol-sha256 PROTOCOL --split test \
+  --annotations test-annotations.json --annotations-sha256 ANNOTATIONS
+```
+
+Only `validation` and `test` are accepted. Annotations need an independent trusted
+pin and must match the selected manifest/split exactly. The command verifies the
+complete bundle, then rechecks model/dataset hashes and compares all three fixed
+detectors on one immutable held-out snapshot. It never refits. The JSON envelope
+contains `bundle_verification` and the existing `comparison` report, including
+per-provenance metrics; qualification stays false. Each verification/evaluation
+pass keeps its 256 MiB read ceiling, plus a bounded 16 KiB model reread between
+passes. Existing frame/image limits remain unchanged. Integrity verification does
+not authenticate pin provenance or establish physical accuracy or model approval.

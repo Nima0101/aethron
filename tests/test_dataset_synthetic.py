@@ -84,7 +84,10 @@ class SyntheticDataset(unittest.TestCase):
                 raise OSError("simulated storage failure")
             return original_open(path, *args, **kwargs)
 
-        with patch.object(api.os, "open", fail_manifest):
+        with (
+            patch.object(api.os, "open", fail_manifest),
+            patch.object(api.os, "supports_dir_fd", os.supports_dir_fd | {fail_manifest}),
+        ):
             with self.assertRaisesRegex(ValueError, "^invalid_fixture_output$"):
                 self.generate()
         self.assertEqual(len(list((self.root / "dataset" / "blobs").iterdir())), 12)

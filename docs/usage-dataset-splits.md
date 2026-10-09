@@ -131,3 +131,13 @@ Run the installed-environment timing script with `--documents --repetitions 3` a
 The existing 10-second and combined 64-KiB limits apply per child, with no retries. A child schedules a stack dump after five seconds; the parent retains at most 16 stack-line SHA-256 digests, fixed stage labels and numeric times. It discards raw stderr, paths and traceback text. Unexpected stderr, incomplete/out-of-order markers or a stack dump cannot count as successful completion. A timeout retains any captured marker prefix and stack digests.
 
 The first marker follows interpreter startup and the bootstrap's `sys`/`time` imports. No marker therefore cannot distinguish scheduler, interpreter or bootstrap stalls. Stage nanoseconds are relative to the child's bootstrap clock, while outer elapsed time also includes startup and cleanup. Instrumentation perturbs timing. Passing later probes do not explain or clear historical failures, and unchanged source hashes are observations rather than execution attestations.
+
+Filesystem CLI operations and dataset fuzz/timing harnesses require POSIX
+descriptor primitives (`O_NOFOLLOW`, `O_NONBLOCK`, `O_DIRECTORY`, directory-relative
+open/stat; fixture creation also requires directory-relative mkdir/link/unlink
+and non-following links). Missing capabilities reject with the existing fixed
+error and no successful report. Fixture generation rejects before creating its
+destination; fuzzing rejects before creating scratch space. Windows is currently
+unsupported for these filesystem paths. In-memory descriptor validation remains
+portable. A capability check does not qualify a filesystem: every subsequent
+operation, hash and resource bound is still checked.

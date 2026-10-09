@@ -15,7 +15,7 @@ from pathlib import Path
 
 import aethron
 from aethron.evaluation.proposals import run as compare
-from aethron.evaluation.splits import MAX_BYTES, _parse
+from aethron.evaluation.splits import MAX_BYTES, _filesystem_supported, _parse
 from aethron.evaluation.synthetic import _dataset, _json
 
 MAX_OUTPUT = 65536
@@ -178,7 +178,7 @@ def _sources():
 def run(dataset_dir, *, repetitions=3):
     """Probe the exact generated v1 test fixture; setup/reference work is untimed."""
     try:
-        if type(repetitions) is not int or not 1 <= repetitions <= 5:
+        if not _filesystem_supported() or type(repetitions) is not int or not 1 <= repetitions <= 5:
             raise ValueError("invalid_timing_input")
         root = Path(dataset_dir).resolve()
         pins = _dataset()[3]
