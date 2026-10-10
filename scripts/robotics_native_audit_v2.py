@@ -91,10 +91,14 @@ def retained_process(command, out, label, *, timeout, input_bytes=None):
         (out / f"{label}-stdout.log").write_bytes(error.stdout or b"")
         (out / f"{label}-stderr.log").write_bytes(error.stderr or b"")
         raise
-    elapsed = time.monotonic_ns() - begin
-    (out / f"{label}-stdout.log").write_bytes(completed.stdout)
-    (out / f"{label}-stderr.log").write_bytes(completed.stderr)
+    try:
+        elapsed = time.monotonic_ns() - begin
+    finally:
+        (out / f"{label}-stdout.log").write_bytes(completed.stdout)
+        (out / f"{label}-stderr.log").write_bytes(completed.stderr)
     completed.check_returncode()
+    if type(elapsed) is not int or elapsed < 0:
+        raise ValueError("invalid_process_duration")
     return completed, elapsed
 
 

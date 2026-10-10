@@ -145,9 +145,13 @@ def _child(command, cases, *, out=None, label="child"):
     except subprocess.TimeoutExpired as exc:
         _retain_output(out, label, exc.stdout, exc.stderr)
         raise
-    elapsed = time.monotonic_ns() - begin
-    _retain_output(out, label, completed.stdout, completed.stderr)
+    try:
+        elapsed = time.monotonic_ns() - begin
+    finally:
+        _retain_output(out, label, completed.stdout, completed.stderr)
     completed.check_returncode()
+    if type(elapsed) is not int or elapsed < 0:
+        raise ValueError("invalid_process_duration")
     value = json.loads(
         completed.stdout,
         object_pairs_hook=_unique_members,

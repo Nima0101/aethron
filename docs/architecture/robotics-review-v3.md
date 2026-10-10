@@ -438,3 +438,37 @@ Timing validation is outside the measured interval. The C and Python work remain
 unequal, so these diagnostics neither rank production runtimes nor establish a
 hardware latency bound. Production and candidate code are unchanged; the separate
 production clock-exception gap and earliest-component decision remain open.
+
+
+## Lifecycle process timing failures preserve captured output
+
+FIX the managed and native evidence harnesses' finishing-clock boundary. Both
+read the ending clock before writing captured stdout/stderr; a raised exception
+there discarded available diagnostic bytes. Both also admitted negative or
+fractional process durations. Captured bytes now pass through `finally` retention,
+and successful process results require a nonnegative integer duration before JSON
+parsing. Zero duration remains admissible. Output writes and duration validation
+stay outside the interval. An initial clock failure before process launch has no
+child output to retain; filesystem write failures remain external I/O failures.
+
+These are existing offline wrappers around fixed trusted commands. Local Python
+cleanup and integer checks preserve the captured byte arrays without decoding or
+an additional process. Moving validation into a candidate runtime would not cover
+the parent clock or retention path. This bounded correction leaves production
+technology selection pending. Python documents the relevant
+[cleanup semantics](https://docs.python.org/3/tutorial/errors.html#defining-clean-up-actions)
+and [integer monotonic clock](https://docs.python.org/3/library/time.html#time.monotonic_ns).
+
+[Retained results](../verification/robotics-process-clock-review-v3.json) include
+an initial run with four assertion failures and two missing-log errors, then a
+clearer six-assertion RED run after adding explicit file-existence assertions.
+All 24 focused methods pass, including unchanged timeout/nonzero-process checks
+and new zero-duration controls. Fault regressions use controlled process results
+and synthetic clock readings, not an OS clock fault or Rust execution.
+The actual managed run compared three process pairs over 16 cases/48 transitions.
+The native attempt failed with a missing compiler and `native_executed: false`.
+The initial Bandit import warning is recorded; inspection confirmed fixed local
+fixture argv and mocked results, and the native test import now carries the same
+narrow rationale used by the other harness tests. No production adapter or
+candidate code changed. The production clock-exception gap and earliest-component
+review remain open; no qualification or completion claim follows.

@@ -186,6 +186,41 @@ class LifecycleAuditTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "managed_lifecycle_parity_failed"):
                 self.api.check_parity(expected, [{"perception_eligible": value, "values": [1]}])
 
+    def test_finishing_clock_failure_retains_bytes_and_rejects_duration(self):
+        completed = subprocess.CompletedProcess(
+            ["fixture"], 0, b'{"results": []}\r\n', b"diagnostic\x00\r\n"
+        )
+        for ending in (RuntimeError("synthetic_clock_failure"), -1, 0.5):
+            error = RuntimeError if isinstance(ending, Exception) else ValueError
+            reason = (
+                "synthetic_clock_failure" if error is RuntimeError else "invalid_process_duration"
+            )
+            with self.subTest(ending=ending), tempfile.TemporaryDirectory() as directory:
+                out = Path(directory)
+                with (
+                    patch.object(self.api.subprocess, "run", return_value=completed),
+                    patch.object(self.api.time, "monotonic_ns", side_effect=[0, ending]),
+                ):
+                    with self.assertRaisesRegex(error, reason):
+                        self.api._child(["fixture"], [], out=out, label="clock")
+                self.assertTrue((out / "clock-stdout.log").is_file(), "missing captured output")
+                self.assertEqual((out / "clock-stdout.log").read_bytes(), completed.stdout)
+                self.assertEqual((out / "clock-stderr.log").read_bytes(), completed.stderr)
+
+    def test_zero_process_duration_preserves_output(self):
+        completed = subprocess.CompletedProcess(["fixture"], 0, b'{"results": []}', b"")
+        with tempfile.TemporaryDirectory() as directory:
+            out = Path(directory)
+            with (
+                patch.object(self.api.subprocess, "run", return_value=completed),
+                patch.object(self.api.time, "monotonic_ns", return_value=0),
+            ):
+                value, elapsed = self.api._child(["fixture"], [], out=out, label="clock")
+            self.assertEqual(value, {"results": []})
+            self.assertEqual(elapsed, 0)
+            self.assertEqual((out / "clock-stdout.log").read_bytes(), completed.stdout)
+            self.assertEqual((out / "clock-stderr.log").read_bytes(), b"")
+
 
 if __name__ == "__main__":
     unittest.main()
