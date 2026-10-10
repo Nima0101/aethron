@@ -1,0 +1,52 @@
+{
+  "review_order_version": 3,
+  "scope": "C08 and C09 historical working-copy source retrieval",
+  "decision": "CLARIFY",
+  "full_component_review_complete": false,
+  "records": [
+    {
+      "report": "docs/engineering/aethron-ecosystem/evidence/phase2/inspection-claims-review-v3.json",
+      "report_commit": "f4b44d755cb7b5914a291afaf563caa90aa0b692",
+      "report_sha256": "e05a00a27ca8cacab77dd44107b012470edbf9e813cd15f8a6a671dabf600852",
+      "external_source_bindings": [
+        {
+          "path": "integrations/edge/aethron_edge/sensors/recording_io.py",
+          "commit": "a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46",
+          "sha256": "08e60949edd62432397fb8a8eee9854624897335757801dddda994d6e44f277e"
+        },
+        {
+          "path": "integrations/edge/aethron_edge/sensors/cloud_inspect.py",
+          "commit": "a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46",
+          "sha256": "2e866dec1201203488d9264687a17d3eeb54bbb44248607c671807be8e94b42b"
+        }
+      ]
+    },
+    {
+      "report": "docs/engineering/aethron-ecosystem/evidence/phase2/appliance-claims-review-v3.json",
+      "report_commit": "be4086c6ea1e0d579c7d1d83ed0f5a8055d758b3",
+      "report_sha256": "9aac0da29550b69038bb2b34585c04dee52aa7e9d753e2954e5c08bea7eb4ed4",
+      "external_source_bindings": [
+        {
+          "path": "integrations/edge/aethron_edge/sensors/provisioning.py",
+          "commit": "a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46",
+          "sha256": "655ef8f8798e373dac9ba46bf7048ff0160320fb312bffb8f2e88920f62c2905"
+        }
+      ]
+    }
+  ],
+  "checks": {
+    "report_bytes_verified": 2,
+    "protected_main_source_bytes_verified": 3,
+    "original_reports_modified": false,
+    "product_sources_modified": false,
+    "runtime_tests_rerun": false
+  },
+  "limits": [
+    "Bindings identify publicly retrievable bytes, not authenticated execution.",
+    "Original working-copy review notes and prior negative evidence remain unchanged.",
+    "No new KEEP/MIGRATE, sensor performance, boot/soak or hardware qualification."
+  ],
+  "documentation_sha256": {
+    "docs/engineering/aethron-ecosystem/P21-WORKING-COPY-PROVENANCE-V3.md": "b37aaf9808f1995c25d50394ce2c2f5e0d0cb7e32a5a285ccb2fbcfc555d7114"
+  }
+}
