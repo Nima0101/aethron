@@ -10,9 +10,9 @@ transport authorization remain separate work.
 Requirements are bounded configuration bytes, a pinned offline trust root,
 verified content provenance, expiry using trusted time, a caller-supplied durable
 rollback floor, no device identity/location data and no hardware assumptions.
-The configuration must remain portable across qualified host runtimes; parsing
-has no real-time requirement. No new network service or privileged installer is
-needed for local admission.
+The JSON boundary is portable; qualification of a particular host runtime is
+not established by this format. Parsing has no specified real-time deadline.
+No network service or privileged installer is needed for local admission.
 
 Reviewed primary sources:
 - [TUF specification](https://theupdateframework.github.io/specification/):
@@ -26,16 +26,15 @@ Reviewed primary sources:
   [OpenSSL pkeyutl](https://docs.openssl.org/3.5/man1/openssl-pkeyutl/):
   credible verification implementations with different runtime/packaging costs.
 
-Select a strict Python data parser composed with the existing OpenSSL Ed25519
-bundle verifier. This keeps signature verification in a maintained crypto
-implementation and avoids a new process boundary, persistent service or native
-binding for a 2048-byte configuration. Go's standard-library Ed25519 and Rust
-verifier libraries are credible for a future independent daemon, but would need
-an executable distribution and IPC contract here. A TUF client adds repository
-roles and metadata not supplied by this offline bundle format; RAUC adds slot
-and platform integration outside this admission component. Existing code has no
-exemption: its verifier is reused only for its signed-byte and regular-file
-contracts. This is not a TUF/Uptane/RAUC compliance or compromise-resilience claim.
+The [fresh V3 review](fleet-policy-review-v3.md) retains strict Python admission
+composed with the shared native OpenSSL verifier. Verification already launches
+an OpenSSL subprocess; there is no process-free implementation claim. Native
+alternatives can use bindings and do not inherently require IPC or a daemon.
+The decision rests on strict bounded parsing, immutable results and one shared
+verification boundary, not existing tooling or rewrite cost. A TUF client adds
+roles and metadata absent from this offline format; RAUC adds platform/slot
+integration outside this component. This is not a TUF/Uptane/RAUC compliance or
+compromise-resilience claim.
 
 ## Frozen additive v1 contract
 
@@ -47,6 +46,22 @@ digest again, so replacement after bundle verification cannot change the policy.
 The caller must supply a locally pinned public key and an administrator-controlled
 bundle directory. Full bundle verification retains the existing v1 limits and
 may read all signed payloads; this is not an untrusted network request handler.
+
+The key file must be a regular non-symlink file of at most 1024 bytes containing
+one `PUBLIC KEY` PEM block. Its canonical Base64 decodes to the exact 44-byte
+RFC 8410 Ed25519 SubjectPublicKeyInfo shape: prefix
+`302a300506032b6570032100` and 32 public-key bytes, with no ASN.1 parameters or
+trailing DER. LF/CRLF body wrapping is accepted. The loader privately snapshots
+these admitted key bytes before the verifier reads them. This is an algorithm
+and encoding allowlist, not certificate validation or trust-root distribution.
+
+The shared v1 verifier currently permits a 2 MiB manifest, 8192 signed members
+and 512 MiB per payload. Its inventory walk and payload hashing have no overall
+wall-clock deadline; the five-second OpenSSL timeout bounds only that subprocess
+operation. The 2048-byte policy limit therefore does not bound all bundle work.
+The caller must protect the directory, key selection, executable search path
+and temporary-file environment. This loader is not a defense against a malicious
+administrator or a same-user process that can modify its private scratch files.
 
 Policy JSON is strict UTF-8, at most 2048 bytes, with exactly these fields:
 
@@ -76,10 +91,21 @@ installation may use floor 1; existing installations must supply their durable
 floor. Policy lifetime never renews on load. `batch_size` and provisioning flags
 are constraints for the future executor, not implemented rollout behavior.
 
-## Focused implementation plan
+## Verification and qualification limits
 
-1. Write real signed-bundle tests before implementation: time/version boundaries,
-   schema/privacy rejection, tamper, wrong key and post-verification replacement.
-2. Implement the immutable policy and loader in `runtime/fleet_policy.py`.
-3. Run only focused tests/lint/security; keep prior fleet-health staging intact
-   until its pending commit-bridge request is fulfilled. No frozen core changes.
+Seventeen focused tests exercise real synthetic Ed25519 signatures, wrong roots,
+tampering, time/version bounds, strict encodings and replacement races. They also
+reject an RSA signature of the same length under an RSA root and malformed key
+profiles. These establish tested software behavior, not cryptographic-module
+certification, deployment readiness or the truth of signed declarations.
+
+`load_fleet_policy` evaluates the supplied time once; it cannot notice elapsed
+time during verification. Consumers needing a post-verification check must use
+the separately reviewed admission boundary and revalidate at use. No returned
+object is lasting permission to deploy.
+
+This format implements neither encryption at rest/in transit, MLS isolation,
+CNSA/Suite B compliance, threshold signing nor key rotation/revocation metadata.
+It provides no hard real-time or uptime guarantee. Insufficient information for
+tactical deployment. Separate versioned protocols and exact qualification
+evidence would be required for any broader claim.

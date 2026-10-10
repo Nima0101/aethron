@@ -1,0 +1,58 @@
+{
+  "audit_policy_version": 3,
+  "component": "P3.4 signed local policy loader and key profile",
+  "reviewed_head": "c7ee8fd2495d1dd1347b5347953ef37e942a26b9",
+  "decision": "KEEP implementation; RETRACT/CLARIFY stale process, resource and qualification prose",
+  "production_change": false,
+  "required_migrations": [],
+  "source_sha256": {
+    "integrations/edge/aethron_edge/runtime/fleet_policy.py": "1ea88dcd1fa38d87298dcd127eda82a1c6576f593a0b8676ad8ef7bccb01505f",
+    "integrations/edge/aethron_edge/runtime/updates.py": "bcc1756c6697482f582e0b9763da00380f873c7f26eb5b10aed949440d63fa5a",
+    "integrations/edge/aethron_edge/runtime/_regular_file.py": "645639c5e002102cc33e1afa126e57b5e93086630f52bf4026c22be1ef94499b",
+    "integrations/edge/aethron_edge/config.py": "9f3fa5429a7bfeae0d98cfd5c8f9ab74441b5b7b9ff9c08b03c2c604d6cf55e8",
+    "tests/integration/test_fleet_policy.py": "2da4d98e8b1899147ba885601156a3b7e37fd823ae0c948a6e9685e097987631",
+    "tests/integration/test_fleet_admission.py": "eeae6ba8229e3c8d6af58d7882dbef5acdc1e2833d268f8ebf5587a1a29cf361",
+    "tests/integration/test_fleet_plan.py": "adcbf642b830922fafcd043c573547c23e27be413f631532c1f4052552bd945b",
+    "tests/integration/test_fleet_claim.py": "23ed63edd72d105c32b65f09a1bd174206591f968d1541f080c82eeffeea098e"
+  },
+  "environment": {
+    "python": "3.13.5",
+    "openssl": "OpenSSL 3.5.6 7 Apr 2026 (Library: OpenSSL 3.5.6 7 Apr 2026)"
+  },
+  "focused_tests": {
+    "policy": 17,
+    "admission": 15,
+    "plan": 15,
+    "claim": 11,
+    "total": 58,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_seconds": 13.521
+  },
+  "checks": {
+    "ruff": "PASS",
+    "bandit": "PASS; no production findings",
+    "commit_identity": "Prior health review bridge verified: author and committer noreply",
+    "peer_dependency": "updates.py SHA-256 equals origin/main at a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46"
+  },
+  "retained_negative_evidence": "docs/verification/fleet-policy-technology-audit-v2.json",
+  "current_negative_cases": [
+    "RSA root with 64-byte signature is rejected; not an Ed25519 forgery",
+    "13 malformed/ambiguous key profiles rejected before verifier",
+    "Wrong root, modified policy, malformed encoding and stale policy rejected",
+    "Original key path replacement cannot change admitted key bytes",
+    "Policy replacement/link substitution after verification cannot change admitted bytes"
+  ],
+  "corrections": [
+    "Shared verifier already launches a process; native alternatives need not use IPC",
+    "Policy byte bound is distinct from bundle member/hash/inventory work",
+    "Exact current Ed25519 PEM/SPKI key profile documented",
+    "No host, CNSA/MLS, realtime or availability qualification implied"
+  ],
+  "limitations": [
+    "Fresh tests are software evidence only; later components are regression-tested but not newly V3-reviewed here.",
+    "No new production defect, comparative performance benchmark or full alternative implementation established.",
+    "No whole-operation wall-clock deadline; local protected directory/executable environment required.",
+    "No full matrix, container, broad fuzz or clean clone run locally."
+  ]
+}
