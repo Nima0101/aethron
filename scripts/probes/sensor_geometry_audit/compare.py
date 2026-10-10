@@ -60,6 +60,8 @@ def outcome(camera, operation, args):
 
 
 def main():
+    if tracemalloc.is_tracing():
+        raise ValueError("geometry_audit_tracing_active")
     spec = {"width": 640, "height": 480, "fx": 400.0, "fy": 400.0, "cx": 320.0, "cy": 240.0}
     cameras = {"production": Pinhole(**spec), "numpy": NumpyPinhole(**spec)}
     cases = [
@@ -140,9 +142,11 @@ def main():
         result = {}
         for key in cameras:
             tracemalloc.start()
-            output = run(cameras[key])
-            peak = tracemalloc.get_traced_memory()[1]
-            tracemalloc.stop()
+            try:
+                output = run(cameras[key])
+                peak = tracemalloc.get_traced_memory()[1]
+            finally:
+                tracemalloc.stop()
             del output
             result[key] = {
                 "cpu_p50_ms": statistics.median(samples[key]["cpu"]),

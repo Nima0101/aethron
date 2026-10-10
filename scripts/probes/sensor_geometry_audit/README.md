@@ -30,6 +30,13 @@ report therefore does not prove parity of every measured call. The report retain
 aggregate measurements, not the individual timing samples. Historical reports
 are not requalified by the new mode guard.
 
+The comparison requires exclusive process ownership of allocation tracing. It
+rejects an active `tracemalloc` session before constructing cameras, preserving
+the caller's traces. Each owned allocation pass stops tracing in `finally`,
+including on candidate exceptions, interrupts and failed peak reads. This is
+not synchronization against concurrent tracing changes. Reported traced peaks
+are not total process/native memory or resource ceilings.
+
 Focused evidence-admission checks (no timing matrix):
 
 ```sh
