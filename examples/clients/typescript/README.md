@@ -65,6 +65,22 @@ clear the observation and reject with `invalid_event`; health/gap events clear
 the view without resetting the sequence check. These checks do not prove transit
 freshness, so current state remains UNKNOWN.
 
+Stream decoding bounds each complete wire event to 65,536 bytes, independently
+of fetch chunk boundaries. The supported API-v1 profile uses LF or CRLF, optional
+`event: scene|health|gap`, and JSON assembled from all `data:` lines. Named events
+must match the JSON kind. Comments do not refresh observations. Duplicate JSON
+keys (including escaped spellings), excessive nesting, malformed UTF-8/JSON,
+truncated events, and unsupported history/retry fields fail closed. Errors use
+`invalid_event`, or `event_limit` for an oversized wire event, without input echo.
+This is a strict AETHRON profile, not a general EventSource parser: bare CR and
+BOM-prefixed framing are not accepted. No automatic reconnect or event history
+is introduced.
+
+Known interoperability boundary: the current producer measures the JSON payload
+alone against 65,536 bytes, so its maximum payload plus SSE framing exceeds this
+client's complete-event bound. That case is retained as a rejection fixture and
+requires producer contract reconciliation; the client limit has not been raised.
+
 The implementation uses authenticated fetch streaming rather than EventSource token URLs. The candidate server rejects Origin headers and cross-origin access; the executed evidence is Node on loopback. Browser deployment needs a separately reviewed same-origin/authenticated TLS integration, and is not claimed from the Node test. No CDN is required.
 
 From the repository root, `scripts/edge_node_e2e.py` installs the packed artifact outside this package and tests it against a real server. The server and Python client instructions are in [edge usage](../../../docs/usage-edge.md).

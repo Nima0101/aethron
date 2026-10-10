@@ -17,7 +17,7 @@ baseline. Their absence is outstanding software work, not an external gate.
 | --- | --- |
 | Versioned contract consumption and runtime admission | MIGRATE to generated AJV validators; executable evidence below |
 | Observation ownership, clocks and projection | KEEP TypeScript/host clock; MIGRATE ordinary fields/full scene to native private fields/minimal projection; evidence below |
-| Authenticated stream/session/renderer lifecycle | Pending reassessment; existing regression suite retained |
+| Authenticated stream/session/renderer lifecycle | In progress: migrate ingress framing/JSON admission; HTTP/session/cleanup decisions and producer size reconciliation remain |
 | Package distribution and contract fixture tooling | Pending reassessment; migration package verification below is a regression check |
 
 P1.5 supplies `scripts/edge_generate_types.py`, `scripts/edge_node_e2e.py` and
@@ -159,3 +159,69 @@ Raw measurements, hashes, failures and package verification are in the
 
 The next cursor is authenticated stream/session/renderer lifecycle. Distribution
 and shared producer reconciliation also remain; no audit completion is claimed.
+
+## Third component, ingress slice: stream framing and JSON admission
+
+Baseline `30895273dfa0260e9e3a5a59c631b46f6d03ada2`. Requirements derive from
+[API-v1](API-CONTRACT.md): bearer headers, no persisted event history or automatic
+replay, ordered session-bound scene/control events, bounded UTF-8 JSON, unique
+keys, and fixed errors without input echo. The consumer is a Node ESM package;
+native OS networking is not required. Fetch chunk boundaries are not event
+boundaries. Current-state UNKNOWN and independent render-time expiry remain.
+
+Current primary-source comparison (2026-10-10):
+
+| Candidate | Decisive property for this deployment |
+| --- | --- |
+| Native EventSource | The [standard constructor and reconnection behavior](https://html.spec.whatwg.org/multipage/server-sent-events.html) do not provide this client's arbitrary bearer-header option and introduce reconnect/history semantics requiring a separate integration. Token URLs are excluded by the contract. |
+| Fetch + `eventsource-parser` | Its [implementation](https://github.com/rexxars/eventsource-parser/blob/main/src/parse.ts) handles general SSE framing, but the buffer guard measures string characters, not complete raw event bytes; JSON duplicate-key admission is outside its purpose. A byte-bound and strict JSON adapter would still be necessary. No library defect is claimed from these differing requirements. |
+| Kotlin/Ktor | [Client SSE](https://ktor.io/docs/client-server-sent-events.html) provides coroutine sessions, header configuration and deserialization. The exact wire byte cap, duplicate-key handling and no-history policy still need explicit adapters. A JVM runtime or Kotlin/JS export adds a deployment boundary without replacing these guards in the Node client. |
+| Dart HTTP streaming | [HttpClient](https://api.dart.dev/dart-io/HttpClient-class.html) and [request abort](https://api.dart.dev/dart-io/HttpClientRequest/abort.html) provide a credible native streaming lifecycle. They do not directly deliver the Node module interface or the strict AETHRON wire admission layer. |
+| C eventsource client | [eventsource-c](https://github.com/rexxars/eventsource-c) exposes bounded parser buffers and incremental polling, a credible embedded choice. A native bridge and lifetime rules would be required for this JS package; there is no demonstrated embedded/network bottleneck to justify that boundary. |
+| TypeScript + host fetch + bounded profile decoder | Direct header/cancellation integration, one reusable fixed byte buffer, strict object preflight and native JSON grammar validation satisfy the measured ingress requirements without another runtime. Explicitly limited to the published producer profile plus CRLF/multiline interoperability, not arbitrary SSE. |
+
+Decision for this slice: **KEEP TypeScript/fetch; MIGRATE concatenated decoded
+chunks to a bounded incremental wire decoder and duplicate-aware JSON preflight.**
+Language choice follows the deployment interface and byte-admission requirements;
+alternative compilers were not benchmarked or rejected for being unavailable.
+The narrow decoder has a maintenance cost: its supported profile is explicit and
+its lexical/framing boundaries have executable tests. General SSE packages remain
+preferable if requirements later expand to general EventSource semantics.
+
+Twelve focused regressions failed before implementation: a large fetch chunk
+containing many valid events was rejected, CRLF and multiline data were mishandled,
+UTF-8 size was undercounted, duplicate root/escaped/nested keys were lost, named
+event mismatch and a second data object were ignored, partial input was discarded,
+and malformed JSON echoed a private marker in its error. All twelve pass after
+migration. Additional cases freeze the inclusive 65,536-byte raw event boundary,
+the producer mismatch below, and 36 valid lexical/chunk combinations plus invalid
+grammar, depth, UTF-8 and history-field cases. No large fuzz run is claimed.
+
+A further regression failed after the initial decoder migration: malformed input
+could leave the last projection admitted while `reader.cancel()` was pending.
+The client now clears the projection and decoder before awaiting cancellation;
+the deterministic watchdog test passes. This does not yet bound cancellation
+completion or guarantee the subsequent DELETE when cancellation never settles.
+
+`WireDecoder` retains at most one 65,536-byte wire buffer, processes each byte once
+for framing, and parses only complete LF/CRLF events. It zeroes the used buffer on
+dispatch and cleanup. This does not bound upstream fetch allocations or claim
+physical memory erasure. A depth-eight lexical preflight detects decoded duplicate
+keys before native JSON parsing; native parsing still validates grammar and AJV
+still validates the resulting schema. Comments are inert; event names, when
+present, must match JSON kind. Existing unnamed data-only clients remain accepted.
+Bare-CR, BOM-prefixed framing, ID/retry fields and incomplete events are rejected.
+
+Retained negative evidence: `service/events.py` currently caps JSON payload bytes,
+whereas API-v1 says 64 KiB per event. A synthetic 65,536-byte JSON payload passes
+that producer size calculation but exceeds the client's complete-wire-event cap.
+The fixture explicitly expects rejection, not interoperability success. This is
+handed to the producing foundation lane; no peer code or frozen limit was changed.
+The transport audit cursor remains open for that reconciliation and for HTTP
+response/session/cleanup admission. In particular, this slice does not claim
+lexical integer-form enforcement, bounded session-response parsing, general SSE
+compliance, live-server qualification or completed client security review.
+
+Source-bound regression and package results are retained in the
+[ingress evidence](evidence/phase3/p33-stream-ingress-audit-v2.json). Earlier negative
+evidence remains unchanged. There is still no audit-complete marker.

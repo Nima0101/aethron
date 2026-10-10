@@ -1,4 +1,5 @@
 import validators from './validators.cjs';
+import {WireDecoder} from './wire.js';
 import type {HealthEvent, SceneEnvelope} from './types.js';
 
 const {validateScene: validate, validateHealth} = validators;
@@ -79,24 +80,17 @@ export async function observe(base: string, token: string, profile: string,
     const response = await fetch(`${base}/api/v1/sessions/${handle}/events`, {headers, signal: eventSignal});
     if (!response.ok || !response.body) throw new Error('stream_unavailable');
     const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8', {fatal: true});
-    let pending = '';
+    const decoder = new WireDecoder();
     let lastSequence = -1;
     try {
       while (true) {
         const chunk = await reader.read();
-        if (chunk.done) break;
-        pending += decoder.decode(chunk.value, {stream: true});
-        if (pending.length > 65536) throw new Error('event_limit');
-        let index: number;
-        while ((index = pending.indexOf('\n\n')) >= 0) {
-          const event = pending.slice(0, index); pending = pending.slice(index + 2);
-          const data = event.split('\n').find(line => line.startsWith('data: '));
-          if (!data) throw new Error('invalid_event');
-          const message: unknown = JSON.parse(data.slice(6));
+        if (chunk.done) { decoder.finish(); break; }
+        for (const {name, value: message} of decoder.feed(chunk.value)) {
           const incoming = message as SceneEnvelope | HealthEvent;
           if ((!validate(message) && !validateHealth(message)) ||
-              incoming.session !== handle || incoming.sequence <= lastSequence) {
+              incoming.session !== handle || incoming.sequence <= lastSequence ||
+              (name !== undefined && name !== incoming.kind)) {
             value.disconnect();
             throw new Error('invalid_event');
           }
@@ -106,7 +100,7 @@ export async function observe(base: string, token: string, profile: string,
           display(value.view());
         }
       }
-    } finally { await reader.cancel(); }
+    } finally { value.disconnect(); decoder.clear(); await reader.cancel(); }
     if (renderFailed) throw renderError;
   } catch (error) {
     // Surface the renderer failure through the observer promise, not the timer.
