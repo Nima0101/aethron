@@ -60,6 +60,9 @@ class RGBDetector:
                     {},
                 ],
             )
+            # An EP execution failure must reach the worker's model_error path,
+            # never rebuild/retry the session on CPU under a Core ML label.
+            self.ort_session.disable_fallback()
             require("CoreMLExecutionProvider" in self.ort_session.get_providers())
             inputs = self.ort_session.get_inputs()
             outputs = self.ort_session.get_outputs()
