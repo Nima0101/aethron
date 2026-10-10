@@ -17,6 +17,90 @@ from unittest.mock import patch
 import test_sensor_intensity_replay as fixtures
 
 
+class IntensityInspectionDiagnostics(unittest.TestCase):
+    def test_help_uses_public_module_name_not_invocation_name(self):
+        from aethron_edge.sensors.intensity_inspect import main
+
+        output, errors = io.StringIO(), io.StringIO()
+        with (
+            patch.object(sys, "argv", ["/private/private-invocation-sentinel", "--help"]),
+            redirect_stdout(output),
+            redirect_stderr(errors),
+        ):
+            with self.assertRaises(SystemExit) as result:
+                main()
+        self.assertEqual(result.exception.code, 0)
+        self.assertEqual(errors.getvalue(), "")
+        self.assertNotIn("private-invocation-sentinel", output.getvalue())
+        self.assertIn("aethron_edge.sensors.intensity_inspect", output.getvalue())
+        self.assertIn("--recording", output.getvalue())
+        self.assertIn("--pixel", output.getvalue())
+
+    def test_argument_errors_do_not_echo_private_values(self):
+        from aethron_edge.sensors.intensity_inspect import main
+
+        valid = [
+            "--recording",
+            "/private/recording-sentinel",
+            "--calibration",
+            "/private/calibration-sentinel",
+            "--expected-calibration-sha256",
+            "0" * 64,
+            "--pixel",
+            "0",
+            "0",
+        ]
+        for args in (
+            [],
+            [*valid, "--private-option-sentinel"],
+            [*valid, "--pixel", "private-pixel-sentinel", "0"],
+            [*valid, "--max-frames", "private-count-sentinel"],
+        ):
+            with self.subTest(args=args):
+                output, errors = io.StringIO(), io.StringIO()
+                with (
+                    patch.object(sys, "argv", ["private-invocation-sentinel", *args]),
+                    redirect_stdout(output),
+                    redirect_stderr(errors),
+                ):
+                    with self.assertRaises(SystemExit) as result:
+                        main()
+                self.assertEqual(result.exception.code, 2)
+                self.assertEqual(output.getvalue(), "")
+                self.assertEqual(errors.getvalue(), "invalid_intensity_inspection\n")
+
+    def test_file_error_does_not_echo_private_exception_or_path(self):
+        from aethron_edge.sensors import intensity_inspect as api
+
+        args = [
+            "private-invocation-sentinel",
+            "--recording",
+            "/private/recording-sentinel",
+            "--calibration",
+            "/private/calibration-sentinel",
+            "--expected-calibration-sha256",
+            "0" * 64,
+            "--pixel",
+            "0",
+            "0",
+        ]
+        output, errors = io.StringIO(), io.StringIO()
+        with (
+            patch.object(sys, "argv", args),
+            patch.object(
+                api, "regular_file", side_effect=OSError("private-error-sentinel")
+            ) as read,
+            redirect_stdout(output),
+            redirect_stderr(errors),
+        ):
+            with self.assertRaises(SystemExit) as result:
+                api.main()
+        read.assert_called_once_with(Path("/private/calibration-sentinel"), 65536)
+        self.assertEqual(result.exception.code, 2)
+        self.assertEqual(output.getvalue(), "")
+        self.assertEqual(errors.getvalue(), "invalid_intensity_inspection\n")
+
+
 class IntensityInspection(unittest.TestCase):
     def test_report_retains_metadata_but_late_rejection_discloses_no_report(self):
         from aethron_edge.sensors.intensity_inspect import main

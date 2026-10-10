@@ -1,4 +1,4 @@
-"""Bounded offline intensity inspection; stdout is emitted only after complete success."""
+"""Offline intensity inspection; reports are buffered until input validation succeeds."""
 
 import argparse
 import hashlib
@@ -38,7 +38,7 @@ def main():
     retained. Buffering prevents reports on input rejection, not partial writes
     if the output destination itself fails. Callers own access and retention.
     """
-    parser = _Parser(description=__doc__)
+    parser = _Parser(prog="aethron_edge.sensors.intensity_inspect", description=__doc__)
     parser.add_argument("--recording", required=True, type=Path)
     parser.add_argument("--calibration", required=True, type=Path)
     parser.add_argument("--expected-calibration-sha256", required=True)
