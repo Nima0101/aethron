@@ -883,3 +883,63 @@ unqualified hardware/security/availability claims remain explicit. No complete
 Help Center, integrated application, P19 acceptance or audit-completion claim is
 made. Next earliest unfinished component: supported-browser execution and the
 P12 host refresh/lifecycle adapter, after delivering this correction.
+
+## P12 display host lifecycle and guidance review
+
+Baseline `c6db2d6a992e8a7610f0f4221bf3e7face8fa6b0`. Verified the bridge's
+eleven files, 64 source bindings and eight retained reports, then published the
+panel and its correction to PR #44. Restarted at SDK admission/private projection,
+then wire/session admission, contract/validator generation, offline package
+lifecycle, Python/Node real-service harness and presenter/panel source. The
+re-entry guards match the preceding regressions. No new SDK defect or migration
+winner was demonstrated. KEEP the static JavaScript-host API with explicit runtime
+schema guards, native Fetch/Streams, Node generation and Python's actual service
+fixture ownership. The open-universe alternatives and constraint comparisons in
+the component sections above remain applicable to this reviewed source; no new
+performance benchmark or target-platform qualification was performed.
+
+Fetched `origin/main` at `fce89d3904ddbfb004b55718fab955c91a9c49a0`;
+the newly merged sensor documentation does not change the consumed client API.
+No peer source or shared policy was edited. The single pre-push PR snapshot at
+`2f22c34` was queued/behind. Publication advanced it to `c6db2d6` without waiting
+or polling. `gh pr edit` failed on its classic-projects GraphQL query; the same
+sanitized title/body update succeeded through the pull-request REST endpoint.
+
+The next demonstrated software gap was the absence of a display lifecycle owner.
+SELECT TypeScript/native page events for `mountObservationHost`. The fixed source
+interface has only fresh `view()` and `disconnect()`. The adapter clears on mount,
+suspension, reactivation and disposal, keeps a single requested 20 ms timer only
+while visible, suppresses inactive reads and removes its five listeners on
+disposal. Source-clear or scheduler failures latch invalid guidance until remount;
+reader errors withdraw details and can recover independently. It never starts or
+stops a transport session, authenticates a source, or upgrades delayed data to
+current evidence. Callers must own ingress cancellation and source authorization.
+
+The deployment constraint is an offline browser-hosted aggregate display with
+explicit lifecycle and no queued history. Compared plain ECMAScript, Lit reactive
+controllers, Elm ports and ReScript bindings. Native typed DOM access meets this
+small boundary without a runtime framework; Lit component connection hooks do
+not replace page visibility/suspension handling, while Elm/ReScript still need
+native-event integration. These are scoped interface comparisons, not runtime
+performance rankings. Official [page lifecycle guidance](https://developer.chrome.com/docs/web-platform/page-lifecycle-api)
+describes task suspension and omitted discard events, so timers are requested
+refreshes, never a real-time or reliable suspend-detection claim. The closed
+[P12-003 ADR](../../../examples/operator/lifecycle-adr.json) records alternatives,
+primary sources, constraints and four C4 views.
+
+Eleven missing-adapter assertions failed before implementation. Further tests
+cover reset re-entry, source-read suspension, repeated activation and closed ADR
+claims. Two additional failing guidance assertions exposed an integration mismatch:
+the existing unavailable help blamed unsupported data even for source/scheduler
+failure. English and Swedish guidance now describes unavailable display and
+client/service status without inventing a wire-format diagnosis. Topic IDs and
+view contracts remain unchanged. See [source-bound results](evidence/phase3/p12-lifecycle-v1.json).
+
+These tests use controlled clocks/events with the actual SDK and a structural DOM.
+The Node-tested SDK archive still needs a compatible browser build for complete
+browser ingress; the host and panel themselves compile to ESM. Existing browser
+probe failures, inaccessible browser/assistive-technology acceptance and the
+producer-payload/full-event size discrepancy remain recorded. No full operator
+application, release-bound role-aware Help Center, P19 or lane completion is
+claimed. Next earliest unfinished component: browser-compatible SDK composition
+and a supported-browser lifecycle/keyboard harness.

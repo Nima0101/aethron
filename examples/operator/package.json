@@ -6,7 +6,7 @@
   "license": "GPL-3.0-only",
   "scripts": {
     "build": "node ../clients/typescript/node_modules/typescript/bin/tsc -p tsconfig.json",
-    "test": "npm run build --prefix ../clients/typescript && npm run build && node --test presenter.test.mjs panel.test.mjs"
+    "test": "npm run build --prefix ../clients/typescript && npm run build && node --test presenter.test.mjs panel.test.mjs lifecycle.test.mjs"
   },
   "devDependencies": {
     "linkedom": "0.18.13"

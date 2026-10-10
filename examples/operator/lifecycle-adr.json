@@ -1,0 +1,52 @@
+{
+  "id": "P12-003",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "Use TypeScript/native page lifecycle events for a read-only observation display host; clear the source on mount, suspension, reactivation and disposal, and request one 20 ms refresh interval only while visible.",
+  "constraints": [
+    "Offline browser DOM with a caller-owned admitted source and authorization; no new transport or credentials.",
+    "No queued views or personal identifiers; UNKNOWN remains current state; en and sv-SE panel guidance survives lifecycle changes.",
+    "Visibility/page suspension can delay or omit callbacks. Requested timer intervals are not real-time guarantees; a resumed view must not reuse observations admitted while inactive."
+  ],
+  "alternatives": [
+    {
+      "technology": "TypeScript / native DOM events",
+      "assessment": "Selected: expresses source/disposal contracts with static DOM checks and no deployed framework. The adapter controls the single timer and five listeners explicitly. The source remains a runtime-validated host boundary."
+    },
+    {
+      "technology": "Plain ECMAScript / native DOM events",
+      "assessment": "Equivalent execution capabilities; checked annotations or separate declarations are needed to preserve the same static consumer contract. No runtime speed advantage measured."
+    },
+    {
+      "technology": "Lit reactive controller",
+      "assessment": "Provides hostConnected/hostDisconnected lifecycle composition. Page visibility, freeze and restored-page revocation still need explicit listeners independent of custom-element connection. A future component system may justify it; this adapter has no custom-element requirement."
+    },
+    {
+      "technology": "Elm ports",
+      "assessment": "Message-driven application model and JavaScript ports are credible for a full application. The source clearer, native page events and timer remain external subscriptions; no material advantage established for this small synchronous host boundary."
+    },
+    {
+      "technology": "ReScript JavaScript bindings",
+      "assessment": "Typed foreign-function bindings can express event and timer APIs. They do not provide missing browser scheduling guarantees or source authorization, and no measured benefit justifies migration of this boundary."
+    }
+  ],
+  "sources": [
+    "https://developer.chrome.com/docs/web-platform/page-lifecycle-api",
+    "https://lit.dev/docs/composition/controllers/",
+    "https://guide.elm-lang.org/interop/ports.html",
+    "https://rescript-lang.org/docs/manual/latest/bind-to-js-function"
+  ],
+  "limits": [
+    "Synthetic event/clock tests in a structural DOM do not qualify browser navigation, back-forward cache, accessibility, OS suspend or installed product behavior.",
+    "The source must be exclusively owned by this host. The adapter does not stop ingress, abort sessions, revoke external copies, validate permission or reset producer state.",
+    "Source clearer or scheduler failure latches invalid guidance until remount. Reader failures withdraw displayed details and may recover on a later independent read.",
+    "No hard-real-time, hardware, weapon integration, MLS/CNSA, DDS/Link16, five-nines or tactical deployment claim.",
+    "No full application, searchable role-aware release-bound Help Center or P19 acceptance."
+  ],
+  "c4": {
+    "context": "flowchart LR\nOperator --> Host[Read-only observation display host]\nAuthorizedSource[Caller-owned authorized source] --> Host\nBrowser[Page lifecycle] --> Host",
+    "containers": "flowchart LR\nSDK[Existing SDK observation] --> Host[Lifecycle adapter]\nHost --> Panel[Native DOM panel]\nPanel --> Presenter[Local bilingual presentation]\nBrowser[Browser events and scheduler] --> Host",
+    "components": "flowchart LR\nEvents[Visibility or page or freeze events] --> Reset[Clear source and stop timer]\nReset --> Active{Visible and no latched failure}\nActive --> Timer[One requested interval]\nTimer --> Read[Fresh source view]\nRead --> Panel[Panel admission]\nDispose[Dispose] --> Cleanup[Clear source timer listeners and panel]",
+    "code": "classDiagram\nclass ObservationSource {\n view() unknown\n disconnect() void\n}\nclass ObservationHost {\n refresh() void\n setLocale(locale) void\n dispose() void\n}\nObservationHost --> ObservationSource\nObservationHost --> Panel"
+  }
+}

@@ -40,6 +40,39 @@ current conditions remain UNKNOWN. Disposal removes listeners and owned content,
 clears the panel's text nodes, and makes later controller calls inert. It cannot
 erase strings another caller copied earlier or close a host transport session.
 
+For an exclusively owned source, `mountObservationHost` adds page lifecycle
+handling and one requested 20 ms refresh interval while the document is visible:
+
+```js
+import {mountObservationHost} from './dist/lifecycle.js';
+const host = mountObservationHost(root, observation, 'en');
+// Mount clears any earlier observation. After a new validated admission:
+host.refresh();
+// On logout or before removing/replacing this host:
+host.dispose();
+```
+
+The source must implement fresh `view()` and `disconnect()` methods; the SDK
+`Observation` satisfies that interface. Do not share its mutable instance with
+another display host or return cached views. Mount, hiding/freezing/page departure,
+reactivation and disposal clear the source. Hidden or suspended displays suppress
+details even if the caller continues ingesting. Reactivation clears observations
+admitted in the background and waits for a subsequent admission. Unsupported
+visibility states remain inactive. Disposal removes the timer and five lifecycle
+listeners as well as the panel. Late timer callbacks are inert.
+
+Source-clearing or timer-creation failure latches unavailable guidance; after
+repairing the host, dispose and remount it. Reader exceptions withdraw details
+without copying their text and can recover on a later independent read. The
+adapter performs no transport, authorization, ingress cancellation or remote
+cleanup. The caller must stop its own session on logout. It does not erase copies
+held elsewhere. Timer scheduling and page lifecycle delivery are browser/OS
+assumptions, not measured deadlines or a reliable suspend detector.
+
+The current SDK archive is tested for Node. The adapter and panel compile to ESM,
+but a complete browser distribution with admitted ingress still needs a compatible
+SDK build and browser acceptance; structural tests compose the real SDK under Node.
+
 The panel updates existing controls without replacing them on refresh. Content
 uses text nodes; status has polite/atomic live-region attributes. Those semantics
 still require real-browser keyboard/focus and assistive-technology acceptance.
@@ -66,4 +99,5 @@ availability or security certification follows from these tests.
 
 See the presenter [ADR](adr.json) and [schema](adr.schema.json), panel
 [ADR](panel-adr.json) and [schema](panel-adr.schema.json), and
-[panel implementation plan](RENDERER-PLAN.md).
+[panel implementation plan](RENDERER-PLAN.md). The optional host has its own
+[lifecycle ADR](lifecycle-adr.json) and [closed schema](lifecycle-adr.schema.json).

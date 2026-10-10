@@ -33,13 +33,13 @@ late calls after disposal; stable controls. No role controls or hidden admin hel
 - [x] Implement src/panel.ts with the interface and lifetime above.
 - [x] Run presenter plus panel tests, compiler, dependency audit and workflow lint.
 - [x] Record closed ADR/C4, evidence/limitations and CI dependency preparation.
-- [ ] Self-review and request cohesive bridge commit.
+- [x] Self-review and bridge commit (`1e99e94`); re-entry correction (`c6db2d6`), both published to PR #44.
 
 Actual browser keyboard/focus/screen-reader and customer-installed acceptance remain
 required. Two bounded Chromium probes timed out in this sandbox; no security flags
 will be disabled to produce a passing claim. P19 Help Center/search/roles, release
 inventory and integrated application remain unfinished.
 
-Verification: 8 initial assertion failures became 8 passes. Two additional retained-node/getter-disposal failures were corrected. Combined presenter/panel tests: 28 PASS, no skips. Dependency audit: zero known vulnerabilities. Workflow actionlint: PASS. Browser acceptance remains unexecuted.
+Initial panel verification: 8 assertion failures became 8 passes. Two additional retained-node/getter-disposal failures were corrected. The original combined presenter/panel run had 28 PASS, no skips. That checkpoint's dependency audit reported zero known vulnerabilities and workflow actionlint passed. Subsequent re-entry and lifecycle results are recorded in P33-REVIEW-V3.md; browser acceptance remains unexecuted.
 
 Self-review correction: unchanged refresh now preserves text nodes while re-reading the host. The original DOM identity assertion exhausted the test formatter heap; retained as negative evidence. Boolean identity assertion avoids recursive DOM formatting, and the original unconditional assignment is reproduced in an isolated test copy. No threshold or memory cap was raised.

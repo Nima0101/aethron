@@ -15,12 +15,12 @@ const guidance = {
   en: {
     expired: ['No current observation', 'The observation has expired or was cleared. No sensor details are available. Wait for a new validated observation.'],
     delayed: ['Delayed observation', 'These sensor details describe an earlier observation. Current conditions are UNKNOWN because transport freshness is not established.'],
-    invalid: ['Observation unavailable', 'The display received an unsupported observation. Sensor details were withdrawn. Check the client and service versions before retrying.'],
+    invalid: ['Observation unavailable', 'The client cannot display this observation. Sensor details were withdrawn. Check the client and service status before retrying.'],
   },
   'sv-SE': {
     expired: ['Ingen aktuell observation', 'Observationen har löpt ut eller rensats. Inga sensoruppgifter är tillgängliga. Vänta på en ny validerad observation.'],
     delayed: ['Fördröjd observation', 'Sensoruppgifterna beskriver en tidigare observation. Det aktuella tillståndet är UNKNOWN eftersom överföringens aktualitet inte har fastställts.'],
-    invalid: ['Observationen är inte tillgänglig', 'Visningen tog emot en observation som inte stöds. Sensoruppgifterna har tagits bort. Kontrollera klientens och tjänstens versioner innan du försöker igen.'],
+    invalid: ['Observationen är inte tillgänglig', 'Klienten kan inte visa observationen. Sensoruppgifterna har tagits bort. Kontrollera klientens och tjänstens status innan du försöker igen.'],
   },
 } as const;
 const sensors = new Set(['rgb', 'lwir', 'radar', 'depth', 'nir']);
