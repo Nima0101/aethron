@@ -563,3 +563,17 @@ fault, arbitrary interruption of cleanup, or exception in another adapter is
 qualified. The comparator candidates do not implement Python callable exceptions;
 existing finite-corpus parity does not cover this correction. The earliest-component
 technology review and later components remain incomplete.
+
+
+## Installed verification after completing local prerequisites
+
+The [focused installed verification](../verification/robotics-installed-clock-review-v3.md)
+resolves the preceding local import errors without changing their recorded results.
+After installing the existing hashed Pydantic dependency subset and locally built
+portable wheels, all 68 selected passive/signing/boot-clock/datagram/lifecycle tests
+passed under an isolated parent interpreter. Four checked production modules were
+loaded from site-packages and matched source bytes, including the clock-withdrawal
+fix. The nested isolated fresh-process replay test also passed. No test was skipped
+or weakened. The exact runner, source/wheel/log hashes and environment limitations
+are retained. This is bounded verification of the existing fix, not a new component,
+a production runtime decision, or full package/product qualification.
