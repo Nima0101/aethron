@@ -1,7 +1,7 @@
 // Copied into an external temporary project by package.test.mjs; no source imports.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {Observation} from 'aethron-edge-client-example';
+import {Observation, createObservationSource} from 'aethron-edge-client-example';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixture.json', import.meta.url), 'utf8'));
 const result = fixture.results[0];
@@ -39,4 +39,7 @@ for (const operation of ['disconnect', 'view', 'accept']) {
   assert.throws(() => observation.accept(interrupted, 400), {message: 'invalid_event'});
   assert.deepEqual(observation.view(400), expired);
 }
-console.log(JSON.stringify({checks: 11, current_state: 'UNKNOWN'}));
+const source = createObservationSource();
+assert.deepEqual(Object.keys(source).sort(), ['disconnect', 'start', 'view']);
+source.disconnect();assert.deepEqual(source.view(), expired);
+console.log(JSON.stringify({checks: 12, current_state: 'UNKNOWN'}));

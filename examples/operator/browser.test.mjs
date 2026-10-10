@@ -20,7 +20,7 @@ async function bundle() {
 
 test('standalone ESM exports only the public observation and presentation boundary',async()=>{
   const module=await bundle();
-  assert.deepEqual(Object.keys(module).sort(),['Observation','mountObservationHost','mountObservationPanel','observe','presentObservation']);
+  assert.deepEqual(Object.keys(module).sort(),['Observation','createObservationSource','mountObservationHost','mountObservationPanel','observe','presentObservation']);
   const result=module.presentObservation(new module.Observation().view(0),'en');
   assert.equal(result.state,'expired');
 });
@@ -150,4 +150,26 @@ test('bundled observer withdraws on abort and retires its timer after cleanup',a
   } finally {controller.close();assert.equal((await observed)?.message,'stream_unavailable');}
   assert.deepEqual(requests,['POST','GET','DELETE']);
   const count=views.length;tick();assert.equal(views.length,count);
+});
+
+test('bundled live source rechecks cancellation after a host clock read',async t=>{
+  const {createObservationSource}=await bundle(),source=createObservationSource();
+  const caller=new AbortController();let controller,signal;
+  t.mock.method(performance,'now',()=>0);
+  t.mock.method(globalThis,'setInterval',()=>assert.fail('live source must not own a scheduler'));
+  t.mock.method(globalThis,'fetch',async(url,options)=>{
+    if(options.method==='POST')return Response.json({source_profile:'bench',session:envelope.session});
+    if(options.method==='DELETE')return new Response(null,{status:204});
+    signal=options.signal;
+    return new Response(new ReadableStream({start(value){controller=value;}}));
+  });
+  const done=source.start('http://127.0.0.1:8765','synthetic-token','bench',caller.signal).then(()=>undefined,error=>error);
+  const turn=()=>new Promise(resolve=>setImmediate(resolve));
+  try {
+    await turn();controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(envelope)}\n\n`));await turn();
+    assert.equal(source.view().label,'delayed_observation');
+    t.mock.method(performance,'now',()=>{caller.abort();return 0;});
+    assert.equal(source.view().label,'expired');assert.equal(signal.aborted,true);
+  } finally {controller.close();await done;}
+  assert.equal((await done)?.message,'stream_unavailable');assert.equal(caller.signal.aborted,true);
 });

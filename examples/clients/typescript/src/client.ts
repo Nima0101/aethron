@@ -99,9 +99,65 @@ export class Observation {
   }
 }
 
+export interface LiveObservationSource {
+  view(): ObservationView;
+  disconnect(): void;
+  start(base: string, token: string, profile: string, signal: AbortSignal): Promise<void>;
+}
+
+/** One explicitly started session, with no callback snapshot cache or scheduler.
+ * The display host owns refreshes and must handle the start promise. */
+export function createObservationSource(): LiveObservationSource {
+  type Run = {value: Observation; stop: AbortController; signal: AbortSignal};
+  let current: Run | undefined;
+  let busy = false;
+  function disconnect(): void {
+    const previous = current;
+    current = undefined; // Revoke before abort can invoke host listeners.
+    previous?.value.disconnect();
+    previous?.stop.abort();
+  }
+  return {
+    view() {
+      const run = current;
+      const view = run && !run.signal.aborted ? run.value.view() : undefined;
+      // Host clock reads can reenter cancellation; publish only the same live run.
+      if (run && current === run && !run.signal.aborted && view) return view;
+      if (current === run) disconnect();
+      return {
+        label: 'expired', current_state: 'UNKNOWN', observed_state: 'UNKNOWN', sources: [], uncertainty: [],
+      };
+    },
+    disconnect,
+    async start(base, token, profile, signal) {
+      if (busy) throw new Error('observer_busy');
+      busy = true;
+      let run: Run | undefined;
+      try {
+        try {
+          const stop = new AbortController();
+          run = {value: new Observation(), stop, signal: AbortSignal.any([signal, stop.signal])};
+        } catch { throw new Error('stream_unavailable'); }
+        current = run;
+        await observeInto(base, token, profile, run.signal, run.value);
+      } finally {
+        if (current === run) current = undefined;
+        run?.value.disconnect();
+        run?.stop.abort();
+        busy = false;
+      }
+    },
+  };
+}
+
 /** Authenticated fetch streaming; credentials never enter URLs or persistent storage. */
 export async function observe(base: string, token: string, profile: string,
   display: (state: ReturnType<Observation['view']>) => void, signal: AbortSignal): Promise<void> {
+  return observeInto(base, token, profile, signal, new Observation(), display);
+}
+
+async function observeInto(base: string, token: string, profile: string, signal: AbortSignal,
+  value: Observation, display?: (state: ObservationView) => void): Promise<void> {
   const origin = endpointOrigin(base);
   const headers = {Authorization: `Bearer ${token}`, 'Content-Type': 'application/json'};
   const request = await fetch(`${origin}/api/v1/sessions`, {method: 'POST', headers, redirect: 'error',
@@ -112,7 +168,6 @@ export async function observe(base: string, token: string, profile: string,
     throw new Error('session_unavailable');
   }
   const handle = await readSession(request, profile);
-  const value = new Observation();
   let stop: AbortController | undefined;
   let timer: ReturnType<typeof setInterval> | undefined;
   let rendering = true;
@@ -125,7 +180,7 @@ export async function observe(base: string, token: string, profile: string,
       eventSignal = AbortSignal.any([signal, stop.signal]);
       // Setup is inside the admitted handle's cleanup scope as well as reception.
       // Independent render-time expiry, including a stalled response.
-      timer = setInterval(() => {
+      if (display) timer = setInterval(() => {
         if (!rendering || renderFailed) return;
         // Cancellation can precede the pending read's promise reaction.
         // A timer must not republish that session's earlier observation.
@@ -162,7 +217,7 @@ export async function observe(base: string, token: string, profile: string,
           lastSequence = incoming.sequence;
           if (incoming.kind === 'scene') value.accept(incoming);
           else value.disconnect();
-          display(value.view());
+          display?.(value.view());
           // A callback can abort while more events remain in this same chunk.
           if (eventSignal.aborted) throw new Error('stream_unavailable');
         }
@@ -182,7 +237,7 @@ export async function observe(base: string, token: string, profile: string,
     rendering = false;
     if (timer !== undefined) clearInterval(timer);
     stop?.abort(); value.disconnect();
-    try { if (!renderFailed) display(value.view()); }
+    try { if (!renderFailed) display?.(value.view()); }
     finally {
       await fetch(`${origin}/api/v1/sessions/${handle}`, {method: 'DELETE', headers, signal: AbortSignal.timeout(2000), redirect: 'error'})
         .then(discardResponse).catch(() => {});

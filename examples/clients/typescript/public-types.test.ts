@@ -1,4 +1,4 @@
-import {Observation, observe} from 'aethron-edge-client-example';
+import {Observation, observe, createObservationSource, type LiveObservationSource} from 'aethron-edge-client-example';
 
 const view = new Observation().view(0);
 const current: 'UNKNOWN' = view.current_state;
@@ -24,3 +24,11 @@ void observe('https://example.invalid', 'synthetic-token', 'bench', state => {
   const callbackCurrent: 'UNKNOWN' = state.current_state;
   void callbackCurrent;
 }, new AbortController().signal);
+
+const source: LiveObservationSource = createObservationSource();
+const sourceState: 'UNKNOWN' = source.view().current_state;
+source.disconnect();
+void source.start('https://example.invalid', 'synthetic-token', 'bench', new AbortController().signal);
+// @ts-expect-error Only the transport may admit data through this public source.
+source.accept({});
+void sourceState;

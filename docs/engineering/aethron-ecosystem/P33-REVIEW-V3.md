@@ -1124,3 +1124,79 @@ retained. An isolated retry with the same timeout passed all three package check
 including 11 installed runtime checks on each installation. Other lane activity
 was not controlled, so contention is not established as the cause. No timeout
 or frozen limit was increased.
+
+## P3.3/P12 fresh source composition
+
+Baseline `1f812e02407225c9f8f272651f3aebb2d124433b`. Re-read the complete
+current policy/review order and restarted from observation admission and session
+ownership. Verified the preceding commit's eight paths, 78 source hashes and nine
+reports before publishing it to PR #44. The single CI snapshot was queued/behind
+at `8ade520`; no polling or check bypass. The earlier compiler timeout remains
+negative evidence despite its unchanged-timeout retry passing.
+
+The source review followed admission/lease projection, bounded session and wire
+parsing, shared transport cleanup, generated contracts/validators, packed consumer
+allowlists, the actual-service harness, P12 presentation and page lifecycle, and
+browser packaging. Their existing separation remains appropriate: transport
+admission runs in executable client code; P12 renders fixed text from admitted
+aggregate views and does not confer source authorization or current presence.
+The Python harness still starts the existing service test fixture and executes an
+installed Node consumer; it is not deployed client code or a second server. No
+new language migration winner or changed producer contract was established in
+these source inspections. Historical component decisions are evidence inputs;
+this record does not assert full phase or product qualification.
+
+A concrete interoperability gap remained between two built components: the SDK's
+`observe()` callback returns snapshots, while `mountObservationHost` requires
+fresh `view()` and `disconnect()` methods. Saving callbacks would bypass read-time
+expiry and revocation. Seven missing-export regressions preceded the new
+`createObservationSource()` implementation. It exposes only a typed fresh view,
+disconnect and explicit asynchronous start. Both source and legacy callback API
+reuse one private transport function and the same decoder, session validator,
+schema admission and aggregate lease. The source has no display callback cache,
+extra timer, public accept method, retry or queued start.
+
+One private run owns its Observation and abort controller. Disconnect detaches it
+before aborting; fresh reads check both run identity and cancellation before
+returning. A separate busy gate rejects overlapping starts until the prior
+promise, including independent best-effort deletion, settles. This avoids a new
+session being cleared by an older cleanup. Explicit restart is possible afterward.
+A host-clock reentry test exposed a missing second cancellation check in the
+initial implementation; its failing result is retained and the check is now
+executed after reading the observation. This is a controlled host reentry case,
+not a claim about ordinary native clock behavior.
+
+SELECT TypeScript/native closure ownership for this composition. Fresh research
+compared direct typed host APIs, checked ECMAScript, tagged RxJS Subscription,
+Kotlin/JS and ReScript external bindings. The decisive requirement is one fresh
+pull reader with one owned asynchronous run, not reactive fan-out, cached replay,
+or shared JVM code. Alternatives still need the same explicit admission/expiry
+and host abort rules. No measured cross-language speed ranking or installed-tool
+preference is claimed. The [closed source ADR](../../../examples/clients/typescript/source-adr.json)
+records constraints, primary sources, candidate tradeoffs and four C4 views.
+
+Public declarations and external installed-consumer checks cover the new factory.
+The browser bundle exports it using the same closed dependency graph. A structural
+DOM integration mounts the host first, admits a wire observation, hides the page,
+checks immediate display withdrawal and transport abort, and confirms restoration
+does not authenticate again. A bundled case rechecks cancellation during a host
+clock read with string code generation disabled. The containing product still
+owns permissions and any explicit restart decision. Existing expiry/byte limits,
+current UNKNOWN semantics and versioned wire interfaces remain unchanged.
+
+[Composition evidence](evidence/phase3/p33-source-composition-v1.json) retains
+missing-component and reentry failures alongside focused transport, browser and
+packaging verification. Native browser lifecycle/keyboard and installed-product
+acceptance, release-bound role-aware P19 help, and the producer payload/whole-event
+cap discrepancy remain open. No completion marker is created. Next earliest
+unreviewed component: the containing browser connection/error flow and its
+contextual help inventory against the now-executable fresh source interface.
+
+The previous ReScript `/manual/latest/` link returned the generic landing page.
+The current function-binding manual was retrieved and both the new source ADR
+and existing lifecycle ADR now link to it. This corrects source attribution only;
+no framework performance claim or prior test outcome is retroactively changed.
+Final focused verification passed 205 SDK checks, 50 operator checks, 14 bundle
+checks and all three package lifecycle checks. The externally installed and
+reinstalled archive each passed 12 runtime checks, including the new factory
+surface; public declarations compiled against the installed package.

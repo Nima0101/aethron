@@ -132,3 +132,32 @@ test('lifecycle ADR uses a closed schema and cannot acquire unsupported qualific
   assert.equal(validate({...adr,qualified:true}),false);
   assert.equal(validate({...adr,c4:{...adr.c4,unreviewed:'claim'}}),false);
 });
+
+test('live SDK source composes with visibility withdrawal without caching callback views',async t=>{
+  const {createObservationSource}=await import('../clients/typescript/dist/client.js');
+  const s=setup(),source=createObservationSource(),caller=new AbortController(),requests=[];
+  Object.assign(s.source,source);
+  let controller,signal;
+  t.mock.method(performance,'now',()=>0);
+  t.mock.method(globalThis,'setInterval',()=>assert.fail('transport source must not create a second display timer'));
+  t.mock.method(globalThis,'fetch',async(url,options)=>{
+    requests.push({url,options});
+    if(options.method==='POST')return Response.json({source_profile:'bench',session:envelope.session});
+    if(options.method==='DELETE')return new Response(null,{status:204});
+    signal=options.signal;
+    return new Response(new ReadableStream({start(value){controller=value;}}));
+  });
+  const host=s.mount('en');
+  const done=source.start('http://127.0.0.1:8765','synthetic-token','bench',caller.signal).then(()=>undefined,error=>error);
+  const turn=()=>new Promise(resolve=>setImmediate(resolve));
+  try {
+    await turn();controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(envelope)}\n\n`));await turn();
+    host.refresh();assert.equal(s.state(),'delayed');assert.equal(s.timers.size,1);
+    s.visibility('hidden');assert.equal(s.state(),'expired');assert.equal(signal.aborted,true);
+    assert.equal(source.view().label,'expired');assert.equal(caller.signal.aborted,false);
+    s.visibility('visible');host.setLocale('sv-SE');assert.equal(s.state(),'expired');
+    assert.equal(requests.filter(r=>r.options.method==='POST').length,1,'visibility must not restart authentication');
+  } finally {controller.close();await done;host.dispose();}
+  assert.equal((await done)?.message,'stream_unavailable');assert.equal(requests.at(-1).options.method,'DELETE');
+  assert.equal(s.root.textContent,'');assert.equal(s.listeners.size,0);assert.equal(s.timers.size,0);
+});

@@ -72,7 +72,7 @@ assumptions, not measured deadlines or a reliable suspend detector.
 The SDK archive is tested for Node. `npm run build:browser --prefix examples/operator`
 now recompiles the SDK and these components, then produces a self-contained
 `browser-dist/aethron-observation.mjs`. An authorized browser host can import
-`Observation`, `observe`, `presentObservation`, `mountObservationPanel` and
+`Observation`, `observe`, `createObservationSource`, `presentObservation`, `mountObservationPanel` and
 `mountObservationHost` from that module. It contains the existing generated
 validators; no CDN, package loader or runtime schema compiler is needed. The build
 tool is development-only and pinned in the lockfile. A populated npm cache permits
@@ -124,3 +124,29 @@ See the presenter [ADR](adr.json) and [schema](adr.schema.json), panel
 [lifecycle ADR](lifecycle-adr.json) and [closed schema](lifecycle-adr.schema.json).
 Browser packaging has a [technology decision](browser-adr.json) and
 [closed schema](browser-adr.schema.json).
+
+For SDK transport composition, create a source and mount the lifecycle host before
+starting its session:
+
+```js
+import {createObservationSource, mountObservationHost} from './browser-dist/aethron-observation.mjs';
+const source = createObservationSource();
+const host = mountObservationHost(root, source, 'en');
+// Authorization and these request parameters belong to the containing product.
+const completion = source.start(base, token, profile, callerSignal);
+// Attach the containing application's error handler immediately.
+completion.catch(reportClientError);
+// On logout/removal: clears display and revokes this source before aborting it.
+host.dispose();
+await completion.catch(() => {});
+```
+
+The source reads its current admitted observation at each refresh; it never renews
+a lease from a saved callback snapshot. Hiding/freezing/page departure clears the
+display and aborts that source. Visibility restoration does not reconnect. The
+containing product may explicitly start a new authorized session after the previous
+start promise settles and its own visibility/permission checks pass. Concurrent
+starts reject with `observer_busy`. The source adds no timer, so the lifecycle host
+remains the sole display scheduler. Current conditions remain UNKNOWN. This
+composition has structural DOM and bundled Node tests; actual browser, accessible
+operator workflow and installed-product acceptance remain pending.

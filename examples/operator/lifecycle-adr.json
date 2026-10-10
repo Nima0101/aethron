@@ -34,7 +34,7 @@
     "https://developer.chrome.com/docs/web-platform/page-lifecycle-api",
     "https://lit.dev/docs/composition/controllers/",
     "https://guide.elm-lang.org/interop/ports.html",
-    "https://rescript-lang.org/docs/manual/latest/bind-to-js-function"
+    "https://rescript-lang.org/docs/manual/bind-to-js-function/"
   ],
   "limits": [
     "Synthetic event/clock tests in a structural DOM do not qualify browser navigation, back-forward cache, accessibility, OS suspend or installed product behavior.",

@@ -237,3 +237,21 @@ unchanged copy of the repository license. This does not inspect the contents of
 allowed files or prove build freshness: build and test the exact source revision
 before packing. The archive is a runtime example, not a source checkout or a
 release qualification artifact.
+
+`createObservationSource()` exposes a fresh `view()`, `disconnect()` and explicit
+async `start(base, token, profile, signal)`. It uses the same authenticated wire
+admission as `observe()` but creates no display timer and has no direct `accept`
+method. Supply the source to an exclusively owned display host and mount that host
+before starting a session. Handle the returned promise; it remains pending through
+best-effort remote cleanup. Overlapping starts reject with `observer_busy` and do
+not queue requests. A later start requires an explicit call after the previous
+promise settles. There is no automatic reconnect or background replay.
+
+`disconnect()` revokes the view before aborting the source's controller. A fresh
+read also withdraws when the caller's signal is aborted. Caller-owned signals are
+never aborted by the source. Delayed transport completion cannot restore a revoked
+view. The source retains no credentials outside the active async call, but cannot
+erase caller copies or bound cleanup when a host Fetch implementation ignores
+cancellation. Native browser execution and product authorization remain host gates.
+The [source ADR](source-adr.json) and [closed schema](source-adr.schema.json)
+record the technology decision, single-session boundary and qualification limits.
