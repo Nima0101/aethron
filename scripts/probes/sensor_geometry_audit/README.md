@@ -47,9 +47,13 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
 
 New reports include `source_sha256` for the harness and the actual imported
 geometry module's on-disk file. Logical labels omit absolute paths. Hashing
-occurs after admission checks and before measured batches; unavailable source
-bytes prevent report emission. This is not executable attestation, report
+occurs before camera construction and admission checks, then again after all
+batches and tracing cleanup. Unavailable initial source bytes prevent camera
+construction. A final digest mismatch raises `geometry_audit_source_changed`;
+final read errors propagate. Neither emits JSON. This is not executable attestation, report
 authentication, a complete dependency closure or an atomic snapshot. Keep source
-files stable during a run. The harness fingerprint covers the fixture-generation
+files stable during a run. Matching reads cannot detect changes restored between
+reads, changes after the final read, or differences from already loaded code.
+The harness fingerprint covers the fixture-generation
 code, not a separately serialized fixture artifact. Historical reports remain
 unchanged. See the [partial source review](../../../docs/engineering/aethron-ecosystem/P21-GEOMETRY-SOURCE-EVIDENCE-V3.md).

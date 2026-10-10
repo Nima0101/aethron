@@ -65,6 +65,13 @@ def outcome(camera, operation, args):
 def main():
     if tracemalloc.is_tracing():
         raise ValueError("geometry_audit_tracing_active")
+    source_paths = {
+        "compare.py": Path(__file__),
+        "aethron_edge.sensors.geometry": Path(geometry.__file__),
+    }
+    source_sha256 = {
+        name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in source_paths.items()
+    }
     spec = {"width": 640, "height": 480, "fx": 400.0, "fy": 400.0, "cx": 320.0, "cy": 240.0}
     cameras = {"production": Pinhole(**spec), "numpy": NumpyPinhole(**spec)}
     cases = [
@@ -109,13 +116,7 @@ def main():
         actual = outcome(cameras["numpy"], operation, args)
         assert actual == expected, (operation, args, actual, expected)
     report = {
-        "source_sha256": {
-            name: hashlib.sha256(path.read_bytes()).hexdigest()
-            for name, path in {
-                "compare.py": Path(__file__),
-                "aethron_edge.sensors.geometry": Path(geometry.__file__),
-            }.items()
-        },
+        "source_sha256": source_sha256,
         "numpy": np.__version__,
         "contract_cases": len(cases),
         "parity": True,
@@ -164,6 +165,9 @@ def main():
                 "traced_peak_bytes": peak,
             }
         report["batches"][str(count)] = result
+    for name, path in source_paths.items():
+        if hashlib.sha256(path.read_bytes()).hexdigest() != source_sha256[name]:
+            raise RuntimeError("geometry_audit_source_changed")
     print(json.dumps(report, indent=2))
 
 

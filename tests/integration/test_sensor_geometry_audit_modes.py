@@ -38,20 +38,31 @@ class InertCamera:
 
 
 class GeometryAuditModeTests(unittest.TestCase):
-    def diagnostic_report(self):
+    def diagnostic_report(
+        self, output=None, harness_path=PROBE, on_admission=None, on_trace_stop=None
+    ):
         main = runpy.run_path(str(PROBE))["main"]
-        output = io.StringIO()
+        output = io.StringIO() if output is None else output
+        outcome = main.__globals__["outcome"]
+
+        def observed_outcome(*args):
+            if on_admission is not None:
+                on_admission()
+            return outcome(*args)
+
         with (
             patch.dict(
                 main.__globals__,
                 {
+                    "__file__": str(harness_path),
+                    "outcome": observed_outcome,
                     "Pinhole": InertCamera,
                     "NumpyPinhole": InertCamera,
                     "time": SimpleNamespace(process_time_ns=lambda: 0, perf_counter_ns=lambda: 0),
                     "tracemalloc": SimpleNamespace(
                         is_tracing=lambda: False,
                         start=Mock(),
-                        stop=Mock(),
+                        stop=Mock(side_effect=on_trace_stop),
                         get_traced_memory=lambda: (0, 0),
                     ),
                 },
@@ -60,6 +71,63 @@ class GeometryAuditModeTests(unittest.TestCase):
         ):
             main()
         return json.loads(output.getvalue())
+
+    def test_changed_source_during_admission_or_measurement_prevents_report(self):
+        for phase in ("on_admission", "on_trace_stop"):
+            for name in ("compare.py", "geometry.py"):
+                with self.subTest(phase=phase, source=name):
+                    with tempfile.TemporaryDirectory() as directory:
+                        root = Path(directory)
+                        for filename in ("compare.py", "geometry.py"):
+                            (root / filename).write_bytes(b"before")
+                        mutation = Mock(
+                            side_effect=lambda target=root / name: target.write_bytes(b"after")
+                        )
+                        output = io.StringIO()
+                        with patch.object(geometry, "__file__", str(root / "geometry.py")):
+                            with self.assertRaisesRegex(
+                                RuntimeError, "^geometry_audit_source_changed$"
+                            ):
+                                self.diagnostic_report(
+                                    **{phase: mutation},
+                                    harness_path=root / "compare.py",
+                                    output=output,
+                                )
+                        self.assertTrue(mutation.called)
+                        self.assertEqual(output.getvalue(), "")
+
+    def test_removed_source_during_measurement_prevents_report(self):
+        for name in ("compare.py", "geometry.py"):
+            with self.subTest(source=name), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                for filename in ("compare.py", "geometry.py"):
+                    (root / filename).write_bytes(b"before")
+                removal = Mock(
+                    side_effect=lambda target=root / name: target.unlink(missing_ok=True)
+                )
+                output = io.StringIO()
+                with patch.object(geometry, "__file__", str(root / "geometry.py")):
+                    with self.assertRaises(FileNotFoundError):
+                        self.diagnostic_report(
+                            on_trace_stop=removal, harness_path=root / "compare.py", output=output
+                        )
+                self.assertTrue(removal.called)
+                self.assertEqual(output.getvalue(), "")
+
+    def test_missing_initial_source_rejects_before_camera_construction(self):
+        main = runpy.run_path(str(PROBE))["main"]
+        camera = Mock(return_value=InertCamera())
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory:
+            with (
+                patch.object(geometry, "__file__", str(Path(directory) / "missing.py")),
+                patch.dict(main.__globals__, Pinhole=camera, NumpyPinhole=InertCamera),
+                contextlib.redirect_stdout(output),
+            ):
+                with self.assertRaises(FileNotFoundError):
+                    main()
+        camera.assert_not_called()
+        self.assertEqual(output.getvalue(), "")
 
     def test_report_pins_harness_and_actual_imported_geometry(self):
         with tempfile.TemporaryDirectory() as directory:
