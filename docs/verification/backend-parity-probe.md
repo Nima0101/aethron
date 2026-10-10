@@ -25,7 +25,7 @@ Replacement after the read or contract validation must fail installation before
 the console check or candidate result is emitted. Synthetic mutation tests model
 that admission boundary; four real backend runs passed after this correction.
 This binding does not authenticate the publisher or protect installed files from
-later modification. Native wheel/source-archive snapshot binding remains open.
+later modification.
 
 On 2026-10-10, all four backends passed on Linux x86_64 / CPython 3.13.13.
 Two wall-time samples per backend are diagnostic observations, not a performance
@@ -85,6 +85,23 @@ Setuptools, Meson and scikit-build-core each passed portable and compiled cases
 on the Linux host. Portable builds receive invalid CC/CXX paths; compiled imports
 must resolve to an extension and preserve positive and negative `2**100` values.
 Source archives must exclude the unrelated fixture file and preserve the inputs.
+The native probe now extracts a captured archive snapshot through
+[tarfile's file-object interface](https://docs.python.org/3.13/library/tarfile.html#tarfile.open)
+and reports that snapshot's digest. Wheel validation, pip hash admission and the
+reported wheel digest also share one captured snapshot. Six synthetic mutation
+scenarios (including the unchanged control) exercise archive replacement after
+read/extraction, wheel replacement after read/validation and replacement after
+installation. Replacement before installation must stop before the consumer or
+candidate result; replacement afterwards must not change the recorded digest.
+These unit tests model the pip boundary. After the correction, all six real
+backend cases passed on Linux/CPython 3.13.13; retained wheels and archives
+matched their reported hashes. The previous observer failed all six mutation/control
+subtests, with the unchanged control rejecting missing hash-admission flags.
+The digest binds consumed archive bytes, not later edits to extracted sources or
+installed files; publisher authentication and hostile-host isolation remain
+outside this probe. The current Python observer retains direct standard-library
+archive access and pip integration; this correction does not change the scoped
+backend KEEP or establish a runtime-language decision.
 Initial scikit-build-core defaults tagged the portable wheel as platform-specific;
 explicit `wheel.cmake=false` corrected the fixture. Multiple source roots and a
 portable wheel with a native ABI tag are rejected by additional negative controls.

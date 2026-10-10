@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import importlib.machinery
+import io
 import json
 import os
 import subprocess
@@ -73,7 +74,10 @@ candidates = {
 
 
 def extract_sdist(sdist, extracted):
-    with tarfile.open(sdist) as archive:
+    with tarfile.open(
+        name=sdist if isinstance(sdist, (str, os.PathLike)) else None,
+        fileobj=None if isinstance(sdist, (str, os.PathLike)) else sdist,
+    ) as archive:
         members = archive.getmembers()
         assert len(members) <= 100
         assert not any(x.name.endswith("unrelated-private-note.txt") for x in members)
@@ -209,7 +213,9 @@ def main():
         sdist = hook(name, backend, p, "build_sdist", OUT / (name + "-sdist"))
         extracted = OUT / (name + "-extracted")
         extracted.mkdir()
-        src = extract_sdist(sdist, extracted)
+        sdist_bytes = sdist.read_bytes()
+        sdist_sha256 = hashlib.sha256(sdist_bytes).hexdigest()
+        src = extract_sdist(io.BytesIO(sdist_bytes), extracted)
         for path, body in payload.items():
             assert (src / path).read_bytes() == body
         for native in [False, True]:
@@ -221,7 +227,9 @@ def main():
                 OUT / (name + ("-native" if native else "-pure")),
                 native,
             )
-            validate_wheel(whl, payload, native)
+            wheel_bytes = whl.read_bytes()
+            wheel_sha256 = hashlib.sha256(wheel_bytes).hexdigest()
+            validate_wheel(io.BytesIO(wheel_bytes), payload, native)
             target = OUT / (name + ("-native-install" if native else "-pure-install"))
             run(
                 [
@@ -231,9 +239,11 @@ def main():
                     "install",
                     "--no-index",
                     "--no-deps",
+                    "--force-reinstall",
+                    "--require-hashes",
                     "--target",
                     str(target),
-                    str(whl),
+                    whl.as_uri() + "#sha256=" + wheel_sha256,
                 ],
                 OUT,
                 OUT / (target.name + ".log"),
@@ -254,8 +264,8 @@ def main():
                 {
                     "backend": name,
                     "native": native,
-                    "wheel_sha256": hashlib.sha256(whl.read_bytes()).hexdigest(),
-                    "sdist_sha256": hashlib.sha256(sdist.read_bytes()).hexdigest(),
+                    "wheel_sha256": wheel_sha256,
+                    "sdist_sha256": sdist_sha256,
                     "result": result.strip(),
                 }
             )
