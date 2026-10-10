@@ -173,3 +173,25 @@ test('bundled live source rechecks cancellation after a host clock read',async t
   } finally {controller.close();await done;}
   assert.equal((await done)?.message,'stream_unavailable');assert.equal(caller.signal.aborted,true);
 });
+
+test('bundled callback suppresses cancellation from its view clock',async t=>{
+  const {observe}=await bundle(),caller=new AbortController(),views=[];
+  let armed=false,reads=0;
+  const response=new Response(`data: ${JSON.stringify(envelope)}\n\n`);
+  t.mock.method(performance,'now',()=>{
+    if(armed&&++reads===2)caller.abort(new Error('private_clock_abort_marker'));
+    return 0;
+  });
+  t.mock.method(globalThis,'setInterval',()=>0);
+  t.mock.method(globalThis,'clearInterval',()=>{});
+  t.mock.method(globalThis,'fetch',async(url,options)=>{
+    if(options.method==='POST')return Response.json({source_profile:'bench',session:envelope.session});
+    if(options.method==='DELETE')return new Response(null,{status:204});
+    armed=true;return response;
+  });
+  const error=await observe('http://127.0.0.1:8765','synthetic-token','bench',view=>views.push(view),caller.signal)
+    .then(()=>undefined,error=>error);
+  assert.equal(caller.signal.aborted,true);
+  assert.equal(error?.message,'stream_unavailable');
+  assert.ok(views.length>0);assert.ok(views.every(view=>view.label==='expired'));
+});

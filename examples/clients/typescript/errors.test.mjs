@@ -8,7 +8,7 @@ const session = {session: 'a'.repeat(32), source_profile: 'bench'};
 const reasons = [new Error('private_transport_marker', {cause: {token: 'private_cause_marker'}}),
   {address: 'private_endpoint_marker'}, 'private_string_marker'];
 
-for (const component of ['observer-setup', 'observer-revocation']) test(`${component} decision uses a closed schema and four architecture views`, async () => {
+for (const component of ['observer-setup', 'observer-revocation', 'render-publication']) test(`${component} decision uses a closed schema and four architecture views`, async () => {
   const {Ajv2020} = await import('ajv/dist/2020.js');
   const read = name => JSON.parse(readFileSync(new URL(name, import.meta.url), 'utf8'));
   const validate = new Ajv2020({strict:true}).compile(read(`./${component}-adr.schema.json`));
@@ -288,3 +288,53 @@ test('timer is retired before independent remote deletion settles', async t => {
     const count = views.length;tick();assert.equal(views.length, count);
   } finally {release(new Response(null, {status:204}));await observed;}
 });
+
+for (const point of ['admission-clock', 'stream-view-clock', 'timer-view-clock']) {
+  test(`callback publication rechecks cancellation after ${point}`, async t => {
+    const caller = new AbortController(), views = [], requests = [];
+    let tick, controller, armed = false, reads = 0;
+    const result = JSON.parse(readFileSync(new URL('../../../contracts/fixtures/v3/blackout-output.json', import.meta.url))).results[0];
+    const scene = {api_version:'1', kind:'scene', sequence:1, session:session.session,
+      clock:{domain:'edge_monotonic', emitted_ms:0, valid_for_ms:100}, result};
+    const body = new ReadableStream({start(value) {
+      controller = value;
+      value.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(scene)}\n\n`));
+    }});
+    const response = new Response(body);
+    t.mock.method(performance, 'now', () => {
+      if (armed && ++reads === (point === 'stream-view-clock' ? 2 : 1)) {
+        caller.abort(new Error('private_clock_abort_marker'));
+      }
+      return 0;
+    });
+    t.mock.method(globalThis, 'setInterval', callback => {tick = callback;return 0;});
+    t.mock.method(globalThis, 'clearInterval', () => {});
+    t.mock.method(globalThis, 'fetch', async (url, options) => {
+      requests.push(options.method ?? 'GET');
+      if (options.method === 'POST') return Response.json(session);
+      if (options.method === 'DELETE') return new Response(null, {status:204});
+      armed = point !== 'timer-view-clock';
+      return response;
+    });
+    const observed = observe('http://127.0.0.1:8765', 'synthetic-token', 'bench',
+      view => views.push(view), caller.signal).then(() => undefined, error => error);
+    try {
+      await new Promise(resolve => setImmediate(resolve));
+      if (point === 'timer-view-clock') {
+        assert.equal(views.at(-1)?.label, 'delayed_observation');
+        armed = true;reads = 0;tick();
+      }
+      assert.equal(caller.signal.aborted, true, 'fault injection must reach a clock read');
+      assert.equal(views.filter(view => view.label === 'delayed_observation').length,
+        point === 'timer-view-clock' ? 1 : 0, 'no cancelled projection may reach display');
+      assert.equal(views.at(-1)?.label, 'expired');
+      assert.deepEqual(views.at(-1).sources, []);
+    } finally {
+      if (body.locked) controller.close();
+      const error = await observed;
+      assert.equal(error?.message, 'stream_unavailable');
+      assert.equal(error.cause, undefined);
+      assert.deepEqual(requests, ['POST', 'GET', 'DELETE']);
+    }
+  });
+}

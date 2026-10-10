@@ -175,6 +175,16 @@ async function observeInto(base: string, token: string, profile: string, signal:
   let renderError: unknown;
   try {
     let eventSignal: AbortSignal;
+    function publish(): void {
+      if (!display || !rendering || renderFailed) return;
+      const view = value.view();
+      // Host clock access can synchronously cancel or retire this renderer.
+      if (!rendering || renderFailed) return;
+      if (eventSignal.aborted) {
+        value.disconnect();
+        display(value.view(0)); // Already empty; do not call the host clock again.
+      } else display(view);
+    }
     try {
       stop = new AbortController();
       eventSignal = AbortSignal.any([signal, stop.signal]);
@@ -182,10 +192,7 @@ async function observeInto(base: string, token: string, profile: string, signal:
       // Independent render-time expiry, including a stalled response.
       if (display) timer = setInterval(() => {
         if (!rendering || renderFailed) return;
-        // Cancellation can precede the pending read's promise reaction.
-        // A timer must not republish that session's earlier observation.
-        if (eventSignal.aborted) value.disconnect();
-        try { display(value.view()); }
+        try { publish(); }
         catch (error) {
           renderFailed = true; renderError = error;
           value.disconnect(); stop?.abort();
@@ -217,7 +224,7 @@ async function observeInto(base: string, token: string, profile: string, signal:
           lastSequence = incoming.sequence;
           if (incoming.kind === 'scene') value.accept(incoming);
           else value.disconnect();
-          display?.(value.view());
+          publish();
           // A callback can abort while more events remain in this same chunk.
           if (eventSignal.aborted) throw new Error('stream_unavailable');
         }

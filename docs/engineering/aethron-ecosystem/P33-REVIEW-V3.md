@@ -1200,3 +1200,39 @@ Final focused verification passed 205 SDK checks, 50 operator checks, 14 bundle
 checks and all three package lifecycle checks. The externally installed and
 reinstalled archive each passed 12 runtime checks, including the new factory
 surface; public declarations compiled against the installed package.
+
+### Callback publication re-review after source composition
+
+Fresh inspection began again at P3.3 Observation, wire/session admission and the
+shared observer. The pull source rechecked cancellation after clock access, but
+the older callback path checked too early: cancellation from an admission clock,
+stream view clock or timer view clock could publish one cancelled projection.
+Three focused failing assertions reproduced these controlled host interleavings.
+A shared publication function now constructs a fresh view, rechecks renderer
+lifetime and native abort state, and substitutes a cleared expired UNKNOWN view
+before invoking the callback. The empty replacement uses an explicit clock value,
+so withdrawal does not call the host clock again. Callback exceptions still use
+the existing cleanup/error path; wire limits, privacy projection and API signatures
+are unchanged.
+
+KEEP TypeScript/native APIs with this correction. The current comparison includes
+checked ECMAScript, tagged RxJS takeUntil, Kotlin/JS and ReScript. All compile-to-JS
+alternatives still need explicit ordering around host calls; reactive completion
+does not by itself guard arbitrary callback side effects. No cross-language speed
+ranking is claimed. The [closed ADR](../../../examples/clients/typescript/render-publication-adr.json)
+records constraints, source-bound tradeoffs and four C4 views.
+
+[Verification evidence](evidence/phase3/p33-render-publication-v1.json) retains the
+three failures and focused results. Native browser acceptance and the containing
+connection/error UI with release-bound role-aware help remain open. This correction
+precedes forward UI expansion; no lane or technology-audit completion is asserted.
+
+Final focused results: 78 SDK checks (including four closed ADR checks), 50
+operator checks, 15 no-string-code-generation bundle checks, and three package
+lifecycle checks pass. Install and reinstall each execute 12 runtime checks.
+The first package invocation incorrectly bypassed npm; two entry-point guards
+failed before packaging, and the corrected documented invocation passed. Both
+logs are retained. Historical browser probe and earlier compiler timeout evidence
+remain unchanged. The new publication ADR refines the earlier timer decision's
+check ordering; its earlier C4 diagram is a historical record, not the current
+publication sequence.

@@ -255,3 +255,10 @@ erase caller copies or bound cleanup when a host Fetch implementation ignores
 cancellation. Native browser execution and product authorization remain host gates.
 The [source ADR](source-adr.json) and [closed schema](source-adr.schema.json)
 record the technology decision, single-session boundary and qualification limits.
+
+Callback publication rechecks cancellation after constructing a fresh view. This
+also covers host clock shims that synchronously abort during admission or a read.
+Timer and stream callbacks share the check; a cancelled observation is cleared
+before an expired UNKNOWN view is passed to the display. This is a controlled
+host-interleaving guarantee, not a native-clock or hard real-time claim. See the
+[publication ADR](render-publication-adr.json) for the scoped comparison and limits.
