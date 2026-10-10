@@ -1,0 +1,99 @@
+{
+  "audit_policy_version": 3,
+  "audit_complete": false,
+  "baseline_head": "d09e0fa84ef577c20997d0ae00e63104de57dc3c",
+  "decision": "KEEP Python-traced allocation metric; FIX session ownership and exceptional cleanup",
+  "source_scope": "Listed project files only; not dependency closure, atomic snapshot or loaded-code attestation.",
+  "source_sha256": {
+    "scripts/passport_technology_probe.py": "1b64db41ed8284ee45b529bf0bca13a9133c33df645f5b415482dfc774978d38",
+    "scripts/passport_technology_probe.mjs": "3ac4a2cd06479cf484310717ec8ac7b7d8afde167af047d8c3938f391ec2f83b",
+    "tests/test_passport_probe.py": "864476b85ee37f577197419af8505fcd46f1d59b393a17b1ce625f177c0c6bd9",
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "docs/engineering/reviews/p16-probe-tracing-v3.md": "862c6e1d8257cedc81a4914239513a87ee7c8ff348821763afd0f9b78c9c3849",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "60d0f4bb9d577ebe73cdd4fb7c8f38d5b731774a19cbf265449a1f99deb5c23d"
+  },
+  "checks": {
+    "corrected_red_methods": 3,
+    "corrected_red_assertion_failures": 4,
+    "corrected_red_errors": 0,
+    "focused_methods": 111,
+    "final_probe_methods_after_test_callback_binding": 14,
+    "skips": 0,
+    "ruff": "PASS after B023 callback binding fix",
+    "format": "PASS",
+    "bandit": "PASS with B101 excluded for guarded evidence assertions",
+    "diff": "PASS"
+  },
+  "retained_log_sha256": {
+    "tracing-red.log": "26291fa6f443460af3b9e83af12d471dc58f44adfb7566054b5e3ae2f9cc5c9c",
+    "tracing-corrected-red.log": "79c4d7e4fa616b72aafbbe8daa8f7b5a2af5a5362e611d413803926b1657c640",
+    "tracing-green.log": "cbba19e94b8526cbfd37cec98f47f9a146b067817d9cdd7d7050a080f77f8720",
+    "tracing-final-tests.log": "92e4cc5d5c6d713d127bfbaf445aae5432fd9eb133efdc525e668eaaf82c681c",
+    "tracing-final-probe.log": "762a632e7f2a6f37abe03f7df24fd3f851baa14898d881636e426b3a64fa0519",
+    "tracing-live-final.json": "1ba1cf294c44d7b09c8def8ae455a0e69a6e421073903191fbe5bc5b26a2c549"
+  },
+  "live_comparison": {
+    "audit_policy_version": 3,
+    "python": "3.13.5",
+    "source_sha256": {
+      "scripts/passport_technology_probe.py": "1b64db41ed8284ee45b529bf0bca13a9133c33df645f5b415482dfc774978d38",
+      "scripts/passport_technology_probe.mjs": "3ac4a2cd06479cf484310717ec8ac7b7d8afde167af047d8c3938f391ec2f83b",
+      "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+      "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+      "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6"
+    },
+    "source_scope": "Listed project files read after execution; not an atomic snapshot, loaded-code attestation or dependency closure.",
+    "fixture_sha256": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "cases": 6,
+    "crypto_accepts": [
+      true,
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "admissions": [
+      "authenticated",
+      "rejected",
+      "rejected",
+      "rejected",
+      "rejected",
+      "rejected"
+    ],
+    "python_lexical_rejections": 5,
+    "python_hash_1mib_ms": 0.600905999817769,
+    "python_verify_mean_ms_128": 1.487789054678501,
+    "python_traced_peak_bytes": 412071,
+    "node_probe": {
+      "node": "v22.23.2",
+      "crypto_accepts": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "hash_digest": "bf718b6f653bebc184e1479f1935b8da974d701b893afcf49e701f3e2f9f9c5a",
+      "hash_1mib_ms": 3.639364999999998,
+      "duplicate_keys_collapsed": true,
+      "float_lexemes_collapsed": true
+    },
+    "limits": "Single-threaded local sample; Python traced allocations only, including input construction; not all native allocations. No hard real-time, RSS, platform or qualification claim. Node primitive probe is not a full verifier."
+  },
+  "negative_evidence": "First active-session regression used an unwrapped verifier mock, causing an unrelated admission assertion. Corrected RED exercised the real verifier. Both logs retained; no historical sample rewritten.",
+  "limits": [
+    "Single local desktop sample, not hard real-time or target qualification.",
+    "Python-traced allocation peak includes input construction; not all native allocations or RSS.",
+    "Serial execution assumption; no protection against concurrent external tracer changes.",
+    "Four new test methods; other runtime admission behavior unchanged."
+  ]
+}

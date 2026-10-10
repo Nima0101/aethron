@@ -155,7 +155,9 @@ def _capture(command, payload, *, timeout=15):
 def main():
     if sys.flags.optimize:
         raise RuntimeError("optimized_probe_execution_forbidden")
-    # Optional tools load only after the evidence-integrity gate.
+    if tracemalloc.is_tracing():
+        raise RuntimeError("probe_tracing_already_active")
+    # Optional tools load only after the evidence-integrity gates.
     from cryptography.exceptions import InvalidSignature
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
@@ -208,12 +210,14 @@ def main():
         assert verify(envelope, policy, **case["arguments"]).status == "authenticated"
     verify_ms = (time.perf_counter() - start) * 1000 / 128
     tracemalloc.start()
-    # Worst permitted input bytes, many tokens: syntax parses but schema rejects.
-    adversarial = b"[" + b"0," * 32766 + b"0]"
-    assert len(adversarial) <= 65536
-    assert verify(adversarial, policy, **case["arguments"]).status == "rejected"
-    _, peak = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
+    try:
+        # Near the byte limit, many tokens: syntax parses but schema rejects.
+        adversarial = b"[" + b"0," * 32766 + b"0]"
+        assert len(adversarial) <= 65536
+        assert verify(adversarial, policy, **case["arguments"]).status == "rejected"
+        _, peak = tracemalloc.get_traced_memory()
+    finally:
+        tracemalloc.stop()
     paths = (
         "scripts/passport_technology_probe.py",
         "scripts/passport_technology_probe.mjs",
@@ -241,7 +245,7 @@ def main():
                 "python_verify_mean_ms_128": verify_ms,
                 "python_traced_peak_bytes": peak,
                 "node_probe": compared,
-                "limits": "Single local sample; no hard real-time, RSS, platform or qualification claim. Node primitive probe is not a full verifier.",
+                "limits": "Single-threaded local sample; Python traced allocations only, including input construction; not all native allocations. No hard real-time, RSS, platform or qualification claim. Node primitive probe is not a full verifier.",
             },
             indent=2,
         )

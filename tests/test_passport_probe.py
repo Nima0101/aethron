@@ -8,6 +8,7 @@ import json
 import runpy
 import subprocess
 import sys
+import tracemalloc
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -29,6 +30,19 @@ class ProbeExecutionTests(unittest.TestCase):
                     self.assertNotEqual(result.returncode, 0)
                     self.assertIn("optimized_probe_execution_forbidden", result.stderr)
                     self.assertEqual(result.stdout, "")
+
+    def test_startup_tracing_is_rejected_without_evidence(self):
+        script = Path(__file__).resolve().parents[1] / "scripts/passport_technology_probe.py"
+        result = subprocess.run(
+            [sys.executable, "-I", "-X", "tracemalloc=3", str(script)],
+            capture_output=True,
+            text=True,
+            timeout=25,
+            check=False,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("probe_tracing_already_active", result.stderr)
+        self.assertEqual(result.stdout, "")
 
 
 class ProbeResponseTests(unittest.TestCase):
@@ -61,8 +75,62 @@ class ProbeResponseTests(unittest.TestCase):
                 result = json.loads(output.getvalue())
                 self.assertEqual(result["node_probe"], self.response)
                 self.assertEqual(result["cases"], 6)
+                self.assertGreater(result["python_traced_peak_bytes"], 0)
+                self.assertFalse(tracemalloc.is_tracing())
                 self.assertEqual(result["audit_policy_version"], 3)
                 self.assertEqual(result["python_lexical_rejections"], 5)
+
+    def test_existing_tracing_is_preserved_without_running_probe(self):
+        output = io.StringIO()
+        tracemalloc.start(3)
+        try:
+            retained = bytearray(8192)
+            with patch.dict(
+                self.main.__globals__,
+                {"verify": unittest.mock.Mock(wraps=self.main.__globals__["verify"])},
+            ) as namespace:
+                with self.assertRaisesRegex(RuntimeError, "probe_tracing_already_active"):
+                    self.invoke(json.dumps(self.response).encode(), output)
+                namespace["verify"].assert_not_called()
+            self.assertTrue(tracemalloc.is_tracing())
+            self.assertEqual(tracemalloc.get_traceback_limit(), 3)
+            self.assertIsNotNone(tracemalloc.get_object_traceback(retained))
+            self.assertEqual(output.getvalue(), "")
+        finally:
+            tracemalloc.stop()
+
+    def test_measurement_failure_stops_owned_tracing_without_evidence(self):
+        original = self.main.__globals__["verify"]
+        for exception in (RuntimeError("measurement failed"), KeyboardInterrupt()):
+            with self.subTest(exception=type(exception).__name__):
+                output = io.StringIO()
+
+                def fail_measurement(raw, *args, failure=exception, **kwargs):
+                    if raw.startswith(b"["):
+                        self.assertTrue(tracemalloc.is_tracing())
+                        raise failure
+                    return original(raw, *args, **kwargs)
+
+                try:
+                    with patch.dict(self.main.__globals__, {"verify": fail_measurement}):
+                        with self.assertRaises(type(exception)) as raised:
+                            self.invoke(json.dumps(self.response).encode(), output)
+                    self.assertIs(raised.exception, exception)
+                    self.assertFalse(tracemalloc.is_tracing())
+                    self.assertEqual(output.getvalue(), "")
+                finally:
+                    tracemalloc.stop()
+
+    def test_peak_read_failure_stops_owned_tracing_without_evidence(self):
+        output = io.StringIO()
+        try:
+            with patch("tracemalloc.get_traced_memory", side_effect=RuntimeError("peak failed")):
+                with self.assertRaisesRegex(RuntimeError, "peak failed"):
+                    self.invoke(json.dumps(self.response).encode(), output)
+            self.assertFalse(tracemalloc.is_tracing())
+            self.assertEqual(output.getvalue(), "")
+        finally:
+            tracemalloc.stop()
 
     def test_comparison_records_project_source_digests(self):
         output = io.StringIO()
