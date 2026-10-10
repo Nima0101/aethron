@@ -52,6 +52,46 @@ class PacketAuditModeTests(unittest.TestCase):
             main()
         return json.loads(output.getvalue())
 
+    def test_version_query_requests_finite_timeout(self):
+        main = runpy.run_path(str(PROBE))["main"]
+        fixture, worker = Mock(), Mock()
+        output = io.StringIO()
+        with (
+            patch.dict(main.__globals__, {"fixture": fixture, "Node": worker}),
+            patch(
+                "subprocess.check_output", side_effect=subprocess.TimeoutExpired("node", 5)
+            ) as query,
+            patch("sys.stdout", output),
+        ):
+            with self.assertRaises(subprocess.TimeoutExpired):
+                main()
+        query.assert_called_once_with(["node", "--version"], text=True, timeout=5)
+        fixture.assert_not_called()
+        worker.assert_not_called()
+        self.assertEqual(output.getvalue(), "")
+
+    def test_version_query_failures_abort_before_comparison_or_report(self):
+        for failure in (
+            OSError("synthetic_spawn_failure"),
+            subprocess.CalledProcessError(1, ["node", "--version"]),
+            subprocess.TimeoutExpired("node", 5),
+        ):
+            with self.subTest(failure=type(failure).__name__):
+                main = runpy.run_path(str(PROBE))["main"]
+                fixture, worker = Mock(), Mock()
+                output = io.StringIO()
+                with (
+                    patch.dict(main.__globals__, {"fixture": fixture, "Node": worker}),
+                    patch("subprocess.check_output", side_effect=failure),
+                    patch("sys.stdout", output),
+                ):
+                    with self.assertRaises(type(failure)) as result:
+                        main()
+                self.assertIs(result.exception, failure)
+                fixture.assert_not_called()
+                worker.assert_not_called()
+                self.assertEqual(output.getvalue(), "")
+
     def test_abnormal_or_unconfirmed_worker_exit_prevents_report(self):
         for status in (1, -9, None):
             with self.subTest(status=status):

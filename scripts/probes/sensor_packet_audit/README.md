@@ -72,3 +72,9 @@ worker's return code to be zero. Nonzero, signal-terminated or unconfirmed exits
 abort without a JSON report, even when sample parity passed. Cleanup exceptions
 still propagate. This checks reported process completion, not worker authenticity
 or hardware behavior; earlier reports are not retroactively requalified.
+
+The separate `node --version` metadata query requests a five-second subprocess
+timeout before fixtures or comparison workers are created. Spawn, exit and
+timeout failures propagate without a JSON report. Process creation, scheduling
+and cleanup can exceed the requested timeout; it is not a wall-clock completion
+guarantee, an output-size limit or attestation of the selected executable.

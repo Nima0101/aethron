@@ -253,7 +253,7 @@ def main():
         },
         "python": platform.python_version(),
         "numpy": np.__version__,
-        "node": subprocess.check_output(["node", "--version"], text=True).strip(),
+        "node": subprocess.check_output(["node", "--version"], text=True, timeout=5).strip(),
         "method": "15 rotated paired samples; worker kernel CPU added to parent CPU, worker pipe I/O CPU excluded",
         "cases": [],
     }

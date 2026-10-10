@@ -1,0 +1,34 @@
+{
+  "review_order_version": 3,
+  "component": "C01_runtime_version_query",
+  "decision": "FIX",
+  "full_component_review_complete": false,
+  "reviewed_head": "57d6970e8e806e91a8708211bc3087a326a51b1f",
+  "production_sensor_behavior_changed": false,
+  "checks": {
+    "red_assertion_failures": 1,
+    "red_errors": 0,
+    "new_methods": 2,
+    "failure_subcases": 3,
+    "green_methods": 20,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "11 unchanged LOW findings across harness and tests",
+    "harness_ast": "Only version query timeout keyword added"
+  },
+  "limitations": [
+    "New query checks use mocked subprocess outcomes; no Node process or OS termination measurement.",
+    "Requested timeout is not a total wall-clock or output-volume bound.",
+    "Full technology reassessment incomplete at C01; no runtime decision.",
+    "No operational benchmark or historical report requalification."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/subprocess.html"
+  ],
+  "sha256": {
+    "scripts/probes/sensor_packet_audit/compare.py": "0a9651feca788744553ace08abee98ecbf91978e25c1b5f84a0a139378c419d9",
+    "tests/integration/test_sensor_packet_audit_modes.py": "c5ec4acc23d754285971fae07b3ebb0d76c9788a9f8d9dec96f107430ec47898",
+    "scripts/probes/sensor_packet_audit/README.md": "cc4b9f92e05cff05a0202a43ef705496eb9f769faa643427c8158b6dd8580f2a",
+    "docs/engineering/aethron-ecosystem/P21-PACKET-VERSION-TIMEOUT-V3.md": "e28b2fc2c5ca3c42a645c09c2d46d9b91f38719b5936c984eb32df0d3944f22c"
+  }
+}
