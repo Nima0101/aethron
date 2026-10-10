@@ -1,0 +1,29 @@
+{
+  "scope": "P1.3 live read-failure policy; RTSP transport/backend selection remains open",
+  "decision": "Retain the existing Python shared-slot controller over native OpenCV for this failure-policy fix: native read(False) is available directly and the bounded regression proves invalidation without a waiting consumer; no evidence yet establishes a replacement live backend winner.",
+  "alternatives_pending": "GStreamer C/Rust appsink exposes bounded queue and EOS controls; executable RTSP stall/cancellation comparison remains required before whole-backend selection.",
+  "official_sources": [
+    "https://docs.opencv.org/4.10.0/d8/dfe/classcv_1_1VideoCapture.html",
+    "https://gstreamer.freedesktop.org/documentation/app/appsink.html",
+    "https://gstreamer.pages.freedesktop.org/gstreamer-rs/stable/latest/docs/gstreamer_app/struct.AppSink.html"
+  ],
+  "source_sha256": {
+    "integrations/edge/aethron_edge/sources/base.py": "9e3664877ceab635bbe456c04b0964e7aada1aafbd9d7cfc983251a930f8631b",
+    "tests/integration/test_decoder_disconnect.py": "9a1892e1a9326fa1b9e90fefcdb824e3afd06223f355d1ff507a0ada84db1cf3"
+  },
+  "regression": {
+    "before": "live decoder remained waiting after native read(False) with an unread frame; recorded EOF control passed",
+    "after": "11 focused and 11 offline-installed checks passed",
+    "fixture": "generated 64x48 single-frame MJPG; real OpenCV native read(False), local file supplied directly to low-level decoder with live policy; not RTSP transport or physical evidence",
+    "limit": "one-second worker join is a regression guard, not a measured hardware latency claim"
+  },
+  "installed": {
+    "core_wheel_sha256": "daeacafc7e70f20bbd0b446f448203b67b0b12ee56e6b3afca6b248d031c9a93",
+    "edge_wheel_sha256": "d651d1d10300801b3b00b85f84c064003a6a00e57be7d4b5b900d6db7c1571ea",
+    "source_bytes_match": true,
+    "outside_checkout": true,
+    "offline_install": true,
+    "temporary_consumer_removed": true
+  },
+  "qualification": "development proof only; hosted exact-head checks pending; frozen timing, unknown clocks and provenance unchanged"
+}

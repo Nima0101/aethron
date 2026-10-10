@@ -1,4 +1,5 @@
 import multiprocessing as mp
+import os
 import threading
 import time
 import types
@@ -57,7 +58,7 @@ class DecoderPublication(unittest.TestCase):
             VideoCapture=lambda: capture,
             cvtColor=lambda *_: types.SimpleNamespace(tobytes=lambda: raw),
         )
-        with patch.dict("sys.modules", {"cv2": backend}), patch("os.dup2"):
+        with patch.dict("sys.modules", {"cv2": backend}), patch("os.dup2"), patch.dict(os.environ):
             _decode(source.config, source.slot, source.metadata, source.lock, stop)
         self.assertTrue(capture.released)
         return source.read(time.monotonic_ns() + 5_000_000_000)
