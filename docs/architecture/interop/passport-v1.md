@@ -11,10 +11,11 @@ external trust, expiry/revocation, retained negative evidence, no person or devi
 Choose Python 3.9+ for the bounded parser and policy evaluator, with optional
 `cryptography==50.0.2` for Ed25519. Its published Python floor includes 3.9.6 and its
 Apache-2.0/BSD-3-Clause licensing is compatible with this GPL-3.0-only project.
-This choice is based on inspectable bounded JSON handling and a maintained crypto API,
-not a requirement to preserve the incumbent language. Rust would add a native build/ABI
-boundary without changing these small message requirements; subprocess OpenSSL adds
-filesystem/process races and timeout handling; handwritten crypto is excluded.
+The current [V3 parser review](../../engineering/reviews/p16-parser-v3.md) and
+[V3 trust review](../../engineering/reviews/p16-trust-v3.md) reassess this selection
+against native and managed alternatives. Build convenience or migration cost does not
+justify the choice. Cryptographic arithmetic remains in the maintained backend;
+handwritten crypto is excluded.
 
 - [RFC 8785](https://www.rfc-editor.org/rfc/rfc8785.html): deterministic serialization.
   This is an ASCII/safe-integer application subset, not a general JCS implementation.
@@ -72,7 +73,10 @@ an envelope cannot supply or extend it. It is bounded JSON with exactly `version
 Revocation lists contain at most 256 unique identifiers/digests each. Keys: 1..16,
 unique IDs and key material, each exactly `key_id`, `issuer`, `public_key`, `not_before`,
 `expires_at`, `capabilities` (1..3 unique allowed names). Key ID must match key bytes.
-All supplied key metadata is validated even for unselected keys.
+All supplied key metadata is validated even for unselected keys. This checks the
+closed metadata schema and key digest binding; it is not proof of key generation,
+ownership, mathematical validation of every unselected key, or trust enrollment.
+The authenticated policy provider owns enrollment of valid publisher keys.
 
 `verify(envelope, policy, *, now_s, minimum_time_s, minimum_policy_revision, expected_subject_sha256)`
 requires caller-trusted UTC time, a persisted policy revision floor and the exact

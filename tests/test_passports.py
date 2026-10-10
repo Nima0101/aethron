@@ -230,7 +230,64 @@ class PassportVerificationTests(unittest.TestCase):
         self.assertFalse(result.motion_authority)
         self.assertFalse(result.evidence_verified)
         self.assertIsNone(result.payload_sha256)
+        self.assertIsNone(result.policy_revision)
+        self.assertIsNone(result.expires_at)
         return result
+
+    def test_unselected_key_metadata_is_not_ignored(self):
+        other_public = Ed25519PrivateKey.from_private_bytes(b"\x01" * 32).public_key()
+        other_bytes = other_public.public_bytes(Encoding.Raw, PublicFormat.Raw)
+        other = copy.deepcopy(self.policy["keys"][0])
+        other.update(public_key=other_bytes.hex(), key_id=hashlib.sha256(other_bytes).hexdigest())
+        self.policy["keys"].append(other)
+        self.assertEqual(self.verify().status, "authenticated")
+        for field, value in (
+            ("issuer", "invalid/alias"),
+            ("not_before", True),
+            ("expires_at", other["not_before"]),
+            ("capabilities", ["unknown"]),
+            ("key_id", "0" * 64),
+        ):
+            with self.subTest(field=field):
+                original = other[field]
+                other[field] = value
+                self.assertEqual(self.assert_rejected().reason, "invalid_input")
+                other[field] = original
+
+    def test_policy_expiry_caps_result_and_requires_reverification(self):
+        self.policy["expires_at"] = 1600
+        self.policy["keys"][0].update(not_before=1000, expires_at=2000)
+        first = self.verify(now_s=1599)
+        self.assertEqual(first.status, "authenticated")
+        self.assertEqual(first.expires_at, 1600)
+        self.assertEqual(self.assert_rejected(now_s=1600).reason, "policy_not_current")
+        self.policy["expires_at"] = 1601
+        self.assertEqual(self.verify(now_s=1600).status, "authenticated")
+
+    def test_revocation_is_rechecked_after_success(self):
+        envelope = self.envelope()
+        self.assertEqual(self.verify(envelope=envelope).status, "authenticated")
+        for field, identifier in (
+            ("revoked_keys", self.key_id),
+            ("revoked_passports", self.document["passport_id"]),
+            ("revoked_evidence", self.document["evidence"][1]["sha256"]),
+        ):
+            with self.subTest(field=field):
+                self.policy[field] = [identifier]
+                self.assertEqual(self.assert_rejected(envelope=envelope).reason, "revoked")
+                self.policy[field] = []
+
+    def test_unsupported_crypto_rejects_without_authentication_metadata(self):
+        from cryptography.exceptions import UnsupportedAlgorithm
+
+        with patch("cryptography.hazmat.primitives.asymmetric.ed25519.Ed25519PublicKey") as backend:
+            backend.from_public_bytes.side_effect = UnsupportedAlgorithm("fixture unavailable")
+            self.assertEqual(self.assert_rejected().reason, "crypto_unavailable")
+            backend.from_public_bytes.side_effect = None
+            backend.from_public_bytes.return_value.verify.side_effect = UnsupportedAlgorithm(
+                "fixture unavailable"
+            )
+            self.assertEqual(self.assert_rejected().reason, "crypto_unavailable")
 
     def test_real_signature_authenticates_only_statement(self):
         result = self.verify()
