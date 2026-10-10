@@ -1,0 +1,65 @@
+{
+  "audit_policy_version": 3,
+  "component": "P3.4 authenticated admission with persistent floors",
+  "reviewed_head": "39fc3722294857c269781748301fe28fe166bc9d",
+  "decision": "KEEP synchronous adapter; FIX documentation and clock-provider failure coverage",
+  "production_change": false,
+  "required_migrations": [],
+  "source_sha256": {
+    "integrations/edge/aethron_edge/runtime/fleet_policy.py": "1ea88dcd1fa38d87298dcd127eda82a1c6576f593a0b8676ad8ef7bccb01505f",
+    "tests/integration/test_fleet_admission.py": "84a0a10f44c4ada86a612576ec9d4894bf92df941b97c294ea550a0ef7deacec"
+  },
+  "environment": {
+    "python": "3.13.5",
+    "sqlite": "3.46.1",
+    "os": "Linux"
+  },
+  "tests": {
+    "admission_tests": 16,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_seconds": 2.565,
+    "new_clock_error_subcases": 9
+  },
+  "new_case": {
+    "name": "test_clock_provider_errors_at_each_sample_do_not_retry_or_echo_details",
+    "exceptions": [
+      "OSError",
+      "RuntimeError",
+      "ValueError"
+    ],
+    "sample_indices": [
+      0,
+      1,
+      2
+    ],
+    "public_error": "invalid_fleet_admission",
+    "retry": false,
+    "reopened_floors_by_failed_sample": [
+      [
+        1,
+        900
+      ],
+      [
+        1,
+        900
+      ],
+      [
+        3,
+        1001
+      ]
+    ]
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_production": "PASS; no findings"
+  },
+  "retained_negative_evidence": "docs/verification/fleet-admission-technology-audit-v2.json",
+  "limitations": [
+    "New cases already pass existing implementation; no production red-to-green claim.",
+    "No alternative-runtime performance benchmark or hardware qualification.",
+    "Final checked clock sample is not persisted; competing admissions can supersede returned configuration.",
+    "No end-to-end deadline, distributed consistency, actuation authority, CNSA/MLS or uptime guarantee."
+  ]
+}

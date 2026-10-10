@@ -72,6 +72,32 @@ class FleetAdmissionTests(unittest.TestCase):
         self.rejected((1000, 1001))
         self.assertEqual(self.store.read(), FleetFloors(3, 1001))
 
+    def test_clock_provider_errors_at_each_sample_do_not_retry_or_echo_details(self):
+        for error_type in (OSError, RuntimeError, ValueError):
+            for failed_sample in range(3):
+                with self.subTest(error=error_type.__name__, sample=failed_sample):
+                    store = FleetFloorStore.initialize(
+                        self.root / f"{error_type.__name__}-{failed_sample}.db",
+                        minimum_version=1,
+                        minimum_time_s=900,
+                    )
+                    calls = []
+
+                    def clock(*, failure=failed_sample, exception=error_type, observed=calls):
+                        index = len(observed)
+                        observed.append(index)
+                        if index == failure:
+                            raise exception("private clock provider details")
+                        return (1000, 1001, 1002)[index]
+
+                    with self.assertRaisesRegex(ValueError, "^invalid_fleet_admission$"):
+                        fleet_policy.admit_fleet_policy(
+                            self.bundle, self.public, floor_store=store, clock=clock
+                        )
+                    self.assertEqual(len(calls), failed_sample + 1)
+                    expected = FleetFloors(3, 1001) if failed_sample == 2 else FleetFloors(1, 900)
+                    self.assertEqual(FleetFloorStore(store.path).read(), expected)
+
     def test_final_clock_observes_commit_before_return(self):
         samples = iter((1000, 1001, 1999))
         observed = []
