@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_commit": "bc196647ed8a5c7a0d1a970c2800eec53f5d0bd7",
+  "scope": "Fresh generic offline signature/trust/expiry/revocation reassessment; working-copy evidence atop baseline. No production code change.",
+  "source_sha256": {
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "tests/test_passport_optional_backend.py": "dfff7466910be0337553de68d0ece1539477719ea0d82317618225c62bc23590",
+    "tests/test_passports.py": "20bdc75b84aa566867197604e2462053e366016638828bb0ba59e990ffd56c3d",
+    "tests/test_passport_schemas.py": "f437fddf0c820bdfc487daa90383ff78ffa001112dac5227bbda92c794ef4512",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "scripts/passport_technology_probe.py": "2fe524081bb31f00b7d97975e8cc810c10db5d00e7902a02f3b92b3cd0d25a72",
+    "scripts/passport_technology_probe.mjs": "4ac119d787fde5c2b3ef0fbd5cc269436790e3d84c03ed1a0a1182b12d8a4f2b",
+    ".github/workflows/aethron-passports.yml": "abd88979695dd2b169e4ac5ea38b7d4af2b7da360e2a636468cf42e6585fa680",
+    "docs/architecture/interop/passport-v1.md": "eb2059302ccad44a8a600ac80422f4e870195598adc09c1efca5c72ee4d02930",
+    "docs/decisions/p16-trust-reassessment-v3.json": "8647cbcbc62f1d40eafee914cf197106168ba3932c61b684029fd63d30c9541d",
+    "docs/engineering/reviews/p16-trust-reassessment-v3.md": "3517cae0aaea137b6a4661e0592e527b63c0ca1b5e98a925fb6efaa1ed7023e7"
+  },
+  "local_artifact_sha256": {
+    "trust-reassessment-negative.log": "c5f699e2ee3774096ad36c49a42bab791259a6eb9588d6cd89abb946021adc44",
+    "trust-reassessment-negative.json": "bd4861cf05deab0fd1995bce302c7ec5ca88c7292052f74e30ee77d02541b76e",
+    "trust-reassessment-probe.log": "d6470e21cbcc7686e0e326609ab66846c5d38ce1ebf4b65db8bfcadf3e4ade34",
+    "trust-reassessment-focused.log": "dbacf9dfaba9f21e0ef654ba1cbbb054d4b6458084f764e73e05e97b9a05e4c9",
+    "trust-reassessment-bandit.log": "ea25dd31efd28dbd8af04b65fd5399ebfc15aa8358a285194cef5baad5d8f481",
+    "trust-reassessment-bandit-final.log": "245b68d5dad232c08a91833b2278d2fe3669f6a0143a826e06bf05822d317ca0",
+    "trust-reassessment-ruff-clean.log": "8c00c65fac12ea33c70f4eef886b326f614e7bf60433fc4ae714babea084ee76",
+    "trust-reassessment-ruff-verified.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "trust-reassessment-format-verified.log": "fd2299c9f1c6dc869070883e281051bfe93aacf66c1a3b0069f45b4aa410ca50",
+    "trust-reassessment-bandit-verified.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "checks": {
+    "focused_methods": 36,
+    "skips": 0,
+    "new_methods": 1,
+    "fresh_child_modes": [
+      "-I -S",
+      "-I -S -O"
+    ],
+    "production_red": false,
+    "negative_control_methods": 1,
+    "negative_control_failures": 2,
+    "negative_control_errors": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS with two reviewed B404/B603 source annotations",
+    "initial_bandit": "Two low findings retained. Intermediate annotations caused scanner warnings; fixed comment layout then lint import placement. Final lint and scan pass."
+  },
+  "negative_control": {
+    "methods": 1,
+    "failures": 2,
+    "errors": 0,
+    "skips": 0,
+    "scope": "in-memory mutation in child; project source unchanged",
+    "replacement": "import aethron.passports as module\nfrom pathlib import Path\nsource = Path(module.__file__).read_text()\nold = 'return _rejected(\"crypto_unavailable\")'\nif source.count(old) != 2:\n    raise RuntimeError('mutation_target_changed')\nexec(compile(source.replace(old, 'return _rejected(\"invalid_input\")'), module.__file__, 'exec'), module.__dict__)\nverify = module.verify"
+  },
+  "primitive_comparison": {
+    "audit_policy_version": 3,
+    "python": "3.13.5",
+    "source_sha256": {
+      "scripts/passport_technology_probe.py": "2fe524081bb31f00b7d97975e8cc810c10db5d00e7902a02f3b92b3cd0d25a72",
+      "scripts/passport_technology_probe.mjs": "4ac119d787fde5c2b3ef0fbd5cc269436790e3d84c03ed1a0a1182b12d8a4f2b",
+      "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+      "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+      "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6"
+    },
+    "source_scope": "Listed project files matched before/after execution; fixture parsed from captured bytes. Not an atomic snapshot, loaded-code attestation or dependency closure; transient changes restored between reads are not detected.",
+    "fixture_sha256": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "cases": 6,
+    "crypto_accepts": [
+      true,
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "admissions": [
+      "authenticated",
+      "rejected",
+      "rejected",
+      "rejected",
+      "rejected",
+      "rejected"
+    ],
+    "python_lexical_rejections": 5,
+    "python_hash_1mib_ms": 0.596587,
+    "python_verify_mean_ms_128": 1.708785484375,
+    "timing_method": {
+      "python_clock": "time.perf_counter_ns",
+      "python_elapsed_ns": {
+        "hash_batch": 596587,
+        "verify_batch": 218724542
+      },
+      "node_clock": "performance.now",
+      "hash_operations": 16,
+      "hash_bytes_per_operation": 65536,
+      "verify_operations": 128,
+      "batches_per_metric": 1,
+      "target_hardware_qualified": false,
+      "runtime_ranking_supported": false,
+      "scope": "Hash timers cover sixteen independent hashes of one reused 64 KiB buffer, including digest hex conversion. The reported digest covers 64 KiB, not 1 MiB. Verify timing covers one batch of 128 full Python admissions plus loop/assert overhead; initialization, fixture checks, Node startup and tracing are outside that interval. Sequential local elapsed-time samples include scheduling delays; no controlled warmup, distribution, jitter or worst-case bound is measured."
+    },
+    "python_traced_peak_bytes": 412019,
+    "node_probe": {
+      "node": "v22.23.2",
+      "crypto_accepts": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "hash_digest": "bf718b6f653bebc184e1479f1935b8da974d701b893afcf49e701f3e2f9f9c5a",
+      "hash_1mib_ms": 1.082761000000005,
+      "duplicate_keys_collapsed": true,
+      "float_lexemes_collapsed": true
+    },
+    "limits": "Single-threaded local sample; Python traced allocations only, including input construction; not all native allocations. No hard real-time, RSS, platform or qualification claim. Node primitive probe is not a full verifier."
+  },
+  "limits": [
+    "Only Python and Node executed; remaining candidates evaluated from linked primary sources.",
+    "Six-case primitive comparison is not full verifier/backend edge-case equivalence or a runtime ranking.",
+    "Subprocess checks trust checkout and interpreter; no sandbox, installed-package qualification, external trust provisioning or persistency tested.",
+    "Local samples do not qualify hard-real-time, physical platforms, encryption, MLS, CNSA or availability.",
+    "Source hashes identify listed working-copy bytes, not an atomic snapshot, loaded-code attestation or dependency closure."
+  ],
+  "next_component": "P16 independent pinned-policy validation; then evidence byte binding",
+  "audit_complete": false
+}
