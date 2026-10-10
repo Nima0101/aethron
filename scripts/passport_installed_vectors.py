@@ -74,6 +74,8 @@ def run(root):
                 "payload_hex"
             ]
             assert result.motion_authority is False
+            assert result.execution_authority is False
+            assert result.evidence_verified is False
     vectors = load_vectors(root, "examples/interop/federation-vectors-v1.json")
     for case in vectors["cases"]:
         result = verify_federated_bundle(
@@ -100,6 +102,7 @@ def run(root):
         assert (result.status, result.reason) == (case["status"], case["reason"]), case["name"]
         assert [item.outcome for item in result.evidence] == case["outcomes"]
         assert result.execution_authority is False and result.motion_authority is False
+        assert result.evidence_verified is False
     vectors = load_vectors(root, "examples/interop/task-vectors-v1.json")
     for case in vectors["cases"]:
         result = validate_task(case["task"].encode(), **case["arguments"])

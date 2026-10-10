@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "p16-packaging-reassessment-v3",
+  "component": "P16 portable installed-source and behavioral conformance tooling",
+  "decision": "KEEP",
+  "constraints": [
+    "Trusted developer wheel on the configured Python 3.9/3.13 Linux/macOS/Windows matrix; local evidence here is Linux Python 3.13 only.",
+    "Compare seven imported source files with reviewed bytes outside the checkout; execute fifty fixed pinned cases against the actual Python return objects.",
+    "No hardware deadline, native computation, hostile-wheel sandbox, deployment installer or operator-readable test authoring requirement."
+  ],
+  "alternatives": [
+    "Standard wheel with Setuptools package selection and direct isolated Python inspection.",
+    "Hatchling declarative build selection and reproducible-build configuration.",
+    "Meson/meson-python for compiled multi-language extensions; Rust/Maturin for Rust-backed Python distribution.",
+    "Robot Framework keyword language with a Python test library.",
+    "CMake/CTest script-based process orchestration, or JavaScript/Node child-process orchestration.",
+    "Dhall typed configuration generating GitHub workflow YAML."
+  ],
+  "rationale": [
+    "KEEP standard wheel selection: the current portable component has no native ABI requirement and explicit package inclusion. Other backends can build wheels but cannot establish the actual imported file identities or supply missing behavioral assertions.",
+    "KEEP direct Python inspection: it obtains Python import locations and full return objects in the interpreter under test without a second cross-language report adapter. CTest, Node and Robot Framework can orchestrate it, but orchestration is not the missing evidence property.",
+    "KEEP native GitHub YAML for this workflow: current path filters already select both changed tooling files. Typed generation does not infer missing result-field checks.",
+    "FIX three missing result-flag assertions in installed conformance. Two regression methods demonstrate five incorrectly accepted substitutions, then pass after the correction. All production modules and fixture pins remain unchanged.",
+    "Fresh isolated execution matches seven installed source files and passes fifty cases. No requirement-derived material migration win was identified; tooling availability, familiarity and rewrite effort are not decision criteria."
+  ],
+  "limits": [
+    "No alternate-backend build or comparative performance benchmark was run. The current installation is reused, not a fresh build or clean customer install.",
+    "File equality and finite behavior checks do not authenticate a wheel, attest loaded bytecode, cover all dependencies or exhaust return-field behavior. Imports execute before inspection.",
+    "Optimized runner modes reject explicitly because assertions must execute. Bandit B101 exclusions must be reported, not described as an unfiltered clean scan.",
+    "The source checker assumes the portable Python file profile; it does not qualify the optional native helper binary or prove source-to-binary correspondence.",
+    "No physical, availability, MLS/CNSA, distribution-signing or whole-phase qualification. Insufficient information for tactical deployment."
+  ],
+  "evidence": [
+    "https://setuptools.pypa.io/en/latest/userguide/package_discovery.html",
+    "https://hatch.pypa.io/latest/config/build/",
+    "https://mesonbuild.com/meson-python/",
+    "https://www.maturin.rs/",
+    "https://docs.python.org/3.13/using/cmdline.html#cmdoption-I",
+    "https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html",
+    "https://cmake.org/cmake/help/latest/manual/ctest.1.html",
+    "https://dhall-lang.org/"
+  ]
+}

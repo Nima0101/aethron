@@ -4,7 +4,7 @@ import importlib.util
 import json
 import tempfile
 import unittest
-from dataclasses import asdict
+from dataclasses import asdict, fields
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -18,6 +18,33 @@ SPEC.loader.exec_module(RUNNER)
 
 
 class InstalledVectorTests(unittest.TestCase):
+    def test_wrong_inbox_result_flags_prevent_success(self):
+        for operation in ("put", "take"):
+            original = getattr(RUNNER.BoundedInbox, operation)
+            for field in ("execution_authority", "evidence_verified"):
+
+                def changed(*args, method=original, changed_field=field, **kwargs):
+                    result = method(*args, **kwargs)
+                    values = {item.name: getattr(result, item.name) for item in fields(result)}
+                    return SimpleNamespace(**(values | {changed_field: True}))
+
+                with self.subTest(operation=operation, field=field):
+                    with patch.object(RUNNER.BoundedInbox, operation, changed):
+                        with self.assertRaises(AssertionError):
+                            RUNNER.run(ROOT)
+
+    def test_wrong_bundle_evidence_flag_prevents_success(self):
+        original = RUNNER.verify_task_bundle
+
+        def changed(*args, **kwargs):
+            result = original(*args, **kwargs)
+            values = {item.name: getattr(result, item.name) for item in fields(result)}
+            return SimpleNamespace(**(values | {"evidence_verified": True}))
+
+        with patch.object(RUNNER, "verify_task_bundle", changed):
+            with self.assertRaises(AssertionError):
+                RUNNER.run(ROOT)
+
     def test_optimized_mode_rejects_before_fixture_reads(self):
         for mode in (1, 2):
             with self.subTest(mode=mode):
