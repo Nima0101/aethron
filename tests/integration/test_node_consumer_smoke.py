@@ -38,7 +38,11 @@ class NodeConsumerSmoke(unittest.TestCase):
         (self.package / "package.json").write_text('{"name":"test-client","version":"1.0.0"}')
         contract = self.root / "contracts/openapi/aethron-edge-v1.json"
         contract.parent.mkdir(parents=True)
-        contract.write_text('{}')
+        contract.write_text("{}")
+        for name in ["package.json", "package-lock.json", "offline-consumer.mjs"]:
+            (self.package / name).write_bytes(
+                (ROOT / "examples/clients/typescript" / name).read_bytes()
+            )
         self.pack_metadata = [{"filename": "test-client-1.0.0.tgz"}]
         self.actions = []
         self.after_install = lambda: None
@@ -77,7 +81,9 @@ class NodeConsumerSmoke(unittest.TestCase):
                         arguments, 0, stdout=json.dumps(self.pack_metadata)
                     )
                 self.actions.append("install")
-                self.installed_archive = Path(arguments[-1])
+                self.assertIn("ci", arguments)
+                self.installed_archive = next(kwargs["cwd"].glob("*.tgz"))
+                self.assertTrue((kwargs["cwd"] / "package-lock.json").is_file())
                 self.assertIn("--offline", arguments)
                 self.assertIn("--ignore-scripts", arguments)
                 package = kwargs["cwd"] / "node_modules/aethron-edge-client-example"
@@ -91,6 +97,8 @@ class NodeConsumerSmoke(unittest.TestCase):
                 self.after_install()
                 return subprocess.CompletedProcess(arguments, 0)
             self.assertEqual(arguments[0], "node")
+            if arguments[1].endswith("offline-consumer.mjs"):
+                self.actions.append("lock")
             return RUN(arguments, **kwargs)
 
         with (
@@ -154,11 +162,11 @@ class NodeConsumerSmoke(unittest.TestCase):
             self.invoke(EMIT)
         except ValueError as error:
             self.fail(str(error))
-        self.assertEqual(self.actions, ["build", "pack", "install"])
+        self.assertEqual(self.actions, ["build", "pack", "lock", "install"])
 
     def test_fresh_archive_and_inputs_are_bound_to_result(self):
         self.invoke(EMIT)
-        self.assertEqual(self.actions, ["build", "pack", "install"])
+        self.assertEqual(self.actions, ["build", "pack", "lock", "install"])
         self.assertNotEqual(self.installed_archive, self.archive)
         record = json.loads(self.output.read_text())
         self.assertEqual(
@@ -186,6 +194,7 @@ class NodeConsumerSmoke(unittest.TestCase):
     def test_failed_server_cleanup_does_not_publish_success(self):
         def fail_cleanup():
             raise RuntimeError("cleanup failed")
+
         self.service.HTTPService.tearDownClass = fail_cleanup
         with self.assertRaisesRegex(RuntimeError, "cleanup failed"):
             self.invoke(EMIT)
@@ -226,8 +235,14 @@ finally {if(!deleted)throw new Error('expected_cleanup_missing');}
         self.assertEqual(self.lifecycle, ["start", "stop"])
 
     def test_invalid_pack_metadata_never_reaches_install(self):
-        for metadata in [[], [{}, {}], [None], [{"filename": 1}],
-                         [{"filename": "../escape.tgz"}], [{"filename": "C:escape.tgz"}]]:
+        for metadata in [
+            [],
+            [{}, {}],
+            [None],
+            [{"filename": 1}],
+            [{"filename": "../escape.tgz"}],
+            [{"filename": "C:escape.tgz"}],
+        ]:
             with self.subTest(metadata=metadata):
                 self.actions.clear()
                 self.pack_metadata = metadata
@@ -248,3 +263,11 @@ finally {if(!deleted)throw new Error('expected_cleanup_missing');}
             self.invoke(EMIT)
         self.assertFalse(self.output.exists())
         self.assertEqual(self.lifecycle, ["start", "stop"])
+
+    def test_invalid_consumer_lock_never_installs_or_starts_server(self):
+        (self.package / "package-lock.json").write_text('{"lockfileVersion":1}')
+        with self.assertRaises(subprocess.CalledProcessError):
+            self.invoke(EMIT)
+        self.assertEqual(self.actions, ["build", "pack", "lock"])
+        self.assertEqual(self.lifecycle, [])
+        self.assertFalse(self.output.exists())

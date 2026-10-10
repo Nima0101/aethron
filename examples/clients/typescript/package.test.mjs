@@ -5,6 +5,8 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {test} from 'node:test';
+import {createRequire} from 'node:module';
+import {renderOfflineConsumer} from './offline-consumer.mjs';
 
 const root = fileURLToPath(new URL('./', import.meta.url));
 const dist = join(root, 'dist');
@@ -42,7 +44,7 @@ test('package contains the unchanged repository license text', () => {
   assert.deepEqual(license, readFileSync(new URL('../../../LICENSE', import.meta.url)));
 });
 
-test('installed public declarations and offline uninstall/reinstall preserve the client boundary', () => {
+test('installed public declarations and offline uninstall/reinstall preserve the client boundary', async () => {
   const npm = process.env.npm_execpath;
   assert.ok(npm, 'Run through npm run test:package');
   const work = mkdtempSync(join(tmpdir(), 'aethron-client-types-'));
@@ -51,9 +53,38 @@ test('installed public declarations and offline uninstall/reinstall preserve the
     const packed = JSON.parse(execFileSync(process.execPath, [npm, 'pack', '--json',
       '--ignore-scripts', '--offline', '--pack-destination', work], {...options, cwd: root}));
     assert.equal(packed.length, 1);
+    const sourceLock = JSON.parse(readFileSync(join(root, 'package-lock.json'), 'utf8'));
+    const sourceManifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+    const fixture = renderOfflineConsumer(sourceManifest, sourceLock, packed[0].filename,
+      readFileSync(join(work, packed[0].filename)));
+    // Use npm's bundled public cacache API to copy integrity-checked archives only.
+    // No registry packuments, node_modules copies, or network seeding in this test.
+    const cacache = createRequire(npm)('cacache');
+    const sourceCache = execFileSync(process.execPath, [npm, 'config', 'get', 'cache'], {...options, cwd: root}).trim();
+    const cache = join(work, 'archive-cache');
+    for (const [name, entry] of Object.entries(sourceLock.packages).filter(([name, entry]) => name && !entry.dev)) {
+      const bytes = await cacache.get.byDigest(join(sourceCache, '_cacache'), entry.integrity);
+      await cacache.put(join(cache, '_cacache'), `locked-archive:${name}`, bytes, {integrity: entry.integrity});
+    }
+    assert.ok(Object.keys(await cacache.ls(join(cache, '_cacache'))).every(key => key.startsWith('locked-archive:')));
+    const installOptions = {...options, cwd: work};
     writeFileSync(join(work, 'package.json'), JSON.stringify({private: true, type: 'module'}));
-    execFileSync(process.execPath, [npm, 'install', '--offline', '--ignore-scripts',
-      '--no-audit', '--no-fund', join(work, packed[0].filename)], {...options, cwd: work});
+    assert.throws(() => execFileSync(process.execPath, [npm, 'install', '--offline', '--ignore-scripts',
+      '--cache', cache, '--no-audit', '--no-fund', join(work, packed[0].filename)], installOptions), /ENOTCACHED/);
+    const seed = () => {
+      writeFileSync(join(work, 'package.json'), JSON.stringify(fixture.manifest));
+      writeFileSync(join(work, 'package-lock.json'), JSON.stringify(fixture.lock));
+    };
+    const install = () => {
+      seed();
+      execFileSync(process.execPath, [npm, 'ci', '--offline', '--ignore-scripts', '--cache', cache,
+        '--no-audit', '--no-fund'], installOptions);
+      assert.deepEqual(JSON.parse(readFileSync(join(work, 'package-lock.json'), 'utf8')), fixture.lock);
+      for (const [name, entry] of Object.entries(fixture.lock.packages).filter(([name]) => name)) {
+        assert.equal(JSON.parse(readFileSync(join(work, name, 'package.json'), 'utf8')).version, entry.version);
+      }
+    };
+    install();
     copyFileSync(new URL('./public-types.test.ts', import.meta.url), join(work, 'consumer.ts'));
     // The fixture imports only the package entry point from outside this checkout.
     try {
@@ -70,7 +101,7 @@ test('installed public declarations and offline uninstall/reinstall preserve the
       ['--disallow-code-generation-from-strings', 'consumer.mjs'], {...options, cwd: work}));
     assert.deepEqual(runConsumer(), {checks: 12, current_state: 'UNKNOWN'});
     execFileSync(process.execPath, [npm, 'uninstall', '--offline', '--ignore-scripts',
-      '--no-audit', '--no-fund', '--save', 'aethron-edge-client-example'], {...options, cwd: work});
+      '--cache', cache, '--no-audit', '--no-fund', '--save', 'aethron-edge-client-example'], {...options, cwd: work});
     assert.equal(existsSync(join(work, 'node_modules/aethron-edge-client-example')), false);
     const manifest = JSON.parse(readFileSync(join(work, 'package.json'), 'utf8'));
     const lock = JSON.parse(readFileSync(join(work, 'package-lock.json'), 'utf8'));
@@ -79,8 +110,7 @@ test('installed public declarations and offline uninstall/reinstall preserve the
     execFileSync(process.execPath, ['--input-type=module', '-e',
       "import assert from 'node:assert/strict'; await assert.rejects(import('aethron-edge-client-example'), {code:'ERR_MODULE_NOT_FOUND'});"],
     {...options, cwd: work});
-    execFileSync(process.execPath, [npm, 'install', '--offline', '--ignore-scripts',
-      '--no-audit', '--no-fund', join(work, packed[0].filename)], {...options, cwd: work});
+    install();
     assert.deepEqual(runConsumer(), {checks: 12, current_state: 'UNKNOWN'});
   } finally {
     rmSync(work, {recursive: true, force: true});

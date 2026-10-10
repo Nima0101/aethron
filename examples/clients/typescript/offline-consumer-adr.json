@@ -1,0 +1,45 @@
+{
+  "id": "P33-OFFLINE-CONSUMER-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "FIX consumer preparation using a shared build/test-only ECMAScript lock-v3 projection and npm ci --offline; KEEP Python HTTP-service orchestration.",
+  "constraints": [
+    "Linux and Windows Node package tests and a Python HTTP-service harness must install the same packed SDK offline from integrity-verified cached archives, without registry packuments.",
+    "Retain npm verification, lifecycle-script denial, source/archive binding, exact runtime versions, public declaration and no-eval runtime checks.",
+    "Small committed flat runtime graph and local archive; reject unsupported lock formats, links or missing integrity. No package resolver, network fallback or full clean clone."
+  ],
+  "alternatives": [
+    {
+      "technology": "ECMAScript plus Node crypto and npm ci",
+      "assessment": "Selected shared adapter: both consumers already execute Node/npm; JSON lock projection and standard archive SHA-512 stay in that toolchain. npm remains the package graph/integrity verifier."
+    },
+    {
+      "technology": "Python stdlib json/hashlib",
+      "assessment": "Technically capable and convenient for the service harness, but would require Python in the standalone Node package check or duplicate a versioned lock projection. Keep Python service lifecycle only and call the same local adapter."
+    },
+    {
+      "technology": "Rust/Serde command-line adapter",
+      "assessment": "Credible typed JSON processing and native standalone binaries, but this small build-only graph has no measured throughput constraint. It adds cross-platform binary/toolchain delivery without removing npm or improving its lock contract."
+    }
+  ],
+  "sources": [
+    "https://docs.npmjs.com/cli/v10/configuring-npm/package-lock-json/",
+    "https://docs.npmjs.com/cli/v11/commands/npm-ci/",
+    "https://github.com/npm/cacache",
+    "https://nodejs.org/api/crypto.html",
+    "https://docs.python.org/3/library/json.html",
+    "https://serde.rs/"
+  ],
+  "limits": [
+    "The consumer fixture is generated from the committed project lock plus exact local archive bytes. It is not a claim that a tarball alone or an empty cache is installable offline.",
+    "The tarball-only regression cache is prepared from existing integrity-checked npm archives using the npm-bundled cacache API. No remote seeding occurs in that test; the documented API lookup is a tested npm toolchain dependency.",
+    "Locked same-version reinstall is tested; platform-wide installation, upgrades, signed releases, browser/hardware acceptance and P19 qualification remain open.",
+    "The adapter accepts this flat npm-v3 runtime graph, not arbitrary workspaces, peer/optional/link/nested package layouts. Reassess it if the committed graph changes."
+  ],
+  "c4": {
+    "context": "flowchart LR\nMaintainer --> Fixture[Locked offline consumer]\nSDK[Packed SDK] --> Fixture\nFixture --> PackageCheck[Public package checks]\nFixture --> ServiceCheck[Read-only HTTP smoke]",
+    "containers": "flowchart LR\nNode[Node lock adapter] --> Lock[Consumer package-lock.json]\nNpm[npm ci offline] --> Consumer[External consumer]\nLock --> Npm\nCache[Integrity-checked archives only] --> Npm\nPython[Python service harness] --> Node",
+    "components": "flowchart LR\nSource[Committed runtime lock] --> Validate[Closed format and pin validation]\nArchive[Local archive bytes] --> Hash[SHA-512 integrity]\nValidate --> Project[Consumer root projection]\nHash --> Project\nProject --> Install[npm ci offline ignore-scripts]",
+    "code": "classDiagram\nclass OfflineConsumer {\n renderOfflineConsumer(manifest, lock, filename, bytes) fixture\n}\nOfflineConsumer --> ConsumerManifest\nOfflineConsumer --> ConsumerLockV3\nConsumerLockV3 --> NpmCi"
+  }
+}

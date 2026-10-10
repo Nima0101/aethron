@@ -51,7 +51,9 @@ def run():
             body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
             assert body == {"source_profile": "bench", "contract": "warn"}
             requests.append("POST")
-            self.answer(201, json.dumps({"session": scene["session"], "source_profile": "bench"}).encode())
+            self.answer(
+                201, json.dumps({"session": scene["session"], "source_profile": "bench"}).encode()
+            )
 
         def do_GET(self):
             assert self.headers["Authorization"] == "Bearer " + Service.token
@@ -98,7 +100,9 @@ def run():
         record = json.loads(output.read_text())
         assert requests == ["POST", "GET", "DELETE"], requests
         assert record["display_callbacks"] >= 3 and record["current_state"] == "UNKNOWN"
-        record["producer_fixture"] = "Controlled stdlib loopback HTTP; not production aethron_edge service"
+        record["producer_fixture"] = (
+            "Controlled stdlib loopback HTTP; not production aethron_edge service"
+        )
         record["requests"] = requests
         report.write_text(json.dumps(record, indent=2) + "\n")
     finally:

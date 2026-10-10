@@ -54,8 +54,15 @@ def run():
         )
         packed = subprocess.run(
             [
-                "npm", "pack", "--offline", "--ignore-scripts", "--json",
-                "--cache", str(cache), "--pack-destination", str(work),
+                "npm",
+                "pack",
+                "--offline",
+                "--ignore-scripts",
+                "--json",
+                "--cache",
+                str(cache),
+                "--pack-destination",
+                str(work),
             ],
             cwd=package,
             check=True,
@@ -68,8 +75,11 @@ def run():
             raise ValueError("invalid_pack_result")
         filename = entries[0].get("filename") if isinstance(entries[0], dict) else None
         if (
-            not isinstance(filename, str) or not filename.endswith(".tgz")
-            or "/" in filename or "\\" in filename or ":" in filename
+            not isinstance(filename, str)
+            or not filename.endswith(".tgz")
+            or "/" in filename
+            or "\\" in filename
+            or ":" in filename
         ):
             raise ValueError("invalid_pack_result")
         archive = work / filename
@@ -82,15 +92,11 @@ def run():
                 raise ValueError("client_archive_changed")
 
         check_inputs()
-        (work / "package.json").write_text(
-            json.dumps(
-                {
-                    "name": "aethron-external-consumer",
-                    "version": "0.1.0",
-                    "private": True,
-                    "type": "module",
-                }
-            )
+        subprocess.run(
+            ["node", str(package / "offline-consumer.mjs"), str(work), filename],
+            cwd=work,
+            check=True,
+            timeout=30,
         )
         subprocess.run(
             [
@@ -99,10 +105,11 @@ def run():
                 str(work),
                 "--cache",
                 str(cache),
-                "install",
+                "ci",
                 "--offline",
                 "--ignore-scripts",
-                str(archive),
+                "--no-audit",
+                "--no-fund",
             ],
             cwd=work,
             check=True,

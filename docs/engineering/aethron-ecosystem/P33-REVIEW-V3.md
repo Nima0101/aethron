@@ -1440,3 +1440,53 @@ Final counts and exact tested source/log/artifact hashes are in the
 [action-help evidence](evidence/phase3/p12-action-help-v1.json). No audit completion
 marker is created. Next: evaluate a bounded offline help-search contribution over
 the implemented public topics, while preserving role-sensitive product-help gates.
+
+## P3.3 locked offline consumer and CI repair — 2026-10-10
+
+Baseline: `bfc2124938ff97c505d59ab3a8352e379bd0638a`; the controller commit,
+103 source hashes and seven prior reports were verified before publication to
+PR #44. Review restarted at generator/validator, wire/session boundaries and
+package delivery. The planned P12 help-search expansion was suspended when the
+single continuation snapshot exposed packaging and formatting failures.
+
+FIX the earliest demonstrated packaging mismatch: preparation with `npm ci`
+caches dependency archives but need not cache registry packuments. The unlocked
+external `npm install <archive> --offline` used by the package test and production
+service smoke required that metadata. Hosted Linux and Windows therefore failed
+with `ENOTCACHED` for AJV. Linux's packed-client run tested merge revision
+`2078c318f56f2ae51f74d00d40c143fc85ec98bf`, composed from PR head `286e2df` and
+base `fce89d3`. The two development failures reported three unformatted lane-owned
+smoke files; those files are now formatted with the pinned Ruff 0.16.10.
+
+The shared local `offline-consumer.mjs` adapter projects the committed npm-v3
+runtime graph and the actual archive SHA-512 into an external consumer lock.
+Both consumers call `npm ci --offline --ignore-scripts`. npm validates dependency
+satisfaction/integrity, rather than this adapter inventing a resolver. Unsupported
+formats, missing pins, links and dependency declaration drift fail closed.
+Uninstall is still exercised; same-version reinstall restores the generated lock.
+No network fallback, package-check removal, weakened timeout or threshold change.
+
+KEEP ECMAScript for this build/test boundary after comparing Python JSON/hashlib
+and Rust/Serde. The actual consumers must execute Node/npm on Linux and Windows;
+a single JSON/crypto adapter avoids adding Python to the standalone Node package
+suite or a native executable without a demonstrated performance requirement.
+KEEP Python for the existing HTTP-service orchestration through this versioned
+JSON boundary. The closed [decision](../../../examples/clients/typescript/offline-consumer-adr.json)
+records primary sources, deployment constraints and all four C4 views.
+
+Verification uses an isolated cache containing only the five integrity-checked
+runtime archives, with no registry metadata. The old unlocked install is expected
+to fail; the locked install passes public type checks, twelve installed-runtime
+checks, uninstall and locked reinstall. Forty-nine focused SDK checks and sixteen
+controlled smoke checks pass. The actual production-service smoke built, packed,
+installed offline and returned three delayed-display callbacks with current
+conditions UNKNOWN. Source/archive binding was verified. Three-file Ruff lint,
+format and diff checks pass; Windows repair still requires hosted verification.
+
+Preserve the hosted failure logs, four missing-helper failures, formatting RED,
+and an initial local smoke rejection caused by package source edits while it ran.
+That provenance rejection was correct; the final stable-input run passed without
+relaxing the check. [Evidence](evidence/phase3/p33-offline-consumer-v1.json) records
+exact source/log hashes and the retained production-service result. No browser
+suite rerun is claimed for this build/test-only correction. Broader P12 review and
+help-search work remain next; no full-lane or P19 completion marker is created.

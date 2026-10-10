@@ -32,7 +32,8 @@ the locked dependency cache first; the TypeScript consumer fixture is never exec
 An additional JavaScript consumer checks observation admission, copying, expiry,
 disconnect and the public import boundary with synthetic data. The test removes
 the package using `npm uninstall`, checks removal from the manifest, lock and
-module resolution, then reinstalls the same archive offline and repeats those
+module resolution, then restores the generated consumer manifest/lock, reinstalls the same archive
+with `npm ci --offline`, and repeats those
 checks in a fresh process. This verifies same-version reinstall, not an upgrade
 between releases or removal of state retained by an already-running application.
 
@@ -262,3 +263,30 @@ Timer and stream callbacks share the check; a cancelled observation is cleared
 before an expired UNKNOWN view is passed to the display. This is a controlled
 host-interleaving guarantee, not a native-clock or hard real-time claim. See the
 [publication ADR](render-publication-adr.json) for the scoped comparison and limits.
+
+
+### Offline consumer fixture and cache boundary
+
+Offline installation needs the committed dependency graph **and** its cached
+integrity-checked archives. `npm ci` preparation need not cache registry package
+metadata; an unlocked `npm install <client.tgz> --offline` can therefore fail with
+`ENOTCACHED` even when every dependency archive is available.
+
+`offline-consumer.mjs` projects this package's committed lock-v3 runtime entries
+into a fresh consumer root and adds the exact local SDK archive with SHA-512
+integrity. Both the package test and Python service smoke use this same adapter,
+then `npm ci --offline --ignore-scripts --no-audit --no-fund`. It accepts the
+current flat pinned graph; unsupported lock/layout changes require reassessment.
+The helper is build/test tooling and is excluded from the published package.
+
+The package regression prepares an isolated cache containing only five existing
+runtime archives, using npm's bundled public `cacache` API with integrity checks.
+It first proves that the old unlocked install fails without registry metadata,
+then validates locked installation, the unchanged consumer declarations/runtime,
+uninstall and locked reinstall. It copies no installed dependency tree and fetches
+nothing. Missing archives still fail; no network fallback is enabled. This is
+same-version, locked-consumer evidence, not standalone archive, empty-cache,
+upgrade or signed customer-product qualification.
+
+See [offline consumer decision](offline-consumer-adr.json) for the technology
+comparison, closed decision schema and four C4 views.

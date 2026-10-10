@@ -6,7 +6,7 @@
   "license": "GPL-3.0-only",
   "scripts": {
     "build": "node generate-contract.mjs --check && node generate-validators.mjs && tsc -p tsconfig.json",
-    "test": "npm run build && node --test test.mjs validation.test.mjs transport.test.mjs wire.test.mjs session.test.mjs redirect.test.mjs disposal.test.mjs errors.test.mjs endpoint.test.mjs numeric.test.mjs generation.test.mjs source.test.mjs && node --disallow-code-generation-from-strings audit-observation.mjs --check && npm run test:package && npm run test:types",
+    "test": "npm run build && node --test test.mjs validation.test.mjs transport.test.mjs wire.test.mjs session.test.mjs redirect.test.mjs disposal.test.mjs errors.test.mjs endpoint.test.mjs numeric.test.mjs generation.test.mjs source.test.mjs offline-consumer.test.mjs && node --disallow-code-generation-from-strings audit-observation.mjs --check && npm run test:package && npm run test:types",
     "test:package": "node package.test.mjs",
     "generate": "node generate-contract.mjs --write",
     "test:types": "tsc --strict --noEmit --target es2022 --module nodenext --moduleResolution nodenext contract-types.test.ts"
