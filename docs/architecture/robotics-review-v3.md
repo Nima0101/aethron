@@ -358,3 +358,21 @@ exceptions. Production and test sources remain unchanged; this corrects the
 qualification claim only. The failure-handling gap remains open, so no general
 fail-closed clock claim, runtime KEEP/MIGRATE decision, first-component completion
 or forward feature expansion is justified by this change.
+
+
+## Executable reproduction of the clock exception receipt
+
+FIX the reproducibility gap in the preceding negative evidence: synthetic
+conditions and output were recorded, but the exact executable probe was absent
+from the public tree. The [reproduction command](../verification/robotics-clock-exception-reproduction-v3.md)
+now exposes the two in-process cases and unconditional cleanup. It deliberately
+retains a nonzero qualification outcome, and explains why that exit code alone
+cannot distinguish a reproduced observation from an execution error.
+
+The code was extracted from the document and executed without a socket; its JSON
+matched both historical observations exactly and stderr was empty. The extracted
+code passed Ruff and Bandit. [Reproduction evidence](../verification/robotics-clock-exception-reproduction-v3.json)
+binds the document, historical receipt, unchanged production source and this
+review. Historical evidence bytes remain unchanged. This documentation addition
+does not fix clock exception handling, select a production runtime, qualify any
+hardware or complete the earliest component review.
