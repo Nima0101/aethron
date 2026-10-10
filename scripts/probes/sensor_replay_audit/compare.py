@@ -9,6 +9,11 @@ import tracemalloc
 
 from aethron_edge.sensors.replay import _read
 
+# Both timing and allocation passes require byte-equality assertions.
+# Reject optimized imports too, before exposing an unchecked report generator.
+if not __debug__:
+    raise SystemExit("replay_audit_requires_assertions")
+
 
 def baseline(stream, size, allow_eof=False):
     buffer = bytearray()

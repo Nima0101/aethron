@@ -19,3 +19,16 @@ not a complete Node replay implementation. It preserves duplicate/escaped-key
 and integer-precision failures. It does not establish that a properly configured
 alternative parser cannot implement the contract. No live input or network is
 used. No benchmark is a hardware or real-time qualification result.
+
+The comparison requires assertions enabled. Optimized execution/import (`-O`,
+`-OO`, or nonzero `PYTHONOPTIMIZE`) is rejected because it removes byte-equality
+checks from both timing and allocation passes. Focused evidence-admission tests:
+
+```sh
+PYTHONPATH=integrations/edge:tests/integration \
+  python -m unittest test_sensor_replay_audit_modes
+```
+
+These tests deliberately fail the first candidate in each measurement pass and
+require no report output. They do not rerun the performance matrix or requalify
+historical reports. The full current technology reassessment remains incomplete.
