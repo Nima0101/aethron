@@ -70,7 +70,8 @@ export async function observe(base: string, token: string, profile: string,
   display: (state: ReturnType<Observation['view']>) => void, signal: AbortSignal): Promise<void> {
   const headers = {Authorization: `Bearer ${token}`, 'Content-Type': 'application/json'};
   const request = await fetch(`${base}/api/v1/sessions`, {method: 'POST', headers, redirect: 'error',
-    body: JSON.stringify({source_profile: profile, contract: 'warn'}), signal});
+    body: JSON.stringify({source_profile: profile, contract: 'warn'}), signal})
+    .catch(() => { throw new Error('session_unavailable'); });
   if (!request.ok) {
     discardResponse(request);
     throw new Error('session_unavailable');
@@ -91,7 +92,8 @@ export async function observe(base: string, token: string, profile: string,
     }
   }, 20);
   try {
-    const response = await fetch(`${base}/api/v1/sessions/${handle}/events`, {headers, signal: eventSignal, redirect: 'error'});
+    const response = await fetch(`${base}/api/v1/sessions/${handle}/events`, {headers, signal: eventSignal, redirect: 'error'})
+      .catch(() => { throw new Error('stream_unavailable'); });
     if (!response.ok || !response.body) {
       discardResponse(response);
       throw new Error('stream_unavailable');
@@ -101,7 +103,8 @@ export async function observe(base: string, token: string, profile: string,
     let lastSequence = -1;
     try {
       while (true) {
-        const chunk = await reader.read();
+        const chunk = await reader.read().catch(() => { throw new Error('stream_unavailable'); });
+        if (eventSignal.aborted) throw new Error('stream_unavailable');
         if (chunk.done) { decoder.finish(); break; }
         for (const {name, value: message} of decoder.feed(chunk.value)) {
           const incoming = message as SceneEnvelope | HealthEvent;
@@ -115,6 +118,8 @@ export async function observe(base: string, token: string, profile: string,
           if (incoming.kind === 'scene') value.accept(incoming);
           else value.disconnect();
           display(value.view());
+          // A callback can abort while more events remain in this same chunk.
+          if (eventSignal.aborted) throw new Error('stream_unavailable');
         }
       }
     } finally {

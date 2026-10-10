@@ -122,3 +122,18 @@ cancellation promises are observed without replacing the primary result. Native
 fetch cancellation is exercised against stalled loopback responses; this does
 not prove termination of an arbitrary source that ignores cancellation, remote
 handle deletion, or a production cleanup deadline.
+
+Request rejections expose fixed errors: `session_unavailable` during session
+creation, and `stream_unavailable` during event request/read failure. Session
+body failures still use `invalid_session`. Transport exception messages, causes,
+and custom abort reasons are not copied into these errors. Callers can inspect
+their own `signal.aborted` to distinguish their cancellation; their signal and
+reason are not modified. Application display-callback exceptions retain their
+identity and remain the application's responsibility.
+
+Cancellation is checked after each event read and synchronous display callback,
+before parsing another event in that chunk. Once a validated handle is known,
+cancellation clears the observation and attempts DELETE with its independent
+timeout. Cancellation before session admission cannot confirm remote cleanup.
+The checks do not preempt synchronous callbacks/parsing or establish a real-time
+shutdown deadline; the host fetch implementation must honor its abort signal.

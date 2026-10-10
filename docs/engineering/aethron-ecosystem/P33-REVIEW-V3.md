@@ -239,3 +239,54 @@ error disclosure, caller abort across all phases, and the lexical-number and
 producer event-cap issues. Distribution/tooling and the remaining client inventory
 have not completed V3 review. No completion marker is created. Source/report/artifact
 bindings are in [the disposal record](evidence/phase3/p33-disposal-review-v3.json).
+
+
+## Third component, transport exception and caller cancellation slice
+
+Baseline `78e8cd98ffef6e5c7a0aac2a03b5669ae87676b1`. Fresh earliest admission,
+projection and clock controls remain passing in the combined source run. This
+slice found raw POST/GET/read rejection values escaping the observer, including
+private custom abort reasons. It also found that aborting inside a display callback
+still processed further events in the same chunk, or parsed a malformed tail and
+replaced cancellation with an admission error. Session body errors already had
+fixed diagnostics; that passing baseline is retained.
+
+Deployment constraints: Node ESM client, native fetch/ReadableStream, synchronous
+application callback, strict ingress diagnostics without response/credential echo,
+caller-owned cancellation and independent best-effort cleanup. There is no native
+compute kernel, hard real-time preemption, actuator or hardware qualification
+requirement. The previous language choice receives no presumption of correctness.
+
+Current primary-source comparison (2026-10-10):
+
+| Candidate | Decisive property |
+| --- | --- |
+| TypeScript/native fetch with narrow rejection handling and explicit checkpoints | The [DOM signal contract](https://dom.spec.whatwg.org/#interface-abortsignal) exposes an abort flag and arbitrary JavaScript reason. Checking the flag without throwing that reason lets this public module separate stop behavior from diagnostics. Narrow Promise catches preserve application callback and parser error identity. |
+| Kotlin coroutines | [ensureActive](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/ensure-active.html) supports cooperative checks in code that does not suspend. It provides a credible lifecycle model for a future JVM client, but synchronous work still needs checkpoints, and a diagnostic policy is still necessary. No measured advantage justifies a JVM/JS bridge for this Node-facing module. |
+| Dart Futures | [Future error handling](https://dart.dev/libraries/async/futures-error-handling) permits scoped handlers and cleanup; handlers placed after a callback can also capture that callback's error. It does not remove the need to distinguish transport from application failures. A Dart client remains a separate deployment candidate, not an evidenced improvement to this Node boundary. |
+| A blanket outer error normalizer | This would erase parser categories and caller-owned renderer errors. Existing renderer-identity controls reject that tradeoff; catches belong only around transport promises. |
+
+**KEEP TypeScript/native fetch; FIX error boundaries and cooperative cancellation.**
+Three narrow rejection handlers produce new fixed errors without retaining causes.
+Checks after a completed reader operation and after each display callback stop
+before the next generator step can parse a buffered event. The existing renderer
+failure override and independent DELETE cleanup remain intact. Neither foreign
+runtime performance nor universal cancellation latency is claimed.
+
+Sixteen controls cover nine transport error values, five real HTTP/native-fetch
+cancellation points, and two same-chunk callback cancellation tails. The initial
+14-case run had 13 assertion failures and one pass; adding the two tail cases
+produced 15 assertion failures and one pass before production changes. The
+corrected source suite includes all 16 cases and prior callback-error controls.
+Tests use synthetic local data; no private endpoint or credential is contacted.
+Five-second native-test watchdogs only bound regression hangs.
+
+Limitations: synchronous callbacks/parser work cannot be preempted by this check;
+custom implementations that ignore abort can retain resources; cancellation before
+admission cannot prove remote viewer deletion. Diagnostics intentionally no longer
+expose native abort error names; callers inspect their own signal. Application
+callback exceptions are intentionally not sanitized. Initial endpoint trust,
+lexical-number equivalence and producer payload/whole-event bounds remain in the
+open transport review. Distribution/tooling and remaining platform/P12 inventory
+have not completed V3 review. No completion marker is created. See the
+[source-bound record](evidence/phase3/p33-errors-review-v3.json).
