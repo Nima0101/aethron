@@ -1,7 +1,7 @@
 # P16–P18 review inventory v3
 
-Snapshot: `ffd019cf746adac2a069eeb5fd23316cbd0b5ad8`, plus the sensor encoding
-conformance correction, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `828943affeeb6d5878dc9e07accf46571791604b`, plus the ROS status
+consumer conformance correction, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -34,7 +34,7 @@ external gates. No whole-phase completion can be inferred from the rows above.
 | Scope | State at this snapshot |
 |---|---|
 | P16 transport, enrollment and persistent rollback floors | Not implemented by the owned modules. Caller-provided pins/floors are assumptions, not these services. |
-| P16 cross-phase conformance | [Edge UNKNOWN corpus](p16-edge-conformance-v3.md) checks one published API/fixture boundary; [P2 packet cases](p16-sensor-conformance-v3.md) exercise the published decoder and P16 binding independently; [encoding cases](p16-sensor-encoding-v3.md) add byte-order, padding and trailing-byte checks. Integrated P2/P3/P14 runtime qualification is not established. |
+| P16 cross-phase conformance | [Edge UNKNOWN corpus](p16-edge-conformance-v3.md) checks one published API/fixture boundary; [P2 packet cases](p16-sensor-conformance-v3.md) exercise the published decoder and P16 binding independently; [encoding cases](p16-sensor-encoding-v3.md) add byte-order, padding and trailing-byte checks. [ROS diagnostic cases](p16-ros-status-v3.md) consume receipt/loss/fault status through real APIs. Integrated P2/P3/P14 runtime qualification is not established. |
 | P17 common picture and operator collaboration | No owned implementation or integrated client evidence identified. |
 | P17 role/authority, intent, coordination and cancellation | No owned command workflow implementation; P16 verification tasks do not implement it. |
 | P17 offline synchronization and conflict handling | Local inbox and direct federation checks do not provide durable synchronization or conflict resolution. |

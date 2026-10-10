@@ -1,0 +1,52 @@
+{
+  "audit_policy_version": 3,
+  "baseline_head": "828943affeeb6d5878dc9e07accf46571791604b",
+  "producer_commit": "a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46",
+  "decision": "KEEP direct API consumer; ADD diagnostic status coverage",
+  "production_defect_demonstrated": false,
+  "red": {
+    "methods": 3,
+    "assertion_failures": 3,
+    "errors": 0
+  },
+  "green": {
+    "consumer_methods": 10,
+    "related_methods": 34,
+    "skips": 0
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS after formatting",
+    "bandit": "PASS",
+    "actionlint": "PASS",
+    "diff": "PASS"
+  },
+  "source_sha256": {
+    "tests/interop_consumers/test_ros_status.py": "64b64d989c8361e4a508631b9fd13caf3a0fd447f6a406a7b4c0fe4b1623c75e",
+    "examples/interop/ros-status-vectors-v1.json": "d9d64c2a2869c6dec3151c969dd343c475a3b610adfbbaf6b641a568be5d9738",
+    ".github/workflows/aethron-passports.yml": "69b98d59726934cf0e8dc504781c8a6d02662770c570df355acd347dd2dfdb52",
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "integrations/edge/aethron_edge/__init__.py": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9",
+    "integrations/edge/aethron_edge/mailbox.py": "84b6c32191d1cd21f5469c908be50b38179d6d594cc9fd1865e2b06e3851b090",
+    "integrations/edge/aethron_edge/sensors/__init__.py": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a",
+    "integrations/edge/aethron_edge/sensors/geometry.py": "24dbd7e248990f426d985d05e9add08615621381f4391209a85682102f50d02b",
+    "integrations/edge/aethron_edge/sensors/packets.py": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192",
+    "integrations/edge/aethron_edge/sensors/rectification.py": "b034b4f5b2e0c5c4bda51f5adfcb4a15193ebe7497ab4099c7887fb57c49f6db",
+    "integrations/edge/aethron_edge/sensors/ros2.py": "41aece1eff1dd5e6ae77272959354c8a9bcc6465ec10da2da7b747ad97589912",
+    "integrations/edge/aethron_edge/sources/__init__.py": "c68be66b7a8e4e95cafcc1cdcf108c0532d1d2a53b55def660cbfdc4b8034f48",
+    "integrations/edge/aethron_edge/sources/base.py": "0617c1b46c55416ff779189c270c7f5e46cd52a7cc0eaa03328c6800b8bbc319"
+  },
+  "retained_artifact_sha256": {
+    "ros-status-red.log": "2abbbedde3c4376310a2dd418476c57b58f52cbc870566b657ea9b8c89e3bfa1",
+    "ros-status-green.log": "b8aa7c5b3f6f59466abc7dbea89b2e9bb7a19e585d4552e8e8abac80713228e9",
+    "ros-status-related.log": "3c05ef2a27bbc2c4a21bd29032311d1886d4f305bf1ececbcac3441396c280f9",
+    "generate_ros_status_fixture.py": "693c19305980b7dfba8b21054f4173f6ad754d2f9fff41230480d488ac13f512"
+  },
+  "limits": [
+    "Dictionary replay only; no DDS/network/device execution.",
+    "Signature binding does not validate diagnostic freshness or truth.",
+    "Listed direct source inputs are not dependency closure or loaded-code attestation.",
+    "No full audit, phase completion or physical qualification."
+  ]
+}

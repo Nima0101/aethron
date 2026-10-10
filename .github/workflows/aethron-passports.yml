@@ -8,6 +8,12 @@ on:
       - 'integrations/edge/aethron_edge/__init__.py'
       - 'integrations/edge/aethron_edge/sensors/__init__.py'
       - 'integrations/edge/aethron_edge/sensors/packets.py'
+      - 'integrations/edge/aethron_edge/mailbox.py'
+      - 'integrations/edge/aethron_edge/sensors/geometry.py'
+      - 'integrations/edge/aethron_edge/sensors/rectification.py'
+      - 'integrations/edge/aethron_edge/sensors/ros2.py'
+      - 'integrations/edge/aethron_edge/sources/__init__.py'
+      - 'integrations/edge/aethron_edge/sources/base.py'
       - 'requirements-passport-sensor-conformance.txt'
       - 'examples/interop/**'
       - 'tests/test_passport*.py'
@@ -36,6 +42,12 @@ on:
       - 'integrations/edge/aethron_edge/__init__.py'
       - 'integrations/edge/aethron_edge/sensors/__init__.py'
       - 'integrations/edge/aethron_edge/sensors/packets.py'
+      - 'integrations/edge/aethron_edge/mailbox.py'
+      - 'integrations/edge/aethron_edge/sensors/geometry.py'
+      - 'integrations/edge/aethron_edge/sensors/rectification.py'
+      - 'integrations/edge/aethron_edge/sensors/ros2.py'
+      - 'integrations/edge/aethron_edge/sources/__init__.py'
+      - 'integrations/edge/aethron_edge/sources/base.py'
       - 'requirements-passport-sensor-conformance.txt'
       - 'examples/interop/**'
       - 'tests/test_passport*.py'
@@ -69,7 +81,7 @@ jobs:
       - run: |
           python -m pip install --only-binary=:all: -r requirements-passport-sensor-conformance.txt
       - run: python -m pip check
-      - run: python -m unittest discover -s tests/interop_consumers -p test_sensor_packets.py -v
+      - run: python -m unittest discover -s tests/interop_consumers -p 'test_*.py' -v
         env:
           PYTHONPATH: .:integrations/edge
   schema-conformance:
