@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "date": "2026-10-09",
+  "scope": "P2.1 opt-in variable-count recorded cloud replay v2",
+  "parent_main": "2d29c3b852936fac9cddf66a55040d1b9a816179",
+  "python": "3.13.15",
+  "platform": "macOS arm64",
+  "source_sha256": {
+    "integrations/edge/aethron_edge/sensors/replay.py": "c4f8a531e627eda2694452fcea1fc17dad1f10d25b306e3ff1f8ffa0f7a8ee5a",
+    "tests/integration/test_sensor_cloud_replay_v2.py": "cf3fa86670a684d138f111791e2975e21bb99d392a8e030a1e5597aed4c96d82",
+    "scripts/edge_ros2_check.py": "0a18ae42ecbebdde0a6f50a29a05d298bda3d80c5a566da950683973c510eb4a"
+  },
+  "red": {
+    "tests": 4,
+    "failures": 1,
+    "subtest_or_test_errors": 11,
+    "reason": "Header version 2 rejected by the prior version <= 1 constraint"
+  },
+  "targeted": {
+    "cloud_v2": 5,
+    "legacy_replay": 6,
+    "packets": 8,
+    "radar_appliance": 4,
+    "result": "passed",
+    "seeded_replay_corruption_cases": 2000
+  },
+  "installed_wheel": {
+    "tests": 5,
+    "isolated_python": true,
+    "result": "passed",
+    "edge_sha256": "c72d96b97d9aef007ae12da6d664af2fd780dde72311163d6a737c2d4a3f7c42"
+  },
+  "static": {
+    "ruff_check": "passed",
+    "ruff_format": "passed",
+    "bandit_changed_runtime": "passed",
+    "diff_check": "passed"
+  },
+  "deferred_hosted": [
+    "full DDS candidate",
+    "platform matrix",
+    "broad fuzz",
+    "clean-clone matrix",
+    "full artifact reproduction"
+  ],
+  "limits": [
+    "Original synthetic packet fixtures only",
+    "No device or field qualification",
+    "No live-clock authority, class inference or tracking added",
+    "Missing selected cloud ordinals remain provider faults; whole-recording provisioning rejects those selections",
+    "Existing recorded/model/latency negative evidence remains unchanged"
+  ],
+  "next_task": "Implement bounded offline cloud sample inspection with explicit recorded provenance and no ROS runtime requirement",
+  "core_verification": {
+    "command": "python scripts/verify.py",
+    "result": "passed",
+    "tests": 218,
+    "skipped": 5
+  },
+  "temporal_evaluation": {
+    "command": "python scripts/temporal_evaluate.py --out build/lane-b/temporal",
+    "result": "failed",
+    "report": "cloud-replay-v2-temporal.json",
+    "benchmark": {
+      "cpu_p95_ms_diagnostic_only": 12.759,
+      "frames": 100,
+      "max_ms": 158.238,
+      "memory_budget_bytes": 33554432,
+      "objects": 32,
+      "p50_ms": 54.449,
+      "p95_budget_ms": 100,
+      "p95_ms": 143.527,
+      "passed": false,
+      "peak_bytes": 118837
+    },
+    "recorded_temporal": {
+      "centre_rmse_normalized": null,
+      "false_negatives": 20,
+      "false_positives": 721,
+      "fragmentations": 0,
+      "id_switches": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "true_positives": 0,
+      "uncertain_predictions_not_counted_as_detections": 70
+    }
+  },
+  "publication": {
+    "status": "held",
+    "reason": "Frozen T10 p95 143.527 ms exceeds 100 ms; no public push or PR",
+    "thresholds_changed": false,
+    "core_runtime_changed": false
+  }
+}
