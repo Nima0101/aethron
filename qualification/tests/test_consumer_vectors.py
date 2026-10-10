@@ -20,6 +20,12 @@ CASE_IDS = {
 
 
 class ConsumerVectorTests(unittest.TestCase):
+    def capture_counts(self, counts):
+        self.assertIs(type(counts), dict)
+        self.assertEqual(set(counts), {"submitted", "eligible", "rejected"})
+        for count in counts.values():
+            self.assertIs(type(count), int)
+
     def corpus(self):
         self.assertTrue(CORPUS.is_file(), "portable consumer corpus missing")
         with CORPUS.open("rb") as stream:
@@ -49,6 +55,7 @@ class ConsumerVectorTests(unittest.TestCase):
                     "capture_counts",
                 },
             )
+            self.capture_counts(case["expected"]["bundle"]["capture_counts"])
             self.assertEqual(len(case["expected"]["artifacts"]), len(case["captures"]))
             for expected in case["expected"]["artifacts"]:
                 self.assertEqual(
@@ -105,6 +112,7 @@ class ConsumerVectorTests(unittest.TestCase):
                     report["references"]["reference_findings"], expected["reference_findings"]
                 )
                 self.assertIs(report["software_checks_passed"], expected["software_checks_passed"])
+                self.capture_counts(report["coverage"]["capture_counts"])
                 self.assertEqual(report["coverage"]["capture_counts"], expected["capture_counts"])
                 for key in (
                     "artifact_bytes_verified",

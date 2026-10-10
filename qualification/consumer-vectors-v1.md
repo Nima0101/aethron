@@ -30,6 +30,14 @@ domain, procedure, artifact-verification and physical flags to remain false;
 artifact authenticity and physical qualification must also remain false.
 This is partial report conformance, not an oracle for every output field.
 
+`capture_counts` contains exactly `submitted`, `eligible` and `rejected`, each
+an integer. The reference runner checks exact built-in `int` types on both
+expectations and returned counts before comparing values. Numeric equality alone
+is insufficient: Python treats `true`/`1` and `1.0`/`1` as equal. This restriction
+describes this corpus and the reference API, not every JSON application's numeric
+equivalence rules. The [count-type correction](technology/consumer-count-types-v3.md)
+retains twelve negative controls; earlier corpus results did not check these types.
+
 All six case IDs must occur exactly once:
 
 | Case | Expected distinction |
