@@ -7,6 +7,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 class NativeAuditTests(unittest.TestCase):
@@ -57,6 +58,33 @@ class NativeAuditTests(unittest.TestCase):
                     "negative",
                 )
             self.assertEqual((out / "negative-stdout.log").read_text(), "negative evidence\n")
+
+    def test_timeout_keeps_exact_partial_bytes_and_remains_failure(self):
+        with tempfile.TemporaryDirectory() as directory:
+            out = Path(directory)
+            failure = subprocess.TimeoutExpired(
+                "fixed-audit-child", 10, output=b"partial\xff\r\n", stderr=b"diagnostic\x00"
+            )
+            with patch.object(self.api.subprocess, "run", side_effect=failure):
+                with self.assertRaises(subprocess.TimeoutExpired) as caught:
+                    self.api.child([sys.executable], [], out, "timeout")
+            self.assertIs(caught.exception, failure)
+            self.assertEqual((out / "timeout-stdout.log").read_bytes(), failure.stdout)
+            self.assertEqual((out / "timeout-stderr.log").read_bytes(), failure.stderr)
+
+    def test_failed_compiler_probe_keeps_stderr_and_failure_receipt(self):
+        with tempfile.TemporaryDirectory() as directory:
+            out = Path(directory) / "attempt"
+            compiler = Path(directory) / "failing-compiler"
+            compiler.write_text("#!/bin/sh\nprintf 'rejected probe\\n' >&2\nexit 3\n")
+            compiler.chmod(0o700)
+            with self.assertRaises(subprocess.CalledProcessError):
+                self.api.run(out, compiler=str(compiler))
+            self.assertTrue((out / "compiler-version-stderr.log").read_bytes())
+            report = json.loads((out / "result.json").read_text())
+            self.assertEqual(report["state"], "failed")
+            self.assertEqual(report["failure_type"], "CalledProcessError")
+            self.assertFalse(report["native_executed"])
 
     def test_missing_compiler_is_failure_with_retained_receipt(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -78,16 +78,29 @@ def fixture_source(cases):
     return "\n".join(lines) + "\n"
 
 
-def child(command, cases, out, label):
+def retained_process(command, out, label, *, timeout, input_bytes=None):
+    """Keep exact diagnostic bytes on both normal exit and subprocess timeout."""
     begin = time.monotonic_ns()
-    completed = subprocess.run(  # nosec B603
-        command, input=json.dumps(cases), text=True, capture_output=True, timeout=10, check=False
-    )
+    try:
+        completed = subprocess.run(  # nosec B603
+            command, input=input_bytes, capture_output=True, timeout=timeout, check=False
+        )
+    except subprocess.TimeoutExpired as error:
+        # TimeoutExpired can carry bytes even in text mode. Keep them losslessly.
+        (out / f"{label}-stdout.log").write_bytes(error.stdout or b"")
+        (out / f"{label}-stderr.log").write_bytes(error.stderr or b"")
+        raise
     elapsed = time.monotonic_ns() - begin
-    # Preserve rejected candidate output and compiler/runtime diagnostics as evidence.
-    (out / f"{label}-stdout.log").write_text(completed.stdout)
-    (out / f"{label}-stderr.log").write_text(completed.stderr)
+    (out / f"{label}-stdout.log").write_bytes(completed.stdout)
+    (out / f"{label}-stderr.log").write_bytes(completed.stderr)
     completed.check_returncode()
+    return completed, elapsed
+
+
+def child(command, cases, out, label):
+    completed, elapsed = retained_process(
+        command, out, label, timeout=10, input_bytes=json.dumps(cases).encode("utf-8")
+    )
     return json.loads(completed.stdout), elapsed
 
 
@@ -110,13 +123,10 @@ def run(out, *, compiler="rustc"):
         shutil.copyfile(DRIVER, out / "native.rs")
         report["fixture_sha256"] = hashlib.sha256(fixture.encode()).hexdigest()
         report["corpus_sha256"] = hashlib.sha256(json.dumps(cases).encode()).hexdigest()
-        report["compiler"] = subprocess.run(  # nosec B603
-            [compiler, "--version", "--verbose"],
-            capture_output=True,
-            text=True,
-            check=True,
-            timeout=10,
-        ).stdout.strip()
+        version, _ = retained_process(
+            [compiler, "--version", "--verbose"], out, "compiler-version", timeout=10
+        )
+        report["compiler"] = version.stdout.decode("utf-8").strip()
         expected = api.reference(cases)
         (out / "expected.json").write_text(json.dumps(expected, indent=2) + "\n")
         report.update(cases=len(cases), steps=sum(len(c["steps"]) for c in cases), runs=[])
@@ -125,7 +135,7 @@ def run(out, *, compiler="rustc"):
             ("optimized", ["-C", "opt-level=2", "-C", "overflow-checks=yes"]),
         ):
             binary = out.resolve() / profile
-            built = subprocess.run(  # nosec B603
+            retained_process(
                 [
                     compiler,
                     "--edition=2021",
@@ -135,13 +145,10 @@ def run(out, *, compiler="rustc"):
                     "-o",
                     str(binary),
                 ],
-                capture_output=True,
-                text=True,
+                out,
+                f"{profile}-compiler",
                 timeout=30,
-                check=False,
             )
-            (out / f"{profile}-compiler.log").write_text(built.stdout + built.stderr)
-            built.check_returncode()
             report[f"{profile}_binary_sha256"] = hashlib.sha256(binary.read_bytes()).hexdigest()
             for repeat in range(1 if profile == "checked" else 3):
                 pair = {"profile": profile}
