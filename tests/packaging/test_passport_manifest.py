@@ -1,29 +1,22 @@
 """Bounded source-selection check, not an archive build or wheel qualification."""
 
-import json
+import importlib.util
 import unittest
 from pathlib import Path
 
 from setuptools._distutils.filelist import FileList
 
 ROOT = Path(__file__).resolve().parents[2]
+SPEC = importlib.util.spec_from_file_location(
+    "passport_sdist_check", ROOT / "scripts/passport_sdist_check.py"
+)
+CHECKER = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(CHECKER)
 
 
 class PassportManifestTests(unittest.TestCase):
     def test_source_distribution_selects_consumer_inputs(self):
-        required = {
-            "examples/passports/README.md",
-            "requirements-passport-sensor-conformance.txt",
-            "requirements-passport-conformance.txt",
-            "requirements-passports.txt",
-            "tests/test_passport_schemas.py",
-            "tests/interop_consumers/test_sensor_packets.py",
-            "tests/interop_consumers/test_ros_status.py",
-        }
-        for name in ("edge-unknown", "sensor-packet", "sensor-encoding", "ros-status"):
-            path = f"examples/interop/{name}-vectors-v1.json"
-            required.add(path)
-            required.update(json.loads((ROOT / path).read_bytes())["source_sha256"])
+        required = CHECKER.required_inputs(ROOT)
         for path in required:
             self.assertTrue((ROOT / path).is_file(), f"missing checkout input: {path}")
         # Only the finite published consumer inputs are candidates in this probe.
