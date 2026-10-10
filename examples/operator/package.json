@@ -6,7 +6,7 @@
   "license": "GPL-3.0-only",
   "scripts": {
     "build": "node ../clients/typescript/node_modules/typescript/bin/tsc -p tsconfig.json",
-    "test": "npm run build:browser && node --test presenter.test.mjs panel.test.mjs lifecycle.test.mjs browser-adr.test.mjs && node --disallow-code-generation-from-strings --test browser.test.mjs",
+    "test": "npm run build:browser && node --test presenter.test.mjs panel.test.mjs lifecycle.test.mjs connection.test.mjs browser-adr.test.mjs && node --disallow-code-generation-from-strings --test browser.test.mjs",
     "build:browser": "node build-browser.mjs"
   },
   "devDependencies": {

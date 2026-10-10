@@ -24,7 +24,7 @@ try {
   });
   const allowed=new Set([
     'examples/operator/dist/browser.js','examples/operator/dist/presenter.js',
-    'examples/operator/dist/panel.js','examples/operator/dist/lifecycle.js',
+    'examples/operator/dist/panel.js','examples/operator/dist/lifecycle.js','examples/operator/dist/connection.js',
     'examples/clients/typescript/dist/client.js','examples/clients/typescript/dist/wire.js',
     'examples/clients/typescript/dist/session.js','examples/clients/typescript/dist/validators.cjs',
     'examples/clients/typescript/node_modules/ajv/dist/runtime/ucs2length.js',

@@ -20,7 +20,7 @@ async function bundle() {
 
 test('standalone ESM exports only the public observation and presentation boundary',async()=>{
   const module=await bundle();
-  assert.deepEqual(Object.keys(module).sort(),['Observation','createObservationSource','mountObservationHost','mountObservationPanel','observe','presentObservation']);
+  assert.deepEqual(Object.keys(module).sort(),['Observation','createObservationSource','mountConnectionControls','mountObservationHost','mountObservationPanel','observe','presentObservation']);
   const result=module.presentObservation(new module.Observation().view(0),'en');
   assert.equal(result.state,'expired');
 });
@@ -194,4 +194,14 @@ test('bundled callback suppresses cancellation from its view clock',async t=>{
   assert.equal(caller.signal.aborted,true);
   assert.equal(error?.message,'stream_unavailable');
   assert.ok(views.length>0);assert.ok(views.every(view=>view.label==='expired'));
+});
+
+test('bundled connection controls stay offline until explicit host-enabled start',async()=>{
+ const {mountConnectionControls}=await bundle();const {document,Event:DOMEvent}=parseHTML('<html><body><main></main></body></html>');
+ Object.defineProperty(document,'defaultView',{value:new EventTarget()});Object.defineProperty(document,'visibilityState',{value:'visible'});
+ let calls=0,finish,signal;const controls=mountConnectionControls(document.querySelector('main'),{start(value){calls++;signal=value;return new Promise(resolve=>{finish=resolve;});},disconnect(){}},'sv-SE');
+ const start=document.querySelector('[data-feature="connection.start"]'),stop=document.querySelector('[data-feature="connection.stop"]');
+ start.dispatchEvent(new DOMEvent('click'));assert.equal(calls,0);controls.setEnabled(true);start.dispatchEvent(new DOMEvent('click'));assert.equal(calls,1);
+ stop.dispatchEvent(new DOMEvent('click'));assert.equal(signal.aborted,true);assert.equal(document.querySelector('[role=status]').getAttribute('data-state'),'stopping');
+ finish();await new Promise(resolve=>setImmediate(resolve));assert.equal(document.querySelector('[role=status]').getAttribute('data-state'),'stopped');controls.dispose();assert.equal(document.querySelector('main').textContent,'');
 });

@@ -2,3 +2,4 @@ export {Observation, observe, createObservationSource} from '../../clients/types
 export {presentObservation} from './presenter.js';
 export {mountObservationPanel} from './panel.js';
 export {mountObservationHost} from './lifecycle.js';
+export {mountConnectionControls} from './connection.js';

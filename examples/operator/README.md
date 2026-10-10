@@ -150,3 +150,49 @@ starts reject with `observer_busy`. The source adds no timer, so the lifecycle h
 remains the sole display scheduler. Current conditions remain UNKNOWN. This
 composition has structural DOM and bundled Node tests; actual browser, accessible
 operator workflow and installed-product acceptance remain pending.
+
+### Explicit connection controls
+
+`mountConnectionControls(root, operation, locale)` adds local Start/Stop buttons,
+status and contextual help. It starts disabled and never reconnects automatically.
+A host operation owns authorization and the SDK session:
+
+```js
+import {createObservationSource, mountObservationHost, mountConnectionControls}
+  from './browser-dist/aethron-observation.mjs';
+const source = createObservationSource();
+const display = mountObservationHost(observationRoot, source, 'en');
+const controls = mountConnectionControls(connectionRoot, {
+  start: signal => source.start(origin, token, profile, signal),
+  disconnect: () => { source.disconnect(); display.refresh(); },
+}, 'en');
+controls.setEnabled(hostCanRequest); // UI availability only; server authorization still required.
+// On account/permission withdrawal:
+controls.setEnabled(false);
+// On removal:
+controls.dispose();
+display.dispose();
+```
+
+Supply exclusively owned roots and one exclusively owned session operation.
+`start(signal)` must settle only after session cleanup, honor cancellation, and
+perform the host's current permission checks. `disconnect()` must synchronously
+clear the source and refresh any observation display. The component neither
+receives credentials nor authenticates the host callback. It cannot force a
+callback that ignores cancellation to settle; Start remains disabled meanwhile.
+
+Stop, access withdrawal, hidden/unknown visibility, freeze, page departure and
+reactivation withdraw the session. Returning does not reconnect. A disconnect
+failure latches unavailable controls until remount. Request failures use fixed
+local guidance and can be explicitly retried. A pending request is labelled
+“Observation session requested”, never authenticated, connected or current.
+
+The seven states (`unavailable`, `paused`, `idle`, `requested`, `stopping`,
+`stopped`, `failed`) each have a `connection.<state>` contextual topic in English
+and Swedish. Buttons expose `connection.start` / `connection.stop` feature IDs.
+The containing application calls `setLocale` on both controls and display to keep
+its language selection consistent. These local topics are not a searchable,
+role-aware, release-SHA-bound P19 Help Center. Account workflows, actual browser
+keyboard/screen-reader acceptance and customer distribution remain unfinished.
+The [connection ADR](connection-adr.json) records the technology comparison and
+four architecture views; the bundle now admits ten explicit runtime modules.

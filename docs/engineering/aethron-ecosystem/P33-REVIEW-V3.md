@@ -1236,3 +1236,51 @@ logs are retained. Historical browser probe and earlier compiler timeout evidenc
 remain unchanged. The new publication ADR refines the earlier timer decision's
 check ordering; its earlier C4 diagram is a historical record, not the current
 publication sequence.
+
+## P12 explicit connection controls and local guidance
+
+At baseline b85429be47e8c69294e40397f174cee8c2e0a99d the callback-publication
+bridge commit, eight exact paths, 83 source hashes and eight report hashes were
+verified before publication. Fresh review restarted with Observation, wire/session
+admission and shared transport, then inspected the presenter, panel, lifecycle
+source boundary and browser builder. Existing cancellation fixes and UNKNOWN
+projection remained consistent with those sources. No new migration winner for
+those boundaries was established; prior qualification limitations remain.
+
+The next concrete integration gap was an absent explicit connection UI. A caller
+could compose the SDK and display, but there were no reusable Start/Stop controls
+or local opening/failure/cleanup guidance. Ten missing-module assertions preceded
+this bounded component. The initial compiler rejected a control-flow-narrowed run
+type; an explicit Run type corrected it without weakening compiler options. Both
+negative logs are retained.
+
+SELECT native HTML with TypeScript for two controls, one pending operation and
+synchronous withdrawal. Current official HTML, Lit lifecycle, Elm interop and
+ReScript binding documentation informed the comparison; checked ECMAScript is
+also considered. No custom-element registry, reactive render loop or separate
+application runtime is required by this host boundary. No native-speed or
+cross-language benchmark claim follows. [Connection ADR](../../../examples/operator/connection-adr.json)
+is closed-schema checked and supplies the C4 views.
+
+The new component starts disabled, permits one explicit host operation, and has
+no transport code, credential fields, storage or timer. Its owned AbortSignal and
+host disconnect callback implement Stop, permission withdrawal and page lifecycle
+withdrawal. Restart stays gated through cleanup and always needs a new click.
+A failed source withdrawal latches the control unavailable. The host and backend
+still enforce authorization; enabling a button is not an authority grant.
+
+All seven states carry local English/Swedish help topics, and both buttons carry
+stable feature IDs. Tests cover each state/locale, host failures, reentry, pending
+cleanup and actual SDK/display composition. The browser allowlist adds only the
+new compiled control module. This is a reusable component, not the completed
+integrated application or P19 release-bound help inventory. Remaining work includes
+unified language/account integration, full help inventory/search and native-browser
+acceptance. [Source-bound results](evidence/phase3/p12-connection-controls-v1.json)
+preserve negative evidence. No audit-complete marker is created.
+
+Final verification passed 66 operator tests (16 connection-specific tests) and
+16 bundle tests with string code generation disabled. The failed-build recovery
+reproduced every artifact byte. The manifest verifies ten compiled runtime inputs
+and four distributed artifacts. Syntax and diff checks pass. These are local
+software checks; the two earlier Chromium probe failures remain retained, and
+no native-browser or customer acceptance claim is added.
