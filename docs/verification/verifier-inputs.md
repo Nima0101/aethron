@@ -39,15 +39,34 @@ one extra byte to detect excess before decoding/parsing. Excess raises
 `worktree_markdown_limit`; later product checks and the final PASS are not reached.
 See [admission decision](../decisions/0025-worktree-markdown-admission.json).
 
+Freeze payload hashing now reads at most 64 KiB per call until EOF, preserving
+exact SHA-256 comparisons and historical AGENTS mappings. I/O failures stop
+completion and close the stream. This bounds input allocation for the hash loop,
+not total bytes processed, RSS or time. See the
+[streaming decision](../decisions/0026-freeze-streaming.json).
+
+Manifest admission v1 accepts at most 1 MiB per fixed manifest and 10,000 file
+entries. A bounded read with one extra byte catches growth after stat. The root
+and `files` must be objects; names must be nonempty and digests must be 64 lowercase
+hexadecimal characters. Duplicate decoded keys anywhere in the document are
+rejected, including metadata and escaped spellings. Complete inventory shape is
+checked before payload reads. Existing path checks still apply at payload access.
+Empty inventories and other metadata values remain permitted; metadata semantics
+and manifest authenticity are not verified. Excess raises `freeze_manifest_limit`;
+duplicates or malformed inventory raise `invalid_freeze_manifest`. Syntax, UTF-8
+and I/O failures also stop completion. The entry cap is applied after parsing;
+objects, metadata and parser allocations add memory beyond admitted input bytes.
+These are developer admission limits, with no change to frozen product thresholds.
+See the [manifest decision](../decisions/0027-freeze-manifest-admission.json).
+
 Git capture uses a 30-second per-command wait budget and 16 MiB stdout cap, discards
 stderr and never accepts partial output after failure. It kills/reaps its direct
 child; spawning/reaping are not hard-bounded and descendants retaining pipes can
 outlive cleanup. No generic process-tree containment is claimed.
 
 These are admission limits, not total RSS, CPU, filesystem or whole-verifier
-bounds. Decoded text/parser allocations are additional. Earlier freeze/source
-reads, other content reads, traversal and product child processes remain outside
-the Markdown budgets. The source syntax rules do not prove runtime security or
+bounds. Decoded text/parser allocations are additional. Source reads, other content
+reads, traversal and product child processes remain outside the Markdown budgets. The source syntax rules do not prove runtime security or
 termination. The final PASS names completed checks, not production qualification.
 
 The dedicated Markdown workflow exercises Linux/macOS/Windows and Python3.9/3.13.

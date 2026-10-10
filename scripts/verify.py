@@ -38,6 +38,9 @@ MAX_WORKTREE_MARKDOWN_BYTES = 1024 * 1024
 MAX_WORKTREE_MARKDOWN_TOTAL_BYTES = 16 * 1024 * 1024
 MAX_WORKTREE_MARKDOWN_DOCUMENTS = 1000
 MAX_WORKTREE_LOCAL_DESTINATIONS = 10000
+FREEZE_HASH_CHUNK_BYTES = 64 * 1024
+MAX_FREEZE_MANIFEST_BYTES = 1024 * 1024
+MAX_FREEZE_MANIFEST_ENTRIES = 10000
 
 
 def require_worktree_root():
@@ -112,20 +115,60 @@ def local_path(path):
     return path
 
 
-def local_bytes(path, *, max_bytes=None):
+def local_bytes(path, *, max_bytes=None, limit_error="worktree_markdown_limit"):
     path = local_path(path)
     info = path.stat()
     assert stat.S_ISREG(info.st_mode), "unsafe repository path"
     if max_bytes is None:
         return path.read_bytes()
     if info.st_size > max_bytes:
-        raise ValueError("worktree_markdown_limit")
+        raise ValueError(limit_error)
     # The extra byte detects growth since stat without an unbounded allocation.
     with path.open("rb") as stream:
         body = stream.read(max_bytes + 1)
     if len(body) > max_bytes:
-        raise ValueError("worktree_markdown_limit")
+        raise ValueError(limit_error)
     return body
+
+
+def unique_manifest_fields(pairs):
+    fields = {}
+    for key, value in pairs:
+        if key in fields:
+            raise ValueError("invalid_freeze_manifest")
+        fields[key] = value
+    return fields
+
+
+def freeze_files(path):
+    """Admit a bounded, unambiguous inventory before opening its payloads."""
+    body = local_bytes(
+        path, max_bytes=MAX_FREEZE_MANIFEST_BYTES, limit_error="freeze_manifest_limit"
+    )
+    doc = json.loads(body.decode("utf-8"), object_pairs_hook=unique_manifest_fields)
+    if not isinstance(doc, dict) or not isinstance(doc.get("files"), dict):
+        raise ValueError("invalid_freeze_manifest")
+    files = doc["files"]
+    if len(files) > MAX_FREEZE_MANIFEST_ENTRIES:
+        raise ValueError("freeze_manifest_limit")
+    for name, digest in files.items():
+        if not name or not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+            raise ValueError("invalid_freeze_manifest")
+    return files
+
+
+def local_sha256(path):
+    """Hash a regular checkout file without allocating its complete contents."""
+    path = local_path(path)
+    assert stat.S_ISREG(path.stat().st_mode), "unsafe repository path"
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        while True:
+            chunk = stream.read(FREEZE_HASH_CHUNK_BYTES)
+            if not chunk:
+                break
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def working_files(base, *, included=None, recursive=True):
@@ -179,8 +222,8 @@ def run():
         "rgb-model-freeze.json",
         "rgb-smoke-freeze.json",
     ]:
-        doc = json.loads(local_bytes(ROOT / "docs/verification" / manifest).decode("utf-8"))
-        for name, digest in doc["files"].items():
+        files = freeze_files(ROOT / "docs/verification" / manifest)
+        for name, digest in files.items():
             actual = (
                 "docs/engineering/history/AGENTS.v1.md"
                 if manifest == "governance-freeze.json" and name == "AGENTS.md"
@@ -188,9 +231,7 @@ def run():
                 if manifest == "amendment-v2-freeze.json" and name == "AGENTS.md"
                 else name
             )
-            assert hashlib.sha256(local_bytes(ROOT / actual)).hexdigest() == digest, (
-                "freeze mismatch: " + name
-            )
+            assert local_sha256(ROOT / actual) == digest, "freeze mismatch: " + name
     for p in working_files(ROOT / "aethron"):
         if not p.match("*.py"):
             continue
