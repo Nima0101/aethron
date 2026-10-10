@@ -207,17 +207,19 @@ def main():
     assert compared["crypto_accepts"] == accepted
     assert accepted == [True, True, True, True, False, True]
     blob = b"a" * 65536
-    start = time.perf_counter()
+    start = time.perf_counter_ns()
     for _ in range(16):
         digest = hashlib.sha256(blob).hexdigest()
-    hash_ms = (time.perf_counter() - start) * 1000
+    hash_ns = time.perf_counter_ns() - start
+    hash_ms = hash_ns / 1000000
     assert compared["hash_digest"] == digest
     case = cases[0]
     envelope, policy = case["envelope"].encode(), case["policy"].encode()
-    start = time.perf_counter()
+    start = time.perf_counter_ns()
     for _ in range(128):
         assert verify(envelope, policy, **case["arguments"]).status == "authenticated"
-    verify_ms = (time.perf_counter() - start) * 1000 / 128
+    verify_ns = time.perf_counter_ns() - start
+    verify_ms = verify_ns / 1000000 / 128
     tracemalloc.start()
     try:
         # Near the byte limit, many tokens: syntax parses but schema rejects.
@@ -243,6 +245,18 @@ def main():
                 "python_lexical_rejections": 5,
                 "python_hash_1mib_ms": hash_ms,
                 "python_verify_mean_ms_128": verify_ms,
+                "timing_method": {
+                    "python_clock": "time.perf_counter_ns",
+                    "python_elapsed_ns": {"hash_batch": hash_ns, "verify_batch": verify_ns},
+                    "node_clock": "performance.now",
+                    "hash_operations": 16,
+                    "hash_bytes_per_operation": 65536,
+                    "verify_operations": 128,
+                    "batches_per_metric": 1,
+                    "target_hardware_qualified": False,
+                    "runtime_ranking_supported": False,
+                    "scope": "Hash timers cover sixteen independent hashes of one reused 64 KiB buffer, including digest hex conversion. The reported digest covers 64 KiB, not 1 MiB. Verify timing covers one batch of 128 full Python admissions plus loop/assert overhead; initialization, fixture checks, Node startup and tracing are outside that interval. Sequential local elapsed-time samples include scheduling delays; no controlled warmup, distribution, jitter or worst-case bound is measured.",
+                },
                 "python_traced_peak_bytes": peak,
                 "node_probe": compared,
                 "limits": "Single-threaded local sample; Python traced allocations only, including input construction; not all native allocations. No hard real-time, RSS, platform or qualification claim. Node primitive probe is not a full verifier.",

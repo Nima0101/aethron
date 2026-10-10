@@ -80,6 +80,37 @@ class ProbeResponseTests(unittest.TestCase):
                 self.assertEqual(result["audit_policy_version"], 3)
                 self.assertEqual(result["python_lexical_rejections"], 5)
 
+    def test_timing_retains_integer_intervals_and_batch_scope(self):
+        output = io.StringIO()
+        verifier = unittest.mock.Mock(wraps=self.main.__globals__["verify"])
+        readings = iter((2**63, 2**63 + 500000001, 2**63 + 1000000000, 2**63 + 1256000128))
+        calls_at_clock = []
+
+        def clock():
+            calls_at_clock.append(verifier.call_count)
+            return next(readings)
+
+        with (
+            patch("time.perf_counter_ns", side_effect=clock),
+            patch.dict(self.main.__globals__, {"verify": verifier}),
+        ):
+            self.invoke(json.dumps(self.response).encode(), output)
+        report = json.loads(output.getvalue())
+        self.assertEqual(calls_at_clock, [6, 6, 6, 134])
+        self.assertEqual(verifier.call_count, 135)
+        self.assertEqual(report["python_hash_1mib_ms"], 500.000001)
+        self.assertEqual(report["python_verify_mean_ms_128"], 2.000001)
+        timing = report["timing_method"]
+        self.assertEqual(
+            timing["python_elapsed_ns"], {"hash_batch": 500000001, "verify_batch": 256000128}
+        )
+        self.assertEqual(timing["hash_operations"], 16)
+        self.assertEqual(timing["hash_bytes_per_operation"], 65536)
+        self.assertEqual(timing["verify_operations"], 128)
+        self.assertEqual(timing["batches_per_metric"], 1)
+        self.assertFalse(timing["target_hardware_qualified"])
+        self.assertFalse(timing["runtime_ranking_supported"])
+
     def test_existing_tracing_is_preserved_without_running_probe(self):
         output = io.StringIO()
         tracemalloc.start(3)

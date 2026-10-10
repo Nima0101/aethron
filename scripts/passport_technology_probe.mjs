@@ -22,8 +22,9 @@ const blob = Buffer.alloc(65536, 0x61);
 const started = performance.now();
 let digest;
 for (let i = 0; i < 16; i++) digest = createHash('sha256').update(blob).digest('hex');
+const hashElapsedMs = performance.now() - started;
 process.stdout.write(JSON.stringify({
   node: process.version, crypto_accepts: results, hash_digest: digest,
-  hash_1mib_ms: performance.now() - started,
+  hash_1mib_ms: hashElapsedMs,
   duplicate_keys_collapsed: true, float_lexemes_collapsed: true,
 }));
