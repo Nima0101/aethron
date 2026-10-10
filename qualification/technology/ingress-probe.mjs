@@ -9,6 +9,9 @@ const sourceDigest = digest(readFileSync(sourceUrl));
 const vectorUrl = new URL('./ingress-vectors-v1.json', import.meta.url);
 const vectorBytes = readFileSync(vectorUrl);
 const vectorDigest = digest(vectorBytes);
+// Pin the reviewed v1 corpus, including negative expectations and exact bytes.
+const corpusDigest = 'a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff';
+if (vectorDigest !== corpusDigest) throw new Error('invalid_ingress_corpus');
 const vectors = JSON.parse(vectorBytes);
 let sourceAvailable = false;
 JSON.parse('1', (key, value, context) => {

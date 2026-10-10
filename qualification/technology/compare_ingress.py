@@ -19,6 +19,8 @@ from qualification.technology import source_snapshot
 from qualification.technology.measurement import peak_bytes, require_untraced
 from qualification.tests.test_evidence import EvidenceTests, encoded
 
+CORPUS_SHA256 = "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff"
+
 
 def outcome(raw, now_ms):
     try:
@@ -116,7 +118,10 @@ def main():
             "qualification/technology/source_snapshot.py",
         ),
     )
-    vectors = json.loads((root / "ingress-vectors-v1.json").read_text())
+    vector_bytes = (root / "ingress-vectors-v1.json").read_bytes()
+    if hashlib.sha256(vector_bytes).hexdigest() != CORPUS_SHA256:
+        raise RuntimeError("invalid_ingress_corpus")
+    vectors = json.loads(vector_bytes)
     requests = [(bytes.fromhex(row["hex"]), 1050) for row in vectors] + collect()
     transport = "\n".join(raw.hex() for raw, _ in requests) + "\n"
     if len(requests) > 256 or len(transport) > 8 * 1024 * 1024:

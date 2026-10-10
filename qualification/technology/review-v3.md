@@ -25,6 +25,9 @@ outcomes reusable; the [readiness inventory](../p15-readiness-v1.md) explicitly
 retains unfinished procedure, producer-consumer and installed-product software gates.
 The [consumer count-type correction](consumer-count-types-v3.md) rejects Boolean
 and floating substitutions that previously compared equal to integer counts.
+The [ingress corpus correction](ingress-corpus-review-v3.md) pins the reviewed
+vector bytes before export or comparison so an empty/replaced corpus cannot
+produce misleading parity evidence.
 
 The [measurement lifecycle correction](#follow-up-measurement-lifecycle--2026-10-10)
 qualifies the older allocation results and corrects all three measurement drivers.

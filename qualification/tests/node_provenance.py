@@ -8,11 +8,33 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from qualification.tests.test_ingress_audit import changed_corpora
+
 ROOT = Path(__file__).resolve().parents[2]
 PREFIX = "qualification/technology/"
 
 
 class NodeProvenanceTests(unittest.TestCase):
+    def test_changed_corpus_prevents_parity_report(self):
+        raw = (ROOT / PREFIX / "ingress-vectors-v1.json").read_bytes()
+        for label, changed in changed_corpora(raw).items():
+            with self.subTest(corpus=label), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                name = "ingress-probe.mjs"
+                (root / name).write_bytes((ROOT / PREFIX / name).read_bytes())
+                (root / "ingress-vectors-v1.json").write_bytes(changed)
+                result = subprocess.run(
+                    ["node", "--v8-pool-size=1", name],
+                    cwd=root,
+                    env=dict(os.environ, UV_THREADPOOL_SIZE="1"),
+                    capture_output=True,
+                    timeout=15,
+                    check=False,
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(result.stdout, b"")
+                self.assertIn(b"invalid_ingress_corpus", result.stderr)
+
     def probe(self, name):
         result = subprocess.run(
             ["node", "--v8-pool-size=1", PREFIX + name],
