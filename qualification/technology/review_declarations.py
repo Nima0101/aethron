@@ -19,7 +19,12 @@ def run_tests():
 
 def main():
     baseline = run_tests()
-    if not baseline.wasSuccessful():
+    if (
+        not baseline.wasSuccessful()
+        or not baseline.testsRun
+        or baseline.skipped
+        or baseline.expectedFailures
+    ):
         raise RuntimeError("declaration_review_failed")
     original = evidence._findings
     mutants = {}
@@ -35,10 +40,22 @@ def main():
 
         with patch.object(evidence, "_findings", omit_finding):
             result = run_tests()
-        if result.wasSuccessful() or result.errors:
+        if (
+            not result.failures
+            or result.errors
+            or result.skipped
+            or result.expectedFailures
+            or result.unexpectedSuccesses
+        ):
             raise RuntimeError("declaration_review_mutation_not_detected")
         mutants[dropped] = {"failures": len(result.failures), "errors": len(result.errors)}
-    if not run_tests().wasSuccessful():
+    restored = run_tests()
+    if (
+        not restored.wasSuccessful()
+        or not restored.testsRun
+        or restored.skipped
+        or restored.expectedFailures
+    ):
         raise RuntimeError("declaration_review_restore_failed")
     root = Path(__file__).parents[2]
     print(

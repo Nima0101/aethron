@@ -25,7 +25,12 @@ def run_tests(name=None):
 
 def main():
     baseline = run_tests()
-    if not baseline.wasSuccessful():
+    if (
+        not baseline.wasSuccessful()
+        or not baseline.testsRun
+        or baseline.skipped
+        or baseline.expectedFailures
+    ):
         raise RuntimeError("artifact_review_failed")
     real_validate = artifacts.validate
 
@@ -60,10 +65,22 @@ def main():
     for label, attribute, replacement, test in cases:
         with patch.object(artifacts, attribute, replacement):
             result = run_tests(test)
-        if result.wasSuccessful() or result.errors:
+        if (
+            not result.failures
+            or result.errors
+            or result.skipped
+            or result.expectedFailures
+            or result.unexpectedSuccesses
+        ):
             raise RuntimeError("artifact_mutation_not_detected")
         mutations[label] = {"failures": len(result.failures), "errors": len(result.errors)}
-    if not run_tests().wasSuccessful():
+    restored = run_tests()
+    if (
+        not restored.wasSuccessful()
+        or not restored.testsRun
+        or restored.skipped
+        or restored.expectedFailures
+    ):
         raise RuntimeError("artifact_review_restore_failed")
     root = Path(__file__).parents[2]
     print(

@@ -23,7 +23,12 @@ def run_tests():
 
 def main():
     baseline = run_tests()
-    if not baseline.wasSuccessful() or baseline.skipped:
+    if (
+        not baseline.wasSuccessful()
+        or not baseline.testsRun
+        or baseline.skipped
+        or baseline.expectedFailures
+    ):
         raise RuntimeError("campaign_review_failed")
 
     def single_counts(values):
@@ -50,11 +55,22 @@ def main():
     for name, control in controls:
         with control:
             result = run_tests()
-        if result.wasSuccessful() or result.errors or result.skipped:
+        if (
+            not result.failures
+            or result.errors
+            or result.skipped
+            or result.expectedFailures
+            or result.unexpectedSuccesses
+        ):
             raise RuntimeError("campaign_mutation_not_detected")
         mutations[name] = {"failures": len(result.failures), "errors": len(result.errors)}
     restored = run_tests()
-    if not restored.wasSuccessful() or restored.skipped:
+    if (
+        not restored.wasSuccessful()
+        or not restored.testsRun
+        or restored.skipped
+        or restored.expectedFailures
+    ):
         raise RuntimeError("campaign_review_restore_failed")
     root = Path(__file__).parents[2]
     print(
