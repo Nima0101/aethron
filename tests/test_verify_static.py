@@ -34,7 +34,7 @@ class StaticCheckClaims(unittest.TestCase):
                     json.dumps({"files": {}}), encoding="utf-8"
                 )
             (root / "aethron").mkdir()
-            (root / "aethron/example.py").write_text(source, encoding="utf-8")
+            (root / "aethron/example.py").write_bytes(source.encode("utf-8"))
             output = io.StringIO()
             calls = []
 

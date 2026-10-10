@@ -20,7 +20,7 @@ class ScanLimits(unittest.TestCase):
         self.assertEqual(len(calls), 1)
 
     def test_source_limit_counts_utf8_bytes_before_parse(self):
-        for source in ("#é\n", "#éx\n"):
+        for source in ("#é\n", "#éx\n", "#é\r\n", "#x\r\n"):
             with self.subTest(source=source), self.fixture(source) as (output, calls):
                 with patch.object(verify, "MAX_SOURCE_BYTES", 4, create=True):
                     if len(source.encode()) == 4:
