@@ -5,6 +5,7 @@ import importlib
 import io
 import json
 import struct
+import traceback
 import unittest
 from dataclasses import asdict, replace
 from unittest.mock import patch
@@ -66,6 +67,44 @@ class SensorIntensityReplay(unittest.TestCase):
         return api.rectify_recorded_intensity(
             frame, calibration, expected_calibration_sha256=pin or calibration.digest
         )
+
+    def test_wrapped_remap_error_retains_nested_private_context(self):
+        for encoding in ("mono8", "mono16"):
+            with self.subTest(encoding=encoding):
+                api, calibration, frame = self.fixture(encoding=encoding)
+                sentinel = "private-remap-detail"
+                inner = ValueError(sentinel)
+
+                def fail_remap(*args, inner=inner):
+                    try:
+                        raise inner
+                    except ValueError:
+                        raise ValueError("invalid_raster_rectification") from None
+
+                with patch.object(api, f"rectify_{encoding}_recorded", side_effect=fail_remap):
+                    with self.assertRaises(ValueError) as raised:
+                        self.run_frame(api, calibration, frame)
+                error = raised.exception
+                self.assertEqual(str(error), "invalid_intensity_replay")
+                self.assertTrue(error.__suppress_context__)
+                self.assertIsNone(error.__cause__)
+                nested = error.__context__
+                self.assertEqual(str(nested), "invalid_raster_rectification")
+                self.assertTrue(nested.__suppress_context__)
+                self.assertIs(nested.__context__, inner)
+                self.assertIn(sentinel, str(nested.__context__))
+                self.assertNotIn(sentinel, "".join(traceback.format_exception(error)))
+
+    def test_remap_runtime_and_control_exceptions_propagate(self):
+        for encoding in ("mono8", "mono16"):
+            api, calibration, frame = self.fixture(encoding=encoding)
+            for error_type in (RuntimeError, MemoryError, KeyboardInterrupt, SystemExit):
+                with self.subTest(encoding=encoding, error=error_type.__name__):
+                    original = error_type("injected-remap-fault")
+                    with patch.object(api, f"rectify_{encoding}_recorded", side_effect=original):
+                        with self.assertRaises(error_type) as raised:
+                            self.run_frame(api, calibration, frame)
+                    self.assertIs(raised.exception, original)
 
     def test_direct_result_construction_does_not_establish_binding(self):
         api = self.api()

@@ -83,6 +83,10 @@ def rectify_recorded_intensity(frame, calibration, *, expected_calibration_sha25
     Repeated calls do not establish freshness or reject duplicates. The returned
     source header describes raw input bytes and layout, not the remapped output.
     Source aliases and matching pins do not authenticate a physical device.
+    The fixed validation-error message suppresses context display, not retained
+    exception objects; nested remapping details remain introspectable. Unexpected
+    runtime and process-control exceptions propagate. This is not a sanitized
+    diagnostic serializer or a process recovery boundary.
     """
     try:
         if (
