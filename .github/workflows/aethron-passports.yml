@@ -3,8 +3,8 @@ on:
   pull_request:
     paths:
       - 'aethron/passport*.py'
-      - 'aethron/interop_tasks.py'
-      - 'tests/test_interop_tasks.py'
+      - 'aethron/interop_*.py'
+      - 'tests/test_interop*.py'
       - 'examples/interop/**'
       - 'aethron/_json_bounds*'
       - 'tests/test_passport*.py'
@@ -18,8 +18,8 @@ on:
     branches: [main]
     paths:
       - 'aethron/passport*.py'
-      - 'aethron/interop_tasks.py'
-      - 'tests/test_interop_tasks.py'
+      - 'aethron/interop_*.py'
+      - 'tests/test_interop*.py'
       - 'examples/interop/**'
       - 'aethron/_json_bounds*'
       - 'tests/test_passport*.py'
@@ -60,7 +60,7 @@ jobs:
       # The import assertion prevents optional-backend skips from masquerading as a pass.
       - run: python -c "from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey"
       - run: python -m unittest discover -s tests -p 'test_passport*.py' -v
-      - run: python -m unittest discover -s tests -p test_interop_tasks.py -v
+      - run: python -m unittest discover -s tests -p 'test_interop*.py' -v
       - name: Verify installed package with source imports disabled
         shell: python
         run: |
@@ -71,6 +71,15 @@ jobs:
           from aethron.passports import verify
           from aethron.passport_evidence import verify_evidence
           from aethron.interop_tasks import validate_task
+          from aethron.interop_bundles import verify_task_bundle
+          vectors = json.loads(Path("examples/interop/bundle-vectors-v1.json").read_bytes())
+          for case in vectors["cases"]:
+              result = verify_task_bundle(
+                  case["task"].encode(), case["envelope"].encode(), case["policy"].encode(),
+                  tuple(bytes.fromhex(value) for value in case["evidence_hex"]), **case["arguments"])
+              assert (result.status, result.reason) == (case["status"], case["reason"]), case["name"]
+              assert [item.outcome for item in result.evidence] == case["outcomes"]
+              assert result.execution_authority is False and result.motion_authority is False
           vectors = json.loads(Path("examples/interop/task-vectors-v1.json").read_bytes())
           for case in vectors["cases"]:
               result = validate_task(case["task"].encode(), **case["arguments"])
