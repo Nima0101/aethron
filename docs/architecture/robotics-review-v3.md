@@ -407,3 +407,34 @@ latency bound or a fair production-runtime ranking: C still omits the Python
 reference's state and provenance work. Production adapter and C candidate bytes
 are unchanged, the supplied-clock exception gap remains open, and the first
 component review is not complete.
+
+
+## Individual reference duration admission
+
+FIX the offline C comparison's asymmetric timing admission. Candidate summary
+fields already required unsigned integer nanoseconds, but the Python reference
+could report `compared` after one negative, fractional or oversized duration.
+A summary-only check is insufficient: sorting and selecting percentiles can hide
+an invalid individual sample. Every measured reference duration now must be an
+integer in the existing unsigned 64-bit report domain before it enters the
+summary. Invalid duration produces `baseline_timing_failed`, retains the failed
+baseline receipt and follows the existing unconditional source cleanup path.
+Zero durations remain permitted; this does not claim a particular clock resolution.
+
+Python documents [monotonic_ns](https://docs.python.org/3/library/time.html#time.monotonic_ns)
+as integer nanoseconds and defines usable time differences rather than a fixed
+epoch. The check therefore constrains elapsed duration, not the absolute clock
+origin. Synthetic patched readings exercise the receipt boundary; they do not
+show that the OS clock actually failed. This small check stays beside the existing
+in-process measurement and typed comparator. A separate native/process validator
+would add serialization without improving admission of these Python integers;
+this correction does not resolve the production runtime reassessment.
+
+[Source-bound evidence](../verification/robotics-baseline-timing-review-v3.json)
+retains three failing assertions followed by 13 passing harness methods and an
+actual normal/sanitized C comparison over 17 cases. Both measured paths recorded
+92 accepted probes out of 512. The Python maximum of 53,603,333 ns is retained.
+Timing validation is outside the measured interval. The C and Python work remains
+unequal, so these diagnostics neither rank production runtimes nor establish a
+hardware latency bound. Production and candidate code are unchanged; the separate
+production clock-exception gap and earliest-component decision remain open.

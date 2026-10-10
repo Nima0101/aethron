@@ -1,0 +1,99 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "079551c4ae3988d0c18558d34a0172632804d372",
+  "component": "P3.1 offline wire reference timing evidence",
+  "decision": "FIX individual measured duration admission",
+  "production_changed": false,
+  "candidate_changed": false,
+  "runtime_decision": "PENDING",
+  "source_sha256": {
+    "scripts/robotics_wire_audit_v2.py": "2fda4dff55357c524523d8bbbd88f861b61b5293d5b9ac5998908b95eec05183",
+    "tests/mavlink/test_wire_audit_v2.py": "66f23dca485d65e51a1b0cb9437ab22033d383b95557d82e210529669d207d3f",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "503b317e0fa21e92fe563e3ddfc333fee5426a6d271fe33a7eab98dd5512f094",
+    "tests/mavlink/audit_v2/reference.c": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483",
+    "docs/architecture/robotics-review-v3.md": "13a2f54d185b12917aec4e5473d27ed9fee40a8b796d233485e51ce1b00790f1"
+  },
+  "red": {
+    "methods": 1,
+    "assertion_failures": 3,
+    "errors": 0,
+    "cases": [
+      "single negative duration",
+      "single fractional duration",
+      "single duration beyond unsigned 64-bit report domain"
+    ]
+  },
+  "green": {
+    "methods": 13,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 4.15,
+    "zero_duration_control": "Python and C summaries accepted unchanged"
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS",
+    "live_receipt_source_bindings": "3 PASS"
+  },
+  "local_comparison": {
+    "audit_policy_version": 3,
+    "state": "compared",
+    "decision": "PENDING",
+    "scope": "fresh unsigned packet admission only; not lifecycle/signing parity",
+    "source_sha256": {
+      "scripts/robotics_wire_audit_v2.py": "2fda4dff55357c524523d8bbbd88f861b61b5293d5b9ac5998908b95eec05183",
+      "integrations/edge/aethron_edge/telemetry/mavlink.py": "503b317e0fa21e92fe563e3ddfc333fee5426a6d271fe33a7eab98dd5512f094",
+      "tests/mavlink/audit_v2/reference.c": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483"
+    },
+    "corpus_cases": 17,
+    "parity": true,
+    "sanitized_parity": true,
+    "python": {
+      "samples": 512,
+      "accepted": 92,
+      "p50_ns": 14557,
+      "p95_ns": 76430,
+      "max_ns": 53603333
+    },
+    "c": {
+      "samples": 512,
+      "accepted": 92,
+      "p50_ns": 51,
+      "p95_ns": 513,
+      "max_ns": 838
+    },
+    "python_version": "3.13.5",
+    "machine": "x86_64",
+    "system": "Linux",
+    "compiler": "cc (Debian 14.2.0-19) 14.2.0",
+    "xml_sha256": "fbac92d0689c9b1bc03b49ebc5cdf989f3fc23026c3c856f7224e4b9af1b5f53",
+    "driver_sha256": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483",
+    "harness_sha256": "2fda4dff55357c524523d8bbbd88f861b61b5293d5b9ac5998908b95eec05183",
+    "corpus_sha256": "d51999b7a2011a0615f9ead65d0080db8733d5c99cb42225d80e7f2c9b7aebdb",
+    "pymavlink": "2.4.50",
+    "limitations": [
+      "512 mixed valid/invalid probes; no hard-real-time claim",
+      "Python constructor excluded; C stack setup included",
+      "C omits state, provenance objects and persistent replay",
+      "No memory, cold-start, signed, UDP or SITL comparison"
+    ]
+  },
+  "retained_local_logs": {
+    "baseline-timing-red.log": "00ebf345d9915f1cdf38f2f5fb619a54873f05d84c977cab577d3bca615bd45d",
+    "baseline-timing-green.log": "0f785863aaf2e3d7e05fd4e0d9dd3bc2d2bfea19533e2a86483e30b36c466065",
+    "baseline-timing-wire.log": "83a135619462a438d3734b3213e4081f3a26c43ba04ebac5769d49fe3a84aeb7",
+    "baseline-timing-wire/result.json": "83a135619462a438d3734b3213e4081f3a26c43ba04ebac5769d49fe3a84aeb7",
+    "baseline-timing-wire/candidate-stdout.log": "56a8e2bf32a53036393cfe200714c8aef74c0734bf4d55750f9449f4e7c3a37c",
+    "baseline-timing-wire/sanitized-candidate-stdout.log": "1783c04f5accfc515a5b4384905231f55ec3f4fea1d1395548c3c619d7ff6086"
+  },
+  "sources": [
+    "https://docs.python.org/3/library/time.html#time.monotonic_ns"
+  ],
+  "limits": [
+    "Synthetic patched readings only; no OS clock failure demonstrated",
+    "No production or candidate implementation change",
+    "Validation after interval; not a hardware clock, performance or availability qualification",
+    "Production supplied-clock exception handling remains unresolved; technology decision incomplete"
+  ]
+}

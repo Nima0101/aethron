@@ -222,9 +222,11 @@ class WireAuditTests(unittest.TestCase):
             out = Path(directory) / "attempt"
             with patch("pymavlink.generator.mavgen.mavgen", return_value=True):
                 with patch.object(self.api, "_execute", side_effect=execute):
-                    report = self.api.run(out)
+                    with patch.object(self.api.time, "monotonic_ns", return_value=0):
+                        report = self.api.run(out)
             self.assertEqual(report["state"], "compared")
             self.assertEqual(report["c"], benchmark)
+            self.assertEqual(report["python"], benchmark)
             self.assertNotIn("failed_stage", report)
             self.assert_source_receipt(report)
 
@@ -269,6 +271,35 @@ class WireAuditTests(unittest.TestCase):
                 self.assertEqual(report["failed_stage"], "baseline")
                 self.assertEqual(report["failure_type"], error.__name__)
                 self.assertNotIn("parity", report)
+
+    def test_measured_baseline_rejects_invalid_individual_durations(self):
+        results = [self.api.python_result(bytes.fromhex(c["hex"])) for c in self.api.corpus()]
+        accepted = sum(results[i % len(results)]["accepted"] for i in range(512))
+        benchmark = {"samples": 512, "accepted": accepted, "p50_ns": 0, "p95_ns": 0, "max_ns": 0}
+
+        def execute(command, **kwargs):
+            if command[0] == "cc":
+                return "fixture compiler"
+            return json.dumps({"results": results, "benchmark": benchmark})
+
+        for first_interval in ((10, 9), (0, 0.5), (0, 2**64)):
+            with self.subTest(interval=first_interval), tempfile.TemporaryDirectory() as directory:
+                out = Path(directory) / "attempt"
+                # One bad interval among otherwise valid readings: percentiles
+                # alone can hide a negative or fractional individual duration.
+                readings = list(first_interval) + [0, 1] * 511
+                with (
+                    patch("pymavlink.generator.mavgen.mavgen", return_value=True),
+                    patch.object(self.api, "_execute", side_effect=execute),
+                    patch.object(self.api.time, "monotonic_ns", side_effect=readings),
+                ):
+                    with self.assertRaisesRegex(ValueError, "baseline_timing_failed"):
+                        self.api.run(out)
+                report = json.loads((out / "result.json").read_text())
+                self.assertEqual(report["state"], "failed")
+                self.assertEqual(report["failed_stage"], "baseline")
+                self.assertEqual(report["failure_type"], "ValueError")
+                self.assertNotIn("python", report)
 
 
 if __name__ == "__main__":

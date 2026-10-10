@@ -264,7 +264,12 @@ def run(out):
             try:
                 begin = time.monotonic_ns()
                 result = _result(source, packets[index % len(packets)])
-                timings.append(time.monotonic_ns() - begin)
+                elapsed = time.monotonic_ns() - begin
+                # Apply the report's unsigned integer duration domain to every
+                # probe; sorted summary quantiles can conceal one bad reading.
+                if type(elapsed) is not int or not 0 <= elapsed < 2**64:
+                    raise ValueError("baseline_timing_failed")
+                timings.append(elapsed)
                 # Validate each measured observation outside the timed interval.
                 # Initial corpus parity cannot certify later benchmark results.
                 try:
