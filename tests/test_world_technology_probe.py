@@ -2,10 +2,18 @@
 
 import unittest
 
-from scripts.world_technology_probe import summarize
+from aethron.simulation_world import SimulatedWorld
+from aethron.temporal.fixtures import detection, encode, frame
+from scripts.world_technology_probe import step, summarize
 
 
 class WorldTechnologyProbe(unittest.TestCase):
+    def test_adapter_probe_accepts_current_support_and_rejects_loss(self):
+        model = SimulatedWorld("vehicle_stop")
+        step(model, encode(frame(0, [detection()])), 0)
+        with self.assertRaisesRegex(ValueError, "lost_current_evidence"):
+            step(model, encode(frame(100, [])), 100)
+
     def test_exact_frozen_budget_boundary(self):
         report = summarize([100.0] * 100, 32 * 1024 * 1024)
         self.assertTrue(report["within_frozen_resource_budget"])

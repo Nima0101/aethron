@@ -14,6 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from aethron.simulation_world import SimulatedWorld  # noqa: E402
 from aethron.temporal import Session  # noqa: E402
 from aethron.temporal.fixtures import detection, encode, frame  # noqa: E402
 from aethron.world import CLOCK_DOMAIN, COORDINATE_FRAME, WorldModel  # noqa: E402
@@ -43,6 +44,20 @@ def summarize(samples, peak):
 
 
 def step(model, data, now):
+    if isinstance(model, SimulatedWorld):
+        out = model.step(
+            data, now_ms=now, coordinate_frame=COORDINATE_FRAME, clock_domain=CLOCK_DOMAIN
+        )
+        rec = out["recommendation"]
+        if (
+            out["quarantined"]
+            or not rec["accepted"]
+            or rec["state"] != "PRESENT"
+            or rec["motion_authority"]
+            or rec["expires_at_ms"] != now + 100
+        ):
+            raise ValueError("lost_current_evidence")
+        return
     if isinstance(model, WorldModel):
         out = model.step(
             data, now_ms=now, coordinate_frame=COORDINATE_FRAME, clock_domain=CLOCK_DOMAIN
@@ -92,6 +107,8 @@ def run():
     ]
     sources = [
         "aethron/world.py",
+        "aethron/simulation_world.py",
+        "aethron/simulated_safety.py",
         "aethron/temporal/session.py",
         "aethron/temporal/fusion.py",
         "aethron/temporal/math.py",
@@ -111,6 +128,7 @@ def run():
         },
         "session": measure(Session, inputs),
         "world": measure(WorldModel, inputs),
+        "simulation_world": measure(lambda: SimulatedWorld("vehicle_stop"), inputs),
     }
 
 
@@ -123,5 +141,7 @@ if __name__ == "__main__":
     args.out.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps({key: value for key, value in report.items() if key != "source_sha256"}))
     # Evidence is written before failure. Do not tune a threshold or discard a run.
-    if not all(report[k]["within_frozen_resource_budget"] for k in ("session", "world")):
+    if not all(
+        report[k]["within_frozen_resource_budget"] for k in ("session", "world", "simulation_world")
+    ):
         sys.exit(1)
