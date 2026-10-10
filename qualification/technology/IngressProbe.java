@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.StreamReadFeature;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
@@ -66,12 +67,21 @@ public final class IngressProbe {
         String[] rows = new String(input, StandardCharsets.US_ASCII).split("\n", -1);
         for (int index = 0; index < count; index++) {
             String row = rows[index];
+            String response;
             try {
                 byte[] document = admitted(HexFormat.of().parseHex(row));
-                System.out.println("{\"accepted\":true,\"document\":"
-                    + new String(document, StandardCharsets.UTF_8) + "}");
+                response = "{\"accepted\":true,\"document\":"
+                    + new String(document, StandardCharsets.UTF_8) + "}\n";
             } catch (Exception rejected) {
-                System.out.println("{\"accepted\":false}");
+                response = "{\"accepted\":false}\n";
+            }
+            // Byte writes avoid the default stdout charset. PrintStream stores
+            // I/O failures internally; checkError flushes and observes that state.
+            byte[] encoded = response.getBytes(StandardCharsets.UTF_8);
+            System.out.write(encoded, 0, encoded.length);
+            if (System.out.checkError()) {
+                // Delivery failure must not become an input rejection response.
+                throw new IOException("probe_output_unavailable");
             }
         }
     }

@@ -7,7 +7,7 @@ import unittest
 
 
 class JavaTransportTests(unittest.TestCase):
-    def invoke(self, payload):
+    def invoke(self, payload, *, stdout=subprocess.PIPE, jvm_options=()):
         return subprocess.run(
             [
                 "java",
@@ -15,12 +15,14 @@ class JavaTransportTests(unittest.TestCase):
                 "-XX:ActiveProcessorCount=1",
                 "-XX:+UseSerialGC",
                 "-Xmx64m",
+                *jvm_options,
                 "-cp",
                 os.environ["QUALIFICATION_AUDIT_CLASSPATH"],
                 "IngressProbe",
             ],
             input=payload,
-            capture_output=True,
+            stdout=stdout,
+            stderr=subprocess.PIPE,
             timeout=15,
             check=False,
         )
@@ -62,6 +64,29 @@ class JavaTransportTests(unittest.TestCase):
             self.rows(b"not_hex\n7b7d\n"),
             [{"accepted": False}, {"accepted": True, "document": {}}],
         )
+
+    def test_output_failure_is_not_success_or_input_rejection(self):
+        # This optional module runs on the Linux audit job; no silent skip.
+        for payload in (b"7b7d\n", b"not_hex\n"):
+            with self.subTest(payload=payload), open("/dev/full", "wb", buffering=0) as sink:
+                result = self.invoke(payload, stdout=sink)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(b"probe_output_unavailable", result.stderr)
+
+    def test_response_is_utf8_when_default_output_encoding_is_ascii(self):
+        document = {"label": "\u00c5ngstr\u00f6m \U0001f6df"}
+        payload = json.dumps(document, ensure_ascii=False).encode("utf-8").hex().encode() + b"\n"
+        result = self.invoke(
+            payload,
+            jvm_options=(
+                "-Dfile.encoding=US-ASCII",
+                "-Dsun.stdout.encoding=US-ASCII",
+                "-Dstdout.encoding=US-ASCII",
+            ),
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stderr, b"")
+        self.assertEqual(json.loads(result.stdout), {"accepted": True, "document": document})
 
 
 if __name__ == "__main__":

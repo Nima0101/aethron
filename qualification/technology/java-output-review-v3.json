@@ -1,0 +1,118 @@
+{
+  "audit_policy_version": 3,
+  "baseline_commit": "abd692acfb1f41275f3e983c78cb0acc1459c636",
+  "component": "P4/P15 Java ingress experiment output delivery",
+  "decision": "KEEP Java/Jackson experiment; FIX UTF-8 and stream-error handling",
+  "red": {
+    "methods": 8,
+    "assertion_failures": 3,
+    "errors": 0,
+    "elapsed_seconds": 4.731
+  },
+  "green": {
+    "java_transport_methods": 8,
+    "java_transport_elapsed_seconds": 3.682,
+    "earlier_review_methods": 13,
+    "earlier_review_elapsed_seconds": 0.09,
+    "skips": 0,
+    "request_rows": 81,
+    "response_rows": 81,
+    "documents_match": true,
+    "reports_match": true
+  },
+  "static": {
+    "javac_release": 17,
+    "javac_xlint_all_werror": "PASS",
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_medium_high": "PASS",
+    "python39_syntax": "PASS; runtime not tested locally"
+  },
+  "local_java_version": [
+    "openjdk version \"21.0.11\" 2026-04-21",
+    "OpenJDK Runtime Environment (build 21.0.11+10-1-deb13u2-Debian)",
+    "OpenJDK 64-Bit Server VM (build 21.0.11+10-1-deb13u2-Debian, mixed mode, sharing)"
+  ],
+  "hosted_java17_result": "not established; published baseline checks queued",
+  "fresh_execution": {
+    "comparison": {
+      "audit_policy_version": 3,
+      "scope": "Java ingress with unchanged Python semantic oracle; not a Java validator",
+      "python": "3.13.5",
+      "ingress_cases": 18,
+      "semantic_requests": 63,
+      "mismatch_indices": [],
+      "report_mismatch_indices": [],
+      "document_mismatch_indices": [],
+      "all_reports_match": true,
+      "all_documents_match": true,
+      "request_transport_sha256": "7c1ddc2d27791242716bfa836e681f0b3b8fa92e05350806b4536350620255e0",
+      "response_transport_sha256": "5059be25311cb6c0e60f0c9e0636ccc3e62535d233661267ee152a5d5f55668f",
+      "python_65536_byte_measurement": {
+        "iterations": 20,
+        "elapsed_ns": [
+          68564728,
+          5398923,
+          5343226,
+          5313822,
+          5668187,
+          5217250,
+          4799488,
+          64407002,
+          5702649,
+          5316114,
+          4854429,
+          4631318,
+          5063881,
+          4531868,
+          4416102,
+          4546436,
+          65784680,
+          5281386,
+          5198790,
+          5238440
+        ],
+        "traced_peak_bytes_one_call": 73735,
+        "acceptance_threshold": null
+      },
+      "source_sha256": {
+        "qualification/technology/IngressProbe.java": "f3e814c0039f3aaec9d50003a908eca18feedcb3edba58be8530f73b56f8ffee",
+        "qualification/technology/compare_ingress.py": "f0318a6a1cfb96f49b7486e84a96ee4b74bfdbea97ca2bfeb4e4bd2d2cdf97ae",
+        "qualification/technology/measurement.py": "4c3e628661aaedefe3cc5b26e01bd887bb6303e13cb2099faf66382e31d7cf0a",
+        "qualification/technology/ingress-vectors-v1.json": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff",
+        "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "qualification/rigs/synthetic-v1.json": "0b68e3a27477d5d53bc616afac23d82568ac357fdf95ce2520f114ac2efb25ea",
+        "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+        "qualification/technology/source_snapshot.py": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365"
+      },
+      "source_observation": "equal_before_and_after_workload",
+      "physical_qualification_passed": false
+    },
+    "request_rows": 81,
+    "response_rows": 81,
+    "compiled_class_sha256": "6b2e49a274a40b7cf83f939faa33593c28d1e40bdb9c172a89864c308f48a785",
+    "parser_jar_sha256": "b64b5874162b503a0e58a8f7758266e8dd9f91bf49e3a59ae0b5f47589a231b7",
+    "parser_jar_bytes": 594187,
+    "source_sha256": "f3e814c0039f3aaec9d50003a908eca18feedcb3edba58be8530f73b56f8ffee"
+  },
+  "source_sha256": {
+    "qualification/technology/IngressProbe.java": "f3e814c0039f3aaec9d50003a908eca18feedcb3edba58be8530f73b56f8ffee",
+    "qualification/tests/java_transport.py": "b108f6b242733901296e0850680615f12e1c8ca04e299843eead609dfe451ffe",
+    "qualification/technology/java-output-review-v3.md": "53fcb9687ba05e6a0f7bdb280078e7214668a0842936cf89670a7ad03b706b75",
+    "qualification/technology/review-v3.md": "691419ff1a1d7420bdd7d460c705d9079d32e70957c8089098f4287fd78869e4",
+    ".github/workflows/aethron-qualification.yml": "62e2dbed01bc30d45e520d5625e7a757b4667ba08004e8d7947152cd7fe22c2a",
+    "qualification/tests/test_declaration_review.py": "f2b1798f19ee679868cf50e7f08e5c94bae5950a7bf6412e80611094e97a03c1",
+    "qualification/tests/test_artifact_review.py": "00c5afdbba6c71fe6f9ebe1ea9057ea3c7a80688ba04b0130f13a6608ae17d1b",
+    "qualification/tests/test_campaign_review.py": "f3bc5240549e6cd79d1861e54ad3e3e41196da176aa98ea5fbb27958b55406ed"
+  },
+  "limitations": [
+    "Stream errors can follow partial delivery; require zero exit and complete comparison.",
+    "Flush is not durable storage acknowledgement.",
+    "Class/source/Jar hashes do not authenticate execution or full dependency closure.",
+    "Local JDK 21 execution with release 17 compilation is not hosted Java 17 verification."
+  ],
+  "audit_complete": false,
+  "product_acceptance_passed": false,
+  "physical_qualification_passed": false
+}
