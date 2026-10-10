@@ -1,6 +1,7 @@
 """Exercise the shipped smoke program with controlled package/server boundaries."""
 
 import contextlib
+import hashlib
 import importlib.util
 import io
 import json
@@ -30,6 +31,17 @@ class NodeConsumerSmoke(unittest.TestCase):
         self.archive.parent.mkdir(parents=True)
         self.archive.write_bytes(b"controlled archive placeholder; never installed")
         self.output.write_text('{"old_success":true}')
+        self.package = self.root / "examples/clients/typescript"
+        (self.package / "src").mkdir(parents=True)
+        self.source = self.package / "src/client.ts"
+        self.source.write_text("synthetic source")
+        (self.package / "package.json").write_text('{"name":"test-client","version":"1.0.0"}')
+        contract = self.root / "contracts/openapi/aethron-edge-v1.json"
+        contract.parent.mkdir(parents=True)
+        contract.write_text('{}')
+        self.pack_metadata = [{"filename": "test-client-1.0.0.tgz"}]
+        self.actions = []
+        self.after_install = lambda: None
         self.lifecycle = []
         lifecycle = self.lifecycle
 
@@ -51,6 +63,21 @@ class NodeConsumerSmoke(unittest.TestCase):
     def invoke(self, body):
         def run(arguments, **kwargs):
             if arguments[0] == "npm":
+                if arguments[1:3] == ["run", "build"]:
+                    self.actions.append("build")
+                    return subprocess.CompletedProcess(arguments, 0)
+                if arguments[1] == "pack":
+                    self.actions.append("pack")
+                    self.assertIn("--offline", arguments)
+                    self.assertIn("--ignore-scripts", arguments)
+                    destination = Path(arguments[arguments.index("--pack-destination") + 1])
+                    archive = destination / "test-client-1.0.0.tgz"
+                    archive.write_bytes(b"fresh synthetic archive")
+                    return subprocess.CompletedProcess(
+                        arguments, 0, stdout=json.dumps(self.pack_metadata)
+                    )
+                self.actions.append("install")
+                self.installed_archive = Path(arguments[-1])
                 self.assertIn("--offline", arguments)
                 self.assertIn("--ignore-scripts", arguments)
                 package = kwargs["cwd"] / "node_modules/aethron-edge-client-example"
@@ -61,6 +88,7 @@ class NodeConsumerSmoke(unittest.TestCase):
                 (package / "index.js").write_text(
                     "export async function observe(base,token,profile,display,signal){" + body + "}"
                 )
+                self.after_install()
                 return subprocess.CompletedProcess(arguments, 0)
             self.assertEqual(arguments[0], "node")
             return RUN(arguments, **kwargs)
@@ -120,12 +148,48 @@ class NodeConsumerSmoke(unittest.TestCase):
             self.invoke("display({label:'expired',current_state:'UNKNOWN'});")
         self.assertFalse(self.output.exists())
 
-    def test_missing_archive_removes_old_success(self):
+    def test_missing_legacy_archive_does_not_block_fresh_build(self):
         self.archive.unlink()
-        with self.assertRaises(ValueError):
-            self.invoke("")
-        self.assertFalse(self.output.exists())
+        try:
+            self.invoke(EMIT)
+        except ValueError as error:
+            self.fail(str(error))
+        self.assertEqual(self.actions, ["build", "pack", "install"])
+
+    def test_fresh_archive_and_inputs_are_bound_to_result(self):
+        self.invoke(EMIT)
+        self.assertEqual(self.actions, ["build", "pack", "install"])
+        self.assertNotEqual(self.installed_archive, self.archive)
+        record = json.loads(self.output.read_text())
+        self.assertEqual(
+            record["archive_sha256"], hashlib.sha256(b"fresh synthetic archive").hexdigest()
+        )
+        self.assertEqual(
+            record["input_sha256"]["examples/clients/typescript/src/client.ts"],
+            hashlib.sha256(b"synthetic source").hexdigest(),
+        )
+
+    def test_input_drift_during_install_rejects_before_server_start(self):
+        self.after_install = lambda: self.source.write_text("changed source")
+        with self.assertRaisesRegex(ValueError, "client_inputs_changed"):
+            self.invoke(EMIT)
         self.assertEqual(self.lifecycle, [])
+        self.assertFalse(self.output.exists())
+
+    def test_archive_drift_during_install_rejects_before_server_start(self):
+        self.after_install = lambda: self.installed_archive.write_bytes(b"changed archive")
+        with self.assertRaisesRegex(ValueError, "client_archive_changed"):
+            self.invoke(EMIT)
+        self.assertEqual(self.lifecycle, [])
+        self.assertFalse(self.output.exists())
+
+    def test_failed_server_cleanup_does_not_publish_success(self):
+        def fail_cleanup():
+            raise RuntimeError("cleanup failed")
+        self.service.HTTPService.tearDownClass = fail_cleanup
+        with self.assertRaisesRegex(RuntimeError, "cleanup failed"):
+            self.invoke(EMIT)
+        self.assertFalse(self.output.exists())
 
     def test_current_client_cancellation_matches_smoke(self):
         client = (ROOT / "examples/clients/typescript/dist/client.js").as_uri()
@@ -159,4 +223,28 @@ finally {if(!deleted)throw new Error('expected_cleanup_missing');}
 """
         self.invoke(body)
         self.assertEqual(json.loads(self.output.read_text())["display_callbacks"], 3)
+        self.assertEqual(self.lifecycle, ["start", "stop"])
+
+    def test_invalid_pack_metadata_never_reaches_install(self):
+        for metadata in [[], [{}, {}], [None], [{"filename": 1}],
+                         [{"filename": "../escape.tgz"}], [{"filename": "C:escape.tgz"}]]:
+            with self.subTest(metadata=metadata):
+                self.actions.clear()
+                self.pack_metadata = metadata
+                with self.assertRaisesRegex(ValueError, "invalid_pack_result"):
+                    self.invoke(EMIT)
+                self.assertEqual(self.actions, ["build", "pack"])
+                self.assertFalse(self.output.exists())
+
+    def test_source_change_during_server_cleanup_rejects_result(self):
+        stop = self.service.HTTPService.tearDownClass
+
+        def change_source():
+            stop()
+            self.source.write_text("changed after observations")
+
+        self.service.HTTPService.tearDownClass = change_source
+        with self.assertRaisesRegex(ValueError, "client_inputs_changed"):
+            self.invoke(EMIT)
+        self.assertFalse(self.output.exists())
         self.assertEqual(self.lifecycle, ["start", "stop"])

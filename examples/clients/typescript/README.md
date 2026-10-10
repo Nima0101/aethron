@@ -107,12 +107,18 @@ requires producer contract reconciliation; the client limit has not been raised.
 
 The implementation uses authenticated fetch streaming rather than EventSource token URLs. The candidate server rejects Origin headers and cross-origin access; the executed evidence is Node on loopback. Browser deployment needs a separately reviewed same-origin/authenticated TLS integration, and is not claimed from the Node test. No CDN is required.
 
-From the repository root, `scripts/edge_node_e2e.py` installs the packed artifact outside this package and tests it against a real server. The server and Python client instructions are in [edge usage](../../../docs/usage-edge.md).
+From the repository root, `scripts/edge_node_e2e.py` builds this package, packs a fresh archive in a unique external consumer directory, installs it offline and tests it against a real server. Prepare Node build dependencies and the existing `build/ecosystem-phase1/npm-cache` first; the smoke command does not download missing dependencies. The server and Python client instructions are in [edge usage](../../../docs/usage-edge.md).
 The smoke result counts `display_callbacks`, which can include watchdog renders
 of the same observation; it does not count distinct wire events. Every callback
 must retain current state UNKNOWN. Only its own cancellation with the SDK's
 `stream_unavailable` error is accepted as the expected shutdown. A failed attempt
 removes the previous result file so stale success cannot stand in for that run.
+Success is written only after server cleanup and repeated archive/input hash
+checks. The result includes `archive_sha256` and `input_sha256` for the selected
+package sources/configuration and OpenAPI input. These local checks detect stale
+archives and ordinary source changes during a run; they are not signed build
+attestations, compiler/dependency verification or protection from hostile local
+processes. The temporary archive is removed with the consumer directory.
 
 
 Session creation replies use a local 65,536-byte accumulator limit, strict UTF-8

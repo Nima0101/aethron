@@ -540,3 +540,57 @@ Archive/source binding and actual real-server execution remain the next distribu
 review items. P19 and its complete offline bilingual contextual Help Center
 requirements were read; no P12/P19 UI or acceptance claim is made before this
 lane's outstanding re-audit and applicable integration gates are complete.
+
+
+## Fourth component, fresh archive and smoke input binding
+
+Baseline `f066e2536c6d3a09b63a150b8d5e1cdea626c3e0`. The fixed archive path
+could select a package built from older sources. A successful report could also
+be written before server teardown failed. This slice corrects the harness boundary;
+it does not establish a signed release or production-service qualification.
+
+Constraints: use the actual npm pack/install behavior, build from the current
+SDK checkout, retain the producing lane's service fixture, perform no deployment
+time dependency fetch, isolate each archive, and reject changed inputs/results.
+The Python/Node versus Node-only/PowerShell reassessment above still applies:
+Python owns the existing service lifecycle, while npm owns package construction
+and Node owns client execution. No additional runtime eliminates either required
+boundary. [npm pack](https://docs.npmjs.com/cli/v11/commands/npm-pack/) provides
+JSON metadata, an explicit destination and ignored lifecycle scripts;
+[Python hashlib](https://docs.python.org/3/library/hashlib.html) provides incremental
+SHA-256 without a new dependency. **KEEP these boundaries; FIX archive selection
+and source/result consistency.** The actual build/pack/install probe below is
+executable evidence, not a comparative latency or cryptographic certification claim.
+
+Each smoke run explicitly builds the SDK, packs offline into its unique consumer
+directory and installs that archive with lifecycle scripts disabled. Pack metadata
+must identify one local `.tgz` basename. Build, pack and install child timeouts
+are 60/30/30 seconds; the existing client timeout remains 20 seconds. These are
+harness limits, not product deadlines. Root SDK source/configuration/docs matching
+`.mjs/.ts/.json/.md`, its license, every `src` file and the OpenAPI input are hashed.
+The archive digest and input map are checked after packing, after installation,
+and after server cleanup. Only then is success published with both bindings.
+The temporary archive is removed by the existing temporary-directory lifecycle.
+
+The corrected baseline retained five assertion failures and eight passing methods,
+with no execution errors. Fifteen final methods pass, including stale archive
+avoidance, changed source/archive rejection, invalid pack metadata, cleanup failure,
+and source change during cleanup. Six metadata cases exercise the same method.
+Earlier SDK regression controls are rechecked independently. See the
+[source-bound evidence](evidence/phase3/p33-archive-review-v3.json).
+
+`python3 tests/integration/node_consumer_loopback.py` additionally exercises actual
+build, pack, offline install and the installed client over IPv4 loopback, using a
+small explicit synthetic HTTP fixture. It requires prepared Node dependencies and
+the same offline npm cache as the real smoke. It checks POST/GET/DELETE, labels its
+report as a substituted service, clears its previous report, and removes the generic
+smoke result so it cannot be mistaken for production-service evidence. It does not
+import the production Python service or qualify hardware. Its final report records
+three display callbacks, UNKNOWN, archive digest and current input hashes.
+
+Hashes identify local bytes; they do not authenticate a compiler, installed npm
+runtime dependencies, a source revision or a remote publisher. Persistent changes
+between checkpoints are detected, but transient change-and-restore races or a
+hostile local process are outside this harness. A fresh actual production-service
+run and remaining distribution/platform/P12 review are still outstanding. No audit
+completion marker or P19 acceptance status is issued.
