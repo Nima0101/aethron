@@ -44,3 +44,12 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
   PYTHONPATH=integrations/edge:tests/integration \
   python -m unittest test_sensor_geometry_audit_modes
 ```
+
+New reports include `source_sha256` for the harness and the actual imported
+geometry module's on-disk file. Logical labels omit absolute paths. Hashing
+occurs after admission checks and before measured batches; unavailable source
+bytes prevent report emission. This is not executable attestation, report
+authentication, a complete dependency closure or an atomic snapshot. Keep source
+files stable during a run. The harness fingerprint covers the fixture-generation
+code, not a separately serialized fixture artifact. Historical reports remain
+unchanged. See the [partial source review](../../../docs/engineering/aethron-ecosystem/P21-GEOMETRY-SOURCE-EVIDENCE-V3.md).

@@ -1,12 +1,15 @@
 """Synthetic C03 scalar-boundary comparison; no hardware accuracy claim."""
 
+import hashlib
 import json
 import math
 import statistics
 import time
 import tracemalloc
+from pathlib import Path
 
 import numpy as np
+from aethron_edge.sensors import geometry
 from aethron_edge.sensors.geometry import Pinhole, finite
 
 # Admission and warm-up parity assertions must run before reporting evidence.
@@ -106,6 +109,13 @@ def main():
         actual = outcome(cameras["numpy"], operation, args)
         assert actual == expected, (operation, args, actual, expected)
     report = {
+        "source_sha256": {
+            name: hashlib.sha256(path.read_bytes()).hexdigest()
+            for name, path in {
+                "compare.py": Path(__file__),
+                "aethron_edge.sensors.geometry": Path(geometry.__file__),
+            }.items()
+        },
         "numpy": np.__version__,
         "contract_cases": len(cases),
         "parity": True,
