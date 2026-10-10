@@ -1,6 +1,6 @@
 # P16–P18 review inventory v3
 
-Snapshot: `67ce70500d179c12b5c2b11e2634b3cd61b34c67`, plus schema/reference-integrity coverage, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `6da83aeeee775887a898e20e565028bca1be4ed2`, plus fresh task/bundle verification, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -17,8 +17,8 @@ remain historical inputs. The consumed JSON-bound helper belongs to the foundati
 | Evidence bytes | [Original review](p16-evidence-v3.md). [Fresh reassessment](p16-policy-evidence-reassessment-v3.md): KEEP immutable per-blob binding; existing tests detect weakened set comparison. No content qualification. [Kind preservation review](p16-evidence-kinds-v3.md): KEEP runtime, add full signed-reference assertion that detects a previously surviving kind-label mutation. |
 | Three passport schemas and conformance | [Review](p16-conformance-v3.md): KEEP structural schema tooling; FIX positive authentication control and dependency closure. [Fresh reassessment](p16-schema-reassessment-v3.md): KEEP standard contracts and offline checker; preserve lexical/authentication gaps. [Reference-integrity review](p16-schema-integrity-v3.md): KEEP contracts; add paired checks and guard-removal controls for selected-field uniqueness and complete references. |
 | Task/federation structural schemas | [Review](p16-interop-schemas-v3.md): FIX missing portable structural contracts; preserve runtime admission. |
-| Task descriptions | [Review](p16-task-v3.md): KEEP bounded descriptions; no task execution or replay store. [Fresh reassessment](p16-task-bundle-reassessment-v3.md): KEEP lexical/canonical description validation; existing test detects removed canonical equality. |
-| Bundle verification | [Review](p16-bundle-v3.md): KEEP snapshot composition; all revocation lists rechecked. [Fresh reassessment](p16-task-bundle-reassessment-v3.md): KEEP immutable snapshots; existing test detects removed envelope pin. |
+| Task descriptions | [Review](p16-task-v3.md): KEEP bounded descriptions; no task execution or replay store. [Fresh reassessment](p16-task-bundle-reassessment-v3.md): KEEP lexical/canonical description validation; existing test detects removed canonical equality. [Current review](p16-task-bundle-reassessment-v3.md#fresh-source-review-at-6da83ae): KEEP after fresh source and candidate review. |
+| Bundle verification | [Review](p16-bundle-v3.md): KEEP snapshot composition; all revocation lists rechecked. [Fresh reassessment](p16-task-bundle-reassessment-v3.md): KEEP immutable snapshots; existing test detects removed envelope pin. [Current review](p16-task-bundle-reassessment-v3.md#fresh-source-review-at-6da83ae): KEEP; existing tests detect independently removed envelope and policy pins. |
 | Direct federation | [Review](p16-federation-v3.md): KEEP closed pinned table; no enrollment or distributed consensus. [Fresh reassessment](p16-federation-inbox-reassessment-v3.md): KEEP closed-table validation; no production mismatch demonstrated. |
 | Inbox resource accounting | [Review](p16-inbox-v3.md): KEEP local bounded queue; no transport or hard real-time guarantee. [Fresh reassessment](p16-federation-inbox-reassessment-v3.md): KEEP accounting; FIX test-runner hang on injected worker deadlock through child-process supervision. |
 | Inbox/federation composition | [Review](p16-delivery-boundary-v3.md): KEEP primitives; ADD real-API expiry, revocation, revision-floor and close traces. Caller refresh and in-flight cancellation are not implemented. Four composition methods freshly rechecked in the [federation/inbox reassessment](p16-federation-inbox-reassessment-v3.md). |

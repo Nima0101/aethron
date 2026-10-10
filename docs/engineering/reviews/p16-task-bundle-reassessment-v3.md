@@ -132,3 +132,33 @@ local logs. They do not attest loaded bytecode, dependency closure or an atomic
 snapshot. Candidate comparisons are source-based, not executed parity tests.
 The current review is incomplete; the next earliest runtime component is direct
 federation, followed by inbox resource accounting. No completion marker is issued.
+
+
+## Fresh source review at 6da83ae
+
+Baseline `6da83aeeee775887a898e20e565028bca1be4ed2`, reviewed 2026-10-10 after
+rereading current owner policy and restarting at the parser. Complete task and bundle
+source, their tests and both normative contracts were inspected. No production,
+contract or deployment-claim mismatch was found. No new runtime or test change is
+justified by this review. The C4 views above still describe the implementation.
+
+The fresh decisions are [KEEP tasks](../../decisions/p16-task-current-v3.json) and
+[KEEP bundles](../../decisions/p16-bundle-current-v3.json). Current primary documentation
+for Python JSON hooks, OTP JSON callbacks, .NET token reading, Rust borrowing and JVM
+ByteString was consulted again. Lexical fidelity, stable ownership and reuse of the
+actual verification boundary determine these decisions. No measured migration winner
+is deferred; incumbent language, installed tooling and rewrite cost are not criteria.
+
+Fresh checks: 22 methods (one lexical, ten task, eleven bundle) pass without skips.
+Three separate in-memory changes weaken canonical equality, envelope pin and policy
+pin. Existing tests detect each with one expected assertion failure, zero errors and
+zero skips. The policy experiment uses changed whitespace: semantic policy equality
+cannot replace the exact byte pin. These are sensitivity controls, not production
+failures. Source files remain byte-identical. Scoped Ruff, formatting and unfiltered
+Bandit pass; four ADR validation methods pass after adding both records.
+
+[Current results](p16-task-bundle-current-v3-results.json) retain exact replacements,
+listed input hashes and local log hashes. They do not make local logs public, attest
+loaded code, establish complete dependency closure or prove hosted execution.
+No target latency, MLS/CNSA, availability, operational capability or complete audit
+claim follows. Next earliest component remains direct federation and inbox accounting.

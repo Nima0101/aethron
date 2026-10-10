@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "decision": "KEEP",
+  "limits": [
+    "Current primary documentation was inspected; no complete alternate implementation or comparative benchmark was run.",
+    "No target hardware, service SLA, hard deadline or process memory envelope is specified. Input-byte bounds are not RSS or execution-time bounds.",
+    "These APIs do not authenticate their pin provider, persist time/revision floors, prevent replay or confer execution authority. Insufficient information for tactical deployment."
+  ],
+  "id": "p16-task-current-v3",
+  "component": "P16 canonical offline task descriptions",
+  "constraints": [
+    "Immutable UTF-8 bytes, at most 65536 bytes and depth eight; duplicate/float lexical rejection, closed ASCII fields, canonical equality and externally authenticated pins.",
+    "Only two verification-description kinds; positive lifetime at most 300 seconds; no I/O, scheduler or executor."
+  ],
+  "alternatives": [
+    "Python JSON pair/numeric hooks with native-backed hashing.",
+    "Erlang/Elixir OTP JSON object and numeric callbacks.",
+    "C#/F# System.Text.Json Utf8JsonReader token and raw-value inspection."
+  ],
+  "rationale": [
+    "KEEP the current bounded hook-based parser and explicit validation: pair and numeric callbacks preserve required lexical distinctions, and canonical byte equality binds exactly one representation.",
+    "OTP callbacks and .NET token readers are credible candidates beyond the incumbent. Neither default decoding nor a runtime change supplies the full pin, lexical and expiry contract. No requirement or measurement establishes a material migration advantage.",
+    "Fresh source review confirms declared bounds and authority limitations. Ten task methods pass; weakening canonical equality causes the existing negative test to fail. No production mismatch found."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/json.html",
+    "https://www.erlang.org/doc/apps/stdlib/json.html",
+    "https://learn.microsoft.com/en-us/dotnet/api/system.text.json.utf8jsonreader?view=net-10.0"
+  ]
+}
