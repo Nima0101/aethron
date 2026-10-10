@@ -19,7 +19,7 @@ claim a completed technology audit of every future deliverable.
 | Rig/calibration/clock/lighting declarations | [v1 schema](schema-v1.md), [validator](evidence.py), [negative cases](tests/test_evidence.py) | No temperature, weather, vibration, EMC, power or device-measurement schema. Any extension needs a versioned contract and tests; actual observations remain external. |
 | Artifact binding | [Bounded immutable-byte checks](artifacts.py), [negative tests](tests/test_artifacts.py) | Content truth, instrument authenticity and source authorization are not implemented here. Consume the producing trust/source contracts through an owned adapter when published. |
 | Campaign matrix and attempt retention | [Coverage evaluator](campaign.py), [tests](tests/test_campaign.py) | Caller-supplied cases cover sensor/lighting/evidence declarations only. No independently authenticated acquisition ledger or proof of complete submission. A local recording/ledger requirement still needs a privacy-scoped design; it cannot be inferred from this report. |
-| Domain/procedure references | [Opaque hash checks](campaign_references.py); [checklist declarations](procedures-v1.md); [domain profile matching](domains-v1.md), [tests](tests/test_domains.py) | Checklist shape, plan binding and bidirectional lighting/sensor/evidence profile coverage are implemented, including unknown states. Referenced method contents, additional environment dimensions and human-review evidence validation remain software work; supplier/field approval remains external. |
+| Domain/procedure references | [Opaque hash checks](campaign_references.py); [checklist declarations](procedures-v1.md); [domain matching](domains-v1.md); [method references](methods-v1.md) | Method-byte binding and declarations of current software rules now supplement checklist/domain checks. Physical acquisition-method specifications, additional environment dimensions and human-review evidence validation remain unfinished; supplier/field approval remains external. |
 | Bundle and process transport | [Composition](campaign_bundle.py), [bounded stdin](campaign_bundle_cli.py), [integration tests](tests/test_bundle_artifact_integration.py) | Source-checkout tooling only; the qualification harness is not shipped in the installed wheel. An installed distribution/consumer acceptance path is still needed. No producer-device capture adapter is implemented by this lane. |
 | Portable consumer evidence | [Six synthetic vectors](consumer-vectors-v1.md), [runner](tests/test_consumer_vectors.py) | Reference Python execution only. Published peer/native consumers must demonstrate their own conformance; fixture portability alone is not successful interoperability. |
 | Technology diagnostics | [Review controls and limitations](technology/review-v3.md), [hosted retention](technology/workflow-retention-review-v3.md) | Local synthetic diagnostics are not target latency, uptime, coding-standard certification or release attestation. Historical failures and finite-corpus limits remain applicable. |
@@ -58,8 +58,10 @@ The non-executing [checklist contract](procedures-v1.md) now provides bounded
 declaration and coverage checks with explicit unknown/unverified states and
 negative fixtures. The [domain declaration contract](domains-v1.md) now checks
 whole lighting/sensor/evidence tuples against campaign cases in both directions.
-Neither API inspects referenced method contents or authenticates human review.
-The next independent software checkpoint is a non-executing method-content
-contract for the checklist references. Target-device procedures and physical
-acceptance cannot be inferred from declaration completeness. No completion marker
-is justified by this inventory.
+The separate [method-reference contract](methods-v1.md) binds supplied method
+bytes and validates declarations of existing software rules. It authenticates no
+human review and does not describe or execute physical acquisition procedures.
+The next independent software checkpoint is a versioned composition of domain,
+method and capture evidence checks into one report that preserves every gate.
+Target-device procedures and physical acceptance cannot be inferred from
+declaration completeness. No completion marker is justified by this inventory.

@@ -110,6 +110,11 @@ profiles with campaign cases in both directions. Null fields never act as
 wildcards, and matching columns separately cannot invent a supported combination.
 Its [synthetic vectors](fixtures/domains-v1.json) retain unknown, empty and joint
 mismatch cases. These checks do not establish field suitability or domain approval.
+The [method-reference verifier](methods-v1.md) binds caller-supplied method bytes
+to checklist references and checks declarations of the frozen software rules.
+It preserves checklist, byte and content failures independently. It executes no
+procedure and does not approve physical methods; [synthetic vectors](fixtures/methods-v1.json)
+retain unknown-rule, changed-rule, missing and corrupt evidence outcomes.
 The [campaign bundle report](campaign-bundle-v1.md) computes both coverage and
 reference matching from raw inputs against one plan. Its software result requires
 both checks; capture artifact verification and physical qualification remain false.

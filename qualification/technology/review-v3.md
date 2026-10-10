@@ -1,6 +1,9 @@
 # Qualification implementation review v3
 
 This is an implementation review record, not a replacement governance policy.
+The [method-reference contract](../methods-v1.md), [decision](method-decision-v1.json)
+and [verification](method-verification-v1.json) bind supplied method declarations
+without executing procedures or modifying frozen rules.
 The [domain declaration contract](../domains-v1.md), [decision](domain-decision-v1.json)
 and [verification](domain-verification-v1.json) add bounded joint-profile coverage.
 They do not extend physical domain claims or reinterpret earlier v1 reports.
