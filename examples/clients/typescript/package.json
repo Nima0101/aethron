@@ -6,7 +6,8 @@
   "license": "GPL-3.0-only",
   "scripts": {
     "build": "node generate-validators.mjs && tsc -p tsconfig.json",
-    "test": "npm run build && node --test test.mjs validation.test.mjs transport.test.mjs wire.test.mjs session.test.mjs redirect.test.mjs disposal.test.mjs errors.test.mjs endpoint.test.mjs numeric.test.mjs && node --disallow-code-generation-from-strings audit-observation.mjs --check"
+    "test": "npm run build && node --test test.mjs validation.test.mjs transport.test.mjs wire.test.mjs session.test.mjs redirect.test.mjs disposal.test.mjs errors.test.mjs endpoint.test.mjs numeric.test.mjs && node --disallow-code-generation-from-strings audit-observation.mjs --check && npm run test:package",
+    "test:package": "node package.test.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0"
@@ -18,6 +19,16 @@
   "exports": "./dist/client.js",
   "types": "./dist/client.d.ts",
   "files": [
-    "dist"
+    "LICENSE",
+    "dist/client.js",
+    "dist/client.d.ts",
+    "dist/session.js",
+    "dist/session.d.ts",
+    "dist/wire.js",
+    "dist/wire.d.ts",
+    "dist/types.js",
+    "dist/types.d.ts",
+    "dist/validators.cjs",
+    "dist/scene.schema.json"
   ]
 }

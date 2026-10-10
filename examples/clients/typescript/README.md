@@ -2,6 +2,8 @@
 
 This local package is an executed Node client example, not a published enterprise SDK. It uses generated OpenAPI types plus strict AJV validation generated at build time. Node 22+ is the prepared CI target; run the locked package tests before using another runtime.
 
+From the repository package directory (not the installed archive):
+
 ```sh
 npm ci --ignore-scripts
 npm test
@@ -164,3 +166,12 @@ the producer's strict integer model. Decimal geometry remains supported. The
 parser requires the source-aware `JSON.parse` reviver executed here on Node
 22.23.2; missing token-source support fails closed. `Observation.accept()` receives
 already parsed values and cannot recover their original numeric spelling.
+
+The package file list names the ten reviewed build files explicitly. Stale modules,
+diagnostics and cache files elsewhere in `dist` are excluded. `npm test` runs a
+packing check with synthetic extra files; `npm run test:package` reruns that check
+after a build. The archive also includes this README, package metadata and an
+unchanged copy of the repository license. This does not inspect the contents of
+allowed files or prove build freshness: build and test the exact source revision
+before packing. The archive is a runtime example, not a source checkout or a
+release qualification artifact.

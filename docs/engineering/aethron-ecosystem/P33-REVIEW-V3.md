@@ -44,15 +44,15 @@ its versioned schema; this review does not rewrite that peer interface.
 
 | Owned surface | Fresh review status |
 | --- | --- |
-| Generated contract admission | Reviewed above; 4 validation tests pass, including 14 independent negative cases |
+| Generated contract admission | Reviewed above and in numeric slice; 5 validation tests pass, including 14 independent negative cases |
 | Observation projection and local clocks | Reviewed below; host-clock exception correction and claim clarification |
 | HTTP/session/stream/renderer lifecycle | Pending full V3 review; in-flight cancellation safety fix retained with four RED-to-GREEN regressions |
-| Package distribution and fixtures | Pending full review; focused installed-artifact checks are regression evidence only |
+| Package distribution and fixtures | Manifest/privacy slice reviewed below; source generation and broader distribution review remain open |
 | Android/JVM, desktop lifecycle, P12 operator application | No completed implementation identified in the previous inventory; fresh inventory and justified implementation decisions remain outstanding |
 
 No completion marker is created. The session-response admission slice below
-resolves the previously open response limit. Lexical integer-form admission and
-producer whole-event versus payload-size reconciliation remain open. Cancellation no longer blocks DELETE, but a source may ignore
+resolves the previously open response limit. Integer wire forms are corrected in
+the numeric slice. Producer whole-event versus payload-size reconciliation remains open. Cancellation no longer blocks DELETE, but a source may ignore
 cancellation and a remote server may fail to delete its session. Full live-server,
 platform and deployment qualification are not established by synthetic tests.
 
@@ -397,3 +397,47 @@ frozen bound is relaxed. Reconciliation remains an open producing-lane contract
 question. Distribution/tooling and the remaining platform/P12 inventory have not
 completed this review. No completion marker is created. See the
 [source-bound record](evidence/phase3/p33-numeric-review-v3.json).
+
+
+## Fourth component, package manifest and license inputs
+
+Baseline `de3ccb15ff92321b4b5ddb649ba204c7c51a1e44`. Fresh admission,
+projection, clock and transport regression checks remain green. Protected main
+`a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46` still caps producer JSON payloads
+rather than complete SSE events. The negative boundary control and producing-lane
+handoff are retained; no peer module or frozen threshold changes here. Independent
+package review found `files: ["dist"]` admitted stale modules, diagnostic records
+and nested npm cache logs. The archive omitted the repository license text.
+
+Constraints: distribute only reviewed Node ESM code/declarations/schema and package
+metadata; preserve installed behavior; use the package manager's actual manifest;
+exercise dirty output directories without deleting unrelated files; run on the
+prepared Node CI platforms without an additional runtime or native build.
+
+| Candidate | Decisive property and current evidence |
+| --- | --- |
+| npm JSON file allowlist + Node regression | [npm files semantics](https://docs.npmjs.com/cli/v11/configuring-npm/package-json#files) permit explicit file selection and automatically include certain metadata. An exact dry-run manifest assertion checks both. [Node execFileSync](https://nodejs.org/api/child_process.html#child_processexecfilesyncfile-args-options) provides shell-free arguments and bounded captured output; the test invokes the same npm JavaScript CLI through Node, avoiding platform command shims. |
+| Yarn or pnpm pack | [Yarn pack](https://yarnpkg.com/cli/pack) and [pnpm pack](https://pnpm.io/cli/pack) offer archive tooling. A different manager still needs reviewed file selection; neither supplies an evidenced benefit for this npm consumer contract. No comparative runtime benchmark is claimed. |
+| Python subprocess harness | [subprocess](https://docs.python.org/3/library/subprocess.html#subprocess.run) can invoke the same npm CLI. It would add a second interpreter to a standalone Node package's test prerequisites without replacing npm's file-selection semantics. KEEP the regression in Node; this is a deployment requirement, not an incumbent-language preference. |
+
+**KEEP npm package format and Node test host; FIX explicit artifact inputs.**
+The manifest names ten build files and the unchanged repository license copy.
+Two regression assertions require the exact archive file set and license bytes.
+The test creates only a unique synthetic directory, runs offline dry-run packing
+with scripts disabled, and removes that directory in `finally`. Its subprocess
+has a 20-second timeout and 1 MiB output cap; these are test controls, not a runtime
+or hardware latency claim. Existing CI invokes the new test through `npm test`.
+
+Both baseline assertions failed. The packing output included three synthetic files
+and two cache entries; the license was absent. The baseline used the system npm
+CLI, and the corrected check also executes the prepared Node installation's npm
+CLI; tool versions and failures are retained in the evidence. A wrong-directory
+edit attempt made no source changes, and an initial corrected run failed from
+host thread exhaustion. Neither is counted as a product assertion failure.
+
+The allowlist does not detect altered contents in permitted files or prove a fresh
+build. It is not a general secrets scanner, legal compliance assessment, browser
+qualification or public SDK release. Full source/build provenance and generated
+declaration/schema parity remain the next distribution review items; the overall
+P3.3/P12 audit remains incomplete. See the
+[source-bound record](evidence/phase3/p33-package-review-v3.json).
