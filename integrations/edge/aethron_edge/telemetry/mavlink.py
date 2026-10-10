@@ -97,7 +97,13 @@ class PassiveTelemetry:
     def _now(self):
         if self._latched:
             return None
-        now = self._clock()
+        try:
+            now = self._clock()
+        except BaseException:
+            # Withdraw before propagating, including operator interruption/exit.
+            # A recovered clock must not revive samples from the failed session.
+            self._withdraw("local_clock_invalid", latch=True)
+            raise
         if type(now) is not int or now < 0 or (self._last_now is not None and now < self._last_now):
             self._withdraw("local_clock_invalid", latch=True)
             return None

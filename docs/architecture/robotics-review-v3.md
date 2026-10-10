@@ -3,6 +3,10 @@
 This is an implementation review record, not a replacement policy. Review starts
 again at the passive MAVLink boundary at `52509c7`; v2 comparisons are historical
 evidence, not v3 completion. No native runtime winner or migration is declared.
+Later sections record corrections; earlier source-bound findings remain historical.
+The supplied-clock retained-sample gap is corrected in
+[Supplied-clock exceptions withdraw retained samples](#supplied-clock-exceptions-withdraw-retained-samples),
+without establishing general clock or hardware qualification.
 
 | Boundary | Current review state |
 | --- | --- |
@@ -515,3 +519,47 @@ An initial test import error from omitted `PYTHONPATH` and two corrected lint
 findings are retained in the review record. Production and candidate sources are
 unchanged. The production clock-exception gap, earliest-component technology
 choice, subsequent components and overall lane completion remain open.
+
+
+## Supplied-clock exceptions withdraw retained samples
+
+FIX the production passive receiver's previously recorded supplied-clock gap.
+`_now()` now clears its two retained sample slots and latches the existing
+`local_clock_invalid` reason before re-raising an exception from the clock callable.
+The same exception object propagates, including `KeyboardInterrupt` and
+`SystemExit`. No failure detail is added to the returned status. Once latched,
+subsequent calls neither consult the clock nor admit packets; recovery cannot
+revive the failed session. Explicit close remains independent of clock access.
+The 100 ms threshold, packet framing, provenance and public status fields are
+unchanged. A caller's previously returned immutable snapshot is not erased.
+
+This correction belongs at the Python callable/state boundary: the object owns
+the samples and receives the exception. An external C/Rust/JavaScript validator
+cannot guarantee this cleanup when that call raises before producing a value.
+The bounded cleanup therefore stays here while the broader production runtime
+choice remains PENDING. This is not an incumbent KEEP decision. Python documents
+[BaseException and interruption semantics](https://docs.python.org/3/library/exceptions.html#KeyboardInterrupt)
+and [cleanup before re-raising](https://docs.python.org/3/tutorial/errors.html#defining-clean-up-actions).
+Catching only `Exception` would omit the interruption/exit controls; swallowing
+them would interfere with operator cancellation. Cleanup immediately re-raises.
+
+[Verification](../verification/robotics-clock-withdrawal-review-v3.json) retains
+eight RED assertions: snapshot/ingest crossed with RuntimeError, OSError,
+KeyboardInterrupt and SystemExit. Each begins with both sample slots populated.
+The passing regression checks empty UNKNOWN, the fixed reason, exception identity,
+no clock reread, no packet readmission and explicit close. The unchanged historical
+reproduction now observes zero retained samples after both RuntimeError cases;
+its deliberately unconditional negative exit and general-qualification flag are
+preserved. Historical evidence files are not rewritten.
+
+The focused passive/datagram/lifecycle suites pass. A broader attempted selection
+also retained two environment errors: an isolated installed-package replay test
+cannot import `aethron_edge`, and the boot-clock test module requires absent
+Pydantic. These are not passes or exemptions; installed-package and boot-clock
+verification remain unqualified in this environment. Bandit's existing deterministic
+mutation-generator warning was inspected and narrowly annotated: it generates
+parser test bytes only, never security entropy. No hardware test, real OS clock
+fault, arbitrary interruption of cleanup, or exception in another adapter is
+qualified. The comparator candidates do not implement Python callable exceptions;
+existing finite-corpus parity does not cover this correction. The earliest-component
+technology review and later components remain incomplete.

@@ -104,17 +104,19 @@ The clock's advertised nanosecond resolution is not a measured accuracy or
 scheduler bound. No suspend/resume qualification is included. See the
 [Linux clock semantics](https://www.kernel.org/doc/html/latest/core-api/timekeeping.html)
 and Python's [clock information](https://docs.python.org/3/library/time.html#time.get_clock_info).
-Clock-return validation does not cover exceptions raised by the supplied clock.
-In the current base adapter, such an exception propagates from `ingest()` or
-`snapshot()` before sample withdrawal or fault latching. If the clock later
-returns an acceptable value, an earlier retained sample can appear again as
-`OBSERVED_UNVERIFIED` subject to the ordinary receipt TTL. This is an unresolved
-failure-handling limitation, not a qualified recovery mechanism. No status is
-returned by the failing call; an earlier status must not be treated as a new
-check. The clock-exception case does not establish fail-closed behavior.
-Explicit `close()` does not read the clock and clears the decoder's retained
-samples. No real clock failure, transport or hardware behavior is qualified by
-the synthetic probe.
+If the supplied clock raises, the base adapter now clears both cached samples
+and latches `local_clock_invalid` before re-raising the original exception.
+Interruption and exit exceptions also propagate; the adapter does not swallow
+operator cancellation. Later snapshots return empty `UNKNOWN`; no later call consults
+the clock or accepts more packets, even after clock recovery. A new instance
+is required. No status is returned by the original failing call, and previously
+returned immutable snapshots held by callers cannot be erased by this cleanup.
+Explicit `close()` does not read the clock and preserves the closed latch.
+The earlier retained-sample behavior remains recorded in the historical negative
+evidence; the [correction record](../../../../docs/verification/robotics-clock-withdrawal-review-v3.json)
+binds the new tests and source. These synthetic callable faults establish neither
+physical clock recovery nor scheduler/transport behavior. Exceptions outside the
+base adapter's clock call and interruption of cleanup itself are not qualified.
 
 See the [partial V3 review](../../../../docs/architecture/robotics-review-v3.md)
 for evidence limits; its first-component technology decision remains open.

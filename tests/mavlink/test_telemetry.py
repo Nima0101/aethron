@@ -4,7 +4,7 @@ import math
 import random
 import socket
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from aethron_edge.telemetry.mavlink import PassiveTelemetry, UdpTelemetry
 from pymavlink.dialects.v20 import common
@@ -120,6 +120,40 @@ class TelemetryTests(unittest.TestCase):
         self.source.ingest(self.packet(sequence=2))
         self.assertEqual(self.source.snapshot().reason, "closed")
 
+    def test_raised_clock_fault_withdraws_and_latches_before_propagating(self):
+        for operation in ("snapshot", "ingest"):
+            for error_type in (RuntimeError, OSError, KeyboardInterrupt, SystemExit):
+                with self.subTest(operation=operation, error_type=error_type.__name__):
+                    clock = Mock(return_value=self.now)
+                    source = PassiveTelemetry(1, 1, clock=clock)
+                    try:
+                        source.ingest(self.packet())
+                        source.ingest(self.packet(sequence=1, kind="position"))
+                        self.assertEqual(len(source.snapshot().samples), 2)
+                        failure = error_type("private-clock-detail")
+                        clock.side_effect = failure
+                        with self.assertRaises(error_type) as caught:
+                            if operation == "snapshot":
+                                source.snapshot()
+                            else:
+                                source.ingest(self.packet(sequence=2, boot=11))
+                        self.assertIs(caught.exception, failure)
+                        calls_after_fault = clock.call_count
+                        clock.side_effect = None
+                        status = source.snapshot()
+                        self.assertEqual(status.state, "UNKNOWN")
+                        self.assertEqual(status.reason, "local_clock_invalid")
+                        self.assertEqual(status.samples, ())
+                        self.assertFalse(status.perception_eligible)
+                        self.assertNotIn("private-clock-detail", repr(status))
+                        source.ingest(self.packet(sequence=3, boot=12))
+                        self.assertEqual(source.snapshot(), status)
+                        self.assertEqual(clock.call_count, calls_after_fault)
+                        source.close()
+                        self.assertEqual(source.snapshot().reason, "closed")
+                    finally:
+                        source.close()
+
     def test_signed_packet_cannot_be_reported_as_authenticated_without_keys(self):
         encoder = common.MAVLink(None, srcSystem=1, srcComponent=1)
         encoder.signing.secret_key = bytes(32)
@@ -147,7 +181,8 @@ class TelemetryTests(unittest.TestCase):
         for system, component in ((True, 1), (0, 1), (256, 1), (1, -1), (1, 1.0)):
             with self.assertRaises(ValueError):
                 PassiveTelemetry(system, component)
-        rng = random.Random(16031)
+        # Reproducible parser mutations only; never keys, tokens or security entropy.
+        rng = random.Random(16031)  # nosec B311
         for _ in range(2000):
             self.source.ingest(rng.randbytes(rng.randrange(400)))
             self.assertEqual(self.source.snapshot().state, "UNKNOWN")
