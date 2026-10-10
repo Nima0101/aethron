@@ -594,3 +594,54 @@ between checkpoints are detected, but transient change-and-restore races or a
 hostile local process are outside this harness. A fresh actual production-service
 run and remaining distribution/platform/P12 review are still outstanding. No audit
 completion marker or P19 acceptance status is issued.
+
+## Fourth component, production-service execution and CI reachability
+
+Baseline `33ada4ce0571124474f49c4cb9dc56badb0d123e`. Fresh reads of client
+admission, projection, session parsing and wire framing preserve the previous
+versioned bounds and UNKNOWN display behavior. The archive bridge commit's six
+paths and 44 source hashes match the reviewed bytes. The next distribution audit
+found no workflow job invoking `scripts/edge_node_e2e.py`: unit tests and the
+controlled loopback probe could not establish that this real-service consumer
+path executes in CI. The parsed baseline reachability check failed as expected.
+
+Constraints are a bounded, unprivileged hosted Linux job; locked dependency
+preparation; offline npm installation during the actual smoke; and retained
+failure logs. The peer service remains a source-checkout subprocess through its
+published test fixture, and the Node client is installed from a fresh archive.
+**KEEP the Python/npm/Node boundary; FIX CI reachability.** GitHub's
+[workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)
+requires YAML. Bash directly composes the existing commands and fails pipelines
+on errors. PowerShell or a Node orchestration wrapper would still launch Python
+and npm and would add another command/error mapping for this Linux-only check;
+no runtime or interoperability benefit is established. This correction selects
+no new product runtime and makes no cross-language performance claim.
+[npm ci](https://docs.npmjs.com/cli/v11/commands/npm-ci/) prepares the locked cache;
+the existing smoke then packs and installs offline. Dependency preparation still
+needs package registries; this is not an air-gapped distribution qualification.
+
+The new client-owned workflow uses pull-request/main/manual events, read-only
+permissions, commit-pinned actions and checkout without persisted credentials.
+Its path filters cover the SDK, OpenAPI/fixtures, producer/core code, replay,
+service/smoke tests and smoke entry point. A ten-minute job runs focused client
+checks and the actual-service smoke. Shell logs, the checked-out revision and
+success JSON (when available) use
+[artifact retention](https://docs.github.com/en/actions/tutorials/store-and-share-data)
+even after step failure. No peer-owned workflow or service implementation changed.
+Static reachability, 20 representative trigger cases, shell syntax and actionlint
+pass; these checks do not substitute for a hosted workflow run.
+
+The system Python lacked service dependencies. Installing the exact hash-locked
+binary dependencies into an isolated lane-local environment enabled the actual
+service run without a VM, image/model download or vision extras. It passed with
+three delayed display callbacks, UNKNOWN state and the expected current archive
+and input hashes. This service uses synthetic replay; the service itself is not
+an installed release artifact. The earlier substituted-service results remain
+historical evidence with their original limitations. The optimization-mode probe
+also passed all 15 existing harness methods and did not reproduce a defect.
+See the [source-bound results](evidence/phase3/p33-service-ci-review-v3.json).
+
+Remaining: hosted execution of the new workflow, broader distribution/platform
+review, producer/consumer SSE-size reconciliation and the unimplemented P12
+operator client. P19/UI/help, device qualification, signed customer distribution
+and lane completion remain unclaimed.
