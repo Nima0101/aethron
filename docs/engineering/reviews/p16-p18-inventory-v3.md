@@ -1,6 +1,6 @@
 # P16–P18 review inventory v3
 
-Snapshot: `ea75e19c4e16486b7a91e83ca8db44de0eb9d6e2`, plus installed-result review, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `e4e38c04ce15df942d46d795d450fbe85dfa08de`, plus probe recheck, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -17,8 +17,10 @@ federation, independent snapshot admission, inbox accounting and four delivery t
 The [current schema review](p16-schema-claims-current-v3.md) confirms six structural
 contracts and fixes payload claim-vocabulary test sensitivity. Next earliest unreviewed
 group was installed/package assurance tooling. The [installed-result review](p16-installed-result-current-v3.md)
-now checks that group and fixes incomplete metadata comparisons. Next: probes and
-remaining cross-phase consumer/lifecycle review. Earlier rows below
+now checks that group and fixes incomplete metadata comparisons. The
+[probe recheck](p16-probe-recheck-v3.md) confirms both diagnostics with fresh live runs
+and retains unfiltered security findings. Next: remaining cross-phase consumer/lifecycle
+review. Earlier rows below
 remain evidence inputs and do not satisfy the remaining restart by themselves.
 
 The history of the owned runtime files starts with passport admission, then evidence,
