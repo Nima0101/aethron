@@ -1,7 +1,7 @@
 # P16–P18 review inventory v3
 
-Snapshot: `92293281386ebafa9895dda5863be179bc41525e`, plus the probe correction
-described below, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `0a1a0ee64463bc168221fd082519e9cb14f1b357`, plus the source-manifest
+correction described below, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -21,7 +21,7 @@ remain historical inputs. The consumed JSON-bound helper belongs to the foundati
 | Direct federation | [Review](p16-federation-v3.md): KEEP closed pinned table; no enrollment or distributed consensus. |
 | Inbox resource accounting | [Review](p16-inbox-v3.md): KEEP local bounded queue; no transport or hard real-time guarantee. |
 | Packaging evidence | [Review](p16-packaging-v3.md): FIX installed/source identity comparison; no full-distribution attestation. |
-| Comparison and mutation probes | FIX optimized-mode evidence loss, as detailed below. |
+| Comparison and mutation probes | FIX optimized-mode evidence loss; [response types](p16-probe-response-v3.md); [capture bounds](p16-probe-capture-v3.md); source-manifest correction below. |
 
 ## Missing implementation and unsupported claims
 
@@ -96,7 +96,50 @@ path filters now include both Python and JavaScript passport probe files.
 This corrects tooling evidence; production passport admission and frozen thresholds are
 unchanged. Existing samples are not retrospectively upgraded into qualification. The
 original policy-2 audit gets a historical-status note linking this current inventory.
-The review still requires checks of remaining comparison-output and evidence-retention
-assumptions before any whole-lane audit marker is justified.
+The subsequent response and capture reviews above correct those boundaries. Their
+limits remain explicit; this inventory does not turn missing software into completion.
 
 Focused outcomes and source hashes: [result record](p16-probe-v3-results.json).
+
+
+## Source evidence reconciliation
+
+The capture bridge was checked against all four requested file hashes and its parent.
+Seventy-seven source-hash entries from ten retained P16 result records match the Git
+commit that first published each record. These are historical byte-identity checks,
+not fresh execution of every historical experiment; they do not authenticate authors
+or prove current deployment parity. Existing result files remain unchanged.
+
+Two new tests exposed incomplete standalone manifests: the comparison report had only
+a fixture digest, and the mutation report omitted the consumed JSON-bound helper and
+vector file. Both tools now emit five explicit project-file digests. The comparison
+covers its Python driver, Node script, passport verifier, JSON-bound helper and vectors.
+The mutation report covers its driver, test module, passport verifier, helper and
+vectors. These are listed direct project inputs, **not dependency closure**: package
+initialization, standard libraries, installed crypto/native libraries, interpreter and
+Node executables are not hashed by this manifest. Files are read after execution;
+there is no atomic snapshot, loaded-bytecode attestation or change-during-run defense.
+The reports carry that limitation beside the digests.
+
+Technology decision: KEEP native-backed standard SHA-256 in the existing driver.
+The constraint is portable metadata for a small fixed list of trusted local files,
+with no throughput target or claim of whole-environment provenance. Python
+[hashlib](https://docs.python.org/3.13/library/hashlib.html), Node
+[createHash](https://nodejs.org/api/crypto.html) and Java/Kotlin
+[MessageDigest](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/security/MessageDigest.html)
+all provide appropriate digest APIs. Java/Kotlin is a credible option outside these
+tools' current languages. Moving the metadata pass to another runtime gives no
+additional snapshot or attestation property; a complete signed provenance system
+would be a different requirement. This is a constraints-based choice, not a measured
+speed ranking or a preference based on installation or rewrite cost.
+
+Fresh comparison output now labels the active audit policy as version 3. Two retained
+assertions exposed the stale version-2 field; historical reports retain their original
+versions. Together with the two manifest failures, all four new assertions now pass.
+Current outcomes and the historical source-match inventory are retained in the
+[source reconciliation record](p16-probe-provenance-v3-results.json).
+
+The current code correction concerns assurance tools only. The missing-software rows
+above remain accurate; no audit or phase completion marker is issued. Next verify the
+source-manifest bridge and reconcile the remaining review boundary before publishing
+P16 task/federation structural conformance work.

@@ -61,7 +61,49 @@ class ProbeResponseTests(unittest.TestCase):
                 result = json.loads(output.getvalue())
                 self.assertEqual(result["node_probe"], self.response)
                 self.assertEqual(result["cases"], 6)
+                self.assertEqual(result["audit_policy_version"], 3)
                 self.assertEqual(result["python_lexical_rejections"], 5)
+
+    def test_comparison_records_project_source_digests(self):
+        output = io.StringIO()
+        self.invoke(json.dumps(self.response).encode(), output)
+        report = json.loads(output.getvalue())
+        self.assertIn("source_sha256", report)
+        paths = {
+            "scripts/passport_technology_probe.py",
+            "scripts/passport_technology_probe.mjs",
+            "aethron/passports.py",
+            "aethron/_json_bounds.py",
+            "examples/passports/vectors.json",
+        }
+        root = Path(__file__).resolve().parents[1]
+        self.assertEqual(set(report["source_sha256"]), paths)
+        for name in paths:
+            self.assertEqual(
+                report["source_sha256"][name],
+                hashlib.sha256((root / name).read_bytes()).hexdigest(),
+            )
+
+    def test_mutation_records_direct_helper_and_fixture_digests(self):
+        root = Path(__file__).resolve().parents[1]
+        main = runpy.run_path(str(root / "scripts/passport_trust_review.py"))["main"]
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            main()
+        report = json.loads(output.getvalue())
+        paths = {
+            "aethron/passports.py",
+            "aethron/_json_bounds.py",
+            "tests/test_passports.py",
+            "scripts/passport_trust_review.py",
+            "examples/passports/vectors.json",
+        }
+        self.assertEqual(set(report["source_sha256"]), paths)
+        for name in paths:
+            self.assertEqual(
+                report["source_sha256"][name],
+                hashlib.sha256((root / name).read_bytes()).hexdigest(),
+            )
 
     def test_malformed_comparison_emits_no_evidence(self):
         changes = [

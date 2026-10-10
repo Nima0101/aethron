@@ -62,7 +62,13 @@ def main():
                 result = unittest.TextTestRunner(stream=io.StringIO()).run(suite)
         assert result.failures and not result.errors and not result.skipped, name
         results.append({"guard": name, "expected_assertion_failures": len(result.failures)})
-    paths = ("aethron/passports.py", "tests/test_passports.py", "scripts/passport_trust_review.py")
+    paths = (
+        "aethron/passports.py",
+        "aethron/_json_bounds.py",
+        "tests/test_passports.py",
+        "scripts/passport_trust_review.py",
+        "examples/passports/vectors.json",
+    )
     print(
         json.dumps(
             {
@@ -71,6 +77,7 @@ def main():
                 "source_sha256": {
                     p: hashlib.sha256((ROOT / p).read_bytes()).hexdigest() for p in paths
                 },
+                "source_scope": "Listed project files read after execution; not an atomic snapshot, loaded-code attestation or dependency closure.",
                 "mutations": results,
                 "limit": "In-memory guard-removal tests; not a cryptographic validation or hardware qualification.",
             },

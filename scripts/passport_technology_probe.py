@@ -214,11 +214,22 @@ def main():
     assert verify(adversarial, policy, **case["arguments"]).status == "rejected"
     _, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
+    paths = (
+        "scripts/passport_technology_probe.py",
+        "scripts/passport_technology_probe.mjs",
+        "aethron/passports.py",
+        "aethron/_json_bounds.py",
+        "examples/passports/vectors.json",
+    )
     print(
         json.dumps(
             {
-                "audit_policy_version": 2,
+                "audit_policy_version": 3,
                 "python": platform.python_version(),
+                "source_sha256": {
+                    p: hashlib.sha256((ROOT / p).read_bytes()).hexdigest() for p in paths
+                },
+                "source_scope": "Listed project files read after execution; not an atomic snapshot, loaded-code attestation or dependency closure.",
                 "fixture_sha256": hashlib.sha256(
                     (ROOT / "examples/passports/vectors.json").read_bytes()
                 ).hexdigest(),
