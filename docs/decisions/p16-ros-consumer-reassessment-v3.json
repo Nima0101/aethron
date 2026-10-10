@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "p16-ros-consumer-reassessment-v3",
+  "component": "P16 published ROS diagnostic conformance tests",
+  "decision": "KEEP",
+  "constraints": [
+    "Four synthetic producer diagnostic states via the published in-process API; no ROS installation, DDS connection, radio or hardware action.",
+    "Bind exact diagnostic serialization while preserving UNKNOWN, unqualified status and separate monotonic-nanosecond and UTC-second domains."
+  ],
+  "alternatives": [
+    "Python unittest direct API tests with portable JSON fixtures; jsonschema plus an explicit reference registry for structural checks.",
+    "JavaScript/TypeScript Node test runner and Ajv draft-2020-12 for portable structural validation.",
+    "Java/Kotlin JUnit with a process or foreign-function adapter to the actual Python APIs.",
+    "Robot Framework keyword-driven acceptance tests backed by Python libraries.",
+    "Rust proptest for generated contract cases with a process or foreign-function adapter."
+  ],
+  "rationale": [
+    "KEEP direct unittest API calls with portable JSON. Exact byte comparison checks the producer output before authentication, avoiding a duplicated diagnostic state machine in another implementation.",
+    "JUnit or Node can supervise Python calls but require an additional representation boundary. Ajv checks shape, not the actual ordered producer calls. Robot Framework is credible for operator-facing acceptance flows, absent from this small diagnostic test.",
+    "Rust proptest could generate transition traces; that is a broader experiment, not a material improvement to this fixed four-state evidence check. No installed-tooling or familiarity preference is used.",
+    "Three methods pass. Two wrapped-result controls yield eight expected assertion failures with no errors or skips. There is no new production or consumer test mismatch."
+  ],
+  "limits": [
+    "This decision concerns offline conformance tests, not the implementation language of a peer-owned decoder or a future transport.",
+    "No alternative performance benchmark or language ranking. No throughput or hard-real-time requirement is assigned to this fixed local corpus.",
+    "Source digests and module paths are not loaded-bytecode attestation, atomic snapshots or complete dependency closure.",
+    "No physical, ROS/DDS, MLS/CNSA, tactical, availability or whole-product qualification."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/unittest.html",
+    "https://python-jsonschema.readthedocs.io/en/stable/referencing/",
+    "https://ajv.js.org/json-schema.html",
+    "https://docs.junit.org/6.1.3/overview.html",
+    "https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html",
+    "https://docs.rs/proptest/latest/proptest/"
+  ]
+}

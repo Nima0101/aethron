@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "p16-packet-consumer-reassessment-v3",
+  "component": "P16 published packet and encoding conformance tests",
+  "decision": "KEEP",
+  "constraints": [
+    "Fixed synthetic corpus: five signed evidence cases and four byte-order/padding variants. No live sensor input or hardware accuracy claim.",
+    "Call the published decoder and byte-binding verifier independently; retain signed malformed and missing-depth evidence as negative qualification examples."
+  ],
+  "alternatives": [
+    "Python unittest direct API tests with portable JSON fixtures; jsonschema plus an explicit reference registry for structural checks.",
+    "JavaScript/TypeScript Node test runner and Ajv draft-2020-12 for portable structural validation.",
+    "Java/Kotlin JUnit with a process or foreign-function adapter to the actual Python APIs.",
+    "Robot Framework keyword-driven acceptance tests backed by Python libraries.",
+    "Rust proptest for generated contract cases with a process or foreign-function adapter."
+  ],
+  "rationale": [
+    "KEEP direct unittest and portable JSON. The exact producer decode API and verifier are exercised without recoding either in a test-language adapter; byte serialization remains independently inspectable.",
+    "Ajv can validate fixture structure but cannot establish actual decoder outcomes. JUnit would require Python invocation or foreign-function adaptation. Robot Framework similarly needs library keywords for these calls.",
+    "Rust proptest is useful for generated and shrunk failure cases; it does not replace the named source-bound regression corpus. No measured or required native driver advantage is established.",
+    "Seven methods pass, including exact byte identity, changed scale, swapped encoding and signed malformed evidence. Two wrapped-result controls yield ten expected assertion failures with no errors or skips. No new mismatch demonstrated."
+  ],
+  "limits": [
+    "This decision concerns offline conformance tests, not the implementation language of a peer-owned decoder or a future transport.",
+    "No alternative performance benchmark or language ranking. No throughput or hard-real-time requirement is assigned to this fixed local corpus.",
+    "Source digests and module paths are not loaded-bytecode attestation, atomic snapshots or complete dependency closure.",
+    "No physical, ROS/DDS, MLS/CNSA, tactical, availability or whole-product qualification."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/unittest.html",
+    "https://python-jsonschema.readthedocs.io/en/stable/referencing/",
+    "https://ajv.js.org/json-schema.html",
+    "https://docs.junit.org/6.1.3/overview.html",
+    "https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html",
+    "https://docs.rs/proptest/latest/proptest/"
+  ]
+}
