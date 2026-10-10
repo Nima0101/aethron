@@ -1,7 +1,7 @@
 # P16–P18 review inventory v3
 
-Snapshot: `76704946d2a518d211dd5f652146dcf73c5e5ba9`, plus installed policy API
-coverage, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `338454b702945cd159748a543bba7485b042b706`, plus fresh parser technology
+reassessment, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -12,7 +12,7 @@ remain historical inputs. The consumed JSON-bound helper belongs to the foundati
 
 | Component | Current evidence and decision |
 |---|---|
-| Parser and canonicalization | [Review](p16-parser-v3.md): FIX pre-conversion integer bound; KEEP bounded offline parser. |
+| Parser and canonicalization | [Original V3 review](p16-parser-v3.md): FIX pre-conversion integer bound. [Fresh reassessment](p16-parser-reassessment-v3.md): KEEP lexical hooks; fourteen portable cases and bounded syntax comparison, no performance ranking. |
 | Signature, trust, expiry and revocation | [Review](p16-trust-v3.md): KEEP native crypto boundary; strengthen rejection tests and clarify provisioning limits. |
 | Independent pinned-policy validation | [Review](p16-policy-admission-v3.md): ADD complete policy validation against an external exact-byte pin, independent of passport success; no persistence or enrollment. |
 | Evidence bytes | [Review](p16-evidence-v3.md): KEEP immutable byte binding; clarify digest/privacy and qualification limits. |

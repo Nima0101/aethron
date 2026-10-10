@@ -1,0 +1,190 @@
+{
+  "baseline_commit": "338454b702945cd159748a543bba7485b042b706",
+  "review_order_version": 3,
+  "decision": "KEEP",
+  "scope": "P16 lexical parsing and canonicalization; bounded software conformance only",
+  "production_changes": false,
+  "checks": {
+    "initial_missing_corpus_failures": 1,
+    "initial_errors": 0,
+    "methods_passed": 28,
+    "skips": 0,
+    "new_portable_cases": 14,
+    "accepted_cases": 4,
+    "rejected_cases": 10,
+    "negative_control_failures": 2,
+    "negative_control_errors": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS without exclusions",
+    "diff": "PASS"
+  },
+  "observations": {
+    "python": "3.13.5",
+    "python_default": [
+      {
+        "name": "canonical",
+        "syntax_accepted": true
+      },
+      {
+        "name": "whitespace",
+        "syntax_accepted": true
+      },
+      {
+        "name": "escaped-ascii-key",
+        "syntax_accepted": true
+      },
+      {
+        "name": "negative-zero",
+        "syntax_accepted": true
+      },
+      {
+        "name": "escaped-duplicate-root",
+        "syntax_accepted": true
+      },
+      {
+        "name": "escaped-duplicate-nested",
+        "syntax_accepted": true
+      },
+      {
+        "name": "utf16-le",
+        "syntax_accepted": true
+      },
+      {
+        "name": "utf16-be",
+        "syntax_accepted": true
+      },
+      {
+        "name": "utf32-le",
+        "syntax_accepted": true
+      },
+      {
+        "name": "utf32-be",
+        "syntax_accepted": true
+      },
+      {
+        "name": "utf8-bom",
+        "syntax_accepted": true
+      },
+      {
+        "name": "float-integer",
+        "syntax_accepted": true
+      },
+      {
+        "name": "exponent-integer",
+        "syntax_accepted": true
+      },
+      {
+        "name": "trailing-document",
+        "syntax_accepted": false
+      }
+    ],
+    "node": {
+      "runtime": "v22.23.2",
+      "results": [
+        {
+          "name": "canonical",
+          "syntax_accepted": true
+        },
+        {
+          "name": "whitespace",
+          "syntax_accepted": true
+        },
+        {
+          "name": "escaped-ascii-key",
+          "syntax_accepted": true
+        },
+        {
+          "name": "negative-zero",
+          "syntax_accepted": true
+        },
+        {
+          "name": "escaped-duplicate-root",
+          "syntax_accepted": true
+        },
+        {
+          "name": "escaped-duplicate-nested",
+          "syntax_accepted": true
+        },
+        {
+          "name": "utf16-le",
+          "syntax_accepted": false
+        },
+        {
+          "name": "utf16-be",
+          "syntax_accepted": false
+        },
+        {
+          "name": "utf32-le",
+          "syntax_accepted": false
+        },
+        {
+          "name": "utf32-be",
+          "syntax_accepted": false
+        },
+        {
+          "name": "utf8-bom",
+          "syntax_accepted": false
+        },
+        {
+          "name": "float-integer",
+          "syntax_accepted": true
+        },
+        {
+          "name": "exponent-integer",
+          "syntax_accepted": true
+        },
+        {
+          "name": "trailing-document",
+          "syntax_accepted": false
+        }
+      ]
+    },
+    "removed_duplicate_guard": {
+      "methods": 1,
+      "assertion_failures": 2,
+      "errors": 0,
+      "failed_cases": [
+        "test_portable_lexical_cases (test_passport_lexical.ParserLexicalConformance.test_portable_lexical_cases) (case='escaped-duplicate-root')",
+        "test_portable_lexical_cases (test_passport_lexical.ParserLexicalConformance.test_portable_lexical_cases) (case='escaped-duplicate-nested')"
+      ]
+    },
+    "fixture_sha256": "1be832f5b9d0120c3dab3816f72c679081ffbdc5b81d38efdb3432fe23922ced",
+    "probe_sha256": "d143bf4feed565d526fdb2a1e41294f33401c5a99969ffda67e5250b696c349d",
+    "limits": [
+      "Syntax observations only, not alternative complete validators.",
+      "No latency or target hardware claim."
+    ]
+  },
+  "syntax_probe_javascript": "// Syntax observation only; this is not a replacement validator.\nconst fs = require('node:fs');\nconst cases = JSON.parse(fs.readFileSync(process.argv[2], 'utf8')).cases;\nconst results = cases.map(c => {\n  try { JSON.parse(Buffer.from(c.input_hex, 'hex').toString('utf8')); return {name:c.name, syntax_accepted:true}; }\n  catch { return {name:c.name, syntax_accepted:false}; }\n});\nprocess.stdout.write(JSON.stringify({runtime:process.version,results}));\n",
+  "source_sha256": {
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "tests/test_passport_lexical.py": "0272780452980ec03e9b180a84e35db7e2aefd04f7bc6cf0ac21cfd9288b1887",
+    "tests/test_passports.py": "20bdc75b84aa566867197604e2462053e366016638828bb0ba59e990ffd56c3d",
+    "tests/test_passport_schemas.py": "f437fddf0c820bdfc487daa90383ff78ffa001112dac5227bbda92c794ef4512",
+    "examples/passports/parser-vectors-v1.json": "1be832f5b9d0120c3dab3816f72c679081ffbdc5b81d38efdb3432fe23922ced",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "docs/decisions/p16-parser-reassessment-v3.json": "a59e8d6cea67b5733ca49cc9b69af50fb7c1935d63132f74561ce53443c54407",
+    "contracts/interop/architecture-decision-v1.schema.json": "e9043056f57e8dfdecb81c5244a95c173b346ff372020a5c662edefa867dbe1a",
+    "docs/engineering/reviews/p16-parser-reassessment-v3.md": "8762b528612c8423b4dd8e908da779fdeb05eaa0c3d28c8a302e9023390f19de"
+  },
+  "local_log_sha256": {
+    "parser-reassessment-red.log": "13ea6d84ba0a4022a5103197f116bb744e4d0c45d4fa53a021de34b258f75f8d",
+    "parser-reassessment-green.log": "7b41f5b782449cebc02a90f9e560512700bf8dc001175d47401536329ee9a874",
+    "parser-reassessment-focused.log": "571ce26a338cad0e39eff17cec7cbfef0b7f6bc80d5f94a025b4ac019b1d12fb",
+    "parser-reassessment-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "parser-reassessment-format.log": "fd2299c9f1c6dc869070883e281051bfe93aacf66c1a3b0069f45b4aa410ca50",
+    "parser-reassessment-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "parser-reassessment-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "parser-reassessment-observations.json": "3dc6a0b75509d6150b354d7b37648653296964c2f91f762d991b03608a426688",
+    "parser-default-probe.cjs": "d143bf4feed565d526fdb2a1e41294f33401c5a99969ffda67e5250b696c349d"
+  },
+  "limits": [
+    "Source hashes describe the reviewed working copy atop baseline, not a complete atomic environment snapshot.",
+    "Default syntax decoders are not full candidate validators.",
+    "No comparative throughput, target hardware, installed-package or hosted qualification in this slice.",
+    "Other candidate libraries were researched, not executed.",
+    "This component decision does not complete the full lane re-audit."
+  ]
+}
