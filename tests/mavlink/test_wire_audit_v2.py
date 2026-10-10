@@ -84,6 +84,32 @@ class WireAuditTests(unittest.TestCase):
                     matching.close()
                     rejected.close()
 
+    def test_v3_compatibility_flag_isolates_local_policy_from_crc_rejection(self):
+        from aethron_edge.telemetry.mavlink import PassiveTelemetry
+        from pymavlink.dialects.v20 import common
+
+        cases = {case["name"]: case for case in self.api.corpus()}
+        name = "v3_compatibility_flag_valid_crc"
+        self.assertIn(name, cases)
+        packet = bytes.fromhex(cases[name]["hex"])
+        self.assertEqual(packet[3], 1)
+        self.assertIs(cases[name]["accepted"], False)
+        # Compatibility flags may be ignored by a protocol endpoint. The SDK
+        # control validates CRC/layout; our diagnostic profile is stricter.
+        decoded = common.MAVLink(None).decode(bytearray(packet))
+        self.assertEqual(decoded.get_msgId(), 30)
+        self.assertEqual(decoded.time_boot_ms, 10)
+        source = PassiveTelemetry(1, 1, clock=lambda: 1_000_000_000)
+        try:
+            source.ingest(packet)
+            status = source.snapshot()
+            self.assertEqual(status.reason, "unsupported_packet")
+            self.assertEqual(status.state, "UNKNOWN")
+            self.assertEqual(status.samples, ())
+            self.assertIs(status.perception_eligible, False)
+        finally:
+            source.close()
+
     def test_existing_output_is_refused_before_generation(self):
         with tempfile.TemporaryDirectory() as directory:
             out = Path(directory)

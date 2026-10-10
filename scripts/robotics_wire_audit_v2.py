@@ -65,6 +65,14 @@ def corpus():
         foreign = common.MAVLink(None, srcSystem=system, srcComponent=component)
         data = common.MAVLink_attitude_message(10, 0.1, -0.2, 0.3, 0.4, -0.5, 0.6).pack(foreign)
         values.append((name, data, False, 30))
+    # Preserve the old malformed-header case and separately challenge this
+    # diagnostic profile's zero-compatibility-flags policy with a valid CRC.
+    flagged = bytearray(full)
+    flagged[3] = 1
+    checksum = common.x25crc(flagged[1:-2])
+    checksum.accumulate(bytes([common.MAVLink_attitude_message.crc_extra]))
+    flagged[-2:] = checksum.crc.to_bytes(2, "little")
+    values.append(("v3_compatibility_flag_valid_crc", bytes(flagged), False, 30))
     return [
         {"name": name, "hex": data.hex(), "accepted": accepted, "message": message}
         for name, data, accepted, message in values

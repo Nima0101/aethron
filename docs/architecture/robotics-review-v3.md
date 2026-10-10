@@ -715,3 +715,16 @@ cases under the unchanged comparator. Production code and repository drivers
 are unchanged. The receipt preserves the initial inspection failure and incidental
 measurements. This corrects a coverage gap without claiming complete behavioral
 equivalence, a runtime winner or completion of the earliest component review.
+
+## Isolate the diagnostic compatibility-flag policy
+
+The next [coverage supplement](../verification/robotics-comparator-coverage-v3.md#compatibility-flag-coverage-supplement)
+adds a CRC-valid compatibility-flag fixture. The SDK accepts it, while the
+existing diagnostic profile rejects it. A temporary audit C copy missing only
+that profile guard passes all previous 19 fixtures and fails the new fixture.
+The unchanged driver passes 20 cases normally and with ASan/UBSan; 42 focused
+methods pass. The [source-bound receipt](../verification/robotics-flag-coverage-v3.json)
+retains the RED assertion and initial wrong-module invocation failure. This
+strict local profile is narrower than MAVLink's permitted handling of unknown
+compatibility flags. No production code, candidate driver, runtime decision or
+qualification status changes.
