@@ -159,15 +159,21 @@ class Node:
         return Cloud(tuple(points), len(samples) - len(points), tuple(samples))
 
     def close(self):
-        self.worker.stdin.close()
         try:
-            self.worker.wait(timeout=5)
+            try:
+                self.worker.stdin.close()
+            finally:
+                try:
+                    self.worker.wait(timeout=5)
+                finally:
+                    if self.worker.poll() is None:
+                        self.worker.kill()
+                        self.worker.wait(timeout=5)
         finally:
-            if self.worker.poll() is None:
-                self.worker.kill()
-                self.worker.wait()
-            self.worker.stdout.close()
-            self.worker.stderr.close()
+            try:
+                self.worker.stdout.close()
+            finally:
+                self.worker.stderr.close()
 
 
 def fixture(big, mixed):

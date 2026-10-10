@@ -9,13 +9,85 @@ import sys
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 
 ROOT = Path(__file__).resolve().parents[2]
 PROBE = ROOT / "scripts/probes/sensor_packet_audit/compare.py"
 
 
 class PacketAuditModeTests(unittest.TestCase):
+    def diagnostic_node(self):
+        node_type = runpy.run_path(str(PROBE))["Node"]
+        node = node_type.__new__(node_type)
+        node.worker = SimpleNamespace(
+            stdin=Mock(),
+            stdout=Mock(),
+            stderr=Mock(),
+            wait=Mock(),
+            poll=Mock(return_value=0),
+            kill=Mock(),
+        )
+        return node
+
+    def test_stdin_close_failure_does_not_skip_wait_or_output_cleanup(self):
+        for failure in (BrokenPipeError("stdin_close"), KeyboardInterrupt()):
+            with self.subTest(failure=type(failure).__name__):
+                node = self.diagnostic_node()
+                node.worker.stdin.close.side_effect = failure
+                with self.assertRaises(type(failure)):
+                    node.close()
+                node.worker.wait.assert_called_once_with(timeout=5)
+                node.worker.stdout.close.assert_called_once_with()
+                node.worker.stderr.close.assert_called_once_with()
+
+    def test_process_cleanup_failure_still_attempts_both_output_closes(self):
+        for operation in ("poll", "kill", "post_kill_wait"):
+            with self.subTest(operation=operation):
+                node = self.diagnostic_node()
+                worker = node.worker
+                worker.poll.return_value = None
+                failure = OSError("synthetic_cleanup_failure")
+                if operation == "post_kill_wait":
+                    worker.wait.side_effect = [None, failure]
+                else:
+                    getattr(worker, operation).side_effect = failure
+                with self.assertRaisesRegex(OSError, "^synthetic_cleanup_failure$"):
+                    node.close()
+                worker.stdout.close.assert_called_once_with()
+                worker.stderr.close.assert_called_once_with()
+
+    def test_stdout_close_failure_still_attempts_stderr_close(self):
+        node = self.diagnostic_node()
+        node.worker.stdout.close.side_effect = OSError("stdout_close")
+        with self.assertRaisesRegex(OSError, "^stdout_close$"):
+            node.close()
+        node.worker.stderr.close.assert_called_once_with()
+
+    def test_timeout_kills_worker_and_uses_timed_second_wait(self):
+        for second_failure in (None, subprocess.TimeoutExpired("synthetic", 5)):
+            with self.subTest(second_failure=second_failure):
+                node = self.diagnostic_node()
+                worker = node.worker
+                worker.poll.return_value = None
+                worker.wait.side_effect = [
+                    subprocess.TimeoutExpired("synthetic", 5),
+                    second_failure,
+                ]
+                with self.assertRaises(subprocess.TimeoutExpired):
+                    node.close()
+                worker.kill.assert_called_once_with()
+                self.assertEqual(worker.wait.call_args_list, [call(timeout=5), call(timeout=5)])
+                worker.stdout.close.assert_called_once_with()
+                worker.stderr.close.assert_called_once_with()
+
+    def test_completed_worker_closes_all_pipes_without_kill(self):
+        node = self.diagnostic_node()
+        node.close()
+        node.worker.wait.assert_called_once_with(timeout=5)
+        node.worker.kill.assert_not_called()
+        for pipe in (node.worker.stdin, node.worker.stdout, node.worker.stderr):
+            pipe.close.assert_called_once_with()
+
     def test_failed_worker_startup_releases_process_and_pipes(self):
         for failure in (b"\0", TimeoutError("startup_timeout"), KeyboardInterrupt()):
             with self.subTest(failure=type(failure).__name__):

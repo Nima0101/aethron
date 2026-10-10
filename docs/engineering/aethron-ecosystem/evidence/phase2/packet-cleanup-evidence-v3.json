@@ -1,0 +1,34 @@
+{
+  "review_order_version": 3,
+  "component": "C01_comparison_worker_cleanup",
+  "decision": "FIX",
+  "full_component_review_complete": false,
+  "reviewed_head": "e9a7b9b6165f99a3f6226a494c9479eb2018c817",
+  "production_changed": false,
+  "checks": {
+    "red_assertion_failures": 8,
+    "red_execution_errors": 0,
+    "new_methods": 5,
+    "green_methods": 13,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "Nine LOW findings identical to baseline by rule/severity/message",
+    "all_non_close_functions_ast": "UNCHANGED"
+  },
+  "limitations": [
+    "Fake processes and pipes; no Node execution or sensor benchmark.",
+    "Both waits have timeout arguments; pipe closure and OS scheduling are not bounded.",
+    "Cleanup failures can supersede earlier errors with context retained.",
+    "Failed kill/wait can leave a child alive; no termination guarantee.",
+    "Historical results unchanged; full technology review incomplete at C01."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3/library/subprocess.html"
+  ],
+  "sha256": {
+    "scripts/probes/sensor_packet_audit/compare.py": "0dbf41d5ebcfc1ed98ba239e42f09392243fbfb292603b2dc491d2b53f636098",
+    "scripts/probes/sensor_packet_audit/README.md": "1dd74ab0c0d97ac9a9faa7d5ae173e8199874cb46e70b36ee30606b0735ae8aa",
+    "tests/integration/test_sensor_packet_audit_modes.py": "2a975305ec4e1919392801e676623ed3709cc2f0bb7c1018a3db0ca65c4bff19",
+    "docs/engineering/aethron-ecosystem/P21-PACKET-CLEANUP-EVIDENCE-V3.md": "8b7b85d918a52309fb84b4acea2875ed53e12b996887d0382f3dbc1c86d978bb"
+  }
+}
