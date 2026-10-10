@@ -125,24 +125,36 @@ def _finite_number(token):
     return value
 
 
-def _child(command, cases):
+def _retain_output(out, label, stdout, stderr):
+    if out is not None:
+        (out / f"{label}-stdout.log").write_bytes(stdout or b"")
+        (out / f"{label}-stderr.log").write_bytes(stderr or b"")
+
+
+def _child(command, cases, *, out=None, label="child"):
     begin = time.monotonic_ns()
-    # Fixed trusted audit drivers, bounded input and process lifetime; no shell.
-    completed = subprocess.run(  # nosec B603
-        command,
-        input=json.dumps(cases),
-        text=True,
-        capture_output=True,
-        timeout=10,
-        check=True,
-    )
+    try:
+        # Fixed trusted audit drivers, bounded input and process lifetime; no shell.
+        completed = subprocess.run(  # nosec B603
+            command,
+            input=json.dumps(cases).encode("utf-8"),
+            capture_output=True,
+            timeout=10,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        _retain_output(out, label, exc.stdout, exc.stderr)
+        raise
+    elapsed = time.monotonic_ns() - begin
+    _retain_output(out, label, completed.stdout, completed.stderr)
+    completed.check_returncode()
     value = json.loads(
         completed.stdout,
         object_pairs_hook=_unique_members,
         parse_constant=_finite_number,
         parse_float=_finite_number,
     )
-    return value, time.monotonic_ns() - begin
+    return value, elapsed
 
 
 def check_parity(expected, actual):
@@ -186,17 +198,21 @@ def run(out):
     try:
         cases = corpus()
         expected = reference(cases)
+        (out / "expected.json").write_text(json.dumps(expected) + "\n")
         runs = []
-        for _ in range(3):
+        for repetition in range(3):
             pair = {}
             for name, command in (
                 ("python", [sys.executable, str(Path(__file__)), "--reference"]),
                 ("javascript", ["node", str(DRIVER)]),
             ):
-                result, elapsed = _child(command, cases)
+                attempt = f"{name}-{repetition}"
+                report["failed_attempt"] = attempt
+                result, elapsed = _child(command, cases, out=out, label=attempt)
                 check_parity(expected, result.pop("results"))
                 pair[name] = {**result, "whole_process_ns": elapsed}
             runs.append(pair)
+        report.pop("failed_attempt", None)
         report.update(
             state="compared",
             parity=True,
@@ -207,13 +223,17 @@ def run(out):
             harness_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
             fixture_sha256=hashlib.sha256(json.dumps(cases).encode()).hexdigest(),
             limitations=[
-                "Whole-process time includes startup, corpus and JSON output",
+                "Whole-process time includes startup, corpus and child JSON output",
+                "Parent JSON parsing and evidence writes excluded; older timings included parsing",
                 "Three sequential repetitions; warm filesystem cache possible",
                 "Original JS subset, not node-mavlink or NextGen SDK qualification",
                 "No signed replay, UDP, installed packaging or real-time proof",
             ],
         )
         return report
+    except Exception as exc:
+        report["failure_type"] = type(exc).__name__
+        raise
     finally:
         (out / "result.json").write_text(json.dumps(report, indent=2) + "\n")
 

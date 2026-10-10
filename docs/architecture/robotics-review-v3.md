@@ -117,3 +117,27 @@ rerun native compilation or qualify hardware. Historical comparison results are
 unchanged. Managed subprocess failure-output retention remains a separate open
 evidence issue; a passing corrected parser does not retroactively validate all
 historical output. The first-component review remains incomplete.
+
+## Managed failure-output retention
+
+The preceding open retention issue is now corrected for the managed `run(out)`
+path. Three failing cases showed missing logs after timeout, nonzero exit and
+strict JSON rejection. The runner captures binary output and writes separate
+stdout/stderr files before checking exit status or parsing JSON. Timeout partial
+bytes are preserved without decoding; the original failure still propagates.
+The report remains failed and records the attempted runtime/repetition and
+exception type. No exception text or command arguments are copied into metadata.
+Spawn failures before output exists can have a failed receipt without output logs.
+Storage failure or abrupt process termination can still prevent retention.
+
+Successful output uses the same path, with distinct files for all three pairs
+and a reference JSON fixture. Hosted artifact configuration includes these files;
+this is not a claim that the changed workflow has run. The process timeout stays
+10 seconds. Elapsed measurement now stops before parent-side parsing/log writes;
+older records included parent parsing and must not be compared as identical timing
+measurements. No prior result is rewritten and no performance improvement is claimed.
+
+[Focused evidence](../verification/robotics-managed-retention-review-v3.json)
+records 16 passing tests, six retained/rechecked successful output pairs and the
+initial failures/static findings. This is an evidence-integrity repair only, not a
+production runtime decision or completion of the first-component V3 review.

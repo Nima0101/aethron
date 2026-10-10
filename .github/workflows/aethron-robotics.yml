@@ -62,4 +62,6 @@ jobs:
             build/robotics-audit/*/result.json
             build/robotics-audit/native/*.log
             build/robotics-audit/native/expected.json
+            build/robotics-audit/lifecycle/*.log
+            build/robotics-audit/lifecycle/expected.json
           if-no-files-found: warn

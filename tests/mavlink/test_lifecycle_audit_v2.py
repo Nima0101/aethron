@@ -1,9 +1,15 @@
 """Executable managed-runtime parity experiment, with synthetic wire only."""
 
 import importlib.util
+import json
+
+# Fixed local Python fixtures; no shell or external input.
+import subprocess  # nosec B404
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 class LifecycleAuditTests(unittest.TestCase):
@@ -53,6 +59,51 @@ class LifecycleAuditTests(unittest.TestCase):
         self.assertEqual(value["results"][0]["values"], [0.10000000149011612])
         self.assertIs(type(value["peak_rss_kib"]), int)
         self.assertGreater(elapsed, 0)
+
+    def test_run_retains_exact_partial_timeout_output_and_failed_receipt(self):
+        failure = subprocess.TimeoutExpired(
+            ["synthetic-child"], 10, output=b"partial\xff\r\n", stderr=b"diagnostic\x00\r\n"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            out = Path(directory) / "attempt"
+            with patch.object(self.api.subprocess, "run", side_effect=failure):
+                with self.assertRaises(subprocess.TimeoutExpired):
+                    self.api.run(out)
+            self.assertTrue((out / "python-0-stdout.log").is_file())
+            self.assertEqual((out / "python-0-stdout.log").read_bytes(), b"partial\xff\r\n")
+            self.assertEqual((out / "python-0-stderr.log").read_bytes(), b"diagnostic\x00\r\n")
+            report = json.loads((out / "result.json").read_text())
+            self.assertEqual(report["state"], "failed")
+            self.assertEqual(report["failure_type"], "TimeoutExpired")
+            self.assertEqual(report["failed_attempt"], "python-0")
+
+    def test_run_retains_nonzero_exit_and_rejected_json_before_propagating(self):
+        real_run = subprocess.run
+        for code, output, error in (
+            (7, b'{"results": []}\r\n', subprocess.CalledProcessError),
+            (0, b'{"results": [1], "results": []}\r\n', ValueError),
+        ):
+            with self.subTest(code=code), tempfile.TemporaryDirectory() as directory:
+                out = Path(directory) / "attempt"
+                program = (
+                    "import os,sys; "
+                    f"os.write(1, {output!r}); os.write(2, b'diagnostic\\r\\n'); "
+                    f"sys.exit({code})"
+                )
+
+                def controlled_child(_command, program=program, **kwargs):
+                    return real_run([sys.executable, "-c", program], **kwargs)
+
+                with patch.object(self.api.subprocess, "run", side_effect=controlled_child):
+                    with self.assertRaises(error):
+                        self.api.run(out)
+                self.assertTrue((out / "python-0-stdout.log").is_file())
+                self.assertEqual((out / "python-0-stdout.log").read_bytes(), output)
+                self.assertEqual((out / "python-0-stderr.log").read_bytes(), b"diagnostic\r\n")
+                report = json.loads((out / "result.json").read_text())
+                self.assertEqual(report["state"], "failed")
+                self.assertEqual(report["failure_type"], error.__name__)
+                self.assertEqual(report["failed_attempt"], "python-0")
 
     def test_parity_distinguishes_boolean_authority_from_numeric_zero(self):
         self.assertTrue(callable(getattr(self.api, "check_parity", None)))
