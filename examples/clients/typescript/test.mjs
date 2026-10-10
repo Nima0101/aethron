@@ -215,3 +215,17 @@ test('stream accepts initial gap and increasing sequences across health clears',
   'delayed_observation','expired','delayed_observation','expired']);
  assert.ok(views.every(view=>view.current_state==='UNKNOWN'));
 });
+
+for (const operation of ['accept', 'view']) {
+ test(`a throwing host clock clears state during ${operation} without disclosing its error`, t => {
+  const o = new Observation();
+  o.accept(envelope, 0);
+  t.mock.method(performance, 'now', () => { throw new Error('private_clock_marker'); });
+  if (operation === 'accept') {
+   assert.throws(() => o.accept(envelope), {message: 'invalid_clock'});
+  } else {
+   assert.equal(o.view().label, 'expired');
+  }
+  assert.equal(o.view(50).label, 'expired', 'a recovered clock cannot resurrect the old observation');
+ });
+}

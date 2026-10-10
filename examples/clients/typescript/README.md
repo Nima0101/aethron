@@ -31,14 +31,22 @@ await observe('http://127.0.0.1:8765', token, 'bench', state => {
 }, controller.signal);
 ```
 
-The named profile uses the `warn` contract in this example. Python's example accepts the other contract names explicitly; application SDKs should preserve the schema enum. `observe()` releases its viewer handle when aborted; the supervisor continues processing. An independent 20ms client timer expires stalled observations. Without a measured transit bound, current state remains UNKNOWN and observations are labeled delayed.
+The named profile uses the `warn` contract in this example. Python's example accepts the other contract names explicitly; application SDKs should preserve the schema enum. `observe()` releases its viewer handle when aborted; the supervisor continues processing. An independent client timer requests an expiry check every 20ms; host scheduling delays can postpone that check. Without a measured transit bound, current state remains UNKNOWN and observations are labeled delayed.
 
 `Observation.accept()` snapshots and validates its input. Mutating that input or a
 returned covariance array cannot change later observations. Explicit local clock
 arguments must be finite, nonnegative milliseconds; fractions are supported.
-Invalid receipt clocks clear the observation and throw `invalid_clock`. Invalid
-or backwards render clocks clear it and return expired/UNKNOWN. A new acceptance
-starts a new local lease; it does not establish transport freshness.
+Invalid receipt clocks, including failure to read the host clock, clear the
+observation and throw `invalid_clock`. Invalid
+or backwards render clocks, and failure to read the host clock, clear it and
+return expired/UNKNOWN. A new acceptance
+starts a new local lease; it does not establish transport freshness. Local clock progress
+and scheduled callbacks are host assumptions, not a suspend or real-time guarantee.
+`disconnect()` clears only the internal projection: it cannot revoke copies already
+returned to application code. Aggregate sources and covariance can still reveal
+scene information; omitting identifiers does not prove anonymity. Direct
+`accept()` calls clone JavaScript input before schema validation and do not impose
+a pre-clone allocation bound. Use the byte-bounded stream ingress for wire input.
 
 The accepted state uses native JavaScript private fields. Public property names
 cannot overwrite its lease or scene, and ordinary reflection/JSON serialization

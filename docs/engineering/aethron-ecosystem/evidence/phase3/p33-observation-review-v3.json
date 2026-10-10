@@ -1,0 +1,127 @@
+{
+  "audit_policy_version": 3,
+  "component": "P3.3 observation ownership, projection and local clocks",
+  "baseline": "0056d221c954a62570016948e2435cc681466607",
+  "decision": "KEEP TypeScript/private minimal projection/host monotonic clock; FIX host-clock exception clearing; CLARIFY lifecycle/privacy guarantees",
+  "source_sha256": {
+    "examples/clients/typescript/src/client.ts": "a82d3f2387aff46d0582158b2aed93375b55cc0e167db2312ea40d40360b2703",
+    "examples/clients/typescript/test.mjs": "5aca7a929ec0a652b1edaaed2d5a1cdbc077645d85b49d55c010bde4e7a937fd",
+    "examples/clients/typescript/README.md": "f7ced2e922702574c0bf2225d4beeb0a9f89d0764228bd9149e4d9f479297ea7",
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "addb73567152d5683cc6e6cd3104e172cb75b3232d173e1313b1ffb56530e03f"
+  },
+  "red": {
+    "pass": 39,
+    "fail": 2,
+    "mismatch": "Default clock evaluation throws before clearing; raw exception exposed during accept/view"
+  },
+  "checks": {
+    "build": "TypeScript PASS",
+    "client_transport_wire": 65,
+    "validation": 4,
+    "independent_safety_rejections": 14,
+    "installed_public": 61,
+    "installed_bytes": "client/wire/validators and declarations match source build",
+    "traces": {
+      "node": "v22.23.2",
+      "platform": "linux",
+      "arch": "x64",
+      "parity_traces": 45,
+      "parity_views": 162,
+      "legacy_exceptions": "Four ownership regressions intentionally corrected; see test.mjs",
+      "cycles_per_round": 100,
+      "views_per_cycle": 20,
+      "tracks": 32,
+      "measurements": [],
+      "sha256": {
+        "src/client.ts": "a82d3f2387aff46d0582158b2aed93375b55cc0e167db2312ea40d40360b2703",
+        "dist/client.js": "fd2cafccc4fa46a01884587e7dfbb6f350e377f9f6768f2962788f0b10f48e35",
+        "audit-observation.mjs": "a0588404b59c22bb98fd8051dd2deb00b305a03da84cecf29f57a0470b39757b",
+        "src/scene.schema.json": "57547fac9399c84cd7db554faf14055c8a7bad9a8efa3232ccc6f62da0f2c417"
+      }
+    },
+    "security": "Focused diff: no dependency/auth/transport/persistence changes; no raw clock-error echo; no actuation or identity output; current_state remains UNKNOWN"
+  },
+  "reports_sha256": {
+    "clock-read-red-v3.tap": "fe8b7c661ab2ff9923e02eb79354bb451b18ab08ed4f7165e20015995e5747de",
+    "clock-read-green-v3.tap": "32e1df66f3e0e5dc59ad7f439785d126cf64cee8c035ec8d73a0995490b93ca7",
+    "clock-validation-v3.tap": "8647fe413c6cd49d938fd37594fdbdd289f4bdbd2c9908e058b810895a2768de",
+    "clock-installed-v3.tap": "df5ab1054ba9657fe4aab9a048854b1266bb43c2e981df114d1db1f776ba1736",
+    "clock-traces-v3.json": "8d359877b4af91baed622c84d7b986fa3812756baa77eb66943fa3935cd03bf3"
+  },
+  "package_sha256": "4c5eb74f2950f74e3f8e8339a942cca097a2f2dad92ab1079d261c51e57d3efd",
+  "package": {
+    "id": "aethron-edge-client-example@0.1.0",
+    "name": "aethron-edge-client-example",
+    "version": "0.1.0",
+    "size": 19101,
+    "unpackedSize": 116640,
+    "shasum": "073c4ffeb383688c977c5dc1af0fd53ee34fa249",
+    "integrity": "sha512-jkG2+G1gazilT3ZQwdJFuNWrAz4VSY5MCQPPqiLKM3dt/KWBGMwUx+ySBwq2EQrPUICwHtb5yrxuroDkepOkOA==",
+    "filename": "aethron-edge-client-example-0.1.0.tgz",
+    "files": [
+      {
+        "path": "README.md",
+        "size": 6654,
+        "mode": 420
+      },
+      {
+        "path": "dist/client.d.ts",
+        "size": 771,
+        "mode": 420
+      },
+      {
+        "path": "dist/client.js",
+        "size": 5833,
+        "mode": 420
+      },
+      {
+        "path": "dist/scene.schema.json",
+        "size": 20344,
+        "mode": 420
+      },
+      {
+        "path": "dist/types.d.ts",
+        "size": 2791,
+        "mode": 420
+      },
+      {
+        "path": "dist/types.js",
+        "size": 11,
+        "mode": 420
+      },
+      {
+        "path": "dist/validators.cjs",
+        "size": 74916,
+        "mode": 420
+      },
+      {
+        "path": "dist/wire.d.ts",
+        "size": 357,
+        "mode": 420
+      },
+      {
+        "path": "dist/wire.js",
+        "size": 4333,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 630,
+        "mode": 420
+      }
+    ],
+    "entryCount": 10,
+    "bundled": []
+  },
+  "limitations": [
+    "Clock injection tests do not establish target clock reliability or suspend behavior",
+    "20ms interval is scheduling intent, not callback delivery guarantee",
+    "Returned copies cannot be revoked by internal disconnect",
+    "Identifier omission does not prove anonymity",
+    "Direct JavaScript input cloning has no pre-clone allocation bound",
+    "No new speed benchmark, dependency audit, live hardware/browser qualification or full repository run"
+  ],
+  "audit_complete": false,
+  "next_earliest_component": "HTTP/session/stream/renderer lifecycle",
+  "retained_host_failures": "Earlier read attempts hit EAGAIN / namespace exhaustion; one read was interrupted by owner after an extended tool stall. No code written by those reads; no performance conclusion drawn."
+}

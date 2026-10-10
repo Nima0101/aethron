@@ -4,6 +4,12 @@ import type {HealthEvent, SceneEnvelope} from './types.js';
 
 const {validateScene: validate, validateHealth} = validators;
 
+function localNow(): number {
+  // A host clock failure must reach the same clearing path as an invalid sample.
+  try { return performance.now(); }
+  catch { return NaN; }
+}
+
 export class Observation {
   // Retain only the displayed aggregate, never the transport handle or track IDs.
   #projection: {
@@ -15,7 +21,7 @@ export class Observation {
   #received = 0;
   #lastViewed = 0;
 
-  accept(value: unknown, now = performance.now()): void {
+  accept(value: unknown, now = localNow()): void {
     this.disconnect();
     if (!Number.isFinite(now) || now < 0) throw new Error('invalid_clock');
     // Validate an owned snapshot: callers must not mutate an admitted lease.
@@ -40,7 +46,7 @@ export class Observation {
 
   disconnect(): void { this.#projection = null; this.#received = 0; this.#lastViewed = 0; }
 
-  view(now = performance.now()) {
+  view(now = localNow()) {
     if (!this.#projection || !Number.isFinite(now) || now < 0 || now < this.#lastViewed ||
         now - this.#received > this.#projection.validForMs) {
       this.disconnect();
