@@ -1,22 +1,52 @@
 """Evidence checks must not disappear under interpreter optimization."""
 
 import contextlib
+import hashlib
 import io
 import json
 import os
 import runpy
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
+
+from aethron_edge.sensors import registration
 
 ROOT = Path(__file__).resolve().parents[2]
 PROBE = ROOT / "scripts/probes/sensor_registration_audit/compare.py"
 
 
 class RegistrationAuditModeTests(unittest.TestCase):
+    def test_report_pins_harness_and_actual_imported_registration(self):
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory:
+            installed = Path(directory) / "registration.py"
+            installed.write_bytes(b"abc")
+            with patch.object(registration, "__file__", str(installed)):
+                self.run_inert_comparison(output)
+        report = json.loads(output.getvalue())
+        self.assertIn("source_sha256", report)
+        self.assertEqual(
+            report["source_sha256"],
+            {
+                "compare.py": hashlib.sha256(PROBE.read_bytes()).hexdigest(),
+                "aethron_edge.sensors.registration": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            },
+        )
+        self.assertNotIn(directory, output.getvalue())
+
+    def test_missing_source_prevents_report_emission(self):
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(registration, "__file__", str(Path(directory) / "missing.py")):
+                with self.assertRaises(FileNotFoundError):
+                    self.run_inert_comparison(output)
+        self.assertEqual(output.getvalue(), "")
+
     def test_optimized_import_rejects_before_exposing_unchecked_helpers(self):
         for flags, optimization in ((["-O"], ""), (["-OO"], ""), ([], "1"), ([], "2")):
             with self.subTest(flags=flags, optimization=optimization):

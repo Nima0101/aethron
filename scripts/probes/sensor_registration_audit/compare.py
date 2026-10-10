@@ -1,11 +1,14 @@
 """C04 complete registration-path comparison with a NumPy transform challenger."""
 
+import hashlib
 import json
 import statistics
 import time
+from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
+from aethron_edge.sensors import registration
 from aethron_edge.sensors.registration import Registration, RigCalibration, _point
 
 # Every iteration must pass parity and non-live checks before reporting evidence.
@@ -36,6 +39,13 @@ def numpy_transform(self, xyz_m):
 
 
 def main():
+    source_sha256 = {
+        name: hashlib.sha256(path.read_bytes()).hexdigest()
+        for name, path in {
+            "compare.py": Path(__file__),
+            "aethron_edge.sensors.registration": Path(registration.__file__),
+        }.items()
+    }
     calibration = artifact()
     scalar = RigCalibration.transform
     digest = RigCalibration.digest
@@ -104,6 +114,7 @@ def main():
     print(
         json.dumps(
             {
+                "source_sha256": source_sha256,
                 "points": 64,
                 "samples": 15,
                 "includes_binding": True,
