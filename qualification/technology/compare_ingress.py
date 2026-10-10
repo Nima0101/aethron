@@ -16,7 +16,7 @@ from pathlib import Path
 from aethron._json_bounds import check
 from qualification.evidence import _pairs, _parse_integer, validate
 from qualification.technology import source_snapshot
-from qualification.technology.measurement import peak_bytes, require_untraced
+from qualification.technology.measurement import peak_bytes, require_result, require_untraced
 from qualification.tests.test_evidence import EvidenceTests, encoded
 
 CORPUS_SHA256 = "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff"
@@ -156,12 +156,33 @@ def main():
     # cross-language timing comparison. No compilation or unbounded soak.
     baseline = (root.parent / "rigs/synthetic-v1.json").read_bytes()
     padded = baseline + b" " * (65536 - len(baseline))
+    # Authored from the reviewed synthetic fixture, not from validate's result.
+    expected_measurement = {
+        "version": 1,
+        "input_sha256": "5ecd7409628816cfb0cdd497fa0ff1f85b0f3340fdf6ec4870c8021c04c53f66",
+        "declaration_checks_passed": True,
+        "sensor_count": 2,
+        "record_count": 6,
+        "evidence_counts": {"synthetic": 6, "recorded": 0, "external_unverified": 0},
+        "findings": [],
+        "artifacts_verified": False,
+        "physical_qualification_passed": False,
+        "physical_status": "blocked_external_evidence_and_review",
+    }
     samples = []
     for _ in range(20):
         start = time.perf_counter_ns()
-        validate(padded, now_ms=1050)
+        measured = validate(padded, now_ms=1050)
         samples.append(time.perf_counter_ns() - start)
-    peak = peak_bytes(validate, padded, now_ms=1050)
+        require_result(measured, expected_measurement, "ingress_measurement_failed")
+    traced_result = None
+
+    def traced_validate():
+        nonlocal traced_result
+        traced_result = validate(padded, now_ms=1050)
+
+    peak = peak_bytes(traced_validate)
+    require_result(traced_result, expected_measurement, "ingress_measurement_failed")
     source_snapshot.verify(root.parent.parent, sources)
     report = {
         "audit_policy_version": 3,
@@ -181,6 +202,9 @@ def main():
             "elapsed_ns": samples,
             "traced_peak_bytes_one_call": peak,
             "acceptance_threshold": None,
+            "all_measured_results_checked": True,
+            "result_validation_excluded_from_measurements": True,
+            "expected_input_sha256": expected_measurement["input_sha256"],
         },
         "source_sha256": sources,
         "source_observation": "equal_before_and_after_workload",

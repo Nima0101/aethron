@@ -40,6 +40,9 @@ the fixed diagnostic through interpreter shutdown.
 The [portable corpus binding correction](consumer-corpus-binding-v3.md) pins the
 reviewed inputs and expectations so named negative cases cannot be silently
 replaced with internally consistent passing cases.
+The [ingress measurement result correction](ingress-measurement-results-v3.md)
+checks all twenty timed results and the traced return against a complete fixed
+declaration report before publishing measurements.
 
 The [measurement lifecycle correction](#follow-up-measurement-lifecycle--2026-10-10)
 qualifies the older allocation results and corrects all three measurement drivers.

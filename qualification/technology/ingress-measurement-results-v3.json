@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_commit": "5f0f24ac72bbf0dddc1c95c4a705bc8ab56c89b5",
+  "decision": "KEEP Python in-process measurement; FIX admission of every measured declaration result",
+  "python": "3.13.5",
+  "platform": "Linux",
+  "production_validator_changed": false,
+  "red": {
+    "methods": 3,
+    "assertion_failures": 43,
+    "errors": 0,
+    "skips": 0,
+    "positive_control_passed": true
+  },
+  "focused_green": {
+    "methods": 21,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "command": "python3 -m unittest qualification.tests.test_ingress_measurement_results qualification.tests.test_measurement_review qualification.tests.test_audit_reports qualification.tests.test_comparison_sources -q"
+  },
+  "earlier_boundary_green": {
+    "methods": 15,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "static": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS zero findings"
+  },
+  "padded_input_sha256": "5ecd7409628816cfb0cdd497fa0ff1f85b0f3340fdf6ec4870c8021c04c53f66",
+  "source_sha256": {
+    "qualification/technology/compare_ingress.py": "47b348960c32f4e72184f943013660d9694c8b0a6b3f787dc0f1e342d7fc3f95",
+    "qualification/technology/measurement.py": "4121cadfb220bef2835eefd9c3eca65501c1f535e05097711fd29c9713721bf3",
+    "qualification/tests/test_ingress_measurement_results.py": "b2d1b0d90b88b10e28fdb840db4205e01e2827ce60f91b6c9b3912726ec131f0",
+    "qualification/rigs/synthetic-v1.json": "0b68e3a27477d5d53bc616afac23d82568ac357fdf95ce2520f114ac2efb25ea"
+  },
+  "source_observation": "Post-check file observations, not execution attestation",
+  "limits": [
+    "Synthetic Python-generated parser responses, not Java execution",
+    "Descriptive elapsed samples and Python allocation peak only",
+    "No physical or hard-real-time qualification",
+    "No full repository suite or installed-product acceptance"
+  ],
+  "physical_qualification_passed": false,
+  "lane_complete": false,
+  "next_review": "Node hash-probe result admission and remaining hosted verification configuration"
+}
