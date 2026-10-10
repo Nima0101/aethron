@@ -66,3 +66,9 @@ authentication, a dependency closure or a race-free snapshot. Keep the installed
 sources stable during a run. Historical reports are unchanged and are not
 retroactively source-bound by this addition. See the
 [partial source-binding review](../../../docs/engineering/aethron-ecosystem/P21-PACKET-SOURCE-EVIDENCE-V3.md).
+
+After measured work and cleanup, report admission also requires the comparison
+worker's return code to be zero. Nonzero, signal-terminated or unconfirmed exits
+abort without a JSON report, even when sample parity passed. Cleanup exceptions
+still propagate. This checks reported process completion, not worker authenticity
+or hardware behavior; earlier reports are not retroactively requalified.

@@ -290,6 +290,8 @@ def main():
             case["node_buffer"].update(startup_ms=node.startup_ms, worker_rss_kib=node.rss_kib)
         finally:
             node.close()
+        if node.worker.returncode != 0:
+            raise RuntimeError("audit_worker_exit")
         report["cases"].append(case)
     print(json.dumps(report, indent=2))
 

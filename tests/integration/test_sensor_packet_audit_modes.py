@@ -21,11 +21,17 @@ PROBE = ROOT / "scripts/probes/sensor_packet_audit/compare.py"
 
 
 class PacketAuditModeTests(unittest.TestCase):
-    def diagnostic_report(self):
+    def diagnostic_report(self, worker_exit=0, output=None):
         main = runpy.run_path(str(PROBE))["main"]
-        worker = SimpleNamespace(decode=Mock(), startup_ms=0, rss_kib=None, close=Mock())
+        worker = SimpleNamespace(
+            decode=Mock(),
+            startup_ms=0,
+            rss_kib=None,
+            close=Mock(),
+            worker=SimpleNamespace(returncode=worker_exit),
+        )
         fixtures = [({"marker": "first"}, b"abc"), ({"marker": "second"}, b"abd")]
-        output = io.StringIO()
+        output = io.StringIO() if output is None else output
         with (
             patch.dict(
                 main.__globals__,
@@ -45,6 +51,19 @@ class PacketAuditModeTests(unittest.TestCase):
         ):
             main()
         return json.loads(output.getvalue())
+
+    def test_abnormal_or_unconfirmed_worker_exit_prevents_report(self):
+        for status in (1, -9, None):
+            with self.subTest(status=status):
+                output = io.StringIO()
+                with self.assertRaisesRegex(RuntimeError, "^audit_worker_exit$"):
+                    self.diagnostic_report(worker_exit=status, output=output)
+                self.assertEqual(output.getvalue(), "")
+
+    def test_successful_worker_exit_allows_complete_report(self):
+        report = self.diagnostic_report(worker_exit=0)
+        self.assertEqual(len(report["cases"]), 2)
+        self.assertTrue(all(case["parity"] for case in report["cases"]))
 
     def test_report_pins_probe_worker_and_actual_imported_module(self):
         with tempfile.TemporaryDirectory() as directory:
