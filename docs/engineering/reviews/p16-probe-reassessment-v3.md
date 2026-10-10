@@ -124,3 +124,44 @@ follows. Insufficient information for tactical deployment.
 
 Next earliest remaining review: cross-phase conformance adapters and their evidence
 boundaries, consuming published peer contracts without changing peer implementations.
+
+
+## Fresh source review at 9357ea4
+
+Baseline `9357ea4c294a01130aeeb449ffc679153247da98`, reviewed 2026-10-10.
+Policy and earliest parser were reread before inspecting both complete Python drivers,
+the Node probe, focused tests and prior claim limits. The packaging correction's bridge
+commit matched its parent, exact paths, bytes and noreply identity and was published.
+
+No new tool/runtime mismatch was found. The current
+[comparison decision](../../decisions/p16-comparison-current-v3.json) and
+[mutation decision](../../decisions/p16-mutation-current-v3.json) retain the implementation
+after fresh primary-source comparison with Node, Rust Tokio, Java/Kotlin Process,
+mutmut and JVM PIT. These choices follow the interpreter-specific observable and fixed
+experiment scope. No alternative runtime was benchmarked or rejected for unfamiliarity.
+The PIT basic-concepts URL failed retrieval; the official homepage was available and
+supports only the ecosystem description used here.
+
+Twenty focused methods pass without skips, including real child overflow/exit/timeout,
+optimization rejection, source-change rejection, tracing ownership and binding restoration.
+The real comparison reports six primitive outcomes and five lexical rejections. The real
+mutation run passes four baseline methods and observes eight expected assertion failures
+across the four named changes. Those failures concern deliberately altered in-memory
+modules, not production failures. No new RED condition is claimed.
+
+Ruff and formatting pass. Bandit passes with B101/B102 excluded for guarded assertions
+and trusted-source compilation; this is not an unfiltered clean result. Node syntax
+checking passes. [The current result record](p16-probe-current-v3-results.json) retains
+both complete live reports, listed source/log hashes and reproduction commands. The
+reports' own ten combined source entries were verified against current files.
+
+All four C4 assurance views above still describe the current source: context is local
+review evidence; containers are a Python observer, Node child and temporary module;
+components gate reports after checks/cleanup/source comparison; code is `_capture`,
+`_comparison_response`, `_run` and the two `main` functions. No structural change is
+needed for this scoped KEEP decision. No operational C2, communications or ISR service
+is implemented by these tools. Existing timeout, memory, source identity and measurement
+limits remain applicable. Insufficient information for tactical deployment.
+
+Next earliest remaining review: cross-phase consumer conformance and lifecycle evidence.
+No audit-completion marker is issued; P16–P19 delivery remains unfinished.
