@@ -1,0 +1,107 @@
+{
+  "review_order_version": 3,
+  "baseline_commit": "ec55eb8bd3cdb25641b6ec761bbd200d90a5604b",
+  "scope": "Fresh P16 evidence/task/bundle/federation/inbox review and public-evidence correction",
+  "runtime_changed": false,
+  "decisions": {
+    "evidence": "KEEP",
+    "task": "KEEP",
+    "bundle": "KEEP",
+    "federation": "KEEP",
+    "inbox": "KEEP"
+  },
+  "corrections": [
+    "Two mixed-kind signed-reference composition tests.",
+    "Nine local executable prefixes removed from two historical records with explicit provenance; all other historical fields preserved."
+  ],
+  "checks": {
+    "focused_methods": 116,
+    "adr_methods_after_new_record": 4,
+    "skips": 0,
+    "errors": 0,
+    "failures": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS; five production components and two changed test modules, no exclusions",
+    "public_content_links": "PASS; unchanged selected loop only",
+    "full_verify": "NOT RUN; concurrent-lane resource policy",
+    "redaction_parity_records": 2
+  },
+  "negative_controls": {
+    "prior_methods_per_component": 11,
+    "prior_relabel_failures": 0,
+    "current_methods_per_component": 12,
+    "current_relabel_failures_per_component": 1,
+    "current_relabel_errors": 0,
+    "current_relabel_skips": 0,
+    "production_sources_unchanged": true,
+    "initial_control_error": "Copied globals hid a hash fault patch, causing one unrelated assertion. Retained initial log; corrected runner executes only the function in live module globals and restores it."
+  },
+  "hosted_failure": {
+    "pr": 35,
+    "published_head": "8c6ccdb9c4e9fa4aa49f9644398e47e5305973da",
+    "reason": "Public-content gate rejected a host path in docs/engineering/reviews/p16-policy-admission-v3-results.json",
+    "jobs": [
+      "https://github.com/Nima0101/aethron/actions/runs/38078187015/job/114289457265",
+      "https://github.com/Nima0101/aethron/actions/runs/38078186991/job/114289457543"
+    ],
+    "new_hosted_pass": false,
+    "note": "Whole-run log command unavailable while other jobs were pending; completed job logs retrieved directly without polling."
+  },
+  "source_sha256": {
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "aethron/passport_floor_store.py": "c9e0f4deb9589b3139296f9eb506113108168561e794cd4c45d3579ad75977e7",
+    "docs/engineering/reviews/p16-policy-admission-v3-results.json": "735a5749b9618fb3b7bf7565a6c6ffc60f47a1fc364a502ed9c67f4b1aaed5fc",
+    "docs/engineering/reviews/p16-adr-publication-v3-results.json": "aa414f65820b73bd8ce33553acfb0e84290ff261ed7e3e493d789fe73b7015eb",
+    "tests/test_passports.py": "20bdc75b84aa566867197604e2462053e366016638828bb0ba59e990ffd56c3d",
+    "tests/test_passport_policy.py": "2ff348136a8b174c53d72e96318462c35d7c4163f3dcfc1f0836a138d6f55acd",
+    "tests/test_passport_lexical.py": "0272780452980ec03e9b180a84e35db7e2aefd04f7bc6cf0ac21cfd9288b1887",
+    "tests/test_passport_evidence.py": "03163f7540fb5b59fab17fbf7704d33cbe09535b36def03b1ef2fd957efddbd9",
+    "tests/test_interop_tasks.py": "2cbf9761590b24410bfed2026f504b720c97a58329ebbbe5d835021c48bbed97",
+    "tests/test_interop_bundles.py": "802af16ebe4c0f3a8c6836fd67ec36f3b63f321c366b0050dbc4f5eac74bbd60",
+    "tests/test_interop_federation.py": "6dc97318721d6e634ec54abc1e95d245f06737401c35b6833714396acbf2958a",
+    "tests/test_interop_inbox.py": "12a4585bab47fd185f54dac18e80799fa25513032ac7965ff52c0f51ea945069",
+    "tests/test_interop_delivery.py": "d7142d775869f91a124ba81fc179c7b7b9912b6044c6188e98ca53a28b497fed",
+    "tests/test_passport_floor_store.py": "9c519a03e78c7a2ede461ef786dbe7dd1ffc43c3a02bba6d71204adf934c8026",
+    "tests/test_passport_schemas.py": "0c423ffb3e53e8edc3f7a9bad16b460c1ca92b76ebeeb05f32492cda0d8f40b2",
+    "scripts/verify.py": "ecc58869388f1b98f5f475757b867f2d28e5d2abb2813017fc35096fa690eba2",
+    "docs/decisions/p16-binding-current-v3.json": "9c9c1ed82662a81c3e9375956fb22ae1c7d2073edfc862ad5d0ce799f47fe7fa",
+    "docs/engineering/reviews/p16-binding-current-v3.md": "e2afe9ef464ef595320d39bc426485ad730b5ff4171f41d07fa9a267c9dd6dba",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "d65e8ea6ad582e12047fea7f5df9f6c15f98b1469e148c57c879e00873572c9d"
+  },
+  "runtime_artifacts_sha256": {
+    "core-8c6ccdb-failure.log": "04c3e2900f252e717a26ec6992dada908323d51a4ca68ee013f537468d7c21c9",
+    "edge-8c6ccdb-failure.log": "d67b4645e724e03c0e311f59e7bbd18b37b6153a640f90f49f4e846731cb772d",
+    "core-8c6ccdb-job.log": "46ce1b79ef54ceb3007dd8ee84c823295df8c078cb8c0013c0d12ad8d6699a1f",
+    "edge-8c6ccdb-job.log": "de04536a89c1358bac1590e74c31facecf70c1df5736780c5c14d45d7b16c9e1",
+    "public-content-ec55eb8-red.log": "1ce8ff2196c634157b4a3f6df94e0e4b740c38c71e3f3284700c68eaf290ae22",
+    "public-content-ec55eb8-green.log": "ea030a0aa6c9148f49e45597fc75c20e285476e11d3d57a6080630868b74586f",
+    "binding-label-old-control.log": "a1e3742a8fcbb0ef6d3e8c0ac7f082acc4c977326de78a34e3ae2eb10116148d",
+    "binding-label-baseline-control.log": "51b7545e69d53f36ed9126a9fd230153f3039c2bc74e48ca644b9e10a70eb14d",
+    "binding-label-new-control.log": "776efecbdfea181329feae8bb2e64983219ada79a4e2a4bc046eea8d9253c93d",
+    "binding-current-focused.log": "77ae03f4be26026fac5ce1cade5e4223a02c9deaf7e26de9102819ae981b0add",
+    "binding-current-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "binding-current-format.log": "3bc53bf3e981a98a34a852e175bf9b77af841edea74fca595d9aedcbaf9a4938",
+    "binding-current-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "binding-current-adr.log": "df0f9e957e70a327edaabfe1c848921f5aad553f00c21ccd4c521d0d3705641d",
+    "binding_label_control.py": "2b3839fecdea941478fbd0e6a8d1dfaa606169eab478f0294c540d45265cc481",
+    "p16_public_content_probe.py": "4bb1f7f916e1ca63013fe942126e444914262a526ca97bc7a702b06e55b4f540",
+    "binding-current-public-content.log": "ea030a0aa6c9148f49e45597fc75c20e285476e11d3d57a6080630868b74586f"
+  },
+  "reproduction": [
+    "PYTHONPATH=tests:. python -m unittest test_passports test_passport_lexical test_passport_policy test_passport_evidence test_interop_tasks test_interop_bundles test_interop_federation test_interop_inbox test_interop_delivery test_passport_floor_store test_passport_schemas.ArchitectureDecisionConformance -v"
+  ],
+  "limits": [
+    "Listed sources are selected inputs, not dependency closure or loaded-code attestation.",
+    "Source tests and researched alternatives; no installed artifacts, native comparison benchmarks, exact-target timing or military accreditation.",
+    "Earlier hosted failures are preserved; corrected working-tree public-content check is not a full verification or new hosted PASS.",
+    "No whole-lane completion; schemas/packaging/probes/consumers and unfinished P16-P19 implementation remain."
+  ],
+  "next": "Published schemas and conformance tooling"
+}

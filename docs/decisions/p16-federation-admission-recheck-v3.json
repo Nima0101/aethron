@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "decision": "KEEP",
+  "limits": [
+    "No alternative implementation or benchmark executed; no language or scheduler performance ranking.",
+    "No network identity, execution authority, physical, hard-real-time, MLS/CNSA, availability or whole-lane qualification."
+  ],
+  "id": "p16-federation-admission-recheck-v3",
+  "component": "Independent complete pinned federation snapshot admission",
+  "constraints": [
+    "Same canonical bounded table as direct federation; an empty deny-all table must return valid metadata independently of successful peer or bundle verification.",
+    "Externally authenticated digest, local alias, current UTC and revision/time floors; complete result on success and no partial metadata on rejection. No persistence or policy fetch."
+  ],
+  "alternatives": [
+    "Python shared lexical/table predicates with native-backed SHA-256.",
+    "Rust visitor-based decoding or .NET token reader with explicit canonical and pin checks.",
+    "Erlang/Elixir OTP callbacks and immutable binary snapshot admission.",
+    "Cedar/Rego for richer rules, retaining a separate exact-byte admission boundary."
+  ],
+  "rationale": [
+    "KEEP after eight current methods: deny-all, full peer validation, pin/domain/floors/interval and rejection parity with direct federation all pass. Removing the snapshot pin predicate causes an existing assertion failure.",
+    "The current API shares the same table grammar without requiring a bundle to authenticate. Alternatives do not eliminate canonical-byte or external-trust requirements. No material semantic or deployment gain from migration is established."
+  ],
+  "evidence": [
+    "https://docs.cedarpolicy.com/overview/terminology.html",
+    "https://www.openpolicyagent.org/docs/policy-language",
+    "https://docs.python.org/3/library/json.html",
+    "https://www.erlang.org/doc/apps/stdlib/json.html"
+  ]
+}

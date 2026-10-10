@@ -1,0 +1,38 @@
+{
+  "review_order_version": 3,
+  "baseline_head": "349781babb93685dfc281a5f45ea7aae87d15ea8",
+  "component": "P16 bounded inbox",
+  "decision": "KEEP bounded deque with explicit lock; FIX coverage; CLARIFY lifecycle claims",
+  "production_changed": false,
+  "checks": {
+    "inbox_before": 8,
+    "inbox_after": 11,
+    "interop_family": 43,
+    "ruff": "PASS after import-order fix",
+    "format": "PASS after formatting new tests",
+    "bandit_production": "PASS",
+    "diff": "PASS"
+  },
+  "retained_negative_evidence": [
+    "Initial Ruff I001 import-order failure corrected; final check passed.",
+    "Rejected put can advance time floor and purge expired entries.",
+    "Close cannot erase bytes retained in previously dequeued results.",
+    "Payload repr suppression does not redact dataclasses.asdict output.",
+    "New cases pass unchanged production; no production RED/fix claimed."
+  ],
+  "qualification": {
+    "physical": false,
+    "real_time": false,
+    "mls": false,
+    "cnsa": false,
+    "availability": false
+  },
+  "source_sha256": {
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "tests/test_interop_inbox.py": "6406514beaed44c98c79408df9b9e9fb58af452427bc57735ed2711665870110",
+    "docs/architecture/interop/inbox-v1.md": "bb6050d4ab9ddd222351a8a4bc212d8a27a9a22c140bf305bc79102d06454368",
+    "docs/engineering/reviews/p16-inbox-v3.md": "cc48818963b0707a0dd32f7db333cef068ed01cc7563c8699d3e25e761947cd0",
+    "examples/interop/inbox-vectors-v1.json": "0c3cb8ce0c8c2ce10525a63158e2ca0b6970c3953b6a09c386b133b0dace5ec3"
+  },
+  "next_component": "P16 packaging/workflow and remaining phase inventory"
+}

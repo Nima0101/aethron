@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "id": "p16-lifecycle-reassessment-v3",
+  "component": "P16 caller trust-floor lifecycle counterexample tests",
+  "decision": "KEEP",
+  "constraints": [
+    "Execute two fixed caller-argument traces against the actual stateless verifier, using actual synthetic signatures. No storage, restart, network or controller is involved.",
+    "Retain both the unsafe caller replay outcome and the protected outcome; rejected statements must not provide trusted metadata or authority."
+  ],
+  "alternatives": [
+    "Python unittest direct API traces with scoped function replacement for sensitivity controls.",
+    "TLA+ with TLC for a state-transition specification and bounded model exploration.",
+    "Alloy relational/temporal models with Analyzer counterexample search.",
+    "Erlang PropEr model-based generated stateful test sequences.",
+    "Java/Kotlin JUnit orchestration of the actual library through an explicit process boundary."
+  ],
+  "rationale": [
+    "KEEP the direct executable traces: they inspect the exact verifier and its returned metadata, rather than a separately encoded model. Two existing traces and eight policy methods pass alongside one lexical method.",
+    "TLA+ and Alloy are strong candidates for exploring a future persistent/concurrent state lifecycle; neither model alone establishes behavior of these Python calls. PropEr offers generated stateful tests, while these two traces are fixed regression counterexamples.",
+    "JUnit can drive an adapter, but the adapter adds a representation boundary without a demonstrated benefit for these fixed direct calls. No deadline, throughput or target memory budget motivates a native test-driver migration.",
+    "Two sensitivity experiments replace only a supplied floor argument before invoking the real verifier. Each causes one expected assertion failure with no errors/skips; original bindings are restored. No new implementation mismatch is demonstrated."
+  ],
+  "limits": [
+    "KEEP concerns the two test traces, not a storage technology choice or exemption for future persistent state.",
+    "Policy enrollment, authenticated configuration delivery, clock trust and durable anti-rollback state are not implemented by these tests.",
+    "Alternative tools were researched, not benchmarked or used for model checking. No language performance ranking or formal proof is claimed.",
+    "No hardware, tactical, MLS/CNSA, availability, installed-product or whole-lane qualification."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/unittest.mock.html",
+    "https://lamport.azurewebsites.net/tla/tla.html",
+    "https://alloytools.org/about.html",
+    "https://proper-testing.github.io/",
+    "https://docs.junit.org/6.1.3/overview.html"
+  ]
+}

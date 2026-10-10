@@ -1,0 +1,89 @@
+{
+  "fixture_only": true,
+  "cases": [
+    {
+      "name": "bounded-description",
+      "task": "{\"evidence_sha256\":[\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\",\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\"],\"expires_at\":1300,\"issued_at\":1000,\"kind\":\"evidence.bind.v1\",\"max_evidence_bytes\":1048576,\"motion_authority\":false,\"passport_sha256\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"policy_sha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"subject_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"task_id\":\"fixture-task\",\"version\":1}",
+      "arguments": {
+        "expected_task_sha256": "917b2786010feba35c231c8540bfde5658b317e714861947b840a82bc3c46ee6",
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "now_s": 1100,
+        "minimum_time_s": 1000
+      },
+      "status": "validated",
+      "reason": "description_matches"
+    },
+    {
+      "name": "expired",
+      "task": "{\"evidence_sha256\":[\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\",\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\"],\"expires_at\":1300,\"issued_at\":1000,\"kind\":\"evidence.bind.v1\",\"max_evidence_bytes\":1048576,\"motion_authority\":false,\"passport_sha256\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"policy_sha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"subject_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"task_id\":\"fixture-task\",\"version\":1}",
+      "arguments": {
+        "expected_task_sha256": "917b2786010feba35c231c8540bfde5658b317e714861947b840a82bc3c46ee6",
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "now_s": 1300,
+        "minimum_time_s": 1000
+      },
+      "status": "rejected",
+      "reason": "task_not_current"
+    },
+    {
+      "name": "clock-rollback",
+      "task": "{\"evidence_sha256\":[\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\",\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\"],\"expires_at\":1300,\"issued_at\":1000,\"kind\":\"evidence.bind.v1\",\"max_evidence_bytes\":1048576,\"motion_authority\":false,\"passport_sha256\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"policy_sha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"subject_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"task_id\":\"fixture-task\",\"version\":1}",
+      "arguments": {
+        "expected_task_sha256": "917b2786010feba35c231c8540bfde5658b317e714861947b840a82bc3c46ee6",
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "now_s": 1100,
+        "minimum_time_s": 1101
+      },
+      "status": "rejected",
+      "reason": "time_rollback"
+    },
+    {
+      "name": "pin-substitution",
+      "task": "{\"evidence_sha256\":[\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\",\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\"],\"expires_at\":1300,\"issued_at\":1000,\"kind\":\"evidence.bind.v1\",\"max_evidence_bytes\":1048576,\"motion_authority\":false,\"passport_sha256\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"policy_sha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"subject_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"task_id\":\"fixture-task\",\"version\":1}",
+      "arguments": {
+        "expected_task_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "now_s": 1100,
+        "minimum_time_s": 1000
+      },
+      "status": "rejected",
+      "reason": "task_mismatch"
+    },
+    {
+      "name": "subject-mismatch",
+      "task": "{\"evidence_sha256\":[\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\",\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\"],\"expires_at\":1300,\"issued_at\":1000,\"kind\":\"evidence.bind.v1\",\"max_evidence_bytes\":1048576,\"motion_authority\":false,\"passport_sha256\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"policy_sha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"subject_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"task_id\":\"fixture-task\",\"version\":1}",
+      "arguments": {
+        "expected_task_sha256": "917b2786010feba35c231c8540bfde5658b317e714861947b840a82bc3c46ee6",
+        "expected_subject_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "now_s": 1100,
+        "minimum_time_s": 1000
+      },
+      "status": "rejected",
+      "reason": "subject_mismatch"
+    },
+    {
+      "name": "motion-authority",
+      "task": "{\"evidence_sha256\":[\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\",\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\"],\"expires_at\":1300,\"issued_at\":1000,\"kind\":\"evidence.bind.v1\",\"max_evidence_bytes\":1048576,\"motion_authority\":true,\"passport_sha256\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"policy_sha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"subject_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"task_id\":\"fixture-task\",\"version\":1}",
+      "arguments": {
+        "expected_task_sha256": "8e1d9f5dcab594a83911975a39a6c238bbbd47c3f14f5667b44ca173d56b40a4",
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "now_s": 1100,
+        "minimum_time_s": 1000
+      },
+      "status": "rejected",
+      "reason": "invalid_input"
+    },
+    {
+      "name": "unsupported-operation",
+      "task": "{\"evidence_sha256\":[\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\",\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\"],\"expires_at\":1300,\"issued_at\":1000,\"kind\":\"motion.follow\",\"max_evidence_bytes\":1048576,\"motion_authority\":false,\"passport_sha256\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"policy_sha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"subject_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"task_id\":\"fixture-task\",\"version\":1}",
+      "arguments": {
+        "expected_task_sha256": "0625d74546ec0336d120d0c07e014e38631926de1ba26d186617f8fe295e7b26",
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "now_s": 1100,
+        "minimum_time_s": 1000
+      },
+      "status": "rejected",
+      "reason": "invalid_input"
+    }
+  ]
+}

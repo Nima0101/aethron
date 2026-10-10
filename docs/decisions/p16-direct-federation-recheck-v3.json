@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "decision": "KEEP",
+  "limits": [
+    "No alternative implementation or benchmark executed; no language or scheduler performance ranking.",
+    "No network identity, execution authority, physical, hard-real-time, MLS/CNSA, availability or whole-lane qualification."
+  ],
+  "id": "p16-direct-federation-recheck-v3",
+  "component": "Direct pinned federation and inbox-delivery conformance",
+  "constraints": [
+    "Offline immutable canonical snapshot, at most 65536 bytes/depth eight and sixteen peers. Validate every row; selected peer must pin exact policy bytes and permit issuer and every signed capability.",
+    "Caller-authenticated snapshot/task pins and independent trusted time/revision floors. Revalidate bundle; earliest expiry wins. No transitive lookup or rule language.",
+    "No supplied target memory budget, throughput SLA or hard deadline. Four local delivery traces exercise two distinct caller clock domains, not a deployed transport."
+  ],
+  "alternatives": [
+    "Closed table in Python using lexical JSON hooks and versioned public bundle verification.",
+    "Rust/Serde or C#/F# token reader with a conformant closed-table adapter.",
+    "Erlang/Elixir OTP JSON callbacks and immutable binaries.",
+    "Cedar scoped authorization policies or OPA/Rego declarative document queries when a general policy language is actually required."
+  ],
+  "rationale": [
+    "KEEP after fresh runtime, contract and twelve federation methods plus four real-API delivery traces. Exact direct-peer membership and complete scope predicates are explicit and bounded; no new mismatch found.",
+    "Cedar and Rego are serious policy technologies, but introducing a policy language does not improve this closed direct-match profile or authenticate snapshot provisioning. Typed alternative runtimes can implement it; none demonstrated a material advantage under current constraints.",
+    "A controlled removal of the selected peer policy-pin comparison is detected by an existing assertion. Negative traces retain the fact that stale supplied configuration can still authenticate and closing the inbox cannot revoke an already returned copy."
+  ],
+  "evidence": [
+    "https://docs.cedarpolicy.com/overview/terminology.html",
+    "https://www.openpolicyagent.org/docs/policy-language",
+    "https://docs.python.org/3/library/json.html",
+    "https://www.erlang.org/doc/apps/stdlib/json.html"
+  ]
+}

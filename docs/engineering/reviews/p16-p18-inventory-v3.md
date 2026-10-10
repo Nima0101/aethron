@@ -1,0 +1,197 @@
+# P16–P18 review inventory v3
+
+Snapshot: `e4e38c04ce15df942d46d795d450fbe85dfa08de`, plus probe recheck, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+approval, qualification statement or lane-completion marker.
+
+## Implemented components
+
+The latest owner-ordered restart begins again at passport admission. The [current
+Base64 review](p16-base64-current-v3.md) rechecks the parser/envelope boundary and
+fixes a guard-sensitivity gap: 33 alias cases now detect removed canonical equality.
+That review left runtime unchanged. The [current policy and persistence review](p16-floor-cleanup-current-v3.md)
+confirms pinned-policy admission and fixes the shared floor-store cleanup error boundary,
+including post-commit error semantics. The [evidence/task/bundle review](p16-evidence-metadata-current-v3.md)
+confirms runtime behavior and adds standalone evidence metadata checks. The
+[current federation/inbox review](p16-federation-inbox-recheck-v3.md) confirms direct
+federation, independent snapshot admission, inbox accounting and four delivery traces.
+The [current schema review](p16-schema-claims-current-v3.md) confirms six structural
+contracts and fixes payload claim-vocabulary test sensitivity. Next earliest unreviewed
+group was installed/package assurance tooling. The [installed-result review](p16-installed-result-current-v3.md)
+now checks that group and fixes incomplete metadata comparisons. The
+[probe recheck](p16-probe-recheck-v3.md) confirms both diagnostics with fresh live runs
+and retains unfiltered security findings. Next: remaining cross-phase consumer/lifecycle
+review. Earlier rows below
+remain evidence inputs and do not satisfy the remaining restart by themselves.
+
+The history of the owned runtime files starts with passport admission, then evidence,
+tasks, bundles, federation and inbox. The entries below record prior review coverage;
+they do not complete the latest owner-ordered restart. The [floor review](p16-floor-current-v3.md)
+rechecked parser, signature and pinned policy, then corrected the floor-store slice.
+The [current binding review](p16-binding-current-v3.md) walks from those earliest
+components through evidence, tasks, bundles, federation and inbox. It adds full signed
+reference coverage and corrects two public evidence records rejected by hosted checks.
+The [current schema/packaging review](p16-installed-floor-v3.md) confirms the six
+schemas and adds the omitted installed floor-store persistence scenario. The [local federation-floor slice](../../architecture/interop/federation-floor-store-v1.md)
+now reuses the reviewed policy transaction core while preserving policy v1 disk format, following the
+[independent pinned snapshot admission](../../architecture/interop/federation-policy-v1.md), the
+[probe dependency correction](p16-probe-optional-v3.md), live comparison/mutation checks
+and [consumer/lifecycle and public-claim refresh](p16-consumer-refresh-v3.md).
+The latter found no new mismatch across four assurance components; 24 focused methods
+and nine controlled assertion failures support the current scoped KEEP decisions.
+The consumed JSON-bound helper belongs to the foundation lane.
+
+| Component | Current evidence and decision |
+|---|---|
+| Parser and canonicalization | [Original V3 review](p16-parser-v3.md): FIX pre-conversion integer bound. [Fresh reassessment](p16-parser-reassessment-v3.md): KEEP lexical hooks; fourteen portable cases and bounded syntax comparison, no performance ranking. |
+| Signature, trust, expiry and revocation | [Original review](p16-trust-v3.md). [Fresh reassessment](p16-trust-reassessment-v3.md): KEEP bounded native crypto boundary; add real missing-package process checks, preserve provisioning limits and source-bound primitive evidence. |
+| Independent pinned-policy validation | [Original review](p16-policy-admission-v3.md). [Fresh reassessment](p16-policy-evidence-reassessment-v3.md): KEEP exact-byte external pin and complete metadata validation; existing tests detect removed pin comparison. No persistence or enrollment. |
+| Local policy-floor persistence | [Contract and technology decision](../../architecture/interop/policy-floor-store-v1.md): ADD single-scope SQLite transactions, independently observed time and pinned-policy revision/digest persistence. Real-file/process tests; whole-store restore remains outside protection. |
+| Evidence bytes | [Original review](p16-evidence-v3.md). [Fresh reassessment](p16-policy-evidence-reassessment-v3.md): KEEP immutable per-blob binding; existing tests detect weakened set comparison. No content qualification. [Kind preservation review](p16-evidence-kinds-v3.md): KEEP runtime, add full signed-reference assertion that detects a previously surviving kind-label mutation. |
+| Three passport schemas and conformance | [Review](p16-conformance-v3.md): KEEP structural schema tooling; FIX positive authentication control and dependency closure. [Fresh reassessment](p16-schema-reassessment-v3.md): KEEP standard contracts and offline checker; preserve lexical/authentication gaps. [Reference-integrity review](p16-schema-integrity-v3.md): KEEP contracts; add paired checks and guard-removal controls for selected-field uniqueness and complete references. |
+| Task/federation structural schemas | [Review](p16-interop-schemas-v3.md): FIX missing portable structural contracts; preserve runtime admission. |
+| Task descriptions | [Review](p16-task-v3.md): KEEP bounded descriptions; no task execution or replay store. [Fresh reassessment](p16-task-bundle-reassessment-v3.md): KEEP lexical/canonical description validation; existing test detects removed canonical equality. [Current review](p16-task-bundle-reassessment-v3.md#fresh-source-review-at-6da83ae): KEEP after fresh source and candidate review. |
+| Bundle verification | [Review](p16-bundle-v3.md): KEEP snapshot composition; all revocation lists rechecked. [Fresh reassessment](p16-task-bundle-reassessment-v3.md): KEEP immutable snapshots; existing test detects removed envelope pin. [Current review](p16-task-bundle-reassessment-v3.md#fresh-source-review-at-6da83ae): KEEP; existing tests detect independently removed envelope and policy pins. |
+| Direct federation | [Review](p16-federation-v3.md): KEEP closed pinned table; no enrollment or distributed consensus. [Fresh reassessment](p16-federation-inbox-reassessment-v3.md): KEEP closed-table validation; no production mismatch demonstrated. [Current review](p16-federation-inbox-reassessment-v3.md#fresh-source-review-and-payload-coverage-at-9400ad7): KEEP after fresh source/candidate review. |
+| Independent federation admission | ADD [complete pinned-snapshot validation](../../architecture/interop/federation-policy-v1.md) independently of peer/bundle success. Ten portable cases include deny-all, floors, domain, pin, malformed and noncanonical inputs. The installed runner consumes these cases; local source execution is not an installed-distribution claim. No floor persistence or enrollment. |
+| Local federation-floor persistence | ADD [separate local profile](../../architecture/interop/federation-floor-store-v1.md); KEEP SQLite/Python after renewed candidate comparison. Persist deny-all, reject stale floors/equivocation, share fixed transaction code and preserve policy format. No whole-store rollback detection or cross-file atomicity. |
+| Inbox resource accounting | [Review](p16-inbox-v3.md): KEEP local bounded queue; no transport or hard real-time guarantee. [Fresh reassessment](p16-federation-inbox-reassessment-v3.md): KEEP accounting; FIX test-runner hang on injected worker deadlock through child-process supervision. [Current review](p16-federation-inbox-reassessment-v3.md#fresh-source-review-and-payload-coverage-at-9400ad7): KEEP runtime; distinct producer bytes expose substituted-payload test blind spot. |
+| Inbox/federation composition | [Review](p16-delivery-boundary-v3.md): KEEP primitives; ADD real-API expiry, revocation, revision-floor and close traces. Caller refresh and in-flight cancellation are not implemented. Four composition methods freshly rechecked in the [federation/inbox reassessment](p16-federation-inbox-reassessment-v3.md). |
+| Packaging evidence | [Review](p16-packaging-v3.md): FIX installed/source identity comparison, [package input coverage](p16-packaging-inputs-v3.md) and [installed fixture coverage](p16-installed-corpus-v3.md) and [installed policy API cases](p16-installed-policy-v3.md); no full-distribution attestation. [Fresh reassessment](p16-packaging-reassessment-v3.md): KEEP portable packaging/direct inspection; FIX three omitted installed-result flag assertions, with five rejection controls. [Source-selection correction](p16-source-selection-v3.md): include twelve omitted conformance inputs and add a bounded hosted manifest regression check; no new archive build. [Archive-input check](p16-archive-inputs-v3.md): share the finite inventory and add member-byte checks to the hosted source build; local synthetic archive tests pass, hosted result remains unobserved. [Installed RECORD association](p16-installed-record-v3.md): connect selected import locations/bytes to local distribution membership, hash and size; not publisher authentication. [Static identity check](p16-installed-identity-v3.md): compare installed name/version with pyproject declarations; exact-profile equality only. [Current cardinality review](p16-installed-identity-v3.md#fresh-cardinality-review-at-383a4c5): reject duplicate identity headers, including matching-first conflicting values; six duplicate cases and a valid mixed-case-header control. [Archive installation gate](p16-sdist-install-v3.md): configure isolated checks after installation from the inspected archive; hosted execution remains unobserved. [Diagnostic retention](p16-packaging-retention-v3.md): capture selected outputs and checkout/run context with failure-preserving pipelines; no signed provenance claim. [Current public claim review](p16-packaging-retention-v3.md#public-claim-review-at-7e34cc6): distinguish configured jobs from observed runs, source consumers from installed P16 checks and temporary diagnostics from release artifacts. |
+| ADR publication tooling | [Review](p16-adr-publication-v3.md): FIX schema/record test discovery and ADR-only workflow triggers; structure is not evidence truth. [Fresh reassessment](p16-schema-reassessment-v3.md): FIX reference character profile; raw controls and malformed percent escapes rejected without optional format validation. |
+| Comparison and mutation probes | FIX optimized-mode evidence loss; [response types](p16-probe-response-v3.md); [capture bounds](p16-probe-capture-v3.md); [tracing lifecycle](p16-probe-tracing-v3.md); [source consistency](p16-probe-snapshot-v3.md); [timing accounting](p16-probe-timing-v3.md); [mutation integrity](p16-mutation-integrity-v3.md); historical source-manifest correction below. [Fresh reassessment](p16-probe-reassessment-v3.md): KEEP direct bounded diagnostics; current tests and in-memory sensitivity controls confirm source-change rejection. No new defect demonstrated. [Current review](p16-probe-reassessment-v3.md#fresh-source-review-at-9357ea4): KEEP both tools after fresh source comparison, twenty focused methods and live reports. |
+
+## Missing implementation and unsupported claims
+
+These rows cannot receive a KEEP/MIGRATE decision for code that does not exist. They
+remain unfinished software or unresolved qualification requirements, not fictitious
+external gates. No whole-phase completion can be inferred from the rows above.
+
+| Scope | State at this snapshot |
+|---|---|
+| P16 transport, enrollment and remaining rollback protection | Transport/enrollment and independent whole-store rollback detection remain unfinished. Separate local policy/federation stores persist one scope/domain each; clock/pin authenticity and protected storage remain caller assumptions. [Lifecycle traces](p16-trust-floor-v3.md) show why floors cannot be derived solely from successful passport results. [Fresh lifecycle review](p16-lifecycle-reassessment-v3.md) confirms both negative traces and reconciles 386 historical source bindings; no persistence implementation is implied. [Current lifecycle review](p16-consumer-current-v3.md) reruns both traces and eight policy methods after fresh technology comparison. |
+| P16 cross-phase conformance | [Edge UNKNOWN corpus](p16-edge-conformance-v3.md) checks one published API/fixture boundary; [P2 packet cases](p16-sensor-conformance-v3.md) exercise the published decoder and P16 binding independently; [encoding cases](p16-sensor-encoding-v3.md) add byte-order, padding and trailing-byte checks. [ROS diagnostic cases](p16-ros-status-v3.md) consume receipt/loss/fault status through real APIs. [Fresh consumer reassessment](p16-cross-phase-reassessment-v3.md): three scoped KEEP decisions, 14 focused methods and six sensitivity experiments. [Current consumer review](p16-consumer-current-v3.md): KEEP three consumer harnesses; add two missing rejection policy-revision assertions, verified by seven controlled assertion failures and current producer-source comparisons. Integrated P2/P3/P14 runtime qualification is not established. |
+| P17 common picture and operator collaboration | No owned implementation or integrated client evidence identified. |
+| P17 role/authority, intent, coordination and cancellation | No owned command workflow implementation; P16 verification tasks do not implement it. |
+| P17 offline synchronization and conflict handling | Local inbox and direct federation checks do not provide durable synchronization or conflict resolution. |
+| P17 audit/replay and human decision support | Byte binding does not supply a durable audit history or decision-support platform. |
+| P18 authorized hardware/radar/satellite/radio adapters | No owned physical adapter implementation or device qualification evidence identified. |
+| P18 timestamp reconciliation and synchronization health | Caller-supplied times in P16 do not establish device clock provenance or synchronization. |
+| P18 scheduling, backpressure and overload | Local inbox accounting does not establish a deterministic end-to-end processing pipeline. |
+| P18 latency/jitter and hardware-in-loop evidence | No identified target hardware class, workload or retained target measurements. Desktop probe samples are insufficient. |
+| P19 enterprise product acceptance, including P19.7 Help Center | Newly assigned integration scope; no integrated installed-distribution acceptance or offline bilingual help coverage established. Software delivery remains unfinished; final qualification also depends on earlier applicable gates. |
+| MLS, CNSA, five-nines and zero-SPOF claims | None established by the owned software/tests. Insufficient information for tactical deployment. |
+| Targeting, weapon integration, unauthorized radio operations and durable person re-identification | Excluded; not represented as pending implementable features. Independent defensive assurance remains available. |
+
+Repository filenames must be interpreted with their path and contents:
+`docs/engineering/aethron-ecosystem/evidence/phase1/p17.json` records a phase-1
+software boot/update result, explicitly without hardware qualification. It is not
+evidence that the P17 command-platform scope is implemented. Peer-owned sensor, robot,
+runtime and client code remains outside this lane's implementation inventory.
+
+## Public-source discovery limits
+
+[ATAK-CIV](https://github.com/deptofdefense/AndroidTacticalAssaultKit-CIV) and the
+[Hack-A-Sat library](https://github.com/deptofdefense/hack-a-sat-library) are public
+source/reference locations, not proof of AETHRON interoperability or accreditation.
+The latter describes a space-document/tutorial library. No code or offensive procedure
+was adopted from either during this review.
+
+The uppercase HAVELSAN URL returned a browser error; subsequent discovery located the
+[public organization](https://github.com/havelsan) and individual repositories.
+[ASTERIX](https://github.com/havelsan/asterix) identifies a Java parser and lists
+resources/samples. The [video framework](https://github.com/havelsan/VideoDistributionFramework)
+page presents a README with empty installation, testing and license sections.
+Those observations do not establish a reusable, tested or licensed implementation.
+Source/rights verification remains necessary before any adoption; no operational
+adapter design or performance conclusion is derived here.
+
+## Probe evidence correction and technology decision
+
+The comparison probe and trust mutation runner used Python assertions as evidence
+gates. [Python optimization](https://docs.python.org/3.13/using/cmdline.html#cmdoption-O)
+removes those assertions. In the comparison probe it also removed verifier calls inside
+assertions, yet the script emitted timing fields. In the mutation runner it removed
+the checks requiring unique source substitutions and actual assertion failures.
+
+Requirements are bounded local inspection of existing Python APIs and an independent
+Node primitive comparison, with no network, target qualification or throughput SLA.
+KEEP Python orchestration with explicit rejection of optimized execution and KEEP the
+independent Node side. Direct Python calls inspect the actual implementation under
+review; Node's [strict assertion API](https://nodejs.org/api/assert.html) supplies a
+separate primitive check. Java with [JUnit](https://docs.junit.org/current/user-guide/)
+is a credible alternative test ecosystem, but replacing this driver with it would
+still require Python execution to inspect these APIs; an additional orchestrator does
+not remedy the evidence defect. This is not a claim of superior Python performance.
+The compiler/interpreter mode is now checked explicitly before either probe performs
+its work. Missing optional crypto cannot be mistaken for a successful comparison.
+
+Real `-O` and `-OO` child processes initially returned success for each script: four
+retained assertion failures across two test runs. Both scripts now reject those modes
+with no JSON evidence output. Normal executions remain independently checked. Workflow
+path filters now include both Python and JavaScript passport probe files.
+
+This corrects tooling evidence; production passport admission and frozen thresholds are
+unchanged. Existing samples are not retrospectively upgraded into qualification. The
+original policy-2 audit gets a historical-status note linking this current inventory.
+The subsequent response and capture reviews above correct those boundaries. Their
+limits remain explicit; this inventory does not turn missing software into completion.
+
+Focused outcomes and source hashes: [result record](p16-probe-v3-results.json).
+
+
+## Source evidence reconciliation
+
+The capture bridge was checked against all four requested file hashes and its parent.
+Seventy-seven source-hash entries from ten retained P16 result records match the Git
+commit that first published each record. These are historical byte-identity checks,
+not fresh execution of every historical experiment; they do not authenticate authors
+or prove current deployment parity. Existing result files remain unchanged.
+
+Two new tests exposed incomplete standalone manifests: the comparison report had only
+a fixture digest, and the mutation report omitted the consumed JSON-bound helper and
+vector file. Both tools now emit five explicit project-file digests. The comparison
+covers its Python driver, Node script, passport verifier, JSON-bound helper and vectors.
+The mutation report covers its driver, test module, passport verifier, helper and
+vectors. These are listed direct project inputs, **not dependency closure**: package
+initialization, standard libraries, installed crypto/native libraries, interpreter and
+Node executables are not hashed by this manifest. Files are read after execution;
+there is no atomic snapshot, loaded-bytecode attestation or change-during-run defense.
+The reports carry that limitation beside the digests.
+
+Technology decision: KEEP native-backed standard SHA-256 in the existing driver.
+The constraint is portable metadata for a small fixed list of trusted local files,
+with no throughput target or claim of whole-environment provenance. Python
+[hashlib](https://docs.python.org/3.13/library/hashlib.html), Node
+[createHash](https://nodejs.org/api/crypto.html) and Java/Kotlin
+[MessageDigest](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/security/MessageDigest.html)
+all provide appropriate digest APIs. Java/Kotlin is a credible option outside these
+tools' current languages. Moving the metadata pass to another runtime gives no
+additional snapshot or attestation property; a complete signed provenance system
+would be a different requirement. This is a constraints-based choice, not a measured
+speed ranking or a preference based on installation or rewrite cost.
+
+Fresh comparison output now labels the active audit policy as version 3. Two retained
+assertions exposed the stale version-2 field; historical reports retain their original
+versions. Together with the two manifest failures, all four new assertions now pass.
+Current outcomes and the historical source-match inventory are retained in the
+[source reconciliation record](p16-probe-provenance-v3-results.json).
+
+That source-manifest correction concerned assurance tools only. Its bridge commit
+`8edce6f5e6cd877b2c836da14a1947f7f06a984f` has now been verified against its parent,
+five recorded file hashes and noreply identity. No audit or phase completion marker is issued.
+
+The task/federation structural publication gap identified above in earlier snapshots is
+now corrected locally. This does not establish integrated cross-phase consumer conformance.
+
+The comparison driver now rejects changes visible between its initial and final reads
+of the five listed files, and hashes the captured fixture bytes it parsed. See the
+[source consistency review](p16-probe-snapshot-v3.md) for remaining race, loaded-code
+and dependency limits. The historical post-execution-only behavior above remains a
+record of the earlier implementation; the trust mutation runner is unchanged here.
+
+The mutation runner now also captures listed source bytes, rejects observable changes,
+and requires the four selected baseline methods to pass before crediting guard-removal
+failures. The [mutation integrity review](p16-mutation-integrity-v3.md) records remaining
+loaded-code and isolation limits; the earlier post-execution-only behavior is historical.
+
+After the current restart catches up, the next forward P16 task remains composition of durable floors with bundle verification, preserving rejection and freshness-at-use limits without granting execution authority.

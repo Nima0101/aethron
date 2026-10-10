@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "id": "p16-mutation-recheck-v3",
+  "component": "P16 fixed source-mutation assurance probe recheck",
+  "decision": "KEEP",
+  "constraints": [
+    "Run four predeclared edits to trusted local Python source against selected actual unittest methods. Require a complete successful baseline before observing expected assertion failures.",
+    "Sequential local execution, scoped restoration of two replaced bindings and before/after source checks. No arbitrary code upload, automatic mutant discovery or test-time deadline."
+  ],
+  "alternatives": [
+    "Python compile/exec of captured source with unittest.mock binding restoration.",
+    "mutmut discovery with POSIX fork or forkserver workers.",
+    "Java PIT mutation testing and build integration.",
+    "Fresh Python interpreter per selected experiment with an explicit result protocol."
+  ],
+  "rationale": [
+    "KEEP explicit source experiments: each reviewed edit has an exact source-match prerequisite and a selected behavioral test. PIT addresses Java code; mutmut adds generated discovery and isolation but does not by itself establish these exact Python substitutions.",
+    "Process-per-experiment isolation would win if tests had uncontrolled state or required a timeout. The current trusted suite promises only two-binding restoration and tests RuntimeError/KeyboardInterrupt cleanup; no broader isolation is claimed.",
+    "Fresh execution passes all four baseline methods and detects the four edits with eight expected assertion failures and no mutant errors. Nineteen focused probe methods also cover broken baselines, restoration and observed source changes. No implementation mismatch was demonstrated.",
+    "Unfiltered Bandit retains B102 for trusted compile/exec. This is not a sandbox or an upload endpoint. The finite experiment list and inspected local source are the boundary; suppressing the finding would not improve it."
+  ],
+  "limits": [
+    "These are trusted developer diagnostics, not deployed command, sensor, transport or authority services. No hardware, hard-real-time, MLS/CNSA, availability or complete-phase qualification.",
+    "Five listed files per tool are compared before/after execution. This is not an atomic snapshot, loaded-code attestation or dependency closure and misses transient restoration.",
+    "Alternatives were researched from official sources, not executed or benchmarked. KEEP is not based on installation, familiarity or rewrite cost.",
+    "Not comprehensive mutation coverage, proof of causality, arbitrary-test resource bounding or independent cryptographic validation.",
+    "Unfiltered Bandit also retains guarded assertion and test subprocess warnings; no unfiltered clean security result is claimed."
+  ],
+  "evidence": [
+    "https://mutmut.readthedocs.io/en/latest/",
+    "https://pitest.org/",
+    "https://docs.python.org/3/library/unittest.mock.html"
+  ]
+}

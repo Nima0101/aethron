@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_commit": "ba0dbbc6af2cf7e87df0da0a8ace7fe1b4fa8e06",
+  "scope": "Fresh task-description and immutable bundle-composition technology reassessment. Documentation-only patch; production code and tests unchanged.",
+  "decisions": {
+    "task_descriptions": "KEEP",
+    "bundle_composition": "KEEP"
+  },
+  "checks": {
+    "focused_methods": 41,
+    "task_methods": 10,
+    "bundle_methods": 11,
+    "adr_recheck_methods": 4,
+    "skips": 0,
+    "production_red": false,
+    "negative_control_methods": 2,
+    "negative_control_failures": 2,
+    "negative_control_errors": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_production": "PASS without exclusions"
+  },
+  "source_sha256": {
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "tests/test_interop_tasks.py": "2cbf9761590b24410bfed2026f504b720c97a58329ebbbe5d835021c48bbed97",
+    "tests/test_interop_bundles.py": "dc0fc58971f7ec90f5268e38c23aab3d51ba9807adafb2e960617e94c0d85596",
+    "tests/test_passport_schemas.py": "494e0b7345892bb2cfea3109f8c05735e8328f0cbf4de5b5319913a585ee0cb7",
+    "tests/test_passport_lexical.py": "0272780452980ec03e9b180a84e35db7e2aefd04f7bc6cf0ac21cfd9288b1887",
+    "examples/interop/task-vectors-v1.json": "17510988868b8fb57f2af7b8375db21ebc980bd845450f6c9cd44bfc0fa4794c",
+    "examples/interop/bundle-vectors-v1.json": "9dc373820c2c278b18887dc35716d941ef2ab6d76b0afe119a34787a7436a460",
+    "docs/architecture/interop/task-v1.md": "5b5eb7215196f293813af2b6b5af0d0ee3b5fd0892c2f6858f2810b52db276ee",
+    "docs/architecture/interop/task-bundle-v1.md": "e1fc6b638906d6bba75fdc885ac636d50b4324c5e6a6e833c0d8c9dabc4f6765",
+    "docs/decisions/p16-task-reassessment-v3.json": "930cf29f39dbed82ef66ed961e489ab08cc63d6cc8cba99733831bd69c273765",
+    "docs/decisions/p16-bundle-reassessment-v3.json": "d0f20bdc0e36b0cc4c3acfdf8be0b9d7218c75cb6729117bdd454f8af4d85a11",
+    "docs/engineering/reviews/p16-task-bundle-reassessment-v3.md": "e5718b61a13c99a77ccc37756ea6c25ce8fad8033a7b12cb6adf3ff241ab6e22"
+  },
+  "local_artifact_sha256": {
+    "task-bundle-bundle_envelope_pin-negative.log": "4b2e665e0cdc9ef2b05a98f996dede52db9bb5bbc4eba6e1f990e495b45486a7",
+    "task-bundle-negative.json": "230cfa712fd2e0591f46d95fdf24befd364374caef5d0f4572716974f49c58a0",
+    "task-bundle-reassessment-adr.log": "fac80f044dd8953a443bee2f1b07d4578e4479be8188ea4fe77eb06a63e39327",
+    "task-bundle-reassessment-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "task-bundle-reassessment-focused.log": "211ce0396e2277fcc1c34e437b4b1af6bbaf41a729bca32475cb913a23ca150e",
+    "task-bundle-reassessment-format.log": "3bc53bf3e981a98a34a852e175bf9b77af841edea74fca595d9aedcbaf9a4938",
+    "task-bundle-reassessment-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "task-bundle-task_canonical-negative.log": "09131175c4d96272cbe3211dca9356fbf8222909992220d932f028502ad20b7d"
+  },
+  "negative_controls": [
+    {
+      "name": "task_canonical",
+      "source": "aethron/interop_tasks.py",
+      "source_sha256": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+      "old": "_require(_canonical(task) == raw)",
+      "new": "_require(True)",
+      "test": "TaskTests.test_exact_pin_subject_and_canonical_bytes",
+      "methods": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "source_unchanged": true
+    },
+    {
+      "name": "bundle_envelope_pin",
+      "source": "aethron/interop_bundles.py",
+      "source_sha256": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+      "old": "sha256(envelope).hexdigest() != description[\"passport_sha256\"]",
+      "new": "False",
+      "test": "TaskBundleTests.test_input_pins_and_evidence_set_fail_closed",
+      "methods": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "source_unchanged": true
+    }
+  ],
+  "reproduction": {
+    "focused": "PYTHONPATH=tests:. python -m unittest test_passport_lexical test_interop_tasks test_interop_bundles test_passport_schemas -v",
+    "adr": "PYTHONPATH=tests:. python -m unittest test_passport_schemas.ArchitectureDecisionConformance -v",
+    "mutations": "Require each recorded old string occurs once in the bound source; compile its replacement in a temporary ModuleType with package aethron registered in sys.modules. For task patch test_interop_tasks.validate_task to the temporary function; for bundle patch test_interop_bundles.interop_bundles to the temporary module. Run the named test, require one assertion failure and no errors/skips; restore patches/module and verify source bytes unchanged. Baseline selected methods must pass first."
+  },
+  "peer_contract": {
+    "fetched_main": "fce89d3904ddbfb004b55718fab955c91a9c49a0",
+    "fresh_fetch": true,
+    "json_bounds_matches_fetched_main": true
+  },
+  "limits": [
+    "Current candidate comparison is source-based, not full alternative implementation parity or benchmarking.",
+    "Mutation failures are expected sensitivity evidence, not demonstrated production defects.",
+    "Hashes identify listed files/logs, not atomic snapshots, loaded bytecode or dependency closure.",
+    "No physical timing, MLS/CNSA, availability, complete distribution or hosted CI qualification."
+  ],
+  "next_component": "P16 direct federation, then inbox resource accounting",
+  "audit_complete": false
+}

@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "id": "p16-mutation-current-v3",
+  "component": "Current fixed mutation experiments and baseline integrity",
+  "decision": "KEEP",
+  "constraints": [
+    "Four predeclared substitutions in trusted Python source, selected unittest methods, sequential in-process execution; no arbitrary upload or automatic mutant discovery.",
+    "Require complete passing baseline, assertion failures without errors/skips for each mutant, restoration of two patched bindings and rejection of observed source changes."
+  ],
+  "alternatives": [
+    "Python captured-source compilation with scoped unittest.mock contexts.",
+    "mutmut automatic discovery with POSIX fork/forkserver isolation.",
+    "Java/JVM PIT mutation testing.",
+    "Separate Python process per experiment with Python, Node, Rust or Java supervision."
+  ],
+  "rationale": [
+    "KEEP direct compilation for the exact source substitutions and actual Python tests being reviewed. PIT targets JVM mutations, while mutmut supplies broader discovery and process isolation. Those are useful different experiment boundaries, not evidence of a material improvement to these four explicit checks.",
+    "Separate processes become useful if independent global-state isolation is required. Current code promises restoration of two bindings only and tests that restoration on RuntimeError and KeyboardInterrupt; it does not claim whole-process side-effect isolation.",
+    "Fresh real execution passes four baseline methods and detects four mutations with eight expected assertion failures. Existing focused tests reject broken baselines and changed source and confirm restoration. No new implementation mismatch was found."
+  ],
+  "limits": [
+    "Current source-based comparison, not executable parity or throughput benchmarking of alternative implementations. No preference based on installed tooling, familiarity or rewrite cost.",
+    "Before/after listed-file comparisons are not atomic, do not attest loaded code or dependency closure, and cannot detect transient changes restored between reads.",
+    "No hosted run, physical qualification, hard-real-time, MLS/CNSA, availability or complete-phase claim.",
+    "Fixed experiment count does not bound arbitrary test execution time. Not a sandbox, comprehensive mutation score, proof of causal completeness or cryptographic validation.",
+    "PIT basic-concepts URL was unavailable during this review; its successfully retrieved official homepage supports only the JVM ecosystem description."
+  ],
+  "evidence": [
+    "https://mutmut.readthedocs.io/en/latest/",
+    "https://pitest.org/",
+    "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Process.html"
+  ]
+}

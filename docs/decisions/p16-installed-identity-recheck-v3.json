@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "id": "p16-installed-identity-recheck-v3",
+  "component": "Installed module identity and local RECORD association",
+  "decision": "KEEP",
+  "constraints": [
+    "Inspect actual import locations in an isolated Python process; compare eight selected source files to a trusted checkout and local distribution membership/hash/size.",
+    "Static name/version must each have exactly one matching header; local metadata is not publisher authentication or loaded-bytecode attestation."
+  ],
+  "alternatives": [
+    "Python importlib.metadata directly reports the distribution used by the target interpreter. Java/Kotlin or Node subprocess orchestration still requires a Python probe for this identity.",
+    "Hatchling and Maturin are credible packaging alternatives, but changing the build backend does not prove the executing import identity or publisher authenticity."
+  ],
+  "rationale": [
+    "KEEP the direct Python checker: seventeen real-file negative/positive methods pass for source-tree imports, byte changes, RECORD membership/location/digest/size and identity header cardinality.",
+    "No runtime or contract mismatch demonstrated. The strict regular-wheel profile deliberately requires RECORD hashes and sizes even where general metadata permits omission."
+  ],
+  "limits": [
+    "Official-source candidate comparison only; no alternative executable or speed benchmark.",
+    "Local focused source tests only; no new installed distribution, hosted matrix, P19 customer acceptance, physical, hard-real-time, MLS/CNSA or availability claim."
+  ],
+  "evidence": [
+    "https://docs.python.org/3/library/importlib.metadata.html",
+    "https://packaging.python.org/en/latest/specifications/recording-installed-packages/",
+    "https://hatch.pypa.io/latest/config/build/",
+    "https://www.maturin.rs/",
+    "https://nodejs.org/api/child_process.html"
+  ]
+}

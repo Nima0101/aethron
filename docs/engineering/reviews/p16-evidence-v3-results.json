@@ -1,0 +1,31 @@
+{
+  "audit_policy_version": 3,
+  "baseline_head": "be2b0f00b855b2e77844f12ac151fd8f1f1158d3",
+  "decision": "KEEP implementation; FIX coverage; CLARIFY claims",
+  "python": "3.13.5",
+  "cryptography": "50.0.2",
+  "source_sha256": {
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "tests/test_passport_evidence.py": "34dd2b858ae87f13008de87a54c82ac66ef9693f8c13ff162bc4a7c097f8086f",
+    "docs/architecture/interop/evidence-binding-v1.md": "641e541589cfc38abe039a94f22dc1629871c990ac22f943e2ddec8ed94c1c11",
+    "docs/engineering/reviews/p16-evidence-v3.md": "72e09d1222241ddbeb3a70329de89bfe5c879727713afd7469f9f98d69df95a1"
+  },
+  "verification": {
+    "evidence_binding_tests": 10,
+    "passport_family_tests": 40,
+    "interop_tests": 31,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_production": "PASS",
+    "diff": "PASS"
+  },
+  "production_change": false,
+  "new_tests_passed_on_existing_implementation": true,
+  "limitations": [
+    "No competitor throughput ranking",
+    "No physical timing or memory qualification",
+    "No anonymity, encryption, secure-erasure or content-truth guarantee",
+    "No V3 completion claim"
+  ]
+}

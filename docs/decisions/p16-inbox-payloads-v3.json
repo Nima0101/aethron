@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "decision": "KEEP",
+  "limits": [
+    "Source-based candidate comparison, not an executed alternate implementation or performance ranking.",
+    "No supplied target hardware, throughput SLA or hard deadline. No MLS/CNSA, physical, availability or lane-completion qualification. Insufficient information for tactical deployment.",
+    "This sampled two-producer trace does not prove all thread interleavings, concurrent-consumer behavior, fairness, linearizability or shutdown latency.",
+    "Close cannot cancel consumers or erase returned payloads. Caller time is not resampled after lock acquisition."
+  ],
+  "id": "p16-inbox-payloads-v3",
+  "component": "P16 bounded inbox accounting and concurrent payload assurance",
+  "constraints": [
+    "Synchronous process-local queue: at most sixteen entries and one MiB retained bytes, sixty-second caller-clock lifetime, per-peer count limits and all-entry expiry.",
+    "Compound operations need one atomic accounting decision; immutable exact byte payloads, no background service, scheduler or disk/network persistence."
+  ],
+  "alternatives": [
+    "Python native deque with explicit lock around compound accounting.",
+    "Rust Crossbeam bounded channels plus byte/peer/expiry accounting.",
+    "C#/F# bounded Channels with explicit overflow behavior and compound accounting.",
+    "Erlang/Elixir process isolation and mailboxes with separate bounded admission."
+  ],
+  "rationale": [
+    "KEEP explicit locked accounting: count-bounded channels or mailboxes alone do not enforce aggregate bytes, per-peer limits and expiry behind a live head. Alternatives remain credible for changed deployment constraints; no performance winner is established here.",
+    "FIX assurance coverage: identical producer bytes allowed returned-payload substitution to survive the concurrency test. Sixteen distinct synthetic bytes and admitted-versus-dequeued multiset equality detect that substitution.",
+    "The real queue passes all twelve inbox methods, including controlled child timeout. The prior test accepts a test-only b-x substitution; the revised test fails one assertion, zero errors or skips. Production queue source remains unchanged."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/threading.html",
+    "https://docs.rs/crossbeam-channel/latest/crossbeam_channel/fn.bounded.html",
+    "https://learn.microsoft.com/en-us/dotnet/core/extensions/channels",
+    "https://www.erlang.org/doc/system/eff_guide_processes.html"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "decision": "KEEP",
+  "limits": [
+    "No alternative runtime was executed or benchmarked in this slice; no measured latency, memory or runtime superiority claim.",
+    "No MLS/CNSA, installed-product, hardware, availability or whole-lane qualification."
+  ],
+  "id": "p16-evidence-metadata-current-v3",
+  "component": "Immutable evidence byte binding and returned digest/expiry metadata",
+  "constraints": [
+    "Offline exact tuple of 1..16 immutable bytes values, each at most 65536 bytes; complete pre-validation before signature or content hashing.",
+    "Authenticate the same envelope/policy snapshot, match every signed digest and preserve signed order/kind/outcome. Return metadata only, never qualification or motion authority.",
+    "No specified target hardware or hard deadline; bounds describe input bytes, not total memory or completion time."
+  ],
+  "alternatives": [
+    "Python exact bytes/tuple and native-backed hashlib composed with the versioned verifier.",
+    "Rust immutable borrows with RustCrypto SHA-2 and an independently conformant verifier adapter.",
+    "Erlang/Elixir immutable binaries with OTP crypto hash and a strict verifier adapter.",
+    "C#/F# SHA256.HashData with owned immutable snapshot semantics; read-only views alone do not prevent mutation through another alias."
+  ],
+  "rationale": [
+    "KEEP the runtime after fresh source and contract review: immutable values preserve the authenticated snapshot across digest checks without a second trust-policy implementation. Each candidate can hash bytes; no material improvement to the required semantics is demonstrated by changing the implementation boundary.",
+    "FIX standalone assurance: the eleven existing evidence methods survived independently removed output digest and policy expiry cap. Two added real-signature methods now reject those changes; production runtime is unchanged.",
+    "The output passport_sha256 names the signed payload, not its envelope. Effective expiry is capped by the supplied policy. Existing bundle coverage already exercised both properties; this correction is scoped to standalone evidence tests."
+  ],
+  "evidence": [
+    "https://docs.python.org/3/library/hashlib.html",
+    "https://docs.rs/sha2/latest/sha2/",
+    "https://www.erlang.org/doc/apps/crypto/crypto.html",
+    "https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.sha256.hashdata"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "audit_policy_version": 3,
+  "baseline_head": "7cb3c7e50142bab0206dcf30c5073b4da5d5611c",
+  "component": "P16 caller trust-floor lifecycle",
+  "decision": "KEEP stateless verifier; CLARIFY consumer contract and ADD negative traces",
+  "production_logic_changed": false,
+  "red_failure_claimed": false,
+  "checks": {
+    "new_trace_methods": 2,
+    "related_methods_including_new": 58,
+    "skips": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_initial": "Two pre-existing B311 seeded mutation-test findings",
+    "bandit_production": "PASS without exclusions",
+    "bandit_tests": "PASS excluding B311"
+  },
+  "source_sha256": {
+    "aethron/passports.py": "54b1c2bcb71b225941d1cd3cf1aaf589ff04112a81756bb2ecaf26673270361a",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "tests/test_passports.py": "20bdc75b84aa566867197604e2462053e366016638828bb0ba59e990ffd56c3d"
+  },
+  "retained_log_sha256": {
+    "trust-floor-traces.log": "2a36ec147f45273998366b0ce9668e1d073096271583a4f656c5f9631d8e1f56",
+    "trust-floor-related.log": "6cb571108b3c9ac8517f342dfa1c8813a68f9ec34667b88ec603a7d92293e96c",
+    "trust-floor-bandit-initial.log": "d1cc73b8d8f6c207f99bbf597c6121835e267c2471cbebd6e524ecc2aa0095e1"
+  },
+  "limits": [
+    "Caller argument replay only; no actual disk restore, reboot or persistent store test.",
+    "Persistence and authenticated policy transport remain unfinished software.",
+    "No new physical, installed-distribution or hosted qualification."
+  ]
+}

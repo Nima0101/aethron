@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "id": "p16-evidence-kinds-v3",
+  "component": "Bounded evidence metadata preservation",
+  "decision": "KEEP",
+  "constraints": [
+    "One to sixteen exact immutable bytes objects, each at most 65536 bytes; authenticate before hashing and preserve signed digest/kind/outcome in signed order.",
+    "Portable synchronous offline software contract, no I/O or content interpretation; no target hardware, deadline, measured bottleneck or throughput requirement."
+  ],
+  "alternatives": [
+    "Python exact immutable inputs with native-backed hashlib SHA-256 and frozen metadata.",
+    "Rust sha2 with owned or safely borrowed stable inputs.",
+    "C#/F# SHA256.HashData span or byte-array APIs with explicit stable ownership.",
+    "Erlang/Elixir OTP crypto:hash with binary message data."
+  ],
+  "rationale": [
+    "KEEP the bounded immutable input and native hash boundary. Each alternative supplies maintained SHA-256 APIs, but none alone preserves signed metadata or establishes a measured deployment improvement for this small stateless operation. No manual hashing, new data copy or streaming layer is required.",
+    "Hashlib can release the GIL on larger inputs, so exact immutable byte ownership matters independently of interpreter serialization. Read-only views in alternative hosts still require backing-storage ownership discipline.",
+    "The current code preserves all reference fields, but the prior ten evidence methods do not detect replacement of every kind with synthetic. One new real-signature test compares complete reference metadata after reversing supplied and signed order; it detects that mutation.",
+    "No runtime failure or winning migration is established. The correction is executable regression coverage, not language diversity or an unmeasured performance recommendation."
+  ],
+  "limits": [
+    "Candidate APIs were inspected from current primary documentation; no full alternate binder or throughput comparison was executed.",
+    "One MiB limits input content, not process RSS. Digests can correlate guessable content and are not encryption or anonymization.",
+    "The binder authenticates signed assertions and matches bytes, not scientific truth, physical provenance, permissions or certification.",
+    "No lane completion, MLS/CNSA, hard-real-time, availability or physical qualification. Insufficient information for tactical deployment."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/hashlib.html",
+    "https://docs.rs/sha2/latest/sha2/",
+    "https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.sha256.hashdata?view=net-10.0",
+    "https://www.erlang.org/doc/apps/crypto/crypto.html#hash/2"
+  ]
+}

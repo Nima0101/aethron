@@ -1,0 +1,164 @@
+{
+  "review_order_version": 3,
+  "baseline_commit": "e45f2f7a7fb582933a49ae4c9f11e29448c9cf3c",
+  "review": "Current edge, packet, ROS-status conformance and caller-floor lifecycle evidence",
+  "decision": "KEEP four assurance components; fix two missing rejection policy_revision assertions",
+  "runtime_changed": false,
+  "tests_changed": true,
+  "production_red": false,
+  "checks": {
+    "focused_methods": 24,
+    "adr_methods": 4,
+    "skips": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS, changed test files, no exclusions",
+    "producer_bindings": 17,
+    "distinct_producer_files": 11
+  },
+  "negative_controls": {
+    "methods": 2,
+    "old_assertion_failures": 0,
+    "new_assertion_failures": 7,
+    "new_failures_by_consumer": {
+      "edge": 5,
+      "packet": 2
+    },
+    "errors": 0,
+    "skips": 0,
+    "bindings_restored": true,
+    "mutation": "Call actual verifier; replace only rejected-result policy_revision with 3"
+  },
+  "negative_control_source": "\"\"\"Finite real-call result substitution, never a production source mutation.\"\"\"\nimport dataclasses\nimport json\nimport sys\nimport unittest\nfrom unittest.mock import patch\nimport test_passport_schemas as edge\nimport test_sensor_packets as packet\n\nif not __debug__:\n    raise RuntimeError('optimized_control_forbidden')\nexpected = int(sys.argv[1])\nexperiments = (\n    (edge.interop_bundles, edge.EdgeEvidenceConformance, 'test_exact_binding_and_negative_portable_cases'),\n    (packet, packet.SensorPacketConformance, 'test_real_binding_preserves_every_portable_outcome'),\n)\nreports=[]\nfor owner, case_type, method in experiments:\n    original=owner.verify_task_bundle\n    def changed(*args, _original=original, **kwargs):\n        result=_original(*args, **kwargs)\n        return dataclasses.replace(result, policy_revision=3) if result.status == 'rejected' else result\n    with patch.object(owner, 'verify_task_bundle', changed):\n        result=unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite([case_type(method)]))\n    if owner.verify_task_bundle is not original or result.errors or result.skipped:\n        raise RuntimeError('invalid_control_run')\n    reports.append({'method':method,'failures':len(result.failures),'errors':len(result.errors),'skips':len(result.skipped)})\nif sum(item['failures'] for item in reports)!=expected:\n    raise RuntimeError('unexpected_failure_count')\nprint(json.dumps(reports,sort_keys=True))\n",
+  "producer_source_comparison": {
+    "main": "fce89d3904ddbfb004b55718fab955c91a9c49a0",
+    "entries": [
+      {
+        "corpus": "examples/interop/edge-unknown-vectors-v1.json",
+        "path": "contracts/openapi/aethron-edge-v1.json",
+        "sha256": "4d562382b803e59dac1ab24a7ead52cd2cdbbc9533aa6d9dc68fca9f6e9b0b83"
+      },
+      {
+        "corpus": "examples/interop/edge-unknown-vectors-v1.json",
+        "path": "contracts/fixtures/v3/unknown-output.json",
+        "sha256": "2b91d797820cce663134417d5b52b016aebcaca02c7a710bc16984487b35a754"
+      },
+      {
+        "corpus": "examples/interop/ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/__init__.py",
+        "sha256": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9"
+      },
+      {
+        "corpus": "examples/interop/ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/mailbox.py",
+        "sha256": "84b6c32191d1cd21f5469c908be50b38179d6d594cc9fd1865e2b06e3851b090"
+      },
+      {
+        "corpus": "examples/interop/ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/__init__.py",
+        "sha256": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a"
+      },
+      {
+        "corpus": "examples/interop/ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/geometry.py",
+        "sha256": "24dbd7e248990f426d985d05e9add08615621381f4391209a85682102f50d02b"
+      },
+      {
+        "corpus": "examples/interop/ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/packets.py",
+        "sha256": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192"
+      },
+      {
+        "corpus": "examples/interop/ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/rectification.py",
+        "sha256": "b034b4f5b2e0c5c4bda51f5adfcb4a15193ebe7497ab4099c7887fb57c49f6db"
+      },
+      {
+        "corpus": "examples/interop/ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/ros2.py",
+        "sha256": "41aece1eff1dd5e6ae77272959354c8a9bcc6465ec10da2da7b747ad97589912"
+      },
+      {
+        "corpus": "examples/interop/ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sources/__init__.py",
+        "sha256": "c68be66b7a8e4e95cafcc1cdcf108c0532d1d2a53b55def660cbfdc4b8034f48"
+      },
+      {
+        "corpus": "examples/interop/ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sources/base.py",
+        "sha256": "0617c1b46c55416ff779189c270c7f5e46cd52a7cc0eaa03328c6800b8bbc319"
+      },
+      {
+        "corpus": "examples/interop/sensor-encoding-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/packets.py",
+        "sha256": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192"
+      },
+      {
+        "corpus": "examples/interop/sensor-encoding-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/__init__.py",
+        "sha256": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9"
+      },
+      {
+        "corpus": "examples/interop/sensor-encoding-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/__init__.py",
+        "sha256": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a"
+      },
+      {
+        "corpus": "examples/interop/sensor-packet-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/packets.py",
+        "sha256": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192"
+      },
+      {
+        "corpus": "examples/interop/sensor-packet-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/__init__.py",
+        "sha256": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9"
+      },
+      {
+        "corpus": "examples/interop/sensor-packet-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/__init__.py",
+        "sha256": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a"
+      }
+    ]
+  },
+  "source_sha256": {
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "docs/decisions/p16-edge-consumer-current-v3.json": "d6cee089485214759a5682a4a39c10a6df1941d25dfa1bb9f7fde181fabc3ee7",
+    "docs/decisions/p16-lifecycle-current-v3.json": "c97180d68fc092d0cc7e25b31bd40854ee62694b8a399e1dbe79b644ba29df22",
+    "docs/decisions/p16-packet-consumer-current-v3.json": "676b7317f97dc9adae00d48ef0be486709500649745ecc91a4e7cd0abf619e32",
+    "docs/decisions/p16-ros-consumer-current-v3.json": "6d4c245c0002aa8ce75fd993d72c5f118ca2cf2ea4b0ee2e194576f03a486080",
+    "docs/engineering/reviews/p16-consumer-current-v3.md": "10569bf601eba6cb7f85e106d0385e59f28252caf8f0f8ca371f9e2204b80bfd",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "1e6130a5e002146d954d21e6b72e0c5b0dac6eb81a544d3327c33a7dc8deba02",
+    "examples/interop/edge-unknown-vectors-v1.json": "ee56de5eaa3b597aace551fc93f8faf6e1f3b9d72ceca9872ee6b0d2886144d7",
+    "examples/interop/ros-status-vectors-v1.json": "d9d64c2a2869c6dec3151c969dd343c475a3b610adfbbaf6b641a568be5d9738",
+    "examples/interop/sensor-encoding-vectors-v1.json": "60ead91ad5b69d10edc7487028823d1acfab8c4259b9a41dae10c6fc922bd39e",
+    "examples/interop/sensor-packet-vectors-v1.json": "80fb60be05c18f87f8954332c2d4f8be28762c16d335d004527555fb3d3aa4fc",
+    "requirements-passport-sensor-conformance.txt": "b6b85e1f3f15fa42ee3d3676bd1a95b0800a672c38106a9a1d8366f818f3393d",
+    "tests/interop_consumers/test_ros_status.py": "64b64d989c8361e4a508631b9fd13caf3a0fd447f6a406a7b4c0fe4b1623c75e",
+    "tests/interop_consumers/test_sensor_packets.py": "69fc7bb99da6907b24997931690f03782865eab61f113e5534c5dc8c627a6770",
+    "tests/test_passport_lexical.py": "0272780452980ec03e9b180a84e35db7e2aefd04f7bc6cf0ac21cfd9288b1887",
+    "tests/test_passport_policy.py": "2ff348136a8b174c53d72e96318462c35d7c4163f3dcfc1f0836a138d6f55acd",
+    "tests/test_passport_schemas.py": "0c423ffb3e53e8edc3f7a9bad16b460c1ca92b76ebeeb05f32492cda0d8f40b2",
+    "tests/test_passports.py": "20bdc75b84aa566867197604e2462053e366016638828bb0ba59e990ffd56c3d"
+  },
+  "runtime_artifacts_sha256": {
+    "consumer-current-focused.log": "9eb1a57f520a2b11ba7eb597cf0f708da943f47cded2fca447dc2e1e6bd1a13e",
+    "consumer-current-old-control.log": "2f746cc1fdbe75fedf6aaa90b79aec5b098b61f066c5d6b2b78d18e1daeb1e65",
+    "consumer-current-new-control.log": "70d27128582a1f5bd0a194e7fa19deed4eacdfa160575bae3551dd34c2a61b72",
+    "consumer-current-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "consumer-current-format.log": "eee76f865de5a9f2456950f710ae5d5f9b5bd0ea02aa54f614c5eed6642a0bfd",
+    "consumer-current-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "consumer-current-adr.log": "6d28ac4dff990d9b57f4493d9101ec411c6438d5ab8e56b51b49a0caaac4cdbf",
+    "consumer-current-source-bindings.json": "6497054ebf51ee0e768c5b193e7f0c536c5edf25cccb7789e11a08bb7602a6d0",
+    "consumer_metadata_control.py": "cb48232677617899930357fd86aaad0fc1f1f7a09d30e30315edbf999b4f630b"
+  },
+  "limits": [
+    "Fixed synthetic cases, no live sensor, ROS graph, DDS or physical interface.",
+    "KEEP decisions concern assurance harnesses, not producer language or future deployment architecture.",
+    "Expected altered-result assertion failures do not identify a runtime defect.",
+    "Source hashes are listed-file byte comparisons, not loaded-code or dependency attestation.",
+    "No alternative executable benchmark, formal proof, hardware timing, MLS/CNSA, availability or whole-phase qualification."
+  ],
+  "next": "Reconcile public architecture/release claims against the current P16 implementation inventory."
+}

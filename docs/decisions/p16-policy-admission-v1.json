@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "id": "p16-policy-admission-v1",
+  "component": "aethron.passports.validate_pinned_policy",
+  "decision": "KEEP",
+  "constraints": [
+    "Offline synchronous metadata call; immutable UTF-8 bytes up to 65536 and depth 8.",
+    "Closed v1 policy, safe integer tokens, complete key metadata, external content pin and caller-trusted time/revision floors.",
+    "No hardware target, deadline, service SLA, persistence or authorization behavior is specified."
+  ],
+  "alternatives": [
+    "Python standard JSON token/pair hooks and native-backed hashlib.",
+    "Java/Kotlin Jackson streaming parser with explicit lexical and duplicate checks.",
+    "Rust Serde with explicit policy validation and lexical parity.",
+    "CUE configuration validation with a separately evidenced raw-byte admission boundary."
+  ],
+  "rationale": [
+    "Retain explicit lexical hooks and immutable snapshots; expose the existing complete policy validator without deriving policy admission from individual passport success.",
+    "Candidate documentation supports alternatives but does not establish a material improvement for this bounded offline contract. No comparative performance ranking is claimed.",
+    "No new language, custom tokenizer or cryptographic algorithm is justified by the actual requirements. Installed tooling and rewrite cost are not selection criteria."
+  ],
+  "limits": [
+    "A checksum from the same untrusted sender does not authenticate a policy. The expected pin must be provisioned independently.",
+    "No floor persistence, enrollment, same-revision conflict detection across calls, key ownership proof or live revocation discovery.",
+    "Constructible result metadata never grants execution or motion authority or qualifies evidence.",
+    "No MLS, CNSA, availability, deterministic deadline or physical qualification."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/json.html",
+    "https://github.com/FasterXML/jackson-core",
+    "https://serde.rs/attributes.html",
+    "https://cuelang.org/docs/concept/how-cue-enables-data-validation/"
+  ]
+}

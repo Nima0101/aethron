@@ -1,0 +1,295 @@
+{
+  "audit_policy_version": 3,
+  "baseline_head": "65dc44e1950c798284af79ed6616f594070763d8",
+  "decision": "KEEP native workflow and packaging backend; FIX build/import trigger coverage and manifest omission",
+  "audit_complete": false,
+  "checks": {
+    "red_trigger_assertions": 1,
+    "red_manifest_assertions": 1,
+    "red_execution_errors": 0,
+    "green_trigger_controls": 24,
+    "root_requirement_manifest_selection": "PASS",
+    "jobs_permissions_branch_restrictions": "unchanged",
+    "installed_source_methods": 5,
+    "interop_methods": 43,
+    "skips": 0,
+    "actionlint": "PASS",
+    "diff": "PASS"
+  },
+  "controls_before": [
+    {
+      "event": "pull_request",
+      "path": "setup.py",
+      "covered": false
+    },
+    {
+      "event": "pull_request",
+      "path": "setup.cfg",
+      "covered": false
+    },
+    {
+      "event": "pull_request",
+      "path": "MANIFEST.in",
+      "covered": false
+    },
+    {
+      "event": "pull_request",
+      "path": "README.md",
+      "covered": false
+    },
+    {
+      "event": "pull_request",
+      "path": "LICENSE",
+      "covered": false
+    },
+    {
+      "event": "pull_request",
+      "path": "NOTICE",
+      "covered": false
+    },
+    {
+      "event": "pull_request",
+      "path": "aethron/__init__.py",
+      "covered": false
+    },
+    {
+      "event": "pull_request",
+      "path": "aethron/core.py",
+      "covered": false
+    },
+    {
+      "event": "pull_request",
+      "path": "aethron/actions.py",
+      "covered": false
+    },
+    {
+      "event": "pull_request",
+      "path": "aethron/features.py",
+      "covered": false
+    },
+    {
+      "event": "pull_request",
+      "path": "aethron/schema.py",
+      "covered": false
+    },
+    {
+      "event": "pull_request",
+      "path": "aethron/models/rules.json",
+      "covered": false
+    },
+    {
+      "event": "push",
+      "path": "setup.py",
+      "covered": false
+    },
+    {
+      "event": "push",
+      "path": "setup.cfg",
+      "covered": false
+    },
+    {
+      "event": "push",
+      "path": "MANIFEST.in",
+      "covered": false
+    },
+    {
+      "event": "push",
+      "path": "README.md",
+      "covered": false
+    },
+    {
+      "event": "push",
+      "path": "LICENSE",
+      "covered": false
+    },
+    {
+      "event": "push",
+      "path": "NOTICE",
+      "covered": false
+    },
+    {
+      "event": "push",
+      "path": "aethron/__init__.py",
+      "covered": false
+    },
+    {
+      "event": "push",
+      "path": "aethron/core.py",
+      "covered": false
+    },
+    {
+      "event": "push",
+      "path": "aethron/actions.py",
+      "covered": false
+    },
+    {
+      "event": "push",
+      "path": "aethron/features.py",
+      "covered": false
+    },
+    {
+      "event": "push",
+      "path": "aethron/schema.py",
+      "covered": false
+    },
+    {
+      "event": "push",
+      "path": "aethron/models/rules.json",
+      "covered": false
+    }
+  ],
+  "controls_after": [
+    {
+      "event": "pull_request",
+      "path": "setup.py",
+      "covered": true
+    },
+    {
+      "event": "pull_request",
+      "path": "setup.cfg",
+      "covered": true
+    },
+    {
+      "event": "pull_request",
+      "path": "MANIFEST.in",
+      "covered": true
+    },
+    {
+      "event": "pull_request",
+      "path": "README.md",
+      "covered": true
+    },
+    {
+      "event": "pull_request",
+      "path": "LICENSE",
+      "covered": true
+    },
+    {
+      "event": "pull_request",
+      "path": "NOTICE",
+      "covered": true
+    },
+    {
+      "event": "pull_request",
+      "path": "aethron/__init__.py",
+      "covered": true
+    },
+    {
+      "event": "pull_request",
+      "path": "aethron/core.py",
+      "covered": true
+    },
+    {
+      "event": "pull_request",
+      "path": "aethron/actions.py",
+      "covered": true
+    },
+    {
+      "event": "pull_request",
+      "path": "aethron/features.py",
+      "covered": true
+    },
+    {
+      "event": "pull_request",
+      "path": "aethron/schema.py",
+      "covered": true
+    },
+    {
+      "event": "pull_request",
+      "path": "aethron/models/rules.json",
+      "covered": true
+    },
+    {
+      "event": "push",
+      "path": "setup.py",
+      "covered": true
+    },
+    {
+      "event": "push",
+      "path": "setup.cfg",
+      "covered": true
+    },
+    {
+      "event": "push",
+      "path": "MANIFEST.in",
+      "covered": true
+    },
+    {
+      "event": "push",
+      "path": "README.md",
+      "covered": true
+    },
+    {
+      "event": "push",
+      "path": "LICENSE",
+      "covered": true
+    },
+    {
+      "event": "push",
+      "path": "NOTICE",
+      "covered": true
+    },
+    {
+      "event": "push",
+      "path": "aethron/__init__.py",
+      "covered": true
+    },
+    {
+      "event": "push",
+      "path": "aethron/core.py",
+      "covered": true
+    },
+    {
+      "event": "push",
+      "path": "aethron/actions.py",
+      "covered": true
+    },
+    {
+      "event": "push",
+      "path": "aethron/features.py",
+      "covered": true
+    },
+    {
+      "event": "push",
+      "path": "aethron/schema.py",
+      "covered": true
+    },
+    {
+      "event": "push",
+      "path": "aethron/models/rules.json",
+      "covered": true
+    }
+  ],
+  "manifest_selection_before": false,
+  "manifest_selection_after": true,
+  "source_sha256": {
+    ".github/workflows/aethron-passports.yml": "0c14894bd1863d5c71705813be8d82c2242a4bc89e5b4aadb585b67ef7863dda",
+    "MANIFEST.in": "cced4a669505276d5959ceca2dd463c5df1ed63df8f04e594bd9ba6abcddc7fa",
+    "pyproject.toml": "c5e3d4d7dd65acd3d3c04baf7f53b49b5ef99db6231fa610f1e144f17eec4b0e",
+    "setup.py": "3225e55c87758412823021749c2f4219103b77cf2de8ab7ee18199551bd02071",
+    "aethron/__init__.py": "8ea373fbd458d5b53b6a5285584c61d14f1541e96d7a05c29f0508011b766fa7",
+    "aethron/core.py": "c5ef2d70c7ac5065b5a95836eba588fd44a78a6bceb97883ec0d0b5ac2a1619a",
+    "aethron/features.py": "f1b77e8f37e5c4724f9fb264ff32483659c5c5e0e804c95b1757a0c22e30c5d1",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "requirements-passport-sensor-conformance.txt": "b6b85e1f3f15fa42ee3d3676bd1a95b0800a672c38106a9a1d8366f818f3393d",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "b64890aa6eaed72477ae061b091493d3fa1141dfcde27f7b93532487d42aafd0",
+    "docs/engineering/reviews/p16-packaging-inputs-v3.md": "abd0c126a2cd9e3d78f06d0c37f5c8527d10b5ebb94461bc959e133b0dc8c235"
+  },
+  "runtime_evidence_sha256": {
+    "check_packaging_inputs.py": "4cbd616d779a5b2a969865bba3a62123357b8133e18dd605fd64d89a5fdaa960",
+    "packaging-inputs-red.log": "f0fdd5d0098f9592b2877117aaf99002a989ed4a2cd68925563d80b0665e5b55",
+    "packaging-inputs-corrected-red.log": "727991bb0919881ace3d8a651efd0cf2fa4da355f95d4c99ce72ba3986fa7883",
+    "packaging-inputs-green.log": "16b7803bd5a25a54bd7f510b68963a9c83f4511d4ed10e9904e731f32748ec37",
+    "packaging-interop-baseline.log": "5a10f8591712de3f45c6d5b749b6930cc025b8c8fcabc595c415ed37c3e14e2b"
+  },
+  "limits": [
+    "No archive was built: FileList selected requirements using root include directives only.",
+    "Path checks cover the positive glob subset and named samples, not hosted event scheduling.",
+    "First RED probe used a prospective model filename; corrected RED uses actual models/rules.json. setup.cfg remains prospective.",
+    "Source hashes cover listed project inputs, not complete dependency or loaded-code attestation.",
+    "Initial namespace/fork EAGAIN read failures were retried successfully.",
+    "No hosted CI, physical, crypto accreditation, MLS or timing qualification."
+  ]
+}

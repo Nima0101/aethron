@@ -1,0 +1,44 @@
+{
+  "audit_policy_version": 3,
+  "baseline_head": "8edce6f5e6cd877b2c836da14a1947f7f06a984f",
+  "decision": "KEEP versioned JSON/runtime; FIX missing structural schemas",
+  "checks": {
+    "red_assertion_failures": 6,
+    "red_errors": 0,
+    "schema_methods": 12,
+    "passport_family_methods": 61,
+    "interop_methods": 43,
+    "skips": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_runtime": "PASS",
+    "diff": "PASS"
+  },
+  "source_sha256": {
+    "contracts/interop/task-v1.schema.json": "6e3ce2bbf2c6ad3022c45ea30c9fe5c8d00d25e1d47d71499ecdc0c37cf2eb6e",
+    "contracts/interop/federation-v1.schema.json": "4ff8cd0e24028ec8ee4a99477c5a80ebb25c32e7b821a9a3ebc7d01c76ecdb13",
+    "tests/test_passport_schemas.py": "15e9c3c40ff121edb64ce695296ea99da20a2f7071fe243b66dc5b3bf9010fee",
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "examples/interop/task-vectors-v1.json": "17510988868b8fb57f2af7b8375db21ebc980bd845450f6c9cd44bfc0fa4794c",
+    "examples/interop/federation-vectors-v1.json": "00c8ee5d07f2dfd976a2e3ec77f6bc7cd3acca8183f338900e99f3c70b9ab0ba",
+    "docs/architecture/interop/schema-conformance-v1.md": "c97c10c425fb99140262ef3cb91d522bc0b404dd72ed21b14a5856af3783157f",
+    "docs/engineering/reviews/p16-interop-schemas-v3.md": "3366c6dcc373d7f3e890c16d4864a062922ffa00d1696ee52ec9cdeae46b73b1",
+    ".github/workflows/aethron-passports.yml": "68953009a7616d914b012ca2f675c1d44caf9e44dcd666af41de92563e5c0cdd"
+  },
+  "log_sha256": {
+    "interop-schema-red.log": "785d3b7f1d398afd4c475aca0ea5314a9a8b80ab821ac27a49e94b0a44657feb",
+    "interop-schema-green.log": "9f003c5cd1c7af9e10b4780f318cd1d1673b40b375b869ead985f913b2e4d82d",
+    "interop-schema-passports.log": "6e04656e0b714c396436b989c8559e041f7ed366fddafa9f53cca0f8c8469dcd",
+    "interop-schema-runtime.log": "20b850c6c9de513ec1d565972f3f8a346542316eada88eecfdd184e3b60059dd"
+  },
+  "limits": [
+    "Listed local file hashes, not loaded-code attestation or dependency closure.",
+    "Structural schemas do not authenticate pins, prove time/revision freshness or grant authority.",
+    "No new hosted run, cross-phase consumer qualification or hardware performance evidence.",
+    "Production modules, fixture bytes and frozen thresholds unchanged."
+  ],
+  "audit_complete": false
+}

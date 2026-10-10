@@ -1,0 +1,95 @@
+{
+  "audit_policy_version": 3,
+  "audit_complete": false,
+  "baseline_head": "337a2eaa3e5997c82f43fc03468deca713eb75bd",
+  "decision": "KEEP driver; FIX evidence response validation",
+  "source_sha256": {
+    "scripts/passport_technology_probe.py": "ffdb51d4737b7d02f1ddf6388fa3f8748468bbc89ac750829638a81bbec7b841",
+    "scripts/passport_technology_probe.mjs": "3ac4a2cd06479cf484310717ec8ac7b7d8afde167af047d8c3938f391ec2f83b",
+    "tests/test_passport_probe.py": "53db5b746c93ba14e1d8bbd7588cccbfc75978f42a8e466d311eb27d867cab0f",
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "docs/engineering/reviews/p16-probe-response-v3.md": "a9b96fc44820910a8d8fb185d74ea7bb7da7b2e7ed5b22d85824063d7418df71"
+  },
+  "red": {
+    "test_methods": 3,
+    "assertion_failures": 17,
+    "errors": 0,
+    "cases": [
+      "integer booleans",
+      "float booleans",
+      "boolean duration",
+      "negative duration",
+      "string duration",
+      "NaN",
+      "Infinity",
+      "numeric parser flag",
+      "false duplicate flag",
+      "false float flag",
+      "null version",
+      "invalid version",
+      "extra field",
+      "duplicate key",
+      "missing field",
+      "oversize response",
+      "overflow duration"
+    ]
+  },
+  "green": {
+    "passport_test_methods": 49,
+    "response_negative_controls": 17,
+    "positive_duration_controls": 2,
+    "optimized_mode_controls": 4,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS with B101/B404/B603 exclusions for assertion checks and controlled subprocess",
+    "diff": "PASS"
+  },
+  "normal_probe": {
+    "audit_policy_version": 2,
+    "python": "3.13.5",
+    "fixture_sha256": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "cases": 6,
+    "crypto_accepts": [
+      true,
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "admissions": [
+      "authenticated",
+      "rejected",
+      "rejected",
+      "rejected",
+      "rejected",
+      "rejected"
+    ],
+    "python_lexical_rejections": 5,
+    "python_hash_1mib_ms": 0.6115641444921494,
+    "python_verify_mean_ms_128": 2.426319328151294,
+    "python_traced_peak_bytes": 412134,
+    "node_probe": {
+      "node": "v22.23.2",
+      "crypto_accepts": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "hash_digest": "bf718b6f653bebc184e1479f1935b8da974d701b893afcf49e701f3e2f9f9c5a",
+      "hash_1mib_ms": 1.631247999999971,
+      "duplicate_keys_collapsed": true,
+      "float_lexemes_collapsed": true
+    },
+    "limits": "Single local sample; no hard real-time, RSS, platform or qualification claim. Node primitive probe is not a full verifier."
+  },
+  "limits": [
+    "Mock child responses test driver admission, not Node implementation.",
+    "Captured-size check does not bound subprocess output capture memory.",
+    "No cross-language performance ranking, runtime change or hardware qualification."
+  ]
+}

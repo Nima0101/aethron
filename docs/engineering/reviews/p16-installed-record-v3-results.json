@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline": "61ffd53a5efd607d35936c6ad5fa440ad49c0b66",
+  "component": "installed selected-file RECORD consistency",
+  "red": {
+    "methods": 6,
+    "errors": 10,
+    "assertion_failures": 0,
+    "reason": "new check_record function absent"
+  },
+  "green": {
+    "focused_methods": 19,
+    "adr_methods": 4,
+    "skips": 0,
+    "existing_installed_files": 7
+  },
+  "sensitivity": {
+    "methods": 5,
+    "expected_assertion_failures": 9,
+    "errors": 0,
+    "skips": 0,
+    "change": "replace only check_record with no-op in memory and restore"
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format_initial": "FAIL one file, retained and corrected",
+    "format_final": "PASS",
+    "bandit": "PASS without exclusions",
+    "diff": "PASS"
+  },
+  "source_sha256": {
+    "scripts/passport_install_check.py": "c7f13fd025caf999c00aed9d559ce117062b861aa528f228349db7d6310d4ea8",
+    "tests/test_passport_install_check.py": "0c77df691b1decfbb6836dbaf1230ced2e8a76fb48384346632eb1e24a3f80c6",
+    "docs/decisions/p16-installed-record-v3.json": "d67d034f3456b3d0c08508742c062e6dbf97e6885be9be999508cc882d62c994",
+    "docs/engineering/reviews/p16-installed-record-v3.md": "81e5a6581ec24b2319dd1b41c6e14297298483ff00e19bb6eb0d7cda4d50d5ec",
+    ".github/workflows/aethron-passports.yml": "760ab5550c53b8ad3dcb4a571356aa8ca790176646dc97e0c0c805591970dc45",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb"
+  },
+  "runtime_log_sha256": {
+    "install-record-red.log": "7606b11e4288a833cd2a3d2994292d6a673c53a8b509a1fb6eefdb3de37ded11",
+    "install-record-red-final.log": "a8bd63dcaef33c43850ca682a038fb556e439704af318fbd3402f09921e872f9",
+    "install-record-green.log": "fa0ceb8bea89e42a68603b168af508235fbda83bae933218a4e6a07f116a2b69",
+    "install-record-installed.json": "a5845b7f0947629a60415442c5b40644a94df0fafceaee76b2e105c888d3bddb",
+    "install-record-focused.log": "e69d5d023139cc9d3f36700423542075837b7c6b602d581617d9b95150a9560c",
+    "install-record-adr.log": "d23407b29bd82263b62a6cd00d2626185073c1a272f6bd3f9a189d6344259cce",
+    "install-record-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "install-record-format-initial.log": "1544b6c9a64d109e136be8d0c4eea248676e68c2e0c2ebe2bc965abc5df07a0f",
+    "install-record-format.log": "3bc53bf3e981a98a34a852e175bf9b77af841edea74fca595d9aedcbaf9a4938",
+    "install-record-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "install-record-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "install-record-controls.log": "9295a8f8c8d16d9d66d80f13e57b8569ceb585f23fcca9f31ae160024bc0977d",
+    "install_record_controls.py": "71dc58507ba5bb796f129175f1a6de7b25c9e3ab2a3c51ee06baf927197a2847"
+  },
+  "limits": [
+    "Existing Linux Python 3.13 installation reused; no new build, installation, clean environment or hosted matrix result.",
+    "Seven selected files only; local metadata/source consistency is not publisher authentication or distribution-version validation.",
+    "Imports execute before checks; reads do not provide atomic snapshot or loaded-bytecode attestation.",
+    "No phase/lane completion, physical qualification, MLS/CNSA, availability or real-time claim."
+  ]
+}

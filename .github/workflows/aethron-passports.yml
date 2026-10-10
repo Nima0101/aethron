@@ -1,0 +1,164 @@
+name: Offline passport verification
+on:
+  pull_request:
+    paths:
+      - 'aethron/**'
+      - 'tests/test_interop*.py'
+      - 'tests/interop_consumers/**'
+      - 'tests/packaging/test_passport*.py'
+      - 'integrations/edge/aethron_edge/__init__.py'
+      - 'integrations/edge/aethron_edge/sensors/__init__.py'
+      - 'integrations/edge/aethron_edge/sensors/packets.py'
+      - 'integrations/edge/aethron_edge/mailbox.py'
+      - 'integrations/edge/aethron_edge/sensors/geometry.py'
+      - 'integrations/edge/aethron_edge/sensors/rectification.py'
+      - 'integrations/edge/aethron_edge/sensors/ros2.py'
+      - 'integrations/edge/aethron_edge/sources/__init__.py'
+      - 'integrations/edge/aethron_edge/sources/base.py'
+      - 'requirements-passport-sensor-conformance.txt'
+      - 'examples/interop/**'
+      - 'tests/test_passport*.py'
+      - 'scripts/passport_*.py'
+      - 'scripts/passport_*.mjs'
+      - 'examples/passports/**'
+      - 'contracts/interop/**'
+      - 'docs/decisions/p16-*.json'
+      - 'contracts/openapi/aethron-edge-v1.json'
+      - 'contracts/fixtures/v3/unknown-output.json'
+      - 'pyproject.toml'
+      - 'setup.py'
+      - 'setup.cfg'
+      - 'MANIFEST.in'
+      - 'README.md'
+      - 'LICENSE'
+      - 'NOTICE'
+      - 'requirements-passports.txt'
+      - 'requirements-passport-conformance.txt'
+      - '.github/workflows/aethron-passports.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'aethron/**'
+      - 'tests/test_interop*.py'
+      - 'tests/interop_consumers/**'
+      - 'tests/packaging/test_passport*.py'
+      - 'integrations/edge/aethron_edge/__init__.py'
+      - 'integrations/edge/aethron_edge/sensors/__init__.py'
+      - 'integrations/edge/aethron_edge/sensors/packets.py'
+      - 'integrations/edge/aethron_edge/mailbox.py'
+      - 'integrations/edge/aethron_edge/sensors/geometry.py'
+      - 'integrations/edge/aethron_edge/sensors/rectification.py'
+      - 'integrations/edge/aethron_edge/sensors/ros2.py'
+      - 'integrations/edge/aethron_edge/sources/__init__.py'
+      - 'integrations/edge/aethron_edge/sources/base.py'
+      - 'requirements-passport-sensor-conformance.txt'
+      - 'examples/interop/**'
+      - 'tests/test_passport*.py'
+      - 'scripts/passport_*.py'
+      - 'scripts/passport_*.mjs'
+      - 'examples/passports/**'
+      - 'contracts/interop/**'
+      - 'docs/decisions/p16-*.json'
+      - 'contracts/openapi/aethron-edge-v1.json'
+      - 'contracts/fixtures/v3/unknown-output.json'
+      - 'pyproject.toml'
+      - 'setup.py'
+      - 'setup.cfg'
+      - 'MANIFEST.in'
+      - 'README.md'
+      - 'LICENSE'
+      - 'NOTICE'
+      - 'requirements-passports.txt'
+      - 'requirements-passport-conformance.txt'
+      - '.github/workflows/aethron-passports.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sensor-conformance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13'
+      - name: Identify packaging evidence context
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/p16-evidence"
+          git rev-parse HEAD > "$RUNNER_TEMP/p16-evidence/checkout-sha.txt"
+          python -c 'import json, os; print(json.dumps({key: os.environ[key] for key in ("GITHUB_SHA", "GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT", "GITHUB_REPOSITORY", "GITHUB_EVENT_NAME")}, sort_keys=True))' > "$RUNNER_TEMP/p16-evidence/run-context.json"
+      - run: |
+          python -m pip install --only-binary=:all: -r requirements-passport-sensor-conformance.txt
+          python -m pip install --only-binary=:all: build==1.6.1 setuptools==84.0.0 wheel==0.48.0
+      - run: python -m pip check
+      - run: python -m unittest discover -s tests/packaging -p 'test_passport*.py' -v
+      - name: Check selected inputs in the built source archive
+        shell: bash
+        run: |
+          python -m build --sdist --outdir "$RUNNER_TEMP/p16-sdist"
+          sha256sum "$RUNNER_TEMP"/p16-sdist/*.tar.gz > "$RUNNER_TEMP/p16-evidence/archive-sha256.txt"
+          python scripts/passport_sdist_check.py "$RUNNER_TEMP"/p16-sdist/*.tar.gz 2>&1 | tee "$RUNNER_TEMP/p16-evidence/archive-check.log"
+      - name: Verify installation from the inspected source archive
+        shell: bash
+        run: |
+          python -m pip install --no-index --no-deps --no-build-isolation --no-cache-dir --force-reinstall "$RUNNER_TEMP"/p16-sdist/*.tar.gz 2>&1 | tee "$RUNNER_TEMP/p16-evidence/install.log"
+          python -m pip check 2>&1 | tee "$RUNNER_TEMP/p16-evidence/dependencies.log"
+          python -I scripts/passport_install_check.py 2>&1 | tee "$RUNNER_TEMP/p16-evidence/installed-check.log"
+          python -I scripts/passport_installed_vectors.py 2>&1 | tee "$RUNNER_TEMP/p16-evidence/installed-vectors.log"
+      - run: python -m unittest discover -s tests/interop_consumers -p 'test_*.py' -v
+        env:
+          PYTHONPATH: .:integrations/edge
+      # Files may be partial after failure; artifact existence is never a PASS gate.
+      - name: Retain packaging diagnostics
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: p16-packaging-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/p16-evidence/checkout-sha.txt
+            ${{ runner.temp }}/p16-evidence/run-context.json
+            ${{ runner.temp }}/p16-evidence/archive-sha256.txt
+            ${{ runner.temp }}/p16-evidence/archive-check.log
+            ${{ runner.temp }}/p16-evidence/install.log
+            ${{ runner.temp }}/p16-evidence/dependencies.log
+            ${{ runner.temp }}/p16-evidence/installed-check.log
+            ${{ runner.temp }}/p16-evidence/installed-vectors.log
+  schema-conformance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13'
+      - run: |
+          python -m pip install --only-binary=:all: -r requirements-passport-conformance.txt
+      - run: python -c "from jsonschema import Draft202012Validator; from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey"
+      - run: python -m unittest discover -s tests -p test_passport_schemas.py -v
+  passports:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ['3.9', '3.13']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -c requirements-passports.txt '.[passports]'
+      - name: Install metadata-check tooling for older Python
+        run: |
+          python -m pip install --only-binary=:all: 'tomli==2.5.0; python_version < "3.11"'
+      # The import assertion prevents optional-backend skips from masquerading as a pass.
+      - run: python -c "from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey"
+      - name: Bind installed P16 modules to reviewed source
+        run: python -I scripts/passport_install_check.py
+      - run: python -m unittest discover -s tests -p 'test_passport*.py' -v
+      - run: python -m unittest discover -s tests -p 'test_interop*.py' -v
+      - name: Verify installed package with source imports disabled
+        run: python -I scripts/passport_installed_vectors.py

@@ -1,0 +1,43 @@
+{
+  "review_order_version": 3,
+  "baseline_head": "3d30cad4d224251f71673e955828fe3fb9a08922",
+  "component": "P16 bundle verification",
+  "decision": "KEEP immutable snapshot composition; FIX coverage; CLARIFY claims",
+  "production_changed": false,
+  "checks": {
+    "bundle_before": 8,
+    "bundle_after": 11,
+    "revocation_combinations": 6,
+    "interop_family": 37,
+    "passport_family": 41,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_production": "PASS",
+    "diff": "PASS"
+  },
+  "retained_negative_evidence": [
+    "Prior task review omitted implemented revoked_evidence list; documentation corrected without altering historical task results.",
+    "Initial bundle source read failed with host namespace resource error; same read succeeded on retry.",
+    "No production defect demonstrated; new boundary cases pass the unchanged implementation."
+  ],
+  "qualification": {
+    "physical": false,
+    "real_time": false,
+    "mls": false,
+    "cnsa": false,
+    "availability": false
+  },
+  "source_sha256": {
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "tests/test_interop_bundles.py": "dc0fc58971f7ec90f5268e38c23aab3d51ba9807adafb2e960617e94c0d85596",
+    "docs/architecture/interop/task-bundle-v1.md": "e1fc6b638906d6bba75fdc885ac636d50b4324c5e6a6e833c0d8c9dabc4f6765",
+    "docs/architecture/interop/task-v1.md": "5b5eb7215196f293813af2b6b5af0d0ee3b5fd0892c2f6858f2810b52db276ee",
+    "docs/engineering/reviews/p16-task-v3.md": "46917bdd6aaf9d92fb0009c4d0e02b0fda49ae7c022ce23aaafeb050207632d9",
+    "docs/engineering/reviews/p16-bundle-v3.md": "cf79d306a4e64d009709d682b4d5fbd7479ca1ac27f821d93920de8fcef1c2fa",
+    "examples/interop/bundle-vectors-v1.json": "9dc373820c2c278b18887dc35716d941ef2ab6d76b0afe119a34787a7436a460"
+  },
+  "next_component": "P16 direct federation"
+}

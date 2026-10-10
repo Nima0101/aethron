@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "decision": "KEEP",
+  "limits": [
+    "No alternative runtime was executed or benchmarked in this slice; no measured latency, memory or runtime superiority claim.",
+    "No MLS/CNSA, installed-product, hardware, availability or whole-lane qualification."
+  ],
+  "id": "p16-task-metadata-review-v3",
+  "component": "Pinned offline task-description validation at current restart",
+  "constraints": [
+    "Exact UTF-8 input at most 65536 bytes/depth eight; canonical closed ASCII JSON, duplicate/integer lexical checks, caller-authenticated task and subject pins.",
+    "Safe integer time floor and half-open lifetime at most 300 seconds; exactly two verification-only kinds, no execution or replay store."
+  ],
+  "alternatives": [
+    "Python JSON lexical hooks and shared bounded canonical profile.",
+    "Rust Serde custom visitors and a canonical/lexical adapter.",
+    "Erlang/Elixir OTP JSON callbacks and explicit byte-profile admission.",
+    "C#/F# Utf8JsonReader with bounded token and canonical equality checks."
+  ],
+  "rationale": [
+    "KEEP after rereading current code, contract and ten passing task methods: shared lexical validation preserves number spellings and duplicate detection before semantic checks. Canonicalization remains explicitly separate from freshness and pin authentication.",
+    "No candidate removes the required external pin, canonical equality or time-floor checks. The current small synchronous adapter directly preserves this versioned profile; no material advantage for migration has been demonstrated under the identified deployment constraints."
+  ],
+  "evidence": [
+    "https://docs.python.org/3/library/json.html",
+    "https://serde.rs/impl-deserialize.html",
+    "https://www.erlang.org/doc/apps/stdlib/json.html",
+    "https://learn.microsoft.com/en-us/dotnet/api/system.text.json.utf8jsonreader"
+  ]
+}

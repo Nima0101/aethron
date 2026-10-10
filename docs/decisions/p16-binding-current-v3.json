@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "p16-binding-current-v3",
+  "component": "P16 evidence, task, bundle, direct federation and bounded inbox review",
+  "decision": "KEEP",
+  "constraints": [
+    "Evidence: one to sixteen immutable blobs, each at most 65536 bytes; exact signed set and ordered metadata preservation; no content interpretation.",
+    "Tasks and bundles: closed canonical 65536-byte descriptions, external pins, immutable envelope/policy bytes, exact resource budget and current trust revalidation; no execution authority.",
+    "Federation: at most sixteen direct peers with exact issuer/capability restrictions and independent revision/time floors; no transitive identity or rule language.",
+    "Inbox: synchronous in-process calls, at most sixteen items and 1 MiB logical retained payload, per-peer quotas, expiry and clock-fault closure within one critical section.",
+    "Offline general-purpose OS library boundaries; no specified target hardware, WCET, RSS, contention throughput or availability guarantee."
+  ],
+  "alternatives": [
+    "Python immutable bytes/tuples, lexical JSON hooks, native SHA-256 and deque plus explicit lock.",
+    "Rust immutable borrowing, serde_json/sha2 and crossbeam bounded channels with additional quota/expiry accounting.",
+    "C#/F# Utf8JsonReader, SHA256.HashData and bounded channels with caller-owned stable input buffers.",
+    "Erlang/Elixir OTP JSON callbacks, immutable binaries, crypto hashing and isolated processes with explicit mailbox admission bounds.",
+    "Cedar policies or OPA/Rego for rule-based federation; these do not themselves authenticate artifact bytes or implement the closed direct-table contract."
+  ],
+  "rationale": [
+    "Evidence KEEP: exact immutable inputs and native per-blob hashing implement the no-mutation/no-aggregate-copy requirement; the reviewed native and managed alternatives offer no established advantage under this bounded contract.",
+    "Task KEEP: lexical callbacks preserve duplicate and numeric-token rejection; direct canonical byte equality checks the versioned contract without adding a second parser or an IPC encoding boundary.",
+    "Bundle KEEP: direct public-verifier composition retains exact snapshots and avoids a separate trust-policy acceptance implementation. New tests cover signed kind/digest/outcome order; production behavior is unchanged.",
+    "Federation KEEP: a bounded direct-match table expresses every required decision without introducing a rule interpreter or workload enrollment dependency. New tests catch evidence kind relabeling at the return boundary.",
+    "Inbox KEEP: one lock atomically combines byte/count/per-peer quota and expiry/clock-fault transitions. Channels need equivalent application accounting; a mailbox alone is not a byte-bound admission gate.",
+    "The decision depends on current data ownership and acceptance semantics, not installed tooling, familiarity or rewrite cost. No comparative runtime benchmark or native migration winner is asserted."
+  ],
+  "limits": [
+    "Alternative technologies were researched but not implemented or benchmarked in this slice. New native deployment or measured resource requirements reopen selection.",
+    "116 focused methods pass; two new full-reference tests reject two independent in-memory relabeling variants that passed the older component suites.",
+    "Publication repair normalizes executable paths in two historical records with explicit redaction provenance. It does not alter the peer-owned release checker or erase prior failed evidence.",
+    "No full repository check, installed-package run, target hardware measurement, physical integration, MLS/CNSA certification or uptime claim. Insufficient information for tactical deployment.",
+    "Remaining schema, packaging and consumer/probe review plus unfinished P16-P19 software prevents audit or phase completion."
+  ],
+  "evidence": [
+    "https://docs.python.org/3/library/hashlib.html",
+    "https://docs.python.org/3/library/json.html",
+    "https://www.erlang.org/doc/apps/stdlib/json.html",
+    "https://www.erlang.org/doc/apps/crypto/crypto.html",
+    "https://docs.rs/sha2/latest/sha2/",
+    "https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.sha256.hashdata?view=net-10.0",
+    "https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/use-utf8jsonreader",
+    "https://docs.cedarpolicy.com/overview/terminology.html",
+    "https://www.openpolicyagent.org/docs/policy-language",
+    "https://docs.rs/crossbeam-channel/latest/crossbeam_channel/fn.bounded.html",
+    "https://learn.microsoft.com/en-us/dotnet/core/extensions/channels",
+    "https://www.erlang.org/doc/system/eff_guide_processes.html",
+    "https://docs.python.org/3/library/collections.html",
+    "https://docs.python.org/3/library/threading.html"
+  ]
+}
