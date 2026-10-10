@@ -12,9 +12,16 @@ class _Parser(argparse.ArgumentParser):
         raise ValueError("invalid_qualification_manifest")
 
 
+class _Once(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if getattr(namespace, self.dest, None) is not None:
+            parser.error("duplicate_evaluation_instant")
+        setattr(namespace, self.dest, values)
+
+
 def main():
-    parser = _Parser(description=__doc__)
-    parser.add_argument("--now-ms", type=int, required=True)
+    parser = _Parser(description=__doc__, allow_abbrev=False)
+    parser.add_argument("--now-ms", type=int, required=True, action=_Once)
     try:
         args = parser.parse_args()
         report = validate(sys.stdin.buffer.read(MAX_BYTES + 1), now_ms=args.now_ms)

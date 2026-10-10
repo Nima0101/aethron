@@ -18,6 +18,11 @@ missing or stale declaration. Exit 2 emits a fixed error on stderr and no report
 for malformed input. `now_ms` is a separately supplied non-boolean monotonic
 integer in the capture's clock domain; for replay the caller supplies the frozen
 evaluation instant. It is not wall time or proof of a trustworthy clock.
+Supply exactly one `--now-ms INTEGER` or `--now-ms=INTEGER`; repeated or
+abbreviated time options are rejected with exit 2, including repeated identical
+values. This prevents an appended option from silently replacing the instant.
+The stdin byte limit bounds admission size, not how long a pipe may take to
+produce input; callers own process supervision and input/output deadlines.
 
 Reports contain the input SHA-256 and aggregate counts, not rig/sensor IDs,
 device digests, timestamps, measurements or input error text. The input digest

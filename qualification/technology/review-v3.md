@@ -10,7 +10,7 @@ inputs only. No audit-complete marker or physical qualification is asserted.
 | Rig, calibration, clock, environment declaration validator | KEEP implementation; FIX evidence coverage; CLARIFY claims |
 | Artifact byte binding | KEEP implementation; FIX evidence coverage; CLARIFY report lifetime |
 | P15 campaign coverage and procedures | KEEP implementation; FIX evidence coverage; CLARIFY unknown-case and provenance claims |
-| CLI/report delivery and verification tooling, including audit probes | Pending fresh review |
+| CLI/report delivery and verification tooling, including audit probes | CLI KEEP/FIX; remaining audit-tool and hosted-evidence review pending |
 
 ## Declaration deployment and technology decision
 
@@ -214,5 +214,48 @@ clock provenance remains the caller's responsibility. The checker cannot establi
 preregistration or detect failed attempts omitted before invocation. These are
 limits of an offline report, not authorization or qualification grants to P17/P18.
 
-Next earliest unreviewed component: CLI/report delivery and verification tooling,
-including all audit probes. The lane review and forward software work remain incomplete.
+## CLI report delivery review
+
+This source-checkout command transforms bounded stdin bytes into one deterministic
+JSON report and a 0/1/2 exit status. It needs the declaration API's exact semantics,
+fixed private errors, one caller-chosen evaluation instant and unchanged golden
+report bytes. It has no interactive UI, plugin system, remote commands or native
+executable distribution requirement. A slow stdin pipe or stdout consumer is not
+given a wall-clock deadline by the byte-size limit; supervision belongs to the caller.
+
+Fresh candidates inspected 2026-10-10:
+
+| Candidate | Requirements-based comparison |
+|---|---|
+| Python argparse plus explicit action | Direct invocation of the reviewed byte API and explicit errors preserve the boundary. Default abbreviation and last-value-wins behavior require correction. |
+| Python Click | Typed options and multiple-value policies are useful for complex CLIs. This single-option command still needs explicit cardinality and privacy behavior; the framework adds no required command composition here. |
+| Rust clap | Set actions reject duplicate arguments by default unless override is enabled. A strong native CLI candidate; it would also need a reviewed binding to the current declaration API or independently verified semantic implementation. |
+| Nushell custom command | Typed parameters and structured pipelines fit operator scripting. The host boundary must still preserve raw bytes, fixed errors and the library's JSON report/exit conventions; a structured shell is not required by this noninteractive command. |
+
+Sources: [argparse actions and abbreviation](https://docs.python.org/3.13/library/argparse.html),
+[Click options](https://click.palletsprojects.com/en/stable/options/),
+[clap ArgAction](https://docs.rs/clap/latest/clap/enum.ArgAction.html), and
+[Nushell custom commands](https://www.nushell.sh/book/custom_commands.html).
+These are viable alternatives rather than an exhaustive language list. The choice
+is not based on installed tools, familiarity or rewrite cost.
+
+**KEEP the thin Python entry point; FIX ambiguous argument admission.** Direct
+library invocation avoids adding a second report/byte conversion boundary, while
+a small argparse action supplies the same required duplicate rejection available
+in native parsers. No native deployment or measured throughput requirement makes
+another runtime materially better for this command. Retain exact golden output;
+reopen if a standalone distribution or a measured startup budget is required.
+
+The retained RED run had six assertion failures and zero errors: three abbreviated
+time options were accepted, and all three repeated-option forms used the last
+value. In particular, `--now-ms 1151 --now-ms 1050` changed a stale evaluation into
+a passing report. The parser now disables abbreviation and rejects a second time
+option, even when values match, before reading input. Separate and equals forms
+with one value still reproduce both golden reports with their original exit codes.
+Invalid argument errors remain fixed and contain no supplied text. JSON schema,
+freshness thresholds and library behavior are unchanged. `cli-review-v3.json`
+records the before/after evidence and source bindings.
+
+Next earliest unfinished component: audit probes, workflow dependency closure and
+retained report-evidence integrity. Their source has been inspected, but that does
+not complete executable verification. No audit-complete marker is warranted yet.
