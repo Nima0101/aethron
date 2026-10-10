@@ -1,0 +1,116 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "41c8ce1535eb517babb58f4e362a8d02a3c6e64c",
+  "component": "P3.1 passive sender configuration comparison",
+  "decision": "FIX versioned comparison configuration; production runtime selection PENDING",
+  "production_adapter_changed": false,
+  "source_sha256": {
+    "scripts/robotics_lifecycle_audit_v2.py": "0d9198384851e97ed405259c6d3f1a07dd5b9610838cd0b6192154db8cb19ab5",
+    "scripts/robotics_native_audit_v2.py": "f825916cf6693677405855b1352501369d5a4fc3d5d3f08edaaa988457761f5c",
+    "scripts/robotics_runtime_input_v3.py": "cbf39f5c655f3d32d7cdc5c2412c2fac3f9f15a0c4609d3b197b815266a699a3",
+    "tests/mavlink/audit_v2/managed.mjs": "b9fda4eaddb0b52e96bfc87c58db926140a4d28e70fe8f16c9df123280d86f12",
+    "tests/mavlink/audit_v2/native.rs": "9a683e2ec80e60661509070def17aa99c64d3b84c298e6bf4f265f4c78e198ea",
+    "tests/mavlink/audit_v2/runtime_input_v3.rs": "69ebee3725f5a06d1cde07974e0082c414ca20095bfec7290fb47f75b1208a8a",
+    "tests/mavlink/test_lifecycle_audit_v2.py": "e6ed0c5d38f41e9f47f0237c762506954a2c05923b26f13e628b4eae3ca314bb",
+    "tests/mavlink/test_runtime_input_v3.py": "62b78628a850ccb6cb085fcc91cbd39c09f320c6f3af0e7e7449b3565200e006",
+    "docs/architecture/robotics-review-v3.md": "c94a6246ba145ef6bdb14660890c4dd545115ea1eb0292788a937d8659edbc37",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "5c987e8740ca52e5bfaf83daaf1f86a0e06a0b1302a417774a6d80c7f1087d5c"
+  },
+  "checks": {
+    "red": {
+      "methods": 2,
+      "failures": 1,
+      "errors": 1,
+      "note": "Missing configured corpus and unsupported configured envelope"
+    },
+    "green": {
+      "methods": 73,
+      "skips": 0,
+      "seconds": 41.592,
+      "command": "PYTHONPATH=integrations/edge:tests/mavlink .venv/bin/python -m unittest test_lifecycle_audit_v2 test_native_audit_v2 test_runtime_input_v3 test_telemetry -v"
+    },
+    "final_test": {
+      "methods": 1,
+      "pass": true,
+      "reason": "Rerun after removing unused test loop binding flagged by Ruff"
+    },
+    "ruff": "PASS",
+    "format": "PASS",
+    "node_syntax": "PASS",
+    "bandit": "PASS",
+    "native_executed": false,
+    "native_failure": "FileNotFoundError: rustc unavailable"
+  },
+  "corpus": {
+    "legacy_21_records_unchanged": true,
+    "legacy_combined_v3_bytes_unchanged": true,
+    "node_reference_parity": true,
+    "lifecycle_cases": 24,
+    "lifecycle_steps": 78,
+    "native_input_cases": 48,
+    "native_input_steps": 102,
+    "input_format": "aethron-audit-v4",
+    "input_bytes": 5966,
+    "input_sha256": "48bef3630bd4716fc189a4d08eba7fc839b76a0b582940e44d7a10a679b3678d",
+    "binary_roundtrip_reference_parity": true,
+    "native_executed": false,
+    "negative_controls": [
+      {
+        "mutation": "hardcoded_filter",
+        "detected": true,
+        "differing_cases": [
+          "configured-1-255",
+          "configured-255-1",
+          "configured-255-255"
+        ]
+      },
+      {
+        "mutation": "hardcoded_output",
+        "detected": true,
+        "differing_cases": [
+          "configured-1-255",
+          "configured-255-1",
+          "configured-255-255"
+        ]
+      }
+    ]
+  },
+  "retained_file_sha256": {
+    "sender-config-v4-evidence.py": "421e7779ab7ae97ab897ce68e4c7cbdacbb2eac7a67dd62ca84850e952ad4610",
+    "sender-config-v4-final-test.log": "20e193d14f5e209d4101c30c7b36e5a4f28e26ed8ebff6794334f9ecf47a5287",
+    "sender-config-v4-green.log": "d4155dca04364dc7c9ed19ae23b0c4a8d581b1e6b10181a5ac6b389691d1936c",
+    "sender-config-v4-native/native-fixture.rs": "efef9eac2150a8f2cd348cebc85ad024dfe3d22666b995f1cf85b9ffa748b4a1",
+    "sender-config-v4-native/native.rs": "9a683e2ec80e60661509070def17aa99c64d3b84c298e6bf4f265f4c78e198ea",
+    "sender-config-v4-native/result.json": "4870ac9b8cb718b43696c26747ecdfc3678beed36fb024e0c3197fdd6b6c9f69",
+    "sender-config-v4-native/runtime-input.bin": "48bef3630bd4716fc189a4d08eba7fc839b76a0b582940e44d7a10a679b3678d",
+    "sender-config-v4-native/runtime_input_v3.rs": "69ebee3725f5a06d1cde07974e0082c414ca20095bfec7290fb47f75b1208a8a",
+    "sender-config-v4-native.log": "9a66e797586fd65f5b969a943c08d840ed192d5c38eb49b3927d6ff01aac467c",
+    "sender-config-v4-parity/corpus.json": "131519000e81274407c8ff08d572d3b8cb24e7efda656a1271d949ff3933b1e0",
+    "sender-config-v4-parity/expected.json": "e367abcb7b0898f3f8fb711e722140d6c29c357f3eb3005a60dedb8d2e1dfbea",
+    "sender-config-v4-parity/hardcoded_filter-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sender-config-v4-parity/hardcoded_filter-stdout.log": "549d0f896cd99b0458c8bc08c4684aac15aaceacefa2a72806b9bc2df18ea9c6",
+    "sender-config-v4-parity/hardcoded_filter.mjs": "fd681be27e31b033efaba7df327a6f0bc53081d6adb14d0ed5bcf68c1f2f726e",
+    "sender-config-v4-parity/hardcoded_output-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sender-config-v4-parity/hardcoded_output-stdout.log": "6e2fe819949aca82c384c7638a88ad34cda5d8ebb0c40d1bf142ef0e4fe548d2",
+    "sender-config-v4-parity/hardcoded_output.mjs": "b6ae7b454f1d21a517e917cc0c7e1c6ddef20ee4287536a0fb64aa5fe245db66",
+    "sender-config-v4-parity/native-input.bin": "48bef3630bd4716fc189a4d08eba7fc839b76a0b582940e44d7a10a679b3678d",
+    "sender-config-v4-parity/node-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sender-config-v4-parity/node-stdout.log": "67c4e9b398185d6cf492c78a6bacfd3f063a1d696b1bceb9ebb2bf3f7426db9c",
+    "sender-config-v4-parity/result.json": "bb6df0a05e20f9a34293d704676977f8310219fba203b9fb6ce6419fe40f4be2",
+    "sender-config-v4-red.log": "dd2a6e10bb20041b532b0d4a10f4b880ad38e02665b92cdc47ad14c62d47f5bd"
+  },
+  "ci_snapshot": {
+    "head": "ac2dfefeffc79d198c8df141f806c4d64e7a16fc",
+    "state": "queued",
+    "check": "passive-wire",
+    "url": "https://github.com/Nima0101/aethron/actions/runs/38084912788/job/114309307781",
+    "polled": false
+  },
+  "limits": [
+    "Five Rust parser tests prepared, not locally executed",
+    "Historical native measurements are not current-source parity",
+    "Unsigned sender IDs remain unverified",
+    "Production deployment budgets and runtime winner remain unresolved",
+    "Later signing/replay review not yet started"
+  ]
+}

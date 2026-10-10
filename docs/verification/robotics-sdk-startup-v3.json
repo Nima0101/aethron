@@ -1,0 +1,525 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "364d7029e0413806d842959485d6aa56bebf87c7",
+  "component": "P3.1 passive SDK startup and CRC fallback characterization",
+  "decision": "VERIFY loaded backend and fixed corruption rejection; production technology decision PENDING",
+  "production_changed": false,
+  "platform": "Linux-6.6.143-09589-gf9e106250941-x86_64-with-glibc2.41",
+  "source_sha256": {
+    "tests/mavlink/sdk_startup_probe_v3.py": "d06171a86c0c1280ccd0aa2050c592ecf3bddc13ea4f908483ebf3eba39c8fae",
+    "tests/mavlink/test_sdk_startup_v3.py": "73deb935f6ed41d087e1afb4fb66a5f47ce3bd1dabfdd2ee3aec1d264e881bc4",
+    "tests/mavlink/test_telemetry.py": "00624096f3655bb2586932f1159ba84fe5ea03c54f521aee1ffa2087c4e09740",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "integrations/edge/requirements-mavlink-linux-x86_64-py313.lock": "fee2eb4848268d8b1feeab220cebb3a297a67daad997aac3ee752def22d86d3b",
+    "docs/verification/robotics-sdk-startup-v3.md": "e8836ce66cdb64b29ceae26b8aac386d4bf54070ca31d03a7a281cc94d9b5adf",
+    "docs/architecture/robotics-review-v3.md": "9ced0ca557a27f74c09562dd47e9956287738303cfa66e529edc41318c39e6e1"
+  },
+  "records": {
+    "initial_pre_linux_guard": [
+      {
+        "repetition": 0,
+        "closed_reason": "closed",
+        "corrupt_reason": "invalid_packet",
+        "corrupt_samples": 0,
+        "corrupt_state": "UNKNOWN",
+        "crc_backend": "_x25crc_fast",
+        "fastcrc_loaded": true,
+        "initial_state": "UNKNOWN",
+        "isolated": true,
+        "lxml_loaded": false,
+        "messages": [
+          "ATTITUDE",
+          "LOCAL_POSITION_NED"
+        ],
+        "mode": "installed",
+        "module_sha256": {
+          "aethron_edge.telemetry.mavlink": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+          "fastcrc": "1d8336381f2c50570a7797d5af8e586b8f6814583eb120dc044e6cb4ab83a675",
+          "fastcrc.__info__": "18b1fab5f53c79c282ce2d6c7ec804c0fa4863ec65d983bc762ad5d1b25d27c1",
+          "fastcrc.crc16": "94f8acd3900533f7b0f9916a1cfef52dfe44ccfdaf78c795731e6a68276fde9f",
+          "fastcrc.crc32": "ff6837156182105966b10f2879ff42ca583bfcba4d281a57cfd5f3ffe6f3b37f",
+          "fastcrc.crc64": "86b02fd0a0826909758483d21e71da234dddefc9e70a67522564eec8b2497a1c",
+          "fastcrc.crc8": "a5a90b256eb0e09ec5902facd4f22755370accffc52f63e6e4014ca88caa3c02",
+          "fastcrc.fastcrc": "7a0e2b3d13c3cf21e211db63c91b5f2da4fc596e22e6b5987a4bc25059543c54",
+          "pymavlink": "8e990fcf3dabda06fcaa8c6abb0cb12c3f7683d78eccc8f2f52bd4cebce0ef23",
+          "pymavlink.dialects": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20.common": "6c4dab96ad0faa3f3bb2796b3d62854eb02eb8e537315b82af773e9855d173a1"
+        },
+        "peak_rss_kib": 27136,
+        "perception_eligible": false,
+        "phase_ns": {
+          "adapter_import": 192179272,
+          "first_constructor": 205474499,
+          "second_constructor": 1195838
+        },
+        "pymavlink_version": "2.4.50",
+        "python": "3.13.5",
+        "schema_version": 1
+      },
+      {
+        "repetition": 0,
+        "closed_reason": "closed",
+        "corrupt_reason": "invalid_packet",
+        "corrupt_samples": 0,
+        "corrupt_state": "UNKNOWN",
+        "crc_backend": "_x25crc_slow",
+        "fastcrc_loaded": false,
+        "initial_state": "UNKNOWN",
+        "isolated": true,
+        "lxml_loaded": false,
+        "messages": [
+          "ATTITUDE",
+          "LOCAL_POSITION_NED"
+        ],
+        "mode": "blocked",
+        "module_sha256": {
+          "aethron_edge.telemetry.mavlink": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+          "pymavlink": "8e990fcf3dabda06fcaa8c6abb0cb12c3f7683d78eccc8f2f52bd4cebce0ef23",
+          "pymavlink.dialects": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20.common": "6c4dab96ad0faa3f3bb2796b3d62854eb02eb8e537315b82af773e9855d173a1"
+        },
+        "peak_rss_kib": 26624,
+        "perception_eligible": false,
+        "phase_ns": {
+          "adapter_import": 270689834,
+          "first_constructor": 200772012,
+          "second_constructor": 2210271
+        },
+        "pymavlink_version": "2.4.50",
+        "python": "3.13.5",
+        "schema_version": 1
+      },
+      {
+        "repetition": 1,
+        "closed_reason": "closed",
+        "corrupt_reason": "invalid_packet",
+        "corrupt_samples": 0,
+        "corrupt_state": "UNKNOWN",
+        "crc_backend": "_x25crc_fast",
+        "fastcrc_loaded": true,
+        "initial_state": "UNKNOWN",
+        "isolated": true,
+        "lxml_loaded": false,
+        "messages": [
+          "ATTITUDE",
+          "LOCAL_POSITION_NED"
+        ],
+        "mode": "installed",
+        "module_sha256": {
+          "aethron_edge.telemetry.mavlink": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+          "fastcrc": "1d8336381f2c50570a7797d5af8e586b8f6814583eb120dc044e6cb4ab83a675",
+          "fastcrc.__info__": "18b1fab5f53c79c282ce2d6c7ec804c0fa4863ec65d983bc762ad5d1b25d27c1",
+          "fastcrc.crc16": "94f8acd3900533f7b0f9916a1cfef52dfe44ccfdaf78c795731e6a68276fde9f",
+          "fastcrc.crc32": "ff6837156182105966b10f2879ff42ca583bfcba4d281a57cfd5f3ffe6f3b37f",
+          "fastcrc.crc64": "86b02fd0a0826909758483d21e71da234dddefc9e70a67522564eec8b2497a1c",
+          "fastcrc.crc8": "a5a90b256eb0e09ec5902facd4f22755370accffc52f63e6e4014ca88caa3c02",
+          "fastcrc.fastcrc": "7a0e2b3d13c3cf21e211db63c91b5f2da4fc596e22e6b5987a4bc25059543c54",
+          "pymavlink": "8e990fcf3dabda06fcaa8c6abb0cb12c3f7683d78eccc8f2f52bd4cebce0ef23",
+          "pymavlink.dialects": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20.common": "6c4dab96ad0faa3f3bb2796b3d62854eb02eb8e537315b82af773e9855d173a1"
+        },
+        "peak_rss_kib": 27268,
+        "perception_eligible": false,
+        "phase_ns": {
+          "adapter_import": 404989507,
+          "first_constructor": 305523165,
+          "second_constructor": 771929
+        },
+        "pymavlink_version": "2.4.50",
+        "python": "3.13.5",
+        "schema_version": 1
+      },
+      {
+        "repetition": 1,
+        "closed_reason": "closed",
+        "corrupt_reason": "invalid_packet",
+        "corrupt_samples": 0,
+        "corrupt_state": "UNKNOWN",
+        "crc_backend": "_x25crc_slow",
+        "fastcrc_loaded": false,
+        "initial_state": "UNKNOWN",
+        "isolated": true,
+        "lxml_loaded": false,
+        "messages": [
+          "ATTITUDE",
+          "LOCAL_POSITION_NED"
+        ],
+        "mode": "blocked",
+        "module_sha256": {
+          "aethron_edge.telemetry.mavlink": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+          "pymavlink": "8e990fcf3dabda06fcaa8c6abb0cb12c3f7683d78eccc8f2f52bd4cebce0ef23",
+          "pymavlink.dialects": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20.common": "6c4dab96ad0faa3f3bb2796b3d62854eb02eb8e537315b82af773e9855d173a1"
+        },
+        "peak_rss_kib": 26632,
+        "perception_eligible": false,
+        "phase_ns": {
+          "adapter_import": 700683414,
+          "first_constructor": 503201221,
+          "second_constructor": 1217166
+        },
+        "pymavlink_version": "2.4.50",
+        "python": "3.13.5",
+        "schema_version": 1
+      },
+      {
+        "repetition": 2,
+        "closed_reason": "closed",
+        "corrupt_reason": "invalid_packet",
+        "corrupt_samples": 0,
+        "corrupt_state": "UNKNOWN",
+        "crc_backend": "_x25crc_fast",
+        "fastcrc_loaded": true,
+        "initial_state": "UNKNOWN",
+        "isolated": true,
+        "lxml_loaded": false,
+        "messages": [
+          "ATTITUDE",
+          "LOCAL_POSITION_NED"
+        ],
+        "mode": "installed",
+        "module_sha256": {
+          "aethron_edge.telemetry.mavlink": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+          "fastcrc": "1d8336381f2c50570a7797d5af8e586b8f6814583eb120dc044e6cb4ab83a675",
+          "fastcrc.__info__": "18b1fab5f53c79c282ce2d6c7ec804c0fa4863ec65d983bc762ad5d1b25d27c1",
+          "fastcrc.crc16": "94f8acd3900533f7b0f9916a1cfef52dfe44ccfdaf78c795731e6a68276fde9f",
+          "fastcrc.crc32": "ff6837156182105966b10f2879ff42ca583bfcba4d281a57cfd5f3ffe6f3b37f",
+          "fastcrc.crc64": "86b02fd0a0826909758483d21e71da234dddefc9e70a67522564eec8b2497a1c",
+          "fastcrc.crc8": "a5a90b256eb0e09ec5902facd4f22755370accffc52f63e6e4014ca88caa3c02",
+          "fastcrc.fastcrc": "7a0e2b3d13c3cf21e211db63c91b5f2da4fc596e22e6b5987a4bc25059543c54",
+          "pymavlink": "8e990fcf3dabda06fcaa8c6abb0cb12c3f7683d78eccc8f2f52bd4cebce0ef23",
+          "pymavlink.dialects": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20.common": "6c4dab96ad0faa3f3bb2796b3d62854eb02eb8e537315b82af773e9855d173a1"
+        },
+        "peak_rss_kib": 27396,
+        "perception_eligible": false,
+        "phase_ns": {
+          "adapter_import": 504411519,
+          "first_constructor": 483935526,
+          "second_constructor": 1012462
+        },
+        "pymavlink_version": "2.4.50",
+        "python": "3.13.5",
+        "schema_version": 1
+      },
+      {
+        "repetition": 2,
+        "closed_reason": "closed",
+        "corrupt_reason": "invalid_packet",
+        "corrupt_samples": 0,
+        "corrupt_state": "UNKNOWN",
+        "crc_backend": "_x25crc_slow",
+        "fastcrc_loaded": false,
+        "initial_state": "UNKNOWN",
+        "isolated": true,
+        "lxml_loaded": false,
+        "messages": [
+          "ATTITUDE",
+          "LOCAL_POSITION_NED"
+        ],
+        "mode": "blocked",
+        "module_sha256": {
+          "aethron_edge.telemetry.mavlink": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+          "pymavlink": "8e990fcf3dabda06fcaa8c6abb0cb12c3f7683d78eccc8f2f52bd4cebce0ef23",
+          "pymavlink.dialects": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20.common": "6c4dab96ad0faa3f3bb2796b3d62854eb02eb8e537315b82af773e9855d173a1"
+        },
+        "peak_rss_kib": 26628,
+        "perception_eligible": false,
+        "phase_ns": {
+          "adapter_import": 400663550,
+          "first_constructor": 315772351,
+          "second_constructor": 84424117
+        },
+        "pymavlink_version": "2.4.50",
+        "python": "3.13.5",
+        "schema_version": 1
+      }
+    ],
+    "final": [
+      {
+        "repetition": 0,
+        "closed_reason": "closed",
+        "corrupt_reason": "invalid_packet",
+        "corrupt_samples": 0,
+        "corrupt_state": "UNKNOWN",
+        "crc_backend": "_x25crc_fast",
+        "fastcrc_loaded": true,
+        "initial_state": "UNKNOWN",
+        "isolated": true,
+        "lxml_loaded": false,
+        "messages": [
+          "ATTITUDE",
+          "LOCAL_POSITION_NED"
+        ],
+        "mode": "installed",
+        "module_sha256": {
+          "aethron_edge.telemetry.mavlink": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+          "fastcrc": "1d8336381f2c50570a7797d5af8e586b8f6814583eb120dc044e6cb4ab83a675",
+          "fastcrc.__info__": "18b1fab5f53c79c282ce2d6c7ec804c0fa4863ec65d983bc762ad5d1b25d27c1",
+          "fastcrc.crc16": "94f8acd3900533f7b0f9916a1cfef52dfe44ccfdaf78c795731e6a68276fde9f",
+          "fastcrc.crc32": "ff6837156182105966b10f2879ff42ca583bfcba4d281a57cfd5f3ffe6f3b37f",
+          "fastcrc.crc64": "86b02fd0a0826909758483d21e71da234dddefc9e70a67522564eec8b2497a1c",
+          "fastcrc.crc8": "a5a90b256eb0e09ec5902facd4f22755370accffc52f63e6e4014ca88caa3c02",
+          "fastcrc.fastcrc": "7a0e2b3d13c3cf21e211db63c91b5f2da4fc596e22e6b5987a4bc25059543c54",
+          "pymavlink": "8e990fcf3dabda06fcaa8c6abb0cb12c3f7683d78eccc8f2f52bd4cebce0ef23",
+          "pymavlink.dialects": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20.common": "6c4dab96ad0faa3f3bb2796b3d62854eb02eb8e537315b82af773e9855d173a1"
+        },
+        "peak_rss_kib": 27324,
+        "perception_eligible": false,
+        "phase_ns": {
+          "adapter_import": 465554453,
+          "first_constructor": 601616696,
+          "second_constructor": 680867
+        },
+        "pymavlink_version": "2.4.50",
+        "python": "3.13.5",
+        "schema_version": 1
+      },
+      {
+        "repetition": 0,
+        "closed_reason": "closed",
+        "corrupt_reason": "invalid_packet",
+        "corrupt_samples": 0,
+        "corrupt_state": "UNKNOWN",
+        "crc_backend": "_x25crc_slow",
+        "fastcrc_loaded": false,
+        "initial_state": "UNKNOWN",
+        "isolated": true,
+        "lxml_loaded": false,
+        "messages": [
+          "ATTITUDE",
+          "LOCAL_POSITION_NED"
+        ],
+        "mode": "blocked",
+        "module_sha256": {
+          "aethron_edge.telemetry.mavlink": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+          "pymavlink": "8e990fcf3dabda06fcaa8c6abb0cb12c3f7683d78eccc8f2f52bd4cebce0ef23",
+          "pymavlink.dialects": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20.common": "6c4dab96ad0faa3f3bb2796b3d62854eb02eb8e537315b82af773e9855d173a1"
+        },
+        "peak_rss_kib": 26684,
+        "perception_eligible": false,
+        "phase_ns": {
+          "adapter_import": 176209280,
+          "first_constructor": 119088020,
+          "second_constructor": 922554
+        },
+        "pymavlink_version": "2.4.50",
+        "python": "3.13.5",
+        "schema_version": 1
+      },
+      {
+        "repetition": 1,
+        "closed_reason": "closed",
+        "corrupt_reason": "invalid_packet",
+        "corrupt_samples": 0,
+        "corrupt_state": "UNKNOWN",
+        "crc_backend": "_x25crc_fast",
+        "fastcrc_loaded": true,
+        "initial_state": "UNKNOWN",
+        "isolated": true,
+        "lxml_loaded": false,
+        "messages": [
+          "ATTITUDE",
+          "LOCAL_POSITION_NED"
+        ],
+        "mode": "installed",
+        "module_sha256": {
+          "aethron_edge.telemetry.mavlink": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+          "fastcrc": "1d8336381f2c50570a7797d5af8e586b8f6814583eb120dc044e6cb4ab83a675",
+          "fastcrc.__info__": "18b1fab5f53c79c282ce2d6c7ec804c0fa4863ec65d983bc762ad5d1b25d27c1",
+          "fastcrc.crc16": "94f8acd3900533f7b0f9916a1cfef52dfe44ccfdaf78c795731e6a68276fde9f",
+          "fastcrc.crc32": "ff6837156182105966b10f2879ff42ca583bfcba4d281a57cfd5f3ffe6f3b37f",
+          "fastcrc.crc64": "86b02fd0a0826909758483d21e71da234dddefc9e70a67522564eec8b2497a1c",
+          "fastcrc.crc8": "a5a90b256eb0e09ec5902facd4f22755370accffc52f63e6e4014ca88caa3c02",
+          "fastcrc.fastcrc": "7a0e2b3d13c3cf21e211db63c91b5f2da4fc596e22e6b5987a4bc25059543c54",
+          "pymavlink": "8e990fcf3dabda06fcaa8c6abb0cb12c3f7683d78eccc8f2f52bd4cebce0ef23",
+          "pymavlink.dialects": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20.common": "6c4dab96ad0faa3f3bb2796b3d62854eb02eb8e537315b82af773e9855d173a1"
+        },
+        "peak_rss_kib": 27320,
+        "perception_eligible": false,
+        "phase_ns": {
+          "adapter_import": 122859196,
+          "first_constructor": 188579799,
+          "second_constructor": 1456487
+        },
+        "pymavlink_version": "2.4.50",
+        "python": "3.13.5",
+        "schema_version": 1
+      },
+      {
+        "repetition": 1,
+        "closed_reason": "closed",
+        "corrupt_reason": "invalid_packet",
+        "corrupt_samples": 0,
+        "corrupt_state": "UNKNOWN",
+        "crc_backend": "_x25crc_slow",
+        "fastcrc_loaded": false,
+        "initial_state": "UNKNOWN",
+        "isolated": true,
+        "lxml_loaded": false,
+        "messages": [
+          "ATTITUDE",
+          "LOCAL_POSITION_NED"
+        ],
+        "mode": "blocked",
+        "module_sha256": {
+          "aethron_edge.telemetry.mavlink": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+          "pymavlink": "8e990fcf3dabda06fcaa8c6abb0cb12c3f7683d78eccc8f2f52bd4cebce0ef23",
+          "pymavlink.dialects": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20.common": "6c4dab96ad0faa3f3bb2796b3d62854eb02eb8e537315b82af773e9855d173a1"
+        },
+        "peak_rss_kib": 26556,
+        "perception_eligible": false,
+        "phase_ns": {
+          "adapter_import": 129466087,
+          "first_constructor": 105742968,
+          "second_constructor": 543051
+        },
+        "pymavlink_version": "2.4.50",
+        "python": "3.13.5",
+        "schema_version": 1
+      },
+      {
+        "repetition": 2,
+        "closed_reason": "closed",
+        "corrupt_reason": "invalid_packet",
+        "corrupt_samples": 0,
+        "corrupt_state": "UNKNOWN",
+        "crc_backend": "_x25crc_fast",
+        "fastcrc_loaded": true,
+        "initial_state": "UNKNOWN",
+        "isolated": true,
+        "lxml_loaded": false,
+        "messages": [
+          "ATTITUDE",
+          "LOCAL_POSITION_NED"
+        ],
+        "mode": "installed",
+        "module_sha256": {
+          "aethron_edge.telemetry.mavlink": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+          "fastcrc": "1d8336381f2c50570a7797d5af8e586b8f6814583eb120dc044e6cb4ab83a675",
+          "fastcrc.__info__": "18b1fab5f53c79c282ce2d6c7ec804c0fa4863ec65d983bc762ad5d1b25d27c1",
+          "fastcrc.crc16": "94f8acd3900533f7b0f9916a1cfef52dfe44ccfdaf78c795731e6a68276fde9f",
+          "fastcrc.crc32": "ff6837156182105966b10f2879ff42ca583bfcba4d281a57cfd5f3ffe6f3b37f",
+          "fastcrc.crc64": "86b02fd0a0826909758483d21e71da234dddefc9e70a67522564eec8b2497a1c",
+          "fastcrc.crc8": "a5a90b256eb0e09ec5902facd4f22755370accffc52f63e6e4014ca88caa3c02",
+          "fastcrc.fastcrc": "7a0e2b3d13c3cf21e211db63c91b5f2da4fc596e22e6b5987a4bc25059543c54",
+          "pymavlink": "8e990fcf3dabda06fcaa8c6abb0cb12c3f7683d78eccc8f2f52bd4cebce0ef23",
+          "pymavlink.dialects": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20.common": "6c4dab96ad0faa3f3bb2796b3d62854eb02eb8e537315b82af773e9855d173a1"
+        },
+        "peak_rss_kib": 27320,
+        "perception_eligible": false,
+        "phase_ns": {
+          "adapter_import": 114543660,
+          "first_constructor": 178497830,
+          "second_constructor": 520623
+        },
+        "pymavlink_version": "2.4.50",
+        "python": "3.13.5",
+        "schema_version": 1
+      },
+      {
+        "repetition": 2,
+        "closed_reason": "closed",
+        "corrupt_reason": "invalid_packet",
+        "corrupt_samples": 0,
+        "corrupt_state": "UNKNOWN",
+        "crc_backend": "_x25crc_slow",
+        "fastcrc_loaded": false,
+        "initial_state": "UNKNOWN",
+        "isolated": true,
+        "lxml_loaded": false,
+        "messages": [
+          "ATTITUDE",
+          "LOCAL_POSITION_NED"
+        ],
+        "mode": "blocked",
+        "module_sha256": {
+          "aethron_edge.telemetry.mavlink": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+          "pymavlink": "8e990fcf3dabda06fcaa8c6abb0cb12c3f7683d78eccc8f2f52bd4cebce0ef23",
+          "pymavlink.dialects": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "pymavlink.dialects.v20.common": "6c4dab96ad0faa3f3bb2796b3d62854eb02eb8e537315b82af773e9855d173a1"
+        },
+        "peak_rss_kib": 26684,
+        "perception_eligible": false,
+        "phase_ns": {
+          "adapter_import": 198015548,
+          "first_constructor": 180250823,
+          "second_constructor": 772252
+        },
+        "pymavlink_version": "2.4.50",
+        "python": "3.13.5",
+        "schema_version": 1
+      }
+    ]
+  },
+  "retained_local_files": {
+    "sdk-startup-0-blocked.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-startup-0-blocked.stdout": "9211cdebcb933bc29dee50a03e2285f9dab9d7208f78d2804f7be3d77d536da5",
+    "sdk-startup-0-installed.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-startup-0-installed.stdout": "6ad163abe0db45856ca994efe43283317e6885c79926984a1402a9d698efcebd",
+    "sdk-startup-1-blocked.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-startup-1-blocked.stdout": "15e5625ed087efcefcc6b4ead60bc4e23eacda3df42e729f71749bdf0de79959",
+    "sdk-startup-1-installed.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-startup-1-installed.stdout": "e8129a726e816fd9f0e4df5dea6a76454cf578d1e5f40164227f6e66a1cde29c",
+    "sdk-startup-2-blocked.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-startup-2-blocked.stdout": "204e8b320eae76a447ec3a7ae236c35cacb437aa75ec1763d75b3a57f0de3af5",
+    "sdk-startup-2-installed.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-startup-2-installed.stdout": "0c861408722995de4e1fd75940d1d49eba9fc2ed6282526987e08ec87cbb3a0b",
+    "sdk-startup-final-0-blocked.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-startup-final-0-blocked.stdout": "4124f94edf70583f537bf5ec7bff8fd75611d84296aff434b6e69911806c4930",
+    "sdk-startup-final-0-installed.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-startup-final-0-installed.stdout": "21da90a38bc2ee2c038e7bfd68fc15210d4025d33dccdb99d36eb48e7524de80",
+    "sdk-startup-final-1-blocked.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-startup-final-1-blocked.stdout": "353ef3e3af4e4c51011d2492cb23a562ea403b93d8da725c1fd3e2ca27fcb7bd",
+    "sdk-startup-final-1-installed.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-startup-final-1-installed.stdout": "637d9a8ceea844d94515095ffbf6d6b25b98642a11cc4d9c2735ff3f1c2d6e0a",
+    "sdk-startup-final-2-blocked.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-startup-final-2-blocked.stdout": "e212ab8869d9809ce2fa4e0e478efcaeca3753ac7ebc0fd7188a440b99723ba2",
+    "sdk-startup-final-2-installed.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-startup-final-2-installed.stdout": "5346b981f24497f8c381e5fb1fb4a96fd90a36a21a23f2f40c20e60fa9ae38d3",
+    "sdk-startup-final-green.log": "a4cce667569a3396a3fcb3bccf4384a0c07034cc92aea62141313f2cab6f61bc",
+    "sdk-startup-final-probe.sha256": "b069b6c61c7b3087cffe71160f86f742ce5d7d923197a1aec023f10e85926de7",
+    "sdk-startup-green.log": "083db6ffbd8de79cb2e8df59f797972e26666fb5a294050e734a5c59ee0278b6",
+    "sdk-startup-linux-green.log": "13668e800eb5dc5cb796f18b41da6a82fd099135e7413282440a4044b360e52f",
+    "sdk-startup-red.log": "b371b1a203d6e8526cef2b85b2748689121600ae6c9ad1c86db479d8b371cf33"
+  },
+  "checks": {
+    "red_assertions": 2,
+    "red_errors": 0,
+    "red_scope": "Probe absent, not production decoder defect",
+    "initial_new_methods": 2,
+    "focused_final_methods": 14,
+    "focused_final_seconds": 1.909,
+    "skips": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS",
+    "final_probe_source_stable_across_six_runs": true
+  },
+  "limits": [
+    "Isolated installed package with source-file match, not clean-host/customer install",
+    "Initial six runs precede Linux guard and overlapped focused tests",
+    "Final six runs followed tests; shared host and filesystem cache uncontrolled",
+    "Phase timings exclude process/interpreter start; no latency or memory upper bounds",
+    "File hashes after measurement are not authenticated loaded-code attestation",
+    "No same-SDK comparison across generated dialect sizes yet; no completed technology selection"
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "review_version": 3,
+  "reviewed_head": "52509c751b58f732776e6a812668ee9385f95775",
+  "run_url": "https://github.com/Nima0101/aethron/actions/runs/38012365223",
+  "artifact_id": 11655342381,
+  "archive_sha256": "26a7cfd767b92cd0989c81f3c3b3e32b09fd7d980584c98d9d99ea0b4c316571",
+  "source_and_fixture_hashes_match": true,
+  "strict_json_and_typed_parity_rechecked_outputs": [
+    "native/checked-0-python-stdout.log",
+    "native/checked-0-rust-stdout.log",
+    "native/optimized-0-python-stdout.log",
+    "native/optimized-0-rust-stdout.log",
+    "native/optimized-1-python-stdout.log",
+    "native/optimized-1-rust-stdout.log",
+    "native/optimized-2-python-stdout.log",
+    "native/optimized-2-rust-stdout.log"
+  ],
+  "historical_native_result": {
+    "audit_policy_version": 2,
+    "state": "compared",
+    "decision": "PENDING",
+    "native_executed": true,
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "driver_sha256": "a694176e7110765d8c19242953fd8d9fb9a41140e5c071cb9cbd5037be96ab88",
+    "harness_sha256": "febcf62014bc3141abfbbd31e5c87162ead2390c893361dc65ee626fa174bf49",
+    "fixture_sha256": "a7d1cd7f23634529a824bf18c555dbddbc3743c2ac9ed078353fdf34a7d33f61",
+    "corpus_sha256": "13948512b478984a35bb8ab2afb0eae6b32d5a41836ea17d75b6003478e082c3",
+    "compiler": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1",
+    "cases": 33,
+    "steps": 65,
+    "runs": [
+      {
+        "profile": "checked",
+        "python": {
+          "runtime": "3.13.15",
+          "peak_rss_kib": 33488,
+          "whole_process_ns": 121509352
+        },
+        "rust": {
+          "peak_rss_kib": 2084,
+          "whole_process_ns": 1407360
+        }
+      },
+      {
+        "profile": "optimized",
+        "python": {
+          "runtime": "3.13.15",
+          "peak_rss_kib": 33600,
+          "whole_process_ns": 122992665
+        },
+        "rust": {
+          "peak_rss_kib": 2012,
+          "whole_process_ns": 1321089
+        }
+      },
+      {
+        "profile": "optimized",
+        "python": {
+          "runtime": "3.13.15",
+          "peak_rss_kib": 33600,
+          "whole_process_ns": 121370203
+        },
+        "rust": {
+          "peak_rss_kib": 2060,
+          "whole_process_ns": 1351156
+        }
+      },
+      {
+        "profile": "optimized",
+        "python": {
+          "runtime": "3.13.15",
+          "peak_rss_kib": 33600,
+          "whole_process_ns": 121783095
+        },
+        "rust": {
+          "peak_rss_kib": 2056,
+          "whole_process_ns": 1344383
+        }
+      }
+    ],
+    "checked_binary_sha256": "bcbac5d7eff3d693748c20f92c618872b2c9c0d89988d3326d5ca573325117ae",
+    "optimized_binary_sha256": "9e875ec9ea571c14eac1e96f4165516584eb6d0dad15131ea3822e87cab723a6",
+    "parity": true,
+    "limitations": [
+      "Original Rust strict subset, not rust-mavlink SDK qualification",
+      "Static input constants omit candidate input JSON parsing; Python consumes JSON",
+      "Python includes pymavlink and corpus encoder import; native uses two layouts",
+      "Finite corpus only; native clock domain u128, Python integers are unbounded",
+      "Linux VmHWM versus Python getrusage RSS; shared scheduling and warm caches",
+      "No signed replay, UDP, packaging, hard-real-time or physical qualification"
+    ]
+  },
+  "qualification": "Synthetic hosted comparison only; no deployment equivalence, target-hardware deadline, runtime winner or audit completion established.",
+  "parser_correction": {
+    "baseline_head": "33b06cb025b5b144cde0b1298cc97736182fecfa",
+    "decision": "FIX",
+    "red_cases": 4,
+    "focused_methods_passed": 9,
+    "additional_cases": [
+      "exponent overflow rejected",
+      "valid types and fractional values preserved"
+    ],
+    "source_sha256": {
+      "scripts/robotics_native_audit_v2.py": "50b332300f10958a058b115bdd8c580f93128345e20ff67ced16457fb872ed2b",
+      "tests/mavlink/test_native_audit_v2.py": "87faa269718cb787062dbe88adc0a9d8b4291eb03d968c2f7cf6a0c7f1acc2b7"
+    },
+    "red_log_sha256": "272efb1b9030894b72684dd7814bcc0f019210ea7d480057494a7e042f38919c",
+    "green_log_sha256": "867bb78467836120eb0d4446e4c0bff06be2b1afb306ff6413263da61a4554fb"
+  }
+}

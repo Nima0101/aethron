@@ -2,6 +2,35 @@
 
 The optional installed `aethron_edge.telemetry.mavlink` adapter decodes real MAVLink 2 common-dialect ATTITUDE (30) and LOCAL_POSITION_NED (32) packets using pymavlink 2.4.50. It is a diagnostic observation interface, not perception evidence or an autopilot controller. No command, heartbeat, ACK, rate request or TIMESYNC is transmitted. It neither enables telemetry streams nor changes flight-controller configuration.
 
+## Assurance limits at this interface
+
+Passing a diagnostic check establishes only the property it checks:
+
+| Observed result | Supported interpretation | Unsupported interpretation |
+| --- | --- | --- |
+| Sender tuple and CRC accepted | Packet passed this decoder's routing and corruption checks | Authenticated sender, authorized source or trustworthy physical measurement |
+| `OBSERVED_UNVERIFIED` | At least one retained diagnostic sample passed the local checks | Perception eligibility, calibrated geometry, clear space or permission to act |
+| Receipt age within 100ms | Age in the supplied local clock at the last explicit check | Sensor capture age, a scheduled watchdog or an end-to-end deadline |
+| Installed module hash matches the reviewed file | Those file bytes match the recorded digest | Signed execution attestation, uncompromised host or certified cryptographic implementation |
+
+The [MAVLink serialization guide](https://mavlink.io/en/guide/serialization.html)
+describes packet checksums; [message signing](https://mavlink.io/en/guide/message_signing.html)
+is a separate mechanism. This unsigned interface rejects signed packets and
+does not provide confidentiality. The optional signed interface below also
+retains unverified measurement status; its shared-key check is not physical
+sensor attestation. Neither interface's diagnostic tests establish CNSA/Suite B
+compliance, MLS isolation, a complete Zero Trust deployment, five-nines
+availability or absence of single points of failure. Those are unqualified
+system requirements, not properties conferred by MAVLink support.
+
+The [accepted-sample receipts](../../../../docs/verification/robotics-sdk-provenance-v3.json)
+bind the unsigned status claims to two fixed synthetic packets in both tested
+CRC backend modes. This evidence is intentionally narrow: no physical device,
+mission, weapon integration or tactical deployment is qualified. Insufficient
+information for tactical deployment.
+
+## Installation and basic use
+
 Install the separately built core and edge wheels first. For the locally tested CPython 3.13/macOS ARM64 SDK closure:
 
 ```sh
@@ -17,11 +46,64 @@ from aethron_edge.telemetry.mavlink import PassiveTelemetry, UdpTelemetry
 
 source = PassiveTelemetry(system=1, component=1)
 with UdpTelemetry(source, port=14560) as receiver:
-    status = receiver.poll()  # one datagram, <=20ms socket wait; no transmission
+    status = receiver.poll()  # one datagram; configured 20ms socket timeout; no transmission
     print(status.state, status.reason)
 ```
 
-An operator-owned local simulator/router must already provide exactly one allowed MAVLink 2 packet per UDP datagram. The socket binds only to `127.0.0.1`; direct serial, WAN, MAVLink 1, multi-packet datagrams and vendor dialects are not implemented. `PassiveTelemetry.ingest(bytes)` also supports explicit in-process wire replay. Poll repeatedly under the caller's supervisor, or configure the signed-only appliance integration described below. PX4/ArduPilot SITL and physical firmware tuples remain untested.
+An operator-owned local simulator/router must already provide exactly one allowed MAVLink 2 packet per UDP datagram for this original API. The socket binds only to `127.0.0.1`; direct serial, WAN, MAVLink 1 and vendor dialects are not implemented. Multi-packet datagrams require the opt-in v1 wrapper below. `PassiveTelemetry.ingest(bytes)` also supports explicit in-process wire replay. Poll repeatedly under the caller's supervisor, or configure the signed-only appliance integration described below. PX4/ArduPilot SITL and physical firmware tuples remain untested.
+
+### Opt-in multi-packet datagrams (v1)
+
+The separate `aethron_edge.telemetry.datagram_v1` API accepts bounded concatenated
+MAVLink 2 packets from an already configured local simulation/router feed:
+
+For Linux x86_64/CPython 3.13 with glibc>=2.28, install the optional wire SDK using
+`python -m pip install --only-binary=:all: --require-hashes -r integrations/edge/requirements-mavlink-linux-x86_64-py313.lock`.
+The core and edge packages must already be available as described above.
+
+```python
+from aethron_edge.telemetry.datagram_v1 import DatagramTelemetryV1, UdpTelemetryV1
+from aethron_edge.telemetry.mavlink import PassiveTelemetry
+
+decoder = PassiveTelemetry(system=1, component=1)
+with UdpTelemetryV1(DatagramTelemetryV1(decoder), port=14560) as receiver:
+    status = receiver.poll()
+```
+
+Pass an explicitly provisioned `SignedTelemetry` instead to retain signed-only
+authentication and persisted replay protection. The wrapper exclusively owns
+its decoder; do not share it with other readers. It checks complete framing
+before decoding, accepts at most 16 packets/4480 bytes, and stops on any rejected
+packet. Heartbeats, commands and other non-allowlisted messages still cause
+UNKNOWN; the caller must supply an already filtered feed. No stream requests or
+other packets are sent. No partial packets are retained across datagrams.
+
+Each framed batch replaces previous samples and has a 100 ms receipt deadline
+including decoding/journal time. Source timing, signing authority and replay
+checks remain in force. A later failure never rolls back committed signing
+counters. Socket queue age and physical capture freshness remain unknown.
+The original single-packet API and appliance worker are unchanged; this API is
+not automatically enabled by appliance configuration. Synthetic wire/loopback
+tests do not qualify a PX4/ArduPilot firmware tuple or actual SITL execution.
+See the [v1 contract and technology decision](../../../../docs/architecture/mavlink-datagram-v1.md).
+
+### Finite console diagnostic
+
+With the optional SDK installed, an already configured loopback simulator/router
+feed can be inspected for up to30seconds:
+
+```sh
+python -m aethron_edge.telemetry.diagnostic_v1 --port 14560 --duration-ms 5000
+```
+
+This unsigned-only diagnostic emits JSON lines with aggregate state/reason and
+sample count. It never exports coordinates, orientation, source IDs, timestamps
+or packet bytes, and never sends packets. Signed packets are rejected; provisioned
+signed consumers use the library interface below. Port0 selects an ephemeral
+port reported by the initial `listening` record. Normal completion emits UNKNOWN
+with reason `closed`. The duration and1500-poll cap bound admission/output;
+scheduling and stdout backpressure can delay process exit. See the
+[diagnostic v1 contract](../../../../docs/architecture/mavlink-diagnostic-v1.md).
 
 ## Contract and failure behavior
 
@@ -29,7 +111,70 @@ An operator-owned local simulator/router must already provide exactly one allowe
 - ATTITUDE carries body Euler angles in radians and angular rates in rad/s. LOCAL_POSITION_NED carries an unregistered local NED position/velocity in m and m/s. The six `fields`, `values` and `units` entries correspond by index. No coordinates are converted to camera displacement, world coordinates or inferred object tracks.
 - Two immutable latest-sample slots, no trajectory/history. A local monotonic receipt older than 100ms expires on `snapshot()`/`poll()`, including no-traffic timeouts. This is a receipt TTL, **not** source measurement freshness: remote boot timestamps remain unmapped and router/socket buffering is unqualified. Never substitute it for frozen v3 exposure-age/calibration rules.
 - Input <=280 bytes, exactly one packet, pinned payload layout/CRC, finite values, sequence progression modulo256 (delta1..127), strictly advancing boot time per message type. Malformed, foreign-sender, unsupported or reordered input clears observations. A boot reset/wrap/duplicate acquisition timestamp or local-clock rollback latches UNKNOWN until a fresh instance. Signed/extension flags are refused. CRC-bypass SDK configuration and SDK version mismatch prevent construction.
-- `close()` erases state and latches closed. Use a single owner/thread; callers retain responsibility for overall polling/resource limits. Unsigned traffic remains spoofable/replayable and must not grant capability authority even when these checks pass.
+- `PassiveTelemetry.close()` clears the adapter's sample slots, per-message boot counters and sequence marker, and latches closed. The instance retains its SDK decoder object and last local clock reading; this is not complete object disposal or memory zeroization. Previously returned immutable observations remain in caller-owned references; closure or expiry cannot erase those copies. A saved status describes an earlier check, not current receipt validity or permission to act. Use a single owner/thread; callers retain responsibility for overall polling/resource limits. Unsigned traffic remains spoofable/replayable and must not grant capability authority even when these checks pass. See the [closure-claim review](../../../../docs/verification/robotics-close-state-claims-v3.json).
+
+The base `PassiveTelemetry`/`UdpTelemetry` interface has no background watchdog.
+Expiry is evaluated during `snapshot()` (also called by `poll()`); stopping calls
+does not schedule a later withdrawal or revise an already returned status.
+The configured socket timeout is not an end-to-end `poll()` deadline: decoding,
+clock reads and OS scheduling also affect return time. Python's
+[socket timeout interface](https://docs.python.org/3/library/socket.html#socket.socket.settimeout)
+specifies blocking-operation behavior, not a hard-real-time service guarantee.
+The receipt TTL neither measures source capture age nor bounds transport latency.
+
+The 100ms comparison is in the supplied clock's units. The default is
+`time.monotonic_ns()`; the reviewed Linux host reports
+`clock_gettime(CLOCK_MONOTONIC)`. Linux documents that this clock stops during
+system suspend. Consequently, this API does not establish a 100ms elapsed-age
+limit spanning host suspension. A stopped or slow injected clock can likewise
+leave receipt age understated without a backward-time transition. The adapter
+checks integer/nonnegative/order properties, not clock rate or suspend history.
+The clock's advertised nanosecond resolution is not a measured accuracy or
+scheduler bound. No suspend/resume qualification is included. See the
+[Linux clock semantics](https://www.kernel.org/doc/html/latest/core-api/timekeeping.html)
+and Python's [clock information](https://docs.python.org/3/library/time.html#time.get_clock_info).
+If the supplied clock raises, the base adapter now clears both cached samples
+and latches `local_clock_invalid` before re-raising the original exception.
+Interruption and exit exceptions also propagate; the adapter does not swallow
+operator cancellation. Later snapshots return empty `UNKNOWN`; no later call consults
+the clock or accepts more packets, even after clock recovery. A new instance
+is required. No status is returned by the original failing call, and previously
+returned immutable snapshots held by callers cannot be erased by this cleanup.
+Explicit `close()` does not read the clock and preserves the closed latch.
+The earlier retained-sample behavior remains recorded in the historical negative
+evidence; the [correction record](../../../../docs/verification/robotics-clock-withdrawal-review-v3.json)
+binds the new tests and source. These synthetic callable faults establish neither
+physical clock recovery nor scheduler/transport behavior.
+
+An unexpected exception from the decoder hook or decoded field extraction
+(including numeric conversion and boot timestamp access) clears both cached samples,
+latches `decoder_fault`, and re-raises the same exception, including interruption
+and cancellation. Later calls return empty `UNKNOWN` until a new instance is
+created. The expected SDK `MAVError` from the decoder call still withdraws with `invalid_packet` and
+permits a later valid packet; malformed traffic alone does not permanently disable
+the session. A field-access `MAVError` indicates an SDK/interface fault and
+latches `decoder_fault`; it is not treated as malformed wire input. This covers
+the decoder call and extraction, not every operation in `ingest()` or
+interruption of cleanup itself. Caller-held snapshots remain immutable historical
+values. The [decoder fault record](../../../../docs/verification/robotics-decoder-fault-v3.json)
+retains both the failing regression and recovery controls. The
+[field extraction record](../../../../docs/verification/robotics-field-fault-v3.json)
+covers failures after the decoder has returned a message.
+
+After decoded-field extraction, unexpected failures in sequence/boot checks,
+the commit hook, observation construction or local state publication clear the
+sample slots, latch `state_commit_fault`, and re-raise the same exception. Later
+calls cannot revive the failed session. A replay counter already persisted by
+the signing hook remains committed; this cleanup does not roll it back. Earlier
+caller-owned snapshots remain unchanged. The
+[state-commit regression](../../../../docs/verification/robotics-state-commit-v3.json)
+uses synthetic failures plus a real temporary SQLite journal. It does not prove
+recovery from actual memory exhaustion, power loss, process termination or a
+second interruption during cleanup, and does not cover every authority callback
+or snapshot operation.
+
+See the [partial V3 review](../../../../docs/architecture/robotics-review-v3.md)
+for evidence limits; its first-component technology decision remains open.
 
 ## Provenance and license boundary
 

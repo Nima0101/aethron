@@ -1,0 +1,73 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "668ef7bbbe2a12992d427987b47e5118e8473983",
+  "component": "P3.1 offline comparison source provenance",
+  "decision": "FIX scoped source digests and stale review label",
+  "runtime_decision": "PENDING",
+  "production_candidates_unchanged": [
+    "tests/mavlink/audit_v2/reference.c",
+    "tests/mavlink/audit_v2/managed.mjs",
+    "tests/mavlink/audit_v2/native.rs",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py"
+  ],
+  "source_sha256": {
+    "scripts/robotics_wire_audit_v2.py": "a734e508b8027244161c166a510b4fa06e0e68948e5b75c68892d7e131d0aed2",
+    "scripts/robotics_lifecycle_audit_v2.py": "4a9cbd8b9f9ffe77bbcbf8c60e51e0ca1419cb565ce20f1d799aecbc45a2a4f1",
+    "scripts/robotics_native_audit_v2.py": "dc43c3be6da82733d9cb9335bccf3a1478ee3173da3f236892ae6e0e474c33c1",
+    "tests/mavlink/test_wire_audit_v2.py": "9ec16e9203dfc0bc8a14f92dba0a4f667fdd0f8019ce6418b84c343ed03483f2",
+    "tests/mavlink/test_lifecycle_audit_v2.py": "9fd15cfca33d90e6f3ee0934c8e00faefad4e4a86082af66cd618dc45dc24dfe",
+    "tests/mavlink/test_native_audit_v2.py": "846d94a5db6428092fc81fd031c908c0aef7fb9db87f5688556e5431ec3d6ab9",
+    "tests/mavlink/audit_v2/reference.c": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483",
+    "tests/mavlink/audit_v2/managed.mjs": "b7c89cdf7ada50ed38ce9563adf699d8c5d41bb95f6327fabe416ba3f42ed0cd",
+    "tests/mavlink/audit_v2/native.rs": "a694176e7110765d8c19242953fd8d9fb9a41140e5c071cb9cbd5037be96ab88",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "503b317e0fa21e92fe563e3ddfc333fee5426a6d271fe33a7eab98dd5512f094",
+    "docs/architecture/robotics-review-v3.md": "9d56d2531a1c8850100496ad78e7c315bd0535d6936ac08af3526a4bad509a32"
+  },
+  "checks": {
+    "red": {
+      "methods": 31,
+      "assertion_failures": 12,
+      "errors": 0,
+      "elapsed_s": 6.288
+    },
+    "green": {
+      "methods": 31,
+      "failures": 0,
+      "errors": 0,
+      "elapsed_s": 4.322
+    },
+    "wire": "17 cases; normal and ASan/UBSan parity PASS",
+    "managed": "16 cases, 48 steps, three process pairs PASS",
+    "native": "FileNotFoundError; rustc unavailable; native_executed=false",
+    "receipt_source_recheck": "11 entries across three receipts PASS",
+    "ruff_check": "PASS",
+    "ruff_format": "PASS on sequential retry",
+    "bandit": "PASS"
+  },
+  "retained_local_logs": {
+    "source-manifest-red.log": "264fdd4c6903fa1a65456a3843bdf829f5dcfd5b7e1ec9d1fd3aefe7ed2d2b3d",
+    "source-manifest-green.log": "4fefe8dbba63900f20a039fa16790cc3fad07dcd2060193e691eecd761e8f015",
+    "source-manifest-wire/result.json": "85a3034913dd5ffc6443974fd980d62cca49056622485cd1ab100a0dcabc98f5",
+    "source-manifest-managed/result.json": "e424bce435c1aa8eb0786a32e15cc6107d2f94ef30470013e8c3d7b671407339",
+    "source-manifest-native/result.json": "cb582c741b5d14da4ef5a0e308c98d952d5aab2b8be47bb3d96cb5b481bb3557",
+    "source-manifest-wire.log": "85a3034913dd5ffc6443974fd980d62cca49056622485cd1ab100a0dcabc98f5",
+    "source-manifest-managed.log": "e424bce435c1aa8eb0786a32e15cc6107d2f94ef30470013e8c3d7b671407339",
+    "source-manifest-native.log": "e74a96c7aecaebc7fdfc673ceacea93c37032d33ae482c105203e2affc8d27fc"
+  },
+  "negative_evidence": [
+    "Initial tool host spawn EAGAIN before policy read; identical retry succeeded",
+    "Ruff format check thread spawn EAGAIN; sequential retry passed",
+    "Initial managed command sandbox fork EAGAIN before execution; sequential retry passed",
+    "Native compiler unavailable; failure receipt retained"
+  ],
+  "sources": [
+    "https://docs.python.org/3/library/hashlib.html"
+  ],
+  "limits": [
+    "Scoped repository files only, not a complete dependency manifest or signed attestation",
+    "On-disk bytes at run start do not prove loaded module origin or prevent concurrent edits",
+    "Native successful-report tests use controlled process results, not Rust execution",
+    "No production or candidate optimization, runtime winner, hardware qualification or audit completion",
+    "Historical reports unchanged"
+  ]
+}

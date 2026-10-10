@@ -1,0 +1,78 @@
+name: AETHRON passive robotics adapters
+on:
+  push:
+    branches: [main, parallel/p31-robotics-20261009]
+    paths:
+      - 'integrations/edge/aethron_edge/telemetry/**'
+      - 'integrations/edge/requirements-mavlink-linux-x86_64-py313.lock'
+      - 'tests/mavlink/**'
+      - 'scripts/robotics_*_audit_v2.py'
+      - 'scripts/robotics_runtime_input_v3.py'
+      - '.github/workflows/aethron-robotics.yml'
+  pull_request:
+    paths:
+      - 'integrations/edge/aethron_edge/telemetry/**'
+      - 'integrations/edge/requirements-mavlink-linux-x86_64-py313.lock'
+      - 'tests/mavlink/**'
+      - 'scripts/robotics_*_audit_v2.py'
+      - 'scripts/robotics_runtime_input_v3.py'
+      - '.github/workflows/aethron-robotics.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  passive-wire:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: integrations/edge:tests/mavlink
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13.15'
+      - name: Install pinned wire SDK
+        run: |
+          python -m pip install --only-binary=:all: --require-hashes -r integrations/edge/requirements-mavlink-linux-x86_64-py313.lock
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.2'
+      - name: Synthetic wire, signed batch, receipt expiry and receive-only UDP
+        run: python -m unittest test_diagnostic_v1 test_datagram_v1 test_telemetry -v
+      - name: Bounded retrospective technology comparisons
+        run: |
+          python -m unittest test_wire_audit_v2 test_lifecycle_audit_v2 test_native_audit_v2 test_runtime_input_v3 -v
+          python scripts/robotics_wire_audit_v2.py --out build/robotics-audit/wire
+          python scripts/robotics_lifecycle_audit_v2.py --out build/robotics-audit/lifecycle
+      - name: Bounded native lifecycle comparison with hosted compiler
+        run: python scripts/robotics_native_audit_v2.py --out build/robotics-audit/native
+      - name: Bounded native comparison with identical runtime input
+        run: python scripts/robotics_native_audit_v2.py --runtime-input --out build/robotics-audit/native-runtime
+      - name: Lint adapter and fixtures
+        run: |
+          python -m pip install ruff==0.16.10
+          ruff check integrations/edge/aethron_edge/telemetry/{datagram_v1,diagnostic_v1}.py tests/mavlink/test_{datagram_v1,diagnostic_v1}.py
+          ruff format --check integrations/edge/aethron_edge/telemetry/{datagram_v1,diagnostic_v1}.py tests/mavlink/test_{datagram_v1,diagnostic_v1}.py
+          ruff check scripts/robotics_*_audit_v2.py scripts/robotics_runtime_input_v3.py tests/mavlink/test_*audit_v2.py tests/mavlink/test_runtime_input_v3.py
+          ruff format --check scripts/robotics_*_audit_v2.py scripts/robotics_runtime_input_v3.py tests/mavlink/test_*audit_v2.py tests/mavlink/test_runtime_input_v3.py
+          node --check tests/mavlink/audit_v2/managed.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bounded-robotics-technology-comparison
+          path: |
+            build/robotics-audit/*/result.json
+            build/robotics-audit/native/*.log
+            build/robotics-audit/native/expected.json
+            build/robotics-audit/native-runtime/*.log
+            build/robotics-audit/native-runtime/*.rs
+            build/robotics-audit/native-runtime/runtime-input.bin
+            build/robotics-audit/native-runtime/expected.json
+            build/robotics-audit/lifecycle/*.log
+            build/robotics-audit/lifecycle/expected.json
+            build/robotics-audit/wire/*.log
+            build/robotics-audit/wire/expected.json
+            build/robotics-audit/wire/corpus.json
+          if-no-files-found: warn

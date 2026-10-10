@@ -1,0 +1,106 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "6ba07f87e57d3bb7d7b8cbe32307533ebebc868e",
+  "component": "P3.1 passive receiver supplied-clock failure",
+  "decision": "FIX withdrawal before propagating clock exceptions",
+  "technology_decision": "PENDING; local callable cleanup does not settle production runtime choice",
+  "source_sha256": {
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "tests/mavlink/test_telemetry.py": "00624096f3655bb2586932f1159ba84fe5ea03c54f521aee1ffa2087c4e09740",
+    "integrations/edge/aethron_edge/telemetry/README.md": "193b58fa579f32177b1641236b3133bef5e83694881bd02430b1c49f9b48d2ef",
+    "docs/architecture/robotics-review-v3.md": "c455204831fda22e0d20fb8260b401bd5b3157cc991ba9c747b5da026832f4fd",
+    "docs/verification/robotics-clock-exception-reproduction-v3.md": "213d88686c23ff9aa9533c34216c90c6ec1a60b02814f047a956940476b6e779"
+  },
+  "red": {
+    "methods": 1,
+    "assertion_failures": 8,
+    "errors": 0
+  },
+  "passive_green": {
+    "methods": 12,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 0.303
+  },
+  "focused_green": {
+    "methods": 42,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 3.908,
+    "modules": [
+      "test_telemetry",
+      "test_datagram_v1",
+      "test_lifecycle_audit_v2"
+    ]
+  },
+  "broader_attempt": {
+    "loaded_tests": 49,
+    "errors": 2,
+    "failures": 0,
+    "seconds": 2.513,
+    "errors_retained": [
+      "Installed fresh-process replay test: isolated interpreter cannot import aethron_edge",
+      "Boot-clock test module import: pydantic absent"
+    ],
+    "not_qualified": [
+      "installed replay package",
+      "boot-clock module"
+    ]
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS after narrow B311 annotation for pre-existing deterministic parser-mutation fixture"
+  },
+  "probe_after_fix": {
+    "scope": "synthetic in-process clock fault; no transport",
+    "results": [
+      {
+        "operation": "snapshot",
+        "clock_exception_propagated": true,
+        "before_state": "OBSERVED_UNVERIFIED",
+        "after_recovery_state": "UNKNOWN",
+        "retained_sample_count": 0,
+        "after_close_state": "UNKNOWN",
+        "after_close_reason": "closed",
+        "perception_eligible": false
+      },
+      {
+        "operation": "ingest",
+        "clock_exception_propagated": true,
+        "before_state": "OBSERVED_UNVERIFIED",
+        "after_recovery_state": "UNKNOWN",
+        "retained_sample_count": 0,
+        "after_close_state": "UNKNOWN",
+        "after_close_reason": "closed",
+        "perception_eligible": false
+      }
+    ],
+    "general_clock_exception_latch_established": false
+  },
+  "probe_exit_code": 1,
+  "probe_exit_limit": "Unchanged historical probe unconditionally exits 1 and does not certify general clock behavior",
+  "sources": [
+    "https://docs.python.org/3/library/exceptions.html#KeyboardInterrupt",
+    "https://docs.python.org/3/tutorial/errors.html#defining-clean-up-actions"
+  ],
+  "retained_local_logs": {
+    "clock-withdraw-red.log": "f5d5d85132b5079056a4aeab22e2394eb3f4646cc6deb61541fdc5787849a8a7",
+    "clock-withdraw-green.log": "3b70273f02294ccc856fc15e249de91dc528b185d311730324403dff24a1057b",
+    "clock-withdraw-related.log": "30d210c6505f900a5f9e8236d8c3134ac48f94696533aee35f04042b87cd9bc8",
+    "clock-withdraw-final-green.log": "9a14d3a805a04f71c3ec4044bfb6f0dec1b2867a4cf799f0ca0964d17a4ae2c0",
+    "clock-withdraw-isolated-import.log": "28454ae49ffab30fc9e8359543f4df8b26d5b21da2778936a18761cfd58366b7",
+    "clock-withdraw-initial-bandit.log": "e1abe06dbce7a2aded3c4b5cd2222d972810da7259d1990939fcb9389f324e49",
+    "clock-withdraw-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "clock-withdraw-reproduction.py": "7bacbc5ea6f10e02b2f86f651f132a7e0fd055261b5c01f6ac637d323f45da78",
+    "clock-withdraw-probe.json": "8abe476ebd40de96d7783e32834abaf2ba95a2a89658408bd46414fa8b914fe8",
+    "clock-withdraw-probe.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "limits": [
+    "Only exceptions from the base supplied clock callable are covered",
+    "Prior immutable snapshots in callers cannot be erased",
+    "No hardware clock fault, cleanup interruption or other adapter fault qualification",
+    "Candidate comparison corpora omit Python callable exceptions",
+    "Full retrospective review and production runtime choice remain incomplete"
+  ]
+}

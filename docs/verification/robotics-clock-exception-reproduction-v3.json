@@ -1,0 +1,45 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "47480100aec56673749863463340333433bfa0b2",
+  "component": "P3.1 passive clock exception evidence reproducibility",
+  "decision": "FIX documentation reproduction gap",
+  "production_changed": false,
+  "runtime_decision": "PENDING",
+  "failure_handling_gap_resolved": false,
+  "source_sha256": {
+    "docs/verification/robotics-clock-exception-reproduction-v3.md": "213d88686c23ff9aa9533c34216c90c6ec1a60b02814f047a956940476b6e779",
+    "docs/verification/robotics-clock-exception-claims-v3.json": "1be5e28f9e23b8c4cd3df70970e67ae5bda29178d57e8d89095502ce29ff1795",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "503b317e0fa21e92fe563e3ddfc333fee5426a6d271fe33a7eab98dd5512f094",
+    "docs/architecture/robotics-review-v3.md": "1926f2a340a2908f566d1155b05dabbd1d0bebe1f098d5bfb5bf1086ee4e4e49"
+  },
+  "verification": {
+    "document_code_extracted_and_executed": true,
+    "probe_exit_code": 1,
+    "stderr_bytes": 0,
+    "json_equal_to_historical_probe": true,
+    "synthetic_cases": 2,
+    "ruff": "PASS",
+    "bandit": "PASS",
+    "existing_baseline_methods": 3,
+    "existing_baseline_failures": 0,
+    "existing_baseline_errors": 0,
+    "existing_baseline_seconds": 0.083
+  },
+  "retained_local_logs": {
+    "clock-exception-reproduction-v3.py": "7bacbc5ea6f10e02b2f86f651f132a7e0fd055261b5c01f6ac637d323f45da78",
+    "clock-exception-reproduction-v3.stdout": "dd585e71f69a37b9b8f825527862355f538f8e1172ebe3c9d5c694a1e5484864",
+    "clock-exception-reproduction-v3.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "sources": [
+    "https://docs.python.org/3/tutorial/errors.html"
+  ],
+  "limits": [
+    "Observation reproduction only; unconditional exit 1 is not a qualification result for a changed implementation",
+    "No production/test implementation changes; no transport or hardware experiment",
+    "No runtime KEEP/MIGRATE or component completion decision"
+  ],
+  "environment_failures": [
+    "Two parallel file reads failed sandbox fork with EAGAIN; required evidence read succeeded sequentially",
+    "Two normal pushes failed because GitHub credential helper could not fork; no credential or sandbox bypass attempted"
+  ]
+}

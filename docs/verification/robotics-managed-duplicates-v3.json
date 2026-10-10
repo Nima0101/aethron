@@ -1,0 +1,41 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "367db5022e08d0858474ddcd68670441a8769bb0",
+  "component": "passive lifecycle managed JSON member uniqueness",
+  "decision": "FIX duplicate input loss before schema admission; production technology PENDING",
+  "production_adapter_changed": false,
+  "source_sha256": {
+    "tests/mavlink/audit_v2/managed.mjs": "7b5d29e4fa24a37e65d00ddaedd01c802ff97a7d8b3eb3efede6d0a05cfb7baf",
+    "tests/mavlink/test_lifecycle_audit_v2.py": "8a90fb19aa8900681148e2f569c06d4855047aadc2341693a70b0dfe3050a621",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "docs/architecture/robotics-review-v3.md": "3064a72bca7f181016b208b8c2c3b99d5b95a4d693d3f38755d1081b3b086c94",
+    "docs/verification/robotics-comparator-coverage-v3.md": "0778ca76f9afa3e586b9b35642dd69c3e95c7c5cc7e4540aca48051b9a38cd36"
+  },
+  "checks": {
+    "red": {
+      "methods": 2,
+      "failures": 10,
+      "errors": 0
+    },
+    "green": {
+      "methods": 61,
+      "skips": 0,
+      "seconds": 24.132
+    },
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS",
+    "node_syntax": "PASS",
+    "node": "v22.23.2",
+    "native_compiled": false
+  },
+  "retained_file_sha256": {
+    "managed-duplicates-v3-red.log": "7ad5095dc30e801df880f54b33f50c615f88efdd209ebe45647f7aa8c3e3dfaa",
+    "managed-duplicates-v3-green.log": "da4e6f7fdf527f497cbaa35dc59c57b721d4d35dd3255c21735aec4d1d19f39e"
+  },
+  "limits": [
+    "Audit input correction only; existing byte bound and parent timeout remain",
+    "No new native execution or benchmark ranking",
+    "Production runtime reassessment and later-component reviews remain incomplete"
+  ]
+}

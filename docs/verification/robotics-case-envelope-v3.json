@@ -1,0 +1,60 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "4689c771f14f398e5b09ef89224a8a51c2ee21af",
+  "component": "passive lifecycle experiment case envelopes",
+  "decision": "FIX experiment envelope admission; production technology PENDING",
+  "production_adapter_changed": false,
+  "source_sha256": {
+    "scripts/robotics_lifecycle_audit_v2.py": "8901e330f1af320eed579289b442e645596bf7f75844ea545d1643c284027c1f",
+    "scripts/robotics_native_audit_v2.py": "4d7d4164928606460d9a0689524b535bd93d7c20b1e15b7f0941bcf418daceec",
+    "tests/mavlink/test_lifecycle_audit_v2.py": "7de082b7c4df1703f6141e05ebdb3e2b3ef06ea267cee2781fc0cfbd490d58a5",
+    "tests/mavlink/test_native_audit_v2.py": "9e1094e20d7e2a2dfc88c98cb8435aa016c69451250db7eb3a02c70e3ec4774e",
+    "tests/mavlink/audit_v2/managed.mjs": "aa1a3f55d245c701a439a250a86d853ce18378f2b6add2ad783fce97deb00fc8",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "docs/architecture/robotics-review-v3.md": "6f1f7de15941b64f6a65a67b242b83a6e60eef9c258bc04b3a33b3889cb119ba",
+    "docs/verification/robotics-comparator-coverage-v3.md": "a466185c1113c00cde22d49dc3f203e37cd51364891ccb4f4315c3bb521d498b"
+  },
+  "checks": {
+    "red": {
+      "methods": 2,
+      "failures": 23,
+      "errors": 0
+    },
+    "green": {
+      "methods": 37,
+      "skips": 0,
+      "seconds": 13.241
+    },
+    "post_format_envelope_methods": 3,
+    "interim_failure": "One test fixture reused a case name and reached name rejection before its intended step-list rejection; preserved and corrected",
+    "ruff": "PASS",
+    "format": "PASS after formatting correction",
+    "bandit": "PASS",
+    "node_syntax": "PASS",
+    "preservation": {
+      "baseline_head": "4689c771f14f398e5b09ef89224a8a51c2ee21af",
+      "lifecycle_cases": 16,
+      "lifecycle_steps": 48,
+      "corpus_and_outputs_unchanged": true,
+      "native_cases": 40,
+      "native_steps": 72,
+      "native_fixture_unchanged": true,
+      "native_compiled": false,
+      "fixture_sha256": "36c80096df538990da4f68cf5c2f131c586b86f9304cb8d7babeb2efb47c3db7"
+    }
+  },
+  "retained_file_sha256": {
+    "case-envelope-v3-red.log": "95a6eebc89fa1df44b9235b3b84ba95eb7584f3891eb1ea85ab2bbdfc8903a16",
+    "case-envelope-v3-green.log": "2573298fe62c73ae23e6d343916f7b1e9ed2d6c83204c89843b174c8cd524440",
+    "case-envelope-v3-final-green.log": "81b34ee030a978b12460f4fd5551266ceb9615a38b0ca83478db9b3b5125f7c4",
+    "case-envelope-v3-verified-green.log": "9e2dc1a22eb6761c58998a583b149e3d6f88409c047bfce9b8471cccf024e4d2",
+    "case-envelope-v3-formatted-green.log": "34b03249589983a85e4b3649847da855ea63e6d073f1c633259317be67881c89",
+    "case-envelope-v3-preservation.json": "62e93e0ac0154d2d3cf7ddd8f478be934e787afb6a5e2550d4f673f9d080aaff"
+  },
+  "limits": [
+    "Case envelopes only; clock/hex domain parity not established",
+    "JavaScript JSON duplicate-member admission remains separate",
+    "Native fixture generation only, no new Rust execution",
+    "No production technology or deployment qualification"
+  ]
+}

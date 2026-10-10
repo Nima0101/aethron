@@ -1,0 +1,59 @@
+{
+  "audit_policy_version": 2,
+  "decision": "PENDING",
+  "native_validation": "NOT_EXECUTED",
+  "local_attempts": [
+    {
+      "audit_policy_version": 2,
+      "state": "failed",
+      "decision": "PENDING",
+      "native_executed": false,
+      "platform": "Linux-6.6.141-09476-g954adab60416-x86_64-with-glibc2.41",
+      "driver_sha256": "a694176e7110765d8c19242953fd8d9fb9a41140e5c071cb9cbd5037be96ab88",
+      "harness_sha256": "e28d571e9effe473f10364770592863316486b20a9f7cf2d485cbf10c4aeadf8",
+      "fixture_sha256": "4652415cd5533e86cd65121d72300a0aca810bfd7a4c14af62f452d87e0a5cd7",
+      "corpus_sha256": "7870b95b978b86a62abd45749453f1549329c3a456643aeb28c26cb043269125",
+      "failure_type": "FileNotFoundError"
+    },
+    {
+      "audit_policy_version": 2,
+      "state": "failed",
+      "decision": "PENDING",
+      "native_executed": false,
+      "platform": "Linux-6.6.141-09476-g954adab60416-x86_64-with-glibc2.41",
+      "driver_sha256": "a694176e7110765d8c19242953fd8d9fb9a41140e5c071cb9cbd5037be96ab88",
+      "harness_sha256": "fd2ed7254b021bc49d07d728fd9d6ca6b4f5e6410a1570129c0256d496388946",
+      "fixture_sha256": "a7d1cd7f23634529a824bf18c555dbddbc3743c2ac9ed078353fdf34a7d33f61",
+      "corpus_sha256": "13948512b478984a35bb8ab2afb0eae6b32d5a41836ea17d75b6003478e082c3",
+      "failure_type": "FileNotFoundError"
+    },
+    {
+      "audit_policy_version": 2,
+      "state": "failed",
+      "decision": "PENDING",
+      "native_executed": false,
+      "platform": "Linux-6.6.141-09476-g954adab60416-x86_64-with-glibc2.41",
+      "driver_sha256": "a694176e7110765d8c19242953fd8d9fb9a41140e5c071cb9cbd5037be96ab88",
+      "harness_sha256": "febcf62014bc3141abfbbd31e5c87162ead2390c893361dc65ee626fa174bf49",
+      "fixture_sha256": "a7d1cd7f23634529a824bf18c555dbddbc3743c2ac9ed078353fdf34a7d33f61",
+      "corpus_sha256": "13948512b478984a35bb8ab2afb0eae6b32d5a41836ea17d75b6003478e082c3",
+      "failure_type": "FileNotFoundError"
+    }
+  ],
+  "focused_tests": {
+    "methods": 11,
+    "result": "PASS",
+    "scope": "Python harness plus prior C/JavaScript audit tests; not Rust compilation"
+  },
+  "negative_evidence": [
+    "No Rust compiler is available in this lane; all native attempts failed before compilation.",
+    "Initial three native harness tests failed before implementation.",
+    "One Ruff invocation and one YAML invocation failed to spawn threads/processes on the shared host; subsequent bounded runs succeeded.",
+    "Ruff found missing explicit subprocess check flags and unsorted imports; corrected and rechecked."
+  ],
+  "hosted_requirements": [
+    "Compile checked and optimized Rust with existing hosted compiler and record version",
+    "Compare 33 cases / 65 transitions and preserve stdout/stderr and any failure",
+    "Keep first audit decision pending until executable native evidence exists"
+  ]
+}

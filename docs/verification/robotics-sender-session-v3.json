@@ -1,0 +1,117 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "ac2dfefeffc79d198c8df141f806c4d64e7a16fc",
+  "component": "P3.1 sender/session comparison coverage",
+  "decision": "FIX missing transition fixtures; CLARIFY fixed-sender scope; production runtime selection PENDING",
+  "production_adapter_changed": false,
+  "candidate_decoder_changed": false,
+  "source_sha256": {
+    "scripts/robotics_lifecycle_audit_v2.py": "47d5c0806cde7c32114a672de136423243cb1e9c99a12845acb3408c623edfd7",
+    "tests/mavlink/test_lifecycle_audit_v2.py": "70afdaf1b393f0cfa8ef8f6759ac893612811b3fbfddb4adcbf5630669d1f07b",
+    "tests/mavlink/test_telemetry.py": "c0c9806d0f4562f80f9cbb27a4fd21e37c52b9a57f05f874ad54a4186750cb54",
+    "docs/architecture/robotics-review-v3.md": "1bf81ca5e7f81de3539a59438b926052476b92313c7c3d248dc94a6042473c83",
+    "tests/mavlink/audit_v2/managed.mjs": "7b5d29e4fa24a37e65d00ddaedd01c802ff97a7d8b3eb3efede6d0a05cfb7baf",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "5c987e8740ca52e5bfaf83daaf1f86a0e06a0b1302a417774a6d80c7f1087d5c"
+  },
+  "checks": {
+    "red": {
+      "methods": 2,
+      "failures": 5,
+      "errors": 0,
+      "note": "Missing comparison cases; production sender configuration test passed"
+    },
+    "green": {
+      "command": "PYTHONPATH=integrations/edge:tests/mavlink .venv/bin/python -m unittest test_lifecycle_audit_v2 test_native_audit_v2 test_runtime_input_v3 test_telemetry -v",
+      "methods": 70,
+      "skips": 0,
+      "seconds": 25.89
+    },
+    "negative_controls": [
+      {
+        "mutation": "advance_rejected_sender",
+        "detected": true,
+        "failure_type": "ValueError",
+        "differing_cases": [
+          "sender_system_recovery",
+          "sender_component_recovery",
+          "sender_rejection_retains_order"
+        ],
+        "candidate_sha256": "48cb3b45d2defb32dea5dc98eb35dbb8528ed4daffd9a22f8bd46ba49333191b"
+      },
+      {
+        "mutation": "forget_accepted_sender",
+        "detected": true,
+        "failure_type": "ValueError",
+        "differing_cases": [
+          "sender_rejection_retains_order"
+        ],
+        "candidate_sha256": "56f344357e9f24917c761af7dfcfbf46bd798416b3f110fd26045d9b0aa6a3a8"
+      },
+      {
+        "mutation": "reuse_closed_session",
+        "detected": true,
+        "failure_type": "ValueError",
+        "differing_cases": [
+          "sender_component_recovery",
+          "sender_rejection_retains_order",
+          "sender_session_closed",
+          "sender_session_fresh"
+        ],
+        "candidate_sha256": "9ee53cd46272c8dfa9d25826d029cdffec9cd323ee6522ace27972eacfbaf5a8"
+      }
+    ],
+    "real_node_parity": true,
+    "original_16_fixture_records": "unchanged",
+    "new_packet_crc": "all added ingest records accepted by pinned SDK decoder",
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS",
+    "native_executed": false
+  },
+  "corpus": {
+    "reference_node_parity": true,
+    "lifecycle_cases": 21,
+    "lifecycle_steps": 66,
+    "native_input_cases": 45,
+    "native_input_steps": 90,
+    "native_input_bytes": 5264,
+    "native_input_sha256": "74c464cdb2dd3a423e036871a23c39ef7f4be2f730165c5a6b6b5a3b2ca9c05b",
+    "native_executed": false,
+    "binary_roundtrip_reference_parity": true
+  },
+  "retained_file_sha256": {
+    "sender-session-v3-red.log": "2e15342c3c1dec60f7a5beb2474f86d0339da40facc9ead054ee23cae94a7b43",
+    "sender-session-v3-green.log": "a43cced41f02e251098e8eaf72dfd68b8fe098baf856af6103f22e02f529f224",
+    "sender-session-v3-negative.py": "b3a64ee643abea8f0b1e2a211f9c01cb8acfcbd475b2264fa9f0be442bb9efa5",
+    "sender-session-v3-negative/advance_rejected_sender-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sender-session-v3-negative/advance_rejected_sender-stdout.log": "86617f83e47dc937f32c3ca7eae91079a678a5bf97a00104b7db36be4dc02a53",
+    "sender-session-v3-negative/advance_rejected_sender.mjs": "48cb3b45d2defb32dea5dc98eb35dbb8528ed4daffd9a22f8bd46ba49333191b",
+    "sender-session-v3-negative/forget_accepted_sender-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sender-session-v3-negative/forget_accepted_sender-stdout.log": "d0687a1d67f7e510c47fe316963e647c3dd9d7a40670334812e5d7f129e2c6c0",
+    "sender-session-v3-negative/forget_accepted_sender.mjs": "56f344357e9f24917c761af7dfcfbf46bd798416b3f110fd26045d9b0aa6a3a8",
+    "sender-session-v3-negative/result.json": "62a41619d756d4c18cd21568ed993486add06279fab3970cfd5f4de0ea1a5d43",
+    "sender-session-v3-negative/reuse_closed_session-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sender-session-v3-negative/reuse_closed_session-stdout.log": "3e7ccf427ba5db0a5aafab64921006ff9cd28c053ec53f37e9e5d52eab811195",
+    "sender-session-v3-negative/reuse_closed_session.mjs": "9ee53cd46272c8dfa9d25826d029cdffec9cd323ee6522ace27972eacfbaf5a8",
+    "sender-session-v3-parity/corpus.json": "b83bcf3f395168fa1f792d596452f8accb94585b1cbbc89a7e172fcd0612a144",
+    "sender-session-v3-parity/expected.json": "2c0cbce99c0dbe5df674afd74bf668d0e7fdb7f46c3512c8a2402921bd63d021",
+    "sender-session-v3-parity/native-fixture.rs": "be06f0e477f4131111c40474bb97ef9a5de5e92ac1f01b6b0db270ae9bdd4274",
+    "sender-session-v3-parity/native-input.bin": "74c464cdb2dd3a423e036871a23c39ef7f4be2f730165c5a6b6b5a3b2ca9c05b",
+    "sender-session-v3-parity/node-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sender-session-v3-parity/node-stdout.log": "1d33479b5c880ef84f18a85d0dcf35430de14540f024586d37e94767d4c4c626",
+    "sender-session-v3-parity/result.json": "66bda203a8bb84096270b1a71a260ef993aa80038c342fbc0658c8baee92b231"
+  },
+  "ci_snapshot": {
+    "head": "935f00c150e56ae6b3ce4ce0a0078d74e4dcfa45",
+    "check": "passive-wire",
+    "state": "queued",
+    "url": "https://github.com/Nima0101/aethron/actions/runs/38084422368/job/114307803009",
+    "polled": false
+  },
+  "limits": [
+    "Candidate sender is fixed to (1,1); configurable sender equivalence remains incomplete",
+    "Unsigned sender IDs are routing filters, not authenticated provenance",
+    "New native corpus prepared, not compiled or executed locally",
+    "No new benchmark ranking, hardware qualification or lane completion"
+  ]
+}

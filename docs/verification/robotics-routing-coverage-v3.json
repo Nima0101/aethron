@@ -1,0 +1,133 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "e296382529b9f59e25f56c077e679bbba610e16b",
+  "component": "P3.1 earliest passive comparator coverage",
+  "decision": "FIX independent routing-test coverage; runtime decision PENDING",
+  "production_changed": false,
+  "source_sha256": {
+    "scripts/robotics_wire_audit_v2.py": "4781a63eb5400c525f2f1bb5a105fa0c0b2ad7aebab9ef8de09354547cfba077",
+    "tests/mavlink/test_wire_audit_v2.py": "4327a1ab1ee6edcbf208d108c5bafb320b7e70be8884e2405030e26af15accb8",
+    "scripts/robotics_native_audit_v2.py": "2a327603388d1c59d255311752b9c5a5daa42e769b2ad1a453b76362584f2e5d",
+    "scripts/robotics_lifecycle_audit_v2.py": "d763fa9c0c51a447d8f06c26032023561b5b35906fc7a4ecfb854664a5adef7a",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "tests/mavlink/audit_v2/reference.c": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483",
+    "docs/architecture/robotics-review-v3.md": "78e2180cdee25af20117fcc83a983dd38673d79ed423cdc6088e19f0b8cb1b82",
+    "docs/verification/robotics-comparator-coverage-v3.md": "f2951b362514190c0748da8d61d1684c2dacadee9d240dcf2c1fc68c808dc22f"
+  },
+  "checks": {
+    "red": {
+      "methods": 1,
+      "assertion_failures": 2,
+      "errors": 0
+    },
+    "focused": {
+      "methods": 41,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "seconds": 9.377
+    },
+    "ruff": "PASS",
+    "ruff_format": "PASS",
+    "bandit": "PASS",
+    "native_fixture_generation": {
+      "cases": 35,
+      "steps": 67,
+      "compiled": false
+    }
+  },
+  "wire_run": {
+    "audit_policy_version": 3,
+    "state": "compared",
+    "decision": "PENDING",
+    "scope": "fresh unsigned packet admission only; not lifecycle/signing parity",
+    "source_sha256": {
+      "scripts/robotics_wire_audit_v2.py": "4781a63eb5400c525f2f1bb5a105fa0c0b2ad7aebab9ef8de09354547cfba077",
+      "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+      "tests/mavlink/audit_v2/reference.c": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483"
+    },
+    "corpus_cases": 19,
+    "parity": true,
+    "sanitized_parity": true,
+    "python": {
+      "samples": 512,
+      "accepted": 81,
+      "p50_ns": 22471,
+      "p95_ns": 118360,
+      "max_ns": 724629
+    },
+    "c": {
+      "samples": 512,
+      "accepted": 81,
+      "p50_ns": 32,
+      "p95_ns": 327,
+      "max_ns": 677
+    },
+    "python_version": "3.13.5",
+    "machine": "x86_64",
+    "system": "Linux",
+    "compiler": "cc (Debian 14.2.0-19) 14.2.0",
+    "xml_sha256": "fbac92d0689c9b1bc03b49ebc5cdf989f3fc23026c3c856f7224e4b9af1b5f53",
+    "driver_sha256": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483",
+    "harness_sha256": "4781a63eb5400c525f2f1bb5a105fa0c0b2ad7aebab9ef8de09354547cfba077",
+    "corpus_sha256": "f2746551f2ed08fde1ab1d0803cfd09a0bd0a44865d423305ad09c296642f69c",
+    "pymavlink": "2.4.50",
+    "limitations": [
+      "512 mixed valid/invalid probes; no hard-real-time claim",
+      "Python constructor excluded; C stack setup included",
+      "C omits state, provenance objects and persistent replay",
+      "No memory, cold-start, signed, UDP or SITL comparison"
+    ]
+  },
+  "negative_control": {
+    "old_fixture_count": 17,
+    "new_fixture_count": 19,
+    "old_fixture_bytes_preserved": true,
+    "negative_control": "routing checks removed only from a temporary audit driver; repository driver unchanged",
+    "old_cases_detect_omission": false,
+    "new_cases_detect_omission": [
+      "v3_sender_valid_crc",
+      "v3_component_valid_crc"
+    ],
+    "existing_typed_numeric_parity_used": true,
+    "result": "coverage gap demonstrated; supplemental fixtures reject missing routing checks",
+    "initial_inspection_failure": "Direct dictionary equality assertion failed on accepted binary32 decimal formatting. Existing typed/numeric parity accepts original 17 outputs; it rejects expanded 19 outputs for two admission mismatches. No tolerance changed."
+  },
+  "retained_file_sha256": {
+    "routing-coverage-v3-red.log": "a01d740095a6385241c9af2c257d463b9d3d1d10aa9950021b51eade7ac9df6f",
+    "routing-coverage-v3-green.log": "67c37ef4af9455ffa87384e56e41b714a5c8a4d8556631939f69eda4009e331f",
+    "routing-coverage-v3-wire.log": "f09915ac28e87f53df94a8200031698200be094d8dbaa52eb0b3ccbec76a8baa",
+    "routing-coverage-v3-original-corpus.json": "d51999b7a2011a0615f9ead65d0080db8733d5c99cb42225d80e7f2c9b7aebdb",
+    "routing-coverage-v3-negative-control.json": "a6e618741259ad892634890aef3964f50ee4d3cc247336903779438ccc90d5c9",
+    "routing-coverage-v3-wire/candidate-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "routing-coverage-v3-wire/candidate-stdout.log": "6edf6781461069172b29840f9ca50f058672503d7eb80814ba3140dd31846ecb",
+    "routing-coverage-v3-wire/compiler-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "routing-coverage-v3-wire/compiler-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "routing-coverage-v3-wire/compiler-version-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "routing-coverage-v3-wire/compiler-version-stdout.log": "78fc11ae2c3ff7c235eb18ed90989d18f6cc864fb27027f839368cd0888deebc",
+    "routing-coverage-v3-wire/corpus.json": "f2746551f2ed08fde1ab1d0803cfd09a0bd0a44865d423305ad09c296642f69c",
+    "routing-coverage-v3-wire/expected.json": "d888fd05cec02da958933d285d7f13a31cfd0af3399ef32919d6b550481fff89",
+    "routing-coverage-v3-wire/generation.log": "ddfc8fecc564daf123bc2583a879fd2100f6f865d97d8e87756b117f42f80a30",
+    "routing-coverage-v3-wire/negative-control-compile-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "routing-coverage-v3-wire/negative-control-compile-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "routing-coverage-v3-wire/negative-control-no-routing": "10aaee983c456f0fab14f3c44568bf3d579677ac1f650d529d164bf7044ce243",
+    "routing-coverage-v3-wire/negative-control-no-routing.c": "301b0efb42c78159d2eaa2c5362572cd6cb7056cd88df652be24f08ea0879c98",
+    "routing-coverage-v3-wire/negative-control-run-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "routing-coverage-v3-wire/negative-control-run-stdout.log": "08fc2063ef5ebdcd8f8e95183742a9e13ea1a1d7765ffbb3b05b1e9ba0580eab",
+    "routing-coverage-v3-wire/reference": "bdc3d9b283da0884ff6562ebc2c2982345f44a5cf42bf3c4f9fe3a86e3a47a1e",
+    "routing-coverage-v3-wire/reference-sanitized": "1795c48ccb3fa0e3aac31b2d8b7d6e79583bffc9801ce4de547ebf9f6d76867b",
+    "routing-coverage-v3-wire/result.json": "f09915ac28e87f53df94a8200031698200be094d8dbaa52eb0b3ccbec76a8baa",
+    "routing-coverage-v3-wire/sanitized-candidate-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "routing-coverage-v3-wire/sanitized-candidate-stdout.log": "381d89ae3abfb4dfb1c3f54e580d7d4b786227dde2ffa6a569d9818c2bbcc239",
+    "routing-coverage-v3-wire/sanitized-compiler-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "routing-coverage-v3-wire/sanitized-compiler-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "routing-coverage-v3-wire/subset.xml": "8bde772f61056776b3d9a781e9bddd9f98b5997bae07429ed1a0836a2c588de9",
+    "routing-coverage-v3-wire/vectors.h": "d600d055a3026061d33b5a69f50af4ef96e7c8fda8d245897494d1a73b8fe040"
+  },
+  "limits": [
+    "No new production implementation or weapon-linked capability",
+    "No current native execution or complete cross-language lifecycle equivalence",
+    "No changed numeric tolerance, frozen timing threshold or historical receipt",
+    "No runtime ranking or hard-real-time, hardware, authentication or deployment qualification"
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "6431785214edccab56765467fc367401dbeb3c28",
+  "component": "passive lifecycle reference CLI JSON admission",
+  "decision": "FIX experiment input parsing; production technology PENDING",
+  "production_adapter_changed": false,
+  "source_sha256": {
+    "scripts/robotics_lifecycle_audit_v2.py": "b1019e340e4f870ed6e44ab1bee039a454065475f155b8589ffe90b5d29bdf3c",
+    "tests/mavlink/test_lifecycle_audit_v2.py": "762dce1e996af41de168af28b664de813105e6000e01d7ba731ab55120023310",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "tests/mavlink/audit_v2/managed.mjs": "5b7441ad93748260f3b1b4c67c48a5fe526c5b2ae14fb1ffc531cd4697567346",
+    "docs/architecture/robotics-review-v3.md": "d377f4c078f49e79836d394d881ce9c1dcb9ac9ff8b3490bc73ce4d1352ae7d6",
+    "docs/verification/robotics-comparator-coverage-v3.md": "cde3a50c69688f31935520ddc486cbded0ed4aaf1a64cef9f761bfb551e8a0c7"
+  },
+  "checks": {
+    "red": {
+      "methods": 3,
+      "failures": 9,
+      "errors": 0
+    },
+    "green": {
+      "methods": 34,
+      "skips": 0,
+      "seconds": 9.375,
+      "modules": [
+        "tests.mavlink.test_lifecycle_audit_v2",
+        "tests.mavlink.test_native_audit_v2"
+      ]
+    },
+    "ruff_check": "PASS",
+    "ruff_format": "PASS after initial formatting failure",
+    "bandit": "PASS",
+    "positive_cli": "Original 16-case/48-step corpus preserves exact reference results at ordinary input size and 65536-byte padded boundary"
+  },
+  "retained_file_sha256": {
+    "reference-json-v3-red.log": "6a51a64ceff94d69a82d3379f99beec63d07f3dd2bac0cc1c09ab1e21d2564f0",
+    "reference-json-v3-green.log": "60f1837979d4fee2acab4e0c7522498dba6e03c647cf622dfc986539bc740d38",
+    "reference-json-v3-final-green.log": "a4d86922e7e0d6323bf1a62383b11d64eba9ba3d82d2f92c368c595c5c450525"
+  },
+  "limits": [
+    "Python CLI input admission only; Node duplicate-member admission not qualified",
+    "No complete root/case/value schema validation",
+    "No independent stdin deadline; existing parent child timeout retained",
+    "No production runtime choice, real-time performance, hardware or deployment qualification"
+  ]
+}

@@ -4,7 +4,9 @@ import importlib.util
 import random
 import socket
 import sqlite3
-import subprocess
+
+# Fixed local Python test program; no shell or caller-supplied code.
+import subprocess  # nosec B404
 import sys
 import tempfile
 import threading
@@ -78,6 +80,36 @@ class SigningTests(unittest.TestCase):
         restarted.ingest(self.packet(timestamp=10_000_002, sequence=1, boot=11))
         self.assertTrue(restarted.snapshot().samples[0].authenticated)
 
+    def test_publication_fault_keeps_committed_replay_counter(self):
+        self.source.ingest(self.packet())
+        previous = self.source.snapshot()
+        packet = self.packet(timestamp=10_000_002, sequence=1, boot=11)
+        failure = MemoryError("synthetic-publication-fault")
+        with patch("aethron_edge.telemetry.mavlink.Observation", side_effect=failure):
+            with self.assertRaises(MemoryError) as caught:
+                self.source.ingest(packet)
+        self.assertIs(caught.exception, failure)
+        status = self.source.snapshot()
+        self.assertEqual(status.state, "UNKNOWN")
+        self.assertEqual(status.reason, "state_commit_fault")
+        self.assertEqual(status.samples, ())
+        self.assertFalse(status.perception_eligible)
+        self.source.ingest(self.packet(timestamp=10_000_003, sequence=2, boot=12))
+        self.assertEqual(self.source.snapshot(), status)
+        self.source.close()
+        with sqlite3.connect(self.path) as connection:
+            self.assertEqual(
+                connection.execute("SELECT timestamp FROM replay WHERE id=1").fetchone(),
+                (10_000_002,),
+            )
+        restarted = self.open()
+        self.addCleanup(restarted.close)
+        restarted.ingest(packet)
+        self.assertEqual(restarted.snapshot().reason, "signature_replay")
+        restarted.ingest(self.packet(timestamp=10_000_003, sequence=2, boot=12))
+        self.assertEqual(restarted.snapshot().samples[0].signature_timestamp, 10_000_003)
+        self.assertEqual(previous.samples[0].signature_timestamp, 10_000_001)
+
     def test_concurrent_receivers_commit_one_counter_before_publication(self):
         peer = self.open()
         self.addCleanup(peer.close)
@@ -112,7 +144,8 @@ assert source.snapshot().samples[0].authenticated
 source.close()
 print('fresh_process_replay_rejected')
 """
-        result = subprocess.run(
+        # Fixed executable/program; arguments are owned temp path and synthetic wire hex.
+        result = subprocess.run(  # nosec B603
             [
                 sys.executable,
                 "-I",
@@ -247,7 +280,8 @@ print('fresh_process_replay_rejected')
     def test_signed_loopback_and_tampering_campaign_never_transmit_or_poison(self):
         from aethron_edge.telemetry.mavlink import UdpTelemetry
 
-        rng = random.Random(16032)
+        # Reproducible corruption positions, never key/nonce generation.
+        rng = random.Random(16032)  # nosec B311
         packet = self.packet(timestamp=15_000_000)
         for _ in range(2000):
             changed = bytearray(packet)
