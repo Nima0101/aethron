@@ -1,6 +1,6 @@
 # P16–P18 review inventory v3
 
-Snapshot: `82e044e8ef66558f8a8519964e6ad42968276fe8`, plus packaging diagnostic retention, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `53cccd69e0b9fa672958dc456d314e388358af29`, plus evidence-kind preservation coverage, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -14,7 +14,7 @@ remain historical inputs. The consumed JSON-bound helper belongs to the foundati
 | Parser and canonicalization | [Original V3 review](p16-parser-v3.md): FIX pre-conversion integer bound. [Fresh reassessment](p16-parser-reassessment-v3.md): KEEP lexical hooks; fourteen portable cases and bounded syntax comparison, no performance ranking. |
 | Signature, trust, expiry and revocation | [Original review](p16-trust-v3.md). [Fresh reassessment](p16-trust-reassessment-v3.md): KEEP bounded native crypto boundary; add real missing-package process checks, preserve provisioning limits and source-bound primitive evidence. |
 | Independent pinned-policy validation | [Original review](p16-policy-admission-v3.md). [Fresh reassessment](p16-policy-evidence-reassessment-v3.md): KEEP exact-byte external pin and complete metadata validation; existing tests detect removed pin comparison. No persistence or enrollment. |
-| Evidence bytes | [Original review](p16-evidence-v3.md). [Fresh reassessment](p16-policy-evidence-reassessment-v3.md): KEEP immutable per-blob binding; existing tests detect weakened set comparison. No content qualification. |
+| Evidence bytes | [Original review](p16-evidence-v3.md). [Fresh reassessment](p16-policy-evidence-reassessment-v3.md): KEEP immutable per-blob binding; existing tests detect weakened set comparison. No content qualification. [Kind preservation review](p16-evidence-kinds-v3.md): KEEP runtime, add full signed-reference assertion that detects a previously surviving kind-label mutation. |
 | Three passport schemas and conformance | [Review](p16-conformance-v3.md): KEEP structural schema tooling; FIX positive authentication control and dependency closure. [Fresh reassessment](p16-schema-reassessment-v3.md): KEEP standard contracts and offline checker; preserve lexical/authentication gaps. |
 | Task/federation structural schemas | [Review](p16-interop-schemas-v3.md): FIX missing portable structural contracts; preserve runtime admission. |
 | Task descriptions | [Review](p16-task-v3.md): KEEP bounded descriptions; no task execution or replay store. [Fresh reassessment](p16-task-bundle-reassessment-v3.md): KEEP lexical/canonical description validation; existing test detects removed canonical equality. |

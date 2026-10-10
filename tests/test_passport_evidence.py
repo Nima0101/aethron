@@ -87,6 +87,22 @@ class EvidenceBindingTests(unittest.TestCase):
             with self.subTest(blobs=blobs):
                 self.rejected(blobs)
 
+    def test_every_signed_kind_and_outcome_preserves_reference_order(self):
+        references = self.signer.document["evidence"]
+        for reference, kind in zip(references, ("synthetic", "recorded", "external_unverified")):
+            reference["kind"] = kind
+        expected = tuple(dict(reference) for reference in references)
+        # Both input ordering and signed ordering differ from the default fixture.
+        references.reverse()
+        result = self.verify(tuple(reversed(self.blobs)))
+        self.assertEqual(result.status, "bound")
+        self.assertEqual(
+            tuple(dataclasses.asdict(reference) for reference in result.evidence),
+            tuple(reversed(expected)),
+        )
+        self.assertFalse(result.motion_authority)
+        self.assertFalse(result.evidence_verified)
+
     def test_entire_input_validated_before_crypto_or_content_hash(self):
         class BytesSubclass(bytes):
             pass

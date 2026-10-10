@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline": "53cccd69e0b9fa672958dc456d314e388358af29",
+  "component": "evidence signed-kind preservation",
+  "decision": "KEEP",
+  "finding": "Prior ten evidence methods permit a mutation replacing all output kind labels with synthetic; added full reference assertion.",
+  "checks": {
+    "evidence_methods": 11,
+    "adr_methods": 4,
+    "skips": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS without exclusions",
+    "production_red": false
+  },
+  "sensitivity": {
+    "mutation": "EvidenceReference(item[\"sha256\"], \"synthetic\", item[\"outcome\"])",
+    "prior_methods": 10,
+    "prior_failures": 0,
+    "new_methods": 1,
+    "new_expected_assertion_failures": 1,
+    "errors": 0,
+    "skips": 0,
+    "production_source_unchanged": true
+  },
+  "source_sha256": {
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "tests/test_passport_evidence.py": "03163f7540fb5b59fab17fbf7704d33cbe09535b36def03b1ef2fd957efddbd9",
+    "tests/test_passports.py": "20bdc75b84aa566867197604e2462053e366016638828bb0ba59e990ffd56c3d",
+    "tests/test_passport_schemas.py": "494e0b7345892bb2cfea3109f8c05735e8328f0cbf4de5b5319913a585ee0cb7",
+    "docs/architecture/interop/evidence-binding-v1.md": "641e541589cfc38abe039a94f22dc1629871c990ac22f943e2ddec8ed94c1c11",
+    "docs/decisions/p16-evidence-kinds-v3.json": "8fa30b2c656d4ed81f17e236faf3ce23146e3a06c90ddfba2696922fa1e47d1a",
+    "docs/engineering/reviews/p16-evidence-kinds-v3.md": "ca877581a5cd8ea2dc4984f13c750f06cb2569668bc5d62708a9db3c5edbcbed"
+  },
+  "runtime_log_sha256": {
+    "evidence-kinds-adr.log": "1efcfda3e5f863abb539edd22a092dfc70f2fe47efd8754247c3f51308762b3a",
+    "evidence-kinds-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "evidence-kinds-control.log": "a675b9e02ee94e9548e494422da830518b3d629337e99248f1530c7c69e06186",
+    "evidence-kinds-focused.log": "53f9b7f943136cbdeb456e0a9b87b006416720fe48e1ab1564743433050f1f22",
+    "evidence-kinds-format.log": "fd2299c9f1c6dc869070883e281051bfe93aacf66c1a3b0069f45b4aa410ca50",
+    "evidence-kinds-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+  },
+  "runtime_probe_sha256": "a41ebcb6bfad635ceccd765d8921a73b79d3848c8b1a6533460f3e5b56d22a1e",
+  "limits": [
+    "Source-derived technology comparison; no full alternative binder benchmark.",
+    "Listed hashes do not establish dependency closure or loaded-code attestation.",
+    "No new production defect, hosted qualification, physical performance or lane completion."
+  ]
+}
