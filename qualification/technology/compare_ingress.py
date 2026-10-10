@@ -138,6 +138,14 @@ def main():
     if len(lines) != len(requests):
         raise RuntimeError("audit_row_count")
     rows = [_response(row) for row in lines]
+    # Equal downstream schema errors do not prove correct token admission.
+    # Only the pinned ingress corpus declares this independent expectation;
+    # collected semantic requests are not a second ingress specification.
+    ingress_mismatches = [
+        index
+        for index, (vector, row) in enumerate(zip(vectors, rows))
+        if row["accepted"] is not (not vector["reject"])
+    ]
     report_mismatches, document_mismatches = [], []
     for index, ((raw, now_ms), row) in enumerate(zip(requests, rows)):
         expected = outcome(raw, now_ms)
@@ -150,7 +158,7 @@ def main():
                 actual["input_sha256"] = hashlib.sha256(raw).hexdigest()
         if actual != expected:
             report_mismatches.append(index)
-    mismatches = sorted(set(report_mismatches) | set(document_mismatches))
+    mismatches = sorted(set(ingress_mismatches) | set(report_mismatches) | set(document_mismatches))
 
     # Local upper-byte-bound measurement, not an acceptance threshold or a
     # cross-language timing comparison. No compilation or unbounded soak.
@@ -191,9 +199,11 @@ def main():
         "ingress_cases": len(vectors),
         "semantic_requests": len(requests) - len(vectors),
         "mismatch_indices": mismatches,
+        "ingress_mismatch_indices": ingress_mismatches,
         "report_mismatch_indices": report_mismatches,
         "document_mismatch_indices": document_mismatches,
         "all_reports_match": not report_mismatches,
+        "all_ingress_expectations_match": not ingress_mismatches,
         "all_documents_match": not document_mismatches,
         "request_transport_sha256": hashlib.sha256(transport.encode("ascii")).hexdigest(),
         "response_transport_sha256": hashlib.sha256(response_bytes).hexdigest(),

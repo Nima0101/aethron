@@ -149,6 +149,38 @@ class AuditReportTests(unittest.TestCase):
                 self.assertEqual(status, 1)
                 self.assertEqual(report["document_mismatch_indices"], [3])
 
+    def test_equal_schema_rejections_do_not_hide_forbidden_ingress_acceptance(self):
+        vectors = json.loads(
+            (Path(compare_ingress.__file__).parent / "ingress-vectors-v1.json").read_text()
+        )
+        # Preserve the decoded float exactly. Document and semantic comparisons
+        # both match, but the ingress contract requires rejection of the token.
+        for index in (3, 4, 5):
+            with self.subTest(vector=vectors[index]["id"]):
+                rows = self.responses()
+                rows[index] = {
+                    "accepted": True,
+                    "document": json.loads(bytes.fromhex(vectors[index]["hex"])),
+                }
+                status, report = self.compare(self.lines(rows))
+                self.assertEqual(status, 1)
+                self.assertEqual(report["ingress_mismatch_indices"], [index])
+                self.assertEqual(report["mismatch_indices"], [index])
+                self.assertFalse(report["all_ingress_expectations_match"])
+                self.assertTrue(report["all_reports_match"])
+                self.assertTrue(report["all_documents_match"])
+
+    def test_ingress_expectations_are_checked_in_both_directions(self):
+        rows = self.responses()
+        status, report = self.compare(self.lines(rows))
+        self.assertEqual(status, 0)
+        self.assertTrue(report["all_ingress_expectations_match"])
+        self.assertEqual(report["ingress_mismatch_indices"], [])
+        status, report = self.compare(self.lines([{"accepted": False} for _ in rows]))
+        self.assertEqual(status, 1)
+        self.assertFalse(report["all_ingress_expectations_match"])
+        self.assertEqual(report["ingress_mismatch_indices"], [0, 1, 2])
+
     def test_accepting_malformed_source_cannot_hide_behind_schema_rejection(self):
         rows = self.responses()
         # Duplicate equal keys, invalid UTF-8, and malformed JSON respectively.

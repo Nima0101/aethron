@@ -539,3 +539,48 @@ full expected reports and rejects numeric type substitutions. Production code
 is unchanged. [Decision](assessment-vectors-decision-v1.json) and
 [checks](assessment-vectors-verification-v1.json) record scope and limits;
 all diagnostic tooling has not been freshly re-reviewed by this slice.
+
+## Independent ingress admission comparison — 2026-10-10
+
+Baseline `20e19c0b6c8a0b7c5de7aa5365a87d9e913f2467`: fresh review of the
+comparison driver and Java/Node candidate probes found a false-success path.
+Accepting a forbidden float, exponent or underflow token while preserving its
+decoded value could match both document and downstream schema-error comparisons.
+The pinned corpus rejection expectation was never independently enforced.
+
+The driver now compares all 18 corpus admission flags independently, exposes
+`ingress_mismatch_indices` and `all_ingress_expectations_match`, and includes
+those failures in `mismatch_indices` and the exit status. The other flags retain
+their narrower meanings. The 63 collected semantic requests have no independent
+ingress expectation: they exercise preservation through the Python schema oracle.
+This additive diagnostic report correction changes no production evidence API.
+Historical reports remain retained; their two old equality flags alone cannot
+establish correct token admission.
+
+[Technology decision](ingress-admission-decision-v3.json) compares direct Python
+instrumentation, Erlang/OTP orchestration, Java streaming and Node execution.
+KEEP the scoped driver and experimental runtimes; FIX its acceptance gate. The
+three forbidden-token regression cases failed before correction. Fresh actual
+Java execution then matched the corpus and semantic requests, with eight passing
+transport tests. Node retains four duplicate-key mismatches. Exact versions,
+source observations, checks and raw local timing samples are retained in
+[verification](ingress-admission-verification-v3.json). Java ran locally on 21,
+not the configured hosted 17. No new cross-language speed conclusion is drawn.
+
+The unchanged architecture boundaries are explicit at each C4 level:
+
+- Context: a software reviewer examines synthetic parser evidence; no operational
+  sensor, command, network, identity or actuation interface exists.
+- Containers: the source-checkout Python reference driver exchanges bounded hex
+  requests and JSON responses with an audit-only Java process; the Node probe
+  independently reads the same pinned token corpus.
+- Components: response admission, pinned ingress expectation, decoded document
+  comparison and semantic oracle remain separate checks before report output.
+- Code: `main` composes the three mismatch sets; `_response`,
+  `_document_matches` and `outcome` retain their separate responsibilities.
+
+Command/control, communications, computers and ISR production capabilities are
+outside this diagnostic's scope. It qualifies none of MLS, ZTA, Link 16, CNSA,
+DDS deadlines, availability or physical sensor performance. Next earliest pending
+review: artifact/campaign comparison and remaining measurement evidence tooling.
+No phase or technology-audit completion is asserted.
