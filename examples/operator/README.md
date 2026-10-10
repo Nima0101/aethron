@@ -45,6 +45,10 @@ uses text nodes; status has polite/atomic live-region attributes. Those semantic
 still require real-browser keyboard/focus and assistive-technology acceptance.
 Unsupported locales throw `unsupported_locale` before changing the view. Reader
 exceptions become fixed invalid guidance without including exception text.
+If a reader or input getter invokes another refresh or changes the locale, only
+the newest refresh can update the panel. An interrupted older refresh cannot
+restore withdrawn details or mix its earlier translation with the newer locale.
+Callbacks and DOM objects remain trusted host code, not an isolation boundary.
 
 `presentObservation(observation.view(), locale)` remains available independently.
 It snapshots before validation; direct object admission has no pre-clone allocation

@@ -92,7 +92,9 @@ assert.equal(strategies.native_private().view, strategies.native_private().view)
 assert.notEqual(strategies.closure().view, strategies.closure().view);
 
 const report = {node: process.version, platform: process.platform, arch: process.arch,
-  parity_traces: traces, parity_views: views, legacy_exceptions: 'Four ownership regressions intentionally corrected; see test.mjs',
+  parity_traces: traces, parity_views: views,
+  parity_scope: 'Plain-data timing/copy traces only; legacy and closure prototypes do not implement current reentrant admission revocation.',
+  legacy_exceptions: 'Historical ownership and later reentrant admission corrections are covered by test.mjs, not this parity comparison.',
   cycles_per_round: 100, views_per_cycle: 20, tracks: 32, measurements: [], sha256: {}};
 const full = structuredClone(envelope);
 full.result.tracks = Array.from({length: 32}, (_, i) => ({...structuredClone(envelope.result.tracks[0]), id: `synthetic-${i}`}));

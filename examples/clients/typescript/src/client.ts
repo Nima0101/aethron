@@ -53,20 +53,24 @@ export class Observation {
   } | null = null;
   #received = 0;
   #lastViewed = 0;
+  #admission: object | null = null;
 
   accept(value: unknown, now = localNow()): void {
     this.disconnect();
     if (!Number.isFinite(now) || now < 0) throw new Error('invalid_clock');
+    const admission = {};
+    this.#admission = admission;
     // Validate an owned snapshot: callers must not mutate an admitted lease.
     let snapshot: unknown;
     try {
       snapshot = structuredClone(value);
-      if (!validate(snapshot)) throw new Error('invalid_event');
+      if (this.#admission !== admission || !validate(snapshot)) throw new Error('invalid_event');
     } catch {
       // structuredClone can invoke input getters, including reentrant callers.
       this.disconnect();
       throw new Error('invalid_event');
     }
+    this.#admission = null;
     const scene = snapshot as SceneEnvelope;
     this.#projection = {
       validForMs: scene.clock.valid_for_ms, observedState: scene.result.state,
@@ -77,7 +81,10 @@ export class Observation {
     this.#lastViewed = now;
   }
 
-  disconnect(): void { this.#projection = null; this.#received = 0; this.#lastViewed = 0; }
+  disconnect(): void {
+    this.#admission = null;
+    this.#projection = null; this.#received = 0; this.#lastViewed = 0;
+  }
 
   view(now = localNow()): ObservationView {
     if (!this.#projection || !Number.isFinite(now) || now < 0 || now < this.#lastViewed ||

@@ -68,7 +68,7 @@ test('installed public declarations and offline uninstall/reinstall preserve the
       join(work, 'fixture.json'));
     const runConsumer = () => JSON.parse(execFileSync(process.execPath,
       ['--disallow-code-generation-from-strings', 'consumer.mjs'], {...options, cwd: work}));
-    assert.deepEqual(runConsumer(), {checks: 8, current_state: 'UNKNOWN'});
+    assert.deepEqual(runConsumer(), {checks: 11, current_state: 'UNKNOWN'});
     execFileSync(process.execPath, [npm, 'uninstall', '--offline', '--ignore-scripts',
       '--no-audit', '--no-fund', '--save', 'aethron-edge-client-example'], {...options, cwd: work});
     assert.equal(existsSync(join(work, 'node_modules/aethron-edge-client-example')), false);
@@ -81,7 +81,7 @@ test('installed public declarations and offline uninstall/reinstall preserve the
     {...options, cwd: work});
     execFileSync(process.execPath, [npm, 'install', '--offline', '--ignore-scripts',
       '--no-audit', '--no-fund', join(work, packed[0].filename)], {...options, cwd: work});
-    assert.deepEqual(runConsumer(), {checks: 8, current_state: 'UNKNOWN'});
+    assert.deepEqual(runConsumer(), {checks: 11, current_state: 'UNKNOWN'});
   } finally {
     rmSync(work, {recursive: true, force: true});
   }

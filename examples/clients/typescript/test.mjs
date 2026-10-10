@@ -86,6 +86,21 @@ test('a failing input getter cannot leave a reentrant observation admitted',()=>
  assert.throws(()=>o.accept(input,0),{message:'invalid_event'});
  assert.equal(o.view(0).label,'expired');
 });
+for (const operation of ['disconnect','view','accept']) {
+ test(`direct input getter ${operation} cannot revive the interrupted admission`,()=>{
+  const o=new Observation();
+  const input={...envelope,get result(){
+   if(operation==='disconnect') o.disconnect();
+   else if(operation==='view') o.view(0);
+   else o.accept(envelope,0);
+   return result;
+  }};
+  assert.throws(()=>o.accept(input,0),{message:'invalid_event'});
+  assert.equal(o.view(0).label,'expired');
+  // Explicit fresh admission remains usable after rejecting the interrupted call.
+  o.accept(envelope,1);assert.equal(o.view(1).label,'delayed_observation');
+ });
+}
 
 test('observer deletes its session even when the final display callback throws',async t=>{
  const {observe}=await import('./dist/client.js');

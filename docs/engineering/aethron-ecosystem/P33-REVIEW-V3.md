@@ -830,3 +830,56 @@ remain unfinished. The safe embedded addendum's informational UNKNOWN/interface
 requirements apply; no weapon-specific sample was imported. No audit/lane
 completion marker is warranted. Next: execute the panel in a supported browser
 harness and integrate its host refresh/lifecycle adapter.
+
+## P3.3 admission and P12 refresh re-entry correction
+
+Baseline `1e99e94a50b725169ef9a3b41720100ad3563c28`. Verified the preceding
+panel bridge commit, thirteen paths and 64 source hashes. Restarted at SDK
+admission, then reviewed the existing projection, transport, generated contracts,
+package lifecycle and P12 presenter/panel boundary. A valid direct input getter
+could disconnect, read the cleared state or admit another observation during
+cloning, yet the interrupted outer admission restored its own observation. Three
+new SDK assertions reproduced this. Admission now uses a private opaque token;
+revocation during cloning rejects with `invalid_event` and clears all state,
+including any nested admission. A later independent acceptance remains supported.
+
+The panel had the corresponding ordering defect: a nested reader/getter refresh
+could withdraw details, then an older refresh restored them. A nested locale
+change could mix English guidance with Swedish labels. Three panel assertions
+reproduced these cases. Only the latest refresh token may now publish to the DOM;
+disposal invalidates it. This adds no queue, retained observation history, timer
+or network operation. It does not bound arbitrary host callback recursion or make
+in-process JavaScript an isolation boundary. JSON wire input cannot carry getters.
+
+The deployment constraints remain browser/Node JavaScript hosts, fixed aggregate
+contracts, explicit revocation, no persistent personal identifiers and no
+qualified real-time deadline. KEEP TypeScript with generated runtime validation
+for SDK admission and native DOM for this panel. Reconsidered plain ECMAScript,
+ReScript, Elm ports, Lit reactive components and the prior native/Wasm boundary
+options: a static type system alone cannot validate incoming JavaScript, and a
+different UI scheduler still needs explicit ordering at this callback boundary.
+The [structured serialization algorithm](https://html.spec.whatwg.org/multipage/structured-data.html#structuredserializeinternal)
+reads property values; [Lit updates](https://lit.dev/docs/components/lifecycle/#reactive-update-cycle)
+and [Elm ports](https://guide.elm-lang.org/interop/ports.html) describe different
+integration models. The KEEP conclusion is an engineering inference from those
+interfaces and these executable regressions, not a measured language performance
+ranking. No material migration winner was established for these corrections.
+
+The comparison script now explicitly limits parity to its 45 plain-data traces
+and 162 views; historical legacy/closure prototypes do not implement this new
+revocation rule. The packed consumer also exercises all three interruptions on
+both initial installation and reinstall. Final results and source bindings are
+recorded in [the correction evidence](evidence/phase3/p33-reentrant-admission-v3.json).
+The first concurrent SDK run passed 242/243: the POST-301 test's server received
+no request before its two-second abort. All 243 pass with file concurrency one
+and the original timeout unchanged. Resource contention is a plausible cause,
+not a proven diagnosis; the original failure log remains retained.
+
+Public PR #44 remains at `2f22c34c716852d5b562d99bb5fb4eb20f59fa2a`;
+its single snapshot was queued/behind. The panel commit is held locally until
+this correction is committed and verified. Existing browser-probe failures,
+full-SSE-event versus producer-payload size mismatch, host scheduling limits and
+unqualified hardware/security/availability claims remain explicit. No complete
+Help Center, integrated application, P19 acceptance or audit-completion claim is
+made. Next earliest unfinished component: supported-browser execution and the
+P12 host refresh/lifecycle adapter, after delivering this correction.

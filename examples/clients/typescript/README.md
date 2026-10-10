@@ -83,8 +83,14 @@ and local lease are retained after admission; transport handles, track IDs and
 geometry are discarded from this observation object. This is encapsulation and
 data minimization, not process isolation or guaranteed memory erasure. Failed
 input cloning clears any observation admitted by a reentrant input getter.
+If a direct JavaScript input getter disconnects, reads the cleared observation or
+starts another admission during cloning, the interrupted outer admission also
+clears state and throws `invalid_event`. A later independent admission may proceed.
+JSON input cannot contain getters; this guard concerns in-process object callers.
 `node audit-observation.mjs` reproduces the bounded legacy/closure/private-field
-comparison; `npm test` includes its deterministic timing trace checks.
+comparison; `npm test` includes its deterministic plain-data timing trace checks.
+Those historical prototypes do not implement the current reentrant admission
+guard; their timing/copy parity does not establish adversarial-input equivalence.
 
 Teardown attempts authenticated session deletion even if the final display
 callback throws or aborts the caller's signal. Deletion uses its own two-second

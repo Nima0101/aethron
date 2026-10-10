@@ -143,3 +143,36 @@ test('unchanged refresh reads again without replacing live-region text nodes', (
   assert.equal(reads,2);
   nodes.forEach((node,index) => assert.ok(node.firstChild === children[index], 'unchanged text node must survive refresh'));
 });
+for (const entry of ['reader','getter']) test(`newer refresh wins when entered from ${entry}`, () => {
+  let next = delayed;
+  let nested = false;
+  const {root,panel} = setup(() => {
+    if (nested && entry === 'reader') {
+      nested = false; next = expired; panel.refresh();
+      return delayed;
+    }
+    return next;
+  });
+  nested = true;
+  if (entry === 'getter') next = {...delayed,get label() {
+    next = expired; panel.refresh(); return 'delayed_observation';
+  }};
+  panel.refresh();
+  assert.equal(root.querySelector('[role=status]').getAttribute('data-state'),'expired');
+  assert.equal(root.querySelector('details').getAttribute('data-help-topic'),'observation.expired');
+  assert.ok(!root.textContent.includes('lwir'));
+  assert.ok(!root.textContent.includes('PRESENT'));
+});
+test('locale change during input snapshot cannot mix languages or restore older details', () => {
+  let next = delayed;
+  const {root,panel} = setup(() => next);
+  next = {...delayed,get label() {
+    next = expired; panel.setLocale('sv-SE'); return 'delayed_observation';
+  }};
+  panel.refresh();
+  assert.equal(root.querySelector('section').lang,'sv-SE');
+  assert.equal(root.querySelector('summary').textContent,'Hjälp');
+  assert.equal(root.querySelector('h2').textContent,'Ingen aktuell observation');
+  assert.ok(!root.textContent.includes('lwir'));
+  assert.ok(!root.textContent.includes('Delayed observation'));
+});

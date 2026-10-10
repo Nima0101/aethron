@@ -29,6 +29,7 @@ export function mountObservationPanel(root: HTMLElement, readView: () => unknown
   details.append(summary, explanation);
   const controls = document.createElement('div');
   let disposed = false;
+  let latestRefresh: object | undefined;
   const buttons = (['en', 'sv-SE'] as const).map(language => {
     const button = document.createElement('button');
     button.type = 'button'; button.lang = language;
@@ -50,14 +51,18 @@ export function mountObservationPanel(root: HTMLElement, readView: () => unknown
 
   function refresh(): void {
     if (disposed) return;
+    // Reader callbacks and structuredClone getters can synchronously reenter.
+    // Only the newest invocation may publish, including a newer withdrawal.
+    const ticket = {};
+    latestRefresh = ticket;
     let input: unknown;
     try { input = readView(); }
     catch { input = null; }
     // Host callbacks may dispose the panel while obtaining the view.
-    if (disposed) return;
+    if (disposed || latestRefresh !== ticket) return;
     const view = presentObservation(input, locale);
     // Snapshotting direct object input can invoke getters too.
-    if (disposed) return;
+    if (disposed || latestRefresh !== ticket) return;
     const copy = labels[locale];
     attribute(section, 'lang', locale);
     attribute(section, 'aria-label', copy.panel);
@@ -81,6 +86,7 @@ export function mountObservationPanel(root: HTMLElement, readView: () => unknown
   function dispose(): void {
     if (disposed) return;
     disposed = true;
+    latestRefresh = undefined;
     for (const {button, select} of buttons) button.removeEventListener('click', select);
     details.removeEventListener('toggle', onToggle);
     // Clear detached references as well as the visible root.

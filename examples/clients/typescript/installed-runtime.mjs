@@ -29,4 +29,14 @@ observation.accept(envelope, 300);
 observation.disconnect();
 assert.deepEqual(observation.view(300), expired);
 await assert.rejects(import('aethron-edge-client-example/dist/wire.js'), {code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'});
-console.log(JSON.stringify({checks: 8, current_state: 'UNKNOWN'}));
+for (const operation of ['disconnect', 'view', 'accept']) {
+  const interrupted = {...envelope, get result() {
+    if (operation === 'disconnect') observation.disconnect();
+    else if (operation === 'view') observation.view(400);
+    else observation.accept(envelope, 400);
+    return result;
+  }};
+  assert.throws(() => observation.accept(interrupted, 400), {message: 'invalid_event'});
+  assert.deepEqual(observation.view(400), expired);
+}
+console.log(JSON.stringify({checks: 11, current_state: 'UNKNOWN'}));
