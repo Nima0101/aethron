@@ -42,9 +42,14 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
 New reports include `source_sha256` for the comparison and the actual imported
 registration module's on-disk file, using logical labels without installation
 paths. Hashing precedes fixture construction and timed samples; missing source
-bytes prevent report emission. This fingerprints files, not loaded code, and is
+bytes prevent report emission. The same two captured paths are read again after
+all rotated iterations and temporary method patches have completed. A changed
+digest raises `registration_audit_source_changed`; read errors propagate.
+Neither failure emits JSON. This fingerprints files, not loaded code, and is
 not authentication, an atomic snapshot or a complete dependency manifest.
 Transitive geometry, model and native dependencies are not covered. Fixture
 construction is identified through the harness source hash, not a separately
-serialized calibration/point digest. Keep sources stable during a run. Historical
+serialized calibration/point digest. Keep sources stable during a run. Matching
+reads cannot detect changes restored between observations, changes after the
+last read, or differences from already loaded code. Historical
 reports are unchanged. See the [partial source review](../../../docs/engineering/aethron-ecosystem/P21-REGISTRATION-SOURCE-EVIDENCE-V3.md).

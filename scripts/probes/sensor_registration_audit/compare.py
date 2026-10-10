@@ -39,12 +39,12 @@ def numpy_transform(self, xyz_m):
 
 
 def main():
+    source_paths = {
+        "compare.py": Path(__file__),
+        "aethron_edge.sensors.registration": Path(registration.__file__),
+    }
     source_sha256 = {
-        name: hashlib.sha256(path.read_bytes()).hexdigest()
-        for name, path in {
-            "compare.py": Path(__file__),
-            "aethron_edge.sensors.registration": Path(registration.__file__),
-        }.items()
+        name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in source_paths.items()
     }
     calibration = artifact()
     scalar = RigCalibration.transform
@@ -111,6 +111,9 @@ def main():
                 samples[name].append((time.process_time_ns() - start) / 1e6)
         assert all(value == outputs["scalar"] for value in outputs.values())
         assert all(not o.live_evidence for o in outputs["scalar"])
+    for name, path in source_paths.items():
+        if hashlib.sha256(path.read_bytes()).hexdigest() != source_sha256[name]:
+            raise RuntimeError("registration_audit_source_changed")
     print(
         json.dumps(
             {

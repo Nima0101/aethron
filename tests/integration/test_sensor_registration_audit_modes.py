@@ -12,7 +12,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from aethron_edge.sensors import registration
 
@@ -21,6 +21,50 @@ PROBE = ROOT / "scripts/probes/sensor_registration_audit/compare.py"
 
 
 class RegistrationAuditModeTests(unittest.TestCase):
+    def test_changed_source_during_comparison_prevents_report(self):
+        for name in ("compare.py", "registration.py"):
+            with self.subTest(source=name), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                for filename in ("compare.py", "registration.py"):
+                    (root / filename).write_bytes(b"before")
+                mutation = Mock(side_effect=lambda target=root / name: target.write_bytes(b"after"))
+                output = io.StringIO()
+                transform = registration.RigCalibration.transform
+                digest = registration.RigCalibration.digest
+                with patch.object(registration, "__file__", str(root / "registration.py")):
+                    with self.assertRaisesRegex(
+                        RuntimeError, "^registration_audit_source_changed$"
+                    ):
+                        self.run_inert_comparison(
+                            output, on_binding=mutation, harness_path=root / "compare.py"
+                        )
+                self.assertTrue(mutation.called)
+                self.assertEqual(output.getvalue(), "")
+                self.assertIs(registration.RigCalibration.transform, transform)
+                self.assertIs(registration.RigCalibration.digest, digest)
+
+    def test_removed_source_during_comparison_prevents_report(self):
+        for name in ("compare.py", "registration.py"):
+            with self.subTest(source=name), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                for filename in ("compare.py", "registration.py"):
+                    (root / filename).write_bytes(b"before")
+                removal = Mock(
+                    side_effect=lambda target=root / name: target.unlink(missing_ok=True)
+                )
+                output = io.StringIO()
+                transform = registration.RigCalibration.transform
+                digest = registration.RigCalibration.digest
+                with patch.object(registration, "__file__", str(root / "registration.py")):
+                    with self.assertRaises(FileNotFoundError):
+                        self.run_inert_comparison(
+                            output, on_binding=removal, harness_path=root / "compare.py"
+                        )
+                self.assertTrue(removal.called)
+                self.assertEqual(output.getvalue(), "")
+                self.assertIs(registration.RigCalibration.transform, transform)
+                self.assertIs(registration.RigCalibration.digest, digest)
+
     def test_report_pins_harness_and_actual_imported_registration(self):
         output = io.StringIO()
         with tempfile.TemporaryDirectory() as directory:
@@ -75,7 +119,9 @@ class RegistrationAuditModeTests(unittest.TestCase):
                 self.assertEqual(result.stdout, "")
                 self.assertEqual(result.stderr.strip(), "registration_audit_requires_assertions")
 
-    def run_inert_comparison(self, output, *, mismatch_at=0, live_iterations=()):
+    def run_inert_comparison(
+        self, output, *, mismatch_at=0, live_iterations=(), on_binding=None, harness_path=PROBE
+    ):
         module = runpy.run_path(str(PROBE))
         bindings = []
 
@@ -83,6 +129,8 @@ class RegistrationAuditModeTests(unittest.TestCase):
             def __init__(self, *args, **kwargs):
                 bindings.append(self)
                 self.ordinal = len(bindings)
+                if on_binding is not None:
+                    on_binding()
 
             def project(self, *args, **kwargs):
                 return SimpleNamespace(
@@ -90,7 +138,9 @@ class RegistrationAuditModeTests(unittest.TestCase):
                     value="wrong" if self.ordinal == mismatch_at else "same",
                 )
 
-        with patch.dict(module["main"].__globals__, Registration=InertRegistration):
+        with patch.dict(
+            module["main"].__globals__, Registration=InertRegistration, __file__=str(harness_path)
+        ):
             with contextlib.redirect_stdout(output):
                 module["main"]()
 

@@ -1,0 +1,34 @@
+{
+  "review_order_version": 3,
+  "component": "C04_source_fingerprint_consistency",
+  "decision": "FIX",
+  "full_component_review_complete": false,
+  "reviewed_head": "35ab396f8ff339de91912f1b1efe94918edfc81f",
+  "production_sensor_behavior_changed": false,
+  "checks": {
+    "red_assertion_failures": 4,
+    "red_errors": 0,
+    "new_methods": 2,
+    "green_methods": 8,
+    "ruff": "PASS",
+    "format": "PASS after assertion wrapping",
+    "bandit": "4 unchanged LOW findings across harness and tests",
+    "ast": "Non-main code and full rotated measurement loop unchanged",
+    "method_restoration": "Transform/digest identities restored before final source rejection propagates"
+  },
+  "limitations": [
+    "New cases use tiny temporary source files and inert registration outputs; no projection benchmark or calibration qualification.",
+    "Before/after observations do not attest loaded code or immutable execution.",
+    "Full technology reassessment incomplete at C01; no runtime decision.",
+    "Historical reports unchanged and not requalified."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/hashlib.html"
+  ],
+  "sha256": {
+    "scripts/probes/sensor_registration_audit/compare.py": "990f029ccb1cb15175048b43b20e37651939ab4e146038b2ba8b42e912e58a98",
+    "tests/integration/test_sensor_registration_audit_modes.py": "c4bb20f30cb093e42c9804bd46e7291a1499a3ba7024103627fdf9feb7e70cee",
+    "scripts/probes/sensor_registration_audit/README.md": "06429023c109fbfec2840ad87ab9322de675844d40082aec4eb924f3a1fa921b",
+    "docs/engineering/aethron-ecosystem/P21-REGISTRATION-SOURCE-CONSISTENCY-V3.md": "920abd12d9d1b2d75871b25af0273637b1eef2d3f10fb6b28901299e6bb77d6e"
+  }
+}
