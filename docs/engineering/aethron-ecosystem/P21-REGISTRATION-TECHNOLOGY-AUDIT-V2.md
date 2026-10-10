@@ -1,10 +1,14 @@
 # P2.1 C04 calibration and registration — audit policy v2
 
-Decision: **KEEP strict Python admission and scalar registration; implement a
+This is a **historical V2 checkpoint**, not a completed fresh V3 review. See the
+[partial qualification correction](P21-REGISTRATION-CLAIMS-REVIEW-V3.md).
+
+The V2 decision was: **KEEP strict Python admission and scalar registration; implement a
 read-only validated calibration snapshot and reuse its digest per binding.**
 This covers persistent rig loading, rigid transform/inverse, declared uncertainty,
 process-local lease and provenance output, including the earlier nested-model
-validation repair. C05–C09 remain pending; no forward feature expansion.
+validation repair. C05–C09 were pending at that checkpoint; this historical
+status does not advance the fresh V3 review.
 
 ## Constraints and findings
 
@@ -20,7 +24,10 @@ clocks, caps lifetime at 600 seconds, withdraws stale/future/wrong-frame/mount/c
 inputs and permanently closes after a clock rewind. Error bounds include declared
 translation, rotation and measurement error; plane crossing or image-domain
 uncertainty withdraws geometry. Outputs preserve digest, expiry and scene-break
-semantics and never self-certify live hardware. The v1 JSON digest encoding must
+semantics and never self-certify live hardware. The digest binds the serialized
+calibration declaration, not measurement bytes or their origin. Error bounds and
+clock values are caller-supplied; acceptance does not verify their physical truth.
+The v1 JSON digest encoding must
 remain byte-compatible; replacing it with another canonicalization is not allowed.
 
 Two defects in the existing ownership/work model were identified: callers could
@@ -78,7 +85,10 @@ caching: it deliberately supplied a known constant for the one synthetic rig.
 Production now stores the digest of its own freshly validated snapshot once in
 `Registration.__init__`. A read-only property preserves access to `calibration`;
 assignment raises `AttributeError`. A different calibration requires a new
-binding and starts with a scene break. Projection copies the stored digest into
+binding and starts with a scene break. A new binding may use the same local
+clock domain; the API does not require domain rotation on every rebind. Closing
+a binding prevents future output but does not erase or rewrite caller-retained
+results. Projection copies the stored digest into
 its result without JSON serialization. Public schema, transform arithmetic,
 uncertainty/time thresholds, expiry and checksum format are unchanged.
 

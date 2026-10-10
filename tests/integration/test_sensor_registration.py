@@ -216,15 +216,23 @@ class SensorRegistration(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "invalid_calibration"):
                 api.load_calibration(invalid)
 
-    def test_rebind_invalidates_previous_geometry_and_requires_new_clock_domain(self):
+    def test_close_withdraws_future_output_without_rewriting_retained_result(self):
         binding = self.binding()
-        self.project(binding)
+        retained = self.project(binding)
+        retained_metadata = (retained.calibration_digest, retained.expires_ns, retained.scene_break)
         binding.close()
         self.assertEqual(self.project(binding).reason, "registration_unavailable")
+        self.assertEqual(
+            (retained.calibration_digest, retained.expires_ns, retained.scene_break),
+            retained_metadata,
+        )
+        self.assertFalse(retained.live_evidence)
         fresh = self.binding(translation_m=(0.0, 0.0, 0.0))
+        self.assertEqual(fresh.clock_id, binding.clock_id)
         result = self.project(fresh)
         self.assertEqual(result.pixel, (320.0, 240.0))
         self.assertTrue(result.scene_break)
+        self.assertFalse(result.live_evidence)
 
     def test_2000_invalid_geometry_inputs_fail_closed_without_private_echo(self):
         import random
