@@ -1,6 +1,6 @@
 # P16–P18 review inventory v3
 
-Snapshot: `2859c59477c1bea7256efabf5629e15bb3b5330d`, plus fresh cross-phase consumer
+Snapshot: `ed7824aca21363d44810eea2af1e14d7a1844912`, plus fresh trust-floor lifecycle
 reassessment, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
@@ -35,7 +35,7 @@ external gates. No whole-phase completion can be inferred from the rows above.
 
 | Scope | State at this snapshot |
 |---|---|
-| P16 transport, enrollment and persistent rollback floors | Not implemented by the owned modules. Caller-provided pins/floors are assumptions, not these services. [Lifecycle traces](p16-trust-floor-v3.md) show why floors cannot be derived solely from successful passport results. |
+| P16 transport, enrollment and persistent rollback floors | Not implemented by the owned modules. Caller-provided pins/floors are assumptions, not these services. [Lifecycle traces](p16-trust-floor-v3.md) show why floors cannot be derived solely from successful passport results. [Fresh lifecycle review](p16-lifecycle-reassessment-v3.md) confirms both negative traces and reconciles 386 historical source bindings; no persistence implementation is implied. |
 | P16 cross-phase conformance | [Edge UNKNOWN corpus](p16-edge-conformance-v3.md) checks one published API/fixture boundary; [P2 packet cases](p16-sensor-conformance-v3.md) exercise the published decoder and P16 binding independently; [encoding cases](p16-sensor-encoding-v3.md) add byte-order, padding and trailing-byte checks. [ROS diagnostic cases](p16-ros-status-v3.md) consume receipt/loss/fault status through real APIs. [Fresh consumer reassessment](p16-cross-phase-reassessment-v3.md): three scoped KEEP decisions, 14 focused methods and six sensitivity experiments. Integrated P2/P3/P14 runtime qualification is not established. |
 | P17 common picture and operator collaboration | No owned implementation or integrated client evidence identified. |
 | P17 role/authority, intent, coordination and cancellation | No owned command workflow implementation; P16 verification tasks do not implement it. |
