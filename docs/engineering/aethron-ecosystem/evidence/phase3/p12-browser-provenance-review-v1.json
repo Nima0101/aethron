@@ -1,0 +1,134 @@
+{
+  "baseline": "350e39bba445566d383a711b261e5eb4fd7560cd",
+  "component": "P12 browser build runtime-input and guidance provenance",
+  "review_order_version": 3,
+  "audit_complete": false,
+  "decision": "KEEP pinned esbuild 0.28.2 with Node ESM orchestration; FIX compiled-input byte binding and reject guidance-source drift during the browser build.",
+  "adr": "examples/operator/browser-adr.json",
+  "source_sha256": {
+    "examples/operator/build-browser.mjs": "68fe9f8a43b0a00e665d711947744acc8ad9b7ca6731a4c2029ee5d2e93ff732",
+    "examples/operator/browser-build.test.mjs": "e1fdf979196546ad9224d5d8687347bc29035ae7abe77c0fd39aab25cdaf4dd4",
+    "examples/operator/browser.test.mjs": "6febda7b96ddc0a4710285ed440d2cbc7cc8864a2a7343e2ef2ab9011787b314",
+    "examples/operator/browser-adr.json": "c74c2cad64abb9535668ed990728059153095a117d15680c7d9f4d4b31a08dbe",
+    "examples/operator/browser-adr.schema.json": "d2ef5e2bbaa2aa0bbcf0c96ed470ed3d2213da1fa44fb008fcc8f89c02f86cce",
+    "examples/operator/browser-adr.test.mjs": "7228bb2a285732e89d76d598ee74e8157be8fe9014a739a9005080cce06ef8f9",
+    "examples/operator/help-inventory.mjs": "ab6ac6ea2d474f59c31425f2c50223176fb4a5121cf4b1dad3c5b9b7c731d170",
+    "examples/operator/src/presenter.ts": "ca6048627c403caf55038d46118b4246e656fd95900a1af509593c4fd53be286",
+    "examples/operator/src/connection.ts": "d9f969d9090fcaade3db0d4f7c7a922ac27c009811c23013430eeeaef1b16c12",
+    "examples/operator/src/action-help.ts": "a812898c3eeea6d2e78d259d310ca6c52a5dd3b8de6478653f7e2512a820d66e",
+    "examples/operator/package.json": "d4001605a8790064d85341b5e447711e8f2a2ef467ab5bf0bdff475c446ad060",
+    "examples/operator/package-lock.json": "f1d6402b9aaeb16efd25bcf4cef728abcc76077d633f0c2e30447134d25464da",
+    "examples/operator/README.md": "0c38d15a7444d4be877e295867bdd3921f1ad2b9274aa13002429bbe0575f3f3",
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "93240c01c8963e19f08c24f517dcfb29e47787959137f2ce9b10ea667851c453"
+  },
+  "log_directory": "build/p33-sdk-linux",
+  "report_sha256": {
+    "browser-provenance-fixture-failed.log": "756b53ceff131c7fa6d83d5a0b74bf6ec986dabc37bb38c414b8bbcb6c84bf73",
+    "browser-provenance-red.log": "77bd90070cd3fc34e0af2a4137eaea1447ec4056b28b2271988601e870130e09",
+    "browser-provenance-green.log": "cd003fdb2fa435c61b40242341bf1e89ab30f4c9c338e6f5b8cafb3301328acd",
+    "browser-provenance-verified.log": "fcca836beede09af83dc29f605267d79c46ebe8066b1072a12673887845fd61e",
+    "browser-review-build.log": "157124070fefcae646f4a16fe892b82669d9fb8ff62444afd858c52160e68b74",
+    "browser-provenance-artifacts.log": "98226e95b1ec0798c6bfafb541ffad9c6a0cee9d2078bd75393cddf13923efea",
+    "browser-review-pr44.json": "d89527058dd3c7e3304f92da623845442183b63904e31d5cee32da0c7d45deec"
+  },
+  "distribution_sha256": {
+    "examples/operator/browser-dist/ACTION-HELP.json": "3d74d0524bd01c4adf135b6732e75b4433606c08cd70c9ce0628ec527a096018",
+    "examples/operator/browser-dist/AJV-LICENSE": "a05350a88e318e4f5f2c2a1ff1e2e88daa4dd38e6e78b71cccae422bdc762cc3",
+    "examples/operator/browser-dist/ESBUILD-LICENSE": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681",
+    "examples/operator/browser-dist/LICENSE": "fb981668c18a279e285fc4d83fba1e836cc84dd4daa73c9697d3cfd2d8aca6e0",
+    "examples/operator/browser-dist/STATE-HELP.json": "2cf14fd6b144efab701b05bfd039f35bcde3a12510433f0453f88379d5cdc804",
+    "examples/operator/browser-dist/aethron-observation.mjs": "1d4d87f92c47aadbc486952083712b5a6f505a545b66668e99a68f4ada4ee30b",
+    "examples/operator/browser-dist/manifest.json": "701c58a4b46bbd8d6392ed4c91b8dba515ecae4dc2a0a255dadacb14200ef95b",
+    "examples/operator/dist/action-help.d.ts": "ac620671b9053ee53d3e5b2d1a5602987f9c059f95136a4de53b12b10fd00780",
+    "examples/operator/dist/action-help.js": "ace36b50ae250363215d9fdbf3c343b3d1763a62ada5037dddf90ac0d21e0c61",
+    "examples/operator/dist/browser.d.ts": "f2f37b0d20f20828032de474a92586b4595a4e1b4695f328d75d576eea89c4b7",
+    "examples/operator/dist/browser.js": "f2f37b0d20f20828032de474a92586b4595a4e1b4695f328d75d576eea89c4b7",
+    "examples/operator/dist/client.d.ts": "100d5412387f0a62e7226382459776ca206f4ca005c68d66ce32293fcbb63266",
+    "examples/operator/dist/client.js": "accb73d1024863e001fcf0fed3c43d7fbe47478909bff87864bc8f8012add918",
+    "examples/operator/dist/connection.d.ts": "3795a0fefa3a29663b5ac4fe419e26348da23be00619b6a1714152de4cbd2878",
+    "examples/operator/dist/connection.js": "984139522c778883bf9719274f861fe46b953117c659a83103473006a93d8218",
+    "examples/operator/dist/lifecycle.d.ts": "5d82f6ed79dff918f3456c565e2381c534a6491c05761d202e91ea7009bb2013",
+    "examples/operator/dist/lifecycle.js": "21acce417c6eca107c2a17a71c62089ae41e91d23dcf335ce66d69548e21bbc6",
+    "examples/operator/dist/panel.d.ts": "48473f57f5d1607c7887cd5eea5e555d512b82dc3577eb35d2ba31bac94e18fe",
+    "examples/operator/dist/panel.js": "c6a1b7d8cec3386c842a7d7919b43fde8817cd73a52550e5752167111a8191d4",
+    "examples/operator/dist/presenter.d.ts": "8282396e83b722d3684e3b5bb623be356536d2676a519634b3e6b46425b7f92d",
+    "examples/operator/dist/presenter.js": "3d84b3f1d06229e56bff834057a440b071c2a5b306deb769d67588fb62f2a51f"
+  },
+  "red": {
+    "methods": 3,
+    "failures": 2,
+    "stable_control_passed": true,
+    "reason": "Manifest hashed a controlled post-bundle file mutation; changed guidance during compilation was accepted with older compiled bytes."
+  },
+  "fixture_negative_evidence": "First fixture symlinked AJV outside the admitted graph and all three cases failed for fixture setup. This is not production-defect evidence. Copying the helper/package/license fixed the fixture; intended red assertions then reproduced.",
+  "checks": {
+    "provenance_and_adr_methods": 5,
+    "artifact_methods": 23,
+    "failures": 0,
+    "skips": 0,
+    "cancelled": 0,
+    "component_build": "PASS",
+    "artifact_rebuild_reproduction": "PASS in artifact suite",
+    "syntax_diff": "PASS",
+    "unchanged_operator_outputs": 14,
+    "unchanged_generated_outputs": 18,
+    "runtime_bundle_byte_identical": true,
+    "help_inventory_changes": "source_revision only; compared reconstructed previous serialized bytes",
+    "bundle_bytes": 148568,
+    "bundle_input_count": 12,
+    "external_imports": 0,
+    "previous_source_hashes_verified": 12,
+    "previous_report_hashes_verified": 10,
+    "previous_distribution_hashes_verified": 21
+  },
+  "commands": {
+    "red": "node --test examples/operator/browser-build.test.mjs",
+    "provenance": "node --test examples/operator/browser-build.test.mjs examples/operator/browser-adr.test.mjs",
+    "build": "npm run build:browser --prefix examples/operator",
+    "artifacts": "node --disallow-code-generation-from-strings --test --test-name-pattern='^(?!failed rebuild)' examples/operator/browser.test.mjs",
+    "artifact_selection_note": "The runner executed all 23 artifact cases, including failed rebuild/recovery; actual result and complete case list are retained."
+  },
+  "research": {
+    "checked_on": "2026-10-10",
+    "candidates": [
+      "Go / esbuild JavaScript API",
+      "JavaScript / Rollup with CommonJS and node-resolve plugins",
+      "Rust / Rolldown",
+      "AJV standalone ESM and native unbundled modules"
+    ],
+    "sources": [
+      "https://esbuild.github.io/api/",
+      "https://rollupjs.org/introduction/",
+      "https://github.com/rollup/plugins/tree/master/packages/commonjs",
+      "https://github.com/rolldown/rolldown",
+      "https://ajv.js.org/standalone.html",
+      "https://esbuild.github.io/plugins/#on-load",
+      "https://rollupjs.org/plugin-development/#load",
+      "https://rolldown.rs/apis/plugin-api"
+    ],
+    "basis": "Official ecosystem load hooks, supplied bytes, standalone validator requirements; real pinned esbuild regression fixtures and unchanged runtime artifact. No cross-tool performance claim."
+  },
+  "security_review": [
+    "Only the twelve admitted runtime paths can supply bytes through the file loader; the emitted dependency graph and capture count must match that set.",
+    "Manifest hashes captured buffers supplied to esbuild, not later file reads. Retention is build-process-only; no new browser dependency or persistence.",
+    "Guidance sources captured before compilation are checked after compilation and bundling; detected drift removes all seven named output files.",
+    "The builder, compiler, dependencies and workspace are trusted. Source edits reverted between comparisons are not detected; no full-source/toolchain or signed-release attestation.",
+    "Public exports, runtime bundle, API wire contract, privacy, cancellation, fixed help vocabulary and runtime resource bounds unchanged."
+  ],
+  "publication": {
+    "pr": "https://github.com/Nima0101/aethron/pull/44",
+    "published_head": "350e39bba445566d383a711b261e5eb4fd7560cd",
+    "observed_ci": {
+      "QUEUED": 40,
+      "SKIPPED": 1
+    },
+    "merge": "Not attempted; checks not polled. Current correction awaits local bridge commit."
+  },
+  "previous_evidence": "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-review-v1.json",
+  "next_earliest_unreviewed": "P12 state/action help inventory and coverage enforcement",
+  "limits": [
+    "Provenance fixtures use the real build entry point and esbuild over copied compiled modules with compilation stubbed. Separate full component build and artifact suite passed.",
+    "Node/structural DOM tests do not qualify actual browsers, assistive technology, customer installation, hard-real-time behavior or hardware.",
+    "Full lane/P12/P19 and installed acceptance remain incomplete. Insufficient information for tactical deployment."
+  ]
+}

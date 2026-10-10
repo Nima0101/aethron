@@ -1,0 +1,51 @@
+{
+  "id": "P33-RENDER-PUBLICATION-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "KEEP TypeScript/native abort-state checks; FIX shared callback publication to recheck cancellation after clock access.",
+  "constraints": [
+    "Preserve the callback API and the pull-source API across Node/browser ESM without changing wire admission, expiry or error privacy.",
+    "A host clock shim can synchronously cancel while an observation is admitted or read. No delayed projection may be published after that cancellation.",
+    "Use one publication boundary for timer and stream callbacks, without new queues, schedulers or dependencies."
+  ],
+  "alternatives": [
+    {
+      "technology": "TypeScript/native AbortSignal",
+      "assessment": "KEEP with executable correction: a shared synchronous publication function checks abort state after view construction and clears to a fixed expired value. Typed host interfaces preserve consumer compatibility without another runtime."
+    },
+    {
+      "technology": "Checked ECMAScript",
+      "assessment": "Can express identical control flow and generated declarations. Removing types does not strengthen host reentry protection; no speed difference claimed."
+    },
+    {
+      "technology": "RxJS takeUntil",
+      "assessment": "Tagged implementation completes a subscriber on notifier emission and checks closed state before source subscription. That mechanism suits composed streams, but this direct callback boundary still needs to guard side effects during view construction. No reactive fan-out requirement justifies replacing transport and ownership."
+    },
+    {
+      "technology": "Kotlin/JS",
+      "assessment": "Official JavaScript compilation/interoperation is credible for shared mobile logic, but the current deployment has no shared Kotlin business layer. Explicit host cancellation checks remain necessary."
+    },
+    {
+      "technology": "ReScript",
+      "assessment": "Typed external function bindings support JavaScript APIs. The same native clock/abort/callback ordering must be implemented; no representation or sharing constraint establishes a material migration win."
+    }
+  ],
+  "sources": [
+    "https://dom.spec.whatwg.org/#dom-abortsignal-aborted",
+    "https://raw.githubusercontent.com/ReactiveX/rxjs/7.8.2/src/internal/operators/takeUntil.ts",
+    "https://kotlinlang.org/docs/js-overview.html",
+    "https://rescript-lang.org/docs/manual/bind-to-js-function/"
+  ],
+  "limits": [
+    "Three controlled host-clock interleavings demonstrate the defect; no claim that a conforming native clock spontaneously invokes application callbacks.",
+    "No protection against an arbitrary hostile JavaScript realm replacing all built-ins, no erased caller copies, and no preemption of synchronous display work.",
+    "This is an ordering/ownership comparison, not a measured cross-language speed ranking.",
+    "Actual browser accessibility, P19 Help Center and installed-product qualification remain unfinished. No physical, tactical, availability or cryptographic certification."
+  ],
+  "c4": {
+    "context": "flowchart LR\nHost[Read-only application] --> SDK[SDK observer]\nSDK -->|bounded observation| Display[Host callback]",
+    "containers": "flowchart LR\nAPI[Existing API-v1] --> Fetch[Native Fetch]\nFetch --> SDK[TypeScript SDK]\nSDK --> Display[Node or browser host]",
+    "components": "flowchart LR\nStream[Stream admission] --> Publish[Shared publication]\nTimer[Display timer] --> Publish\nPublish --> View[Fresh clock-based view]\nView --> Check{Cancelled or retired?}\nCheck -->|cancelled| Clear[Clear and publish expired]\nCheck -->|live| Display[Publish view]\nCheck -->|retired| Skip[Return]",
+    "code": "sequenceDiagram\nparticipant P as publish\nparticipant V as Observation\nparticipant S as AbortSignal\nparticipant D as display\nP->>V: view()\nV-->>P: projection\nP->>S: aborted\nalt cancelled\nP->>V: disconnect()\nP->>D: expired UNKNOWN\nelse live\nP->>D: projection\nend"
+  }
+}

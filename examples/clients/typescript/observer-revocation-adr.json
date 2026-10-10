@@ -1,0 +1,52 @@
+{
+  "id": "P33-OBSERVER-REVOCATION-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "KEEP TypeScript/native abort and timer APIs; FIX timer-side cancellation and terminal callback retirement.",
+  "constraints": [
+    "One read-only session in Node or a browser host, synchronous display callbacks, native Fetch streams and an existing 20 ms requested expiry timer.",
+    "Abort state must withdraw aggregate details at the next rendering opportunity even before a pending read reaction; terminal callbacks must become inert before remote deletion settles.",
+    "Preserve public types, fixed transport errors, independent best-effort DELETE, and frozen timing/byte limits; add no replay queue or credential storage."
+  ],
+  "alternatives": [
+    {
+      "technology": "TypeScript with native AbortSignal and scoped rendering flag",
+      "assessment": "Selected: inspect the combined native abort state before rendering and retire the closure in finally. Direct host interoperation and static types express this small single-session lifetime without extra runtime ownership machinery. Six focused cases and bundled parity exercise the behavior."
+    },
+    {
+      "technology": "Plain ECMAScript with checked annotations",
+      "assessment": "Supports the same closure and native abort-state check. Erasing TypeScript syntax does not change runtime cancellation or supply a stronger boundary; no material advantage for the typed consumer API was established."
+    },
+    {
+      "technology": "RxJS Subscription",
+      "assessment": "The tagged 7.8.2 source closes a subscription before finalizers and supports parent/child resource grouping. That is useful for a graph of reactive resources. This single Fetch reader and timer still need explicit signal-to-display withdrawal; introducing subscription ownership does not remove the demonstrated gate and adds a runtime abstraction without a required resource graph."
+    },
+    {
+      "technology": "Kotlin/JS",
+      "assessment": "Official documentation describes transpilation to JavaScript and ESM interoperation plus JVM/mobile code sharing. This host boundary has no current cross-platform shared implementation requirement. It still needs host abort-state and callback-lifetime handling; no correctness or deployment win over a direct typed ESM API is established."
+    },
+    {
+      "technology": "Rust/WebAssembly with web-sys",
+      "assessment": "The official Fetch example uses host Request/Response and JsFuture. This component has no native computation kernel or memory-isolation requirement that a Wasm module would satisfy; host callbacks and cancellation still need explicit integration. No measured native performance advantage is claimed."
+    }
+  ],
+  "sources": [
+    "https://dom.spec.whatwg.org/#dom-abortsignal-aborted",
+    "https://raw.githubusercontent.com/ReactiveX/rxjs/7.8.2/src/internal/Subscription.ts",
+    "https://kotlinlang.org/docs/js-overview.html",
+    "https://wasm-bindgen.github.io/wasm-bindgen/examples/fetch.html"
+  ],
+  "limits": [
+    "Abort-state checking happens when the timer callback executes; it does not synchronously erase an already delivered copy or preempt a running callback.",
+    "Retained-callback injection checks the application lifetime guard; it does not assert that a conforming native timer invokes a cleared callback.",
+    "Native HTTP testing runs on Node loopback. Browser timing/accessibility, actual hardware latency and independent installed-product acceptance remain unqualified.",
+    "No cross-language speed benchmark was performed. The choice follows host API and single-session ownership constraints, not installed-tool convenience.",
+    "No additional runtime dependency, changed API contract, real actuation, targeting, surveillance history or availability/security certification."
+  ],
+  "c4": {
+    "context": "flowchart LR\nCaller -->|cancel| Observer[Read-only observer]\nObserver --> Display[Caller display]\nObserver --> Service[Existing authenticated service]",
+    "containers": "flowchart LR\nHost[Node or browser host] --> Timer[Native timer]\nHost --> Signal[Combined abort signal]\nSignal --> Observer[TypeScript observer]\nTimer --> Observer\nObserver --> Display[Aggregate callback]",
+    "components": "flowchart LR\nTick[Timer invocation] --> Active{Rendering active?}\nActive -->|yes| Abort{Signal aborted?}\nActive -->|no| Return[No callback]\nAbort -->|yes| Clear[Disconnect observation]\nAbort -->|no| View[Fresh view]\nClear --> View\nView --> Display\nFinally[Terminal cleanup] --> Retire[Disable rendering]\nRetire --> Delete[Best-effort DELETE]",
+    "code": "classDiagram\nclass ObserverScope {\n boolean rendering\n AbortSignal eventSignal\n timerTick()\n finallyRetire()\n}\nclass Observation {\n disconnect()\n view()\n}\nObserverScope --> Observation"
+  }
+}

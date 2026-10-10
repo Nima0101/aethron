@@ -1,0 +1,245 @@
+{
+  "scope": "P3.3 TypeScript observation clock and ownership boundary",
+  "base_commit": "2d29c3b852936fac9cddf66a55040d1b9a816179",
+  "branch": "parallel/p33-sdk-20261009",
+  "status": "linux_verified_session_followup_pending_delivery",
+  "source_sha256": {
+    "examples/clients/typescript/src/client.ts": "a5405a264d0bb651ef5bb27545d49a55c633d6032c07dc0f426d4bc913d518e1",
+    "examples/clients/typescript/test.mjs": "8855955868d7b3b806d82b94c1291a55117733387e9125852d61329af85347f6",
+    "examples/clients/typescript/package-lock.json": "e9851168f26e274480aa106a84f447bbd5429cf9c3e8462ec44c58c2158666c1"
+  },
+  "runtime": {
+    "node": "22.23.2",
+    "npm": "10.9.8",
+    "typescript": "5.9.3"
+  },
+  "checks": {
+    "initial_regression": {
+      "command": "npm test",
+      "passed": 6,
+      "failed": 14,
+      "exit_code": 1
+    },
+    "final_source": {
+      "command": "npm test",
+      "passed": 20,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "dependency_audit": {
+      "command": "npm audit --ignore-scripts --audit-level=low",
+      "vulnerabilities": 0,
+      "exit_code": 0
+    },
+    "syntax": {
+      "command": "node --check test.mjs",
+      "exit_code": 0
+    },
+    "diff_check": {
+      "command": "git diff --check",
+      "exit_code": 0
+    },
+    "packed_consumer": {
+      "status": "passed",
+      "tests_passed": 20,
+      "tests_failed": 0,
+      "exit_code": 0,
+      "method": "Pack with workspace-local npm cache, install tarball in build/p33-sdk/consumer, copy test.mjs with only the import changed to the public package name, run node --test test.mjs.",
+      "archive_sha256": "6981a2fe493e85805679259fb17845f4be468d5a437ba793aa8e802a6eaf2272",
+      "install_dependency_advisories": 0,
+      "limitations": "Local Node consumer using synthetic fixtures; no full clean-clone, server E2E, update/uninstall, hosted or hardware qualification."
+    }
+  },
+  "retained_failures": [
+    "All seven invalid receipt-clock cases were accepted instead of throwing invalid_clock.",
+    "NaN, numeric string, null and boolean render clocks kept observations alive.",
+    "Render rollback within the receipt lease kept the observation alive.",
+    "Input mutation changed accepted state/provenance; returned covariance aliased internal state.",
+    "Initial npm pack failed EPERM writing the global npm cache; retry uses workspace-local cache."
+  ],
+  "not_run": [
+    "full repository matrix",
+    "temporal evaluation",
+    "full fuzz",
+    "full clean clone",
+    "server E2E",
+    "hosted CI",
+    "hardware qualification"
+  ],
+  "claims": {
+    "current_state_remains_unknown": true,
+    "physical_qualification": false,
+    "sdk_release_complete": false
+  },
+  "next_task": "Commit the verified increment, reconcile current protected main, and submit a public-safe PR.",
+  "prior_delivery_failure": {
+    "commit": null,
+    "pr": null,
+    "reason": "Sandbox denies writes to linked worktree Git metadata; fetch cannot write FETCH_HEAD and staging cannot create index.lock."
+  },
+  "linux_verification": {
+    "platform": "Linux",
+    "node": "22.23.2",
+    "npm": "10.9.8",
+    "environment": {
+      "UV_THREADPOOL_SIZE": "1",
+      "NODE_OPTIONS": "--v8-pool-size=1 --max-old-space-size=128"
+    },
+    "dependency_install": {
+      "command": "npm ci --ignore-scripts --cache ../../../build/p33-sdk-linux/npm-cache",
+      "exit_code": 0
+    },
+    "compile": {
+      "command": "node node_modules/typescript/bin/tsc -p tsconfig.json",
+      "exit_code": 0
+    },
+    "source_tests": {
+      "command": "node --test test.mjs",
+      "passed": 20,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "audit": {
+      "command": "npm audit --ignore-scripts --cache ../../../build/p33-sdk-linux/npm-cache --audit-level=low",
+      "vulnerabilities": 0,
+      "exit_code": 0
+    },
+    "pack_and_install": {
+      "exit_code": 0,
+      "archive_sha256": "1b8ab17e4959efdf14f55a8ab3bc6336123bff58cfd40a102c14f973dc83ac14"
+    },
+    "installed_consumer": {
+      "command": "node --test test.mjs",
+      "passed": 20,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "retained_failures": [
+      "Initial npm ci aborted with exit 134; an independent command could not fork (resource temporarily unavailable).",
+      "npm test exited 2 because its nested shell could not fork. The unchanged compile and test commands passed when run directly in sequence with reduced Node thread and heap settings."
+    ],
+    "limitations": "Focused Node client checks only. Historical checks remain separate. No claim of full release, hardware qualification or byte-identical cross-platform archives."
+  },
+  "lifecycle_followup": {
+    "date": "2026-10-10",
+    "source_sha256": {
+      "examples/clients/typescript/src/client.ts": "cdf46f3ef826514de4116b056f9ca3e671cc7b62d87102f9fb1a194106a3dd08",
+      "examples/clients/typescript/test.mjs": "0acb865401defce2c1faccbe89660dca3e5f34b040db83d36edccc5798c8b731"
+    },
+    "retained_red": {
+      "test": "observer deletes its session even when the final display callback throws",
+      "exit_code": 1,
+      "actual_requests": 2,
+      "required_requests": 3,
+      "missing_request": "DELETE"
+    },
+    "compile": {
+      "exit_code": 0
+    },
+    "source_tests": {
+      "passed": 21,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "installed_package_tests": {
+      "passed": 21,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "archive_sha256": "6c6c615b1fc46fb9db5c20bb334da26c64bd10dd10a0accd657dccfbea123828",
+    "dependency_audit": {
+      "vulnerabilities": 0,
+      "exit_code": 0
+    },
+    "environment": {
+      "UV_THREADPOOL_SIZE": "1",
+      "NODE_OPTIONS": "--v8-pool-size=1 --max-old-space-size=128"
+    },
+    "limitations": "Lifecycle regression uses controlled fetch responses; no live server, hosted CI, hardware or full release qualification. Earlier source hashes and checks describe the observation-only increment."
+  },
+  "watchdog_followup": {
+    "date": "2026-10-10",
+    "source_sha256": {
+      "examples/clients/typescript/src/client.ts": "8aeb82fd6f470dded098020ae0321edaa8ae02398ee00d3eb1bd71ac7179a4b0",
+      "examples/clients/typescript/test.mjs": "6133d11ae3183090f2d7632211f11d9c424afc0795d706835e4d75aa6271920d"
+    },
+    "retained_red": [
+      {
+        "cases": [
+          "stalled headers",
+          "stalled body"
+        ],
+        "failed": 2,
+        "exit_code": 1,
+        "reason": "Renderer exception escaped watchdog callback."
+      },
+      {
+        "case": "stalled body closes normally on abort",
+        "failed": 1,
+        "exit_code": 1,
+        "reason": "Observer resolved rather than preserving renderer error after cancellation."
+      }
+    ],
+    "compile": {
+      "exit_code": 0,
+      "warning": "node: pthread_create: Resource temporarily unavailable; command nevertheless completed successfully"
+    },
+    "source_tests": {
+      "passed": 24,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "installed_package_tests": {
+      "passed": 24,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "archive_sha256": "63f3666dec1d8f0563ce1c0533d14f421d5cbfa8747add575b58446d7d20c5e9",
+    "dependency_audit": {
+      "vulnerabilities": 0,
+      "exit_code": 0
+    },
+    "environment": {
+      "UV_THREADPOOL_SIZE": "1",
+      "NODE_OPTIONS": "--v8-pool-size=1 --max-old-space-size=128"
+    },
+    "limitations": "Timers and fetch responses are controlled test boundaries. No live server, browser suspend, hardware, hosted CI or full release qualification. Earlier source hashes and checks describe earlier increments."
+  },
+  "session_followup": {
+    "date": "2026-10-10",
+    "source_sha256": {
+      "examples/clients/typescript/src/client.ts": "f712dae33a9e0dd39b30c78056a26016a030bf0a1fdbe3f6c672c06ee29d441d",
+      "examples/clients/typescript/test.mjs": "af6302231c47fd423cfaa272ce891cd62021f89deb0430e75d4a259585b0a7b8"
+    },
+    "retained_red": {
+      "passed": 1,
+      "failed": 10,
+      "exit_code": 1,
+      "reason": "Wrong-session, duplicate/decreasing, malformed control, unsafe sequence, unknown kind and null events did not reject."
+    },
+    "compile": {
+      "exit_code": 0
+    },
+    "source_tests": {
+      "passed": 35,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "installed_package_tests": {
+      "passed": 35,
+      "failed": 0,
+      "exit_code": 0
+    },
+    "archive_sha256": "ca41f94a9d4fc9122a45438a1c5dc73af20322c11e6dab2a4d1b68b84b3e2019",
+    "dependency_audit": {
+      "vulnerabilities": 0,
+      "exit_code": 0
+    },
+    "environment": {
+      "UV_THREADPOOL_SIZE": "1",
+      "NODE_OPTIONS": "--v8-pool-size=1 --max-old-space-size=128"
+    },
+    "contract": "Existing generated API v1 SceneEnvelope and HealthEvent; increasing sequence scoped to the opened transport session.",
+    "limitations": "Controlled fetch and clock boundaries using the synthetic scene fixture. No live server, hardware, hosted CI or full release qualification. Historical increments retain their own hashes and results."
+  }
+}

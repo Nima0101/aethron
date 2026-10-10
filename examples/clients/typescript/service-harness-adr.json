@@ -1,0 +1,50 @@
+{
+  "id": "P33-SERVICE-HARNESS-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "KEEP Python stdlib orchestration with the shared Node offline adapter; FIX child result admission before publishing service-smoke evidence.",
+  "constraints": [
+    "A Linux CI test driver must build and pack the SDK, install an external Node consumer offline, invoke the existing Python HTTP service fixture and always close an admitted service before publishing a result. No server implementation changes.",
+    "Commands use argument arrays, check=True and explicit timeouts. npm lifecycle scripts and registry fallback stay disabled. Client input/archive hashes are rechecked before service start and after teardown.",
+    "Admit exactly display_callbacks (integer at least three), current_state UNKNOWN and installed_client true. Reject duplicate/extra/missing keys and contradictory types/values. Validation must remain active under Python -O. Counts measure display callbacks, not unique sensor events.",
+    "Both Python service dependencies and Node/npm are required at this integration boundary. This is low-throughput build/test orchestration with existing bounded child durations, not a tactical runtime or a hard-real-time scheduler."
+  ],
+  "alternatives": [
+    {
+      "technology": "Python stdlib subprocess/json/tempfile/hashlib plus shared Node lock adapter",
+      "assessment": "KEEP: directly owns the existing Python service fixture lifecycle while supervising the actual installed Node consumer. subprocess.run provides argument-list execution, checked exit status and timeout termination; JSON object_pairs_hook exposes duplicate keys for rejection. The adapter remains shared with Node package checks. Seventeen controlled harness methods and an optimized-interpreter rejection run exercise the executable decision."
+    },
+    {
+      "technology": "Node ECMAScript or TypeScript orchestration",
+      "assessment": "Credible and provides child process control, timeouts and output limits. Would directly own npm but must launch Python for the service and introduce a lifecycle/status protocol or duplicate its fixture configuration. No demonstrated elimination of a runtime or improved correctness justifies replacing this small Python lifecycle owner. Node continues to own SDK execution and lock projection."
+    },
+    {
+      "technology": "PowerShell 7 process orchestration",
+      "assessment": "Credible cross-platform deployment/test automation option beyond the component languages; Start-Process supports process waiting and stream redirection. It would require an additional shell runtime and explicit result/JSON type checks while retaining both Python and Node. No customer PowerShell integration or Windows service requirement applies to this Linux CI driver; no material deployment advantage demonstrated."
+    },
+    {
+      "technology": "Dart compiled command-line orchestrator",
+      "assessment": "Credible standalone executable deployment for Windows/macOS/Linux, with architecture-specific machine code plus runtime. It still needs Python for this service fixture and Node for the client, while adding binary release/verification per target. No measured throughput or startup requirement warrants that additional deployment boundary."
+    }
+  ],
+  "sources": [
+    "https://docs.python.org/3/library/subprocess.html",
+    "https://docs.python.org/3/library/json.html",
+    "https://nodejs.org/api/child_process.html",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-process?view=powershell-7.5",
+    "https://dart.dev/tools/dart-compile"
+  ],
+  "limits": [
+    "The former count-only assertion admitted nine contradictory/malformed reports in controlled cases and exposed four TypeErrors plus assertion/JSON diagnostics for other rejected cases. This is a report-admission defect, not proof that the actual SDK emitted contradictory results.",
+    "The new closed check does not authenticate a hostile local executable or establish the truth of otherwise well-formed claims. Existing source/archive binding and checked child exit remain necessary.",
+    "Controlled harness tests substitute npm/server boundaries; selected tests do execute Node and the unchanged SDK module. The current interpreter lacks httpx/uvicorn/starlette/pydantic, so no fresh actual-service run is claimed.",
+    "Source checks bind SDK inputs and the packed archive, not a complete service dependency/toolchain attestation. Capture report/driver revision and dependencies through hosted evidence before a release claim.",
+    "Child timeouts and output capture are host process behavior, not strict memory bounds or descendant-process containment. No whole-system timing, installed customer acceptance, MLS/CNSA, uptime or hardware qualification."
+  ],
+  "c4": {
+    "context": "flowchart LR\nMaintainer --> Harness[Read-only integration check]\nHarness --> Service[Python API service fixture]\nHarness --> Consumer[Installed Node SDK consumer]\nHarness --> Evidence[Validated local report]",
+    "containers": "flowchart LR\nPython[Python harness] --> Npm[npm build pack and offline ci]\nPython --> Adapter[Shared Node lock adapter]\nPython --> Service[Service fixture lifecycle]\nPython --> Node[Node consumer subprocess]\nNode --> Service",
+    "components": "flowchart LR\nInputs[SDK inputs and archive] --> Bind[Hash and recheck]\nChild[Checked child exit and stdout] --> Parse[Duplicate-aware JSON decode]\nParse --> Validate[Exact fields types and values]\nValidate --> Cleanup[Service teardown]\nCleanup --> Recheck[Recheck input hashes]\nRecheck --> Report[Write report]\nBind --> Recheck",
+    "code": "classDiagram\nclass SmokeHarness {\n client_inputs() hashes\n consumer_result(text) record\n run() void\n}\nclass HTTPService {\n setUpClass() void\n tearDownClass() void\n}\nSmokeHarness --> HTTPService\nSmokeHarness --> NodeConsumer"
+  }
+}

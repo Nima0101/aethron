@@ -1,0 +1,47 @@
+{
+  "id": "P33-GENERATOR-STRUCTURE-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "MIGRATE generic schema-shape checks to AJV Draft 2020-12 metaschema validation; KEEP explicit ECMAScript subset projection and standalone runtime validators.",
+  "constraints": [
+    "Offline Node build of repository-owned API-v1 contract must reject malformed keyword values before producing declarations or bundle.",
+    "Preserve canonical bundle and declaration bytes, closed vocabulary, local reference policy, tuple bound and runtime-only number/string bounds.",
+    "Validation error must remain fixed; no new runtime import, network reference loader, schema coercion or peer contract change."
+  ],
+  "alternatives": [
+    {
+      "technology": "ECMAScript with AJV validateSchema plus explicit subset guards",
+      "assessment": "Selected: AJV documents schema validation independently of instance compilation. Moves generic keyword-shape checks to its Draft 2020-12 metaschema while custom guards retain this narrower generator policy. Same Node process and JSON values avoid a second serialized tool boundary. Fourteen baseline failures and unchanged output tests exercise the migration."
+    },
+    {
+      "technology": "Fully handwritten ECMAScript shape checks",
+      "assessment": "Rejected for generic schema shape validation: observed string required lists, duplicate requirements and malformed bounds bypassed checks. Adding parallel implementations of standard keyword rules is less maintainable than a versioned metaschema. Keep only local subset rules."
+    },
+    {
+      "technology": "Python jsonschema Draft202012Validator.check_schema",
+      "assessment": "Credible schema checking with explicit schema-error handling. For this standalone Node build it requires an extra interpreter plus JSON subprocess boundary while offering the same schema-shape layer and still requiring custom subset guards. No Python shared build service or other deployment requirement is present here."
+    },
+    {
+      "technology": "Rust jsonschema crate",
+      "assessment": "Credible native schema validation and configurable reference resolution. This offline build requires no measured native throughput or memory guarantee; a cross-platform binary plus serialized Node boundary does not remove either the TS emitter or local subset policy. No native performance superiority claimed."
+    }
+  ],
+  "sources": [
+    "https://ajv.js.org/api.html",
+    "https://ajv.js.org/standalone.html",
+    "https://python-jsonschema.readthedocs.io/en/stable/validate/",
+    "https://docs.rs/jsonschema/latest/jsonschema/"
+  ],
+  "limits": [
+    "Metaschema validity is not semantic satisfiability, authorization or hardware qualification. TypeScript declarations intentionally omit numeric/string constraints retained in the runtime bundle.",
+    "Input is repository-owned parsed JSON. Arbitrary objects, cyclic graphs, huge schemas and adversarial regex performance are not qualified by this build adapter.",
+    "This is a local incremental technology migration for schema-shape checking, not a language rewrite. Other language candidates were researched, not installed or benchmarked.",
+    "Runtime validators remain generated ahead of time; the generator may compile its local metaschema during the build. No remote schema fetch is configured."
+  ],
+  "c4": {
+    "context": "flowchart LR\nContract[Versioned API contract] --> Build[SDK build]\nBuild --> Consumer[Read-only client consumer]",
+    "containers": "flowchart LR\nNode[Node generator] --> TS[TypeScript declarations]\nNode --> JSON[Canonical schema bundle]\nJSON --> AJV[Standalone runtime validators]",
+    "components": "flowchart LR\nContract --> Shape[AJV local metaschema validation]\nShape --> Subset[Explicit keyword and reference policy]\nSubset --> Emitter[TS declarations]\nSubset --> Bundle[Canonical schema bundle]\nShape --> Reject[Fixed failure]\nSubset --> Reject",
+    "code": "classDiagram\nclass ContractGenerator {\n renderContract(spec) outputs\n}\nContractGenerator --> Ajv2020\nAjv2020 : validateSchema(schema) boolean\nContractGenerator --> SubsetGuard\nContractGenerator --> CanonicalBundle"
+  }
+}

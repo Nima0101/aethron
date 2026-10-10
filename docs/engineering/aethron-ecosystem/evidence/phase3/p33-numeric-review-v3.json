@@ -1,0 +1,132 @@
+{
+  "audit_policy_version": 3,
+  "component": "P3.3 integer token admission",
+  "baseline": "39956fd924fcdf1c2d65b16a5b998003892cfcba",
+  "source_binding": "Reviewed post-change bytes delivered with this evidence; baseline identifies the pre-change commit. Producer modules are read-only requirement inputs, not edited.",
+  "decision": "KEEP TypeScript/native source-aware JSON; FIX lexical integer and safe-range admission before schema validation",
+  "source_sha256": {
+    "examples/clients/typescript/src/client.ts": "ec90f3c96d5195c6ffc033566ea5a17f5cf64ccc0864f279d9cbb7292a73b220",
+    "examples/clients/typescript/src/scene.schema.json": "57547fac9399c84cd7db554faf14055c8a7bad9a8efa3232ccc6f62da0f2c417",
+    "examples/clients/typescript/src/types.ts": "79c889063624704f04a14b0dac3c46f3da653cb09cd3e5e372e628f4e891ef9d",
+    "examples/clients/typescript/src/validators.d.cts": "964ebda7e68dfb4c54af38364067e4298a114042fd1a933ac92f978d6ec81297",
+    "examples/clients/typescript/src/wire.ts": "47891df5be59e1df0537faae87020a98e31f52b5659e8d8ff481434a2faa6a26",
+    "examples/clients/typescript/src/session.ts": "17cabbb49e597f78aa0b41ddd00fad91391e5b108de14652f91129429da56155",
+    "examples/clients/typescript/generate-validators.mjs": "e438372169d9d34f312541922b2d98c3078a27fdcfcd0ada4afc4c69636d986e",
+    "examples/clients/typescript/package.json": "46813ba7bedff90213ab5e96ca630fe6a0dba3ed621c35f57cd1a160f2205eb0",
+    "examples/clients/typescript/package-lock.json": "e9851168f26e274480aa106a84f447bbd5429cf9c3e8462ec44c58c2158666c1",
+    "examples/clients/typescript/tsconfig.json": "f0a2fb4639eab2cb4c22884c54ddd948f0a8f5c1bc0d6b61f1698ea61fc955cf",
+    "examples/clients/typescript/test.mjs": "80947c49fd6dcc4628383cf6b0ef788a93d192acfef03e4453b077d8ce28fb22",
+    "examples/clients/typescript/validation.test.mjs": "529415dc7f4eb69dea567d57e4dc1c5a3ec19b3c47eec0cd96bb147ac682b084",
+    "examples/clients/typescript/transport.test.mjs": "9e3a1089d907904ac2af575e454a33924546fe87968d4de140f345cbc4b1cd15",
+    "examples/clients/typescript/wire.test.mjs": "001e55f149ea79574d474d945a35b9bad591f6c796d77da09bdfb96956390b67",
+    "examples/clients/typescript/session.test.mjs": "448c00e8e65b70e17ee6f14a02bbeb0436da8e3ec2c217b41f6a1de94d9d2776",
+    "examples/clients/typescript/redirect.test.mjs": "4f67dc638e1b56501913e7eb423d26d448b8ee8fecc16f2ae37e985ca6b58e41",
+    "examples/clients/typescript/disposal.test.mjs": "7285c4501b8dd12bfd5b5bb64269dc68eca7d47174bec26c6f3a3f254d46cecb",
+    "examples/clients/typescript/README.md": "64254875d18cb94f1adc367619aae6d1c1d0611621c347087b3b2eba66514f49",
+    "contracts/fixtures/v3/blackout-output.json": "39cce631744143dd5e8114e791098dfd308ab95de33f0cafeb4b77e38027bbfb",
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "fc5b46490f3390171a220ecf3c1472019bacd013cca5cce78fa904f880cc14c7",
+    "examples/clients/typescript/errors.test.mjs": "0fe085746feca67003d7d5f16bf7ad9dff75efacc3b5223d1d00a294a032ca33",
+    "examples/clients/typescript/endpoint.test.mjs": "d12a4efc5e97e817e21dc2d26bbe1e0b8f2e59062cce8331156019a19d4e968f",
+    "docs/usage-edge.md": "71772ac917aadf327309b61fe8ce81116abe37b65e3b30bacd3e2467915c2ba5",
+    "examples/clients/typescript/numeric.test.mjs": "10a66171cc7ca49641e09b28b6ba52cc3ad42b05d3379c585928ac08df880895",
+    "examples/clients/typescript/audit-observation.mjs": "a0588404b59c22bb98fd8051dd2deb00b305a03da84cecf29f57a0470b39757b",
+    "integrations/edge/aethron_edge/contracts.py": "a783f857d3c459d40f3357d876ef9546794a167c71959503171131a1f917dc36",
+    "integrations/edge/aethron_edge/common_types.py": "5a10387000cb160918d558b7022790529461e9d944d6e02747a170ee4b1ea962",
+    "integrations/edge/aethron_edge/service/events.py": "a825db7da68a3a253c57bd0118c5bbfe04c72f19c562d63dcaadc5b2e93e94ca"
+  },
+  "reports": {
+    "numeric-red-v3.tap": {
+      "sha256": "e54bccd6ad0a94e1262e48d9d2776e56dc1fa286a861cfa732381343f24157a8",
+      "tests": 35,
+      "pass": 7,
+      "fail": 28,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "numeric-red-final-v3.tap": {
+      "sha256": "8e9f9400dc6b9da89beb7e68b65afa389406ad669e639eb9527d106e0e6b5530",
+      "tests": 36,
+      "pass": 8,
+      "fail": 28,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "numeric-metadata-red-v3.tap": {
+      "sha256": "4b4df96c821a86d767ecfb179dde0979b5be16eeb28d0a4fd792d0ac5ddc8e40",
+      "tests": 5,
+      "pass": 4,
+      "fail": 1,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "numeric-source-v3.tap": {
+      "sha256": "2c0fc30c62482e25a3981c144995e26a4b9dbff08a1cb9bf0d9d439d79be3b93",
+      "tests": 226,
+      "pass": 226,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "numeric-validation-v3.tap": {
+      "sha256": "95d4cc7af94a41aea97c6b573defe852ca572e16fb24f51a11249c7f4d66a671",
+      "tests": 5,
+      "pass": 5,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "numeric-installed-v3.tap": {
+      "sha256": "499a52bde4fce02b8232a8595e57b4e6decd5caf50180b49964e2b13fa0550d2",
+      "tests": 222,
+      "pass": 222,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    }
+  },
+  "green": {
+    "focused_tests": 231,
+    "installed_public_tests": 222,
+    "typescript_build": "PASS; generator and compiler executed separately after host allocation failure",
+    "installed_artifact_bytes": "All ten dist files equal tested build",
+    "strict_typescript_consumer": "PASS",
+    "syntax": "Generator and all changed tests executed successfully",
+    "observation_parity": {
+      "traces": 45,
+      "views": 162,
+      "report_sha256": "3ffbcfd14e552b0b7c2cf9bdf4ab6cc10c92000d066b13c0bae47fbf8c8ff463"
+    }
+  },
+  "package": {
+    "id": "aethron-edge-client-example@0.1.0",
+    "size": 22422,
+    "unpacked_size": 136013,
+    "sha256": "ce3b474e93fd1c585d36160ccaf2bbc48935241c4157a33db4b045b87bbf851d"
+  },
+  "sources": [
+    "https://github.com/tc39/proposal-json-parse-with-source",
+    "https://json-schema.org/understanding-json-schema/reference/numeric",
+    "https://pkg.go.dev/encoding/json",
+    "https://docs.rs/serde_json/latest/serde_json/struct.Number.html#method.is_i64"
+  ],
+  "environment": {
+    "node": "v22.23.2",
+    "platform": "linux",
+    "network": "synthetic IPv4 loopback regression tests only"
+  },
+  "negative_evidence": [
+    "Initial RED has 28 failures/7 passes including a malformed positive reason-text fixture. Fixture corrected before production changes; retained corrected RED has 28 failures/8 passes across 36 controls.",
+    "Independent integer metadata control: one failure/four passes before implementation.",
+    "Initial build command used a nonexistent output directory and did not run. Corrected npm build recorded pthread_create resource exhaustion. After interrupted tool execution, source test report did not exist; no completion inferred. Sequential generator/compiler retry passed.",
+    "Host EAGAIN/SIGTRAP failures and unavailable Python probe from the interrupted attempt are not producer parity evidence. Strict producer model source is inspected; no new executable Python parity result is claimed.",
+    "Producer payload-only bound and consumer whole-SSE-event bound remain inconsistent at the maximum payload. Existing negative control remains rejected; no frozen threshold changed.",
+    "No full repository suite, full fuzz, clean clone, browser/TLS/IPv6 socket or physical qualification performed."
+  ],
+  "security_review": "Source tokens prevent fractional rounding from bypassing integer admission. Escaped keys use decoded names. Metadata is immutable and missing runtime source support rejects integer-bearing events. Safe range checks precede unchanged closed schema validation. No new dependency, network destination, peer code or diagnostic payload is added. Decimal geometry remains binary64; direct object admission cannot recover wire spelling.",
+  "limitations": [
+    "Current closed schema uses named integer object properties with no integer array items or floating-point name collisions; future schema changes require explicit review.",
+    "This stricter wire profile deliberately rejects 1.0 and 1e0 although JSON Schema mathematically permits them.",
+    "Native parsing/host scheduling have no hard real-time guarantee; broader transport/platform/P12 review incomplete."
+  ],
+  "audit_complete": false
+}

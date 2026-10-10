@@ -1,0 +1,1762 @@
+{
+  "baseline": "e4110809291cb8a5d9c449b91fc8c2a247e7bd9e",
+  "review_order_version": 3,
+  "audit_complete": false,
+  "scope": [
+    "examples/clients/typescript",
+    "examples/operator",
+    "scripts/edge_generate_types.py",
+    "scripts/edge_node_e2e.py",
+    "tests/integration/node_consumer_loopback.py",
+    "tests/integration/test_node_consumer_smoke.py",
+    "tests/integration/test_node_loopback_evidence.py",
+    ".github/workflows/aethron-typescript-client.yml"
+  ],
+  "coverage": "Tracked and intended new source files in owned client packages and explicit owned harness/workflow paths; excludes ignored artifacts and node_modules.",
+  "interpretation": "Matching hashes identify evidence inputs only, not fresh decisions, test success or qualification. Unmatched entries remain visible.",
+  "component_index": "docs/engineering/aethron-ecosystem/P33-COMPONENT-INVENTORY-V3.md",
+  "files": [
+    {
+      "path": ".github/workflows/aethron-typescript-client.yml",
+      "sha256": "00795b8a7dbf97a72a1c530a4ccd8ef6db463915b3f304c5bf1dc4bbc2dd05ab",
+      "role": "contract-or-configuration",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-loopback-evidence-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/.gitignore",
+      "sha256": "790e3169bc19b046fe55ba1da6d13b976c28363c8c00462a2195fe5faf260910",
+      "role": "contract-or-configuration",
+      "matching_retained_evidence": []
+    },
+    {
+      "path": "examples/clients/typescript/LICENSE",
+      "sha256": "fb981668c18a279e285fc4d83fba1e836cc84dd4daa73c9697d3cfd2d8aca6e0",
+      "role": "documentation",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-package-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generation-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-smoke-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-archive-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-ci-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-public-types-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-lifecycle-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/OFFLINE-CONSUMER-PLAN.md",
+      "sha256": "cea54a17ccdcac391e3d4c248b5f21b1ca8bd68d6300a828b15b594f1234636a",
+      "role": "documentation",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/README.md",
+      "sha256": "572870b5d6f5a9a572c4b800403568f8ea869acd3ac1590eb5374ec9bc375edf",
+      "role": "documentation",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-harness-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/audit-cancellation.mjs",
+      "sha256": "60abe61a93d95f4e9ba9d81ce2f942195200619168f922e24d509964694b4ac4",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-cancellation-oracle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/audit-observation.mjs",
+      "sha256": "ea6aa9ab0003843823f78d0cf97868dbacc164b5f7045cc973064dc983b8ea5d",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/audit-redirect.mjs",
+      "sha256": "10da17e1767dab482af80e95209c8e54f89b6bda75722d4eecc456262d305e3b",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-transport-install-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/audit-session-boundary.mjs",
+      "sha256": "897c9a0d4094598a9546eb78f958ab3f1069a53e2e7c60412a88831f0d121341",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-boundary-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/audit-validation.mjs",
+      "sha256": "c3599152c62e90c16b80da3414a473771d555b3e651f38e79952ca21a853254d",
+      "role": "code",
+      "matching_retained_evidence": []
+    },
+    {
+      "path": "examples/clients/typescript/build-lifecycle-adr.json",
+      "sha256": "f568375c26d47e3a68ee628c45095d9b71ae3f668ea5b61e8bdc24c35a49eb88",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/build-lifecycle-adr.schema.json",
+      "sha256": "3d308ec9298aa506e933720b6bda3180ef084f680ab9e2e3d6eb08ab46141f8a",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/build.mjs",
+      "sha256": "3fef76ca0da3993a7e9d79eedc0d52d8ab4c51a8c9bc773ee689fc48790867e2",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-boundary-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-cancellation-oracle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/build.test.mjs",
+      "sha256": "e38c9746cd063cfc7d95ab97b197449199ece6ef8d8fd9cdb3b3bcbd9cfa3cc1",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/cancellation-oracle-adr.json",
+      "sha256": "34c6148d7e8af2c6169e95bbe588fc681ae78a0ebe1a296363f75c3883d39562",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-cancellation-oracle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/cancellation-oracle-adr.schema.json",
+      "sha256": "92e1ae4f5da740f72cbe8605a305ed8274d1b30f07ef9253654c8f6902a3c9e8",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-cancellation-oracle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/contract-types.test.ts",
+      "sha256": "e7f08071f5bc0f3fc286b40583820319237c95d78a7ecfcaf23df8b9544384a3",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generation-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-smoke-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-archive-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-ci-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-public-types-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-lifecycle-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generator-selectors-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generator-structure-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/disposal.test.mjs",
+      "sha256": "7285c4501b8dd12bfd5b5bb64269dc68eca7d47174bec26c6f3a3f254d46cecb",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-disposal-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-errors-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-endpoint-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-numeric-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-package-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generation-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-smoke-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-archive-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-ci-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-public-types-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-lifecycle-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-cancellation-oracle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/endpoint.test.mjs",
+      "sha256": "d12a4efc5e97e817e21dc2d26bbe1e0b8f2e59062cce8331156019a19d4e968f",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-endpoint-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-numeric-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-package-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generation-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-smoke-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-archive-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-ci-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-public-types-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-lifecycle-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-transport-install-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/errors.test.mjs",
+      "sha256": "a1927cff571800ef2780dd6d381f8d261fdcbf5fd0a7b3071c041359b4cee161",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-cancellation-oracle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/generate-contract.mjs",
+      "sha256": "b551440c98e5c0f12a2c776e2474f78558c2cfdb2489f59c314954c88c9679d2",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generator-structure-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-boundary-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-cancellation-oracle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/generate-validators.mjs",
+      "sha256": "e989f6fb25921f3ce3be7a2a58a5e44b2377d16a5f1ea0a0871d7d04380b051a",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-boundary-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-cancellation-oracle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/generation.test.mjs",
+      "sha256": "c4e5ca785bca8018bf66dcafc24054ba9479da42da4ee93e1142797181425c5a",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-boundary-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/generator-selectors-adr.json",
+      "sha256": "b053ab6d2b26b662487ab39b11f25f88fddd07549162a308d3e124d75df15352",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generator-selectors-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generator-structure-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/generator-selectors-adr.schema.json",
+      "sha256": "de4090c413a9e3883632a496ab362c90eba6405b042dd79b8f80ec72677d7b48",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generator-selectors-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generator-structure-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/generator-structure-adr.json",
+      "sha256": "826c4f341d7caa9150779ab6be587a152a0a06739d197cb7e7b81e32aa9c3ea0",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generator-structure-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/generator-structure-adr.schema.json",
+      "sha256": "3b7f5407d21f489e611fad36ee86691db89b1519700fa27cb014a0f1be063c7b",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generator-structure-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/installed-runtime.mjs",
+      "sha256": "3852e80e06269b7f3d19a931aa248cff3451ddbe1d175ceb310a2412d8049974",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-transport-install-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/loopback-evidence-adr.json",
+      "sha256": "ae1ffbc5bbdfe0fa3d6cefc89b3ede49d9cb8c6694ee66ba7fb2461b1dc61ec0",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-loopback-evidence-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/loopback-evidence-adr.schema.json",
+      "sha256": "7946321b2cc9039aecabc3fe24d6717cf9c11b5570b95c4df4b737e2c5e6ee18",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-loopback-evidence-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/numeric.test.mjs",
+      "sha256": "10a66171cc7ca49641e09b28b6ba52cc3ad42b05d3379c585928ac08df880895",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-numeric-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-package-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generation-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-smoke-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-archive-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-ci-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-public-types-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-lifecycle-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-boundary-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/observer-revocation-adr.json",
+      "sha256": "ff9b3359684687742061476e8e3a2951402def8e15568756e4034cd3b73a51ec",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/observer-revocation-adr.schema.json",
+      "sha256": "7775409cbe19ccc23ec98e8caeee6b5414e16abf38bff1a696d84aae95ce9628",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/observer-setup-adr.json",
+      "sha256": "657f622f75343dba6fc25f293671d259b60c09914149ff7c03053fb848bf4efd",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/observer-setup-adr.schema.json",
+      "sha256": "e63457f6e6e69037074f6efff2dfdda55e54074c0114100d6f16367548bb1599",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/offline-consumer-adr.json",
+      "sha256": "988fc4f46dd99164b5b487ccce2383d03fdd3161c289ae715dfd7c523778f8aa",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/offline-consumer-adr.schema.json",
+      "sha256": "75679c44bcec583adf8d4d9e2bea6fcaee7b1995c0c8b35ccb3133ad2ad555d7",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/offline-consumer.mjs",
+      "sha256": "056a97f71e2b8138765d882426e0ce9c4511e2ff86e80ab3117778321258d359",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-transport-install-review-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-harness-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/offline-consumer.test.mjs",
+      "sha256": "c27554d8cbe952738f175ad278b909f820a32bd59ccee1d1d12a87002e6be108",
+      "role": "test",
+      "matching_retained_evidence": []
+    },
+    {
+      "path": "examples/clients/typescript/package-lock.json",
+      "sha256": "e9851168f26e274480aa106a84f447bbd5429cf9c3e8462ec44c58c2158666c1",
+      "role": "contract-or-configuration",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-typescript-observation.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-validation-audit-v2.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observation-audit-v2.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-stream-ingress-audit-v2.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-disposal-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-errors-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-endpoint-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-numeric-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-package-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generation-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-smoke-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-archive-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-ci-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-public-types-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-lifecycle-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generator-selectors-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generator-structure-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-boundary-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-cancellation-oracle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-transport-install-review-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-harness-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/package.json",
+      "sha256": "ac7a9ec00556d2ab1c170de89dd61437490e60854406782774f8a6ab4a6fffcc",
+      "role": "contract-or-configuration",
+      "matching_retained_evidence": []
+    },
+    {
+      "path": "examples/clients/typescript/package.test.mjs",
+      "sha256": "3739199152c69ceeaf78af7806988bac776b847c9f159ab9e695a97b76abcdf6",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-transport-install-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/public-types.test.ts",
+      "sha256": "50bdb4234d3acfe413f998fbed32f7e47e398bbf4cc5f66055f0c61546ee333e",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-transport-install-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/redirect.test.mjs",
+      "sha256": "4f67dc638e1b56501913e7eb423d26d448b8ee8fecc16f2ae37e985ca6b58e41",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-redirect-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-disposal-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-errors-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-endpoint-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-numeric-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-package-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generation-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-smoke-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-archive-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-ci-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-public-types-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-lifecycle-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-transport-install-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/render-publication-adr.json",
+      "sha256": "9b00bf25eda7bd9b7731a306a0ed924cf5b85c5dec2f63c95382948b70b613bf",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/render-publication-adr.schema.json",
+      "sha256": "2a448360c60a7a500e397ba0713c2fd1dd819b9d2f597b275d70e67a5e44b33b",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/service-harness-adr.json",
+      "sha256": "877bce66b74b1b5c8a83896735dbcd498c4093bc14d12a8ad3b2ee5016f5e666",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-harness-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/service-harness-adr.schema.json",
+      "sha256": "f76c10ee9d0f1fa3ece6ace19f52f310ac6535bdaad4356a83cc188a0d59789a",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-harness-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/session-boundary-adr.json",
+      "sha256": "659fae94c966b0b87ea677aedd59899e75ce9c8b16826d45c58cf9835cf03bd6",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-boundary-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/session-boundary-adr.schema.json",
+      "sha256": "e481bf794c3cf6c298d5eb99b3e0bd885cc36e2536781c6a7a1fd6b57254a111",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-boundary-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/session-boundary.test.mjs",
+      "sha256": "b6c87808e2ba55ddc1d865ee16690caa37db8c18259b7573425766825f55fb3c",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-boundary-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/session.test.mjs",
+      "sha256": "448c00e8e65b70e17ee6f14a02bbeb0436da8e3ec2c217b41f6a1de94d9d2776",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-disposal-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-errors-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-endpoint-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-numeric-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-package-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generation-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-smoke-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-archive-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-ci-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-public-types-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-lifecycle-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-boundary-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-cancellation-oracle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/source-adr.json",
+      "sha256": "62e5176691f5d927d1eaebc945a13886ae5e4ab95567fbf54856b8ebc5b61b30",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-cancellation-oracle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/source-adr.schema.json",
+      "sha256": "2abb671f28ed0744f1ce5f639b8da41fdb8283fb9f95c55442ac806c9c0d5d3f",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/source.test.mjs",
+      "sha256": "ed922719dac098b51966948a43f64d7d0f65f9a34ec26bd61ce6b991a01a4bce",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-cancellation-oracle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/src/client.ts",
+      "sha256": "2ad3ccf7651ae6dfb7da865b110b0161959878d56d5a64364066a4440ad79bc5",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-boundary-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-cancellation-oracle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-transport-install-review-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-harness-review-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/src/scene.schema.json",
+      "sha256": "57547fac9399c84cd7db554faf14055c8a7bad9a8efa3232ccc6f62da0f2c417",
+      "role": "contract-or-configuration",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-validation-audit-v2.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observation-audit-v2.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-stream-ingress-audit-v2.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-disposal-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-errors-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-endpoint-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-numeric-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-package-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generation-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-smoke-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-archive-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-ci-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-public-types-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-lifecycle-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generator-selectors-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generator-structure-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/src/session.ts",
+      "sha256": "17cabbb49e597f78aa0b41ddd00fad91391e5b108de14652f91129429da56155",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-disposal-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-errors-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-endpoint-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-numeric-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-package-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generation-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-smoke-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-archive-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-ci-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-public-types-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-lifecycle-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-boundary-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-cancellation-oracle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/src/types.ts",
+      "sha256": "849fc85341150f634fba6f18e862175ad502b191c1a431a191f4471ca95b2c9b",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generation-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-smoke-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-archive-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-ci-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-public-types-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-lifecycle-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generator-selectors-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generator-structure-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/src/validators.d.cts",
+      "sha256": "964ebda7e68dfb4c54af38364067e4298a114042fd1a933ac92f978d6ec81297",
+      "role": "contract-or-configuration",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-numeric-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-package-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generation-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-smoke-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-archive-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-ci-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-public-types-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-lifecycle-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/src/wire.ts",
+      "sha256": "47891df5be59e1df0537faae87020a98e31f52b5659e8d8ff481434a2faa6a26",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-numeric-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-package-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generation-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-smoke-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-archive-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-ci-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-public-types-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-lifecycle-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-boundary-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-cancellation-oracle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/test.mjs",
+      "sha256": "41a95eb599caf653bf4b4d750d122efe4457d54e1c1ecaed5715fde0333c1d5f",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-cancellation-oracle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/transport-install-adr.json",
+      "sha256": "7cc0e8db5f279e55eb2e476fdb563a9269637160525b0bfa1fdfce1fc710539d",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-transport-install-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/transport-install-adr.schema.json",
+      "sha256": "83859f589e8fab6100731cbaed66ad75b239380386deebe3f2d99e86b6ec9c4c",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-transport-install-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/transport.test.mjs",
+      "sha256": "9e3a1089d907904ac2af575e454a33924546fe87968d4de140f345cbc4b1cd15",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-disposal-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-errors-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-endpoint-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-numeric-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-package-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generation-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-smoke-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-archive-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-ci-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-public-types-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-lifecycle-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-boundary-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/tsconfig.json",
+      "sha256": "415f53062ea2f6b7844d6dba313e3ddb270ba0af26ce492e31b0afbf6fdb6b66",
+      "role": "contract-or-configuration",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/validation-audit.test.mjs",
+      "sha256": "7ad313341fb0923cc3cb105db723b30eaa72ddd49e15fc54a95aeaf3eb7d3eb0",
+      "role": "test",
+      "matching_retained_evidence": []
+    },
+    {
+      "path": "examples/clients/typescript/validation-probe-adr.json",
+      "sha256": "07f8db71a2ebe8c88d0dac6b9c608fc6e775f595642372984cb5d905f5043686",
+      "role": "decision",
+      "matching_retained_evidence": []
+    },
+    {
+      "path": "examples/clients/typescript/validation-probe-adr.schema.json",
+      "sha256": "3490a1fe8575f311342851e01e75e085668a3d7a88798357e1ef90ddd010e238",
+      "role": "decision",
+      "matching_retained_evidence": []
+    },
+    {
+      "path": "examples/clients/typescript/validation.test.mjs",
+      "sha256": "529415dc7f4eb69dea567d57e4dc1c5a3ec19b3c47eec0cd96bb147ac682b084",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-numeric-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-package-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generation-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-smoke-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-archive-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-ci-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-public-types-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-lifecycle-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generator-selectors-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generator-structure-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json"
+      ]
+    },
+    {
+      "path": "examples/clients/typescript/wire.test.mjs",
+      "sha256": "001e55f149ea79574d474d945a35b9bad591f6c796d77da09bdfb96956390b67",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-stream-ingress-audit-v2.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-disposal-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-errors-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-endpoint-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-numeric-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-package-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generation-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-smoke-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-archive-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-ci-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-public-types-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-lifecycle-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-boundary-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/.gitignore",
+      "sha256": "424531b9ed17d9239a4debb4b16f235b0b4295d56ddff801e736819a2c5f9f9d",
+      "role": "contract-or-configuration",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/ACTION-HELP-PLAN.md",
+      "sha256": "64e4c64a19fa57d9fb707c7cb70fb963daca39c3bd94750ebf4cb5f0b650b755",
+      "role": "documentation",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/CLIENT-PLAN.md",
+      "sha256": "d7d55bbd6a166eab40c2866f45adbf9e18ce597f63ea3256f5c4604c75d78af8",
+      "role": "documentation",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/CONNECTION-PLAN.md",
+      "sha256": "c1d97b04693ebf70246cbd9a4898e26592a1daaa1de7d4be80f2799fef0cd4b2",
+      "role": "documentation",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/PLAN.md",
+      "sha256": "412991ce3c90a014fa0907cd8c17e31bf0c4ebe065d76e6068898bf669a8304d",
+      "role": "documentation",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/README.md",
+      "sha256": "56703e460954219d81277b7524af6ac95b3ae48acd8b478249c6f9cabfc93442",
+      "role": "documentation",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-binding-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/RENDERER-PLAN.md",
+      "sha256": "d1a9217c8dcc03f30c23a665f010ccea1bb8d878e69c4e6c6ab9bb6142dfd0d2",
+      "role": "documentation",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/STATE-HELP-PLAN.md",
+      "sha256": "1fa346f9c9e268a937e3ccba20d1e9ac7f1cbf352e697b592c676af6d4f6a150",
+      "role": "documentation",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/action-help-adr.json",
+      "sha256": "c7150aba49d87560ff3028379a2d9aa45f8edab6e2eab3eeb6060a8bf1bcbf8a",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-binding-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/action-help-adr.schema.json",
+      "sha256": "8a303022b45c17e5534a524fc40622191f1f15677aa8d77c2291cb9603243aab",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-help-inventory-review-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-binding-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/action-help.test.mjs",
+      "sha256": "c3766b7dab60292f4bd9fa86e58291728d07279f5ead1ff369dbdbbf0c24ee2d",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-binding-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/adr.json",
+      "sha256": "b1606fea39c53dfa4455fac212e7e07601062bfe4c714b79bdbf4a858785fcb8",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-display-build-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/adr.schema.json",
+      "sha256": "dfc4f2db9adeb84cb3963a4cf192ac81482caca25feeb9a211b14c7244bccaf6",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-display-build-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/browser-adr.json",
+      "sha256": "c74c2cad64abb9535668ed990728059153095a117d15680c7d9f4d4b31a08dbe",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-provenance-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/browser-adr.schema.json",
+      "sha256": "d2ef5e2bbaa2aa0bbcf0c96ed470ed3d2213da1fa44fb008fcc8f89c02f86cce",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-provenance-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/browser-adr.test.mjs",
+      "sha256": "7228bb2a285732e89d76d598ee74e8157be8fe9014a739a9005080cce06ef8f9",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-provenance-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/browser-build.test.mjs",
+      "sha256": "e1fdf979196546ad9224d5d8687347bc29035ae7abe77c0fd39aab25cdaf4dd4",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-provenance-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/browser.test.mjs",
+      "sha256": "86523eb322713dbd6b2c0bce37c0b0fc894ad32d7d2588f1ddb676908757f2b3",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-binding-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/build-adr.json",
+      "sha256": "d70d6a4464d1e3b0ef4783b9b97cf16471842f772ed9b7145ad53a240886d423",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-display-build-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/build-adr.schema.json",
+      "sha256": "8a11dd7fcb11abec7145212a51268ead33c722db4af3aa3237dc7025071036c4",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-display-build-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/build-browser.mjs",
+      "sha256": "68fe9f8a43b0a00e665d711947744acc8ad9b7ca6731a4c2029ee5d2e93ff732",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-provenance-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/build.mjs",
+      "sha256": "95deaea2807dc388a39001393444370408131d9c62477b3763c1d6464834e4c9",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-display-build-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/build.test.mjs",
+      "sha256": "894b73389f7556d93aa55c9126c1932a088c0622e2ac80e2df91165fb483c06c",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-display-build-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/client-adr.json",
+      "sha256": "4a4ee552e43b8189df4b549f3e259366ce2fc5c458cea45e8f7891a9a820cb46",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/client-adr.schema.json",
+      "sha256": "b1009a2d84f61bf3ee8974ae49ede0634194644313142d546f796ba901f2c84c",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/client.test.mjs",
+      "sha256": "aee5410f8544de44ad54e4042da5204642902f7c13f2be5cba36cd1895ad4f38",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/connection-adr.json",
+      "sha256": "0c34f5c0ff761629b99f4687e81e9c5d80d9cb287ea403715bfb96548827f59b",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/connection-adr.schema.json",
+      "sha256": "de1e94d4105994a9d81410d46f6a5fd9dd4258b15deb8ceda0d2a26e763a0a68",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/connection.test.mjs",
+      "sha256": "dbb9b1d733163dc11b473a27267cc568811586b2525a38f6f89bd43b211d06dd",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/help-inventory.mjs",
+      "sha256": "1a1b0384fb3dc5e538ab803b58146d397bfa1fd29e80a2f9b368701b6d31fb47",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-help-inventory-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/help-inventory.test.mjs",
+      "sha256": "0b515d4d76edee8f32adf9fb370464c5af310c27d6c9cbbc7466ff6ec4ee687c",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-help-inventory-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/lifecycle-adr.json",
+      "sha256": "389e04ac0013f991f3d3ac7a983fa4610305c0ff2e985a1f8025568dab19ea4c",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/lifecycle-adr.schema.json",
+      "sha256": "7d57aa6bb5419e199e28140927f5a3cdcd875490f0175614b66cfea3d0b970a9",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/lifecycle.test.mjs",
+      "sha256": "4aff63b5c4faf205fddc287996da02faf97923db586422fa89cdc95b8bc90b7a",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/package-lock.json",
+      "sha256": "f1d6402b9aaeb16efd25bcf4cef728abcc76077d633f0c2e30447134d25464da",
+      "role": "contract-or-configuration",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-display-build-review-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-review-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-provenance-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/package.json",
+      "sha256": "d4001605a8790064d85341b5e447711e8f2a2ef467ab5bf0bdff475c446ad060",
+      "role": "contract-or-configuration",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-provenance-review-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-help-inventory-review-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-binding-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/panel-adr.json",
+      "sha256": "a818e0d7929dcafe74c7dc2d05a942d4486bf09c4008d918741410257ee6fcf6",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-display-build-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/panel-adr.schema.json",
+      "sha256": "774fa69d1feb39971d7cb1cbed3a92e9544cbab1a6eb7ea37ed36697e6553848",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-display-build-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/panel.test.mjs",
+      "sha256": "69c9fa65bcdd33fd6b42d0328f1d3e9767fdae9ff0579873c398cf1296576db3",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-display-build-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/presenter.test.mjs",
+      "sha256": "3cc52c5037bca321dbc86d1779c193386321c7db8dd6c7f450c1457e608f81fe",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-display-build-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/src/action-help.ts",
+      "sha256": "7fc044809c26c6a12e5684ce0fdc596f2400347d768bfee572578f840df444fd",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-binding-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/src/browser.ts",
+      "sha256": "467cb5ec328101f6f15280d5c7f551475d6e0d1f527b0faca16f44a0fbe4e203",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/src/client.ts",
+      "sha256": "10d0b76b3f2a03a6c590072ab44a532ef8e87f8691f43636abd8e4a90e3ee791",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-review-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-binding-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/src/connection.ts",
+      "sha256": "35894bac5487b8375d88a0579dcf6aebe4c567c6648258803315080c428ecde7",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-binding-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/src/lifecycle.ts",
+      "sha256": "1da3e5a95b92d2db6cd372faf482173f3a0e6947da2760e4cfc96d7c5206ae7d",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-review-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-review-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-review-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-binding-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/src/panel.ts",
+      "sha256": "a573ce4d5df7f7a0726a4063960d61324248f15eb1b1be3479f0eb2751cd5a7b",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-binding-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/src/presenter.ts",
+      "sha256": "ca6048627c403caf55038d46118b4246e656fd95900a1af509593c4fd53be286",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-display-build-review-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-review-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-provenance-review-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-help-inventory-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/state-help-adr.json",
+      "sha256": "11e616428f479d221a2bee8b8e3a3fef2a06c65899ea2d92386cf3780ceeb26b",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-help-inventory-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/state-help-adr.schema.json",
+      "sha256": "6a5ba62f42ed5f10110203ac28ef79281551972f0a1dda1cf99ed31132695756",
+      "role": "decision",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-help-inventory-review-v1.json"
+      ]
+    },
+    {
+      "path": "examples/operator/tsconfig.json",
+      "sha256": "861762865a2d56efd4b3400ba541b9a1606f363f67845e632a718384a6971513",
+      "role": "contract-or-configuration",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-display-build-review-v1.json"
+      ]
+    },
+    {
+      "path": "scripts/edge_generate_types.py",
+      "sha256": "3ac876b39d6b46e84fbda5a1b682b0b5b82d098041b192d8785f74ab9042b2f6",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-generation-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-smoke-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-archive-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-ci-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-public-types-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-lifecycle-review-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-presenter-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-panel-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-reentrant-admission-v3.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-browser-component-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-setup-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-observer-revocation-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-source-composition-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-render-publication-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-connection-controls-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-client-integration-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-state-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p12-action-help-v1.json",
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-offline-consumer-v1.json"
+      ]
+    },
+    {
+      "path": "scripts/edge_node_e2e.py",
+      "sha256": "bb7521f4a58d32368671a5628a4a45ad0e19f8c3f1d2c0e5c6c98247b178fbbf",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-harness-review-v1.json"
+      ]
+    },
+    {
+      "path": "tests/integration/node_consumer_loopback.py",
+      "sha256": "bcdaff35a201dd2e0517f4c568a4a1317293575b70aa4185fef3e700b186c76d",
+      "role": "code",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-loopback-evidence-review-v1.json"
+      ]
+    },
+    {
+      "path": "tests/integration/test_node_consumer_smoke.py",
+      "sha256": "90331d25a569b68c21df43be14e755c10c3966b599621d75152fd510c1368193",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-harness-review-v1.json"
+      ]
+    },
+    {
+      "path": "tests/integration/test_node_loopback_evidence.py",
+      "sha256": "2e308106152b60c438d0c6313ec8994e498d643a8afb05c1be2f8cafefc7e87e",
+      "role": "test",
+      "matching_retained_evidence": [
+        "docs/engineering/aethron-ecosystem/evidence/phase3/p33-loopback-evidence-review-v1.json"
+      ]
+    }
+  ],
+  "next_earliest_unreviewed": "audit-observation.mjs report provenance and bounded comparison semantics"
+}

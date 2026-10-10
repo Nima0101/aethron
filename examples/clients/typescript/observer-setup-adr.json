@@ -1,0 +1,46 @@
+{
+  "id": "P33-OBSERVER-SETUP-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "KEEP TypeScript/native Fetch and AbortSignal; FIX the admitted session cleanup scope to include observer setup.",
+  "constraints": [
+    "Node and browser-hosted read-only client with synchronous display callbacks and native abort/timer APIs.",
+    "A validated remote handle must reach best-effort deletion if local setup fails; fixed errors must not copy host exception details.",
+    "No extra runtime dependency, retry, history or new wire contract. Existing display-callback error identity and independent deletion timeout remain intact."
+  ],
+  "alternatives": [
+    {
+      "technology": "TypeScript / native async try-finally",
+      "assessment": "Selected: explicit resource scope covers the validated handle, partially allocated controller/timer, final withdrawal and DELETE. Static optional-resource types expose partial setup; runtime negative tests verify it. No runtime wrapper or FFI is needed."
+    },
+    {
+      "technology": "Plain ECMAScript with checked annotations",
+      "assessment": "Can express the same try-finally and host APIs. Removing static TypeScript syntax would not change the cleanup scope or strengthen runtime admission; no runtime advantage demonstrated."
+    },
+    {
+      "technology": "Kotlin/JS",
+      "assessment": "Official documentation supports JavaScript environments and ESM/CommonJS interop. Shared JVM implementation can be valuable, but this component has no JVM ownership requirement. It still depends on host Fetch/timers and explicit remote-handle lifetime; no material win established."
+    },
+    {
+      "technology": "Rust / WebAssembly with web-sys and wasm-bindgen",
+      "assessment": "Official Fetch example wraps host requests and promises through JsFuture. Native ownership is useful for native resources, but does not independently delete a server handle across asynchronous host setup failure. This small host orchestration adds no native compute workload justifying an FFI deployment boundary."
+    }
+  ],
+  "sources": [
+    "https://dom.spec.whatwg.org/#dom-abortsignal-any",
+    "https://kotlinlang.org/docs/js-overview.html",
+    "https://wasm-bindgen.github.io/wasm-bindgen/examples/fetch.html"
+  ],
+  "limits": [
+    "Host-failure injection is not a browser compatibility or physical fault qualification.",
+    "Cleanup remains best effort and relies on working host cancellation, timeout and fetch APIs. No asynchronous DELETE guarantee on process loss.",
+    "No language performance comparison was executed; KEEP follows the narrow resource-lifetime and interoperability requirements.",
+    "No changed timing/byte thresholds, credentials storage, actuation, targeting or security/availability certification."
+  ],
+  "c4": {
+    "context": "flowchart LR\nCaller --> SDK[Read-only observer]\nSDK --> Service[Existing authenticated session API]",
+    "containers": "flowchart LR\nHost[Native abort and timer APIs] --> Observer[TypeScript observer]\nObserver --> Display[Caller display]\nObserver --> Service[Session endpoint]",
+    "components": "flowchart LR\nAdmit[Validate session reply] --> Scope[Cleanup scope]\nScope --> Setup[Controller signal timer]\nSetup --> Receive[Bounded event reception]\nSetup --> Failure[Fixed stream error]\nReceive --> Finally[Withdraw and delete]\nFailure --> Finally",
+    "code": "classDiagram\nclass ObserverScope {\n optional controller\n optional timer\n validated handle\n setup()\n receive()\n finallyWithdrawAndDelete()\n}\nObserverScope --> Observation"
+  }
+}

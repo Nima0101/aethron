@@ -1,0 +1,101 @@
+{
+  "baseline": "7f727087180f81c9d016b8d972e4068ba4a9279f",
+  "component": "P3.3 session cancellation and observation lifecycle test oracle",
+  "review_order_version": 3,
+  "audit_complete": false,
+  "decision": "KEEP TypeScript/native Fetch and Node test tooling; FIX watchdog-forced cleanup falsely satisfying cancellation tests. Production runtime unchanged.",
+  "adr": "examples/clients/typescript/cancellation-oracle-adr.json",
+  "source_sha256": {
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "787976085702cbbdf5eeb1b81745cb5db6964b481bd453baa3902f1ad9e64f87",
+    "examples/clients/typescript/README.md": "caf560a000100526af73080eb17a21f55d6302e4d5fd80cdb725406fc24c9781",
+    "examples/clients/typescript/audit-cancellation.mjs": "60abe61a93d95f4e9ba9d81ce2f942195200619168f922e24d509964694b4ac4",
+    "examples/clients/typescript/cancellation-oracle-adr.json": "34c6148d7e8af2c6169e95bbe588fc681ae78a0ebe1a296363f75c3883d39562",
+    "examples/clients/typescript/cancellation-oracle-adr.schema.json": "92e1ae4f5da740f72cbe8605a305ed8274d1b30f07ef9253654c8f6902a3c9e8",
+    "examples/clients/typescript/errors.test.mjs": "a1927cff571800ef2780dd6d381f8d261fdcbf5fd0a7b3071c041359b4cee161",
+    "examples/clients/typescript/package.json": "ef026e086205f435872b27ba3b7ca140e32a29b780ae4ea70f2b7a0952c82325",
+    "examples/clients/typescript/package-lock.json": "e9851168f26e274480aa106a84f447bbd5429cf9c3e8462ec44c58c2158666c1",
+    "examples/clients/typescript/src/client.ts": "2ad3ccf7651ae6dfb7da865b110b0161959878d56d5a64364066a4440ad79bc5",
+    "examples/clients/typescript/src/session.ts": "17cabbb49e597f78aa0b41ddd00fad91391e5b108de14652f91129429da56155",
+    "examples/clients/typescript/src/wire.ts": "47891df5be59e1df0537faae87020a98e31f52b5659e8d8ff481434a2faa6a26",
+    "examples/clients/typescript/test.mjs": "41a95eb599caf653bf4b4d750d122efe4457d54e1c1ecaed5715fde0333c1d5f",
+    "examples/clients/typescript/source.test.mjs": "ed922719dac098b51966948a43f64d7d0f65f9a34ec26bd61ce6b991a01a4bce",
+    "examples/clients/typescript/disposal.test.mjs": "7285c4501b8dd12bfd5b5bb64269dc68eca7d47174bec26c6f3a3f254d46cecb",
+    "examples/clients/typescript/session.test.mjs": "448c00e8e65b70e17ee6f14a02bbeb0436da8e3ec2c217b41f6a1de94d9d2776",
+    "examples/clients/typescript/source-adr.json": "62e5176691f5d927d1eaebc945a13886ae5e4ab95567fbf54856b8ebc5b61b30",
+    "examples/clients/typescript/generate-contract.mjs": "b551440c98e5c0f12a2c776e2474f78558c2cfdb2489f59c314954c88c9679d2",
+    "examples/clients/typescript/generate-validators.mjs": "e989f6fb25921f3ce3be7a2a58a5e44b2377d16a5f1ea0a0871d7d04380b051a",
+    "examples/clients/typescript/build.mjs": "3fef76ca0da3993a7e9d79eedc0d52d8ab4c51a8c9bc773ee689fc48790867e2"
+  },
+  "log_directory": "build/p33-sdk-linux",
+  "report_sha256": {
+    "cancellation-watchdog-red.log": "61cfa4e4b9c21b9ccfa9f383c174ec23400cfa0a955a590945c94c1ff6c4821f",
+    "cancellation-watchdog-green.log": "a06037a1cdf6d5c6ec45ed83d5026802b91a3a380e7f705dceebb395639e6d62",
+    "cancellation-focused.log": "a79b002e23e36814d516e2dc559bac9540c64dd103190b54f7d05c22f015a044",
+    "cancellation-adr.log": "e99a4daa41531d92b580f9ddf3bbd697128669a472147d802c3e4dcd420487c1",
+    "cancellation-audit-final.log": "8daf938cfc74ac2f48804a2bcd45c05aa20ce235ccad2eae6ed0a63763f79960",
+    "cancellation-package.log": "4696c6855fb1a7f120af77307289f5a36a2ca627595a96e699ae8bc4266ef6da"
+  },
+  "distribution_sha256": {
+    "examples/clients/typescript/dist/client.d.ts": "af30b39d8e1db5983826abc2a17d3875fa06aaa3dbedb41c25e39e91c691ffc3",
+    "examples/clients/typescript/dist/client.js": "fd1fd0155e3f20d107b2bd039fed69e52507a6a7fca6ca2a07f0b51fbfae62c9",
+    "examples/clients/typescript/dist/scene.schema.json": "39d0180c8c3d8ec0376c029b7e2e2724668343f58d4695d27cd1613bb96b460a",
+    "examples/clients/typescript/dist/session.d.ts": "c371ffcdfef108e3e49ea04fb333c8c18f799eee2aa1cfd51d526ae3a586aa87",
+    "examples/clients/typescript/dist/session.js": "30d353bfb91747d72426b6f47ea148b3d5e92cbe36f2c9b9d510f411d54778db",
+    "examples/clients/typescript/dist/types.d.ts": "acd854e2abeca3ed1c2849e2a5e1d563944c78cdfc33d9ffcd9eafaef0e63338",
+    "examples/clients/typescript/dist/types.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "examples/clients/typescript/dist/validators.cjs": "7046fcbc5f655e1f6768207d366ff0cac69502dd7147457bed0ebe4e512fdec3",
+    "examples/clients/typescript/dist/wire.d.ts": "58023ff80c20e478e5a951255687883542e91e1cccfb7bbcdc8af663fdd5a238",
+    "examples/clients/typescript/dist/wire.js": "55d6ee1a9cc38a898195027880b1752650ae8786af806ea7693f7c13b638940c"
+  },
+  "red": {
+    "command": "node audit-cancellation.mjs",
+    "tests_revision": "7f727087180f81c9d016b8d972e4068ba4a9279f",
+    "mutation": "Remove POST fetch signal in copied built client; original selected native cancellation test passed after watchdog shutdown",
+    "audit_result": "FAIL: status 0 instead of expected 1; false PASS reproduced before oracle correction",
+    "production_failure": false
+  },
+  "checks": {
+    "focused_methods": 118,
+    "focused_failures": 0,
+    "focused_skips": 0,
+    "adr_methods": 4,
+    "adr_failures": 0,
+    "mutation_controls": 2,
+    "expected_mutation_assertion_failures": 2,
+    "package_methods": 3,
+    "package_failures": 0,
+    "syntax_diff": "PASS",
+    "unchanged_distribution_files": 10,
+    "previous_commit_source_hashes_verified": 20,
+    "previous_report_hashes_verified": 11
+  },
+  "security_review": [
+    "Only loopback synthetic HTTP and temporary copied modules; fixed child arguments with shell:false, 15000 ms timeout and 1 MiB output cap.",
+    "Mutation checks require the named watchdog assertion, exactly one selected failing method and zero cancellations; import/syntax failures cannot masquerade as detection.",
+    "Five-second cleanup watchdog unchanged and still releases fixture sockets; package allowlist excludes new audit and ADR files. No credentials or private configuration inspected."
+  ],
+  "publication": {
+    "pr": "https://github.com/Nima0101/aethron/pull/44",
+    "published_head": "7f727087180f81c9d016b8d972e4068ba4a9279f",
+    "push": "PASS fast-forward ba2f888 to 7f727087 on existing delivery branch",
+    "current_head_ci": "Not queried; no polling or merge",
+    "prior_ci_head": "ba2f8885b4bbb6844c6b462527b99066c70921b5",
+    "prior_failed_checks": [
+      {
+        "name": "vision",
+        "url": "https://github.com/Nima0101/aethron/actions/runs/38077908761/job/114288651179"
+      },
+      {
+        "name": "vision",
+        "url": "https://github.com/Nima0101/aethron/actions/runs/38077905433/job/114288641050"
+      }
+    ]
+  },
+  "previous_evidence": "docs/engineering/aethron-ecosystem/evidence/phase3/p33-session-boundary-v1.json",
+  "next_earliest_unreviewed": "Endpoint/redirect admission and package/service consumer lifecycle, then remaining P12 display/help review",
+  "limits": [
+    "This is a demonstrated verification defect. No production transport failure was reproduced and no runtime source changed.",
+    "No full repository suite, clean clone, large fuzz, browser/mobile/Windows, hard-real-time, safety, cryptographic or customer-release qualification.",
+    "SSE producer/consumer byte-cap mismatch and integrated P19 Help Center gates remain unfinished. No audit-completion marker."
+  ]
+}
