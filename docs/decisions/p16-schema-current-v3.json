@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "id": "p16-schema-current-v3",
+  "component": "Published interop schemas and offline conformance",
+  "decision": "KEEP",
+  "constraints": [
+    "Six trusted local Draft 2020-12 schemas, finite CI fixtures, no remote retrieval; raw-wire and authenticated runtime checks remain separate.",
+    "No embedded deployment, throughput SLA or hard deadline is specified for this authoring tool."
+  ],
+  "alternatives": [
+    "Python jsonschema with explicit deny-retrieval Registry and direct runtime comparisons.",
+    "JavaScript/TypeScript Ajv Draft 2020-12 validator.",
+    "C#/F# JsonSchema.Net with dialect and registry controls.",
+    "CUE closed constraints with independently verified standard-schema interchange."
+  ],
+  "rationale": [
+    "Fresh schema, runtime, test, requirements and workflow review found no new acceptance mismatch. Preserve language-neutral JSON Schema and direct positive/negative runtime comparisons.",
+    "Alternate validators are credible consumer implementations, but do not replace raw-byte lexical checks or authentication. CUE could express richer configuration relations; that is not a demonstrated requirement here.",
+    "KEEP is based on offline validation and direct execution of actual APIs, not installed tools, familiarity or rewrite cost. No material winning migration was established."
+  ],
+  "limits": [
+    "Only the Python conformance implementation was executed; this is not a cross-runtime benchmark or universal equivalence proof.",
+    "Structural acceptance never grants authority or qualifies evidence. No whole-lane completion or tactical qualification."
+  ],
+  "evidence": [
+    "https://python-jsonschema.readthedocs.io/en/stable/referencing/",
+    "https://ajv.js.org/json-schema.html",
+    "https://docs.json-everything.net/schema/basics/",
+    "https://cuelang.org/docs/concept/how-cue-enables-data-validation/"
+  ]
+}

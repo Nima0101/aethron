@@ -2,6 +2,7 @@
 
 import json
 import sys
+import tempfile
 from hashlib import sha256
 from pathlib import Path
 
@@ -10,6 +11,7 @@ from aethron.interop_federation import verify_federated_bundle
 from aethron.interop_inbox import BoundedInbox
 from aethron.interop_tasks import validate_task
 from aethron.passport_evidence import verify_evidence
+from aethron.passport_floor_store import FloorStoreError, PolicyFloorStore
 from aethron.passports import validate_pinned_policy, verify
 
 # Reviewed fixture bytes; changes require deliberate coverage review.
@@ -54,6 +56,69 @@ def load_vectors(root, relative):
     if type(data["cases"]) is not list or len(data["cases"]) != expected_count:
         raise ValueError("invalid_vector_coverage")
     return data
+
+
+def check_floor_persistence(root):
+    """One synthetic real-file scenario; no power-loss or device qualification."""
+    case = load_vectors(root, "examples/passports/vectors.json")["cases"][0]
+    policy = case["policy"].encode()
+    pin = sha256(policy).hexdigest()
+
+    def check(row, revision, time_s, digest):
+        assert (row.scope, row.policy_revision, row.minimum_time_s, row.policy_sha256) == (
+            "installed-check",
+            revision,
+            time_s,
+            digest,
+        )
+        assert row.execution_authority is False
+        assert row.motion_authority is False
+        assert row.evidence_verified is False
+
+    with tempfile.TemporaryDirectory(prefix="aethron-floor-check-") as directory:
+        path = str(Path(directory).resolve() / "floor.sqlite")
+        PolicyFloorStore.create(
+            path,
+            scope="installed-check",
+            policy=policy,
+            expected_policy_sha256=pin,
+            now_s=1500,
+            minimum_time_s=1400,
+            minimum_policy_revision=3,
+        )
+        store = PolicyFloorStore(path, scope="installed-check")
+        check(store.read(), 3, 1500, pin)
+        check(store.observe_time(now_s=1501), 3, 1501, pin)
+        check(PolicyFloorStore(path, scope="installed-check").read(), 3, 1501, pin)
+
+        updated = json.loads(policy)
+        updated["revision"] = 4
+        updated["revoked_keys"] = [updated["keys"][0]["key_id"]]
+        raw = json.dumps(updated).encode()
+        updated_pin = sha256(raw).hexdigest()
+        check(
+            store.accept_policy(raw, expected_policy_sha256=updated_pin, now_s=1502),
+            4,
+            1502,
+            updated_pin,
+        )
+        reopened = PolicyFloorStore(path, scope="installed-check")
+        check(reopened.read(), 4, 1502, updated_pin)
+        for method, arguments, reason in (
+            (reopened.observe_time, {"now_s": 1501}, "time_rollback"),
+            (
+                reopened.accept_policy,
+                {"policy": policy, "expected_policy_sha256": pin, "now_s": 1503},
+                "policy_rejected",
+            ),
+        ):
+            try:
+                method(**arguments)
+            except FloorStoreError as error:
+                assert str(error) == reason
+            else:
+                raise AssertionError("installed floor rollback accepted")
+            check(PolicyFloorStore(path, scope="installed-check").read(), 4, 1502, updated_pin)
 
 
 def run(root):
@@ -135,7 +200,8 @@ def run(root):
         assert result.execution_authority is False
         assert result.motion_authority is False
         assert result.evidence_verified is False
-    return sum(count for _, count in CORPORA.values())
+    check_floor_persistence(root)
+    return sum(count for _, count in CORPORA.values()) + 1
 
 
 if __name__ == "__main__":

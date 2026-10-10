@@ -18,6 +18,87 @@ SPEC.loader.exec_module(RUNNER)
 
 
 class InstalledVectorTests(unittest.TestCase):
+    def test_floor_persistence_is_executed_with_real_api(self):
+        from aethron.passport_floor_store import PolicyFloorStore
+
+        with patch.object(RUNNER, "PolicyFloorStore", wraps=PolicyFloorStore, create=True) as store:
+            RUNNER.run(ROOT)
+            self.assertEqual(store.create.call_count, 1)
+            self.assertGreaterEqual(store.call_count, 3)
+
+    def test_floor_write_loss_prevents_success(self):
+        from aethron.passport_floor_store import PolicyFloorStore
+
+        def lost_write(store, *, now_s):
+            return SimpleNamespace(**(asdict(store.read()) | {"minimum_time_s": now_s}))
+
+        with patch.object(PolicyFloorStore, "observe_time", lost_write):
+            with self.assertRaises(AssertionError):
+                RUNNER.run(ROOT)
+
+    def test_floor_policy_write_loss_prevents_success(self):
+        from hashlib import sha256
+
+        from aethron.passport_floor_store import PolicyFloorStore
+
+        def lost_write(store, policy, *, expected_policy_sha256, now_s):
+            return SimpleNamespace(
+                **(
+                    asdict(store.read())
+                    | {
+                        "policy_revision": json.loads(policy)["revision"],
+                        "policy_sha256": sha256(policy).hexdigest(),
+                        "minimum_time_s": now_s,
+                    }
+                )
+            )
+
+        with patch.object(PolicyFloorStore, "accept_policy", lost_write):
+            with self.assertRaises(AssertionError):
+                RUNNER.run(ROOT)
+
+    def test_floor_rollback_acceptance_prevents_success(self):
+        from aethron.passport_floor_store import FloorStoreError, PolicyFloorStore
+
+        for name in ("observe_time", "accept_policy"):
+            original = getattr(PolicyFloorStore, name)
+
+            def suppress_rejection(store, *args, method=original, **kwargs):
+                try:
+                    return method(store, *args, **kwargs)
+                except FloorStoreError:
+                    return store.read()
+
+            with self.subTest(method=name):
+                with patch.object(PolicyFloorStore, name, suppress_rejection):
+                    with self.assertRaisesRegex(
+                        AssertionError, "installed floor rollback accepted"
+                    ):
+                        RUNNER.run(ROOT)
+
+    def test_wrong_floor_metadata_prevents_success(self):
+        from aethron.passport_floor_store import PolicyFloorStore
+
+        original = PolicyFloorStore.read
+        for field, value in (
+            ("scope", "wrong"),
+            ("policy_revision", 99),
+            ("minimum_time_s", 0),
+            ("policy_sha256", "0" * 64),
+            ("execution_authority", True),
+            ("motion_authority", True),
+            ("evidence_verified", True),
+        ):
+
+            def changed(*args, changed_field=field, changed_value=value, **kwargs):
+                result = original(*args, **kwargs)
+                return SimpleNamespace(**(asdict(result) | {changed_field: changed_value}))
+
+            with self.subTest(field=field):
+                with patch.object(PolicyFloorStore, "read", changed):
+                    with self.assertRaises(AssertionError):
+                        RUNNER.run(ROOT)
+
     def test_wrong_inbox_result_flags_prevent_success(self):
         for operation in ("put", "take"):
             original = getattr(RUNNER.BoundedInbox, operation)
@@ -55,7 +136,7 @@ class InstalledVectorTests(unittest.TestCase):
                         RUNNER.run(Path("missing-fixture-root"))
 
     def test_current_corpora_execute_all_checks(self):
-        self.assertEqual(RUNNER.run(ROOT), 50)
+        self.assertEqual(RUNNER.run(ROOT), 51)
 
     def test_policy_corpus_is_executed_with_real_api(self):
         from aethron.passports import validate_pinned_policy
@@ -65,7 +146,7 @@ class InstalledVectorTests(unittest.TestCase):
         with patch.object(
             RUNNER, "validate_pinned_policy", wraps=validate_pinned_policy, create=True
         ) as validator:
-            self.assertEqual(RUNNER.run(ROOT), 50)
+            self.assertEqual(RUNNER.run(ROOT), 51)
             self.assertEqual(validator.call_count, 10)
 
     def test_wrong_policy_result_fields_prevent_success(self):
