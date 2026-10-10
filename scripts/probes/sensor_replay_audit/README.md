@@ -10,6 +10,11 @@ UV_THREADPOOL_SIZE=1 node --v8-pool-size=1 scripts/probes/sensor_replay_audit/js
 No new Python dependency is needed. The comparison holds one synthetic 1 MiB
 payload, uses a temporary file and 15 rotated samples for each I/O candidate.
 CPU/wall timing excludes tracing; peak allocation is measured in separate calls.
+An existing trace session is rejected before fixture creation and left intact.
+Each trace session started by the harness is stopped if a candidate, peak read
+or interrupt exits the allocation pass. This assumes exclusive process tracing
+ownership during the run; it is not synchronization against another thread
+starting or stopping tracing. Traced allocation is not total process memory.
 The fragmented stream caps reads at 4096 bytes. All returned bytes must match.
 The readinto prototype assumes that optional stream interface and is not a full
 replacement for the production reader's EOF/adapter contract.

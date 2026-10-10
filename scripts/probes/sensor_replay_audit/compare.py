@@ -65,6 +65,8 @@ class Fragmented(io.BytesIO):
 
 
 def main():
+    if tracemalloc.is_tracing():
+        raise ValueError("replay_audit_tracing_active")
     data = b"x" * (1024 * 1024)
     functions = {"baseline": baseline, "direct": direct, "readinto": readinto, "production": _read}
     report = {"payload_bytes": len(data), "samples": 15, "cases": {}}
@@ -88,9 +90,11 @@ def main():
                     del result
                     stream.seek(0)
                     tracemalloc.start()
-                    result = functions[key](stream, len(data))
-                    samples[key]["peak"].append(tracemalloc.get_traced_memory()[1])
-                    tracemalloc.stop()
+                    try:
+                        result = functions[key](stream, len(data))
+                        samples[key]["peak"].append(tracemalloc.get_traced_memory()[1])
+                    finally:
+                        tracemalloc.stop()
                     assert result == data
                     del result
             report["cases"][name] = {

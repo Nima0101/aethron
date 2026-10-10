@@ -16,6 +16,76 @@ PROBE = ROOT / "scripts/probes/sensor_replay_audit/compare.py"
 
 
 class ReplayAuditModeTests(unittest.TestCase):
+    def test_existing_trace_session_rejects_before_fixture_creation(self):
+        module = runpy.run_path(str(PROBE))
+        output = io.StringIO()
+        tracemalloc.start()
+        retained = bytearray(32)
+        try:
+            with patch.object(module["tempfile"], "TemporaryFile") as create_file:
+                create_file.side_effect = RuntimeError("fixture_creation_entered")
+                with contextlib.redirect_stdout(output):
+                    try:
+                        module["main"]()
+                    except Exception as exc:
+                        failure = exc
+                    else:
+                        failure = None
+                self.assertIs(type(failure), ValueError)
+                self.assertEqual(str(failure), "replay_audit_tracing_active")
+                create_file.assert_not_called()
+            self.assertTrue(tracemalloc.is_tracing())
+            self.assertIsNotNone(tracemalloc.get_object_traceback(retained))
+            self.assertEqual(output.getvalue(), "")
+        finally:
+            tracemalloc.stop()
+
+    def test_traced_candidate_failure_stops_owned_tracing_without_report(self):
+        for failure_type in (RuntimeError, KeyboardInterrupt):
+            with self.subTest(failure_type=failure_type):
+                module = runpy.run_path(str(PROBE))
+                calls = []
+
+                def candidate(stream, size, failure_type=failure_type, calls=calls):
+                    calls.append(tracemalloc.is_tracing())
+                    if tracemalloc.is_tracing():
+                        raise failure_type("synthetic_candidate_failure")
+                    return stream.read(size)
+
+                output = io.StringIO()
+                try:
+                    with patch.dict(module["main"].__globals__, baseline=candidate):
+                        with contextlib.redirect_stdout(output):
+                            with self.assertRaisesRegex(
+                                failure_type, "synthetic_candidate_failure"
+                            ):
+                                module["main"]()
+                    self.assertEqual(calls, [False, True])
+                    self.assertEqual(output.getvalue(), "")
+                    self.assertFalse(tracemalloc.is_tracing())
+                finally:
+                    tracemalloc.stop()
+
+    def test_peak_read_failure_stops_owned_tracing_without_report(self):
+        module = runpy.run_path(str(PROBE))
+        output = io.StringIO()
+        try:
+            with patch.dict(
+                module["main"].__globals__, baseline=lambda stream, size: stream.read(size)
+            ):
+                with patch.object(
+                    tracemalloc,
+                    "get_traced_memory",
+                    side_effect=RuntimeError("synthetic_peak_failure"),
+                ):
+                    with contextlib.redirect_stdout(output):
+                        with self.assertRaisesRegex(RuntimeError, "synthetic_peak_failure"):
+                            module["main"]()
+            self.assertEqual(output.getvalue(), "")
+            self.assertFalse(tracemalloc.is_tracing())
+        finally:
+            tracemalloc.stop()
+
     def test_optimized_import_rejects_before_exposing_unchecked_helpers(self):
         for flags, optimization in ((["-O"], ""), (["-OO"], ""), ([], "1"), ([], "2")):
             with self.subTest(flags=flags, optimization=optimization):
