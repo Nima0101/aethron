@@ -14,6 +14,59 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class SensorPacketConformance(unittest.TestCase):
+    def encoding_vectors(self):
+        path = ROOT / "examples/interop/sensor-encoding-vectors-v1.json"
+        self.assertTrue(path.is_file(), "missing byte-order/padding conformance corpus")
+        return json.loads(path.read_bytes())
+
+    def test_encoding_corpus_binds_original_source_and_case_inventory(self):
+        vectors = self.encoding_vectors()
+        original = ROOT / "examples/interop/sensor-packet-vectors-v1.json"
+        self.assertEqual(vectors["version"], 1)
+        self.assertEqual(vectors["base_case"], "synthetic-depth")
+        self.assertEqual(
+            vectors["base_corpus_sha256"], hashlib.sha256(original.read_bytes()).hexdigest()
+        )
+        self.assertEqual(vectors["source_commit"], self.vectors()["source_commit"])
+        self.assertEqual(vectors["source_sha256"], self.vectors()["source_sha256"])
+        self.assertEqual(
+            [case["name"] for case in vectors["cases"]],
+            [
+                "equivalent-big-endian",
+                "changed-byte-order",
+                "equivalent-row-padding",
+                "trailing-byte",
+            ],
+        )
+
+        self.assertEqual(
+            [(case["decode_error"], case["depth_m"]) for case in vectors["cases"]],
+            [(None, 5.0), (None, 100.37), (None, 5.0), ("invalid_image_bytes", None)],
+        )
+
+    def test_decodable_encoding_changes_cannot_reuse_original_authentication(self):
+        vectors = self.encoding_vectors()
+        original = self.vectors()["cases"][0]
+        self.assertEqual(self.bind(original).status, "bound")
+        for case in vectors["cases"]:
+            with self.subTest(case=case["name"]):
+                layout_bytes, pixel_bytes = map(bytes.fromhex, case["evidence_hex"])
+                self.assertNotEqual(case["evidence_hex"], original["evidence_hex"])
+                if case["decode_error"] is None:
+                    raster = packets.decode_image(json.loads(layout_bytes), pixel_bytes)
+                    self.assertIsNone(raster.depth_m(0, 0))
+                    self.assertAlmostEqual(raster.depth_m(1, 0), case["depth_m"])
+                else:
+                    with self.assertRaisesRegex(ValueError, "^invalid_image_bytes$"):
+                        packets.decode_image(json.loads(layout_bytes), pixel_bytes)
+                result = self.bind(dict(original, evidence_hex=case["evidence_hex"]))
+                self.assertEqual((result.status, result.reason), ("rejected", "evidence_mismatch"))
+                self.assertEqual(result.evidence, ())
+                self.assertIsNone(result.task_sha256)
+                self.assertIsNone(result.passport_sha256)
+                self.assertIsNone(result.policy_revision)
+                self.assertIsNone(result.expires_at)
+
     def vectors(self):
         path = ROOT / "examples/interop/sensor-packet-vectors-v1.json"
         self.assertTrue(path.is_file(), "missing portable P2/P16 conformance corpus")

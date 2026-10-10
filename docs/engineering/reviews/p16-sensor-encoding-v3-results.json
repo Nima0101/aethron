@@ -1,0 +1,44 @@
+{
+  "audit_policy_version": 3,
+  "review": "P16 consumed sensor encoding",
+  "baseline_head": "ffd019cf746adac2a069eeb5fd23316cbd0b5ad8",
+  "producer_commit": "a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46",
+  "decision": "KEEP direct producer API checks and portable JSON; ADD missing encoding coverage",
+  "production_defect_demonstrated": false,
+  "red": {
+    "methods": 7,
+    "assertion_failures": 2,
+    "errors": 0
+  },
+  "green": {
+    "consumer_methods": 7,
+    "related_methods": 60,
+    "skips": 0
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS after formatting",
+    "bandit": "PASS"
+  },
+  "source_sha256": {
+    "tests/interop_consumers/test_sensor_packets.py": "891eee7a0f9f7612dae89d5fbbc4aa49bc37784afb2b82f4d3a1c5f13e6af0dd",
+    "examples/interop/sensor-encoding-vectors-v1.json": "60ead91ad5b69d10edc7487028823d1acfab8c4259b9a41dae10c6fc922bd39e",
+    "examples/interop/sensor-packet-vectors-v1.json": "80fb60be05c18f87f8954332c2d4f8be28762c16d335d004527555fb3d3aa4fc",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "integrations/edge/aethron_edge/sensors/packets.py": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192",
+    "integrations/edge/aethron_edge/__init__.py": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9",
+    "integrations/edge/aethron_edge/sensors/__init__.py": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a"
+  },
+  "retained_log_sha256": {
+    "sensor-encoding-red.log": "0e2e3f5db08d63e2179f08edfc38860fef9b6db311dc2c1d002fe92cbe3c36cf",
+    "sensor-encoding-green.log": "f4fc308bb629f0e11dd602c044313e04908e8f8b16ce482581db5774777b80c5",
+    "sensor-encoding-related.log": "975970dbba725d204e38d3250083005b70dbb3a961e0d34825acf25a2a44c8da"
+  },
+  "limits": [
+    "Cached main only; no new fetch claimed.",
+    "Analytical software fixtures only; no physical or latency qualification.",
+    "No dependency-closure or loaded-code attestation.",
+    "No whole-phase completion."
+  ]
+}
