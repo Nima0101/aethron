@@ -116,6 +116,18 @@ does not change processing. The initial SSE gap remains part of the API contract
 
 ## Evidence and remaining execution
 
+The guest sensor probe observes declared batch counters. Its legacy
+`processing_at_end` field means a valid processing sample advanced the counter
+within the preceding 2000 ms, including the endpoint. A subsequent fault,
+unchanged counter or invalid sample does not clear that window. Fault and invalid
+sample counts remain separate diagnostics. Recovery and update flags latch
+historical observations; they can remain true after recent activity expires.
+These fields establish neither uninterrupted service nor latest-sample health.
+The observer assumes trusted status mappings and a monotonic integer clock in
+the same domain as the emission times. It does not authenticate those inputs or
+validate the host clock. Four profiles bound retained rows; counters still grow
+with run duration. No availability percentage follows from these diagnostics.
+
 Tests exercise strict provisioning, signed inventory coverage, real spawned
 supervision with zero viewers, source removal, worker crash/recovery, expiry,
 EOF, corrupt/oversized recordings, long-gap heartbeats, and a real signed CLI
