@@ -54,3 +54,19 @@ historical run. Those limits remain open. The original report is unchanged,
 including the mixed-width alternative advantage, omitted worker pipe-I/O CPU,
 shared-host timing and previous latency/startup failures. No new benchmark,
 production change or fresh KEEP/MIGRATE decision is included.
+
+## C02 historical replay report retrieval
+
+The retained replay report and its four source hashes match public delivery
+commit `413791f79e9239dc67341e727047a11574b1eb5c`. The sources are the replay
+module, replay tests, I/O comparison harness and separate stock-JSON parser
+counterexample. `historical_replay_binding` records the report digest and source
+map. This supplies the missing public retrieval reference without editing the
+historical report or substituting the current harness.
+
+The source snapshot is the final implementation. It does not establish the
+source bytes used for the report's `before` observations, authenticate either
+run, or recover individual timing samples. The stock-parser counterexample is
+not a complete alternate replay implementation. The recorded fragmented-input
+advantage for `readinto`, tracing-versus-RSS distinction and previous failures
+remain unchanged. No timing or whole-replay qualification is added.

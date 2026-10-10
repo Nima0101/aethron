@@ -1,6 +1,6 @@
 {
   "review_order_version": 3,
-  "scope": "C01 historical packet snapshot and C08/C09 working-copy source retrieval",
+  "scope": "C01/C02 historical snapshots and C08/C09 working-copy source retrieval",
   "decision": "CLARIFY",
   "full_component_review_complete": false,
   "records": [
@@ -41,16 +41,19 @@
     "product_sources_modified": false,
     "runtime_tests_rerun": false,
     "historical_packet_report_bytes_verified": 1,
-    "historical_packet_source_bytes_verified": 4
+    "historical_packet_source_bytes_verified": 4,
+    "historical_replay_report_bytes_verified": 1,
+    "historical_replay_source_bytes_verified": 4
   },
   "limits": [
     "Bindings identify publicly retrievable bytes, not authenticated execution.",
     "Original working-copy review notes and prior negative evidence remain unchanged.",
     "No new KEEP/MIGRATE, sensor performance, boot/soak or hardware qualification.",
-    "C01 public binding identifies the final source snapshot only; superseded experiment source snapshots and historical execution are not verified."
+    "C01 public binding identifies the final source snapshot only; superseded experiment source snapshots and historical execution are not verified.",
+    "C02 binding covers the final snapshot; before-observation sources and historical execution remain unverified."
   ],
   "documentation_sha256": {
-    "docs/engineering/aethron-ecosystem/P21-WORKING-COPY-PROVENANCE-V3.md": "1f2929397b832eb1dfae28d3ff13d485ee8ff360b00e7b3682f4921e88eac288"
+    "docs/engineering/aethron-ecosystem/P21-WORKING-COPY-PROVENANCE-V3.md": "bd7906551c1bc2ce4fe0a582c78e692f8ae2dec9c8d738a72d70616db7216f75"
   },
   "historical_packet_binding": {
     "report": "docs/engineering/aethron-ecosystem/evidence/phase2/technology-v2-packets.json",
@@ -64,6 +67,21 @@
       "scripts/probes/sensor_packet_audit/buffer_worker.cjs": "827b7c4fda88ff7b717983eb2309684956f22ba5007a3ce6de2e024cb9bf04fa"
     },
     "superseded_experiment_source_bindings": "unverified",
+    "raw_timing_samples": "not retained in this report",
+    "execution_attested": false
+  },
+  "historical_replay_binding": {
+    "report": "docs/engineering/aethron-ecosystem/evidence/phase2/technology-v2-replay.json",
+    "report_commit": "413791f79e9239dc67341e727047a11574b1eb5c",
+    "report_sha256": "c6ba3ae1df77966a2a7de047c044803a4f54a3da32a02a49731c5fcb859d624e",
+    "source_commit": "413791f79e9239dc67341e727047a11574b1eb5c",
+    "source_sha256": {
+      "integrations/edge/aethron_edge/sensors/replay.py": "8375a3112d1144b401353b849f599854ada92c95e0ea15ceb02cfa352803787e",
+      "tests/integration/test_sensor_replay.py": "27d075cb482ed38161f69c8a0bc395caea9b0937275b1077c3e13d9d2bd205bb",
+      "scripts/probes/sensor_replay_audit/compare.py": "d5f26cc5136f0801c92171b32eaf35d1b20f84c10599e99932b1d2c6041453e4",
+      "scripts/probes/sensor_replay_audit/json_candidate.cjs": "05ff94ac56e06c1c460b6c45d6a526faaa926b3165f9650f968a802380b344ee"
+    },
+    "before_observation_source_bindings": "unverified",
     "raw_timing_samples": "not retained in this report",
     "execution_attested": false
   }
