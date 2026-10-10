@@ -154,3 +154,6 @@ The [software assessment API](assessment-v1.md) now composes domain, method,
 campaign and per-capture artifact checks from raw inputs. Its aggregate result
 is software consistency only; authentication, independent review and physical
 qualification remain unverified. Existing bundle/stream v1 reports are unchanged.
+
+Ten [portable assessment vectors](assessment-vectors-v1.md) retain complete
+software-only outcomes and fixed errors without Python fixture builders.

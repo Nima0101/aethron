@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "baseline_commit": "0c2c58e273378f24a83ae56abf274257f553ba25",
+  "scope": "Portable synthetic assessment regression corpus; production code unchanged",
+  "source_sha256": {
+    "qualification/tests/test_assessment_vectors.py": "c478bc83dedb27416b5e3d303a45828313a445ba7bd1625a418c015446937f11",
+    "qualification/fixtures/assessment-vectors-v1.json": "afe52af644bbc67dc0bdb0df3d13839ab1a3c3d768471ce32b02d314d899fa2c",
+    "qualification/assessment-vectors-v1.md": "80b2d5d5b2437d2e88b89f1f153ae381a908050d00ce373c3a33407b523a9ec8",
+    "qualification/technology/assessment-vectors-decision-v1.json": "5a66c8e00004f740c30a72004c47d49b01cd7a8790e5631e48033ff4108ae1a2",
+    "qualification/technology/assessment-vectors-decision-v1.schema.json": "770bf4964746a672c32d3f4a907e2f8aaf3001e44dcc13fb321781a498bc4c89",
+    "qualification/assessment.py": "8d2df16612ff788af4fe51ac73ca5a5953d2e9424dac6d1097c6b6e2b48c5956",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "qualification/artifacts.py": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+    "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+    "qualification/domains.py": "7ef976b0936b0b6c2db701767e4f31e84ec51193b81c4ec2fb2489c2aea3e2a0",
+    "qualification/procedures.py": "5c6bc37c7eb4a8a45ad9ba8f592838065ebea1a9b95090bf7f6f7a345fd6923a",
+    "qualification/methods.py": "ac80ba3089447ac3d23bb37b98555e0b9bdb6b42360bb59901f02e84baeec388"
+  },
+  "source_observations_unchanged": true,
+  "red": {
+    "test": "test_complete_reports_and_fixed_errors_match",
+    "expected_failures": 1,
+    "reason": "Portable corpus absent before implementation"
+  },
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "qualification.tests.test_assessment_vectors",
+        "qualification.tests.test_assessment",
+        "qualification.tests.test_evidence",
+        "qualification.tests.test_artifacts",
+        "-q"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 11.89847,
+      "stdout": "",
+      "stderr": "----------------------------------------------------------------------\nRan 38 tests in 10.922s\n\nOK\n"
+    },
+    {
+      "command": [
+        "ruff",
+        "check",
+        "qualification/tests/test_assessment_vectors.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.063632,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "ruff",
+        "format",
+        "--check",
+        "qualification/tests/test_assessment_vectors.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.018586,
+      "stdout": "1 file already formatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "bandit",
+        "qualification/tests/test_assessment_vectors.py",
+        "-q"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.812014,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "negative_controls": [
+    {
+      "control": "promoted_physical",
+      "expected_assertion_failures": 8,
+      "unexpected_errors": 0
+    },
+    {
+      "control": "boolean_count",
+      "expected_assertion_failures": 8,
+      "unexpected_errors": 0
+    },
+    {
+      "control": "floating_count",
+      "expected_assertion_failures": 8,
+      "unexpected_errors": 0
+    },
+    {
+      "control": "suppressed_artifact_findings",
+      "expected_assertion_failures": 2,
+      "unexpected_errors": 0
+    }
+  ],
+  "corpus": {
+    "bytes": 133639,
+    "cases": 10,
+    "admitted_reports": 8,
+    "fixed_errors": 2,
+    "sha256": "afe52af644bbc67dc0bdb0df3d13839ab1a3c3d768471ce32b02d314d899fa2c"
+  },
+  "review": {
+    "start": "Earliest evidence byte/type and timing boundary",
+    "reviewed": [
+      "evidence.py",
+      "artifacts.py",
+      "campaign_references.py",
+      "campaign_bundle.py",
+      "assessment.py"
+    ],
+    "decision": "KEEP bounded raw-byte production APIs; FIX evidence portability with pinned data and exact recursive result comparison.",
+    "next_earliest_unreviewed": "Diagnostic tooling: ingress comparison driver and candidate probes under the current review order."
+  },
+  "limits": [
+    "Finite synthetic regression evidence, not exhaustive independent conformance.",
+    "Expected full reports originated from the baseline reference API; named negative meanings are asserted separately.",
+    "No non-Python consumer, installed release, live device or hardware acceptance demonstrated.",
+    "ADR JSON Schema supplied; no external schema-engine conformance run.",
+    "Current diagnostic-tool re-audit remains unfinished; no completion marker.",
+    "File hashes observe sources, not execution attestation."
+  ],
+  "physical_qualification_passed": false,
+  "phase_complete": false
+}

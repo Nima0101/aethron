@@ -528,3 +528,14 @@ record current candidate mechanisms and focused negative evidence. Existing
 technology probe results remain historical inputs, including Node duplicate-key
 failures; no new cross-runtime speed or parity result is claimed. This is not a
 phase-complete marker or independent device/customer acceptance.
+
+## Portable assessment review evidence — 2026-10-10
+
+At `0c2c58e273378f24a83ae56abf274257f553ba25`, the fresh admission-to-
+assessment review retains exact byte/type limits, independent findings and
+non-qualification flags. The [ten-case corpus](../assessment-vectors-v1.md)
+corrects the Python-builder-only consumer evidence gap. It pins raw inputs and
+full expected reports and rejects numeric type substitutions. Production code
+is unchanged. [Decision](assessment-vectors-decision-v1.json) and
+[checks](assessment-vectors-verification-v1.json) record scope and limits;
+all diagnostic tooling has not been freshly re-reviewed by this slice.
