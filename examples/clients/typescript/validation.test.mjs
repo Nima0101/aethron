@@ -63,8 +63,9 @@ test('built validators exactly match the bundled versioned schema', () => {
   const ajv = new Ajv2020({strict: true, code: {source: true}});
   ajv.addSchema(schema, 'scene');
   ajv.addSchema({...schema, $ref: '#/$defs/HealthEvent'}, 'health');
+  ajv.addSchema({...schema, $ref: '#/$defs/SessionHandle'}, 'session');
   assert.equal(readFileSync(new URL('./dist/validators.cjs', import.meta.url), 'utf8'),
-    standalone(ajv, {validateScene: 'scene', validateHealth: 'health'}));
+    standalone(ajv, {validateScene: 'scene', validateHealth: 'health', validateSession: 'session'}));
 });
 
 test('built client loads without runtime string compilation', () => {

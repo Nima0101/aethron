@@ -1,5 +1,6 @@
 import validators from './validators.cjs';
 import {WireDecoder} from './wire.js';
+import {readSession} from './session.js';
 import type {HealthEvent, SceneEnvelope} from './types.js';
 
 const {validateScene: validate, validateHealth} = validators;
@@ -66,8 +67,7 @@ export async function observe(base: string, token: string, profile: string,
   const request = await fetch(`${base}/api/v1/sessions`, {method: 'POST', headers,
     body: JSON.stringify({source_profile: profile, contract: 'warn'}), signal});
   if (!request.ok) throw new Error('session_unavailable');
-  const handle: unknown = (await request.json()).session;
-  if (typeof handle !== 'string' || !/^[a-f0-9]{32}$/.test(handle)) throw new Error('invalid_session');
+  const handle = await readSession(request, profile);
   const value = new Observation();
   const stop = new AbortController();
   const eventSignal = AbortSignal.any([signal, stop.signal]);

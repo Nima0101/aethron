@@ -98,3 +98,54 @@ Arbitrary in-process code, suspension, host clock rate and scheduler correctness
 remain outside this object's guarantees. No hard-real-time or physical qualification
 is inferred. The next earliest component is the full HTTP/session/stream lifecycle;
 its known session-response and lexical-number issues remain unresolved.
+
+## Third component, session-response admission slice
+
+Baseline `57e9b3998d8a63a5839a27cc51bccf1162961122`. The previous path used
+`Response.json()` and checked only a returned handle regex. It accepted missing,
+extra, duplicated or mismatched profile fields and accumulated an unrestricted
+body before parsing; malformed JSON and read failures could expose source errors.
+The existing published `SessionHandle` schema requires exactly `session` and
+`source_profile`; the local producer already emits both. This correction consumes
+that schema without modifying peer code.
+
+Requirements are defensive admission of one small authenticated HTTP response,
+fixed errors, exact profile binding and no use of an unvalidated handle. The
+client now caps its own body accumulator at 65,536 bytes before decode/parse.
+This is an explicit local admission policy, not a newly asserted server response
+limit. Fetch may allocate larger chunks upstream; no total-process/network
+memory bound is claimed. A stalled response still needs caller cancellation,
+and a source ignoring cancellation may retain its own resources.
+
+Current primary-source comparison (2026-10-10):
+
+| Candidate | Decisive property |
+| --- | --- |
+| Fetch `Response.json()` | The [body consumption algorithm](https://fetch.spec.whatwg.org/#dom-body-json) consumes the body before JSON conversion; this API has no caller-supplied byte cap or duplicate-key rejection policy. It does not meet this boundary unaided. |
+| TypeScript/host reader + generated schema | The host reader allows checking each chunk before copying into the fixed buffer. [AJV standalone generation](https://ajv.js.org/standalone.html) can add the existing session schema without runtime compilation. The already-tested duplicate/depth preflight can be shared. |
+| Kotlin/Ktor | [Response handling](https://ktor.io/docs/client-responses.html) supports streaming as well as complete-body conversions; explicit byte accounting and contract admission are still required. A Kotlin client is credible, but it does not itself replace these protocol guards in the Node module. |
+| Dart HTTP | [HttpClientResponse](https://api.dart.dev/dart-io/HttpClientResponse-class.html) is a byte stream with response metadata. A Dart implementation could enforce the same guards, but would need a separate host/module boundary and schema integration for this Node distribution. No throughput requirement or measured runtime advantage justifies that change here. |
+
+**KEEP TypeScript/fetch and build-time schema generation; FIX body admission.**
+A dedicated internal helper accounts for bytes, decodes UTF-8 strictly, rejects
+duplicate/deep/invalid JSON, validates the generated `SessionHandle`, and binds
+its profile to the request. All body/schema failures return `invalid_session`.
+Cleanup clears the accumulator and releases the reader without awaiting source
+cancellation. No body/error value is logged or persisted. No command interface,
+actuator channel or new dependency is added.
+
+Sixteen focused cases include thirteen baseline failures: missing/wrong/extra
+fields, duplicate and escaped keys, malformed private input, null body/root, BOM,
+oversize response, reader cleanup and raw transport errors. Positive controls
+include split one-byte input and the inclusive local byte limit. Existing client
+fixtures previously omitted the required profile and are corrected to match the
+producer; this is not a server schema change. Invalid replies produce no further
+handle-based requests. Consequently, an invalid or lost response cannot establish
+that a remotely created viewer handle was released; no remote-cleanup guarantee
+is made.
+
+The full transport review remains open for request/redirect policy, cancellation
+across all response phases, lexical integer forms and the known producer raw-event
+size mismatch. Neither this slice nor earlier tests establish deployment security,
+physical freshness or hard-real-time behavior. Review evidence is in
+[the session record](evidence/phase3/p33-session-review-v3.json).

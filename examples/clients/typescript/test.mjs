@@ -93,7 +93,7 @@ test('observer deletes its session even when the final display callback throws',
  const controller=new AbortController();
  t.mock.method(globalThis,'fetch',async (url,options)=>{
   requests.push({url,options});
-  if(options.method==='POST') return Response.json({session:'b'.repeat(32)});
+  if(options.method==='POST') return Response.json({source_profile:'bench',session:'b'.repeat(32)});
   if(options.method==='DELETE') return new Response(null,{status:204});
   return new Response('');
  });
@@ -126,7 +126,7 @@ for (const stall of ['headers','body','body-close']) {
   t.mock.method(globalThis,'clearInterval',handle=>{cleared.push(handle);});
   t.mock.method(globalThis,'fetch',async (url,options)=>{
    requests.push({url,options});
-   if(options.method==='POST') return Response.json({session:'c'.repeat(32)});
+   if(options.method==='POST') return Response.json({source_profile:'bench',session:'c'.repeat(32)});
    if(options.method==='DELETE') return new Response(null,{status:204});
    streamSignal=options.signal;
    ready();
@@ -175,7 +175,7 @@ async function consumeEvents(t,events) {
  t.mock.method(globalThis,'clearInterval',()=>{});
  t.mock.method(globalThis,'fetch',async (url,options)=>{
   requests.push({url,options});
-  if(options.method==='POST') return Response.json({session:envelope.session});
+  if(options.method==='POST') return Response.json({source_profile:'bench',session:envelope.session});
   if(options.method==='DELETE') return new Response(null,{status:204});
   return new Response(events.map(event=>`data: ${JSON.stringify(event)}\n\n`).join(''));
  });

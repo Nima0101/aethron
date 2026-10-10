@@ -2,7 +2,7 @@ const LIMIT = 65536;
 
 /** Preflight duplicate decoded keys and depth before native JSON parsing.
  * JSON.parse remains responsible for the complete JSON grammar. */
-function strictObject(text: string): unknown {
+export function strictObject(text: string): unknown {
   const stack: {object: boolean; key: boolean; keys: Set<string>}[] = [];
   try {
     for (let i = 0; i < text.length; i++) {

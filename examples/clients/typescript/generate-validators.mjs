@@ -8,6 +8,7 @@ const schema = JSON.parse(readFileSync(new URL('./src/scene.schema.json', import
 const ajv = new Ajv2020({strict: true, code: {source: true}});
 ajv.addSchema(schema, 'scene');
 ajv.addSchema({...schema, $ref: '#/$defs/HealthEvent'}, 'health');
-const code = standalone(ajv, {validateScene: 'scene', validateHealth: 'health'});
+ajv.addSchema({...schema, $ref: '#/$defs/SessionHandle'}, 'session');
+const code = standalone(ajv, {validateScene: 'scene', validateHealth: 'health', validateSession: 'session'});
 mkdirSync(new URL('./dist/', import.meta.url), {recursive: true});
 writeFileSync(new URL('./dist/validators.cjs', import.meta.url), code);

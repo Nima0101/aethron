@@ -15,7 +15,7 @@ async function consume(t,chunks) {
   t.mock.method(globalThis,'clearInterval',()=>{});
   t.mock.method(globalThis,'fetch',async(url,options)=>{
     requests.push({url,options});
-    if(options.method==='POST')return Response.json({session:scene.session});
+    if(options.method==='POST')return Response.json({source_profile:'bench',session:scene.session});
     if(options.method==='DELETE')return new Response(null,{status:204});
     let index=0;
     return new Response(new ReadableStream({
@@ -101,7 +101,7 @@ test('ingress failure clears state before pending reader cancellation',async t=>
   t.mock.method(globalThis,'setInterval',callback=>{tick=callback;return 0;});
   t.mock.method(globalThis,'clearInterval',()=>{});
   t.mock.method(globalThis,'fetch',async(url,options)=>{
-    if(options.method==='POST')return Response.json({session:scene.session});
+    if(options.method==='POST')return Response.json({source_profile:'bench',session:scene.session});
     if(options.method==='DELETE')return new Response(null,{status:204});
     return new Response(new ReadableStream({
       start(controller){controller.enqueue(encode(wire(scene)+'data: {broken}\n\n'));},
@@ -130,7 +130,7 @@ for (const failureKind of ['parser', 'renderer']) {
       t.mock.method(globalThis, 'clearInterval', () => {});
       t.mock.method(globalThis, 'fetch', async (url, options) => {
         requests.push({url, options});
-        if (options.method === 'POST') return Response.json({session: scene.session});
+        if (options.method === 'POST') return Response.json({source_profile:'bench',session: scene.session});
         if (options.method === 'DELETE') return new Response(null, {status: 204});
         streamSignal = options.signal;
         stream = new ReadableStream({

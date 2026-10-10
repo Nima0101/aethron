@@ -1,0 +1,126 @@
+{
+  "audit_policy_version": 3,
+  "component": "P3.3 HTTP session-response admission slice",
+  "baseline": "57e9b3998d8a63a5839a27cc51bccf1162961122",
+  "decision": "KEEP TypeScript/fetch and generated schema; FIX byte/JSON/schema/profile admission",
+  "source_sha256": {
+    "examples/clients/typescript/src/client.ts": "c7781ff5b533e265e39b4fc50ddd4f8f5a7806bef4a3bf266eea0a0878fcddcb",
+    "examples/clients/typescript/src/session.ts": "17cabbb49e597f78aa0b41ddd00fad91391e5b108de14652f91129429da56155",
+    "examples/clients/typescript/src/wire.ts": "a48da9c2746819b10a72c09054787711d282a6c29bf5cc64ad588c41639309ba",
+    "examples/clients/typescript/generate-validators.mjs": "1db7c830977d035bf069cddb25581fcb6073f33ddd80f4b75e42c33a7c47faef",
+    "examples/clients/typescript/session.test.mjs": "448c00e8e65b70e17ee6f14a02bbeb0436da8e3ec2c217b41f6a1de94d9d2776",
+    "examples/clients/typescript/validation.test.mjs": "88ac29f1ea09498530b9edf7ec0fdde523cdbd890aae67cb054842fba536f8f3",
+    "examples/clients/typescript/src/scene.schema.json": "57547fac9399c84cd7db554faf14055c8a7bad9a8efa3232ccc6f62da0f2c417"
+  },
+  "red": {
+    "pass": 3,
+    "fail": 13,
+    "report_sha256": "a6c01f631069f3900b9046089412ba31965890820c8ff657be769837bcd4a755"
+  },
+  "green": {
+    "session_cases": 16,
+    "source_client_transport_wire_session": 81,
+    "validation": 4,
+    "installed_public": 77,
+    "typescript_build_and_consumer": "PASS",
+    "installed_bytes": "client/session/wire/validators and declarations equal tested build",
+    "diff_check": "PASS"
+  },
+  "report_sha256": {
+    "session-green-v3.tap": "f8a70af8c0f363a21e6854afe0a9c41aef5c2dfa1c717601451f79d677ca4d3e",
+    "session-source-v3.tap": "155d1f48541057e2ebdc6ad9b71045ec30b565732225eaf18b4d7d0f3f97e299",
+    "session-validation-v3.tap": "bad68d401a6e45d640828526647f2fc5bbc3ae910bcbd6f3746a47737601c728",
+    "session-installed-v3.tap": "94b1282d7190ff67b944e08cee293a5f09b6b0a4c5c67d1e81d9f3f63ca69191"
+  },
+  "package_sha256": "5f50899c491e031c9a491f08dfce6e82f8fe67f855d67bad6a4bcf8aab49351e",
+  "package": {
+    "id": "aethron-edge-client-example@0.1.0",
+    "name": "aethron-edge-client-example",
+    "version": "0.1.0",
+    "size": 19954,
+    "unpackedSize": 129363,
+    "shasum": "f28e506aabead66871f584b5ea537fd4a3f9d12c",
+    "integrity": "sha512-poiqXuWC56KtDj7oBvzwcqlRksuVvrfmf0zNT6YqGwGFXTi2f0TnmdOReyQuGYPqBE1uOnGBGHN0XHZzaKCDkg==",
+    "filename": "aethron-edge-client-example-0.1.0.tgz",
+    "files": [
+      {
+        "path": "README.md",
+        "size": 7266,
+        "mode": 420
+      },
+      {
+        "path": "dist/client.d.ts",
+        "size": 771,
+        "mode": 420
+      },
+      {
+        "path": "dist/client.js",
+        "size": 5768,
+        "mode": 420
+      },
+      {
+        "path": "dist/scene.schema.json",
+        "size": 20344,
+        "mode": 420
+      },
+      {
+        "path": "dist/session.d.ts",
+        "size": 91,
+        "mode": 420
+      },
+      {
+        "path": "dist/session.js",
+        "size": 1406,
+        "mode": 420
+      },
+      {
+        "path": "dist/types.d.ts",
+        "size": 2791,
+        "mode": 420
+      },
+      {
+        "path": "dist/types.js",
+        "size": 11,
+        "mode": 420
+      },
+      {
+        "path": "dist/validators.cjs",
+        "size": 85367,
+        "mode": 420
+      },
+      {
+        "path": "dist/wire.d.ts",
+        "size": 561,
+        "mode": 420
+      },
+      {
+        "path": "dist/wire.js",
+        "size": 4340,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 647,
+        "mode": 420
+      }
+    ],
+    "entryCount": 12,
+    "bundled": []
+  },
+  "local_policy": {
+    "max_response_bytes": 65536,
+    "depth_limit": 8,
+    "invalid_response_error": "invalid_session",
+    "profile": "exact request binding",
+    "schema": "unchanged SessionHandle definition from bundled producer schema"
+  },
+  "negative_evidence": [
+    "Initial tests accepted incomplete, mismatched and ambiguous session replies",
+    "Native parser/read errors exposed raw details before correction",
+    "Rejected or lost replies cannot establish cleanup of a server-created viewer handle",
+    "No whole-process/upstream allocation bound or response deadline established",
+    "Request/redirect/cancellation policy, lexical integer forms and producer event-cap mismatch remain open"
+  ],
+  "security_review": "Defensive admission only: no new dependency, actuator transport, persisted identity, token URL, source logging or server/core change. Invalid handles are never used for follow-up requests. Body read errors normalized; cleanup cancellation rejection observed. Not a complete deployment security assessment.",
+  "audit_complete": false
+}
