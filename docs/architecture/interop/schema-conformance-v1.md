@@ -18,9 +18,10 @@ complete evidence references therefore remain the normative runtime verifier's j
 [python-jsonschema](https://python-jsonschema.readthedocs.io/en/stable/validate/) and
 [Ajv](https://ajv.js.org/json-schema.html) both support this draft. Choose the maintained
 python-jsonschema 4.26.0 validator for a separate Python 3.13 hosted conformance job:
-it supplies installed metaschemas and an explicit no-retrieval registry, so tiny local
-fixtures can be tested offline without bringing a JavaScript build tree or native
-compiler into this test. This is a test-tool choice, not a language requirement for
+installed metaschemas and an explicit no-retrieval registry support offline checks,
+and tests distinguish structural acceptance from actual runtime authentication.
+The [V3 review](../../engineering/reviews/p16-conformance-v3.md) compares Ajv, CUE
+and native validation alternatives. This is a test-tool choice, not a language requirement for
 consumers or a second implementation of another lane's SDK. No runtime dependency changes.
 
 ## Conformance boundary
@@ -38,9 +39,13 @@ annotation. Policy schemas fix key/revocation list limits and scalar types, but 
 authenticate provisioning or validate key-ID hashes. Array uniqueness in schemas cannot
 substitute for the runtime's uniqueness by capability name, digest and key ID.
 
-Tests cover all existing portable vectors, missing/unknown properties, scalar confusion,
+Tests cover the passport and evidence-binding portable envelope/policy fixtures,
+missing/unknown properties, scalar confusion,
 resource bounds, invalid base64, trailing newlines, and intentionally well-shaped yet
 expired/revoked/forged statements that the runtime must still reject. External `$ref`
 retrieval is forbidden by the test registry. The normal dependency-free runtime test
-suite may skip the optional schema tool; the hosted conformance job imports it explicitly
-before running and never counts a missing tool as success.
+suite may skip the optional schema tool. Install `requirements-passport-conformance.txt`
+to run these comparisons; it includes the pinned passport crypto closure. The hosted
+job explicitly imports both schema and crypto backends before running. The runtime
+comparison must authenticate a known-good fixture and reject negative fixtures for
+their expected reasons; an unavailable or always-rejecting backend cannot pass it.

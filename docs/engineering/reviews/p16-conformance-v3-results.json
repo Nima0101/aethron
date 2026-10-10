@@ -1,0 +1,41 @@
+{
+  "audit_policy_version": 3,
+  "baseline_head": "2519b63ff4383f2c6a2d4820370cb6581b42b885",
+  "decision": "KEEP schema/tool choice; FIX runtime comparison and CI dependency closure",
+  "python": "3.13.5",
+  "dependencies": {
+    "jsonschema": "4.26.0",
+    "referencing": "0.37.0",
+    "cryptography": "50.0.2"
+  },
+  "source_sha256": {
+    "tests/test_passport_schemas.py": "5b0a396e795d9b49abe967033f5f003a52de4021c635a110b61a1253db218006",
+    "requirements-passport-conformance.txt": "1d137f508c86edba0b3bf6d5c5e9d6cf673b31c3e4cfed2d57a3122ccad73dd3",
+    "requirements-passports.txt": "f6a456c822fb9de2a51699bdbacf232070362b51371790526c4a33b2a09fd801",
+    ".github/workflows/aethron-passports.yml": "17f15ac9ed1c1407646e2b7d443672e8301895b3c8e5ed76ed83262109c54bd1",
+    "contracts/interop/passport-v1.schema.json": "df89ef1e467821c429aaddcbd9b4e530e4f622cdbec64b85854ba578cc231d88",
+    "contracts/interop/passport-envelope-v1.schema.json": "6e3872ba208a573aa792e321342eda6788518e2e3bf638ff833e4c60db984c38",
+    "contracts/interop/passport-policy-v1.schema.json": "b6172dac43bce1a5905cd6c91ef2b7b485d0e70a988593571f2529a2bfad23b0",
+    "docs/architecture/interop/schema-conformance-v1.md": "829f8441013fbbbce4563e8e59395e1fa6f932e7c655a5f2b871e2c14160b45b",
+    "docs/engineering/reviews/p16-conformance-v3.md": "188990364dd87c31935af2c62a517ba5863f9e355177a931d360b1f75351eb78"
+  },
+  "retained_negative": "Old runtime comparison passed an always-rejecting verifier stub. New detection regression initially failed: AssertionError not raised. Corrected comparison passes the detection regression.",
+  "checks": {
+    "schema_tests": 7,
+    "passport_family_tests": 41,
+    "interop_tests": 31,
+    "ruff": "PASS",
+    "format": "PASS after one formatting correction",
+    "actionlint": "PASS",
+    "offline_pinned_requirements_dry_run": "PASS; already installed, no download",
+    "diff": "PASS"
+  },
+  "production_change": false,
+  "schema_change": false,
+  "hosted_status": "not run for this correction",
+  "limits": [
+    "No full validator performance ranking",
+    "No hardware, cryptographic certification, MLS, availability or tactical qualification",
+    "V3 review incomplete"
+  ]
+}

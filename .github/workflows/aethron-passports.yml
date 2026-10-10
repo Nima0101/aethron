@@ -42,7 +42,7 @@ jobs:
           python-version: '3.13'
       - run: |
           python -m pip install --only-binary=:all: -r requirements-passport-conformance.txt
-      - run: python -c "from jsonschema import Draft202012Validator"
+      - run: python -c "from jsonschema import Draft202012Validator; from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey"
       - run: python -m unittest discover -s tests -p test_passport_schemas.py -v
   passports:
     strategy:

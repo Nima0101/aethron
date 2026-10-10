@@ -4,6 +4,7 @@ import copy
 import json
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from aethron import passports
 
@@ -33,6 +34,15 @@ def first_case():
 
 @unittest.skipIf(Draft202012Validator is None, "install optional passport conformance requirements")
 class PassportSchemaConformance(unittest.TestCase):
+    def test_runtime_comparison_detects_always_rejecting_verifier(self):
+        with patch.object(
+            passports,
+            "verify",
+            return_value=passports.VerificationResult("rejected", "crypto_unavailable"),
+        ):
+            with self.assertRaises(AssertionError):
+                self.test_schema_success_is_not_authentication_or_time_validity()
+
     def test_payload_identifier_rejects_trailing_line_terminators(self):
         check = validator("passport-v1.schema.json")
         original = json.loads((ROOT / "examples/passports/vectors.json").read_bytes())[
@@ -157,22 +167,31 @@ class PassportSchemaConformance(unittest.TestCase):
         check = validator("passport-policy-v1.schema.json")
         case = first_case()
         original = json.loads(case["policy"])
+        check.validate(original)
+        validator("passport-envelope-v1.schema.json").validate(json.loads(case["envelope"]))
+        positive = passports.verify(
+            case["envelope"].encode(), case["policy"].encode(), **case["arguments"]
+        )
+        self.assertEqual(
+            (positive.status, positive.reason), ("authenticated", "signature_verified")
+        )
         invalid = []
         expired = copy.deepcopy(original)
         expired["expires_at"] = 1500
-        invalid.append(expired)
+        invalid.append((expired, "policy_not_current"))
         revoked = copy.deepcopy(original)
         revoked["revoked_passports"] = ["fixture-statement-1"]
-        invalid.append(revoked)
+        invalid.append((revoked, "revoked"))
         wrong_key = copy.deepcopy(original)
         wrong_key["keys"][0]["public_key"] = "0" * 64
-        invalid.append(wrong_key)
-        for policy in invalid:
+        invalid.append((wrong_key, "invalid_input"))
+        for policy, reason in invalid:
             check.validate(policy)
             result = passports.verify(
                 case["envelope"].encode(), json.dumps(policy).encode(), **case["arguments"]
             )
             self.assertEqual(result.status, "rejected")
+            self.assertEqual(result.reason, reason)
             self.assertFalse(result.motion_authority)
         # JSON Schema's mathematical integer accepts 1.0; wire parsing must not.
         payload = json.loads((ROOT / "examples/passports/vectors.json").read_bytes())[
