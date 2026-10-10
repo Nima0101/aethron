@@ -38,6 +38,22 @@ The mutable returned dictionary is not an authenticated receipt or authorization
 token. Recompute from authorized original inputs before relying on its results.
 The bundle grants no motion authority or operational capability to peer consumers.
 
+For separate capture-artifact checks, pass each original manifest and its same
+evaluation instant to `qualification.artifacts.verify`. Retain the full submitted
+capture list, including failed and reused attempts, when computing the bundle.
+Passing artifact checks cannot replace campaign coverage. Conversely, bundle
+success says nothing about supplied artifact bytes. Keep both reports and their
+negative findings; do not overwrite the bundle's permanently false flags.
+
+An artifact report's nested `input_sha256` binds only that manifest's exact bytes.
+It does not bind the evaluation instant, case assignment, campaign or provenance.
+The campaign's `captures_sha256` binds the complete submitted multiset of case,
+manifest digest and instant. A consumer must retain those original inputs and
+recompute at the intended instant; selecting an old passing report by artifact
+digest alone can associate it with a different or stale manifest. Even all
+software checks passing does not authenticate instruments or qualify hardware.
+See the [composed API checks](technology/bundle-artifact-integration-v3.md).
+
 ## Technology decision and baseline review — 2026-10-10
 
 The preceding declaration, artifact, campaign, CLI/comparison and reference-binding

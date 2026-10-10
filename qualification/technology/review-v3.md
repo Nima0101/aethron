@@ -18,6 +18,8 @@ The [Java output correction](java-output-review-v3.md) makes UTF-8 delivery
 explicit and prevents output errors from appearing as successful probe execution.
 The [hosted retention correction](workflow-retention-review-v3.md) retains raw
 transport and tool/build observations without claiming execution attestation.
+The [bundle/artifact integration review](bundle-artifact-integration-v3.md)
+checks independent failure retention and report association across the real APIs.
 
 The [measurement lifecycle correction](#follow-up-measurement-lifecycle--2026-10-10)
 qualifies the older allocation results and corrects all three measurement drivers.
