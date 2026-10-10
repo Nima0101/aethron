@@ -3,7 +3,8 @@
 This audit covers the existing qualification software in historical order:
 declaration validation (including rig, calibration, clock and environment
 rules), artifact byte binding, campaign coverage, then CLI/report delivery and
-verification tooling. None has a completed policy-2 KEEP/MIGRATE decision yet.
+verification tooling. Declaration validation and artifact binding have policy-2
+KEEP decisions below; campaign coverage and delivery/tooling decisions remain open.
 Earlier technology notes are hypotheses to reassess, not completion evidence.
 No new qualification capability or physical result is claimed by this audit.
 
@@ -85,10 +86,129 @@ recovered intermittently. No latency comparison is credible from this run.
 Two initial Jackson documentation requests failed; the sources above were
 located subsequently. These limitations remain part of the audit record.
 
-## Cursor and next experiment
+## Strict streaming experiment and declaration decision
 
-Cursor: declaration validation, decision pending. Next compare a strict streaming
-candidate (System.Text.Json or Jackson) against the same ingress corpus and
-semantic report fixtures, then assess bounded startup/allocation measurements
-under a stable runner. Complete KEEP/MIGRATE evidence and any winning migration
-before advancing to artifact binding. No audit completion marker is warranted.
+`IngressProbe.java` implements the alternative ingress boundary with Jackson
+2.21.5: explicit input-byte cap, reporting UTF-8 decoder, duplicate detection,
+depth/number limits, integer tokens and one root value. It is audit-only code,
+not a parallel production validator. The dependency is 594,187 bytes, pinned to
+SHA-256 `b64b5874162b503a0e58a8f7758266e8dd9f91bf49e3a59ae0b5f47589a231b7`.
+This version is beyond the patched versions in the document-length advisory;
+the prototype also checks the exact byte length itself.
+
+`compare_ingress.py` exports the same eighteen vectors plus 63 calls collected
+while executing the existing schema/timing tests. Java parses these bytes; the
+comparison applies the unchanged Python semantic validator to its output and
+retains the original input-byte commitment. All 81 outcomes match. This establishes
+frontend compatibility for this corpus, **not** an independent Java implementation
+of calibration, clock, environment or report logic. The Python oracle tests retain
+their independently specified expectations. The experiment would fail if duplicate
+keys or integral float tokens were admitted, required findings changed, or input
+byte commitments were dropped. `ingress-java-result-v1.json` binds source and
+transport hashes and retains execution limitations.
+
+Twenty Python calls at the full 65,536-byte input boundary had median 5.813 ms,
+maximum 64.194 ms, and a separate single-call tracemalloc peak of 73,615 bytes
+(preconstructed input excluded). These are descriptive measurements on a shared
+host, not a frozen threshold, hard-real-time guarantee or cross-language speed
+ranking. Java startup intermittently failed creating native threads. Sequential
+export/run/compare succeeded with JIT disabled and a 64 MiB heap cap. This host
+failure is not evidence against Java as a language. Hosted reproduction has been
+added; workflow existence is not a hosted PASS.
+
+**Decision: KEEP Python for declaration validation.** Ranking priorities are
+strict evidence interpretation and deterministic findings, then a small auditable
+admission boundary and bounded resource use for a one-shot offline tool. Python
+provides immutable input bytes, exact integer arithmetic, object-pair hooks and
+separate numeric token types; explicit caps and exact type checks close its
+permissive defaults. The existing bounded implementation passes the portable
+corpus and semantic tests. Jackson proves a viable strict alternative but adds
+an external parser plus UTF-8 and object-conversion plumbing without an observed
+contract improvement here. CUE/Ajv improve schema expression but still require
+a distinct strict byte boundary and procedural timing/hash/report logic. Go,
+Serde and System.Text.Json can implement that boundary, but their static types
+do not alone enforce duplicate rejection, cross-field clock-domain checks or
+evidence provenance. They need application validation as well.
+
+This decision follows the operational fit and trusted-code/dependency surface,
+not installed tools, familiarity, rewrite effort, or a claim that Python wins
+throughput. A required embedded/native binary, sustained batch throughput,
+memory ceiling below the measured envelope, or a proven static contract that
+eliminates an actual validation defect would reopen it. No alternative has
+demonstrated a material win for the current offline contract, so no production
+migration is prescribed for this component.
+
+To reproduce the strict comparison with JDK 17 or later and the pinned jar in
+an audit scratch directory (no library installation is needed):
+
+```sh
+javac -cp "$QUALIFICATION_AUDIT_DIR/jackson-core.jar" -d "$QUALIFICATION_AUDIT_DIR" qualification/technology/IngressProbe.java
+python3 -m qualification.technology.compare_ingress --export > "$QUALIFICATION_AUDIT_DIR/requests.hex"
+java -Xint -XX:ActiveProcessorCount=1 -XX:+UseSerialGC -Xmx64m -cp "$QUALIFICATION_AUDIT_DIR:$QUALIFICATION_AUDIT_DIR/jackson-core.jar" IngressProbe < "$QUALIFICATION_AUDIT_DIR/requests.hex" > "$QUALIFICATION_AUDIT_DIR/responses.jsonl"
+python3 -m qualification.technology.compare_ingress --responses "$QUALIFICATION_AUDIT_DIR/responses.jsonl"
+```
+
+Python is used for experiment orchestration because the semantic oracle exposes
+Python objects and exceptions. Keeping those calls in-process avoids altering
+the oracle through a second wire representation. This is an instrumentation
+choice, not a presumption about the production language.
+
+## Artifact byte binding
+
+Constraints: at most fifteen immutable byte values, 1 MiB each, 4 MiB total;
+SHA-256 equality for every referenced value; exact byte/type admission and a
+mapping snapshot; retain missing, extra, corrupt and declaration-negative evidence.
+No filesystem traversal, network fetching, instrument authentication, timing
+deadline or crypto algorithm design belongs to this API. The language boundary
+must not let a mutable alias change content while native hashing releases an
+interpreter lock or operates in another worker.
+
+Candidate comparison, from current official ecosystems:
+
+| Candidate | Decisive property and fit |
+|---|---|
+| Python bytes + hashlib | Immutable byte values and native hashing directly satisfy the ownership boundary; exact types intentionally reject mutable bytearray/memoryview inputs. |
+| Node Buffer + crypto | Native SHA-256 is suitable. Views alias mutable storage; ownership needs an explicit copy or a separately enforced transfer protocol. |
+| Rust owned slices/Arc + SHA-256 | Ownership and immutable shared slices are a strong static alternative. A native standalone distributor or high-throughput pipeline could favor this design; neither is required by this bounded in-process API. |
+| C# ReadOnlySpan + SHA256 | Efficient read-only view, but view access does not establish ownership of the backing memory. A producer/consumer ownership rule is still required. |
+| Swift Data + Swift Crypto | Value semantics and cross-platform crypto are credible; the Linux package brings its own crypto implementation/build boundary without an Apple SDK requirement here. |
+| Erlang/Elixir binaries + crypto | Immutable binary values and native crypto fit the byte boundary; actor supervision/distributed execution offer no required benefit for a synchronous bounded calculation. |
+
+Sources: [Python hashing](https://docs.python.org/3.13/library/hashlib.html),
+[Node crypto](https://nodejs.org/api/crypto.html#cryptocreatehashalgorithm-options),
+[Node Buffer views](https://nodejs.org/api/buffer.html#buffers-and-typedarrays),
+[Rust Arc](https://doc.rust-lang.org/std/sync/struct.Arc.html),
+[ReadOnlySpan](https://learn.microsoft.com/en-us/dotnet/api/system.readonlyspan-1?view=net-10.0),
+[Swift Crypto](https://github.com/apple/swift-crypto), and
+[Erlang crypto](https://www.erlang.org/doc/apps/crypto/crypto.html#hash/2).
+The ownership conclusions are engineering inferences from those documented data
+models, not claims that the alternative languages cannot implement safe binding.
+
+`hash-probe.mjs` checks empty/abc SHA-256 vectors, four distinct 1 MiB payloads,
+and a mutable alias versus an owned-copy control. `measure_binding.py` evaluates
+the production API with the same four payloads at its 4 MiB aggregate ceiling.
+Digests match across the native implementations; Node's alias changes while its
+owned snapshot remains unchanged. Python reports four matched references and no
+physical qualification. The full artifact suite separately checks tampering,
+missing/extra payloads, type/size bounds and preservation of calibration failures.
+
+Ten production verification calls measured median 4.058 ms and maximum 58.344 ms;
+single-call traced allocations peaked at 10,949 bytes, excluding the preallocated
+4 MiB input. The active hash object came from `_hashlib`. Node's copy-and-hash
+probe and Python's complete verifier do different work, and this shared host is
+noisy: **the retained timing arrays are not a cross-language ranking**. Neither
+probe changes cryptographic or physical assurance. Results and source hashes are
+in `hash-node-result-v1.json` and `binding-python-result-v1.json`.
+
+**Decision: KEEP Python for artifact byte binding.** Its immutable byte boundary,
+explicit budget checks, mapping snapshot and native SHA-256 meet the requirement
+without extra payload copies or another execution/crypto dependency. The measured
+allocation envelope and finite contract tests support this choice. Native Rust
+ownership and Erlang immutable binaries are viable, but no stronger property
+required by this API remains unimplemented, and no measured bottleneck calls for
+a new boundary. This is not a preference for interpreter hashing: the actual
+hashing is native. Reopen for a native consumer ABI, concurrent producer contract,
+or a demonstrated throughput/memory requirement the current path cannot satisfy.
+No winning production migration is identified.
+
+Cursor: campaign coverage. No lane audit completion marker is warranted.

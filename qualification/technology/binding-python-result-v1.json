@@ -1,0 +1,41 @@
+{
+  "scope": "four_mib_production_artifact_binding",
+  "python": "3.13.5",
+  "hash_backend_module": "_hashlib",
+  "four_mib_digests": [
+    "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58",
+    "ee78cd29d3a534713b36e6ff6fa3668c8a8f851a542d5eb2401c25ca4e057d02",
+    "2fa4430272111c7854b204001461e16f2c73725b07dde2b6d1dc4f2aa8fe18da",
+    "9ed3b916b5b6b1dbe61b8844c8130657b9bc4f7ff80a07c7835989c911ad430a"
+  ],
+  "verify_elapsed_ns": [
+    3879967,
+    3558519,
+    3449004,
+    58344475,
+    4945441,
+    4733412,
+    3681151,
+    3652537,
+    4236542,
+    5013629
+  ],
+  "traced_peak_bytes_one_call": 10949,
+  "input_storage_excluded_from_tracing": true,
+  "artifact_counts": {
+    "referenced": 4,
+    "supplied": 4,
+    "matched": 4,
+    "missing": 0,
+    "mismatched": 0,
+    "unreferenced": 0,
+    "supplied_bytes": 4194304
+  },
+  "manifest_sha256": "11e2cdcb0c5511aa2132f6136bf36033d6bae99f7935f33baa90eee722e55ef7",
+  "source_sha256": {
+    "qualification/artifacts.py": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+    "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+    "qualification/technology/measure_binding.py": "fc9881911f6c26cf7dc6ee9793103a03813bb834aff8be33588810e5d973e99d"
+  },
+  "physical_qualification_passed": false
+}
