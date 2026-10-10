@@ -84,12 +84,11 @@ class IntensityInspectionDiagnostics(unittest.TestCase):
             "0",
             "0",
         ]
+        original = OSError("private-error-sentinel")
         output, errors = io.StringIO(), io.StringIO()
         with (
             patch.object(sys, "argv", args),
-            patch.object(
-                api, "regular_file", side_effect=OSError("private-error-sentinel")
-            ) as read,
+            patch.object(api, "regular_file", side_effect=original) as read,
             redirect_stdout(output),
             redirect_stderr(errors),
         ):
@@ -97,8 +96,42 @@ class IntensityInspectionDiagnostics(unittest.TestCase):
                 api.main()
         read.assert_called_once_with(Path("/private/calibration-sentinel"), 65536)
         self.assertEqual(result.exception.code, 2)
+        self.assertIs(result.exception.__context__, original)
+        self.assertIn("private-error-sentinel", str(result.exception.__context__))
         self.assertEqual(output.getvalue(), "")
         self.assertEqual(errors.getvalue(), "invalid_intensity_inspection\n")
+
+    def test_unhandled_faults_propagate_without_fixed_diagnostic(self):
+        from aethron_edge.sensors import intensity_inspect as api
+
+        args = [
+            "inspection-test",
+            "--recording",
+            "unused-recording",
+            "--calibration",
+            "unused-calibration",
+            "--expected-calibration-sha256",
+            "0" * 64,
+            "--pixel",
+            "0",
+            "0",
+        ]
+        for error_type in (RuntimeError, MemoryError, KeyboardInterrupt, SystemExit):
+            with self.subTest(error=error_type.__name__):
+                original = error_type("injected-unhandled-fault")
+                output, errors = io.StringIO(), io.StringIO()
+                with (
+                    patch.object(sys, "argv", args),
+                    patch.object(api, "regular_file", side_effect=original) as read,
+                    redirect_stdout(output),
+                    redirect_stderr(errors),
+                ):
+                    with self.assertRaises(error_type) as raised:
+                        api.main()
+                read.assert_called_once_with(Path("unused-calibration"), 65536)
+                self.assertIs(raised.exception, original)
+                self.assertEqual(output.getvalue(), "")
+                self.assertEqual(errors.getvalue(), "")
 
 
 class IntensityInspection(unittest.TestCase):

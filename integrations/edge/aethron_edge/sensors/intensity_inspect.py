@@ -37,6 +37,9 @@ def main():
     Reports are not anonymized: source aliases, clocks, layouts and digests are
     retained. Buffering prevents reports on input rejection, not partial writes
     if the output destination itself fails. Callers own access and retention.
+    Fixed diagnostics cover handled errors only. Their SystemExit retains the
+    original exception context; it is not a sanitized diagnostic object. Other
+    runtime faults and process-control exceptions propagate to the caller.
     """
     parser = _Parser(prog="aethron_edge.sensors.intensity_inspect", description=__doc__)
     parser.add_argument("--recording", required=True, type=Path)
