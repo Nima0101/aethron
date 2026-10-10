@@ -1,0 +1,41 @@
+{
+  "id": "0025-worktree-markdown-admission",
+  "review_order_version": 3,
+  "component": "P1.1 worktree public-content Markdown admission",
+  "source_revision": "39c07b4b232f9e92e956a9158c333d68b1fe2a98",
+  "source_sha256": "89595482679c56abe82df8a1c387c22ac3b0bdf00067377ce7b67129ce29947e",
+  "decision": "KEEP",
+  "constraints": [
+    "Offline sequential developer scan on Python3.9/3.13 and Linux/macOS/Windows; preserve strict UTF-8, path checks, complete scans below the budget, and failure before the final PASS or later product child checks.",
+    "Public-content Markdown limits:1000 documents,1MiB each,16MiB cumulative bytes,10000 local destinations. Count empty/untracked selected documents and repeated destinations. Reject excess rather than silently truncate. These are new developer admission defaults, not changes to frozen product thresholds."
+  ],
+  "comparison": [
+    "Python buffered binary read(size) provides a bounded returned byte string; stat permits rejection before opening a known oversized regular file. This directly supplies the observed requirement without serializing content to a second process. The executable growth fixture verifies a five-byte request for a four-byte allowance.",
+    "Go io.LimitReader can limit bytes read, but reaching its limit produces EOF. A caller still needs an extra-byte overflow check and aggregate counters to avoid treating truncation as a complete document.",
+    "Java InputStream.readNBytes(len) also limits returned bytes. It is a credible alternative outside the component language, but requires the same overflow/cumulative accounting. Neither Java nor Go was benchmarked here; no throughput or latency advantage is asserted for any candidate."
+  ],
+  "rationale": [
+    "KEEP Python for this narrow admission layer because its standard I/O API enforces the decisive bound within the same process that decodes and parses the document, preserving the tested path/error boundary without an additional content transfer. FIX the missing admission checks; the language itself was not the cause.",
+    "Reject known oversize files before opening. Read no more than the smaller of document allowance and remaining total allowance plus one byte, then reject excess before decoding. Charge actual byte length rather than Unicode characters. Reject excess document/destination counts before the corresponding read/lookup.",
+    "Keep counters local to each invocation and add the focused admission and existing containment/content regressions to the six-job Markdown workflow. No other language is excluded by toolchain availability; reconsider when runtime requirements warrant a separate process or native I/O boundary."
+  ],
+  "evidence": [
+    "Focused RED:8 methods,7 assertion failures,0 errors in1.099s. Initial run also discovered8 imported pre-existing tests; the import was corrected before the focused RED. Raw logs retained.",
+    "GREEN:8 new methods in0.799s; final focused integration:57 methods PASS in5.301s. Product child commands were intercepted in synthetic fixtures; no full verifier or product execution occurred.",
+    "Five in-memory weakened variants (unbounded read, accepted truncated data, missing document count, missing byte accumulation, missing destination count) were all rejected:6 assertion failures,0 errors across40 method executions.",
+    "Ruff lint/format PASS after formatting correction. Bandit exit1:17 LOW findings,0 scan errors, no suppressions. Linux CPython3.13.13 only; hosted matrix not run."
+  ],
+  "limits": [
+    "Admission counts bound only the worktree public-content Markdown phase. Earlier freeze-manifest/source-rule reads, non-Markdown reads, traversal, Git inventory and product subprocesses remain outside these budgets.",
+    "Buffered I/O, decoding, parser tokens and interpreter memory exceed returned input-byte counts. There is no read deadline, total RSS bound or worst-case parser guarantee. Stable trusted checkout remains required; this is not a concurrent-filesystem snapshot or hostile race defense.",
+    "No actual Python3.9/macOS/Windows, full repository, release, deployment, hardware, defense compliance or weapon integration qualification. P1.1-P1.7 audit remains incomplete."
+  ],
+  "revisit": [
+    "Next earliest generic verifier boundary: freeze-manifest/file read admission and streaming digest requirements. Prepare public-safe delivery and exact-head hosted checks separately; never publish private lane history."
+  ],
+  "references": [
+    "https://docs.python.org/3.13/library/io.html#io.BufferedIOBase.read",
+    "https://pkg.go.dev/io#LimitReader",
+    "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/InputStream.html#readNBytes(int)"
+  ]
+}
