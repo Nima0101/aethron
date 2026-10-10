@@ -9,6 +9,12 @@ from .provisioning import load_manifest, recording_frames, verified_recording
 
 
 def replay_worker(profile, send, stop):
+    """Publish recorded diagnostics only; availability is not live scene evidence.
+
+    Cancellation is cooperative; blocking file I/O or a send callback has no
+    deadline here. Supervisor termination is separate. A failing fault-message
+    sink can raise, so this function does not guarantee delivery of a final fault.
+    """
     batches = 0
     provider = None
     logical = consumed_at = 0
