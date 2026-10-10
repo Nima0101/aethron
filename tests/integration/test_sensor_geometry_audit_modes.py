@@ -20,6 +20,16 @@ from aethron_edge.sensors import geometry
 ROOT = Path(__file__).resolve().parents[2]
 PROBE = ROOT / "scripts/probes/sensor_geometry_audit/compare.py"
 
+TRACE_CASES = (
+    "test_existing_trace_session_rejects_before_camera_creation",
+    "test_traced_candidate_failure_stops_owned_tracing_without_report",
+    "test_peak_read_failure_stops_owned_tracing_without_report",
+    "test_inert_success_reports_two_batches_and_releases_tracing",
+    "test_missing_initial_source_rejects_before_camera_construction",
+    "test_admission_mismatch_emits_no_report",
+    "test_warmup_mismatch_emits_no_report",
+)
+
 
 class InertCamera:
     """Exercise harness control flow without executing geometry algorithms."""
@@ -38,6 +48,83 @@ class InertCamera:
 
 
 class GeometryAuditModeTests(unittest.TestCase):
+    def test_trace_cases_preserve_runner_trace(self):
+        # The outer process owns its tracer; this test must not alter the suite runner's.
+        code = """
+import json, sys, tracemalloc, unittest
+from test_sensor_geometry_audit_modes import GeometryAuditModeTests, TRACE_CASES
+tracemalloc.start(3)
+retained = bytearray(32)
+before = tracemalloc.get_object_traceback(retained)
+result = unittest.TextTestRunner().run(unittest.TestSuite(
+    GeometryAuditModeTests(name) for name in TRACE_CASES
+))
+print(json.dumps({
+    'success': result.wasSuccessful(), 'tests': result.testsRun, 'skips': len(result.skipped),
+    'tracing': tracemalloc.is_tracing(),
+    'limit': tracemalloc.get_traceback_limit(),
+    'trace_preserved': before is not None and tracemalloc.get_object_traceback(retained) == before,
+}))
+sys.exit(0 if result.wasSuccessful() else 1)
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            env=self.child_environment(),
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            json.loads(result.stdout),
+            {
+                "success": True,
+                "tests": 7,
+                "skips": 0,
+                "tracing": True,
+                "limit": 3,
+                "trace_preserved": True,
+            },
+        )
+
+    @staticmethod
+    def child_environment():
+        env = dict(
+            os.environ,
+            PYTHONPATH=os.pathsep.join(
+                (str(ROOT / "integrations/edge"), str(Path(__file__).parent))
+            ),
+            OPENBLAS_NUM_THREADS="1",
+            OMP_NUM_THREADS="1",
+        )
+        # Each child owns a fresh trace and must execute the harness assertions.
+        env.pop("PYTHONTRACEMALLOC", None)
+        env.pop("PYTHONOPTIMIZE", None)
+        return env
+
+    def run_isolated_trace_case(self):
+        self.assertIn(self._testMethodName, TRACE_CASES)
+        code = """
+import json, sys, unittest
+from test_sensor_geometry_audit_modes import GeometryAuditModeTests
+result = unittest.TextTestRunner().run(unittest.TestSuite([
+    GeometryAuditModeTests(sys.argv[1])
+]))
+print(json.dumps({'tests': result.testsRun, 'skips': len(result.skipped)}))
+sys.exit(0 if result.wasSuccessful() else 1)
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", code, "_" + self._testMethodName],
+            env=self.child_environment(),
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout), {"tests": 1, "skips": 0})
+
     def diagnostic_report(
         self, output=None, harness_path=PROBE, on_admission=None, on_trace_stop=None
     ):
@@ -115,6 +202,9 @@ class GeometryAuditModeTests(unittest.TestCase):
                 self.assertEqual(output.getvalue(), "")
 
     def test_missing_initial_source_rejects_before_camera_construction(self):
+        self.run_isolated_trace_case()
+
+    def _test_missing_initial_source_rejects_before_camera_construction(self):
         main = runpy.run_path(str(PROBE))["main"]
         camera = Mock(return_value=InertCamera())
         output = io.StringIO()
@@ -152,6 +242,9 @@ class GeometryAuditModeTests(unittest.TestCase):
                     self.diagnostic_report()
 
     def test_existing_trace_session_rejects_before_camera_creation(self):
+        self.run_isolated_trace_case()
+
+    def _test_existing_trace_session_rejects_before_camera_creation(self):
         module = runpy.run_path(str(PROBE))
         output = io.StringIO()
         tracemalloc.start()
@@ -174,6 +267,9 @@ class GeometryAuditModeTests(unittest.TestCase):
             tracemalloc.stop()
 
     def test_traced_candidate_failure_stops_owned_tracing_without_report(self):
+        self.run_isolated_trace_case()
+
+    def _test_traced_candidate_failure_stops_owned_tracing_without_report(self):
         for failure_type in (RuntimeError, KeyboardInterrupt):
             with self.subTest(failure_type=failure_type):
                 module = runpy.run_path(str(PROBE))
@@ -202,6 +298,9 @@ class GeometryAuditModeTests(unittest.TestCase):
                     tracemalloc.stop()
 
     def test_peak_read_failure_stops_owned_tracing_without_report(self):
+        self.run_isolated_trace_case()
+
+    def _test_peak_read_failure_stops_owned_tracing_without_report(self):
         module = runpy.run_path(str(PROBE))
         output = io.StringIO()
         try:
@@ -222,6 +321,9 @@ class GeometryAuditModeTests(unittest.TestCase):
             tracemalloc.stop()
 
     def test_inert_success_reports_two_batches_and_releases_tracing(self):
+        self.run_isolated_trace_case()
+
+    def _test_inert_success_reports_two_batches_and_releases_tracing(self):
         module = runpy.run_path(str(PROBE))
         output = io.StringIO()
         with (
@@ -266,6 +368,9 @@ class GeometryAuditModeTests(unittest.TestCase):
                 self.assertEqual(result.stderr.strip(), "geometry_audit_requires_assertions")
 
     def test_admission_mismatch_emits_no_report(self):
+        self.run_isolated_trace_case()
+
+    def _test_admission_mismatch_emits_no_report(self):
         module = runpy.run_path(str(PROBE))
         output = io.StringIO()
         with patch.dict(
@@ -278,6 +383,9 @@ class GeometryAuditModeTests(unittest.TestCase):
         self.assertEqual(output.getvalue(), "")
 
     def test_warmup_mismatch_emits_no_report(self):
+        self.run_isolated_trace_case()
+
+    def _test_warmup_mismatch_emits_no_report(self):
         module = runpy.run_path(str(PROBE))
         output = io.StringIO()
         with patch.object(module["np"], "allclose", return_value=False):
