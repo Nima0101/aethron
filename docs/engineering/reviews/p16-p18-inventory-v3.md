@@ -1,6 +1,6 @@
 # P16–P18 review inventory v3
 
-Snapshot: `8df5c4826f943802437df95d91efc8d924608655`, plus fresh structural-schema technology
+Snapshot: `ba0dbbc6af2cf7e87df0da0a8ace7fe1b4fa8e06`, plus fresh task/bundle technology
 reassessment, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
@@ -18,8 +18,8 @@ remain historical inputs. The consumed JSON-bound helper belongs to the foundati
 | Evidence bytes | [Original review](p16-evidence-v3.md). [Fresh reassessment](p16-policy-evidence-reassessment-v3.md): KEEP immutable per-blob binding; existing tests detect weakened set comparison. No content qualification. |
 | Three passport schemas and conformance | [Review](p16-conformance-v3.md): KEEP structural schema tooling; FIX positive authentication control and dependency closure. [Fresh reassessment](p16-schema-reassessment-v3.md): KEEP standard contracts and offline checker; preserve lexical/authentication gaps. |
 | Task/federation structural schemas | [Review](p16-interop-schemas-v3.md): FIX missing portable structural contracts; preserve runtime admission. |
-| Task descriptions | [Review](p16-task-v3.md): KEEP bounded descriptions; no task execution or replay store. |
-| Bundle verification | [Review](p16-bundle-v3.md): KEEP snapshot composition; all revocation lists rechecked. |
+| Task descriptions | [Review](p16-task-v3.md): KEEP bounded descriptions; no task execution or replay store. [Fresh reassessment](p16-task-bundle-reassessment-v3.md): KEEP lexical/canonical description validation; existing test detects removed canonical equality. |
+| Bundle verification | [Review](p16-bundle-v3.md): KEEP snapshot composition; all revocation lists rechecked. [Fresh reassessment](p16-task-bundle-reassessment-v3.md): KEEP immutable snapshots; existing test detects removed envelope pin. |
 | Direct federation | [Review](p16-federation-v3.md): KEEP closed pinned table; no enrollment or distributed consensus. |
 | Inbox resource accounting | [Review](p16-inbox-v3.md): KEEP local bounded queue; no transport or hard real-time guarantee. |
 | Inbox/federation composition | [Review](p16-delivery-boundary-v3.md): KEEP primitives; ADD real-API expiry, revocation, revision-floor and close traces. Caller refresh and in-flight cancellation are not implemented. |
