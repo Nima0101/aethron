@@ -54,6 +54,36 @@ class TelemetryTests(unittest.TestCase):
         self.assertEqual(sample.evidence, "external_unverified")
         self.assertFalse(status.perception_eligible)
 
+    def test_configured_sender_boundaries_and_rejection_recovery(self):
+        for system, component in ((1, 255), (255, 1), (255, 255)):
+            with self.subTest(system=system, component=component):
+                source = PassiveTelemetry(system, component, clock=lambda: self.now)
+                try:
+                    source.ingest(self.packet(system=system, component=component))
+                    source.ingest(self.packet(sequence=1, boot=200, system=2, component=2))
+                    self.assertEqual(source.snapshot().reason, "sender_mismatch")
+                    self.assertEqual(source.snapshot().samples, ())
+                    source.ingest(
+                        self.packet(sequence=1, boot=11, system=system, component=component)
+                    )
+                    status = source.snapshot()
+                    self.assertEqual(status.state, "OBSERVED_UNVERIFIED")
+                    self.assertEqual(len(status.samples), 1)
+                    sample = status.samples[0]
+                    self.assertEqual((sample.system_id, sample.component_id), (system, component))
+                    self.assertEqual(sample.source_boot_ms, 11)
+                    self.assertFalse(sample.authenticated)
+                    self.assertFalse(status.perception_eligible)
+                finally:
+                    source.close()
+        for invalid in (0, 256, -1, True, 1.0, "1", None):
+            for sender in ((invalid, 1), (1, invalid)):
+                with (
+                    self.subTest(sender=sender),
+                    self.assertRaisesRegex(ValueError, "invalid_sender"),
+                ):
+                    PassiveTelemetry(*sender)
+
     def test_latest_slots_expire_independently_without_new_packets(self):
         self.source.ingest(self.packet())
         self.now += 50_000_000

@@ -965,3 +965,49 @@ after the injected failure. Ruff and Bandit pass. These are synthetic SDK fault
 injections, not evidence that malformed wire packets cause these SDK exceptions,
 native exception parity, or hardware qualification. Runtime selection stays
 PENDING at passive wire; signing/replay remains the next later unreviewed component.
+
+## Sender rejection and session isolation comparison coverage
+
+Review baseline: `ac2dfefeffc79d198c8df141f806c4d64e7a16fc`. The production
+constructor accepts exact integer sender IDs from 1 through 255. Both independent
+comparison receivers and the reference experiment use fixed sender `(1,1)`.
+Their output parity must not be described as configurable-sender contract parity.
+This is a confirmed comparison scope limit, not a production routing defect.
+
+The [MAVLink routing specification](https://mavlink.io/en/guide/routing.html)
+identifies system/component IDs as routing identifiers. The diagnostic adapter
+only filters packet origin; it does not forward messages, infer authority from
+IDs or implement command routing. Unsigned IDs remain spoofable. The packet
+[serialization specification](https://mavlink.io/en/guide/serialization.html)
+distinguishes header sender fields from payload fields; the added fixtures use
+the pinned SDK encoder so changed sender headers receive valid checksums.
+Reusing that encoder for synthetic input avoids making a second manual wire
+builder an implicit oracle. This is a fixture decision, not an incumbent-runtime
+KEEP decision; the broader native/managed/Kotlin comparison remains open.
+
+Five added lifecycle cases exercise sender rejection from populated two-slot
+state, recovery without advancing or erasing the accepted sequence/boot ledger,
+and a closed session followed by a fresh receiver with lower clocks/counters.
+Literal reason, sample-count and boot-time expectations constrain the reference;
+the existing comparator checks the full managed outputs against it. A separate
+production test confirms `(1,255)`, `(255,1)` and `(255,255)` handling and rejects
+zero, negative, overflow, boolean, float, string and absent configuration values.
+
+[Evidence](../verification/robotics-sender-session-v3.json) records five expected
+coverage failures before adding the corpus cases and 70 passing focused methods.
+The production configuration test already passed before any fixture change.
+Three temporary managed-source mutations were detected: accepting counters from
+a mismatched sender, forgetting previous counters during rejection, and reusing
+one receiver across case boundaries. These negative controls are experiment-only
+copies; neither production nor independent decoder source was modified.
+
+The original 16 fixture records are unchanged.
+The managed corpus now has 21 cases/66 steps; retained real Node/reference output
+parity passes. The combined native input has 45 cases/90 steps and encodes to
+5,264 bytes. Python binary roundtrip parity passes, but no new Rust execution is
+claimed. Native hosted checks for the preceding published comparison head were
+still queued at the one-time continuation snapshot. Historical timing receipts
+remain tied to their older corpora and source revisions; no new performance
+ranking is inferred. Ruff, formatting and Bandit pass. Runtime selection remains
+PENDING at passive wire; versioned configurable-sender comparison is still an
+executable gap before the next later component, signing/replay.

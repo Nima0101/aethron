@@ -54,6 +54,50 @@ class LifecycleAuditTests(unittest.TestCase):
         self.assertEqual(results["boot_reset"][-1]["reason"], "source_clock_reset")
         self.assertEqual(results["closed"][-1]["reason"], "closed")
 
+    def test_sender_recovery_and_session_boundaries_have_independent_expectations(self):
+        cases = self.api.corpus()
+        results = dict(zip((c["name"] for c in cases), self.api.reference(cases)))
+        expected = {
+            "sender_system_recovery": [
+                "unmapped_source_clock",
+                "unmapped_source_clock",
+                "sender_mismatch",
+                "unmapped_source_clock",
+            ],
+            "sender_component_recovery": [
+                "unmapped_source_clock",
+                "unmapped_source_clock",
+                "sender_mismatch",
+                "unmapped_source_clock",
+            ],
+            "sender_rejection_retains_order": [
+                "unmapped_source_clock",
+                "unmapped_source_clock",
+                "sender_mismatch",
+                "packet_order",
+                "unmapped_source_clock",
+            ],
+            "sender_session_closed": ["unmapped_source_clock", "closed", "closed"],
+            "sender_session_fresh": ["no_observation", "unmapped_source_clock"],
+        }
+        for name, reasons in expected.items():
+            with self.subTest(case=name):
+                self.assertIn(name, results, "comparison lacks sender/session boundary")
+                outputs = results[name]
+                self.assertEqual([output["reason"] for output in outputs], reasons)
+                for output in outputs:
+                    self.assertFalse(output["perception_eligible"])
+                    if output["reason"] != "unmapped_source_clock":
+                        self.assertEqual(output["state"], "UNKNOWN")
+                        self.assertEqual(output["samples"], [])
+                if name.endswith("recovery") or name == "sender_rejection_retains_order":
+                    self.assertEqual(len(outputs[1]["samples"]), 2)
+                    self.assertEqual(len(outputs[-1]["samples"]), 1)
+                    self.assertEqual(outputs[-1]["samples"][0]["source_boot_ms"], 101)
+                if name == "sender_session_fresh":
+                    self.assertEqual(outputs[-1]["samples"][0]["source_boot_ms"], 1)
+                    self.assertEqual(outputs[-1]["samples"][0]["receive_ns"], "1000000000")
+
     def test_operation_records_reject_unknown_or_ignored_fields(self):
         for step in (
             {"op": "snapsho", "now": "0"},

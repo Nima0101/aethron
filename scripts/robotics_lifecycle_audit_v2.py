@@ -22,8 +22,8 @@ DRIVER = ROOT / "tests/mavlink/audit_v2/managed.mjs"
 
 
 def corpus():
-    def packet(seq=0, boot=10, position=False, corrupt=False, first=1):
-        encoder = common.MAVLink(None, srcSystem=1, srcComponent=1)
+    def packet(seq=0, boot=10, position=False, corrupt=False, first=1, system=1, component=1):
+        encoder = common.MAVLink(None, srcSystem=system, srcComponent=component)
         encoder.seq = seq
         message = (
             common.MAVLink_local_position_ned_message
@@ -81,6 +81,33 @@ def corpus():
         ("signed_flag", bytes.fromhex(packet())[:2] + b"\x01" + bytes.fromhex(packet())[3:]),
     ):
         cases[name] = [ingest(), {"op": "ingest", "now": "1000000001", "hex": data.hex()}]
+    # Valid CRC packets from a mismatched sender must withdraw samples without
+    # advancing or forgetting the accepted sender's sequence/boot ledger.
+    for name, sender, position in (
+        ("sender_system_recovery", {"system": 2}, False),
+        ("sender_component_recovery", {"component": 2}, True),
+    ):
+        cases[name] = [
+            ingest(seq=9, boot=100, position=True),
+            ingest(1, seq=10, boot=100),
+            ingest(2, seq=11, boot=200, position=position, **sender),
+            ingest(3, seq=11, boot=101, position=position),
+        ]
+    cases["sender_rejection_retains_order"] = [
+        ingest(seq=9, boot=100, position=True),
+        ingest(1, seq=10, boot=100),
+        ingest(2, seq=11, boot=200, system=2),
+        ingest(3, seq=10, boot=101),
+        ingest(4, seq=11, boot=101),
+    ]
+    # Adjacent cases get independent receiver instances. Closing one cannot leak
+    # its latch, clock, source boot counter or sequence into the next session.
+    cases["sender_session_closed"] = [
+        ingest(1_000_000_000, seq=255, boot=2**32 - 1),
+        {"op": "close", "now": "2000000001"},
+        ingest(seq=0, boot=1),
+    ]
+    cases["sender_session_fresh"] = [snap(0), ingest(seq=0, boot=1)]
     return [{"name": name, "steps": steps} for name, steps in cases.items()]
 
 
