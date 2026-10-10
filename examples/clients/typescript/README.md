@@ -290,3 +290,12 @@ upgrade or signed customer-product qualification.
 
 See [offline consumer decision](offline-consumer-adr.json) for the technology
 comparison, closed decision schema and four C4 views.
+
+
+The declaration generator validates schema keyword shapes against AJV's local
+Draft 2020-12 metaschema before projection, then enforces its narrower supported
+keyword and local-reference policy. Malformed required lists, bounds and mixed
+structural keywords fail with a fixed build error. This does not prove a schema
+is satisfiable. Numeric/string constraints remain runtime checks in the unchanged
+bundle; TypeScript declarations cannot enforce them. See the
+[structural validation decision](generator-structure-adr.json).

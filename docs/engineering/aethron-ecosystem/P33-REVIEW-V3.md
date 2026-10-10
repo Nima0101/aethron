@@ -1514,3 +1514,27 @@ checks byte equality and rejection behavior; alternative compilers were not run.
 No full schema-validator or audit-completion claim is made. Next earliest review
 is the remaining generator structural forms and standalone validator boundary,
 before returning to later client and help components.
+
+
+## Fresh structural generator and validator boundary review
+
+Baseline `5c52aef4c04f9048b231c1c680d562f2c8606568`. The earliest component
+review confirmed prior selector rejection, then found generic shape checks still
+missing: string/duplicate required lists, malformed array and scalar bounds,
+undeclared required fields and foreign structural keywords could emit output or
+raise incidental errors. Fourteen new baseline failures are retained.
+
+MIGRATE generic keyword-shape validation to local AJV Draft 2020-12 metaschema
+validation; KEEP ECMAScript projection and explicit subset guards. This corrects
+production build code now. The [closed decision](../../../examples/clients/typescript/generator-structure-adr.json)
+compares handwritten checks, AJV, Python jsonschema and Rust jsonschema from
+official sources, with four C4 views and explicit limits. No foreign runtime
+benchmark is claimed. Valid generated files remain byte-identical. Optional
+properties and runtime-only string/number bounds have positive contract coverage.
+
+Re-read the standalone validator builder and its 682-case parity corpus plus
+14 independent negative cases. Runtime imports still use emitted code, with no
+instance schema compilation. A successful build does not make schema shape
+checking an authorization or hardware qualification boundary. The remaining
+standalone-build failure/artifact lifecycle is the next earliest review item.
+No full retrospective audit or lane completion is declared.

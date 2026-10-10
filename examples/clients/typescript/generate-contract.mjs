@@ -1,6 +1,7 @@
 import {readFileSync, writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
+import {Ajv2020} from 'ajv/dist/2020.js';
 
 const prefix = '#/components/schemas/';
 const primitives = new Map(Object.entries({string: 'string', number: 'number', integer: 'number', boolean: 'boolean', null: 'null'}));
@@ -11,10 +12,17 @@ const canonical = value => Array.isArray(value) ? value.map(canonical) :
   value && typeof value === 'object' ? Object.fromEntries(Object.entries(value)
     .sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([key, child]) => [key, canonical(child)])) : value;
 const invalid = () => { throw new Error('unsupported_contract_schema'); };
+const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+const schemaChecker = new Ajv2020({strict: true});
 
 // Deliberately supports only the checked API-v1 schema vocabulary, not all OpenAPI.
 export function renderContract(spec) {
+  if (!record(spec) || !record(spec.components) || !record(spec.components.schemas)) invalid();
   const schemas = spec.components.schemas;
+  // Validate keyword value shapes before emitting declarations. This does not
+  // resolve schema references or fetch anything; the local subset checks below
+  // still own supported vocabulary and reference policy.
+  if (!schemaChecker.validateSchema({$defs: schemas})) invalid();
   const names = Object.keys(schemas);
   if (!names.includes('SceneEnvelope') || names.some(name => !/^[A-Z][A-Za-z0-9_]*$/.test(name))) invalid();
   const reference = ref => {
@@ -62,6 +70,7 @@ export function renderContract(spec) {
       return schema.anyOf.map(type).join(' | ');
     }
     if (schema.type === 'array') {
+      only(['type', 'items', 'minItems', 'maxItems']);
       const item = type(schema.items);
       if (schema.minItems !== undefined && schema.minItems === schema.maxItems) {
         if (!Number.isInteger(schema.minItems) || schema.minItems < 0 || schema.minItems > 32) invalid();
@@ -70,10 +79,15 @@ export function renderContract(spec) {
       return '(' + item + ')[]';
     }
     if (schema.type === 'object') {
-      if (schema.additionalProperties !== false) invalid();
+      only(['type', 'properties', 'required', 'additionalProperties']);
+      if (schema.additionalProperties !== false || !record(schema.properties) ||
+          schema.required?.some(key => !Object.hasOwn(schema.properties, key))) invalid();
       return '{ ' + Object.entries(schema.properties).map(([key, child]) =>
         JSON.stringify(key) + (schema.required?.includes(key) ? '' : '?') + ': ' + type(child)).join('; ') + ' }';
     }
+    if (schema.type === 'string') only(['type', 'pattern', 'maxLength']);
+    else if (schema.type === 'number' || schema.type === 'integer') only(['type', 'minimum', 'maximum', 'exclusiveMinimum']);
+    else only(['type']);
     return primitives.get(schema.type) ?? invalid();
   };
   const bundleSchema = schema => {
