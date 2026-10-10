@@ -161,6 +161,18 @@ retains both the failing regression and recovery controls. The
 [field extraction record](../../../../docs/verification/robotics-field-fault-v3.json)
 covers failures after the decoder has returned a message.
 
+After decoded-field extraction, unexpected failures in sequence/boot checks,
+the commit hook, observation construction or local state publication clear the
+sample slots, latch `state_commit_fault`, and re-raise the same exception. Later
+calls cannot revive the failed session. A replay counter already persisted by
+the signing hook remains committed; this cleanup does not roll it back. Earlier
+caller-owned snapshots remain unchanged. The
+[state-commit regression](../../../../docs/verification/robotics-state-commit-v3.json)
+uses synthetic failures plus a real temporary SQLite journal. It does not prove
+recovery from actual memory exhaustion, power loss, process termination or a
+second interruption during cleanup, and does not cover every authority callback
+or snapshot operation.
+
 See the [partial V3 review](../../../../docs/architecture/robotics-review-v3.md)
 for evidence limits; its first-component technology decision remains open.
 

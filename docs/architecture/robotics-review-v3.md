@@ -1071,3 +1071,51 @@ are not native execution. No current-head Rust parity, new performance ranking,
 hardware timing or deployment qualification is claimed. The passive-wire decision
 remains PENDING; next review is its state-commit fault boundary, followed later by
 the still-unreviewed signing/replay component. No audit-complete marker is warranted.
+
+## Passive receiver state-commit fault boundary
+
+Fresh baseline: `18ea78922074f720996e8ae47d6821b7f05cab0f`. FIX a retained-state
+gap after decoded-field extraction: ordering checks, the commit hook, observation
+construction and local state publication were outside fault cleanup. Injected
+failures propagated while earlier samples remained `OBSERVED_UNVERIFIED`. The
+new boundary clears both slots and latches `state_commit_fault` before re-raising
+the original exception. Expected rejection returns retain their original behavior.
+The single-owner API, fixed packet/slot/expiry limits and unverified provenance
+remain unchanged. No command, control output or physical interface is added.
+
+This is a correction to the existing Python execution boundary while production
+runtime selection remains PENDING. Explicit cleanup plus re-raise is required by
+the current interface: [Python's exception hierarchy](https://docs.python.org/3/library/exceptions.html#BaseException)
+includes interruption/exit outside ordinary `Exception`. A blanket conversion to
+an error return would hide those signals. A rollback transaction is also the wrong
+mechanism after the signed replay journal has committed. The native candidate's
+fixed storage avoids these particular object allocations, but does not establish
+equivalent fault handling: [Rust catch_unwind](https://doc.rust-lang.org/std/panic/fn.catch_unwind.html)
+only handles unwinding panics, not aborting failures. The earlier C/C++, Rust,
+managed and Kotlin candidate assessment remains open; this correction does not
+turn installed tooling or incumbent code into a KEEP decision.
+
+[Evidence](../verification/robotics-state-commit-v3.json) retains 25 failing
+fault-injection combinations (five points and five exception classes) and a
+separate publication failure with a real temporary SQLite journal. After the fix,
+86 focused telemetry/signing/datagram/lifecycle methods pass. The journal test
+checks its persisted timestamp directly, then reopens the receiver and confirms
+that the failed-publication packet is rejected as replay while a newer packet is
+accepted. This is a base-class integration regression, not completion of the
+later signing/replay audit. Earlier caller-owned snapshots remain unchanged.
+
+Ruff/format checks pass. The initial Bandit scan raised three existing test-only
+findings: subprocess import/invocation and a deterministic mutation RNG. Their
+fixed local program, bounded subprocess, owned temporary path and synthetic hex
+arguments were inspected; the RNG only chooses corruption positions. Narrow
+rule annotations now state those reasons. The initial scan is retained, and the
+final scan passes without disabling rules globally.
+
+These are deliberate callable/allocation/state-write failures, not demonstrated
+malformed-wire exploitation or actual out-of-memory recovery. Cleanup cannot
+guarantee survival of another interruption, process abort or power failure.
+Authority callbacks and snapshot construction are outside this newly reviewed
+span. No equivalent native fault qualification, hard deadline, MLS/CNSA or
+hardware availability claim is established. Insufficient information for tactical
+deployment. The audit cursor remains at passive wire; next is its authority-hook
+fault behavior, with signing/replay still the next later unreviewed component.

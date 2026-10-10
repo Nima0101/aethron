@@ -169,36 +169,42 @@ class PassiveTelemetry:
             # must not leave observations from before this failed attempt live.
             self._withdraw("decoder_fault", latch=True)
             raise
-        sequence = packet[4]
-        if self._sequence is not None and not 1 <= (sequence - self._sequence) % 256 <= 127:
-            self._withdraw("packet_order")
-            return
-        if message_id in self._boot and boot <= self._boot[message_id]:
-            # Identical acquisition timestamps are replay/duplicates, not a new
-            # observation; reset/wrap needs explicit fresh session provisioning.
-            self._withdraw("source_clock_reset", latch=True)
-            return
-        if not self._commit_packet(packet):
-            return
-        self._sequence = sequence
-        self._boot[message_id] = boot
-        self._samples[message_id] = Observation(
-            self._system,
-            self._component,
-            name,
-            frame,
-            fields,
-            values,
-            units,
-            boot,
-            now,
-            authenticated=bool(self._signature_bytes),
-            link_id=packet[-13] if self._signature_bytes else None,
-            signature_timestamp=int.from_bytes(packet[-12:-6], "little")
-            if self._signature_bytes
-            else None,
-        )
-        self._reason = "unmapped_source_clock"
+        try:
+            sequence = packet[4]
+            if self._sequence is not None and not 1 <= (sequence - self._sequence) % 256 <= 127:
+                self._withdraw("packet_order")
+                return
+            if message_id in self._boot and boot <= self._boot[message_id]:
+                # Identical acquisition timestamps are replay/duplicates, not a new
+                # observation; reset/wrap needs explicit fresh session provisioning.
+                self._withdraw("source_clock_reset", latch=True)
+                return
+            if not self._commit_packet(packet):
+                return
+            self._sequence = sequence
+            self._boot[message_id] = boot
+            self._samples[message_id] = Observation(
+                self._system,
+                self._component,
+                name,
+                frame,
+                fields,
+                values,
+                units,
+                boot,
+                now,
+                authenticated=bool(self._signature_bytes),
+                link_id=packet[-13] if self._signature_bytes else None,
+                signature_timestamp=int.from_bytes(packet[-12:-6], "little")
+                if self._signature_bytes
+                else None,
+            )
+            self._reason = "unmapped_source_clock"
+        except BaseException:
+            # Publication may fail after replay state or local counters advance.
+            # Withdraw and require a fresh session; never roll durable state back.
+            self._withdraw("state_commit_fault", latch=True)
+            raise
 
     def snapshot(self) -> TelemetryStatus:
         now = self._now()

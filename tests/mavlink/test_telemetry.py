@@ -5,6 +5,7 @@ import math
 import random
 import socket
 import unittest
+from contextlib import nullcontext
 from unittest.mock import Mock, patch
 
 from aethron_edge.telemetry.mavlink import PassiveTelemetry, UdpTelemetry
@@ -269,6 +270,64 @@ class TelemetryTests(unittest.TestCase):
                         source.ingest(self.packet(sequence=3, boot=12))
                         self.assertEqual(source.snapshot(), status)
                         self.assertEqual(len(previous.samples), 2)
+                    finally:
+                        source.close()
+
+    def test_state_commit_fault_withdraws_before_propagating(self):
+        for point in ("boot_compare", "commit_hook", "observation", "boot_write", "sample_write"):
+            for error_type in (
+                RuntimeError,
+                MemoryError,
+                KeyboardInterrupt,
+                SystemExit,
+                asyncio.CancelledError,
+            ):
+                with self.subTest(point=point, error_type=error_type.__name__):
+                    source = PassiveTelemetry(1, 1, clock=lambda: self.now)
+                    try:
+                        source.ingest(self.packet())
+                        source.ingest(self.packet(sequence=1, kind="position"))
+                        previous = source.snapshot()
+                        self.assertEqual(len(previous.samples), 2)
+                        failure = error_type("private-commit-detail")
+
+                        class FailedWrite(dict):
+                            def __setitem__(self, key, value, failure=failure):
+                                raise failure
+
+                        class FailedBoot:
+                            def __le__(self, other, failure=failure):
+                                raise failure
+
+                        context = nullcontext()
+                        if point == "boot_compare":
+                            decoded = common.MAVLink_attitude_message(11, 1, 2, 3, 4, 5, 6)
+                            decoded.time_boot_ms = FailedBoot()
+                            context = patch.object(source._decoder, "decode", return_value=decoded)
+                        elif point == "commit_hook":
+                            context = patch.object(source, "_commit_packet", side_effect=failure)
+                        elif point == "observation":
+                            context = patch(
+                                "aethron_edge.telemetry.mavlink.Observation", side_effect=failure
+                            )
+                        elif point == "boot_write":
+                            source._boot = FailedWrite(source._boot)
+                        else:
+                            source._samples = FailedWrite(source._samples)
+                        with context, self.assertRaises(error_type) as caught:
+                            source.ingest(self.packet(sequence=2, boot=11))
+                        self.assertIs(caught.exception, failure)
+                        status = source.snapshot()
+                        self.assertEqual(status.state, "UNKNOWN")
+                        self.assertEqual(status.reason, "state_commit_fault")
+                        self.assertEqual(status.samples, ())
+                        self.assertFalse(status.perception_eligible)
+                        self.assertNotIn("private-commit-detail", repr(status))
+                        source.ingest(self.packet(sequence=3, boot=12))
+                        self.assertEqual(source.snapshot(), status)
+                        self.assertEqual(len(previous.samples), 2)
+                        source.close()
+                        self.assertEqual(source.snapshot().reason, "closed")
                     finally:
                         source.close()
 
