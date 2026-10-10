@@ -16,10 +16,11 @@ bind immutable artifacts by digest, which motivates checking the actual bytes se
 from authenticating assertions. This adapter is not an in-toto verifier.
 [Python hashlib](https://docs.python.org/3/library/hashlib.html) and
 [Go crypto/sha256](https://pkg.go.dev/crypto/sha256) both provide maintained SHA-256
-implementations. Native library/process approaches can also hash these bytes, but a
-process/FFI boundary adds input copies and deployment surface without a demonstrated
-benefit under this finite offline bound. Choose a Python adapter using the native-backed
-standard SHA-256 API: no new dependency, handwritten cryptography, or parallel runtime.
+implementations. An FFI boundary does not inherently require copying: a suitable native
+API can borrow a stable buffer. Runtime choice must preserve the immutable snapshot
+across authentication and hashing. The [V3 evidence review](../../engineering/reviews/p16-evidence-v3.md)
+compares native and managed alternatives and keeps Python with native-backed SHA-256
+for this bounded offline contract. Dependency convenience alone is not the rationale.
 There is no hard-real-time or hardware-performance claim; implementation language remains
 replaceable by a conformant adapter if measured deployment requirements justify it.
 
@@ -46,6 +47,10 @@ tuple of `EvidenceReference(sha256, kind, outcome)` in signed order (success onl
 serialization. `bound` means bytes match an authenticated assertion, not that its content,
 licensing, outcome, scientific merit or physical validity is established. No raw evidence
 bytes, caller identifiers, paths or exception details appear in the result.
+Digest metadata is not anonymization or encryption: identical artifacts have identical
+digests, and guessed artifacts can be hashed for comparison. The caller owns appropriate
+handling of both input bytes and returned metadata. This API promises no secure memory
+erasure or removal of caller-held references.
 
 Reverify at use time. The caller still owns trustworthy policy provisioning, persisted
 time/revision floors and the expected software digest; accepting an old result object is

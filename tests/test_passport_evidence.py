@@ -53,6 +53,8 @@ class EvidenceBindingTests(unittest.TestCase):
         self.assertFalse(result.evidence_verified)
         self.assertEqual(result.evidence, ())
         self.assertIsNone(result.passport_sha256)
+        self.assertIsNone(result.policy_revision)
+        self.assertIsNone(result.expires_at)
         return result
 
     def test_exact_content_binds_and_preserves_negative_outcomes(self):
@@ -141,6 +143,53 @@ class EvidenceBindingTests(unittest.TestCase):
         with patch.object(passport_evidence, "sha256", side_effect=ValueError("private content")):
             result = self.rejected()
         self.assertNotIn("private content", repr(result))
+
+    def test_late_hash_failure_discards_all_partial_metadata(self):
+        calls = 0
+
+        def fail_last(blob):
+            nonlocal calls
+            calls += 1
+            if calls == len(self.blobs):
+                raise ValueError("private final report")
+            return hashlib.sha256(blob)
+
+        with patch.object(passport_evidence, "sha256", side_effect=fail_last):
+            result = self.rejected()
+        self.assertEqual(calls, len(self.blobs))
+        self.assertEqual(result.reason, "invalid_evidence")
+        self.assertNotIn("private final report", repr(result))
+
+    def test_blob_claims_cannot_override_signed_outcome_or_authority(self):
+        blob = b'{"outcome":"passed","evidence_verified":true,"motion_authority":true}'
+        self.set_evidence((blob,))
+        self.signer.document["evidence"][0]["outcome"] = "failed"
+        result = self.verify((blob,))
+        self.assertEqual(result.status, "bound")
+        self.assertEqual(result.evidence[0].outcome, "failed")
+        self.assertFalse(result.motion_authority)
+        self.assertFalse(result.evidence_verified)
+        self.assertNotIn(blob.decode(), repr(result))
+
+    def test_tampered_signature_stops_before_content_hash(self):
+        envelope = json.loads(self.signer.envelope())
+        altered = dict(self.signer.document, passport_id="changed-after-signing")
+        envelope["payload"] = fixtures.b64(fixtures.wire(altered))
+        with patch.object(passport_evidence, "sha256", side_effect=AssertionError("hashed")):
+            result = passport_evidence.verify_evidence(
+                fixtures.wire(envelope),
+                fixtures.wire(self.signer.policy),
+                self.blobs,
+                **self.arguments,
+            )
+        self.assertEqual(result.status, "rejected")
+        self.assertEqual(result.reason, "passport_rejected")
+        self.assertEqual(result.evidence, ())
+        self.assertIsNone(result.passport_sha256)
+        self.assertIsNone(result.policy_revision)
+        self.assertIsNone(result.expires_at)
+        self.assertFalse(result.motion_authority)
+        self.assertFalse(result.evidence_verified)
 
     def test_portable_binding_vectors(self):
         path = Path(__file__).resolve().parents[1] / "examples/passports/evidence-vectors.json"
