@@ -1,0 +1,53 @@
+{
+  "id": "P12-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "Use TypeScript for a dependency-free presentation function consuming the existing aggregate SDK view. Localize fixed text for en and sv-SE, and reject malformed projections to UNKNOWN. No frontend framework or bundler is selected by this component.",
+  "constraints": [
+    "Deterministic synchronous presentation of a bounded aggregate; no raw frames, tracks, identifiers, persistence or transport.",
+    "Node-verifiable ESM, portable browser output with no Node imports; future UI must call with a fresh SDK view.",
+    "Runtime validation remains in application code; static types alone cannot authorize data.",
+    "Avoid dependencies at runtime and preserve versioned API-v1 vocabulary."
+  ],
+  "alternatives": [
+    {
+      "technology": "TypeScript / native ECMAScript",
+      "assessment": "Selected: explicit status/locale unions plus ordinary ECMAScript runtime guards; direct integration with the SDK declaration boundary. No numeric kernel or new runtime needed."
+    },
+    {
+      "technology": "Plain ECMAScript",
+      "assessment": "Same runtime possible but loses this boundary's static locale and status contract unless a separate declaration or annotation check is added."
+    },
+    {
+      "technology": "Elm",
+      "assessment": "Credible closed-state model, but JS ports/interop would still be required for the existing host SDK; this small synchronous presenter gains no demonstrated runtime guard or capability from that boundary."
+    },
+    {
+      "technology": "Lit web components",
+      "assessment": "Useful candidate for future DOM integration. Rendering and custom-element lifecycle are outside this presentation function; adding its runtime now would not enforce input semantics."
+    },
+    {
+      "technology": "ReScript",
+      "assessment": "Can compile a strongly typed presenter to JS. The existing SDK still needs external/runtime admission. No material runtime or interoperability improvement established for these three display states."
+    }
+  ],
+  "sources": [
+    "https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions",
+    "https://guide.elm-lang.org/interop/",
+    "https://lit.dev/docs/",
+    "https://rescript-lang.org/docs/manual/latest/json"
+  ],
+  "limits": [
+    "Not a UI application, Help Center, role system, source authenticator or P19 acceptance.",
+    "A stale previously returned view has no new freshness guarantee; renderer must request a fresh SDK view.",
+    "Direct object snapshot happens before shape validation; no pre-clone byte or process-memory bound.",
+    "Finite two-coordinate covariance is checked for shape only and then discarded; no accuracy or physical calibration claim.",
+    "No hard real-time, MLS/CNSA, DDS/Link16, uptime or tactical deployment qualification."
+  ],
+  "c4": {
+    "context": "flowchart LR\nOperator --> UI[Future read-only operator UI]\nUI --> SDK[Validated aggregate SDK view]\nUI --> Guidance[Local English and Swedish guidance]",
+    "containers": "flowchart LR\nService[Peer API-v1 service] --> SDK[Existing Node SDK]\nSDK --> Presenter[P12 pure presentation module]\nPresenter --> UI[Future operator client]\nPresenter --> Text[Bundled fixed text]",
+    "components": "flowchart LR\nFresh[Fresh Observation.view result] --> Guard[Snapshot and shape guard]\nGuard -->|valid| Mapper[State mapper]\nGuard -->|invalid| Unknown[UNKNOWN without source details]\nMapper --> Locale[Locale lookup]\nUnknown --> Locale\nLocale --> Result[OperatorStatus]",
+    "code": "classDiagram\nclass OperatorStatus {\n locale\n state\n currentState UNKNOWN\n observedState\n sources\n title\n explanation\n helpId\n}\nclass Presenter {\n presentObservation(input, locale) OperatorStatus\n}\nPresenter --> OperatorStatus"
+  }
+}

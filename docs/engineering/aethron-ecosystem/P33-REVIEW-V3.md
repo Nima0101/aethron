@@ -727,3 +727,52 @@ Android support or P12/P19 acceptance. The safe embedded engineering addendum wa
 read; its informational UNKNOWN and documented-interface requirements apply to
 these client boundaries, with no weapon-specific integration. The next owned
 work remains platform lifecycle and P12 readiness. No audit completion marker.
+
+## Current SDK checkpoint and first P12 presentation component
+
+Baseline `f133a6fae9dd3cdaa2707d0351c6c9233bdb005c`. Re-read the current
+admission generator, projection/clock, session/wire, service-smoke and package
+lifecycle boundaries against the earlier component-specific decisions. The
+five-file lifecycle bridge commit and its 49 source bindings match. Keep the
+generated schema validation, TypeScript/host transport, private projection,
+Node contract generator and Python/Node service fixture boundaries for the
+reasons above; no new migration winner or production correction was demonstrated
+in this pass. The history walk covers the original client through the latest
+installed-package slice. Cross-version upgrades and platform implementations are
+remaining delivery work, not evidence of already implemented support. The
+producer SSE size disagreement remains a producing-lane contract handoff.
+
+The first P12 component is now a reusable observation presenter in
+`examples/operator`, with its own strict ADR schema and four C4 views in
+[`P12-001`](../../../examples/operator/adr.json). It consumes an aggregate SDK
+view and supplies fixed English/Swedish title, explanation and help-topic ID;
+no DOM or application shell is implemented yet. Current state always remains
+UNKNOWN. Invalid projections withdraw source details; input exceptions cannot
+become display text. No track/session IDs, raw geometry or covariance are returned.
+This is a presentation check, not source authorization or a new freshness lease.
+
+Constraints are a small synchronous mapping, explicit state/locale types, no
+runtime dependency and no raw sensor or persistence boundary. TypeScript/native
+ECMAScript directly describes that contract. Plain ECMAScript would need separate
+type checking/declarations; Elm ports or ReScript foreign-function bindings add
+no demonstrated guard to this mapping; Lit's DOM lifecycle belongs to a later
+rendering component. **KEEP the SDK interoperability boundary; SELECT TypeScript
+for this presenter.** No framework or bundler is selected yet. The ADR records
+primary-source alternatives and the absence of performance/qualification claims.
+
+Tests first failed because the new module was absent. The initial implementation
+then exposed three sparse-array guard failures: ordinary `some()` skipped holes.
+Dense iteration fixes all three. Final tests cover both locales, authority and
+unknown-field rejection, source copying, nonfinite/malformed arrays, throwing
+getters and actual SDK admission/expiry composition. ADR validation rejects
+unexpected claim fields. The client-owned CI initially lacked operator path
+triggers and execution; three static checks now pass and actionlint is clean.
+Hosted execution is still pending. See the
+[source-bound evidence](evidence/phase3/p12-presenter-v1.json).
+
+The presenter requires a fresh `Observation.view()` at render time; holding an old
+projection does not establish freshness. Direct object cloning precedes shape
+validation and has no pre-clone byte bound. This is not the P12 application or
+P19 Help Center: accessible DOM interaction, navigation, provenance/permissions,
+release-SHA-bound bidirectional help coverage, browser testing and independent
+customer acceptance remain executable work. No lane/audit completion is claimed.

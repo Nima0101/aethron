@@ -1,0 +1,11 @@
+{
+  "name": "aethron-operator-client-example",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "build": "node ../clients/typescript/node_modules/typescript/bin/tsc -p tsconfig.json",
+    "test": "npm run build --prefix ../clients/typescript && npm run build && node --test presenter.test.mjs"
+  }
+}

@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'examples/clients/typescript/**'
+      - 'examples/operator/**'
       - 'contracts/**'
       - 'integrations/edge/**'
       - 'aethron/**'
@@ -16,6 +17,7 @@ on:
     branches: [main]
     paths:
       - 'examples/clients/typescript/**'
+      - 'examples/operator/**'
       - 'contracts/**'
       - 'integrations/edge/**'
       - 'aethron/**'
@@ -62,6 +64,7 @@ jobs:
       - name: Client contracts and smoke rejection controls
         run: |
           npm test --prefix examples/clients/typescript 2>&1 | tee build/ecosystem-phase1/client-ci/client-tests.log
+          npm test --prefix examples/operator 2>&1 | tee build/ecosystem-phase1/client-ci/operator-tests.log
           python -m unittest discover -s tests/integration -p test_node_consumer_smoke.py -v 2>&1 | tee build/ecosystem-phase1/client-ci/smoke-controls.log
       - name: Fresh packed client against the production service
         run: python scripts/edge_node_e2e.py 2>&1 | tee build/ecosystem-phase1/client-ci/packed-client.log
