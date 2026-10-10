@@ -83,3 +83,25 @@ scene monotonic milliseconds remain uninterpreted evidence bytes. A bound result
 not translate clocks, establish live freshness or qualify sensor observations.
 This is one offline producer-contract/consumer check, not P2/P3/P14 runtime integration.
 See [review and technology decision](../../engineering/reviews/p16-edge-conformance-v3.md).
+
+
+## P2 synthetic packet consumer
+
+`examples/interop/sensor-packet-vectors-v1.json` binds two separate immutable blobs:
+UTF-8 layout JSON and binary pixel bytes. Five portable cases cover exact input,
+layout substitution, pixel modification, a newly signed truncated payload and newly
+signed missing-depth samples. Each case supplies complete P16 verification inputs.
+
+Run the optional Python 3.13 consumer using
+`python -m pip install --only-binary=:all: -r requirements-passport-sensor-conformance.txt`,
+then `PYTHONPATH=.:integrations/edge python -m unittest discover -s tests/interop_consumers -p test_sensor_packets.py -v`.
+Imports fail if dependencies are absent; this job has no optional success-by-skip path.
+The consumer calls the published P2 `decode_image` API without copying its parser.
+
+Authentication and packet decoding are separate results. A new valid signature can
+bind malformed bytes; the producer still rejects a truncated image. Zero depth remains
+unknown. Layout scale is an assertion, not calibrated distance; matching bytes never
+qualifies measurement truth, observation freshness or motion authority. These are
+analytical fixtures with a public test signing key, not physical sensor observations.
+No replay parser, recorded-clock conversion or sensor runtime is qualified here.
+See the [review and evidence](../../engineering/reviews/p16-sensor-conformance-v3.md).
