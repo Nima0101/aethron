@@ -47,6 +47,15 @@ class IntensityCalibration(Closed):
 
 @dataclass(frozen=True)
 class RecordedIntensity:
+    """Recorded-result storage, not an independently verified evidence envelope.
+
+    Direct construction performs no type or binding validation. Frozen fields
+    do not freeze mutable objects supplied by callers. Representation suppression
+    does not redact generic dataclass conversion, which omits the version,
+    source_evidence and live_evidence properties. Binding checks belong to
+    rectify_recorded_intensity; these properties do not attest that it ran.
+    """
+
     # The header describes the original raw recording, NOT the remapped raster.
     source_header: Header = field(repr=False)
     calibration: IntensityCalibration = field(repr=False)

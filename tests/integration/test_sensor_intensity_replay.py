@@ -6,7 +6,7 @@ import io
 import json
 import struct
 import unittest
-from dataclasses import replace
+from dataclasses import asdict, replace
 from unittest.mock import patch
 
 from aethron_edge.sensors.packets import Raster
@@ -66,6 +66,34 @@ class SensorIntensityReplay(unittest.TestCase):
         return api.rectify_recorded_intensity(
             frame, calibration, expected_calibration_sha256=pin or calibration.digest
         )
+
+    def test_direct_result_construction_does_not_establish_binding(self):
+        api = self.api()
+        result = api.RecordedIntensity(None, None, None)
+        self.assertIsNone(result.source_header)
+        self.assertIsNone(result.calibration)
+        self.assertIsNone(result.raster)
+        # Properties are representation labels, not proof of successful binding.
+        self.assertEqual(result.version, 1)
+        self.assertEqual(result.source_evidence, "recorded")
+        self.assertFalse(result.live_evidence)
+
+    def test_generic_result_conversion_retains_contents_but_omits_evidence_labels(self):
+        api = self.api()
+        source = {"private_fixture_marker": "raw-metadata"}
+        calibration = {"private_fixture_marker": "calibration-declaration"}
+        raster_data = {"data": b"private-fixture-bytes"}
+        result = api.RecordedIntensity(source, calibration, raster_data)
+        self.assertNotIn("private", repr(result))
+        converted = asdict(result)
+        self.assertEqual(
+            converted,
+            {"source_header": source, "calibration": calibration, "raster": raster_data},
+        )
+        self.assertEqual(set(converted), {"source_header", "calibration", "raster"})
+        source["private_fixture_marker"] = "changed"
+        self.assertEqual(result.source_header["private_fixture_marker"], "changed")
+        self.assertEqual(converted["source_header"]["private_fixture_marker"], "raw-metadata")
 
     def test_binary_replay_preserves_counts_mask_and_original_metadata(self):
         for encoding in ("mono8", "mono16"):

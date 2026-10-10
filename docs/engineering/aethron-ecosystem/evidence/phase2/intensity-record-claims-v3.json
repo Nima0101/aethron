@@ -1,0 +1,31 @@
+{
+  "review_order_version": 3,
+  "component": "C07_result_record_claims",
+  "decision": "CLARIFY",
+  "full_component_review_complete": false,
+  "reviewed_head": "0aa56db04b56dfcf99a7b58848ac6edf09d6026a",
+  "production_behavior_changed": false,
+  "checks": {
+    "new_methods": 2,
+    "new_controls_passed_before_docstring_change": true,
+    "green_methods": 2,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "zero findings across module and tests",
+    "production_executable_ast": "UNCHANGED"
+  },
+  "limitations": [
+    "Direct records with None/dictionary fixtures only; no sensor computation.",
+    "No RED production defect or remediation claimed.",
+    "Full technology reassessment incomplete at C01; no runtime decision.",
+    "Historical negative evidence retained."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/dataclasses.html"
+  ],
+  "sha256": {
+    "integrations/edge/aethron_edge/sensors/intensity_replay.py": "aa7881d7d6bf5457ab9f02a3ca4c8c48fbe28fbd3f6e339ad5e1610bf27188c0",
+    "tests/integration/test_sensor_intensity_replay.py": "fb3e7fda1079106446c7487d8003180a73dae71f2856fc6acaadcde67981e2ab",
+    "docs/engineering/aethron-ecosystem/P21-INTENSITY-RECORD-CLAIMS-V3.md": "7b1fc6a426621ee0d892f67435b04c2b9a9ae187dfa509fdc7e032838bf00000"
+  }
+}
