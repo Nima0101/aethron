@@ -1,0 +1,64 @@
+{
+  "baseline": "e4110809291cb8a5d9c449b91fc8c2a247e7bd9e",
+  "component": "P3.3 component inventory and validation comparison probe",
+  "review_order_version": 3,
+  "audit_complete": false,
+  "decision": "KEEP Node/ECMAScript comparison harness and build-time AJV; FIX unequal validator coverage and separate correctness from timing.",
+  "adr": "examples/clients/typescript/validation-probe-adr.json",
+  "source_sha256": {
+    "examples/clients/typescript/audit-validation.mjs": "c3599152c62e90c16b80da3414a473771d555b3e651f38e79952ca21a853254d",
+    "examples/clients/typescript/validation-audit.test.mjs": "7ad313341fb0923cc3cb105db723b30eaa72ddd49e15fc54a95aeaf3eb7d3eb0",
+    "examples/clients/typescript/validation.test.mjs": "529415dc7f4eb69dea567d57e4dc1c5a3ec19b3c47eec0cd96bb147ac682b084",
+    "examples/clients/typescript/package.json": "ac7a9ec00556d2ab1c170de89dd61437490e60854406782774f8a6ab4a6fffcc",
+    "examples/clients/typescript/offline-consumer.test.mjs": "c27554d8cbe952738f175ad278b909f820a32bd59ccee1d1d12a87002e6be108",
+    "examples/clients/typescript/validation-probe-adr.json": "07f8db71a2ebe8c88d0dac6b9c608fc6e775f595642372984cb5d905f5043686",
+    "examples/clients/typescript/validation-probe-adr.schema.json": "3490a1fe8575f311342851e01e75e085668a3d7a88798357e1ef90ddd010e238",
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "5f9d347d6fcf23eb2149722657a3c0904f2e55aae0e83f58bdfbc205a2ad6253",
+    "docs/engineering/aethron-ecosystem/P33-COMPONENT-INVENTORY-V3.md": "af9406bf5335d581e02c7aca8655ed058dd516aab874f354e3aaafb10441fb0a",
+    "docs/engineering/aethron-ecosystem/evidence/phase3/p33-component-inventory-v3.json": "e67babe2713dd8f8a3b4cba6388df202c4ce8c9178b7fac3ef89cfa8ace0f21a"
+  },
+  "log_directory": "build/p33-sdk-linux",
+  "report_sha256": {
+    "component-inventory-probe-red.log": "964d36bf75b945e234cf8bdc090a624adaf918218f6ca79a83574d50f259059d",
+    "component-inventory-probe-green.log": "12830a34a8e20fac6ec5182e8d0616c9fff259fa760a4b7084b0d638f3f073c5",
+    "component-inventory-probe-final.log": "587fa1cd922e4fee30c4aed9b023f5afc875f392a2d9abe2672ae71716dea13d",
+    "component-inventory-adr.log": "d6bb02176c3adc428c0346100c7726855b821a9429240e59e313231bf80d95f8",
+    "component-inventory-pr44.json": "add021a494c3cbf31df4753f41d94678ea601bba805f6b27b95b075e89addbe8"
+  },
+  "red": {
+    "methods": 1,
+    "failures": 1,
+    "reason": "Existing probe has no correctness-only mode or equal three-validator coverage."
+  },
+  "checks": {
+    "focused_methods": 7,
+    "failures": 0,
+    "skips": 0,
+    "shared_engine_mutation_cases": 682,
+    "independent_negative_cases": 14,
+    "controlled_broken_session_validator": "rejected with no success report",
+    "closed_adr_methods": 1,
+    "inventory_paths": 126,
+    "syntax_diff": "PASS"
+  },
+  "technology_sources_reviewed": [
+    "https://ajv.js.org/standalone.html",
+    "https://rescript-lang.org/docs/manual/latest/json",
+    "https://kotlinlang.org/docs/js-to-kotlin-interop.html",
+    "https://dart.dev/interop/js-interop"
+  ],
+  "comparative_benchmark": null,
+  "pr": 44,
+  "published_head": "e4110809291cb8a5d9c449b91fc8c2a247e7bd9e",
+  "ci": {
+    "QUEUED": 10
+  },
+  "next": "audit-observation.mjs report provenance and bounded comparison semantics",
+  "limits": [
+    "Both branches use AJV: agreement is migration parity, not independent schema correctness. Independent negative admission tests remain required.",
+    "ready_ms includes module loading and, for runtime mode, schema parsing/compilation; warm_ms measures scene validation only. RSS delta is process RSS change, not peak memory. Shared-host measurements are not hard real-time or hardware qualification.",
+    "Correctness-only mode publishes no timing samples. This review does not refresh historical benchmark results or compare alternative source compilers.",
+    "A controlled altered generated validator tests report rejection; no production service, sensor, actuation, MLS/CNSA, uptime or customer-install claim.",
+    "Source inventory linkage is not full audit completion. Insufficient information for tactical deployment."
+  ]
+}

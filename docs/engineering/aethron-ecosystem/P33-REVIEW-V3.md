@@ -2149,3 +2149,47 @@ and remaining delivery/integration gates. Exact source matches to older evidence
 are useful reconciliation inputs, not fresh decisions by themselves. Native client
 selection, producer SSE boundary reconciliation, full operator workflows and product
 help/acceptance remain open. No technology-audit completion marker is created.
+
+### P3.3 inventory and validation-comparison reassessment — 2026-10-10
+
+At `e4110809291cb8a5d9c449b91fc8c2a247e7bd9e`, re-read the full policy,
+V3 order and frozen safety/protocol/verification boundaries. Verified the bridge
+commit, seven source hashes and six retained reports, then fast-forward published
+the commit. One exact-head PR snapshot contained ten queued checks; no polling.
+
+The [component inventory](P33-COMPONENT-INVENTORY-V3.md) now identifies the executable
+surfaces, associated evidence, and unfinished P3.3/P12 contributions. Re-read the
+SDK generators, byte/session admission, aggregate/source/render lifecycle and P12
+presenter/containing-client/lifecycle during reconciliation. Retained source hashes
+are indexed explicitly as evidence linkage, never fresh review completion.
+
+FIX a stale validation comparison: the runtime branch compiled only scene/health,
+while the generated module also contained session admission. The probe now compiles
+and checks all three in both branches. A correctness-only mode runs one pair of
+children, does not execute the warm benchmark loop and emits no measurement samples.
+The default bounded measurement mode remains separately labeled shared-host evidence.
+Probe and fixture hashes are now included alongside schema/generated-code/lock hashes.
+Historical V2 timing records remain unchanged and are not measurements of this revision.
+
+KEEP Node/ECMAScript and build-time AJV for this host-runtime comparison. Fresh
+[AJV standalone documentation](https://ajv.js.org/standalone.html) supports generating
+runtime validators without runtime compilation. [ReScript JSON access](https://rescript-lang.org/docs/manual/latest/json),
+[Kotlin/JS exports](https://kotlinlang.org/docs/js-to-kotlin-interop.html) and
+[Dart JavaScript interop](https://dart.dev/interop/js-interop) provide credible
+alternatives outside this component's language. They do not replace schema admission
+or the need to measure the actual Node consumer. This is a requirements-based
+inference, not a benchmark ranking. The closed ADR records constraints and C4 views.
+
+Verification: the new probe regression failed on the baseline. The final seven
+focused tests pass, including the existing 682-case shared-AJV mutation comparison,
+fourteen independent negative cases, disabled runtime string-compilation check,
+and a controlled generated session validator that incorrectly accepts an extra
+field. That altered validator causes the probe to fail without a success report.
+The closed ADR rejects root/nested qualification extensions. Package CI includes
+the correctness-only regression; no benchmark is added to the default test command.
+The SDK runtime and browser artifact are unchanged. Retained logs and source hashes
+are in [the result](evidence/phase3/p33-validation-probe-review-v1.json).
+
+Next earliest unreviewed auxiliary component: `audit-observation.mjs` report
+provenance and bounded comparison semantics. Full audit, forward platform work and
+product acceptance remain incomplete; no completion marker is created.
