@@ -2045,3 +2045,58 @@ reports and source/distribution hashes are in
 Next earliest unreviewed component: contextual action-help runtime binding and
 its accessibility/lifecycle boundaries. The full lane review and P19 acceptance
 remain incomplete; no audit-completion marker is created.
+
+### P12 contextual action-help binding reassessment — 2026-10-10
+
+At `96a5fcff8e63c0d10502627a2bd626c49c1b230b`, re-read the authoritative
+policy and V3 order and reviewed action-help allocation, fixed bilingual text,
+locale forwarding, disposal, component callers, tests and claims. Verified the
+previous bridge commit and its fifteen source, five report and twenty-one
+artifact hashes. The verified commit was fast-forward pushed to PR #44; one
+exact-head snapshot showed forty queued and one skipped check. No polling or merge.
+
+KEEP TypeScript/native DOM for this synchronous, offline four-button binding.
+Fresh official sources in the closed [ADR](../../../examples/operator/action-help-adr.json)
+support the domain comparison: W3C guidance separates short visible button names
+from linked descriptions; Lit supplies a reactive update lifecycle; ReScript can
+bind directly to JavaScript functions; Rust/web-sys exposes DOM access through
+Wasm bindings. The contract needs immediate DOM mutation and cleanup with no
+transport, numerical computation, cross-target data processing or custom-element
+registration requirement. The native DOM implementation satisfies those properties
+without another scheduler or artifact boundary. No comparative timing benchmark
+or assistive-technology qualification is claimed.
+
+FIX a demonstrated tree-scoping error. ID allocation only queried the Document.
+An existing host ID inside a shadow root was invisible to that lookup, so mounting
+the client created a second element with the same ID as a contextual description.
+Both the compiled-source regression and the previously distributed browser module
+failed the one-reference/one-element assertion. The correction passes the mount
+root to the internal binder and checks its non-composed root tree as well as the
+owner document. A detached root's own ID is included, since querySelector only
+searches descendants. This follows the documented getRootNode tree boundary;
+no global DOM constructor or cross-realm instanceof check is required.
+
+The allocation attempt limit stays 32, and the per-document WeakMap retains only
+a number. This is not a hard execution-time limit: DOM query cost depends on host
+tree size. The host remains responsible for later ID changes, cross-tree moves
+and independently loaded module copies composing previously detached trees. No
+observation identifier, permission, transport or localized guidance text changes.
+README and the ADR now state those limits. Tests cover document/shadow/detached
+host collisions, exhaustion before mounting and after the display timer starts,
+bilingual bundled references and clearing retained descriptions on disposal.
+
+Verification: retained source and old-bundle negative logs each contain the
+intended duplicate-ID failure. The first focused panel/connection/client/help
+run passes all 59 checks. After adding detached-root-self and partial-mount
+exhaustion cases and revising the closed ADR, the final 27 help/inventory checks
+pass. The component compiler and browser build pass. Three targeted bundled help
+checks pass with dynamic string code generation disabled, including unchanged
+bilingual topic parity and the new shadow-root/disposal regression. All twelve
+manifest input hashes and six artifact hashes match; external imports remain
+empty. Syntax and diff checks pass. Evidence is retained in
+[the result record](evidence/phase3/p12-action-binding-review-v1.json).
+
+Next task: reconcile the full P3.3/P12 component inventory and remaining delivery
+and integration gates against the corrected HEAD before forward expansion. This
+slice closes the contextual action-help runtime review; it does not declare the
+full phase review, product Help Center or independent installed acceptance complete.

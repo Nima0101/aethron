@@ -308,7 +308,12 @@ button is disabled. Changing language updates both panels and their help without
 starting a session. Stop withdraws the local observation and requests cancellation;
 its help does not claim confirmed remote deletion. IDs identify DOM nodes only.
 The host exclusively owns the component DOM. Disposal clears descriptions and
-removes their links; two mounted clients receive distinct description IDs.
+removes their links; clients from one loaded module share a document counter.
+Allocation checks existing IDs in the document and mount-root tree, including
+shadow roots and detached subtrees. It tries at most 32 candidates before failing;
+the containing client cleans up a partial mount. DOM lookup cost depends on host
+tree size. The host must coordinate later ID changes, moving mounted roots between
+trees, or combining detached trees created by separately loaded module copies.
 
 `ACTION-HELP.json` supplements `STATE-HELP.json` in the browser distribution. It
 extracts the literal action union and English/Swedish dictionary, binds source and

@@ -321,3 +321,27 @@ for(const event of ['pageshow','resume'])test(`bundled containing client rejects
   start();assert.equal(calls,1);finish();await new Promise(resolve=>setImmediate(resolve));
  }finally{session.disconnect=()=>{};client.dispose();finish?.();}
 });
+
+test('bundled contextual help avoids host shadow-root IDs and clears retained descriptions',async()=>{
+ const {mountObservationClient}=await bundle(),{document}=parseHTML('<html><body><aside></aside></body></html>');
+ const window=new EventTarget();window.setInterval=()=>1;window.clearInterval=()=>{};
+ Object.defineProperty(document,'defaultView',{value:window});Object.defineProperty(document,'visibilityState',{value:'visible'});
+ const shadow=document.querySelector('aside').attachShadow({mode:'closed'});
+ shadow.innerHTML='<p id="aethron-action-help-1">Host text</p><main></main>';
+ const root=shadow.querySelector('main'),client=mountObservationClient(root,{view:()=>null,disconnect(){},start(){assert.fail('unexpected start');}});
+ const paragraphs=[...root.querySelectorAll('[data-help-action]')],buttons=[...root.querySelectorAll('button')];
+ try {
+  assert.equal(paragraphs.length,4);
+  for(const locale of ['en','sv-SE']) {
+   client.setLocale(locale);
+   for(const button of buttons) {
+    const matches=[...shadow.querySelectorAll('[id]')].filter(p=>p.id===button.getAttribute('aria-describedby'));
+    assert.equal(matches.length,1);assert.ok(paragraphs.includes(matches[0]));
+    assert.equal(matches[0].lang,locale);assert.equal(matches[0].getAttribute('data-help-action'),button.getAttribute('data-feature'));
+   }
+  }
+ } finally {client.dispose();}
+ for(const p of paragraphs)assert.equal(p.textContent,'');
+ for(const b of buttons)assert.equal(b.hasAttribute('aria-describedby'),false);
+ assert.equal(root.textContent,'');assert.equal(shadow.querySelector('p').textContent,'Host text');
+});

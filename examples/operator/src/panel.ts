@@ -38,7 +38,7 @@ export function mountObservationPanel(root: HTMLElement, readView: () => unknown
     button.textContent = language === 'en' ? 'English' : 'Svenska';
     const select = () => { if (!disposed) (requestLocale ?? setLocale)(language); };
     button.addEventListener('click', select);
-    const help = bindActionHelp(button, `locale.${language}`, locale);
+    const help = bindActionHelp(button, `locale.${language}`, locale, root);
     controls.append(button, help.element);
     return {button, language, select, help};
   });

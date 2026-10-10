@@ -46,8 +46,8 @@ export function mountConnectionControls(root: HTMLElement, operation: Connection
   const summary = document.createElement('summary'), guidance = document.createElement('p');
   const start = document.createElement('button'), stop = document.createElement('button');
   start.type = stop.type = 'button';
-  const startHelp = bindActionHelp(start, 'connection.start', locale);
-  const stopHelp = bindActionHelp(stop, 'connection.stop', locale);
+  const startHelp = bindActionHelp(start, 'connection.start', locale, root);
+  const stopHelp = bindActionHelp(stop, 'connection.stop', locale, root);
   status.setAttribute('role','status');status.setAttribute('aria-live','polite');status.setAttribute('aria-atomic','true');
   details.append(summary,guidance);section.append(heading,status,start,startHelp.element,stop,stopHelp.element,details);root.replaceChildren(section);
   let disposed = false, enabled = false, suspended = false, clearing = false, fault = false;

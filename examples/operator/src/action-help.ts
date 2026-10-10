@@ -17,25 +17,32 @@ const actionGuidance = {
 } as const;
 // DOM element identifiers only. One scalar per live Document; no observation data.
 const sequences = new WeakMap<Document, number>();
-function descriptionId(document: Document): string {
+function descriptionId(scope: HTMLElement): string {
+  const document = scope.ownerDocument;
+  // Buttons are still detached during construction. Use the mount root's tree,
+  // including a shadow root or detached subtree, when checking host collisions.
+  const tree = scope.getRootNode() as Document | DocumentFragment | Element;
   for (let attempt = 0; attempt < 32; attempt++) {
     const next = (sequences.get(document) ?? 0) + 1;
     if (!Number.isSafeInteger(next)) break;
     sequences.set(document, next);
     const id = `aethron-action-help-${next}`;
-    if (!document.getElementById(id)) return id;
+    if (!document.getElementById(id) &&
+        !(tree.nodeType === 1 && (tree as Element).id === id) &&
+        !tree.querySelector(`[id="${id}"]`)) return id;
   }
   throw new Error('help_id_unavailable');
 }
 
 /** Internal, exclusively owned button. Caller inserts element beside the button
- * and forwards locale/disposal. No listeners, source reads, timers or transport. */
-export function bindActionHelp(button: HTMLButtonElement, action: Action, locale: Locale) {
+ * and forwards locale/disposal. scope is the containing mount root before the
+ * detached button is inserted. No listeners, source reads, timers or transport. */
+export function bindActionHelp(button: HTMLButtonElement, action: Action, locale: Locale, scope: HTMLElement = button) {
   function check(next: Locale): void {if (next !== 'en' && next !== 'sv-SE') throw new Error('unsupported_locale');}
   check(locale);
   if (!Object.hasOwn(actionGuidance.en, action)) throw new Error('unsupported_action');
   const element = button.ownerDocument.createElement('p');
-  element.id = descriptionId(button.ownerDocument);
+  element.id = descriptionId(scope);
   element.setAttribute('data-help-action', action);
   button.setAttribute('data-feature', action);
   button.setAttribute('aria-describedby', element.id);

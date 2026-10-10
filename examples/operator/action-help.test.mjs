@@ -67,3 +67,31 @@ test('unchanged refresh preserves description text nodes',async()=>{
   panel.refresh();paragraphs.forEach((p,index)=>assert.equal(p.firstChild === nodes[index],true));
  }finally{panel.dispose();}
 });
+
+for(const mode of ['document','shadow','detached'])test(`contextual help avoids existing IDs in a ${mode} host`,()=>{
+ const h=host(),shadow=mode==='shadow'?h.document.querySelector('aside').attachShadow({mode:'open'}):mode==='detached'?h.document.createElement('div'):h.document.querySelector('aside');
+ shadow.innerHTML='<p id="aethron-action-help-1">Host text</p><main></main>';
+ if(mode==='detached')shadow.id='aethron-action-help-2';
+ const root=shadow.querySelector('main'),client=mountObservationClient(root,h.session);
+ try {
+  const buttons=[...root.querySelectorAll('button')];assert.equal(buttons.length,4);
+  for(const button of buttons) {
+   const id=button.getAttribute('aria-describedby');
+   const matches=[shadow,...shadow.querySelectorAll('[id]')].filter(node=>node.id===id);
+   assert.equal(matches.length,1,'each contextual reference must identify exactly one element in its tree');
+   assert.ok(root.contains(matches[0]));assert.equal(matches[0].getAttribute('data-help-action'),button.getAttribute('data-feature'));
+  }
+  assert.equal(h.starts,0);
+ } finally {client.dispose();}
+ assert.equal(shadow.querySelector('p').textContent,'Host text');
+});
+
+for(const first of [1,3])test(`help collision exhaustion from ID ${first} withdraws all partially mounted resources`,()=>{
+ const h=host(),shadow=h.document.querySelector('aside').attachShadow({mode:'closed'});
+ shadow.innerHTML=Array.from({length:32},(_,i)=>`<p id="aethron-action-help-${i+first}">Host text</p>`).join('')+'<main></main>';
+ let scheduled=0;const timers=new Set();h.document.defaultView.setInterval=()=>{timers.add(++scheduled);return scheduled;};h.document.defaultView.clearInterval=id=>timers.delete(id);
+ const root=shadow.querySelector('main');
+ assert.throws(()=>mountObservationClient(root,h.session),{message:'client_unavailable'});
+ assert.equal(root.childNodes.length,0);assert.equal(scheduled,first===1?0:1);assert.equal(timers.size,0);assert.equal(h.starts,0);
+ assert.equal(shadow.querySelectorAll('p').length,32);
+});
