@@ -1,0 +1,36 @@
+{
+  "review_order_version": 3,
+  "component": "C08_inspection_exception_limits",
+  "decision": "CLARIFY",
+  "full_component_review_complete": false,
+  "reviewed_head": "b861cc92a388ac40e37283da1dc99a2b65724a23",
+  "production_behavior_changed": false,
+  "checks": {
+    "new_methods": 1,
+    "extended_methods": 1,
+    "fault_cases": 5,
+    "diagnostic_methods": 4,
+    "before_documentation": "PASS",
+    "after_documentation": "PASS",
+    "production_red_claimed": false,
+    "ruff": "PASS",
+    "format": "PASS after test formatting",
+    "bandit": "4 unchanged LOW findings: B404 once, B603 three times",
+    "ast": "Identical after removing docstrings"
+  },
+  "limitations": [
+    "In-process injected file-open errors; no file opened or image processing.",
+    "Captured streams do not establish launched-interpreter traceback privacy.",
+    "No real OOM, OS signal, stderr-failure or process isolation test.",
+    "Full V3 audit remains incomplete at C01."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/exceptions.html#exception-context",
+    "https://docs.python.org/3.13/library/argparse.html#argparse.ArgumentParser.exit"
+  ],
+  "sha256": {
+    "integrations/edge/aethron_edge/sensors/intensity_inspect.py": "81da2660568a7915adfafa8825e7a8d426891bdd45e2bca9233fcdb21863bc6f",
+    "tests/integration/test_sensor_intensity_inspect.py": "b57a42820ad4e777588185078fa5a857eb33b2b49f73028d1ced68d5531f2c29",
+    "docs/engineering/aethron-ecosystem/P21-INSPECTION-EXCEPTION-LIMITS-V3.md": "43b2c8141c2389e7c60f2a68218616a8d01841e7279de782a58ae6dba0e23302"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "review_order_version": 3,
+  "component": "C08_offline_io_inspection",
+  "decision": "CLARIFY",
+  "scope": "Disclosure, output and file-trust qualification claims only",
+  "full_component_review_complete": false,
+  "reviewed_head": "939184099ed6269920fa1414d8e0c8c391a40bbc",
+  "production_behavior_changed": false,
+  "checks": {
+    "production_executable_ast_unchanged": true,
+    "focused_test_methods_passed": 2,
+    "new_test_methods": 1,
+    "new_test_passed_before_docstring_change": true,
+    "earlier_component_source_bindings_rechecked": 32,
+    "ruff": "PASS",
+    "format": "PASS after formatting new test",
+    "bandit": "PASS",
+    "diff_check": "PASS",
+    "hardware_checks": false,
+    "new_benchmarks": false
+  },
+  "focused_command": "PYTHONPATH=integrations/edge:tests/integration build/lane-b/linux-tools/bin/python -m unittest test_sensor_intensity_inspect.IntensityInspection.test_report_retains_metadata_but_late_rejection_discloses_no_report test_sensor_intensity_replay.SensorIntensityReplay.test_repeated_call_retains_raw_header_without_freshness_or_output_hash",
+  "limitations": [
+    "Reports expose complete source headers alongside selected samples; no anonymity guarantee.",
+    "No report on input rejection is not transactional output on destination failure.",
+    "Regular-file checks do not authenticate parent paths or snapshot changing files.",
+    "Declared replay span is not an elapsed execution deadline.",
+    "Full V3 technology reassessment remains incomplete."
+  ],
+  "negative_evidence": [
+    "Initial tool-host handshake failed; same full policy read succeeded on retry.",
+    "Fetch failed on read-only FETCH_HEAD; read-only remote refs confirmed main and C06 delivery SHA without bypass.",
+    "Evidence generation initially hit process exhaustion; retried using already verified HEAD.",
+    "Historical T10 latency and signed radar startup failures remain."
+  ],
+  "source_binding_note": "recording_io.py and cloud_inspect.py are existing untracked lane copies, read-only for this pass; hashes bind reviewed working bytes, not files added by this patch.",
+  "sha256": {
+    "integrations/edge/aethron_edge/sensors/intensity_inspect.py": "141b00a2d50c68bd79cc194b760dd62c96efc1a05327fe126db3a56e541b6fc2",
+    "integrations/edge/aethron_edge/sensors/recording_io.py": "08e60949edd62432397fb8a8eee9854624897335757801dddda994d6e44f277e",
+    "integrations/edge/aethron_edge/sensors/cloud_inspect.py": "2e866dec1201203488d9264687a17d3eeb54bbb44248607c671807be8e94b42b",
+    "tests/integration/test_sensor_intensity_inspect.py": "601e06d8543f2d73916b90aa2fe3d7e4627395b01c52e4d27492727cc28848c9",
+    "docs/engineering/aethron-ecosystem/P21-INSPECTION-CLAIMS-REVIEW-V3.md": "0cebf3315b803d3f4a8b15afc8d970dc055ea71f4108332794792151dd3f3697"
+  }
+}
