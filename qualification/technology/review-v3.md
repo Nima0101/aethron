@@ -2,14 +2,14 @@
 
 This is an implementation review record, not a replacement governance policy.
 The review starts at the earliest declaration component in commit `eebfad47`
-and covers the lane built through `a5158617`. Earlier decisions are evidence
+and includes the later review corrections through `6797ef61`. Earlier decisions are evidence
 inputs only. No audit-complete marker or physical qualification is asserted.
 
 | Historical component | Current review state |
 |---|---|
 | Rig, calibration, clock, environment declaration validator | KEEP implementation; FIX evidence coverage; CLARIFY claims |
 | Artifact byte binding | KEEP implementation; FIX evidence coverage; CLARIFY report lifetime |
-| P15 campaign coverage and procedures | Pending fresh review |
+| P15 campaign coverage and procedures | KEEP implementation; FIX evidence coverage; CLARIFY unknown-case and provenance claims |
 | CLI/report delivery and verification tooling, including audit probes | Pending fresh review |
 
 ## Declaration deployment and technology decision
@@ -152,5 +152,67 @@ rights and instrument authenticity. A matched digest grants no operational or
 motion authority. Native byte ingestion, transport and crypto certification are
 separate peer/external responsibilities, not claims supplied by this API.
 
-Next earliest unreviewed component: P15 campaign coverage and procedures. The
-entire lane review and forward software work remain incomplete.
+## Campaign coverage and procedures review
+
+The earlier declaration and artifact review controls pass again before this
+component is reviewed. The deployed interface remains a synchronous source-checkout
+API accepting at most sixteen cases and sixty-four immutable manifest byte strings,
+each at most 65,536 bytes. It performs no capture, database persistence, networking,
+clock sampling or device access. Constraints are exact input admission, retention
+of every submitted occurrence, fixed negative findings, integer counts and a
+permutation-invariant byte/time commitment. No hard deadline, durable campaign
+ledger, rule distribution or recursive query requirement exists for this interface.
+
+Fresh domain-specific candidate comparison, including non-incumbent technologies:
+
+| Candidate | Decisive properties for this contract |
+|---|---|
+| Python Counter, sets of findings and ordered triples | Multiset counts retain repeated inputs while finding sets minimize diagnostics. Immutable bytes are hashed directly; no relational re-encoding is necessary. |
+| SQLite SQL aggregation | GROUP BY/count and LEFT JOIN express duplicate rejection and missing coverage. The executable candidate preserves each ordinal and uses parameterized values. Its tables/views add a second representation but enable relational queries if the deployment later needs them. |
+| OPA/Rego | Declarative relations and rule composition fit larger policy sets. Arrays retain duplicates; sets do not. A correct adapter must preserve attempt ordinals and exact manifest bytes before policy evaluation. No policy-bundle distribution or independently configurable rule set is required here. |
+| Soufflé Datalog | Aggregate queries fit relational coverage analysis; explicit attempt identity is needed to retain repeated submissions. Recursive/fixed-point analysis offers no required advantage for this bounded one-pass report. |
+| CUE/JSON Schema plus a host | Useful for plan shape constraints; raw immutable manifests, cross-capture multiplicity and the versioned commitment still need procedural handling. |
+| Rust or C# native/typed aggregation | Static representations are credible when a native ABI or measured memory/throughput constraint is required. Neither typing nor native compilation proves completeness of submitted evidence. No such deployment constraint or measured gain is demonstrated here. |
+
+Current primary sources inspected 2026-10-10:
+[Python Counter](https://docs.python.org/3.13/library/collections.html#collections.Counter),
+[SQLite aggregate semantics](https://www.sqlite.org/lang_aggfunc.html),
+[Rego arrays and sets](https://www.openpolicyagent.org/docs/policy-language), and
+[Soufflé aggregates](https://souffle-lang.github.io/aggregates).
+The earlier [candidate comparison](retrospective-v2.md) retains the remaining
+ecosystem sources and bounded maximum-size experiment. These sources support
+language properties; the suitability judgments above are this component's analysis.
+
+**KEEP Python aggregation; FIX independent coverage; CLARIFY claims.** The direct
+multiset/immutable-byte representation meets this exact contract with fewer
+representation transitions than the tested SQL composition. SQL is a viable
+alternative, with shared input/capture semantics and independently implemented
+aggregation, not an independent end-to-end validator. Its historical timing samples
+do not establish a performance ranking. No missing required property or material
+measured advantage warrants migration. Reopen for durable evidence retention,
+independent policy deployment, native integration or a demonstrated resource bound;
+installation, familiarity and rewrite cost do not decide this choice.
+
+Five new methods assert outcomes independently and compare both implementations:
+an unknown-case duplicate still invalidates the planned occurrence even with a
+different evaluation instant; a literal commitment preimage retains identical
+triples and sorts times numerically; satisfied minimums do not erase malformed or
+unplanned attempts; domain/procedure hash changes bind the plan without verifying
+referenced contents; and whitespace-distinct declarations may satisfy coverage
+without demonstrating separate acquisitions. No production defect was demonstrated.
+
+`python3 -m qualification.technology.review_campaign` runs these controls, introduces
+three temporary mutations (erased duplicate counts, deduplicated commitment triples,
+and SQL duplicate admission), requires assertion failures without execution errors
+or skips, and reruns the restored baseline. `campaign-review-v3.json` binds these
+results to the sources. No long soak, physical run or full fuzz campaign is implied.
+
+The contract previously implied all entries undergo declaration validation and
+called committed instants trusted. It now states the actual behavior: unknown-case
+bytes are rejected, hashed and duplicate-counted without declaration evaluation;
+clock provenance remains the caller's responsibility. The checker cannot establish
+preregistration or detect failed attempts omitted before invocation. These are
+limits of an offline report, not authorization or qualification grants to P17/P18.
+
+Next earliest unreviewed component: CLI/report delivery and verification tooling,
+including all audit probes. The lane review and forward software work remain incomplete.

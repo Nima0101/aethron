@@ -1,6 +1,6 @@
 # P15 capture campaign contract v1
 
-`qualification.campaign.evaluate(plan_bytes, captures)` checks a preregistered
+`qualification.campaign.evaluate(plan_bytes, captures)` checks a caller-supplied
 case matrix against bounded capture declarations. No hardware is accessed and
 no perception, actuator, field or certification authority is granted. Scope is
 declaration coverage only, not accuracy, sample independence or held-out data.
@@ -27,11 +27,13 @@ the list/dicts during evaluation; memory allocated before calling is outside
 this function's budget. Invalid plan/input structure raises fixed
 `ValueError("invalid_capture_campaign")` without input text.
 
-For each entry, run the unchanged v1 declaration validator. Retain malformed
-and failed declarations as fixed findings in the report. Require the planned
+For each entry assigned to a planned case, run the unchanged v1 declaration
+validator. Retain malformed and failed declarations as fixed findings in the report. Require the planned
 rig digest; all required sensors; each required sensor's environment lighting;
-and the planned evidence category on every record. Unknown case IDs fail
-coverage. An exact manifest repeated anywhere in the batch invalidates *every*
+and the planned evidence category on every record. Unknown case IDs produce
+`capture_unplanned`; their manifest bytes are committed and included in duplicate
+counts, but their declaration semantics are not evaluated. An exact manifest
+repeated anywhere in the batch invalidates *every*
 occurrence, including across cases, so input ordering cannot select a winner.
 Different JSON formatting can change the byte digest; this duplicate check is
 not a scientific claim of independent acquisitions or sample uniqueness.
@@ -50,8 +52,11 @@ The capture commitment is SHA-256 of ASCII
 `aethron.qualification.captures.v1` followed by a zero byte and compact ASCII JSON
 of sorted `[case_id, manifest_sha256, now_ms]` triples. Sort lexicographically by
 case ID, then lowercase digest, then integer instant; retain duplicate triples.
-This binds exact manifest bytes and trusted evaluation instants while making
-submission order irrelevant. It is not a signature or proof of acquisition.
+This binds exact manifest bytes and caller-supplied evaluation instants while making
+submission order irrelevant. It does not establish that those instants are trusted.
+It is not a signature, preregistration receipt or proof of acquisition. Consumers
+must independently establish clock provenance and retain the complete submitted
+batch: this function cannot detect attempts omitted before invocation.
 
 ## Capture procedure
 
@@ -70,17 +75,10 @@ submission order irrelevant. It is not a signature or proof of acquisition.
    authenticity, data-rights/held-out evaluation and independent domain review.
    Matching bytes/complete declarations do not close those external gates.
 
-## Technology decision — 2026-10-10
+## Technology review — 2026-10-10
 
-Constraints are bounded offline metadata, cross-capture joins, deterministic
-diagnostics, no device SDK and no hard real-time requirement. [CUE closed
-constraints](https://cuelang.org/docs/concept/how-cue-enables-data-validation/)
-can validate declarative structures; [JSON Schema
-conditionals](https://json-schema.org/understanding-json-schema/reference/conditionals)
-cover local shape dependencies. Both still need a host adapter for opaque
-manifest bytes and the established declaration evaluator. [Python JSON
-hooks](https://docs.python.org/3.13/library/json.html) plus explicit bounded loops
-permit those joins and fixed errors in one auditable offline module. Select that
-approach for this contract; no language preference or measured speed superiority
-is assumed. Plan: failing synthetic coverage/duplicate/binding tests first, then
-implementation, targeted tests, lint/security and source-bound evidence.
+The [current review](technology/review-v3.md#campaign-coverage-and-procedures-review)
+compares Python multiset aggregation, SQLite SQL, Rego, Soufflé and schema-oriented
+alternatives against this bounded offline contract. Executable SQL parity and
+independent negative controls support retaining the current implementation;
+neither technology establishes real capture independence or trusted provenance.

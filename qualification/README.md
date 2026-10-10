@@ -55,11 +55,12 @@ establish byte binding while calibration remains expired; inspect both
 physical qualification remain false. This bounded API opens no files/devices
 and does not reinterpret the original declaration CLI's exit or report fields.
 
-[P15 capture campaigns](campaign-v1.md) compare a bounded preregistered matrix
+[P15 capture campaigns](campaign-v1.md) compare a bounded caller-supplied matrix
 with minimized capture declarations. The API retains failed attempts and rejects
 exact duplicate captures; its report binds both the plan and submitted inputs.
 It measures declaration coverage, never physical sample independence or field
-qualification. The included plan and inputs below are synthetic:
+qualification, and cannot prove preregistration or detect attempts omitted by
+the caller. The included plan and inputs below are synthetic:
 
 ```python
 from pathlib import Path

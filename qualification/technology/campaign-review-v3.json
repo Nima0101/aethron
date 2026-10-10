@@ -1,0 +1,39 @@
+{
+  "review_order_version": 3,
+  "component": "campaign_coverage_and_procedures",
+  "python": "3.13.5",
+  "sqlite": "3.46.1",
+  "baseline_tests": 5,
+  "baseline_passed": true,
+  "mutations": {
+    "duplicate_counts_erased": {
+      "failures": 2,
+      "errors": 0
+    },
+    "commitment_multiplicity_erased": {
+      "failures": 1,
+      "errors": 0
+    },
+    "sql_duplicates_admitted": {
+      "failures": 1,
+      "errors": 0
+    }
+  },
+  "restored_baseline_passed": true,
+  "limits": [
+    "SQL aggregation is independent; admission and capture semantics are shared.",
+    "Finite synthetic controls do not demonstrate scientific sample independence.",
+    "No authenticated preregistration, clock, procedure or domain evidence."
+  ],
+  "physical_qualification_passed": false,
+  "source_sha256": {
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+    "qualification/technology/campaign_sql.py": "4deb710665852d208c1b8170a5963cc649a73e0536116d88926eff99074259c3",
+    "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+    "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+    "qualification/tests/test_campaign_review.py": "f3bc5240549e6cd79d1861e54ad3e3e41196da176aa98ea5fbb27958b55406ed",
+    "qualification/technology/review_campaign.py": "678d80924f29663e3e4545fc4a990e6515197946aa3fed30c459615b50378b6c"
+  }
+}
