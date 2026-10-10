@@ -86,6 +86,9 @@ report = evaluate(
 The separate [campaign reference byte checker](campaign-references-v1.md) matches
 supplied domain/procedure bytes to the plan's hashes. It does not authenticate
 those references, approve their contents or change campaign qualification flags.
+The [campaign bundle report](campaign-bundle-v1.md) computes both coverage and
+reference matching from raw inputs against one plan. Its software result requires
+both checks; capture artifact verification and physical qualification remain false.
 
 ## Technology decision and execution plan
 

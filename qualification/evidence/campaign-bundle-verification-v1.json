@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_head": "992c987ca3d3cbb5b51425e11f129cfe78f45362",
+  "baseline_methods": 75,
+  "red": {
+    "methods": 6,
+    "assertion_failures": 13,
+    "errors": 0
+  },
+  "conjunction_mutation": {
+    "methods": 1,
+    "assertion_failures": 2,
+    "errors": 0,
+    "skips": 0,
+    "passed": false
+  },
+  "restored": {
+    "methods": 7,
+    "assertion_failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "passed": true
+  },
+  "focused": {
+    "methods": 82,
+    "assertion_failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "passed": true
+  },
+  "source_sha256": {
+    "qualification/campaign_bundle.py": "1584e531f994fde5c612dce52eafc993adfe51044d9338b5db27d97fe843e32e",
+    "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+    "qualification/campaign_references.py": "ffae611838d8627c036c68bd3e6988dab9656cbc6aee8f7032857a34199e6686",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "qualification/tests/test_campaign_bundle.py": "eec7d74e1bd8c5432366be08c61e4bb71ae47b85127342ae5849efc473429026",
+    "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+    "qualification/tests/test_campaign_references.py": "37ed0a291ecd08e28b66dabe3f0b4ab4ee37442d75ced6439391d937660e6698",
+    "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+    "qualification/campaign-bundle-v1.md": "0e4e7051c29d1c14b29dea86b8c526c763d1dd971fe7b35774c4576a0ba3a655"
+  },
+  "physical_qualification_passed": false,
+  "hosted_execution_verified": false
+}
