@@ -1,7 +1,7 @@
 # P16–P18 review inventory v3
 
-Snapshot: `a3c9a815d8c81717dd58fd5b4ce47f50bad174c9`, plus the sensor packet
-conformance correction, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `65dc44e1950c798284af79ed6616f594070763d8`, plus the package-input
+workflow correction, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -21,7 +21,7 @@ remain historical inputs. The consumed JSON-bound helper belongs to the foundati
 | Bundle verification | [Review](p16-bundle-v3.md): KEEP snapshot composition; all revocation lists rechecked. |
 | Direct federation | [Review](p16-federation-v3.md): KEEP closed pinned table; no enrollment or distributed consensus. |
 | Inbox resource accounting | [Review](p16-inbox-v3.md): KEEP local bounded queue; no transport or hard real-time guarantee. |
-| Packaging evidence | [Review](p16-packaging-v3.md): FIX installed/source identity comparison; no full-distribution attestation. |
+| Packaging evidence | [Review](p16-packaging-v3.md): FIX installed/source identity comparison and [package input coverage](p16-packaging-inputs-v3.md); no full-distribution attestation. |
 | Comparison and mutation probes | FIX optimized-mode evidence loss; [response types](p16-probe-response-v3.md); [capture bounds](p16-probe-capture-v3.md); source-manifest correction below. |
 
 ## Missing implementation and unsupported claims

@@ -10,3 +10,4 @@ recursive-include aethron *.pxd
 include requirements-passports.txt
 include requirements-passport-conformance.txt
 recursive-include contracts/interop *.json
+include requirements-passport-sensor-conformance.txt
