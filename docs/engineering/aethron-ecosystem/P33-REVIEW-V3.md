@@ -1006,3 +1006,61 @@ negative evidence. P19 role-aware release-bound help, native Android justificati
 and other unfinished owned UI work remain open; no lane/audit completion marker.
 Next earliest unfinished component: supported-browser transport/display integration
 and its offline lifecycle/keyboard acceptance harness.
+
+## P3.3 observer setup cleanup correction
+
+Baseline `605db933f2a6b9a0892e4d6fb1e0cd9f6d4b6830`. Re-read the full policy
+and review order, restarted at admission/projection, and verified the preceding
+browser bridge: 13 paths, 74 source hashes and nine retained reports matched.
+Published that verified component to PR #44; the single earlier CI snapshot at
+`5a92da5` was queued/behind. No checks were bypassed or polled.
+
+The fresh SDK review found that controller creation, signal composition and timer
+startup occurred after session admission but before the try/finally covering
+withdrawal and DELETE. A synchronous host setup failure therefore skipped both
+cleanup actions and exposed the host exception. Four failing regressions establish
+this for signal composition and timer startup, including a final display callback
+that itself throws. This is a software lifetime defect; no hardware failure rate
+or browser incompatibility was inferred from controlled fault injection.
+
+KEEP TypeScript/native host APIs; FIX the cleanup scope. Optional controller/timer
+state now represents partial setup. All three setup operations execute within the
+validated handle's cleanup scope; setup failure becomes `stream_unavailable`.
+Only allocated timers are cleared, the local controller is aborted if available,
+an expired view is delivered and authenticated deletion is attempted. A final
+application display exception retains its identity while DELETE still runs.
+Successful ingress, callback cancellation and frozen timing/byte bounds are
+unchanged. Six setup cases cover all three setup stages with and without display
+failure; two more exercise the self-contained browser bundle without string code
+generation. Remote cleanup remains best effort, dependent on functioning host
+fetch/timeout/cancellation APIs and process survival.
+
+The deployment constraint is asynchronous native-host orchestration with one
+admitted session, no queued history and explicit partial resource ownership.
+Fresh research compared native TypeScript, plain ECMAScript, Kotlin/JS and
+Rust/WebAssembly host bindings. Kotlin's module/platform sharing does not
+establish a win for a boundary without a JVM consumer. The official wasm-bindgen
+Fetch example still crosses host promises through JsFuture; changing language
+would not independently repair server-handle cleanup. The TypeScript choice
+keeps static partial-resource checks and direct host interoperation with no new
+runtime abstraction. No cross-language speed ranking was performed. The closed
+[setup ADR](../../../examples/clients/typescript/observer-setup-adr.json) contains
+primary source links, constraints, alternatives and four C4 views. The old
+wasm-bindgen documentation explicitly redirected maintenance to its new domain;
+the maintained source was read. RxJS's documentation yielded no substantive API
+text and the attempted source path failed; no RxJS-specific decision relies on it.
+
+Continued source inspection through wire/session admission, Node contract and
+validator generation, package allowlisting/install lifecycle, the Python actual
+service harness and P12 presenter/panel/lifecycle/bundler. No additional defect
+was demonstrated in those inspected paths. Their established component decisions
+remain scoped to the reviewed contracts; this correction is not a full phase or
+product completion claim. The earlier browser artifact size/hash evidence remains
+historical: this source correction produces a newly hashed bundle.
+
+[Current evidence](evidence/phase3/p33-observer-setup-v1.json) retains RED,
+transport/disposal regressions, closed ADR validation, browser parity/reproduction
+and package checks. Native browser lifecycle/keyboard acceptance, revocable
+transport-to-display integration, release-bound role-aware help and the existing
+producer-payload/whole-event discrepancy remain open. Next earliest unfinished
+component: a fresh revocable source integration for the browser lifecycle host.

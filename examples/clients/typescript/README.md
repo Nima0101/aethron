@@ -177,6 +177,15 @@ their own `signal.aborted` to distinguish their cancellation; their signal and
 reason are not modified. Application display-callback exceptions retain their
 identity and remain the application's responsibility.
 
+After a session handle is validated, observer setup is covered by the same
+withdrawal and best-effort deletion scope as event reception. Failure to create
+the local abort controller, combine signals or start the expiry timer rejects
+with `stream_unavailable`, emits an expired view and attempts DELETE without
+starting event reception. Setup exception details are not copied. A final display
+exception still retains its identity, and deletion is attempted even when that
+callback fails. These controlled host-failure tests do not establish compatibility
+with a browser missing other required APIs or guarantee remote cleanup.
+
 Cancellation is checked after each event read and synchronous display callback,
 before parsing another event in that chunk. Once a validated handle is known,
 cancellation clears the observation and attempts DELETE with its independent

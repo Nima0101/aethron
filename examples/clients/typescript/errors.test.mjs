@@ -8,6 +8,52 @@ const session = {session: 'a'.repeat(32), source_profile: 'bench'};
 const reasons = [new Error('private_transport_marker', {cause: {token: 'private_cause_marker'}}),
   {address: 'private_endpoint_marker'}, 'private_string_marker'];
 
+test('observer setup decision uses a closed schema and four architecture views', async () => {
+  const {Ajv2020} = await import('ajv/dist/2020.js');
+  const read = name => JSON.parse(readFileSync(new URL(name, import.meta.url), 'utf8'));
+  const validate = new Ajv2020({strict:true}).compile(read('./observer-setup-adr.schema.json'));
+  const adr = read('./observer-setup-adr.json');
+  assert.equal(validate(adr), true, JSON.stringify(validate.errors));
+  assert.equal(validate({...adr, qualified:true}), false);
+  assert.equal(validate({...adr, c4:{...adr.c4, unreviewed:'claim'}}), false);
+});
+
+for (const phase of ['controller', 'signal-composition', 'scheduler']) {
+  for (const displayFails of [false, true]) {
+    test(`${phase} setup failure withdraws display and releases the admitted handle (display failure=${displayFails})`, async t => {
+      const requests = [], views = [], cleared = [];
+      const privateFailure = new Error('private_setup_marker');
+      const displayFailure = new Error('application_display_failure');
+      const caller = new AbortController();
+      const admittedResponse = Response.json(session);
+      const deletedResponse = new Response(null, {status:204});
+      if (phase === 'controller') t.mock.method(globalThis, 'AbortController', function () {throw privateFailure;});
+      t.mock.method(globalThis, 'setInterval', () => {
+        if (phase === 'scheduler') throw privateFailure;
+        assert.fail('no timer should start after signal composition fails');
+      });
+      t.mock.method(globalThis, 'clearInterval', timer => cleared.push(timer));
+      if (phase === 'signal-composition') t.mock.method(AbortSignal, 'any', () => {throw privateFailure;});
+      t.mock.method(globalThis, 'fetch', async (url, options) => {
+        requests.push({url, options});
+        if (options.method === 'POST') return admittedResponse;
+        assert.equal(options.method, 'DELETE', 'setup failure must not start event reception');
+        return deletedResponse;
+      });
+      const error = await observe('http://127.0.0.1:8765', 'synthetic-token', 'bench', view => {
+        views.push(view);if (displayFails) throw displayFailure;
+      }, caller.signal).then(() => undefined, error => error);
+      assert.deepEqual(requests.map(request => request.options.method), ['POST', 'DELETE']);
+      assert.equal(views.length, 1);assert.equal(views[0].label, 'expired');
+      assert.deepEqual(views[0].sources, []);assert.deepEqual(cleared, []);
+      assert.notEqual(requests[1].options.signal, caller.signal);
+      assert.equal(requests[1].options.redirect, 'error');
+      if (displayFails) assert.equal(error, displayFailure);
+      else {assert.equal(error?.message, 'stream_unavailable');assert.equal(error.cause, undefined);}
+    });
+  }
+}
+
 for (const phase of ['POST', 'GET', 'read']) {
   for (const [index, reason] of reasons.entries()) {
     test(`${phase} transport rejection ${index} exposes only a fixed phase error`, async t => {

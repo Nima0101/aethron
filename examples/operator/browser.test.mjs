@@ -44,6 +44,22 @@ test('bundled observation withdraws reentrant and caller-mutated data',async()=>
   assert.throws(()=>observation.accept(nested,0),{message:'invalid_event'});
   assert.equal(observation.view(0).label,'expired');
 });
+for (const phase of ['signal-composition','scheduler']) test(`bundled ${phase} failure withdraws and attempts deletion`,async t=>{
+  const {observe}=await bundle();const requests=[],views=[];
+  const caller=new AbortController();
+  t.mock.method(globalThis,'setInterval',()=>{throw new Error('private_scheduler_marker');});
+  t.mock.method(globalThis,'clearInterval',()=>assert.fail('no timer was allocated'));
+  if(phase==='signal-composition')t.mock.method(AbortSignal,'any',()=>{throw new Error('private_signal_marker');});
+  t.mock.method(globalThis,'fetch',async(url,options)=>{
+    requests.push(options.method);
+    if(options.method==='POST')return Response.json({source_profile:'bench',session:envelope.session});
+    assert.equal(options.method,'DELETE');return new Response(null,{status:204});
+  });
+  await assert.rejects(observe('http://127.0.0.1:8765','synthetic-token','bench',view=>views.push(view),caller.signal),
+    {message:'stream_unavailable'});
+  assert.deepEqual(requests,['POST','DELETE']);assert.equal(views.length,1);
+  assert.equal(views[0].label,'expired');assert.deepEqual(views[0].sources,[]);
+});
 test('bundled panel renders bilingual fixed text and clears detached content',async()=>{
   const {Observation,mountObservationPanel}=await bundle();
   const {document}=parseHTML('<main></main>');const root=document.querySelector('main');

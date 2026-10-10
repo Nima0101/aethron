@@ -113,20 +113,26 @@ export async function observe(base: string, token: string, profile: string,
   }
   const handle = await readSession(request, profile);
   const value = new Observation();
-  const stop = new AbortController();
-  const eventSignal = AbortSignal.any([signal, stop.signal]);
+  let stop: AbortController | undefined;
+  let timer: ReturnType<typeof setInterval> | undefined;
   let renderFailed = false;
   let renderError: unknown;
-  // Independent render-time expiry, including a stalled response with no next frame.
-  const timer = setInterval(() => {
-    if (renderFailed) return;
-    try { display(value.view()); }
-    catch (error) {
-      renderFailed = true; renderError = error;
-      value.disconnect(); stop.abort();
-    }
-  }, 20);
   try {
+    let eventSignal: AbortSignal;
+    try {
+      stop = new AbortController();
+      eventSignal = AbortSignal.any([signal, stop.signal]);
+      // Setup is inside the admitted handle's cleanup scope as well as reception.
+      // Independent render-time expiry, including a stalled response.
+      timer = setInterval(() => {
+        if (renderFailed) return;
+        try { display(value.view()); }
+        catch (error) {
+          renderFailed = true; renderError = error;
+          value.disconnect(); stop?.abort();
+        }
+      }, 20);
+    } catch { throw new Error('stream_unavailable'); }
     const response = await fetch(`${origin}/api/v1/sessions/${handle}/events`, {headers, signal: eventSignal, redirect: 'error'})
       .catch(() => { throw new Error('stream_unavailable'); });
     if (!response.ok || !response.body) {
@@ -169,7 +175,8 @@ export async function observe(base: string, token: string, profile: string,
     // Surface the renderer failure through the observer promise, not the timer.
     throw renderFailed ? renderError : error;
   } finally {
-    clearInterval(timer); stop.abort(); value.disconnect();
+    if (timer !== undefined) clearInterval(timer);
+    stop?.abort(); value.disconnect();
     try { if (!renderFailed) display(value.view()); }
     finally {
       await fetch(`${origin}/api/v1/sessions/${handle}`, {method: 'DELETE', headers, signal: AbortSignal.timeout(2000), redirect: 'error'})
