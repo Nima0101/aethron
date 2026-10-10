@@ -32,6 +32,12 @@ class _BoundedReader:
 
 
 def main():
+    """Emit selected counts and complete source headers after input validation.
+
+    Reports are not anonymized: source aliases, clocks, layouts and digests are
+    retained. Buffering prevents reports on input rejection, not partial writes
+    if the output destination itself fails. Callers own access and retention.
+    """
     parser = _Parser(description=__doc__)
     parser.add_argument("--recording", required=True, type=Path)
     parser.add_argument("--calibration", required=True, type=Path)

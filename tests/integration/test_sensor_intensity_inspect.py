@@ -1,7 +1,8 @@
-"""Offline command uses recorded clocks and emits bounded selected counts only."""
+"""Offline command retains source metadata alongside bounded selected counts."""
 
 import hashlib
 import importlib.util
+import io
 import json
 import os
 import struct
@@ -9,12 +10,59 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 import test_sensor_intensity_replay as fixtures
 
 
 class IntensityInspection(unittest.TestCase):
+    def test_report_retains_metadata_but_late_rejection_discloses_no_report(self):
+        from aethron_edge.sensors.intensity_inspect import main
+
+        _, calibration, frame = fixtures.SensorIntensityReplay().fixture()
+        raw = frame.header.model_dump_json().encode()
+        recording_bytes = struct.pack(">I", len(raw)) + raw + frame.payload.data
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            recording = root / "private-recording-name.bin"
+            document = root / "private-calibration-name.json"
+            recording.write_bytes(recording_bytes)
+            document.write_text(calibration.model_dump_json())
+            args = [
+                "intensity_inspect",
+                "--recording",
+                str(recording),
+                "--calibration",
+                str(document),
+                "--expected-calibration-sha256",
+                calibration.digest,
+                "--pixel",
+                "0",
+                "0",
+            ]
+            output, errors = io.StringIO(), io.StringIO()
+            with patch.object(sys, "argv", args), redirect_stdout(output), redirect_stderr(errors):
+                main()
+            report = json.loads(output.getvalue())
+            self.assertEqual(errors.getvalue(), "")
+            self.assertEqual(report["frames"][0]["counts"], [0])
+            self.assertEqual(
+                report["frames"][0]["source_header"], json.loads(frame.header.model_dump_json())
+            )
+            self.assertFalse(report["live_evidence"])
+            self.assertNotIn(str(root), output.getvalue())
+            # A complete valid first frame must not escape when later parsing fails.
+            recording.write_bytes(recording_bytes + b"bad")
+            output, errors = io.StringIO(), io.StringIO()
+            with patch.object(sys, "argv", args), redirect_stdout(output), redirect_stderr(errors):
+                with self.assertRaises(SystemExit) as exit_result:
+                    main()
+            self.assertEqual(exit_result.exception.code, 2)
+            self.assertEqual(output.getvalue(), "")
+            self.assertEqual(errors.getvalue(), "invalid_intensity_inspection\n")
+
     def test_offline_inspection_does_not_load_live_provider_or_provisioning(self):
         import aethron_edge
 
