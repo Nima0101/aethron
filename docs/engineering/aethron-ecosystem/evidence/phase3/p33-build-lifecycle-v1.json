@@ -1,0 +1,131 @@
+{
+  "baseline": "ba2f8885b4bbb6844c6b462527b99066c70921b5",
+  "component": "P3.3 validator and package build artifact lifecycle",
+  "review_order_version": 3,
+  "audit_complete": false,
+  "decision": "KEEP Node tooling; FIX generated-output invalidation and handled-failure withdrawal with noEmitOnError.",
+  "adr": "examples/clients/typescript/build-lifecycle-adr.json",
+  "source_sha256": {
+    "contracts/openapi/aethron-edge-v1.json": "4d562382b803e59dac1ab24a7ead52cd2cdbbc9533aa6d9dc68fca9f6e9b0b83",
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "c61b625acb01a7e7c74c35d119a25c28e40a96fd90161053d48de5a02068a891",
+    "examples/clients/typescript/README.md": "26eac3950f0ef9c9dea0bf29e815d004be700c6eb318fc25ff759cd100ccb30a",
+    "examples/clients/typescript/build-lifecycle-adr.json": "f568375c26d47e3a68ee628c45095d9b71ae3f668ea5b61e8bdc24c35a49eb88",
+    "examples/clients/typescript/build-lifecycle-adr.schema.json": "3d308ec9298aa506e933720b6bda3180ef084f680ab9e2e3d6eb08ab46141f8a",
+    "examples/clients/typescript/build.mjs": "3fef76ca0da3993a7e9d79eedc0d52d8ab4c51a8c9bc773ee689fc48790867e2",
+    "examples/clients/typescript/build.test.mjs": "e38c9746cd063cfc7d95ab97b197449199ece6ef8d8fd9cdb3b3bcbd9cfa3cc1",
+    "examples/clients/typescript/contract-types.test.ts": "e7f08071f5bc0f3fc286b40583820319237c95d78a7ecfcaf23df8b9544384a3",
+    "examples/clients/typescript/generate-contract.mjs": "b551440c98e5c0f12a2c776e2474f78558c2cfdb2489f59c314954c88c9679d2",
+    "examples/clients/typescript/generate-validators.mjs": "e989f6fb25921f3ce3be7a2a58a5e44b2377d16a5f1ea0a0871d7d04380b051a",
+    "examples/clients/typescript/generation.test.mjs": "d993eb63417db3eccf0fab31ad0a9516827966d7e986328b48d0737f95c456ee",
+    "examples/clients/typescript/generator-selectors-adr.json": "b053ab6d2b26b662487ab39b11f25f88fddd07549162a308d3e124d75df15352",
+    "examples/clients/typescript/generator-selectors-adr.schema.json": "de4090c413a9e3883632a496ab362c90eba6405b042dd79b8f80ec72677d7b48",
+    "examples/clients/typescript/generator-structure-adr.json": "826c4f341d7caa9150779ab6be587a152a0a06739d197cb7e7b81e32aa9c3ea0",
+    "examples/clients/typescript/generator-structure-adr.schema.json": "3b7f5407d21f489e611fad36ee86691db89b1519700fa27cb014a0f1be063c7b",
+    "examples/clients/typescript/package-lock.json": "e9851168f26e274480aa106a84f447bbd5429cf9c3e8462ec44c58c2158666c1",
+    "examples/clients/typescript/package.json": "ed729ac42074abb984a7be711573929bfa4afc95b97542b1309da4b7fc27e515",
+    "examples/clients/typescript/package.test.mjs": "3739199152c69ceeaf78af7806988bac776b847c9f159ab9e695a97b76abcdf6",
+    "examples/clients/typescript/src/scene.schema.json": "57547fac9399c84cd7db554faf14055c8a7bad9a8efa3232ccc6f62da0f2c417",
+    "examples/clients/typescript/src/types.ts": "849fc85341150f634fba6f18e862175ad502b191c1a431a191f4471ca95b2c9b",
+    "examples/clients/typescript/tsconfig.json": "415f53062ea2f6b7844d6dba313e3ddb270ba0af26ce492e31b0afbf6fdb6b66",
+    "examples/clients/typescript/validation.test.mjs": "529415dc7f4eb69dea567d57e4dc1c5a3ec19b3c47eec0cd96bb147ac682b084"
+  },
+  "log_directory": "build/p33-sdk-linux",
+  "report_sha256": {
+    "build-lifecycle-invocation.log": "167f4c8b7b933c28dafe56794b46d68665227380272bb641ed33d7812e331a0e",
+    "build-lifecycle-red.log": "a4eac22f03ffc91ebb72b77f215e336bcc8490796863e19e2a203d5d3a41fbf1",
+    "build-lifecycle-direct-red.log": "ad47fe219cc399ac7798a940605bd4c15d517402284d4d0761cfb541c63ded1b",
+    "build-lifecycle-green.log": "f22713b8175c6e336ba7e90a7c6a3798bac5f8691b74f6abd14a88dec1c7b288",
+    "build-lifecycle-build.log": "3b93166f11504d6e3c5f994b1a4b8349390831c8793b5f780f01c172fe657caf",
+    "build-lifecycle-focused.log": "8617e3c64f6ef32e537df57749be977fd13b0048963234489f4ba18a66dfc1ff",
+    "build-lifecycle-runtime.log": "602f7589d8be31bf7de793678628f9f107359667eb57bc3ce8183f0e9caef8ee",
+    "build-lifecycle-package.log": "d67d0460a91fd009997b3f0c72c47338363478b79cd0f4305dcc657ad2ab1e40"
+  },
+  "distribution_sha256": {
+    "examples/clients/typescript/dist/client.d.ts": "af30b39d8e1db5983826abc2a17d3875fa06aaa3dbedb41c25e39e91c691ffc3",
+    "examples/clients/typescript/dist/client.js": "fd1fd0155e3f20d107b2bd039fed69e52507a6a7fca6ca2a07f0b51fbfae62c9",
+    "examples/clients/typescript/dist/scene.schema.json": "39d0180c8c3d8ec0376c029b7e2e2724668343f58d4695d27cd1613bb96b460a",
+    "examples/clients/typescript/dist/session.d.ts": "c371ffcdfef108e3e49ea04fb333c8c18f799eee2aa1cfd51d526ae3a586aa87",
+    "examples/clients/typescript/dist/session.js": "30d353bfb91747d72426b6f47ea148b3d5e92cbe36f2c9b9d510f411d54778db",
+    "examples/clients/typescript/dist/types.d.ts": "acd854e2abeca3ed1c2849e2a5e1d563944c78cdfc33d9ffcd9eafaef0e63338",
+    "examples/clients/typescript/dist/types.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "examples/clients/typescript/dist/validators.cjs": "7046fcbc5f655e1f6768207d366ff0cac69502dd7147457bed0ebe4e512fdec3",
+    "examples/clients/typescript/dist/wire.d.ts": "58023ff80c20e478e5a951255687883542e91e1cccfb7bbcdc8af663fdd5a238",
+    "examples/clients/typescript/dist/wire.js": "55d6ee1a9cc38a898195027880b1752650ae8786af806ea7693f7c13b638940c"
+  },
+  "red": {
+    "package_build_failures": 2,
+    "direct_validator_failure": 1,
+    "invocation_failure": "Initial npm exec attempted offline node registry resolution and failed ENOTCACHED before executing tests; corrected invocation through explicit npm script."
+  },
+  "green": {
+    "lifecycle_tests": 3,
+    "focused_tests": 45,
+    "package_tests": 3,
+    "failures": 0,
+    "skips": 0,
+    "build": "PASS",
+    "public_installed_declarations": "PASS",
+    "no_string_code_generation_runtime": "PASS",
+    "syntax_diff": "PASS",
+    "recovery": "Every output file byte-identical after contract-drift and compiler-error recovery"
+  },
+  "security_review": [
+    "Fixed Node executable and argument arrays, shell:false, repository-relative cwd; no command interpolation or privileged tools.",
+    "Wrapper owns only generated dist. Direct generator owns only validators.cjs. Real failure tests preserve source and successful rebuild behavior.",
+    "Static package allowlist excludes build helpers; offline archive integrity and no-eval installed runtime tests remain active."
+  ],
+  "negative_evidence": {
+    "current": "Two package-build stale-output failures, one direct-generator stale-validator failure and initial test invocation failure retained.",
+    "previous": {
+      "current": "Fourteen new baseline failures retained.",
+      "previous": {
+        "current": "Twelve baseline regressions retained; previous-head CI offline metadata and formatting failures retained.",
+        "previous": {
+          "current": "Hosted Linux/Windows ENOTCACHED, three formatting errors, four missing-helper assertions and local source-drift rejection retained.",
+          "previous": {
+            "current": "Seven initial missing-description/inventory failures and one refresh text-node identity failure retained; conditional writes corrected the latter.",
+            "previous": {
+              "current": "Eleven missing-component assertions retained; deliberate source mutations reject unsupported coverage.",
+              "previous": {
+                "previous": {
+                  "missing_module": "Ten initial assertions retained.",
+                  "initial_compiler": "Run type narrowing failure retained.",
+                  "historical": {
+                    "initial_package_passes": 1,
+                    "initial_package_failures": 2,
+                    "cause": "Operator invocation error: direct node execution omitted npm_execpath; entry-point guards rejected before packaging. Correct documented npm invocation passed with unchanged limits.",
+                    "historical": {
+                      "prior_package_timeout": {
+                        "initial_package_passes": 2,
+                        "initial_package_failures": 1,
+                        "failure": "External installed consumer TypeScript compiler: spawnSync node ETIMEDOUT at unchanged 30000 ms timeout.",
+                        "retry": "One isolated retry passed with unchanged timeout; original failure preserved. Cause not established."
+                      },
+                      "browser": "Two historical Chromium probes timed out; no actual browser acceptance.",
+                      "current_red_logs": "Missing component and initial new-source reentry failures retained; final focused checks pass."
+                    }
+                  }
+                },
+                "current": "Eight missing-module assertions retained. Initial evidence-reader lookup omitted log_directory; corrected path lookup verified all seven baseline logs before publication."
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "publication": {
+    "pr": 44,
+    "published_head": "ba2f8885b4bbb6844c6b462527b99066c70921b5",
+    "observed_ci_head": "5c52aef4c04f9048b231c1c680d562f2c8606568",
+    "observed_status": "6 completed, 23 queued, 13 in progress; packed-client-service queued; no failures in snapshot",
+    "new_head_checked": false,
+    "polling": false
+  },
+  "limits": [
+    "One writer per build directory. Cleanup assumes writable filesystem; parent termination, power loss and concurrent/hostile filesystem writes are not qualified.",
+    "Requested per-stage 30000 ms timeout is not a real-time guarantee. Direct generator cannot clean before static dependencies load; package wrapper clears first.",
+    "No full repository suite, full clone, Windows local validation or browser rerun. Tests use small source fixtures and linked existing dependencies.",
+    "Entire retrospective lane review and P12/P19 application/help remain unfinished. Next earliest review is wire/session admission and observation lifecycle."
+  ]
+}

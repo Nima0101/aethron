@@ -1538,3 +1538,29 @@ instance schema compilation. A successful build does not make schema shape
 checking an authorization or hardware qualification boundary. The remaining
 standalone-build failure/artifact lifecycle is the next earliest review item.
 No full retrospective audit or lane completion is declared.
+
+
+## Fresh validator/build artifact lifecycle review
+
+Baseline `ba2f8885b4bbb6844c6b462527b99066c70921b5`. Re-read generator admission,
+validator emission, npm build ordering and TypeScript output configuration.
+Found stale-distribution behavior: contract drift leaves prior dist intact;
+compiler errors can emit files; direct validator parse failure leaves the old
+validator. Two package-build and one direct-generator baseline regressions
+reproduce these failures.
+
+KEEP Node tooling; FIX generated-output ownership with a sequential Node wrapper,
+fixed argument arrays, per-stage 30000 ms timeout, initial cleanup and handled
+failure cleanup. Enable noEmitOnError as an additional compiler guard. Direct
+validator generation clears only its output before work and after failure.
+[Closed ADR](../../../examples/clients/typescript/build-lifecycle-adr.json) compares
+Node, shell chaining, Python subprocess and Rust process APIs with current
+official sources and all four C4 views. This is a build lifecycle correction,
+not a timing or availability qualification. No foreign runtime benchmark.
+
+Fixtures copy only package sources/configuration and the versioned contract,
+link local dependencies and run real build stages; no full clean clone. Recovery
+checks compare every emitted file with the current successful distribution.
+An initial npm exec invocation tried offline Node resolution before running tests;
+that negative tooling result is retained separately from the real regressions.
+Next earliest review: wire/session admission and observation lifecycle.

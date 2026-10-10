@@ -299,3 +299,16 @@ structural keywords fail with a fixed build error. This does not prove a schema
 is satisfiable. Numeric/string constraints remain runtime checks in the unchanged
 bundle; TypeScript declarations cannot enforce them. See the
 [structural validation decision](generator-structure-adr.json).
+
+
+`npm run build` invalidates the generated `dist` directory before checking the
+contract, generating validators and running TypeScript. A handled stage failure
+removes partial output; TypeScript also uses `noEmitOnError`. Each child stage has
+a 30-second timeout. Use one build writer per package directory. This is not
+crash-safe publication: parent termination or cleanup-denying filesystem errors
+still require a fresh successful build. Direct validator generation withdraws
+only its own `validators.cjs` output on handled read/compile/write failure.
+`npm run test:build` checks contract drift, compiler error and validator parse
+failure with small local fixtures and verifies byte-identical recovery. It links
+the installed toolchain and does not install dependencies or clone the repository.
+See the [build lifecycle decision](build-lifecycle-adr.json).
