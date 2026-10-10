@@ -1,8 +1,9 @@
 # P2.1 retrospective technology audit — policy v2
 
-This audit starts with the earliest raw-packet component and proceeds through the
-existing P2.1 implementation. It is incomplete: forward feature expansion is
-paused. A prior technology note is not a completed policy-v2 reassessment.
+This document retains the historical C01 policy-v2 checkpoint. Its cursor table
+records that checkpoint, not current lane completion. Subsequent component notes
+are separate evidence. The fresh [V3 claims review](P21-PACKET-CLAIMS-REVIEW-V3.md)
+does not treat this historical decision as V3 completion.
 
 | Cursor | Existing component | Decision |
 | --- | --- | --- |
@@ -23,10 +24,13 @@ consumed; this audit does not create competing implementations.
 ## C01 constraints
 
 Linux, shared 6.3 GiB host, offline/read-only operation, no device SDK or actuator.
-The public packet boundary returns immutable Python `Image`, `Point` and `Cloud`
-values. Its strict metadata rejects boolean numeric fields, nonfinite metadata,
+The public packet boundary returns frozen Python `Raster`, `Point` and `Cloud`
+values. Frozen attributes are not a process isolation or authenticity boundary;
+container members are not made deeply immutable by Pydantic. In particular,
+`CloudLayout.fields` is a list. Its strict metadata rejects boolean numeric fields, nonfinite metadata,
 unknown fields and unsupported layouts. Images are bounded to 1920×1080 and
-8 MiB with explicit encoding/scale; ingestion retains immutable input bytes,
+8 MiB of payload with explicit encoding/scale; this is not a total process-memory
+limit; ingestion retains immutable input bytes,
 without a full-raster transform. Cloud layouts allow at most 4096 samples,
 12–128-byte records, both byte orders, unaligned FLOAT32/FLOAT64 XYZ and optional
 signed radial velocity, unordered fields and row padding. Nonfinite sample
