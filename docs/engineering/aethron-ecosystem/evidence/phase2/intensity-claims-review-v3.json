@@ -1,0 +1,43 @@
+{
+  "review_order_version": 3,
+  "component": "C07_intensity_binding",
+  "decision": "CLARIFY",
+  "scope": "Provenance and lifetime claims only; no operational enhancement or runtime selection",
+  "full_component_review_complete": false,
+  "reviewed_head": "1d2c91c001530f2cf87f67a277c02680135986c4",
+  "production_behavior_changed": false,
+  "checks": {
+    "production_executable_ast_unchanged": true,
+    "focused_test_methods_passed": 7,
+    "new_test_methods": 1,
+    "new_test_passed_before_docstring_change": true,
+    "earlier_component_source_bindings_rechecked": 29,
+    "ruff": "PASS on retry",
+    "format": "PASS on retry",
+    "bandit": "PASS",
+    "hardware_checks": false,
+    "new_benchmarks": false
+  },
+  "focused_command": "PYTHONPATH=integrations/edge:tests/integration build/lane-b/linux-tools/bin/python -m unittest test_sensor_intensity_replay",
+  "limitations": [
+    "Digest equality does not authenticate device, acquisition time, physical calibration or ownership.",
+    "Returned source header describes raw bytes and layout, not remapped output.",
+    "Repeated calls retain recorded metadata without duplicate rejection or freshness renewal.",
+    "Full V3 technology reassessment remains incomplete; no KEEP/MIGRATE decision in this limited pass."
+  ],
+  "negative_evidence": [
+    "Two initial tool-host SIGTRAP failures recovered before substantive work.",
+    "Initial shell, Ruff and AST verification attempts hit process/thread resource exhaustion; subsequent verification passed.",
+    "C06 public push attempts encountered credential-helper thread exhaustion; publication is tracked separately.",
+    "Historical T10 latency and signed radar startup failures remain."
+  ],
+  "sha256": {
+    "integrations/edge/aethron_edge/sensors/intensity_replay.py": "1adcfd13a26ebb0af92bcede5b144eb156b5b54085473a326d8dda1802c697d9",
+    "tests/integration/test_sensor_intensity_replay.py": "5525ed1269b1c9e3babe15d17b56685b8e6b14a2ada6c4fd2b4773200f6b0594",
+    "docs/engineering/aethron-ecosystem/P21-INTENSITY-CLAIMS-REVIEW-V3.md": "7d8e8c7d778921b2be1cbce0abc8fd1b96479ebbd100b171f746ad0fd2b941ed"
+  },
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/hashlib.html",
+    "https://docs.python.org/3.13/library/hmac.html"
+  ]
+}

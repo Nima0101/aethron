@@ -71,6 +71,9 @@ def rectify_recorded_intensity(frame, calibration, *, expected_calibration_sha25
     The pin establishes equality only, not signature verification or physical
     calibration validity. No clock conversion, freshness renewal or history is
     introduced. Sequence/clock continuity remains the replay reader's contract.
+    Repeated calls do not establish freshness or reject duplicates. The returned
+    source header describes raw input bytes and layout, not the remapped output.
+    Source aliases and matching pins do not authenticate a physical device.
     """
     try:
         if (
