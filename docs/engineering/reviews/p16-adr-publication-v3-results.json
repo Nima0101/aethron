@@ -10,7 +10,7 @@
   "checks": {
     "related": {
       "command": [
-        "/home/heisenberg/Projects/aethron-migration-20261009/agent-runtime/parallel-p16-passport-20261009/venv/bin/python",
+        "python",
         "-m",
         "unittest",
         "test_passport_schemas",
@@ -21,7 +21,7 @@
     },
     "ruff": {
       "command": [
-        "/home/heisenberg/Projects/aethron-migration-20261009/agent-runtime/parallel-p16-passport-20261009/venv/bin/ruff",
+        "ruff",
         "check",
         "tests/test_passport_schemas.py"
       ],
@@ -29,7 +29,7 @@
     },
     "format": {
       "command": [
-        "/home/heisenberg/Projects/aethron-migration-20261009/agent-runtime/parallel-p16-passport-20261009/venv/bin/ruff",
+        "ruff",
         "format",
         "--check",
         "tests/test_passport_schemas.py"
@@ -38,7 +38,7 @@
     },
     "bandit": {
       "command": [
-        "/home/heisenberg/Projects/aethron-migration-20261009/agent-runtime/parallel-p16-passport-20261009/venv/bin/bandit",
+        "bandit",
         "-q",
         "tests/test_passport_schemas.py"
       ],
@@ -46,7 +46,7 @@
     },
     "actionlint": {
       "command": [
-        "/home/heisenberg/.local/bin/actionlint",
+        "actionlint",
         ".github/workflows/aethron-passports.yml"
       ],
       "exit_code": 0
@@ -93,5 +93,13 @@
     "No runtime parser/policy change, target hardware measurement, installed-package or hosted run.",
     "Direct file hashes are not full dependency provenance or loaded-code attestation.",
     "Earlier phase/audit completion remains unestablished."
-  ]
+  ],
+  "publication_redaction": {
+    "baseline_commit": "ec55eb8bd3cdb25641b6ec761bbd200d90a5604b",
+    "original_record_sha256": "853e08d996c6377f2de6e5631f725003e5a6b4bc1fcf6e4189bc9a1193f2be5a",
+    "executable_paths_replaced": 5,
+    "representation": "Command executable entries are public basenames with private local prefixes removed; not verbatim historical argv or a new execution.",
+    "preserved": "All historical command arguments, results, source hashes and runtime-log hashes remain unchanged.",
+    "cause": "The unchanged public-content gate rejected a local host path. This is a publication correction, not a passing full verification run."
+  }
 }

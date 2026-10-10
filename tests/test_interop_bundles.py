@@ -94,6 +94,24 @@ class TaskBundleTests(unittest.TestCase):
                 self.assertEqual(result.evidence, ())
                 self.assertIsNone(result.task_sha256)
 
+    def test_all_signed_references_survive_bundle_composition(self):
+        signer = self.fixture.signer
+        for reference, kind in zip(
+            signer.document["evidence"], ("synthetic", "recorded", "external_unverified")
+        ):
+            reference["kind"] = kind
+        signer.document["evidence"].reverse()
+        expected = tuple(dict(reference) for reference in signer.document["evidence"])
+        self.envelope = signer.envelope()
+        self.task["passport_sha256"] = digest(self.envelope)
+        result = self.check(evidence=tuple(reversed(self.blobs)))
+        self.assertEqual((result.status, result.reason), ("bound", "evidence_bound"))
+        self.assertEqual(
+            tuple(dataclasses.asdict(reference) for reference in result.evidence), expected
+        )
+        for name in ("execution_authority", "motion_authority", "evidence_verified"):
+            self.assertIs(dataclasses.asdict(result)[name], False)
+
     def test_budget_and_unreferenced_signed_evidence(self):
         self.task["max_evidence_bytes"] -= 1
         self.assertEqual(self.check().reason, "evidence_budget")

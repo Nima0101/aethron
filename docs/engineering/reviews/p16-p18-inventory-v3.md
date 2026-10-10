@@ -1,15 +1,18 @@
 # P16–P18 review inventory v3
 
-Snapshot: `8c6ccdb9c4e9fa4aa49f9644398e47e5305973da`, plus local policy-floor implementation, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `ec55eb8bd3cdb25641b6ec761bbd200d90a5604b`, plus local binding-coverage and public-evidence corrections, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
 
 The history of the owned runtime files starts with passport admission, then evidence,
 tasks, bundles, federation and inbox. The entries below record prior review coverage;
-they do not complete the latest owner-ordered restart. The [current restart](p16-floor-current-v3.md)
-rechecks parser, signature and pinned policy, then corrects the pending floor-store
-slice. Evidence-byte binding is the next earliest unreviewed component of this restart.
+they do not complete the latest owner-ordered restart. The [floor review](p16-floor-current-v3.md)
+rechecked parser, signature and pinned policy, then corrected the floor-store slice.
+The [current binding review](p16-binding-current-v3.md) walks from those earliest
+components through evidence, tasks, bundles, federation and inbox. It adds full signed
+reference coverage and corrects two public evidence records rejected by hosted checks.
+Published schemas and conformance tooling are next in the current review cursor.
 The consumed JSON-bound helper belongs to the foundation lane.
 
 | Component | Current evidence and decision |

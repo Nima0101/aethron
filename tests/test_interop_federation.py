@@ -94,6 +94,24 @@ class FederationTests(unittest.TestCase):
         self.snapshot["peers"] = []
         self.assertEqual(self.check().reason, "untrusted_peer")
 
+    def test_all_signed_references_survive_federation_composition(self):
+        signer = self.bundle.fixture.signer
+        for reference, kind in zip(
+            signer.document["evidence"], ("synthetic", "recorded", "external_unverified")
+        ):
+            reference["kind"] = kind
+        signer.document["evidence"].reverse()
+        expected = tuple(dict(reference) for reference in signer.document["evidence"])
+        self.bundle.envelope = signer.envelope()
+        self.bundle.task["passport_sha256"] = fixtures.digest(self.bundle.envelope)
+        result = self.check(evidence=tuple(reversed(self.bundle.blobs)))
+        self.assertEqual((result.status, result.reason), ("bound", "direct_peer_scope_verified"))
+        self.assertEqual(
+            tuple(dataclasses.asdict(reference) for reference in result.evidence), expected
+        )
+        for name in ("execution_authority", "motion_authority", "evidence_verified"):
+            self.assertIs(dataclasses.asdict(result)[name], False)
+
     def test_scope_cannot_expand(self):
         self.snapshot["peers"][0]["issuers"] = ["other-publisher"]
         self.assertEqual(self.check().reason, "peer_scope_mismatch")

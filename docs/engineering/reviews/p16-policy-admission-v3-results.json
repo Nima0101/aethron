@@ -29,7 +29,7 @@
   "checks": {
     "related": {
       "command": [
-        "/home/heisenberg/Projects/aethron-migration-20261009/agent-runtime/parallel-p16-passport-20261009/venv/bin/python",
+        "python",
         "-m",
         "unittest",
         "test_passport_policy",
@@ -45,7 +45,7 @@
     },
     "ruff": {
       "command": [
-        "/home/heisenberg/Projects/aethron-migration-20261009/agent-runtime/parallel-p16-passport-20261009/venv/bin/ruff",
+        "ruff",
         "check",
         "aethron/passports.py",
         "tests/test_passport_policy.py"
@@ -54,7 +54,7 @@
     },
     "format": {
       "command": [
-        "/home/heisenberg/Projects/aethron-migration-20261009/agent-runtime/parallel-p16-passport-20261009/venv/bin/ruff",
+        "ruff",
         "format",
         "--check",
         "aethron/passports.py",
@@ -64,7 +64,7 @@
     },
     "bandit": {
       "command": [
-        "/home/heisenberg/Projects/aethron-migration-20261009/agent-runtime/parallel-p16-passport-20261009/venv/bin/bandit",
+        "bandit",
         "-q",
         "aethron/passports.py",
         "tests/test_passport_policy.py"
@@ -114,5 +114,13 @@
     "The full retrospective review remains incomplete; no audit-complete marker.",
     "No weapon control, targeting, actuation, sensor fusion or operational command implementation.",
     "No MLS, CNSA, uptime, target hardware or real-time qualification."
-  ]
+  ],
+  "publication_redaction": {
+    "baseline_commit": "ec55eb8bd3cdb25641b6ec761bbd200d90a5604b",
+    "original_record_sha256": "044fb7cd5754da9455bbf559d14e98404029b9659f67a7c6510d893fcd640d0c",
+    "executable_paths_replaced": 4,
+    "representation": "Command executable entries are public basenames with private local prefixes removed; not verbatim historical argv or a new execution.",
+    "preserved": "All historical command arguments, results, source hashes and runtime-log hashes remain unchanged.",
+    "cause": "The unchanged public-content gate rejected a local host path. This is a publication correction, not a passing full verification run."
+  }
 }
