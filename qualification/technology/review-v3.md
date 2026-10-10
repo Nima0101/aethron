@@ -12,6 +12,8 @@ claims. Source hashes alone are not proof of executed code.
 The [comparison/measurement follow-up](comparison-source-observation-v3.md)
 applies the same bounded claim to ingress report/export, artifact measurement
 and SQL comparison workloads.
+The [Node probe follow-up](node-source-observation-v3.md) checks module/vector
+observations around the experiments while retaining known parser failures.
 
 The [measurement lifecycle correction](#follow-up-measurement-lifecycle--2026-10-10)
 qualifies the older allocation results and corrects all three measurement drivers.

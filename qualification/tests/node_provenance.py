@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -33,7 +34,69 @@ class NodeProvenanceTests(unittest.TestCase):
             },
         )
         self.assertEqual(report.get("audit_policy_version"), 3)
+        self.assertEqual(report.get("source_observation"), "equal_before_and_after_workload")
         self.assertIs(report["physical_qualification_passed"], False)
+
+    def changed_source(self, probe, target, *, remove=False):
+        # Mutate only disposable copies, after the real experiment has started.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in (probe, "ingress-vectors-v1.json"):
+                (root / name).write_bytes((ROOT / PREFIX / name).read_bytes())
+            original = (root / target).read_bytes()
+            operation = "unlinkSync(target)" if remove else "appendFileSync(target, '\\n ')"
+            trigger = (
+                "const tick = process.hrtime.bigint;\n"
+                "process.hrtime.bigint = () => { const result = tick(); mutate(); return result; };"
+                if probe == "hash-probe.mjs"
+                else "const parse = JSON.parse;\n"
+                "JSON.parse = (...args) => { const result = parse(...args); "
+                "if (Buffer.isBuffer(args[0])) mutate(); return result; };"
+            )
+            (root / "driver.mjs").write_text(
+                "import { appendFileSync, unlinkSync } from 'node:fs';\n"
+                f"const target = new URL({json.dumps('./' + target)}, import.meta.url);\n"
+                "let changed = false;\n"
+                f"function mutate() {{ if (!changed) {{ changed = true; {operation}; }} }}\n"
+                f"{trigger}\n"
+                f"await import(new URL({json.dumps('./' + probe)}, import.meta.url));\n",
+                encoding="utf-8",
+            )
+            result = subprocess.run(
+                ["node", "--v8-pool-size=1", "driver.mjs"],
+                cwd=root,
+                env=dict(os.environ, UV_THREADPOOL_SIZE="1"),
+                capture_output=True,
+                timeout=15,
+                check=False,
+            )
+            if remove:
+                self.assertFalse((root / target).exists(), "mutation did not execute")
+            else:
+                self.assertNotEqual(
+                    (root / target).read_bytes(), original, "mutation did not execute"
+                )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(result.stdout, b"")
+            if not remove:
+                self.assertIn(b"probe_sources_changed", result.stderr)
+
+    def test_changed_module_prevents_report(self):
+        for probe in ("hash-probe.mjs", "ingress-probe.mjs"):
+            with self.subTest(probe=probe):
+                self.changed_source(probe, probe)
+
+    def test_changed_vectors_prevent_report(self):
+        self.changed_source("ingress-probe.mjs", "ingress-vectors-v1.json")
+
+    def test_removed_sources_prevent_report(self):
+        for probe, target in (
+            ("hash-probe.mjs", "hash-probe.mjs"),
+            ("ingress-probe.mjs", "ingress-probe.mjs"),
+            ("ingress-probe.mjs", "ingress-vectors-v1.json"),
+        ):
+            with self.subTest(probe=probe, target=target):
+                self.changed_source(probe, target, remove=True)
 
     def test_ingress_binds_source_and_vectors_without_erasing_negatives(self):
         report = self.probe("ingress-probe.mjs")
