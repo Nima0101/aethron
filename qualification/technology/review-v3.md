@@ -28,6 +28,9 @@ and floating substitutions that previously compared equal to integer counts.
 The [ingress corpus correction](ingress-corpus-review-v3.md) pins the reviewed
 vector bytes before export or comparison so an empty/replaced corpus cannot
 produce misleading parity evidence.
+The [artifact measurement result correction](binding-results-review-v3.md) requires
+the complete expected report from every timed and allocation-traced call before
+publishing measurements, including exact count types and non-qualification flags.
 
 The [measurement lifecycle correction](#follow-up-measurement-lifecycle--2026-10-10)
 qualifies the older allocation results and corrects all three measurement drivers.
