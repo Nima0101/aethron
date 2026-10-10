@@ -101,3 +101,65 @@ the executable comparison was absent. Final audit plus datagram regression run:
 are limited to fixed local commands and trusted installed SDK input. The generated
 C comparison compiles with `-Wall -Wextra -Werror`; normal and sanitized admission
 parity pass. No full repository suite, full fuzz or hardware qualification ran.
+
+## Managed lifecycle comparison — 2026-10-10 continuation
+
+The next executable comparison is an original JavaScript strict subset in
+`tests/mavlink/audit_v2/managed.mjs`, with a receiver state machine and a fixed
+CRC/message layout. It uses bounded Buffer reads and BigInt clock arithmetic;
+it has no socket or transmit API. This measures a managed-language alternative,
+not the node-mavlink/NextGen SDKs, their full dialects or their maintenance cost.
+No external npm code, install scripts or new packages are used. JavaScript is
+selected for this experiment because the primary MAVLink catalog establishes a
+credible protocol ecosystem and its different runtime permits direct resource
+comparison; availability of Node alone does not justify a production choice.
+
+```sh
+PYTHONPATH=integrations/edge python scripts/robotics_lifecycle_audit_v2.py --out build/lifecycle-audit-fresh
+```
+
+The final corpus has 16 cases/48 transitions. It checks independent sample expiry,
+the exact 100 ms boundary, clock rollback/invalid types, timestamps beyond 2^53,
+boot reset/wrap, sequence wrap/half-range rejection, malformed packet recovery,
+nonfinite values, signed-flag rejection and irreversible close. Every returned
+state, reason, sample value, unit/frame and provenance field is compared against
+the production Python adapter; four negative cases also have independent expected
+reasons. Two new tests initially failed for the missing comparison. The final
+managed and wire audit tests pass (6 methods), as do Ruff, Bandit and Node syntax
+checking. Narrow subprocess suppression covers fixed local audit commands only.
+An additional RED-to-GREEN check requires boolean authority fields to retain
+their JSON type: Python's ordinary equality would consider `False` equal to `0`.
+The comparator now rejects that mismatch while accepting equivalent JSON numeric
+representations such as `1` and `1.0`.
+
+[All measurement sets](../verification/robotics-lifecycle-audit-v2-results.json)
+are retained, including a final run with type-aware parity. In the second run's
+expanded corpus, fresh Python processes reported peak RSS
+28920 KiB and whole-process elapsed 0.915–1.412 s; Node 22.23.2 reported
+46192–46456 KiB and 0.379–0.689 s. Python uses less resident memory in this
+experiment; JavaScript finishes sooner. These numbers include startup, all cases
+and JSON output, not just initialization or packet decode. Three repetitions run
+sequentially, Python first in each pair; filesystem caches may be warm and the
+shared host scheduler is uncontrolled. They are not throughput or real-time
+qualification. The Python reference also loads pymavlink and the corpus encoder;
+the JavaScript process uses an original minimal decoder. Do not generalize this
+comparison to equally trimmed implementations or signed workers.
+The final type-aware run also retains a reversed timing pair: JavaScript took
+1.919 s versus Python 1.904 s. Neither runtime has a demonstrated worst-case
+startup bound, and these samples must not be reduced to an unconditional speed
+ranking.
+
+RSS sources are the documented Linux `resource.getrusage` and Node
+[`process.resourceUsage().maxRSS`](https://nodejs.org/docs/latest-v22.x/api/process.html#processresourceusage)
+interfaces. Clock transport uses decimal strings so JSON cannot silently round
+nanoseconds above JavaScript's safe Number range.
+
+The focused robotics workflow now runs both experiments and retains result JSON,
+including failed-state receipts when an experiment reaches output initialization.
+Workflow presence is not hosted execution evidence. Decision remains **PENDING**:
+the managed comparison exposes a resource tradeoff, while the earlier C comparison
+omits temporal/replay state and does not settle memory safety. Next compare a
+memory-safe native candidate at this same cursor before KEEP/MIGRATE. A larger
+runtime is not justified merely by a shorter synthetic run, and current Python
+is not retained merely because it is deployed. No forward feature work or audit
+completion marker is authorized by these intermediate results.
