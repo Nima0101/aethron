@@ -69,9 +69,30 @@ cleanup. The caller must stop its own session on logout. It does not erase copie
 held elsewhere. Timer scheduling and page lifecycle delivery are browser/OS
 assumptions, not measured deadlines or a reliable suspend detector.
 
-The current SDK archive is tested for Node. The adapter and panel compile to ESM,
-but a complete browser distribution with admitted ingress still needs a compatible
-SDK build and browser acceptance; structural tests compose the real SDK under Node.
+The SDK archive is tested for Node. `npm run build:browser --prefix examples/operator`
+now recompiles the SDK and these components, then produces a self-contained
+`browser-dist/aethron-observation.mjs`. An authorized browser host can import
+`Observation`, `observe`, `presentObservation`, `mountObservationPanel` and
+`mountObservationHost` from that module. It contains the existing generated
+validators; no CDN, package loader or runtime schema compiler is needed. The build
+tool is development-only and pinned in the lockfile. A populated npm cache permits
+offline dependency preparation with `npm ci --offline --ignore-scripts`.
+
+Deploy the component together with `LICENSE`, `AJV-LICENSE`, `ESBUILD-LICENSE` and
+`manifest.json`. The manifest binds compiled runtime inputs and output bytes; it
+does not attest the full source/toolchain closure or authorize a release. The build
+removes its previous named outputs before compiling, rejects changes to its
+explicit runtime dependency list, and writes the manifest last. An absent manifest
+means the build is incomplete. Do not serve the output directory during a build;
+copy a completed, verified artifact into the host's versioned distribution.
+
+Tests import the bundle from a data URL without external-module resolution and
+with string code generation disabled, compare admission with the Node SDK, and
+rebuild it for local byte reproduction. These remain Node/structural DOM checks,
+not browser acceptance. ES2022 output does not polyfill runtime APIs. In particular,
+strict wire ingress requires JSON.parse reviver context as well as Fetch streams,
+TextDecoder and structuredClone. Actual browser versions, transport/CORS policy,
+CSP, keyboard/accessibility behavior and installed-product acceptance are unverified.
 
 The panel updates existing controls without replacing them on refresh. Content
 uses text nodes; status has polite/atomic live-region attributes. Those semantics
@@ -101,3 +122,5 @@ See the presenter [ADR](adr.json) and [schema](adr.schema.json), panel
 [ADR](panel-adr.json) and [schema](panel-adr.schema.json), and
 [panel implementation plan](RENDERER-PLAN.md). The optional host has its own
 [lifecycle ADR](lifecycle-adr.json) and [closed schema](lifecycle-adr.schema.json).
+Browser packaging has a [technology decision](browser-adr.json) and
+[closed schema](browser-adr.schema.json).

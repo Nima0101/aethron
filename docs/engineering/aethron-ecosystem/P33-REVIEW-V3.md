@@ -943,3 +943,66 @@ producer-payload/full-event size discrepancy remain recorded. No full operator
 application, release-bound role-aware Help Center, P19 or lane completion is
 claimed. Next earliest unfinished component: browser-compatible SDK composition
 and a supported-browser lifecycle/keyboard harness.
+
+## P3.3/P12 browser component packaging checkpoint
+
+Baseline `5a92da58706bbf8b5fd2d398d782f11c2c1c4fba`. Re-read the authoritative
+policy and review order, then restarted at SDK admission/projection, wire/session,
+generators, package/service harness, presenter, panel and lifecycle. The lifecycle
+bridge's ten paths, 68 source bindings and eight reports matched; published that
+commit to PR #44. No new defect was demonstrated in those admission boundaries.
+The earlier queued/behind CI snapshot was at `c6db2d6`; no CI polling or merge.
+
+KEEP the typed JavaScript-host contracts and generated runtime admission. The
+requirements remain native Fetch/Streams/DOM integration, bounded wire admission,
+no runtime schema compiler, immediate withdrawal and no stored personal history.
+Fresh official [Kotlin/JS](https://kotlinlang.org/docs/js-overview.html) documentation
+confirms browser/Node module and multiplatform options. This lane has no existing
+JVM consumer requiring shared implementation, so that capability does not establish
+a migration win. [ReScript](https://rescript-lang.org/docs/manual/latest/bind-to-js-function)
+currently resolves to its language overview, which describes typed JavaScript and
+interop; it does not independently verify detailed bindings from earlier research.
+[TypeScript](https://www.typescriptlang.org/docs/handbook/typescript-from-scratch.html)
+provides static checking while runtime admission must remain explicit. Neither
+alternative supplies the missing browser artifact or browser scheduling guarantees
+by changing the source language. No cross-language performance ranking is claimed.
+Node generator/npm packaging and the Python actual-service fixture remain separate
+build/test boundaries; no new competing server or SDK was added.
+
+The next concrete mismatch was packaging: the SDK imported CommonJS generated
+validators and a package helper, while native browser ESM cannot resolve that
+Node package boundary. SELECT esbuild 0.28.2, pinned as a development dependency,
+to bundle fresh SDK/UI compilation into one ESM file. Compared Go/esbuild,
+JavaScript/Rollup with official CommonJS support, Rust/Rolldown and direct AJV ESM.
+The decisive property is built-in conversion/resolution plus inspectable dependency
+metadata without plugins or a second validator implementation, not compiler speed.
+See the closed [P12-004 ADR](../../../examples/operator/browser-adr.json) for source
+links and C4 views. The Rolldown documentation host failed; its official repository
+was available. Only the selected tool was executed.
+
+The output includes nine explicitly allowed runtime inputs, zero external imports,
+license bytes and an unsigned compiled-input/output hash manifest. Previous named
+outputs are invalidated before compilation; the manifest is written last. Failure
+to locate a compiler command removes stale output, and recovery reproduces every
+artifact byte locally. The artifact is 133,120 bytes without minification. This is
+an observed artifact size, not a memory/latency or browser compatibility bound.
+The CI client job now builds/tests and retains it using one Go scheduler thread.
+
+Six initial missing-artifact assertions failed. An additional test run was started
+before the first build finished and produced six missing-artifact failures; that
+orchestration failure is retained, not represented as a production defect. After
+the completed build, six initial checks passed. Expanded checks exercise bundled
+authenticated ingress, strict numeric tokens, duplicate keys, fixed error text,
+withdrawal, re-entry, bilingual structural rendering, licenses and failed-build
+recovery. See [source-bound results](evidence/phase3/p12-browser-component-v1.json).
+
+This resolves packaging only. The public `observe` callback does not expose its
+mutable observation as a lifecycle-owned source; a complete browser application
+still needs an explicit revocable transport/display integration, not a cached
+callback view treated as fresh evidence. Actual browser lifecycle, keyboard,
+accessibility and offline installed-product acceptance remain unverified. Existing
+Chromium timeouts and the producer-payload/whole-event cap discrepancy remain
+negative evidence. P19 role-aware release-bound help, native Android justification
+and other unfinished owned UI work remain open; no lane/audit completion marker.
+Next earliest unfinished component: supported-browser transport/display integration
+and its offline lifecycle/keyboard acceptance harness.

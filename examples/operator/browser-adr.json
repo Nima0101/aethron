@@ -1,0 +1,49 @@
+{
+  "id": "P12-004",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "KEEP TypeScript admission and presentation; add pinned esbuild 0.28.2 as a development-only bundler for a self-contained browser ESM component.",
+  "constraints": [
+    "Offline component includes validators and Unicode helper without a package loader, CDN or schema compiler at runtime.",
+    "Preserve SDK admission and withdrawal; browser and installed-product acceptance are separate gates.",
+    "Fresh compilation, closed bundled input set, byte hashes and licenses; no competing SDK or server changes."
+  ],
+  "alternatives": [
+    {
+      "technology": "Go / esbuild JavaScript API",
+      "assessment": "Selected: built-in CommonJS and ESM bundling, browser resolution, write:false and dependency metadata meet the single-output, closed-input contract without plugins. No speed ranking is claimed."
+    },
+    {
+      "technology": "JavaScript / Rollup with CommonJS and node-resolve plugins",
+      "assessment": "Credible ESM bundling and tree shaking. Official CommonJS documentation describes the added conversion plugin. This component needs no plugin customization or chunking; esbuild supplies its conversion and resolution in one pinned tool."
+    },
+    {
+      "technology": "Rust / Rolldown",
+      "assessment": "Official repository describes a Rust bundler with Rollup-compatible APIs. No measured superiority or required Rollup integration establishes a material win here. Not installed or benchmarked; documentation host failed, official repository was read."
+    },
+    {
+      "technology": "AJV standalone ESM and native unbundled modules",
+      "assessment": "Standalone ESM exports are available; helper references still need resolution. A separate validator format adds a parity surface; bundling the same generated code preserves one admission implementation."
+    }
+  ],
+  "sources": [
+    "https://esbuild.github.io/api/",
+    "https://rollupjs.org/introduction/",
+    "https://github.com/rollup/plugins/tree/master/packages/commonjs",
+    "https://github.com/rolldown/rolldown",
+    "https://ajv.js.org/standalone.html"
+  ],
+  "limits": [
+    "Node data-URL import and structural DOM tests do not qualify browsers, accessibility, CSP deployment, customer installation or hardware.",
+    "Manifest hashes compiled runtime inputs and artifacts. It is unsigned, not release-SHA attestation, toolchain closure or P19 acceptance.",
+    "ES2022 syntax does not polyfill APIs: strict ingress needs Fetch streams, structuredClone, TextDecoder and JSON.parse reviver context. Actual browsers require validation.",
+    "Local byte reproduction is not cross-platform reproducibility or hard-real-time evidence.",
+    "No weapon integration, actuation, MLS/CNSA qualification, DDS/Link16 interoperability or five-nines claim."
+  ],
+  "c4": {
+    "context": "flowchart LR\nIntegrator --> Build[Component build]\nBuild --> Browser[Caller-authorized read-only host]",
+    "containers": "flowchart LR\nSDK[Existing SDK] --> Compiler[Fresh compile]\nUI[Presenter panel lifecycle] --> Compiler\nCompiler --> Bundler[Pinned esbuild]\nBundler --> ESM[ESM and licenses]\nESM --> Host[Browser host]",
+    "components": "flowchart LR\nInvalidate[Remove previous named output] --> Compile[Compile SDK then UI]\nCompile --> Bundle[Bundle ESM]\nBundle --> Gate[Closed inputs and zero external imports]\nGate --> Output[Component and licenses]\nOutput --> Manifest[Hash manifest last]",
+    "code": "classDiagram\nclass BrowserComponent {\n Observation\n observe()\n presentObservation()\n mountObservationPanel()\n mountObservationHost()\n}\nclass Manifest {\n inputs\n artifacts\n external_imports\n qualified_browser false\n}\nBrowserComponent --> Manifest"
+  }
+}

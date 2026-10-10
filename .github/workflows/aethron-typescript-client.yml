@@ -41,6 +41,7 @@ jobs:
     timeout-minutes: 10
     env:
       UV_THREADPOOL_SIZE: '1'
+      GOMAXPROCS: '1'
       NODE_OPTIONS: '--v8-pool-size=1 --max-old-space-size=192'
       NPM_CONFIG_CACHE: ${{ github.workspace }}/build/ecosystem-phase1/npm-cache
     steps:
@@ -77,5 +78,6 @@ jobs:
           path: |
             build/ecosystem-phase1/client-ci/
             build/ecosystem-phase1/node-consumer.json
+            examples/operator/browser-dist/
           if-no-files-found: error
           retention-days: 14
