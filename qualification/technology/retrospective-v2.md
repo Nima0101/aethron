@@ -3,8 +3,8 @@
 This audit covers the existing qualification software in historical order:
 declaration validation (including rig, calibration, clock and environment
 rules), artifact byte binding, campaign coverage, then CLI/report delivery and
-verification tooling. Declaration validation and artifact binding have policy-2
-KEEP decisions below; campaign coverage and delivery/tooling decisions remain open.
+verification tooling. Declaration validation, artifact binding and campaign coverage
+have policy-2 KEEP decisions below; delivery/tooling remains open.
 Earlier technology notes are hypotheses to reassess, not completion evidence.
 No new qualification capability or physical result is claimed by this audit.
 
@@ -211,4 +211,85 @@ hashing is native. Reopen for a native consumer ABI, concurrent producer contrac
 or a demonstrated throughput/memory requirement the current path cannot satisfy.
 No winning production migration is identified.
 
-Cursor: campaign coverage. No lane audit completion marker is warranted.
+## Campaign coverage: constraints and alternatives
+
+The offline API accepts at most sixteen cases and sixty-four attempts, with each
+manifest capped at 65,536 bytes. It has no durable database, policy distribution,
+concurrent writers, external query API or embedded-device requirement. Every
+attempt contributes to the commitment and every negative finding survives even
+when another attempt meets the case minimum. A repeated digest invalidates all
+occurrences globally, including across cases. Missing cases count as zero.
+Reports retain plan order, sort findings and commit exact submitted bytes and
+evaluation instants independently of submission order. Fixed errors and aggregate
+reports must not disclose private case names. No hard execution deadline exists.
+
+Candidate discovery for these aggregation requirements includes:
+
+| Candidate | Decisive property and remaining work |
+|---|---|
+| Python Counter, sets and ordered lists | Explicit multiset counting before admission; no database or policy interpreter; bounded exact integers and deterministic explicit sorting. |
+| SQL/SQLite in memory | GROUP BY, COUNT and LEFT JOIN directly express duplicates and absent coverage. Preserve a distinct ordinal per submission, use bound parameters, close the connection, and retain negative rows separately. |
+| OPA/Rego | Declarative decisions over structured documents and denial sets fit coverage rules. Undefined decisions must fail closed; retain array indices so set construction cannot erase duplicate attempts; strict byte ingress and commitments still need a host boundary. |
+| Soufflé/Datalog | Relational aggregation suits evidence coverage and larger derived relations. An attempt ordinal is necessary to preserve multiplicity; facts/imports and fixed report serialization require a host boundary. No recursive relation is required here. |
+| CUE comprehensions and constraints | Good fit for plan shape and per-case constraints. Global multiplicity, retention of all rejected attempts, raw-byte commitments and report construction still require explicit design; schema validation alone is not the complete evaluator. |
+
+Sources inspected 2026-10-10: [Python multiset counting](https://docs.python.org/3/library/collections.html#collections.Counter),
+[SQLite aggregation](https://www.sqlite.org/lang_aggfunc.html),
+[private in-memory databases](https://www.sqlite.org/inmemorydb.html),
+[Rego policy semantics](https://www.openpolicyagent.org/docs/policy-language),
+[Soufflé aggregates](https://souffle-lang.github.io/aggregates), and
+[CUE comprehensions](https://cuelang.org/docs/tour/expressions/listcomp/).
+The suitability judgments are engineering inferences from these documented
+features, rather than measured claims about unimplemented alternatives.
+
+### Executable relational comparison
+
+`campaign_sql.py` is an audit-only SQL implementation of aggregation and report
+construction. It deliberately shares strict plan/input admission and per-capture
+semantic findings with production; it is **not** an independent whole validator.
+The SQL path inserts every submission with its ordinal, groups digests before
+counting eligible rows, uses a left join for missing coverage and orders all
+commitment rows. It creates a private `:memory:` connection, requests memory-only
+temporary storage, binds all input values as parameters, and explicitly closes
+it. No files, SQL supplied by a caller, extension loading or network are used.
+
+The new test class first failed eleven methods because the prototype did not
+exist. After implementation, all eleven methods pass across 48 candidate calls,
+including the original nine contract methods plus permutation and full-cardinality
+cases. Assertions cover fixed errors, timing/rig/environment negatives, missing
+coverage, cross-case duplicates, commitments and permanently false qualification
+flags. Changing the SQL singleton filter from `n = 1` to `n >= 1` causes three
+assertion failures and zero execution errors. The mutation is temporary and never
+changes production. This demonstrates sensitivity to accidental duplicate credit.
+
+`compare_campaign.py` reproduces those checks and runs ten alternating-order calls
+of each full path at sixteen cases and sixty-four unique byte inputs. Python
+3.13.5/SQLite 3.46.1 measured medians of 86.502 ms (Python aggregation) and 87.162 ms
+(SQL aggregation), with maxima 91.679 ms and 90.344 ms. The small median difference
+on this shared host is **not** a speed ranking. Tracemalloc peaks were 37,823 and
+48,866 bytes respectively; preconstructed inputs and native SQLite allocations
+are excluded, so these numbers are not total memory comparisons. Source digests,
+raw timing arrays and the report are retained in `campaign-sql-result-v1.json`.
+Whitespace-distinct synthetic manifests exercise the byte-identity contract only;
+they do not establish independent physical captures.
+
+**Decision: KEEP Python for campaign coverage.** The required operation is a
+finite multiset count and negative-finding union, with deterministic formatting.
+Counter and sets express it directly without query schema, connection lifetime,
+fact import or undefined-policy-result semantics in the trusted production path.
+The relational alternative demonstrates contract parity, but no correctness or
+measured resource improvement that warrants adding its execution boundary at
+64 rows. Rego/CUE/Datalog would become stronger candidates if externally authored
+policies or recursive relationships were required; SQL would gain value for
+large persistent evidence collections. Those are absent deployment requirements,
+not objections to the technologies. Existing language, installation convenience
+and rewrite cost do not decide this choice. No winning migration is identified;
+the executable alternative and mutation checks remain regression evidence.
+
+Reproduce with `python3 -m qualification.technology.compare_campaign`.
+Hosted qualification contracts run the candidate parity tests on Python 3.9 and
+3.13; the audit job retains the comparison artifact. Workflow configuration does
+not constitute a hosted pass.
+
+Cursor: CLI/report delivery and verification tooling. No lane audit completion
+marker is warranted.

@@ -124,6 +124,8 @@ jobs:
           assert python["artifact_counts"]["matched"] == 4
           assert python["physical_qualification_passed"] is False
           PY
+      - name: Compare campaign aggregation and duplicate mutation
+        run: python -m qualification.technology.compare_campaign > "$RUNNER_TEMP/qualification-audit/campaign-comparison.json"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
