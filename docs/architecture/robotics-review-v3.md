@@ -170,3 +170,33 @@ prove each named header guard; the fixture names are not isolated guard coverage
 The C runner's JSON member admission and subprocess diagnostic retention have not
 received the later managed/native corrections. Those evidence limitations remain
 open, as do the first-component technology decision and subsequent V3 reviews.
+
+## C comparison JSON admission and subprocess evidence
+
+The preceding C JSON/retention issues are corrected for the offline `run(out)`
+path. Five candidate documents with repeated root/nested members or non-finite
+numbers previously reached a successful comparison receipt. Two subprocess cases
+also demonstrated missing timeout/nonzero-exit logs. The loader now uses the
+documented JSON member/number hooks described above, and the process wrapper saves
+binary stdout/stderr before exit checking or UTF-8 decoding. Timeout partial bytes
+are saved before the original exception propagates. Compiler, candidate, sanitizer
+and compiler-version calls use distinct log names. The failed receipt records the
+stage and exception type without copying command arguments or raw exception text.
+
+The same bounded corpus and numeric tolerance remain. Compiler/candidate timeouts
+remain 30/5 seconds. The reference output and input corpus are retained alongside
+process logs, and the hosted upload configuration now includes these artifacts.
+This does not claim that the changed workflow has run. The artifact directory must
+still be new; storage failure, abrupt termination or process-spawn failure can
+prevent complete logs. In-process Python generation errors are not subprocess
+output and are not covered by the wrapper's binary-log claim.
+
+[Evidence](../verification/robotics-wire-json-retention-review-v3.json) retains
+the initial fixture mistake, seven corrected RED assertions, 25 passing focused
+methods and normal/sanitized execution of the unchanged 17-case experiment. Five
+output pairs were retained and both candidate logs independently parsed and checked
+against the reference. Real local fixture processes also verify rejected JSON and
+invalid UTF-8 retention. No production receiver, candidate decoder or frozen bound
+changed. The new receipt is separate from historical measurements; no performance
+ranking is inferred. This resolves these evidence defects, not the open technology
+decision, isolated-header-guard coverage or complete V3 review.

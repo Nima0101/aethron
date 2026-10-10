@@ -1,0 +1,114 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "ed6f15a67d1e685b9d956da6b523c09f458fa895",
+  "component": "passive_wire comparison evidence",
+  "decision": "FIX C JSON admission and subprocess retention",
+  "production_receiver_changed": false,
+  "runtime_decision": "PENDING",
+  "initial_test_fixture_error": {
+    "assertion_failures": 6,
+    "errors": 1,
+    "reason": "Root-duplicate fixture omitted benchmark metadata; KeyError before intended assertion"
+  },
+  "corrected_red": {
+    "methods": 8,
+    "assertion_failures": 7,
+    "errors": 0
+  },
+  "green": {
+    "methods": 25,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_s": 3.412
+  },
+  "static": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS",
+    "actionlint": "PASS"
+  },
+  "retained_negatives": [
+    "Independent log recheck initially used system Python without pymavlink; rerun in lane virtual environment passed"
+  ],
+  "source_sha256": {
+    ".github/workflows/aethron-robotics.yml": "0e70ea14c901690470be6e3dfbad44d269be5f2981f6d4f3d542552d8e963d39",
+    "scripts/robotics_wire_audit_v2.py": "2b10f47c073dedd36f0a1b3d6c5eec09ec8afc10caefaf37b51f9f2f84bf3f35",
+    "tests/mavlink/test_wire_audit_v2.py": "9754cf1c1073c0daa6160cae8fe99dc3192a6ffa6fe01b91039640878e61a8c1"
+  },
+  "retained_local_logs": {
+    "wire-json-retention-red.log": "4c468e2174663c4333aec8d2197f6fb49afe01cc5ebe339c8b1a7dea11b6b751",
+    "wire-json-retention-red-corrected.log": "db5ac06d0ab762b2a2acebd6cb4b9ce64ecf4410f48562663a53d1e3f4d1fe8c",
+    "wire-json-retention-green.log": "226d4bd09792673815b2f68d74cc097be4f6e6aa2de727edf9956cda76584084",
+    "wire-json-retention-final.log": "957a81ebcd6ed07ca82efa0eb5f79fdde410b45203b8d30e27131c1c87909f02",
+    "wire-json-retention-comparison.log": "4ba37d582230a29c2a165f16a1b3111a34c407000a971f1b2e49f3c78c627a6f"
+  },
+  "output_retention": {
+    "stdout_files": 5,
+    "stderr_files": 5,
+    "candidate_parity_rechecks": 2,
+    "sha256": {
+      "candidate-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "candidate-stdout.log": "fa7faab080632da3f6741b11911d40d0e6ef3ef77394720b167b92d78e33a9b3",
+      "compiler-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "compiler-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "compiler-version-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "compiler-version-stdout.log": "78fc11ae2c3ff7c235eb18ed90989d18f6cc864fb27027f839368cd0888deebc",
+      "sanitized-candidate-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sanitized-candidate-stdout.log": "b8045fe5ad059469225d4ebd0618d4091ef2f1b8f9e2da78898807ba6f133d09",
+      "sanitized-compiler-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sanitized-compiler-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "comparison_receipt_sha256": "4ba37d582230a29c2a165f16a1b3111a34c407000a971f1b2e49f3c78c627a6f",
+  "comparison_receipt": {
+    "audit_policy_version": 2,
+    "state": "compared",
+    "decision": "PENDING",
+    "scope": "fresh unsigned packet admission only; not lifecycle/signing parity",
+    "corpus_cases": 17,
+    "parity": true,
+    "sanitized_parity": true,
+    "python": {
+      "samples": 512,
+      "accepted": 92,
+      "p50_ns": 27166,
+      "p95_ns": 115499,
+      "max_ns": 6237534
+    },
+    "c": {
+      "samples": 512,
+      "accepted": 92,
+      "p50_ns": 41,
+      "p95_ns": 403,
+      "max_ns": 808
+    },
+    "python_version": "3.13.5",
+    "machine": "x86_64",
+    "system": "Linux",
+    "compiler": "cc (Debian 14.2.0-19) 14.2.0",
+    "xml_sha256": "fbac92d0689c9b1bc03b49ebc5cdf989f3fc23026c3c856f7224e4b9af1b5f53",
+    "driver_sha256": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483",
+    "harness_sha256": "2b10f47c073dedd36f0a1b3d6c5eec09ec8afc10caefaf37b51f9f2f84bf3f35",
+    "corpus_sha256": "d51999b7a2011a0615f9ead65d0080db8733d5c99cb42225d80e7f2c9b7aebdb",
+    "pymavlink": "2.4.50",
+    "limitations": [
+      "512 mixed valid/invalid probes; no hard-real-time claim",
+      "Python constructor excluded; C stack setup included",
+      "C omits state, provenance objects and persistent replay",
+      "No memory, cold-start, signed, UDP or SITL comparison"
+    ]
+  },
+  "reference_sha256": "7a5d2989484c3069e7547235a7b9f9751a1431d51d7f4e536086cc0cdbaeeb89",
+  "sources": [
+    "https://docs.python.org/3/library/json.html#standard-compliance-and-interoperability",
+    "https://docs.python.org/3/library/subprocess.html#subprocess.TimeoutExpired"
+  ],
+  "limits": [
+    "No production adapter, candidate decoder, corpus, tolerance or timeout change",
+    "No changed-workflow remote execution claimed",
+    "Storage failure, abrupt termination or spawn failure may prevent complete retention",
+    "In-process generation diagnostics are outside subprocess binary-log coverage",
+    "Header rejection fixtures do not isolate each guard; technology choice remains pending",
+    "No hardware, real-time, installed-package or complete V3 qualification"
+  ]
+}

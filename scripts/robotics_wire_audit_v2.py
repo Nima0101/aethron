@@ -103,11 +103,45 @@ def check_parity(expected, actual):
                 raise ValueError("candidate_parity_failed")
 
 
-def _execute(command, *, timeout):
+def _execute(command, *, timeout, out, label):
     # All callers supply fixed local commands; no shell or remote installer.
-    return subprocess.run(  # nosec B603
-        command, check=True, capture_output=True, text=True, timeout=timeout
-    ).stdout
+    try:
+        completed = subprocess.run(  # nosec B603
+            command, check=False, capture_output=True, timeout=timeout
+        )
+    except subprocess.TimeoutExpired as error:
+        (out / f"{label}-stdout.log").write_bytes(error.stdout or b"")
+        (out / f"{label}-stderr.log").write_bytes(error.stderr or b"")
+        raise
+    (out / f"{label}-stdout.log").write_bytes(completed.stdout)
+    (out / f"{label}-stderr.log").write_bytes(completed.stderr)
+    completed.check_returncode()
+    return completed.stdout.decode("utf-8")
+
+
+def _unique_members(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate_json_member")
+        result[key] = value
+    return result
+
+
+def _finite_number(token):
+    value = float(token)
+    if not math.isfinite(value):
+        raise ValueError("nonfinite_json_number")
+    return value
+
+
+def decode_candidate(raw):
+    return json.loads(
+        raw,
+        object_pairs_hook=_unique_members,
+        parse_constant=_finite_number,
+        parse_float=_finite_number,
+    )
 
 
 def run(out):
@@ -117,7 +151,13 @@ def run(out):
         "state": "failed",
         "decision": "PENDING",
         "scope": "fresh unsigned packet admission only; not lifecycle/signing parity",
+        "failed_stage": "setup",
     }
+
+    def execute(command, label, timeout):
+        report["failed_stage"] = label
+        return _execute(command, timeout=timeout, out=out, label=label)
+
     try:
         if version("pymavlink") != "2.4.50":
             raise ValueError("unreviewed_sdk")
@@ -136,6 +176,7 @@ def run(out):
         ET.ElementTree(subset).write(subset_path)
         from pymavlink.generator import mavgen
 
+        report["failed_stage"] = "generation"
         with (out / "generation.log").open("w") as log, contextlib.redirect_stdout(log):
             if not mavgen.mavgen(
                 mavgen.Opts(str(out / "generated"), wire_protocol="2.0", language="C"),
@@ -145,6 +186,8 @@ def run(out):
         cases = corpus()
         (out / "corpus.json").write_text(json.dumps(cases, indent=2) + "\n")
         packets = [bytes.fromhex(case["hex"]) for case in cases]
+        expected = [python_result(data) for data in packets]
+        (out / "expected.json").write_text(json.dumps(expected, indent=2) + "\n")
         vectors = ["static const uint8_t vectors[][320] = {"]
         vectors.extend("{" + ",".join(map(str, data or b"\0")) + "}," for data in packets)
         vectors += [
@@ -172,17 +215,21 @@ def run(out):
             "-o",
             str(executable),
         ]
-        _execute(command, timeout=30)
-        candidate = json.loads(_execute([str(executable)], timeout=5))
-        expected = [python_result(data) for data in packets]
+        execute(command, "compiler", 30)
+        candidate = decode_candidate(execute([str(executable)], "candidate", 5))
         check_parity(expected, candidate["results"])
         sanitized = (out / "reference-sanitized").resolve()
-        _execute(
+        execute(
             command[:-2]
             + ["-fsanitize=address,undefined", "-fno-omit-frame-pointer", "-o", str(sanitized)],
-            timeout=30,
+            "sanitized-compiler",
+            30,
         )
-        check_parity(expected, json.loads(_execute([str(sanitized)], timeout=5))["results"])
+        check_parity(
+            expected,
+            decode_candidate(execute([str(sanitized)], "sanitized-candidate", 5))["results"],
+        )
+        report["failed_stage"] = "baseline"
         for case, result in zip(cases, expected):
             if case["accepted"] != result["accepted"]:
                 raise ValueError("baseline_contract_failed")
@@ -211,7 +258,7 @@ def run(out):
             python_version=platform.python_version(),
             machine=platform.machine(),
             system=platform.system(),
-            compiler=_execute(["cc", "--version"], timeout=5).splitlines()[0],
+            compiler=execute(["cc", "--version"], "compiler-version", 5).splitlines()[0],
             xml_sha256=hashlib.sha256(xml.read_bytes()).hexdigest(),
             driver_sha256=hashlib.sha256(driver.read_bytes()).hexdigest(),
             harness_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
@@ -224,9 +271,13 @@ def run(out):
                 "No memory, cold-start, signed, UDP or SITL comparison",
             ],
         )
+        report.pop("failed_stage")
         return report
+    except Exception as error:
+        report["failure_type"] = type(error).__name__
+        raise
     finally:
-        (out / "result.json").write_text(json.dumps(report, indent=2) + "\n")
+        (out / "result.json").write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
 
 
 if __name__ == "__main__":

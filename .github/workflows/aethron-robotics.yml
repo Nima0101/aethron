@@ -64,4 +64,7 @@ jobs:
             build/robotics-audit/native/expected.json
             build/robotics-audit/lifecycle/*.log
             build/robotics-audit/lifecycle/expected.json
+            build/robotics-audit/wire/*.log
+            build/robotics-audit/wire/expected.json
+            build/robotics-audit/wire/corpus.json
           if-no-files-found: warn
