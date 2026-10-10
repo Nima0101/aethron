@@ -70,3 +70,22 @@ run, or recover individual timing samples. The stock-parser counterexample is
 not a complete alternate replay implementation. The recorded fragmented-input
 advantage for `readinto`, tracing-versus-RSS distinction and previous failures
 remain unchanged. No timing or whole-replay qualification is added.
+
+## C03 and C04 historical snapshot retrieval
+
+The geometry report and its three source hashes match public delivery commit
+`8d5a1728bcba7373aa7fcae577bfe9c03bf4162e`. The registration report and its three
+source hashes match public delivery commit
+`05456766041c88f4094d6e767bc2672e5484e9d1`. Each set covers its implementation,
+tests and comparison harness. `historical_geometry_binding` and
+`historical_registration_binding` record these immutable retrieval references.
+Neither the reports nor their retained source hashes are modified.
+
+These checks identify final snapshots. They do not authenticate execution,
+recover individual timing samples or prove that the recorded process loaded
+those files. In particular, C04's initial and intermediate experiment source
+snapshots remain unverified by this supplement. Current harness corrections
+must not be retroactively attributed to historical reports. The scalar-only
+C03 comparison, C04's single translated fixture, source-only alternatives and
+prior failures retain their original limits. No numerical algorithm, calibration
+claim, timing result or technology decision changes in this supplement.

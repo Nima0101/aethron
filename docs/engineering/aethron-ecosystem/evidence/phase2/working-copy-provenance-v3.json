@@ -1,6 +1,6 @@
 {
   "review_order_version": 3,
-  "scope": "C01/C02 historical snapshots and C08/C09 working-copy source retrieval",
+  "scope": "C01\u2013C04 historical snapshots and C08/C09 working-copy source retrieval",
   "decision": "CLARIFY",
   "full_component_review_complete": false,
   "records": [
@@ -43,17 +43,22 @@
     "historical_packet_report_bytes_verified": 1,
     "historical_packet_source_bytes_verified": 4,
     "historical_replay_report_bytes_verified": 1,
-    "historical_replay_source_bytes_verified": 4
+    "historical_replay_source_bytes_verified": 4,
+    "historical_geometry_report_bytes_verified": 1,
+    "historical_geometry_source_bytes_verified": 3,
+    "historical_registration_report_bytes_verified": 1,
+    "historical_registration_source_bytes_verified": 3
   },
   "limits": [
     "Bindings identify publicly retrievable bytes, not authenticated execution.",
     "Original working-copy review notes and prior negative evidence remain unchanged.",
     "No new KEEP/MIGRATE, sensor performance, boot/soak or hardware qualification.",
     "C01 public binding identifies the final source snapshot only; superseded experiment source snapshots and historical execution are not verified.",
-    "C02 binding covers the final snapshot; before-observation sources and historical execution remain unverified."
+    "C02 binding covers the final snapshot; before-observation sources and historical execution remain unverified.",
+    "C03/C04 bindings identify final source snapshots; historical execution and C04 initial/intermediate source snapshots remain unverified."
   ],
   "documentation_sha256": {
-    "docs/engineering/aethron-ecosystem/P21-WORKING-COPY-PROVENANCE-V3.md": "bd7906551c1bc2ce4fe0a582c78e692f8ae2dec9c8d738a72d70616db7216f75"
+    "docs/engineering/aethron-ecosystem/P21-WORKING-COPY-PROVENANCE-V3.md": "cf3c69bbd062f4b06205e7ff9afe0e4275658719670335fb94a45291d938a588"
   },
   "historical_packet_binding": {
     "report": "docs/engineering/aethron-ecosystem/evidence/phase2/technology-v2-packets.json",
@@ -84,5 +89,32 @@
     "before_observation_source_bindings": "unverified",
     "raw_timing_samples": "not retained in this report",
     "execution_attested": false
+  },
+  "historical_geometry_binding": {
+    "report": "docs/engineering/aethron-ecosystem/evidence/phase2/technology-v2-geometry.json",
+    "report_commit": "8d5a1728bcba7373aa7fcae577bfe9c03bf4162e",
+    "report_sha256": "36afb276b6cbe5683db6e123ab997fc4e2f4e0095e14ad0baf3ae25d797080a4",
+    "source_commit": "8d5a1728bcba7373aa7fcae577bfe9c03bf4162e",
+    "source_sha256": {
+      "integrations/edge/aethron_edge/sensors/geometry.py": "24dbd7e248990f426d985d05e9add08615621381f4391209a85682102f50d02b",
+      "tests/integration/test_sensor_geometry_numeric.py": "cf5e7cf076878f9207141d251e34c53bcdc85649cc772688e6acecd2f1c3dc2d",
+      "scripts/probes/sensor_geometry_audit/compare.py": "68c5d27f8e9688ec344a4d9c72b1936c76ca4944032414ebf151557ed3d90e57"
+    },
+    "raw_timing_samples": "not retained in this report",
+    "execution_attested": false
+  },
+  "historical_registration_binding": {
+    "report": "docs/engineering/aethron-ecosystem/evidence/phase2/technology-v2-registration.json",
+    "report_commit": "05456766041c88f4094d6e767bc2672e5484e9d1",
+    "report_sha256": "9899f84339b083d191f251f3e681a1c991dd88fab5d1c61516df186c32b93dcf",
+    "source_commit": "05456766041c88f4094d6e767bc2672e5484e9d1",
+    "source_sha256": {
+      "integrations/edge/aethron_edge/sensors/registration.py": "6ec929ab4c081e10fbc258e59667aa8387603811d8f2fa4d285840fa9d60f22b",
+      "tests/integration/test_sensor_registration.py": "77698fde83d36d9f6c78e9a2d8a122ae6adc691ef592b3cc9338013d27f01e7c",
+      "scripts/probes/sensor_registration_audit/compare.py": "e2bd04e03e04ab67d1053f30005d13be2fe62f2cfb94f8dc4913632d9d713fce"
+    },
+    "raw_timing_samples": "not retained in this report",
+    "execution_attested": false,
+    "initial_and_intermediate_source_bindings": "unverified"
   }
 }
