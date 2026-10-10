@@ -778,3 +778,14 @@ hooks. Nine expected RED assertions became green; 34 focused methods pass.
 [Evidence](../verification/robotics-reference-json-v3.json) binds this correction
 to source and logs. Production telemetry and candidate drivers are unchanged.
 This does not complete case/schema admission or the runtime reassessment.
+
+## Validate lifecycle experiment case envelopes
+
+The [case-envelope review](../verification/robotics-comparator-coverage-v3.md#lifecycle-case-envelopes)
+found inconsistent acceptance of empty or malformed cases and ignored names.
+Python reference/native preparation now share envelope validation; the JavaScript
+driver checks the same constraints independently before constructing receivers.
+The original corpora, reference outputs and generated Rust constants are unchanged.
+[Retained evidence](../verification/robotics-case-envelope-v3.json) records 23 RED
+assertions and 37 passing focused methods. This fixes experiment admission, not
+the production adapter or the still-pending runtime selection.

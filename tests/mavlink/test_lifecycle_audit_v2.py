@@ -67,6 +67,72 @@ class LifecycleAuditTests(unittest.TestCase):
                 with self.assertRaises(subprocess.CalledProcessError):
                     self.api._child(["node", str(self.api.DRIVER)], cases)
 
+    def case_adapters(self):
+        spec = importlib.util.spec_from_file_location(
+            "native_case_audit", self.api.ROOT / "scripts/robotics_native_audit_v2.py"
+        )
+        native = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(native)
+        return {
+            "reference": self.api.reference,
+            "native_fixture": native.fixture_source,
+            "javascript": lambda cases: self.api._child(["node", str(self.api.DRIVER)], cases),
+        }
+
+    def test_case_envelopes_reject_empty_ambiguous_and_excess_work(self):
+        steps = [{"op": "snapshot", "now": "0"}]
+        valid = {"name": "case", "steps": steps}
+        invalids = [
+            [],
+            {},
+            [{"steps": steps}],
+            [dict(valid, ignored=True)],
+            [dict(valid, name=False)],
+            [dict(valid, name="")],
+            [valid, dict(valid)],
+            [dict(valid, steps=[])],
+            [dict(valid, steps={})],
+            [dict(valid, name=str(i)) for i in range(65)],
+            [dict(valid, steps=steps * 65)],
+        ]
+        for name, adapter in self.case_adapters().items():
+            for index, cases in enumerate(invalids):
+                with self.subTest(adapter=name, case=index):
+                    with self.assertRaises((ValueError, subprocess.CalledProcessError)):
+                        adapter(cases)
+
+    def test_reference_checks_all_case_envelopes_before_execution(self):
+        valid = {"name": "valid", "steps": [{"op": "snapshot", "now": "0"}]}
+        for invalid in (
+            None,
+            False,
+            "case",
+            [],
+            {"name": "bad"},
+            dict(valid, name="bad_steps", steps=None),
+        ):
+            with self.subTest(case=invalid), patch.object(self.api, "PassiveTelemetry") as source:
+                with self.assertRaisesRegex(ValueError, "audit_case_record|audit_step_limit"):
+                    self.api.reference([valid, invalid])
+                source.assert_not_called()
+
+    def test_case_envelopes_preserve_inclusive_work_bounds(self):
+        steps = [{"op": "snapshot", "now": "0"}]
+        for cases in (
+            [{"name": str(i), "steps": steps} for i in range(64)],
+            [{"name": "steps", "steps": steps * 64}],
+        ):
+            expected = self.api.reference(cases)
+            for name, adapter in self.case_adapters().items():
+                with self.subTest(adapter=name, cases=len(cases)):
+                    value = adapter(cases)
+                    if name == "javascript":
+                        self.api.check_parity(expected, value[0]["results"])
+                    elif name == "native_fixture":
+                        self.assertEqual(value.count("Step {"), 64)
+                    else:
+                        self.api.check_parity(expected, value)
+
     def reference_cli(self, payload):
         return subprocess.run(  # nosec B603
             [sys.executable, str(Path(self.api.__file__)), "--reference"],
@@ -92,14 +158,18 @@ class LifecycleAuditTests(unittest.TestCase):
                 self.assertEqual(result.stdout, b"")
 
     def test_reference_cli_rejects_oversize_bytes_and_hidden_tail(self):
-        unicode_case = json.dumps([{"name": "é" * 33000, "steps": []}], ensure_ascii=False).encode(
-            "utf-8"
-        )
-        for payload in (b"[]" + b" " * 65535, b"[]" + b" " * 65535 + b"invalid", unicode_case):
+        steps = [{"op": "snapshot", "now": "0"}]
+        small = json.dumps([{"name": "valid", "steps": steps}]).encode()
+        oversized = small + b" " * (65537 - len(small))
+        unicode_case = json.dumps(
+            [{"name": "é" * 33000, "steps": steps}], ensure_ascii=False
+        ).encode("utf-8")
+        for payload in (oversized, oversized + b"invalid", unicode_case):
             with self.subTest(size=len(payload)):
                 result = self.reference_cli(payload)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertEqual(result.stdout, b"")
+                self.assertIn(b"audit_input_too_large", result.stderr)
 
     def test_reference_cli_preserves_corpus_and_exact_byte_limit(self):
         cases = self.api.corpus()
@@ -121,7 +191,7 @@ class LifecycleAuditTests(unittest.TestCase):
                 out = Path(directory) / "attempt"
                 failure = error_type("synthetic-private-diagnostic")
                 with (
-                    patch.object(self.api, "corpus", return_value=[]),
+                    patch.object(self.api, "corpus", return_value=self.api.corpus()[:1]),
                     patch.object(self.api, "_child", side_effect=failure) as child,
                     self.assertRaises(error_type) as caught,
                 ):
@@ -181,7 +251,16 @@ class LifecycleAuditTests(unittest.TestCase):
             self.assert_source_receipt(report)
 
     def test_later_failure_preserves_validated_measurements_and_partial_pair(self):
-        valid = b'{"results": [], "peak_rss_kib": 42, "runtime": "fixture"}\n'
+        valid = (
+            json.dumps(
+                {
+                    "results": self.api.reference(self.api.corpus()[:1]),
+                    "peak_rss_kib": 42,
+                    "runtime": "fixture",
+                }
+            ).encode()
+            + b"\n"
+        )
         failures = (
             subprocess.TimeoutExpired("fixture", 10, output=b"partial", stderr=b"timeout"),
             subprocess.CompletedProcess(["fixture"], 7, b"failed", b"exit"),
@@ -205,7 +284,7 @@ class LifecycleAuditTests(unittest.TestCase):
                 responses = [subprocess.CompletedProcess(["fixture"], 0, valid, b"")] * 3
                 responses.append(failure)
                 with (
-                    patch.object(self.api, "corpus", return_value=[]),
+                    patch.object(self.api, "corpus", return_value=self.api.corpus()[:1]),
                     patch.object(self.api.subprocess, "run", side_effect=responses),
                     patch.object(self.api.time, "monotonic_ns", side_effect=range(0, 80, 10)),
                 ):

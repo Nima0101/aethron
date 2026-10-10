@@ -257,3 +257,43 @@ input rejection are not established here. The managed driver still uses
 `JSON.parse`; this Python CLI correction must not be described as cross-runtime
 duplicate-member parity. Production receiver code and all candidate drivers are
 unchanged. The production runtime decision remains PENDING.
+
+## Lifecycle case envelopes
+
+Reviewed baseline: `4689c771f14f398e5b09ef89224a8a51c2ee21af`.
+The reference accepted empty arrays/objects as experiments, ignored missing or
+extra case metadata, and did not apply the native generator's case/step bounds.
+The JavaScript driver allowed empty arrays and ignored case names. This could
+produce ordinary comparison results for no work or ambiguous labels.
+
+All three paths now require a list of 1–64 cases. Each case has exactly `name`
+and `steps`, with a nonempty string name unique within the experiment and a list
+of 1–64 steps. Python reference and native preparation share a preflight check;
+JavaScript implements it independently. Every case envelope is checked before
+any receiver is created. This aligns the existing native work bounds; it does
+not change physical thresholds, packet policy or clock-value semantics.
+
+The existing direct checks remain suitable for this small audit envelope.
+[JSON Schema array constraints](https://json-schema.org/understanding-json-schema/reference/array#length)
+can express list lengths, but name uniqueness across objects also needs an
+explicit projected-name check. Here a bounded set and exact field checks preserve
+input types without a second schema runtime in the measurement process. This
+is a scoped correctness correction, not comparative performance evidence or
+a production-language KEEP decision.
+
+The [receipt](robotics-case-envelope-v3.json) retains 23 expected RED assertions
+across reference, native generation and actual Node invocation, then 37 passing
+focused methods. Inclusive 64-case and 64-step tests pass. A mocked receiver
+confirms invalid later case envelopes are rejected before execution. An interim
+test fixture accidentally reused a name and exercised the wrong rejection; that
+failed run is retained, and the corrected fixture uses a distinct name. Existing
+negative clock/packet tests now supply valid named envelopes so they still reach
+the intended rejection. Oversized CLI tests use otherwise-valid cases and assert
+the size error to avoid false positives from the new empty-case rejection.
+
+All original 16 lifecycle cases/48 steps, reference outputs and 40-case/72-step
+native generated inputs are unchanged. Ruff, formatting, Bandit and Node syntax
+checks pass; three envelope methods were rerun after formatting. No new native
+compilation, hardware qualification or timing ranking is claimed. Operation value
+domains and independent JavaScript duplicate-member rejection remain separate
+boundaries. Production runtime selection and later-component review are pending.

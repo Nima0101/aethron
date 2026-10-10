@@ -80,10 +80,25 @@ class Receiver {
 const raw = readFileSync(0);
 if (raw.length > 65536) throw new Error('audit_input_limit');
 const cases = JSON.parse(raw);
-if (!Array.isArray(cases) || cases.length > 64) throw new Error('audit_case_limit');
+if (!Array.isArray(cases) || cases.length < 1 || cases.length > 64) {
+  throw new Error('audit_case_limit');
+}
+const names = new Set();
+for (const c of cases) {
+  if (c === null || typeof c !== 'object' || Array.isArray(c) ||
+      Object.keys(c).length !== 2 || !Object.hasOwn(c, 'name') || !Object.hasOwn(c, 'steps')) {
+    throw new Error('audit_case_record');
+  }
+  if (typeof c.name !== 'string' || c.name.length === 0 || names.has(c.name)) {
+    throw new Error('audit_case_name');
+  }
+  names.add(c.name);
+  if (!Array.isArray(c.steps) || c.steps.length < 1 || c.steps.length > 64) {
+    throw new Error('audit_step_limit');
+  }
+}
 const results = cases.map(c => {
   const receiver = new Receiver();
-  if (c.steps.length > 64) throw new Error('audit_step_limit');
   return c.steps.map(step => {
     if (step === null || typeof step !== 'object' || Array.isArray(step)) {
       throw new Error('audit_operation_record');

@@ -39,7 +39,12 @@ class NativeAuditTests(unittest.TestCase):
 
     def test_fixture_preserves_bytes_and_large_integer_clocks(self):
         fixture = self.api.fixture_source(
-            [{"steps": [{"op": "ingest", "now": str(2**53 + 1), "hex": "fd00ff"}]}]
+            [
+                {
+                    "name": "fixture",
+                    "steps": [{"op": "ingest", "now": str(2**53 + 1), "hex": "fd00ff"}],
+                }
+            ]
         )
         self.assertIn("Some(9007199254740993u128)", fixture)
         self.assertIn("packet: &[253,0,255]", fixture)
@@ -48,11 +53,16 @@ class NativeAuditTests(unittest.TestCase):
     def test_fixture_rejects_out_of_domain_and_source_injection(self):
         for now in ("0); panic!(); (0", str(2**128), "-1", 0):
             with self.subTest(now=now), self.assertRaises(ValueError):
-                self.api.fixture_source([{"steps": [{"op": "snapshot", "now": now}]}])
+                self.api.fixture_source(
+                    [{"name": "fixture", "steps": [{"op": "snapshot", "now": now}]}]
+                )
         for step in ({"op": "send", "now": "0"}, {"op": "ingest", "now": "0", "hex": "zz"}):
             with self.assertRaises(ValueError):
-                self.api.fixture_source([{"steps": [step]}])
-        for cases in ([{"steps": []}] * 65, [{"steps": [{"op": "snapshot", "now": "0"}] * 65}]):
+                self.api.fixture_source([{"name": "fixture", "steps": [step]}])
+        for cases in (
+            [{"name": "fixture", "steps": []}] * 65,
+            [{"name": "fixture", "steps": [{"op": "snapshot", "now": "0"}] * 65}],
+        ):
             with self.assertRaises(ValueError):
                 self.api.fixture_source(cases)
 
@@ -64,7 +74,7 @@ class NativeAuditTests(unittest.TestCase):
             {"op": "ingest", "now": "0"},
         ):
             with self.subTest(step=step), self.assertRaisesRegex(ValueError, "audit_operation"):
-                self.api.fixture_source([{"steps": [step]}])
+                self.api.fixture_source([{"name": "fixture", "steps": [step]}])
 
     def test_combined_corpus_checks_fractional_values_and_trimmed_payloads(self):
         cases = self.api.corpus()

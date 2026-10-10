@@ -97,7 +97,25 @@ def validate_operation(step):
     return op
 
 
+def validate_cases(cases):
+    """Validate experiment envelopes before creating receivers or native input."""
+    if type(cases) is not list or not 1 <= len(cases) <= 64:
+        raise ValueError("audit_case_limit")
+    names = set()
+    for case in cases:
+        if type(case) is not dict or case.keys() != {"name", "steps"}:
+            raise ValueError("audit_case_record")
+        name = case["name"]
+        if type(name) is not str or not name or name in names:
+            raise ValueError("audit_case_name")
+        names.add(name)
+        steps = case["steps"]
+        if type(steps) is not list or not 1 <= len(steps) <= 64:
+            raise ValueError("audit_step_limit")
+
+
 def reference(cases):
+    validate_cases(cases)
     results = []
     for case in cases:
         current = [None]

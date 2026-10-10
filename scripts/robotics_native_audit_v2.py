@@ -45,15 +45,13 @@ def corpus():
 
 def fixture_source(cases):
     """Emit only validated input constants, never candidate results or raw strings."""
-    if type(cases) is not list or not 1 <= len(cases) <= 64:
-        raise ValueError("audit_case_limit")
+    api = lifecycle_api()
+    api.validate_cases(cases)
     lines = ["const CASES: &[&[Step]] = &["]
     operations = {"ingest": 0, "snapshot": 1, "close": 2}
-    validate_operation = lifecycle_api().validate_operation
+    validate_operation = api.validate_operation
     for case in cases:
         steps = case["steps"]
-        if type(steps) is not list or not 1 <= len(steps) <= 64:
-            raise ValueError("audit_step_limit")
         lines.append("&[")
         for step in steps:
             op = validate_operation(step)
