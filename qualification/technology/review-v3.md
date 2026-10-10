@@ -512,3 +512,19 @@ methods also passed under `python3 -O`. Ruff, formatting and targeted Bandit che
 passed. Source bindings and retained RED counts are in
 [measurement-review-v3.json](measurement-review-v3.json). These checks establish
 software regression behavior, not hosted execution or physical qualification.
+
+## Software assessment boundary — 2026-10-10
+
+Baseline `1c0c111b59300b6563d591c82624f24ac217a7a6`: re-read earliest
+byte/type admission, rig/time findings, artifact binding, campaign coverage,
+reference binding, bundle/process transport and current checklist/domain/method
+APIs. KEEP their versioned semantics and independent false qualification flags.
+The remaining composition gap required consumers to assemble separate reports;
+the new [raw-input assessment](../assessment-v1.md) makes the conjunction and
+shared snapshot executable, with a campaign-wide artifact budget.
+
+[Decision](assessment-decision-v1.json) and [verification](assessment-verification-v1.json)
+record current candidate mechanisms and focused negative evidence. Existing
+technology probe results remain historical inputs, including Node duplicate-key
+failures; no new cross-runtime speed or parity result is claimed. This is not a
+phase-complete marker or independent device/customer acceptance.

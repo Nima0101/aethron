@@ -1,7 +1,7 @@
 # P4/P15 software and acceptance inventory — 2026-10-10
 
-Reviewed baseline: `488d9deb4dc30193152447efa74272d0436fe047`, plus the portable
-synthetic vectors accompanying this inventory. **P15 is incomplete.** Physical
+Reviewed baseline: `1c0c111b59300b6563d591c82624f24ac217a7a6`, plus the bounded
+software assessment accompanying this inventory. **P15 is incomplete.** Physical
 qualification remains external, but that does not make the unfinished software
 below externally blocked or complete. No device/domain/customer acceptance is
 granted by a declaration, matching digest, local test result or workflow file.
@@ -61,7 +61,10 @@ whole lighting/sensor/evidence tuples against campaign cases in both directions.
 The separate [method-reference contract](methods-v1.md) binds supplied method
 bytes and validates declarations of existing software rules. It authenticates no
 human review and does not describe or execute physical acquisition procedures.
-The next independent software checkpoint is a versioned composition of domain,
-method and capture evidence checks into one report that preserves every gate.
+The [software assessment](assessment-v1.md) composes these gates with campaign
+coverage and supplied capture artifacts, retaining independent negatives and
+bounding all artifact payloads together. It accepts no precomputed approvals.
+The next independent software checkpoint is portable assessment vectors and a
+bounded process-consumer path for the same versioned raw-input contract.
 Target-device procedures and physical acceptance cannot be inferred from
 declaration completeness. No completion marker is justified by this inventory.
