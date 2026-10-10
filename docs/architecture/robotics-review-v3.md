@@ -821,3 +821,51 @@ in each object before any receiver executes. Ten RED assertions became green;
 61 focused audit methods pass. [Evidence](../verification/robotics-managed-duplicates-v3.json)
 binds the correction to source and logs. Production telemetry is unchanged;
 this closes a specific comparison-input gap, not the pending runtime decision.
+
+## Passive receiver decision checkpoint and decoder-fault correction
+
+Fresh review baseline: `bed2a3ecb5366c5a02e624bcb38cb9f844135c39`.
+The deployment boundary remains an optional Linux read-only diagnostic process:
+two latest samples, 280-byte packet bound, supplied receipt clock and no capture
+clock mapping or perception authority. There is no numerical target RAM budget,
+packet-rate requirement or target-hardware deadline in the available contract.
+Insufficient information for tactical deployment. The software assessment can
+continue without inventing those parameters.
+
+Primary ecosystems were reread for this checkpoint; the available local compiler
+or incumbent language is not a selection criterion:
+
+| Candidate | Decisive evidence and remaining comparison constraint |
+| --- | --- |
+| Python / pymavlink | [Upstream](https://github.com/ArduPilot/pymavlink) supplies generated dialects; the pinned installed SDK is exercised by production contract tests. Local startup receipts show the full common-module and optional CRC backend costs. Managed allocation and scheduling do not establish a hard deadline. |
+| C / C++ reference | [MAVLink](https://mavlink.io/en/) describes its header-only C implementation for constrained resources. The retained C experiment is faster for its measured decode subset, but omits the full lifecycle and provides no memory-safe complete replacement evidence. |
+| Rust / rust-mavlink | [Upstream](https://github.com/mavlink/rust-mavlink) separates core, generator and transport features and supports signing and embedded/std modes. Safe native storage is attractive. The hosted original Rust prototype uses about 2 MiB peak RSS versus about 33 MiB for Python, but uses compiled inputs and omits signed replay, packaging and the full clock/callback contract. Those figures do not measure the SDK or equivalent deployment. |
+| JavaScript / TypeScript | The existing independent managed prototype exercises lifecycle output parity, with a larger measured RSS than Python and mixed whole-process timing results. Decimal-string/BigInt handling avoids Number timestamp rounding; managed-runtime scheduling still needs target measurements. Its original decoder does not qualify a third-party SDK. |
+| Kotlin Multiplatform | [Upstream](https://github.com/divyanshupundir/mavlink-kotlin) offers generated definitions, separate serialization and platform-specific connections. This is a credible candidate beyond the incumbent and the native prototypes; JVM and Linux native resource envelopes must be evaluated separately. No equivalent executable measurement is currently retained. |
+
+The source-bound [hosted Rust record](../verification/robotics-native-hosted-review-v3.json)
+and [managed results](../verification/robotics-lifecycle-audit-v2-results.json) are
+comparison evidence, not current-source production qualification. Neither proves
+Python optimal. No production KEEP/MIGRATE decision is asserted at this checkpoint;
+the decisive missing software evidence is equivalent ingress and lifecycle/fault
+behavior, not mere availability of an installed compiler. The audit cursor stays
+at this component and does not advance to signing/replay.
+
+The current source review found another concrete mismatch with fail-closed
+behavior: `ingest()` withdrew observations for expected SDK packet errors but
+propagated unexpected decoder failures while leaving cached observations intact.
+Five injected failures reproduced a subsequent `OBSERVED_UNVERIFIED` snapshot.
+The decoder call now withdraws and latches `decoder_fault` before propagating the
+same exception. Expected `MAVError` retains its recoverable `invalid_packet` path.
+The worker's existing ordinary-exception handling still emits its generic fault;
+this change does not expand its reason vocabulary or silently swallow cancellation.
+
+[Retained evidence](../verification/robotics-decoder-fault-v3.json) covers runtime,
+OS, interruption, exit and asyncio cancellation exceptions from populated two-slot
+state, attempted recovery and absence of private exception text in public status.
+The expected-error control confirms recovery on a subsequent valid packet.
+79 focused telemetry/signing/datagram/lifecycle methods pass, as do Ruff, formatting
+and Bandit. The independent native/managed experiments do not inject Python SDK
+exceptions, so their parity results do not prove this newly tested behavior.
+This narrow exception cleanup does not promise atomic handling of every possible
+interruption in ingest, cleanup, transport or caller-owned immutable snapshots.

@@ -161,6 +161,47 @@ class TelemetryTests(unittest.TestCase):
                     finally:
                         source.close()
 
+    def test_unexpected_decoder_fault_withdraws_and_latches_before_propagating(self):
+        for error_type in (
+            RuntimeError,
+            OSError,
+            KeyboardInterrupt,
+            SystemExit,
+            asyncio.CancelledError,
+        ):
+            with self.subTest(error_type=error_type.__name__):
+                source = PassiveTelemetry(1, 1, clock=lambda: self.now)
+                try:
+                    source.ingest(self.packet())
+                    source.ingest(self.packet(sequence=1, kind="position"))
+                    self.assertEqual(len(source.snapshot().samples), 2)
+                    failure = error_type("private-decoder-detail")
+                    with patch.object(source._decoder, "decode", side_effect=failure):
+                        with self.assertRaises(error_type) as caught:
+                            source.ingest(self.packet(sequence=2, boot=11))
+                    self.assertIs(caught.exception, failure)
+                    status = source.snapshot()
+                    self.assertEqual(status.state, "UNKNOWN")
+                    self.assertEqual(status.reason, "decoder_fault")
+                    self.assertEqual(status.samples, ())
+                    self.assertFalse(status.perception_eligible)
+                    self.assertNotIn("private-decoder-detail", repr(status))
+                    source.ingest(self.packet(sequence=3, boot=12))
+                    self.assertEqual(source.snapshot(), status)
+                finally:
+                    source.close()
+
+    def test_expected_decoder_rejection_remains_recoverable(self):
+        self.source.ingest(self.packet())
+        with patch.object(
+            self.source._decoder, "decode", side_effect=common.MAVError("bad packet")
+        ):
+            self.source.ingest(self.packet(sequence=1, boot=11))
+        self.assertEqual(self.source.snapshot().reason, "invalid_packet")
+        self.assertEqual(self.source.snapshot().samples, ())
+        self.source.ingest(self.packet(sequence=2, boot=12))
+        self.assertEqual(self.source.snapshot().state, "OBSERVED_UNVERIFIED")
+
     def test_signed_packet_cannot_be_reported_as_authenticated_without_keys(self):
         encoder = common.MAVLink(None, srcSystem=1, srcComponent=1)
         encoder.signing.secret_key = bytes(32)

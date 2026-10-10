@@ -150,6 +150,11 @@ class PassiveTelemetry:
         except self._decode_error:
             self._withdraw("invalid_packet")
             return
+        except BaseException:
+            # Unexpected SDK failure or interruption invalidates this session.
+            # Withdraw before propagating; later calls must not revive old data.
+            self._withdraw("decoder_fault", latch=True)
+            raise
         if message is None:
             return
         name, frame, fields, units = _LAYOUTS[message_id]
