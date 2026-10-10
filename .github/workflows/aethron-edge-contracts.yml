@@ -98,6 +98,8 @@ jobs:
           python -I -m unittest discover -s tests/integration -p test_edge_contract.py -v
           python -I -m unittest discover -s tests/integration -p test_openapi.py -v
           python -I -m unittest discover -s tests/integration -p test_external_clients.py -v
+      - name: Installed aggregate fleet health privacy and freshness
+        run: python -I -m unittest discover -s tests/integration -p test_fleet_health.py -v
       - name: Installed worker preload, clock and expiry checks
         run: |
           python -I -c "import sys, unittest; sys.path.insert(0, 'tests/integration'); unittest.main(module=None, argv=['unittest', 'test_worker_replay_input', 'test_clock_pipeline', 'test_worker_imports', 'test_pipeline.Pipeline.test_headless_replay_expires_when_worker_stops', 'test_pipeline.Pipeline.test_unstarted_pipeline_is_unknown', '-v'])"
