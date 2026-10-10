@@ -110,5 +110,54 @@ class InstalledRecordTests(unittest.TestCase):
                     self.check_record()
 
 
+class InstalledIdentityTests(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
+        self.info = self.root / "aethron-0.2.0.dist-info"
+        self.info.mkdir()
+        self.metadata = self.info / "METADATA"
+        self.metadata.write_text("Metadata-Version: 2.4\nName: aethron\nVersion: 0.2.0\n")
+        self.project = self.root / "pyproject.toml"
+        self.project.write_text('[project]\nname = "aethron"\nversion = "0.2.0"\n')
+
+    def check_identity(self):
+        CHECKER.check_identity(Distribution.at(self.info), self.project)
+
+    def test_matching_static_identity_is_accepted(self):
+        self.check_identity()
+
+    def test_wrong_or_missing_installed_identity_is_rejected(self):
+        for fields in (
+            "Name: other\nVersion: 0.2.0\n",
+            "Name: aethron\nVersion: 0.1.0\n",
+            "Name: aethron\n",
+            "Version: 0.2.0\n",
+        ):
+            with self.subTest(fields=fields):
+                self.metadata.write_text("Metadata-Version: 2.4\n" + fields)
+                with self.assertRaisesRegex(ValueError, "installed_identity_mismatch"):
+                    self.check_identity()
+
+    def test_missing_nonstring_or_dynamic_source_version_is_rejected(self):
+        for field in (
+            "",
+            "version = 2\n",
+            'version = ""\n',
+            'dynamic = ["version"]\n',
+            'version = "0.2.0"\ndynamic = ["version"]\n',
+        ):
+            with self.subTest(field=field):
+                self.project.write_text('[project]\nname = "aethron"\n' + field)
+                with self.assertRaisesRegex(ValueError, "invalid_source_identity"):
+                    self.check_identity()
+
+    def test_duplicate_toml_version_is_rejected(self):
+        self.project.write_text(self.project.read_text() + 'version = "0.2.0"\n')
+        with self.assertRaises(ValueError):
+            self.check_identity()
+
+
 if __name__ == "__main__":
     unittest.main()

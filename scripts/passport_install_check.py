@@ -19,6 +19,23 @@ MODULES = (
 )
 
 
+def check_identity(installed_distribution, project_path):
+    """Require the installed identity to match this checkout's static metadata."""
+    if sys.version_info >= (3, 11):
+        import tomllib
+    else:
+        import tomli as tomllib
+
+    with project_path.open("rb") as stream:
+        project = tomllib.load(stream).get("project", {})
+    for field in ("name", "version"):
+        value = project.get(field)
+        if type(value) is not str or not value or field in project.get("dynamic", []):
+            raise ValueError("invalid_source_identity")
+        if installed_distribution.metadata[field.title()] != value:
+            raise ValueError("installed_identity_mismatch")
+
+
 def check_file(source, installed, source_root):
     """Require an external installed copy with the same bytes as reviewed source."""
     installed = installed.resolve(strict=True)
@@ -58,6 +75,7 @@ if __name__ == "__main__":
         raise SystemExit("run with python -I")
     root = Path(__file__).resolve().parents[1]
     installed_distribution = distribution("aethron")
+    check_identity(installed_distribution, root / "pyproject.toml")
     checked = {}
     for name in MODULES:
         module = importlib.import_module(name)

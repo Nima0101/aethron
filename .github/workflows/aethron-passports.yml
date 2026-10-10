@@ -119,6 +119,9 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: python -m pip install -c requirements-passports.txt '.[passports]'
+      - name: Install metadata-check tooling for older Python
+        run: |
+          python -m pip install --only-binary=:all: 'tomli==2.5.0; python_version < "3.11"'
       # The import assertion prevents optional-backend skips from masquerading as a pass.
       - run: python -c "from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey"
       - name: Bind installed P16 modules to reviewed source

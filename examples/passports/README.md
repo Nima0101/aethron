@@ -7,6 +7,8 @@ Timestamps are artificial; passing `now_s=1500` is appropriate only for these fi
 Install the optional verifier with `python -m pip install -c requirements-passports.txt
 '.[passports]'` from the repository root. Run
 `python -m unittest discover -s tests -p 'test_passport*.py' -v`.
+On Python below 3.11, these developer checks also require `tomli==2.5.0`
+to read `pyproject.toml`; this is not a passport runtime dependency.
 
 [The portable vectors](vectors.json) contain the exact canonical payload, SHA-256,
 DSSE signing bytes (hex), envelopes, externally supplied policies, caller arguments and

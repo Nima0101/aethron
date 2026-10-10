@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline": "cee3e17906834e1bd6520da8b6b4fc1111654bf6",
+  "component": "installed static distribution identity consistency",
+  "red": {
+    "methods": 4,
+    "errors": 11,
+    "assertion_failures": 0,
+    "reason": "new check_identity function absent"
+  },
+  "green": {
+    "focused_methods": 23,
+    "adr_methods": 4,
+    "skips": 0,
+    "existing_installed_files": 7
+  },
+  "sensitivity": {
+    "methods": 3,
+    "expected_assertion_failures": 10,
+    "errors": 0,
+    "skips": 0,
+    "change": "replace only check_identity with no-op in memory and restore"
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS without exclusions",
+    "actionlint_initial": "FAIL YAML quoting; retained and corrected",
+    "actionlint_final": "PASS",
+    "diff": "PASS"
+  },
+  "source_sha256": {
+    "scripts/passport_install_check.py": "83e38c1e33df2dd7f9178ae2a60a90d5f08ec362e3f9613ba0743f0756ca60d9",
+    "tests/test_passport_install_check.py": "c1cda03dab42b3ff48afb537d363154cfc219f6f1948ab329b23c972f8f0e520",
+    ".github/workflows/aethron-passports.yml": "d047c2abb8f8ddb54aabdc3d07f79551833ca0927483988633809f4e2ccddc3e",
+    "examples/passports/README.md": "23d6641166e58d87fe0d64ace90f6ad14595d63c0621437233857dd08950edef",
+    "pyproject.toml": "c5e3d4d7dd65acd3d3c04baf7f53b49b5ef99db6231fa610f1e144f17eec4b0e",
+    "docs/decisions/p16-installed-identity-v3.json": "17f559157c4d32d0a06636566d0fe249f89274f9a4697a0a7900da0243597092",
+    "docs/engineering/reviews/p16-installed-identity-v3.md": "974010d7f129af5cfca9c9fe8094fa5dc10c6e01a8e00033f7f3e2e5d019b3f8",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb"
+  },
+  "runtime_log_sha256": {
+    "install-identity-actionlint-initial.log": "aad5fc9d0c77be72e950695e7c12b266e7fb4163abf51e3cd722b5f67236dfad",
+    "install-identity-actionlint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "install-identity-adr.log": "adcfdde47894ec093c9332bf50848e735840241ef74e9cb7e7514c18838e7f63",
+    "install-identity-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "install-identity-controls.log": "88ccf82adfc42afddfce5077a622dc59cc10d10cca145d392b44369d881d4f1c",
+    "install-identity-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "install-identity-focused.log": "64770104497f52d04092eac3db22a915d1b90eb7ea04bc23103071d73c8ff304",
+    "install-identity-format.log": "3bc53bf3e981a98a34a852e175bf9b77af841edea74fca595d9aedcbaf9a4938",
+    "install-identity-green.log": "72a3df111010b0a6aa75a19b9d45ed16c3331521918bc072898a53747c97e994",
+    "install-identity-installed.json": "a5845b7f0947629a60415442c5b40644a94df0fafceaee76b2e105c888d3bddb",
+    "install-identity-red.log": "fcb1707d322aca53da1891fcd1b5a9d3a69756b751151212899149e7bb6e9634",
+    "install-identity-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "install_identity_controls.py": "ddacb910a4dd3efb35693d17e1ef3f96a3625390bea2409b4155d9e135048b89"
+  },
+  "limits": [
+    "Existing Linux Python 3.13 installation reused; no new wheel, clean installation or hosted matrix result.",
+    "Python 3.9/Tomli, Windows and macOS execution remain unobserved.",
+    "Exact static name/version strings only; no normalization, dynamic metadata resolution, publisher authentication or package __version__ comparison.",
+    "Selected source and RECORD consistency does not establish dependency closure, atomic snapshot or loaded-bytecode attestation.",
+    "No phase/lane completion, physical qualification, MLS/CNSA, availability or real-time claim."
+  ]
+}
