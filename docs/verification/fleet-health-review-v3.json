@@ -1,0 +1,297 @@
+{
+  "audit_policy_version": 3,
+  "reviewed_head": "8a0dc57f5417cd4499af690f838944244e65e3c3",
+  "component": "P3.4 local aggregate health",
+  "decision": "KEEP implementation; RETRACT/CLARIFY availability, privacy and technology prose",
+  "tests": {
+    "committed_health": 15,
+    "working_health": 15,
+    "failures": 0,
+    "errors": 0
+  },
+  "observations": {
+    "caller_supplied_report_accepted_without_availability_probe": true,
+    "one_slot_snapshot": {
+      "version": 1,
+      "total": 1,
+      "states": {
+        "running": 1,
+        "recovering": 0,
+        "fault": 0,
+        "stopped": 0,
+        "unknown": 0
+      },
+      "scene_state": "UNKNOWN",
+      "qualified": false
+    },
+    "fresh_snapshot_at_expiry": {
+      "version": 1,
+      "total": 1,
+      "states": {
+        "running": 0,
+        "recovering": 0,
+        "fault": 0,
+        "stopped": 0,
+        "unknown": 1
+      },
+      "scene_state": "UNKNOWN",
+      "qualified": false
+    },
+    "retained_snapshot_still_running": true,
+    "new_collector_accepts_same_report_with_fresh_caller_clock": true
+  },
+  "probe_evidence": {
+    "audit_policy_version": 2,
+    "component": "fleet_health",
+    "source_sha256": "75e284acbea0193f7499ff4c20d5def7cc0195875855f7e1e13a4c61b609c15d",
+    "environment": {
+      "python": "3.13.5",
+      "node": "v22.23.2",
+      "os": "Linux",
+      "architecture": "x86_64"
+    },
+    "scope": "Synthetic single-process probes; no worst-case, contention, or hardware qualification",
+    "cases": [
+      {
+        "name": "valid",
+        "expected": true,
+        "python": true,
+        "node_strict": true,
+        "node_default_object_validation": true
+      },
+      {
+        "name": "duplicate",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": true
+      },
+      {
+        "name": "escaped_duplicate",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": true
+      },
+      {
+        "name": "float_version",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": true
+      },
+      {
+        "name": "exponent_time",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": true
+      },
+      {
+        "name": "bool_time",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": false
+      },
+      {
+        "name": "nonfinite",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": false
+      },
+      {
+        "name": "future",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": false
+      },
+      {
+        "name": "expired",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": false
+      },
+      {
+        "name": "over_lifetime",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": false
+      },
+      {
+        "name": "extra",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": false
+      },
+      {
+        "name": "nested_state",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": false
+      },
+      {
+        "name": "escaped_key",
+        "expected": true,
+        "python": true,
+        "node_strict": true,
+        "node_default_object_validation": true
+      },
+      {
+        "name": "escaped_state",
+        "expected": true,
+        "python": true,
+        "node_strict": true,
+        "node_default_object_validation": true
+      },
+      {
+        "name": "whitespace_boundary",
+        "expected": true,
+        "python": true,
+        "node_strict": true,
+        "node_default_object_validation": true
+      },
+      {
+        "name": "oversize",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": false
+      },
+      {
+        "name": "trailing_comma",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": false
+      },
+      {
+        "name": "trailing_value",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": false
+      },
+      {
+        "name": "utf8_bom",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": false
+      },
+      {
+        "name": "invalid_utf8",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": false
+      },
+      {
+        "name": "array",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": false
+      },
+      {
+        "name": "null",
+        "expected": false,
+        "python": false,
+        "node_strict": false,
+        "node_default_object_validation": false
+      }
+    ],
+    "measurements": {
+      "python_decode_validate": {
+        "unit": "microseconds",
+        "iterations_per_sample": 2000,
+        "samples": [
+          8.138162,
+          43.039821,
+          48.725631500000006,
+          43.8871985,
+          7.9785565
+        ],
+        "median": 43.039821,
+        "max_sample": 48.725631500000006
+      },
+      "python_1024_ingest_and_snapshot": {
+        "unit": "microseconds",
+        "iterations_per_sample": 1,
+        "samples": [
+          186717.772,
+          130370.405,
+          180598.998,
+          182550.53,
+          136671.09
+        ],
+        "median": 180598.998,
+        "max_sample": 186717.772
+      },
+      "python_full_snapshot": {
+        "unit": "microseconds",
+        "iterations_per_sample": 500,
+        "samples": [
+          717.665034,
+          405.190628,
+          396.534846,
+          268.861868,
+          551.653186
+        ],
+        "median": 405.190628,
+        "max_sample": 717.665034
+      }
+    },
+    "node_decode_validate": {
+      "unit": "microseconds",
+      "iterations_per_sample": 2000,
+      "samples": [
+        44.5712255,
+        89.511752,
+        6.408967000000019,
+        6.300560999999988,
+        36.44211999999999
+      ],
+      "median": 36.44211999999999,
+      "max_sample": 89.511752
+    },
+    "memory": {
+      "python_traced_retained_bytes": 222762,
+      "python_traced_peak_bytes": 224678,
+      "python_process_peak_rss_kib": 21752,
+      "node_process_peak_rss_kib": 57200
+    },
+    "limitations": [
+      "Node candidate covers decoder only, not state machine or thread safety.",
+      "Timing excludes interpreter startup, IPC and contention; runs are not interleaved.",
+      "Traced allocation excludes interpreter and native allocator overhead.",
+      "Peak RSS includes probe overhead; runtimes do different work and RSS is not a ranking."
+    ]
+  },
+  "bindings": {
+    "tests/integration/test_fleet_health.py": "b08c25e9da82cb799111d72df7fee11e0fdc733d13483c055fa3651bc6afc632",
+    "scripts/technology-audit/fleet_health_probe.py": "78891259e1c2a398e9e215e0e4184e2d0c6761243d72db5afb0bfdbbc6d96c6d",
+    "scripts/technology-audit/fleet_health_decoder.mjs": "4a10781c237e0d8591c6443e5448db5598cd0756d4a5822beb04e6d88883519c"
+  },
+  "retained_failures": [
+    "Initial committed-module check omitted PYTHONPATH and failed before tests with ModuleNotFoundError: aethron_edge; corrected command passed."
+  ],
+  "limitations": [
+    "Probe format retains audit_policy_version=2 because the unchanged v2 harness was rerun; this enclosing record is the fresh v3 review.",
+    "Uncommitted leased health projection and P11 fabric are not approved by this decision.",
+    "No proof of physical availability, anonymity, worst-case latency, uptime, cryptographic certification or target hardware qualification."
+  ],
+  "checks": {
+    "ruff": "PASS",
+    "ruff_format": "PASS",
+    "bandit_health": "PASS: no findings",
+    "node_syntax": "PASS",
+    "diff_whitespace": "PASS"
+  }
+}
