@@ -1,0 +1,7 @@
+# P16.1 optional offline verifier closure; no core runtime dependency change.
+cryptography==50.0.2
+cffi==2.1.1; platform_python_implementation != "PyPy" and python_version >= "3.10"
+pycparser==3.11; platform_python_implementation != "PyPy" and python_version >= "3.10"
+cffi==2.0.0; platform_python_implementation != "PyPy" and python_version < "3.10"
+pycparser==2.23; platform_python_implementation != "PyPy" and python_version < "3.10"
+typing_extensions==4.16.0; python_version < "3.11"

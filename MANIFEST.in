@@ -6,3 +6,5 @@ recursive-include tests *.py
 recursive-include .github *.yml *.md
 include requirements-native.lock
 recursive-include aethron *.pxd
+include requirements-passports.txt
+recursive-include contracts/interop *.json

@@ -1,0 +1,86 @@
+{
+  "fixture_only": true,
+  "canonical_payload": "{\"assurance\":\"self_declared\",\"capabilities\":[{\"evidence_sha256\":[\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\"],\"name\":\"perception.direct.v3\"}],\"evidence\":[{\"kind\":\"synthetic\",\"outcome\":\"passed\",\"sha256\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"},{\"kind\":\"recorded\",\"outcome\":\"failed\",\"sha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\"}],\"expires_at\":2000,\"issued_at\":1000,\"issuer\":\"fixture-publisher\",\"motion_authority\":false,\"passport_id\":\"fixture-statement-1\",\"subject_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"version\":1}",
+  "payload_sha256": "faf62f8596492dafcd95c453a703e4bf1961efece29447ae955d0835ec077f85",
+  "pae_hex": "445353457631203531206170706c69636174696f6e2f766e642e61657468726f6e2e6361706162696c6974792d70617373706f72742e76312b6a736f6e20363937207b226173737572616e6365223a2273656c665f6465636c61726564222c226361706162696c6974696573223a5b7b2265766964656e63655f736861323536223a5b2262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262222c2263636363636363636363636363636363636363636363636363636363636363636363636363636363636363636363636363636363636363636363636363636363225d2c226e616d65223a2270657263657074696f6e2e6469726563742e7633227d5d2c2265766964656e6365223a5b7b226b696e64223a2273796e746865746963222c226f7574636f6d65223a22706173736564222c22736861323536223a2262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262227d2c7b226b696e64223a227265636f72646564222c226f7574636f6d65223a226661696c6564222c22736861323536223a2263636363636363636363636363636363636363636363636363636363636363636363636363636363636363636363636363636363636363636363636363636363227d5d2c22657870697265735f6174223a323030302c226973737565645f6174223a313030302c22697373756572223a22666978747572652d7075626c6973686572222c226d6f74696f6e5f617574686f72697479223a66616c73652c2270617373706f72745f6964223a22666978747572652d73746174656d656e742d31222c227375626a6563745f736861323536223a2261616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161222c2276657273696f6e223a317d",
+  "cases": [
+    {
+      "name": "signed-self-declaration-with-failed-evidence",
+      "envelope": "{\"payload\":\"eyJhc3N1cmFuY2UiOiJzZWxmX2RlY2xhcmVkIiwiY2FwYWJpbGl0aWVzIjpbeyJldmlkZW5jZV9zaGEyNTYiOlsiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYiIsImNjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2MiXSwibmFtZSI6InBlcmNlcHRpb24uZGlyZWN0LnYzIn1dLCJldmlkZW5jZSI6W3sia2luZCI6InN5bnRoZXRpYyIsIm91dGNvbWUiOiJwYXNzZWQiLCJzaGEyNTYiOiJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiIn0seyJraW5kIjoicmVjb3JkZWQiLCJvdXRjb21lIjoiZmFpbGVkIiwic2hhMjU2IjoiY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjYyJ9XSwiZXhwaXJlc19hdCI6MjAwMCwiaXNzdWVkX2F0IjoxMDAwLCJpc3N1ZXIiOiJmaXh0dXJlLXB1Ymxpc2hlciIsIm1vdGlvbl9hdXRob3JpdHkiOmZhbHNlLCJwYXNzcG9ydF9pZCI6ImZpeHR1cmUtc3RhdGVtZW50LTEiLCJzdWJqZWN0X3NoYTI1NiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJ2ZXJzaW9uIjoxfQ==\",\"payloadType\":\"application/vnd.aethron.capability-passport.v1+json\",\"signatures\":[{\"keyid\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"sig\":\"0NHf4ByoKHYRKRHfGJUBc/6F19ztCCNldHjXegJmbkQqEBnJ20KTxTBn7saIPe3hQcJIBf6PkekOl/8ake4tBw==\"}]}",
+      "policy": "{\"expires_at\":2100,\"issued_at\":900,\"keys\":[{\"capabilities\":[\"perception.direct.v3\"],\"expires_at\":3000,\"issuer\":\"fixture-publisher\",\"key_id\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"not_before\":800,\"public_key\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\"}],\"revision\":3,\"revoked_evidence\":[],\"revoked_keys\":[],\"revoked_passports\":[],\"version\":1}",
+      "arguments": {
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_policy_revision": 3,
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "status": "authenticated",
+      "reason": "signature_verified"
+    },
+    {
+      "name": "expired",
+      "envelope": "{\"payload\":\"eyJhc3N1cmFuY2UiOiJzZWxmX2RlY2xhcmVkIiwiY2FwYWJpbGl0aWVzIjpbeyJldmlkZW5jZV9zaGEyNTYiOlsiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYiIsImNjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2MiXSwibmFtZSI6InBlcmNlcHRpb24uZGlyZWN0LnYzIn1dLCJldmlkZW5jZSI6W3sia2luZCI6InN5bnRoZXRpYyIsIm91dGNvbWUiOiJwYXNzZWQiLCJzaGEyNTYiOiJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiIn0seyJraW5kIjoicmVjb3JkZWQiLCJvdXRjb21lIjoiZmFpbGVkIiwic2hhMjU2IjoiY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjYyJ9XSwiZXhwaXJlc19hdCI6MjAwMCwiaXNzdWVkX2F0IjoxMDAwLCJpc3N1ZXIiOiJmaXh0dXJlLXB1Ymxpc2hlciIsIm1vdGlvbl9hdXRob3JpdHkiOmZhbHNlLCJwYXNzcG9ydF9pZCI6ImZpeHR1cmUtc3RhdGVtZW50LTEiLCJzdWJqZWN0X3NoYTI1NiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJ2ZXJzaW9uIjoxfQ==\",\"payloadType\":\"application/vnd.aethron.capability-passport.v1+json\",\"signatures\":[{\"keyid\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"sig\":\"0NHf4ByoKHYRKRHfGJUBc/6F19ztCCNldHjXegJmbkQqEBnJ20KTxTBn7saIPe3hQcJIBf6PkekOl/8ake4tBw==\"}]}",
+      "policy": "{\"expires_at\":2100,\"issued_at\":900,\"keys\":[{\"capabilities\":[\"perception.direct.v3\"],\"expires_at\":3000,\"issuer\":\"fixture-publisher\",\"key_id\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"not_before\":800,\"public_key\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\"}],\"revision\":3,\"revoked_evidence\":[],\"revoked_keys\":[],\"revoked_passports\":[],\"version\":1}",
+      "arguments": {
+        "now_s": 2000,
+        "minimum_time_s": 1400,
+        "minimum_policy_revision": 3,
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "status": "rejected",
+      "reason": "passport_not_current"
+    },
+    {
+      "name": "revoked-failed-evidence",
+      "envelope": "{\"payload\":\"eyJhc3N1cmFuY2UiOiJzZWxmX2RlY2xhcmVkIiwiY2FwYWJpbGl0aWVzIjpbeyJldmlkZW5jZV9zaGEyNTYiOlsiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYiIsImNjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2MiXSwibmFtZSI6InBlcmNlcHRpb24uZGlyZWN0LnYzIn1dLCJldmlkZW5jZSI6W3sia2luZCI6InN5bnRoZXRpYyIsIm91dGNvbWUiOiJwYXNzZWQiLCJzaGEyNTYiOiJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiIn0seyJraW5kIjoicmVjb3JkZWQiLCJvdXRjb21lIjoiZmFpbGVkIiwic2hhMjU2IjoiY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjYyJ9XSwiZXhwaXJlc19hdCI6MjAwMCwiaXNzdWVkX2F0IjoxMDAwLCJpc3N1ZXIiOiJmaXh0dXJlLXB1Ymxpc2hlciIsIm1vdGlvbl9hdXRob3JpdHkiOmZhbHNlLCJwYXNzcG9ydF9pZCI6ImZpeHR1cmUtc3RhdGVtZW50LTEiLCJzdWJqZWN0X3NoYTI1NiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJ2ZXJzaW9uIjoxfQ==\",\"payloadType\":\"application/vnd.aethron.capability-passport.v1+json\",\"signatures\":[{\"keyid\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"sig\":\"0NHf4ByoKHYRKRHfGJUBc/6F19ztCCNldHjXegJmbkQqEBnJ20KTxTBn7saIPe3hQcJIBf6PkekOl/8ake4tBw==\"}]}",
+      "policy": "{\"expires_at\":2100,\"issued_at\":900,\"keys\":[{\"capabilities\":[\"perception.direct.v3\"],\"expires_at\":3000,\"issuer\":\"fixture-publisher\",\"key_id\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"not_before\":800,\"public_key\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\"}],\"revision\":3,\"revoked_evidence\":[\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\"],\"revoked_keys\":[],\"revoked_passports\":[],\"version\":1}",
+      "arguments": {
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_policy_revision": 3,
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "status": "rejected",
+      "reason": "revoked"
+    },
+    {
+      "name": "policy-rollback",
+      "envelope": "{\"payload\":\"eyJhc3N1cmFuY2UiOiJzZWxmX2RlY2xhcmVkIiwiY2FwYWJpbGl0aWVzIjpbeyJldmlkZW5jZV9zaGEyNTYiOlsiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYiIsImNjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2MiXSwibmFtZSI6InBlcmNlcHRpb24uZGlyZWN0LnYzIn1dLCJldmlkZW5jZSI6W3sia2luZCI6InN5bnRoZXRpYyIsIm91dGNvbWUiOiJwYXNzZWQiLCJzaGEyNTYiOiJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiIn0seyJraW5kIjoicmVjb3JkZWQiLCJvdXRjb21lIjoiZmFpbGVkIiwic2hhMjU2IjoiY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjYyJ9XSwiZXhwaXJlc19hdCI6MjAwMCwiaXNzdWVkX2F0IjoxMDAwLCJpc3N1ZXIiOiJmaXh0dXJlLXB1Ymxpc2hlciIsIm1vdGlvbl9hdXRob3JpdHkiOmZhbHNlLCJwYXNzcG9ydF9pZCI6ImZpeHR1cmUtc3RhdGVtZW50LTEiLCJzdWJqZWN0X3NoYTI1NiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJ2ZXJzaW9uIjoxfQ==\",\"payloadType\":\"application/vnd.aethron.capability-passport.v1+json\",\"signatures\":[{\"keyid\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"sig\":\"0NHf4ByoKHYRKRHfGJUBc/6F19ztCCNldHjXegJmbkQqEBnJ20KTxTBn7saIPe3hQcJIBf6PkekOl/8ake4tBw==\"}]}",
+      "policy": "{\"expires_at\":2100,\"issued_at\":900,\"keys\":[{\"capabilities\":[\"perception.direct.v3\"],\"expires_at\":3000,\"issuer\":\"fixture-publisher\",\"key_id\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"not_before\":800,\"public_key\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\"}],\"revision\":3,\"revoked_evidence\":[],\"revoked_keys\":[],\"revoked_passports\":[],\"version\":1}",
+      "arguments": {
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_policy_revision": 4,
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "status": "rejected",
+      "reason": "policy_rollback"
+    },
+    {
+      "name": "forged-signature",
+      "envelope": "{\"payload\":\"eyJhc3N1cmFuY2UiOiJzZWxmX2RlY2xhcmVkIiwiY2FwYWJpbGl0aWVzIjpbeyJldmlkZW5jZV9zaGEyNTYiOlsiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYiIsImNjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2MiXSwibmFtZSI6InBlcmNlcHRpb24uZGlyZWN0LnYzIn1dLCJldmlkZW5jZSI6W3sia2luZCI6InN5bnRoZXRpYyIsIm91dGNvbWUiOiJwYXNzZWQiLCJzaGEyNTYiOiJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiIn0seyJraW5kIjoicmVjb3JkZWQiLCJvdXRjb21lIjoiZmFpbGVkIiwic2hhMjU2IjoiY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjYyJ9XSwiZXhwaXJlc19hdCI6MjAwMCwiaXNzdWVkX2F0IjoxMDAwLCJpc3N1ZXIiOiJmaXh0dXJlLXB1Ymxpc2hlciIsIm1vdGlvbl9hdXRob3JpdHkiOmZhbHNlLCJwYXNzcG9ydF9pZCI6ImZpeHR1cmUtc3RhdGVtZW50LTEiLCJzdWJqZWN0X3NoYTI1NiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJ2ZXJzaW9uIjoxfQ==\",\"payloadType\":\"application/vnd.aethron.capability-passport.v1+json\",\"signatures\":[{\"keyid\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"sig\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==\"}]}",
+      "policy": "{\"expires_at\":2100,\"issued_at\":900,\"keys\":[{\"capabilities\":[\"perception.direct.v3\"],\"expires_at\":3000,\"issuer\":\"fixture-publisher\",\"key_id\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"not_before\":800,\"public_key\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\"}],\"revision\":3,\"revoked_evidence\":[],\"revoked_keys\":[],\"revoked_passports\":[],\"version\":1}",
+      "arguments": {
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_policy_revision": 3,
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "status": "rejected",
+      "reason": "invalid_signature"
+    },
+    {
+      "name": "signed-motion-authority-escalation",
+      "envelope": "{\"payload\":\"eyJhc3N1cmFuY2UiOiJzZWxmX2RlY2xhcmVkIiwiY2FwYWJpbGl0aWVzIjpbeyJldmlkZW5jZV9zaGEyNTYiOlsiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYiIsImNjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2MiXSwibmFtZSI6InBlcmNlcHRpb24uZGlyZWN0LnYzIn1dLCJldmlkZW5jZSI6W3sia2luZCI6InN5bnRoZXRpYyIsIm91dGNvbWUiOiJwYXNzZWQiLCJzaGEyNTYiOiJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiIn0seyJraW5kIjoicmVjb3JkZWQiLCJvdXRjb21lIjoiZmFpbGVkIiwic2hhMjU2IjoiY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjYyJ9XSwiZXhwaXJlc19hdCI6MjAwMCwiaXNzdWVkX2F0IjoxMDAwLCJpc3N1ZXIiOiJmaXh0dXJlLXB1Ymxpc2hlciIsIm1vdGlvbl9hdXRob3JpdHkiOnRydWUsInBhc3Nwb3J0X2lkIjoiZml4dHVyZS1zdGF0ZW1lbnQtMSIsInN1YmplY3Rfc2hhMjU2IjoiYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsInZlcnNpb24iOjF9\",\"payloadType\":\"application/vnd.aethron.capability-passport.v1+json\",\"signatures\":[{\"keyid\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"sig\":\"XADzsGrvNFcJF/G7FlaBO9bY5SZrs2TgW/y1GURh0nRIsdWUGBdqIRHxm2Ey1erj4ctmnvSGTUAXhb4UNbSzCg==\"}]}",
+      "policy": "{\"expires_at\":2100,\"issued_at\":900,\"keys\":[{\"capabilities\":[\"perception.direct.v3\"],\"expires_at\":3000,\"issuer\":\"fixture-publisher\",\"key_id\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"not_before\":800,\"public_key\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\"}],\"revision\":3,\"revoked_evidence\":[],\"revoked_keys\":[],\"revoked_passports\":[],\"version\":1}",
+      "arguments": {
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_policy_revision": 3,
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "status": "rejected",
+      "reason": "invalid_input"
+    }
+  ]
+}
