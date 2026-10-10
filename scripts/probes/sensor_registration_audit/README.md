@@ -21,3 +21,20 @@ limitation in mind. Production always computes its own validated snapshot digest
 The report records process CPU medians, not RSS or hardware deadlines. Source
 rotation/admission and fault coverage lives in test_sensor_registration.py; this
 single fixture is not broad performance or physical calibration evidence.
+
+The harness requires assertions enabled and rejects optimized execution/import
+(`-O`, `-OO`, nonzero `PYTHONOPTIMIZE`). Each complete rotated iteration is checked
+for parity and non-live results before its outputs can be replaced. Earlier
+versions checked only the final iteration; their reports cannot establish parity
+or non-live flags for all measured calls. Historical results remain unchanged and
+are not requalified by this correction. Checks occur outside timed regions, but
+can affect subsequent host/cache state; no old timing is relabeled as a new run.
+
+Focused evidence-admission checks substitute inert registration outputs and do
+not benchmark production projection:
+
+```sh
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
+  PYTHONPATH=integrations/edge:tests/integration \
+  python -m unittest test_sensor_registration_audit_modes
+```

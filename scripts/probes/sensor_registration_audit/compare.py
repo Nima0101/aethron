@@ -8,6 +8,10 @@ from unittest.mock import patch
 import numpy as np
 from aethron_edge.sensors.registration import Registration, RigCalibration, _point
 
+# Every iteration must pass parity and non-live checks before reporting evidence.
+if not __debug__:
+    raise SystemExit("registration_audit_requires_assertions")
+
 
 def artifact():
     return RigCalibration(
@@ -43,7 +47,6 @@ def main():
         point = _point(xyz_m)
         return tuple(_point(tuple(map(float, rotation @ point + translation))))
 
-    outputs = {}
     samples = {
         name: []
         for name in (
@@ -74,6 +77,7 @@ def main():
         ]
 
     for i in range(15):
+        outputs = {}
         names = list(samples)
         for name in names[i % len(names) :] + names[: i % len(names)]:
             with (
@@ -95,8 +99,8 @@ def main():
                 start = time.process_time_ns()
                 outputs[name] = run()
                 samples[name].append((time.process_time_ns() - start) / 1e6)
-    assert all(value == outputs["scalar"] for value in outputs.values())
-    assert all(not o.live_evidence for o in outputs["scalar"])
+        assert all(value == outputs["scalar"] for value in outputs.values())
+        assert all(not o.live_evidence for o in outputs["scalar"])
     print(
         json.dumps(
             {
