@@ -3,6 +3,9 @@
 import importlib.util
 import tempfile
 import unittest
+from base64 import urlsafe_b64encode
+from hashlib import sha256
+from importlib.metadata import Distribution
 from pathlib import Path
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts/passport_install_check.py"
@@ -45,6 +48,66 @@ class InstalledSourceTests(unittest.TestCase):
         self.installed.unlink()
         with self.assertRaises(FileNotFoundError):
             CHECKER.check_file(self.source, self.installed, self.source_root)
+
+
+class InstalledRecordTests(unittest.TestCase):
+    def setUp(self):
+        InstalledSourceTests.setUp(self)
+        self.info = self.root / "aethron-0.2.0.dist-info"
+        self.info.mkdir()
+        (self.info / "METADATA").write_text(
+            "Metadata-Version: 2.4\nName: aethron\nVersion: 0.2.0\n"
+        )
+        self.source_bytes = self.source.read_bytes()
+        digest = urlsafe_b64encode(sha256(self.source_bytes).digest()).decode().rstrip("=")
+        self.row = f"installed.py,sha256={digest},{len(self.source_bytes)}\n"
+        self.record = self.info / "RECORD"
+        self.record.write_text(self.row)
+
+    def check_record(self, installed=None):
+        CHECKER.check_record(
+            Distribution.at(self.info),
+            "installed.py",
+            installed or self.installed,
+            self.source_bytes,
+        )
+
+    def test_matching_record_is_accepted(self):
+        self.check_record()
+
+    def test_missing_record_is_rejected(self):
+        self.record.unlink()
+        with self.assertRaisesRegex(ValueError, "missing_distribution_record"):
+            self.check_record()
+
+    def test_missing_or_duplicate_member_is_rejected(self):
+        for record in ("different.py,,\n", self.row * 2):
+            with self.subTest(record=record):
+                self.record.write_text(record)
+                with self.assertRaisesRegex(ValueError, "invalid_distribution_member"):
+                    self.check_record()
+
+    def test_identical_copy_outside_record_location_is_rejected(self):
+        alternate = self.root / "unowned.py"
+        alternate.write_bytes(self.source_bytes)
+        # The original byte check accepts this copy; RECORD association must not.
+        CHECKER.check_file(self.source, alternate, self.source_root)
+        with self.assertRaisesRegex(ValueError, "distribution_location_mismatch"):
+            self.check_record(alternate)
+
+    def test_missing_wrong_hash_algorithm_or_digest_is_rejected(self):
+        for value in ("", "sha512=wrong", "sha256=wrong"):
+            with self.subTest(value=value):
+                self.record.write_text(f"installed.py,{value},{len(self.source_bytes)}\n")
+                with self.assertRaisesRegex(ValueError, "distribution_hash_mismatch"):
+                    self.check_record()
+
+    def test_missing_or_wrong_size_is_rejected(self):
+        for value in ("", str(len(self.source_bytes) + 1)):
+            with self.subTest(value=value):
+                self.record.write_text(self.row.rsplit(",", 1)[0] + f",{value}\n")
+                with self.assertRaisesRegex(ValueError, "distribution_size_mismatch"):
+                    self.check_record()
 
 
 if __name__ == "__main__":
