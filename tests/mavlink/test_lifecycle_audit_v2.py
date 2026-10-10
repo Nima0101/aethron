@@ -67,6 +67,51 @@ class LifecycleAuditTests(unittest.TestCase):
                 with self.assertRaises(subprocess.CalledProcessError):
                     self.api._child(["node", str(self.api.DRIVER)], cases)
 
+    def reference_cli(self, payload):
+        return subprocess.run(  # nosec B603
+            [sys.executable, str(Path(self.api.__file__)), "--reference"],
+            input=payload,
+            capture_output=True,
+            timeout=10,
+            check=False,
+        )
+
+    def test_reference_cli_rejects_ambiguous_or_nonfinite_input(self):
+        payloads = [
+            b'[{"name":"duplicate","steps":[{"op":"ingest","op":"snapshot","now":"0"}]}]',
+            b'[{"name":"duplicate","steps":[{"op":"snapshot","now":"1","now":"0"}]}]',
+        ]
+        payloads += [
+            b'[{"name":"number","steps":[{"op":"snapshot","now":' + token + b"}]}]"
+            for token in (b"NaN", b"Infinity", b"-Infinity", b"1e999")
+        ]
+        for payload in payloads:
+            with self.subTest(payload=payload):
+                result = self.reference_cli(payload)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(result.stdout, b"")
+
+    def test_reference_cli_rejects_oversize_bytes_and_hidden_tail(self):
+        unicode_case = json.dumps([{"name": "é" * 33000, "steps": []}], ensure_ascii=False).encode(
+            "utf-8"
+        )
+        for payload in (b"[]" + b" " * 65535, b"[]" + b" " * 65535 + b"invalid", unicode_case):
+            with self.subTest(size=len(payload)):
+                result = self.reference_cli(payload)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(result.stdout, b"")
+
+    def test_reference_cli_preserves_corpus_and_exact_byte_limit(self):
+        cases = self.api.corpus()
+        payload = json.dumps(cases).encode("utf-8")
+        for value in (payload, payload + b" " * (65536 - len(payload))):
+            with self.subTest(size=len(value)):
+                result = self.reference_cli(value)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                output = json.loads(result.stdout)
+                self.api.check_measurement(output)
+                self.api.check_parity(self.api.reference(cases), output["results"])
+
     def test_run_records_cancellation_without_swallowing_it(self):
         for error_type in (KeyboardInterrupt, SystemExit, asyncio.CancelledError):
             with (

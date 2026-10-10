@@ -288,7 +288,18 @@ if __name__ == "__main__":
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
     if args.reference:
-        results = reference(json.loads(sys.stdin.read(65537)))
+        # Reject the sentinel byte before parsing; text reads count characters
+        # and can hide an oversized tail after an otherwise valid JSON document.
+        payload = sys.stdin.buffer.read(65537)
+        if len(payload) > 65536:
+            raise ValueError("audit_input_too_large")
+        cases = json.loads(
+            payload.decode("utf-8"),
+            object_pairs_hook=_unique_members,
+            parse_constant=_finite_number,
+            parse_float=_finite_number,
+        )
+        results = reference(cases)
         print(
             json.dumps(
                 {

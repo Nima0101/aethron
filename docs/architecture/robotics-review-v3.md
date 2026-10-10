@@ -767,3 +767,14 @@ reference outputs and generated native constants are unchanged. [Evidence](../ve
 records source hashes and preservation checks. This corrects fixture admission;
 production telemetry, the production runtime decision and later review cursor
 remain unchanged.
+
+## Bound and disambiguate reference CLI JSON
+
+The [reference input review](../verification/robotics-comparator-coverage-v3.md#reference-cli-json-admission)
+found that repeated members, non-finite numbers and oversized input could reach
+the reference experiment. The CLI now reads a bounded byte prefix, rejects an
+over-limit sentinel before parsing, and applies existing duplicate/finite-number
+hooks. Nine expected RED assertions became green; 34 focused methods pass.
+[Evidence](../verification/robotics-reference-json-v3.json) binds this correction
+to source and logs. Production telemetry and candidate drivers are unchanged.
+This does not complete case/schema admission or the runtime reassessment.

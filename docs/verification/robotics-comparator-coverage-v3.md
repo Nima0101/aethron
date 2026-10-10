@@ -218,3 +218,42 @@ not establish duplicate-member rejection, canonical clock/hex syntax, complete
 case/root shape validation, callback-exception equivalence, or full lifecycle
 qualification. Those boundaries remain distinct. The earliest production runtime
 decision stays PENDING and later component reassessments remain incomplete.
+
+## Reference CLI JSON admission
+
+Reviewed baseline: `6431785214edccab56765467fc367401dbeb3c28`.
+The `--reference` entry point used the default JSON parser after a 65,537-character
+read. Duplicate keys silently selected the last value; JSON non-finite extensions
+and overflowed floating values reached experiment execution. A valid document
+padded beyond the intended input limit, a trailing suffix beyond the read window,
+and a multibyte document larger than 65,536 bytes could still produce results.
+
+The CLI now reads at most 65,537 bytes from its binary standard input, rejects
+more than 65,536 bytes before parsing, explicitly decodes UTF-8 and reuses the
+existing duplicate-member and finite-number hooks from result admission. Valid
+boolean clock fixtures and wide integer timestamps are preserved. The existing
+parent subprocess timeout remains ten seconds; this change adds no independent
+CLI input deadline. The byte cap is an experiment input limit, not a new frozen
+physical or telemetry threshold.
+
+[Python's JSON documentation](https://docs.python.org/3/library/json.html#repeated-names-within-an-object)
+describes last-value handling and the `object_pairs_hook`, `parse_constant` and
+`parse_float` customization points. For this existing Python reference process,
+reusing those hooks provides duplicate visibility before dictionaries discard it.
+Post-decoding schema validation alone cannot recover discarded duplicate keys.
+This small parser correction is not a production language KEEP decision, a
+performance comparison or a replacement for the open runtime reassessment.
+
+The [receipt](robotics-reference-json-v3.json) records nine expected RED assertions
+(two duplicate-member inputs, four non-finite numbers, three oversized inputs),
+then 34 passing lifecycle/native harness methods without skips. Positive CLI
+checks preserve all original 16 cases/48 steps and compare the exact reference
+results both at ordinary size and padded to the inclusive 65,536-byte boundary.
+Ruff, formatting and Bandit pass after one initial formatting correction. Real
+Node parity still runs; no new native compilation or timing ranking is claimed.
+
+Case/root shapes, complete field-value admission and independent managed JSON
+input rejection are not established here. The managed driver still uses
+`JSON.parse`; this Python CLI correction must not be described as cross-runtime
+duplicate-member parity. Production receiver code and all candidate drivers are
+unchanged. The production runtime decision remains PENDING.
