@@ -1,6 +1,7 @@
 """Executable managed-runtime parity experiment, with synthetic wire only."""
 
 import importlib.util
+import sys
 import unittest
 from pathlib import Path
 
@@ -28,6 +29,30 @@ class LifecycleAuditTests(unittest.TestCase):
         self.assertEqual(results["rollback"][-1]["reason"], "local_clock_invalid")
         self.assertEqual(results["boot_reset"][-1]["reason"], "source_clock_reset")
         self.assertEqual(results["closed"][-1]["reason"], "closed")
+
+    def test_child_rejects_ambiguous_or_nonfinite_json_before_parity(self):
+        for payload in (
+            '{"results": [1], "results": []}',
+            '{"results": [{"perception_eligible": true, "perception_eligible": false}]}',
+            '{"results": [], "peak_rss_kib": NaN}',
+            '{"results": [], "peak_rss_kib": Infinity}',
+            '{"results": [], "peak_rss_kib": 1e999}',
+        ):
+            with self.subTest(payload=payload), self.assertRaises(ValueError):
+                self.api._child(
+                    [sys.executable, "-c", "import sys; print(sys.argv[1])", payload], []
+                )
+
+    def test_child_preserves_valid_authority_clock_and_fractional_types(self):
+        payload = '{"results": [{"perception_eligible": false, "receive_ns": "9007199254740993", "values": [0.10000000149011612]}], "peak_rss_kib": 42}'
+        value, elapsed = self.api._child(
+            [sys.executable, "-c", "import sys; print(sys.argv[1])", payload], []
+        )
+        self.assertIs(value["results"][0]["perception_eligible"], False)
+        self.assertEqual(value["results"][0]["receive_ns"], "9007199254740993")
+        self.assertEqual(value["results"][0]["values"], [0.10000000149011612])
+        self.assertIs(type(value["peak_rss_kib"]), int)
+        self.assertGreater(elapsed, 0)
 
     def test_parity_distinguishes_boolean_authority_from_numeric_zero(self):
         self.assertTrue(callable(getattr(self.api, "check_parity", None)))

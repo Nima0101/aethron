@@ -1,0 +1,44 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "3ec78f1ebdf6c6b066990a622929565470dff50d",
+  "component": "passive_wire comparison evidence",
+  "decision": "FIX audit JSON admission only",
+  "production_receiver_changed": false,
+  "technology_decision": "PENDING",
+  "red": {
+    "methods": 1,
+    "assertion_failures": 5,
+    "errors": 0,
+    "reason": "ValueError not raised for duplicated or non-finite candidate JSON"
+  },
+  "green": {
+    "methods": 14,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_s": 1.769,
+    "command": "PYTHONPATH=integrations/edge:tests/mavlink .venv/bin/python -m unittest test_lifecycle_audit_v2 test_native_audit_v2 -v"
+  },
+  "static": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS"
+  },
+  "sources": [
+    "https://docs.python.org/3/library/json.html#standard-compliance-and-interoperability"
+  ],
+  "sha256": {
+    "scripts/robotics_lifecycle_audit_v2.py": "7e4d776761f859ce13a17625daf7587bbd8d2ba13b67d2abb7c70f295621bdb4",
+    "tests/mavlink/test_lifecycle_audit_v2.py": "14ec0243e0e8a3abdb02d339a26fc7f86d25f7434da39f9dc2a4852b19d1530b"
+  },
+  "retained_local_logs": {
+    "lifecycle-json-red.log": "71781e0bb8e159e5b27e7214027828848ac19b85a8a879a070688dc342d70269",
+    "lifecycle-json-green.log": "0931e1a2530be46ef46db980a0520f12186b7f3d4f64c48020cc39a2c7e57509"
+  },
+  "limits": [
+    "No receiver or runtime candidate change",
+    "No native compilation, hardware or realtime qualification",
+    "Prior historical evidence unchanged",
+    "Managed subprocess output retention is not resolved by this parser repair",
+    "First-component runtime decision and remaining V3 inventory incomplete"
+  ]
+}

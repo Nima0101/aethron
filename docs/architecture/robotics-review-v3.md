@@ -98,3 +98,22 @@ not permission to retain a surveillance history or treat a saved status as live.
 No production code, frozen threshold or transport behavior changes. This closes
 the documentation mismatch only; the technology decision and review cursor remain
 open. Existing timing failures and all hardware/deployment limitations remain.
+
+## Managed comparison evidence admission
+
+The independent JavaScript comparison still used the default JSON decoder after
+the native harness correction. Five subprocess cases demonstrated acceptance of
+repeated root/nested members and NaN, Infinity or exponent overflow in metadata.
+FIX: reject those forms before typed parity comparison using the documented JSON
+object-pair and number hooks already described above. A positive subprocess case
+checks boolean provenance, a decimal-string clock beyond binary64's exact integer
+range, and a finite fractional value. No receiver, runtime candidate or timing
+threshold changed. This narrow repair does not choose a production technology.
+
+[Focused evidence](../verification/robotics-managed-json-review-v3.json) retains
+five initial failures and the subsequent 14 passing managed/native harness tests,
+including actual execution of the existing managed comparison. This does not
+rerun native compilation or qualify hardware. Historical comparison results are
+unchanged. Managed subprocess failure-output retention remains a separate open
+evidence issue; a passing corrected parser does not retroactively validate all
+historical output. The first-component review remains incomplete.

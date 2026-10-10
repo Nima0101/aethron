@@ -109,6 +109,22 @@ def reference(cases):
     return json.loads(json.dumps(results))
 
 
+def _unique_members(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate_json_member")
+        result[key] = value
+    return result
+
+
+def _finite_number(token):
+    value = float(token)
+    if not math.isfinite(value):
+        raise ValueError("nonfinite_json_number")
+    return value
+
+
 def _child(command, cases):
     begin = time.monotonic_ns()
     # Fixed trusted audit drivers, bounded input and process lifetime; no shell.
@@ -120,7 +136,13 @@ def _child(command, cases):
         timeout=10,
         check=True,
     )
-    return json.loads(completed.stdout), time.monotonic_ns() - begin
+    value = json.loads(
+        completed.stdout,
+        object_pairs_hook=_unique_members,
+        parse_constant=_finite_number,
+        parse_float=_finite_number,
+    )
+    return value, time.monotonic_ns() - begin
 
 
 def check_parity(expected, actual):
