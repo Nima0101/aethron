@@ -206,6 +206,22 @@ test('bundled connection controls stay offline until explicit host-enabled start
  finish();await new Promise(resolve=>setImmediate(resolve));assert.equal(document.querySelector('[role=status]').getAttribute('data-state'),'stopped');controls.dispose();assert.equal(document.querySelector('main').textContent,'');
 });
 
+for(const trigger of ['permission','pageshow'])test(`bundled ${trigger} withdrawal rejects reentrant Start`,async()=>{
+ const {mountConnectionControls}=await bundle();const {document,Event:DOMEvent}=parseHTML('<main></main>');const window=new EventTarget();
+ Object.defineProperty(document,'defaultView',{value:window});Object.defineProperty(document,'visibilityState',{value:'visible'});
+ let calls=0,finish,disabledDuringWithdrawal;
+ const operation={start(){calls++;return new Promise(resolve=>finish=resolve);},disconnect(){}};
+ const controls=mountConnectionControls(document.querySelector('main'),operation);
+ const start=document.querySelector('[data-feature="connection.start"]');controls.setEnabled(true);
+ operation.disconnect=()=>{controls.setEnabled(true);disabledDuringWithdrawal=start.disabled;start.dispatchEvent(new DOMEvent('click'));};
+ try{
+  if(trigger==='permission')controls.setEnabled(false);else window.dispatchEvent(new Event('pageshow'));
+  assert.equal(calls,0);assert.equal(disabledDuringWithdrawal,true);
+  operation.disconnect=()=>{};start.dispatchEvent(new DOMEvent('click'));assert.equal(calls,1);
+  finish();await new Promise(resolve=>setImmediate(resolve));
+ }finally{operation.disconnect=()=>{};controls.dispose();finish?.();}
+});
+
 test('standalone containing client shares locale and withdraws a stopped observation',async()=>{
  const {mountObservationClient}=await bundle();const {document,Event:DOMEvent}=parseHTML('<main></main>');const window=new EventTarget();let tick,finish,signal;
  Object.defineProperty(document,'defaultView',{value:window});Object.defineProperty(document,'visibilityState',{value:'visible'});

@@ -65,6 +65,23 @@ test('synchronous host start failure uses fixed guidance and releases the gate',
 test('reentrant disconnect cannot recursively clear or enable a new request',()=>{
  const s=setup();let calls=0;s.operation.disconnect=()=>{calls++;s.controls.setEnabled(false);s.controls.setEnabled(true);s.click('start');};s.controls.setEnabled(false);assert.equal(calls,1);assert.equal(s.calls(),0);assert.equal(s.state(),'failed');s.controls.dispose();
 });
+for(const trigger of ['permission withdrawal','page reactivation'])test(`${trigger} cannot start a session from inside source withdrawal`,async()=>{
+ const s=setup();s.controls.setEnabled(true);let disabledDuringWithdrawal;
+ s.operation.disconnect=()=>{
+  s.controls.setEnabled(true);
+  disabledDuringWithdrawal=s.root.querySelector('[data-feature="connection.start"]').disabled;
+  s.click('start');
+ };
+ try{
+  if(trigger==='permission withdrawal')s.controls.setEnabled(false);else s.emit('pageshow');
+  assert.equal(s.calls(),0,'no session may begin before source withdrawal returns');
+  assert.equal(disabledDuringWithdrawal,true,'Start must reflect the active withdrawal gate');
+  assert.equal(s.state(),'idle');
+  s.operation.disconnect=()=>{};
+  s.click('start');assert.equal(s.calls(),1,'a later explicit action can start after withdrawal');
+  s.resolve();await turn();assert.equal(s.state(),'stopped');
+ }finally{s.operation.disconnect=()=>{};s.controls.dispose();if(s.calls())s.resolve();await turn();}
+});
 test('actual SDK source and display withdraw immediately when Stop is activated',async t=>{
  const {createObservationSource}=await import('../clients/typescript/dist/client.js');
  const {mountObservationHost}=await import('./dist/lifecycle.js');

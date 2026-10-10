@@ -65,7 +65,7 @@ export function mountConnectionControls(root: HTMLElement, operation: Connection
     status.setAttribute('data-state',state);details.setAttribute('data-help-topic',`connection.${state}`);
     summary.textContent = text.help;start.textContent = text.start;stop.textContent = text.stop;
     startHelp.setLocale(locale);stopHelp.setLocale(locale);
-    start.disabled = fault || !!run || !enabled || !visible();stop.disabled = !run || run.stopping;
+    start.disabled = clearing || fault || !!run || !enabled || !visible();stop.disabled = !run || run.stopping;
   }
   function withdraw(): void {
     if (clearing) {fault = true;return;}
@@ -78,7 +78,7 @@ export function mountConnectionControls(root: HTMLElement, operation: Connection
     withdraw();previous?.controller.abort();render();
   }
   async function begin(): Promise<void> {
-    if (disposed || fault || run || !enabled || !visible()) return;
+    if (disposed || clearing || fault || run || !enabled || !visible()) return;
     let current: Run;
     try {current = {controller:new AbortController(),stopping:false};}
     catch {fault = true;render();return;}

@@ -1834,3 +1834,45 @@ Verified bridge commit 546293e1 was fast-forward pushed to PR #44. Its single
 exact-head snapshot showed 40 queued and one skipped check; no polling or merge.
 Next earliest unreviewed component: P12 connection controller and browser build,
 then the remaining help inventory. Full lane/P19 acceptance remains incomplete.
+
+
+### P12 connection-controller reassessment — 2026-10-10
+
+At `4c658ce7c1b865a2b55d280f0cc7638c52a5603e`, re-read the authoritative
+policy/V3 order and early SDK build boundary, verified eleven prior source hashes,
+seven retained reports and fourteen operator outputs, then reviewed connection
+source, tests, composed client, ADR and documentation. No peer or native-client
+module changed.
+
+KEEP TypeScript/native HTML under the updated closed
+[connection ADR](../../../examples/operator/connection-adr.json). Fresh official
+source comparison against checked ECMAScript, Lit reactive lifecycle, Elm interop
+and ReScript bindings supports this synchronous two-action/one-operation boundary.
+The decisive constraints are browser ESM, explicit AbortSignal interop, immediate
+source withdrawal, fixed bilingual state text and a typed host lifetime contract.
+No alternate runtime removes host authorization responsibilities or establishes
+a timing advantage; no migration or cross-language benchmark claim is justified.
+The four C4 views now explicitly include the clearing gate.
+
+FIX a reentrant-start defect. When no operation was pending, disconnect could
+synchronously enable the controls and dispatch Start while withdrawal was still
+executing. Both permission-withdrawal and pageshow reproductions started one
+operation before the callback returned, failing the expected zero-start assertion.
+The actual begin guard and displayed Start availability now both reject that
+clearing interval. Attempts are ignored without queuing; the tests also confirm
+a subsequent independent Start succeeds after successful withdrawal. This is
+callback-order enforcement, not authentication or containment of hostile host code.
+
+The focused connection/composed-client/lifecycle/help suite passes all 70 methods,
+including the two regressions. Eight Node-based artifact checks additionally exercise the
+same two cases with a data-URL imported standalone bundle and string code generation
+disabled; exact results and hashes are in
+[the evidence](evidence/phase3/p12-connection-review-v1.json). Runtime state vocabulary,
+localized help topics, public signatures, cancellation semantics and timing bounds
+remain unchanged. Only the generated connection JavaScript needs different runtime
+bytes; other compiled operator modules are compared against the prior evidence.
+
+Verified bridge commit 4c658ce7 was fast-forward pushed to PR #44. One exact-head
+snapshot reported 40 queued and one skipped check; no polling or merge. Next earliest
+unreviewed component: the containing P12 client and browser build, then remaining
+help coverage. Full lane and installed P19 acceptance remain incomplete.

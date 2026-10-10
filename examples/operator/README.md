@@ -199,6 +199,10 @@ perform the host's current permission checks. `disconnect()` must synchronously
 clear the source and refresh any observation display. The component neither
 receives credentials nor authenticates the host callback. It cannot force a
 callback that ignores cancellation to settle; Start remains disabled meanwhile.
+Start is also blocked while `disconnect()` is executing, including reentrant
+callback attempts that re-enable the controls. These attempts are ignored rather
+than queued. After withdrawal returns successfully, a later explicit Start can
+request a session if the host has enabled the controls.
 
 Stop, access withdrawal, hidden/unknown visibility, freeze, page departure and
 reactivation withdraw the session. Returning does not reconnect. A disconnect
