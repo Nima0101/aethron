@@ -31,7 +31,7 @@ admission/expiry composition; document that old projections cannot attest freshn
   in `src/presenter.ts`; fixed local text and input guard, no side effects.
 - [x] Add sparse-array RED cases and correct hole handling with dense iteration.
 - [x] Validate ADR schema, run final focused tests and inspect the final diff.
-- [ ] Commit the cohesive component; retain source-bound evidence and remaining gates.
+- [x] Commit the cohesive component (`2f22c34`); retain source-bound evidence and remaining gates.
 
 Ruling: no separate approval pause or subagent review, following explicit owner
 execution/no-subagent instructions. Author self-review has less independence than

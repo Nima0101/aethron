@@ -1,41 +1,65 @@
-# P12 observation presentation boundary
+# P12 observation presentation components
 
-This is a reusable presentation component, not an operator application. It maps
-an SDK aggregate view to fixed English (`en`) or Swedish (`sv-SE`) text and a
-stable help-topic ID. All current-state output remains `UNKNOWN`. Delayed
-observed presence is explicitly distinguished from current conditions. Malformed
-projections discard sensor details and return an unavailable state.
+The presenter maps an SDK aggregate view to fixed English (`en`) or Swedish
+(`sv-SE`) text. The reusable DOM panel adds language buttons and contextual
+Help/Hjälp disclosure for expired, delayed and invalid observations. All current
+conditions remain `UNKNOWN`; an earlier `PRESENT` observation is labelled as
+historical. Invalid input withdraws sensor details. This is not a complete operator
+application or a qualified browser distribution.
 
-Prepare the locked TypeScript SDK dependencies once, then from the repository root:
+Prepare locked development dependencies once, then run the focused checks:
 
 ```sh
 npm ci --prefix examples/clients/typescript --ignore-scripts
+npm ci --prefix examples/operator --ignore-scripts
 npm test --prefix examples/operator
 ```
 
-Only preparation needs a registry. Tests build the SDK, build this module with
-the SDK's pinned compiler, and execute synthetic positive/negative checks. The
-presenter itself has no dependencies, network requests, browser storage or timers.
-The example package intentionally is not independently published or installed.
+Preparation needs a registry or a populated offline npm cache. Tests compile the
+SDK and panel, then exercise the presenter and a structural DOM implementation.
+The panel has no runtime library dependency. LinkeDOM is development-only; it does
+not verify browser layout, keyboard behavior or screen-reader output.
 
-Use `presentObservation(observation.view(), locale)` at render time. The presenter
-cannot determine whether a previously returned SDK view is stale. Pass its strings
-to text nodes, not HTML interpolation. Unsupported locales throw
-`unsupported_locale`; there is no silent language fallback. Returned sensor arrays
-are detached. Covariance shape is checked but the matrix, geometry, session/track
-IDs and source input are omitted from the result. Sensor names do not authenticate
-an upstream source or establish calibration/accuracy.
+A host with an existing admitted SDK `observation` can mount the built module:
 
-Direct object admission snapshots before validation, like the SDK's direct object
-API. This is not a pre-clone allocation bound; use bounded SDK wire ingress for
-network data. The fixed states are `expired`, `delayed`, and `invalid`, with topic
-IDs `observation.expired`, `observation.delayed`, and `observation.invalid`.
-English and Swedish explanations are included, but these IDs do not yet constitute
-navigable help links or a complete Help Center. No role or permission system is
-implemented here.
+```js
+import {mountObservationPanel} from './dist/panel.js';
+const panel = mountObservationPanel(root, () => observation.view(), 'en');
+// Call after admission, on the host's expiry watchdog, and on host activation:
+panel.refresh();
+// Before removing the host view or logging out:
+panel.dispose();
+```
 
-Remaining P12/P19 work includes the actual accessible UI, scene/map/replay workflows,
-source provenance, authenticated integration, release-bound help coverage and
-independent customer acceptance. No browser, hardware, tactical, availability or
-security certification follows from these Node tests. See [the ADR](adr.json),
-its [closed schema](adr.schema.json), and the [implementation plan](PLAN.md).
+The host must own `root` exclusively, retain the SDK observation, enforce source
+access/authorization and schedule refreshes. This component never connects to a
+service or starts a timer. Every refresh, language change and opening of help calls
+the reader again. Never supply a cached projection as a freshness guarantee.
+Stalled host execution can leave delayed historical text visible; the displayed
+current conditions remain UNKNOWN. Disposal removes listeners and owned content,
+clears the panel's text nodes, and makes later controller calls inert. It cannot
+erase strings another caller copied earlier or close a host transport session.
+
+The panel updates existing controls without replacing them on refresh. Content
+uses text nodes; status has polite/atomic live-region attributes. Those semantics
+still require real-browser keyboard/focus and assistive-technology acceptance.
+Unsupported locales throw `unsupported_locale` before changing the view. Reader
+exceptions become fixed invalid guidance without including exception text.
+
+`presentObservation(observation.view(), locale)` remains available independently.
+It snapshots before validation; direct object admission has no pre-clone allocation
+bound. Use bounded SDK wire ingress for network data. Sensor names are vocabulary,
+not source authentication or calibration evidence. Raw covariance/geometry,
+track/session IDs and caller input are not returned or rendered.
+
+The three local topic IDs are `observation.expired`, `observation.delayed` and
+`observation.invalid`. Their disclosure content follows the current displayed
+state and locale. No role-sensitive administrator guidance is included. Search,
+role enforcement, onboarding, release-SHA-bound bidirectional help coverage,
+scene/map/replay flows and integrated P19 acceptance remain unfinished. Two local
+Chromium probes timed out; no browser acceptance is claimed. No hardware, tactical,
+availability or security certification follows from these tests.
+
+See the presenter [ADR](adr.json) and [schema](adr.schema.json), panel
+[ADR](panel-adr.json) and [schema](panel-adr.schema.json), and
+[panel implementation plan](RENDERER-PLAN.md).

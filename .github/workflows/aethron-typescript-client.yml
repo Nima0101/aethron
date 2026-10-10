@@ -61,6 +61,7 @@ jobs:
         run: |
           python -m pip install --only-binary=:all: --require-hashes -r integrations/edge/requirements-server.lock 2>&1 | tee build/ecosystem-phase1/client-ci/service-dependencies.log
           npm ci --prefix examples/clients/typescript --ignore-scripts 2>&1 | tee build/ecosystem-phase1/client-ci/client-dependencies.log
+          npm ci --prefix examples/operator --ignore-scripts 2>&1 | tee build/ecosystem-phase1/client-ci/operator-dependencies.log
       - name: Client contracts and smoke rejection controls
         run: |
           npm test --prefix examples/clients/typescript 2>&1 | tee build/ecosystem-phase1/client-ci/client-tests.log

@@ -776,3 +776,57 @@ validation and has no pre-clone byte bound. This is not the P12 application or
 P19 Help Center: accessible DOM interaction, navigation, provenance/permissions,
 release-SHA-bound bidirectional help coverage, browser testing and independent
 customer acceptance remain executable work. No lane/audit completion is claimed.
+
+## P12 native observation panel and disposal review
+
+Baseline `2f22c34c716852d5b562d99bb5fb4eb20f59fa2a`. The presenter bridge
+commit, eleven paths and all 57 recorded source hashes were verified before
+publishing to PR #44. Re-read the earlier SDK projection/clock, wire/session,
+contract/validator generators, package lifecycle and real-service fixture source,
+then the new presenter. KEEP these bounded component decisions: generated runtime
+schema guards, private aggregate projection, host Fetch/Streams transport, Node
+contract generation, and Python's reuse of the peer service test harness. Existing
+negative timing/provenance and full-event-versus-payload size evidence remains;
+there is no new physical qualification or migration winner in that pass.
+
+The next reusable P12 slice is `mountObservationPanel`: stable native language
+buttons, UNKNOWN status and contextual Help/Hjälp disclosures backed by the actual
+presenter. The host supplies a fresh SDK view reader and owns scheduling, transport
+and authorization. Language/help activation re-reads that view. Reader failures
+withdraw details; disposal clears owned text/content and removes event listeners.
+Late callbacks cannot repopulate the panel, including disposal during an input
+getter. Repeated identical refreshes retain text nodes while still reading a new
+view. The panel itself performs no network request, persistence or timer operation.
+
+SELECT TypeScript/native DOM for this fixed component after comparing ordinary
+ECMAScript, Lit, Elm and ReScript against explicit lifecycle, offline text, static
+DOM typing and host integration requirements. No benchmark or general framework
+superiority is claimed. [P12-002](../../../examples/operator/panel-adr.json) records
+the decision, primary sources and four C4 views under a closed schema. Lit's
+reactive web components and Elm's port/message boundary remain credible larger
+application options; neither removes the current input/host trust boundary.
+LinkeDOM is lock-pinned for development-only structural tests, not a browser.
+
+Verification retained eight missing-renderer assertion failures, followed by eight
+passes. Two new disposal regressions then exposed retained text nodes and getter
+repopulation; both were corrected. The initial repeated-text identity assertion
+exhausted the test runner's configured heap while formatting a DOM-object diff.
+That failure remains recorded. A bounded boolean assertion and an isolated copy
+with the original unconditional assignment demonstrate the intended assertion
+failure without exhaustion; the guarded implementation passes. Final focused
+results and source bindings are in
+[evidence](evidence/phase3/p12-panel-v1.json). Offline lock installation, dependency
+audit and workflow lint were checked. CI now prepares this component's locked
+structural test dependencies before running its tests.
+
+Two bounded local Chromium probes timed out (read-only profile access, then host
+DBus/NSS diagnostics). Security settings were not disabled. DOM tests do not prove
+keyboard/focus behavior, screen-reader announcements, rendered contrast or browser
+interoperability. Host stalls may retain explicitly delayed historical text until
+refresh; current conditions remain UNKNOWN. No role-sensitive instructions are
+shipped. Authentication, release-bound help inventory/search, onboarding, full
+scene/map/replay application, installed customer walkthrough and P19 integration
+remain unfinished. The safe embedded addendum's informational UNKNOWN/interface
+requirements apply; no weapon-specific sample was imported. No audit/lane
+completion marker is warranted. Next: execute the panel in a supported browser
+harness and integrate its host refresh/lifecycle adapter.
