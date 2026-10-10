@@ -161,7 +161,16 @@ def main():
     from cryptography.exceptions import InvalidSignature
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
-    cases = json.loads((ROOT / "examples/passports/vectors.json").read_bytes())["cases"]
+    paths = (
+        "scripts/passport_technology_probe.py",
+        "scripts/passport_technology_probe.mjs",
+        "aethron/passports.py",
+        "aethron/_json_bounds.py",
+        "examples/passports/vectors.json",
+    )
+    sources = {path: (ROOT / path).read_bytes() for path in paths}
+    fixture = sources["examples/passports/vectors.json"]
+    cases = json.loads(fixture)["cases"]
     inputs, accepted, admissions = [], [], []
     for case in cases:
         envelope, policy = json.loads(case["envelope"]), json.loads(case["policy"])
@@ -218,25 +227,16 @@ def main():
         _, peak = tracemalloc.get_traced_memory()
     finally:
         tracemalloc.stop()
-    paths = (
-        "scripts/passport_technology_probe.py",
-        "scripts/passport_technology_probe.mjs",
-        "aethron/passports.py",
-        "aethron/_json_bounds.py",
-        "examples/passports/vectors.json",
-    )
+    if any((ROOT / path).read_bytes() != raw for path, raw in sources.items()):
+        raise RuntimeError("probe_source_changed")
     print(
         json.dumps(
             {
                 "audit_policy_version": 3,
                 "python": platform.python_version(),
-                "source_sha256": {
-                    p: hashlib.sha256((ROOT / p).read_bytes()).hexdigest() for p in paths
-                },
-                "source_scope": "Listed project files read after execution; not an atomic snapshot, loaded-code attestation or dependency closure.",
-                "fixture_sha256": hashlib.sha256(
-                    (ROOT / "examples/passports/vectors.json").read_bytes()
-                ).hexdigest(),
+                "source_sha256": {p: hashlib.sha256(raw).hexdigest() for p, raw in sources.items()},
+                "source_scope": "Listed project files matched before/after execution; fixture parsed from captured bytes. Not an atomic snapshot, loaded-code attestation or dependency closure; transient changes restored between reads are not detected.",
+                "fixture_sha256": hashlib.sha256(fixture).hexdigest(),
                 "cases": len(cases),
                 "crypto_accepts": accepted,
                 "admissions": admissions,

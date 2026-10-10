@@ -152,6 +152,40 @@ class ProbeResponseTests(unittest.TestCase):
                 hashlib.sha256((root / name).read_bytes()).hexdigest(),
             )
 
+    def test_changed_project_source_emits_no_evidence(self):
+        root = Path(__file__).resolve().parents[1]
+        read = Path.read_bytes
+        paths = (
+            "scripts/passport_technology_probe.py",
+            "scripts/passport_technology_probe.mjs",
+            "aethron/passports.py",
+            "aethron/_json_bounds.py",
+            "examples/passports/vectors.json",
+        )
+        for name in paths:
+            with self.subTest(path=name):
+                state = {"changed": False}
+                output = io.StringIO()
+
+                def capture(*args, phase=state):
+                    phase["changed"] = True
+                    return json.dumps(self.response).encode()
+
+                def read_after_change(path, selected=name, phase=state):
+                    raw = read(path)
+                    return raw + b" " if phase["changed"] and path == root / selected else raw
+
+                with (
+                    patch("shutil.which", return_value="node"),
+                    patch.dict(self.main.__globals__, {"_capture": capture}),
+                    patch.object(Path, "read_bytes", read_after_change),
+                    contextlib.redirect_stdout(output),
+                ):
+                    with self.assertRaisesRegex(RuntimeError, "probe_source_changed"):
+                        self.main()
+                self.assertEqual(output.getvalue(), "")
+                self.assertFalse(tracemalloc.is_tracing())
+
     def test_mutation_records_direct_helper_and_fixture_digests(self):
         root = Path(__file__).resolve().parents[1]
         main = runpy.run_path(str(root / "scripts/passport_trust_review.py"))["main"]
