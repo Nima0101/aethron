@@ -195,7 +195,7 @@ its language selection consistent. These local topics are not a searchable,
 role-aware, release-SHA-bound P19 Help Center. Account workflows, actual browser
 keyboard/screen-reader acceptance and customer distribution remain unfinished.
 The [connection ADR](connection-adr.json) records the technology comparison and
-four architecture views; the bundle now admits ten explicit runtime modules.
+four architecture views; the bundle uses an explicit runtime-module allowlist (see its manifest).
 
 ### One observation client view
 
@@ -259,3 +259,30 @@ installed-product acceptance. Those are listed as remaining coverage and continu
 to block full P19.7 acceptance. It does not contain administrator procedures,
 credentials or sensor values. [State-help decision](state-help-adr.json) records
 parser alternatives and the supported source grammar.
+
+
+### Contextual button help
+
+Each of the four buttons (English, Svenska, Start and Stop) has visible bilingual
+text associated through `aria-describedby`, a stable `data-feature` action ID,
+and a matching `data-help-action` paragraph. Descriptions stay readable when a
+button is disabled. Changing language updates both panels and their help without
+starting a session. Stop withdraws the local observation and requests cancellation;
+its help does not claim confirmed remote deletion. IDs identify DOM nodes only.
+The host exclusively owns the component DOM. Disposal clears descriptions and
+removes their links; two mounted clients receive distinct description IDs.
+
+`ACTION-HELP.json` supplements `STATE-HELP.json` in the browser distribution. It
+extracts the literal action union and English/Swedish dictionary, binds source and
+module bytes, and records the same clean/dirty Git provenance rules. Negative
+checks reject missing or extra entries and executable expressions. The offline
+bundle check compares **every button** to the inventory in both locales, resolves
+every contextual description link, and executes all four actions. A new button
+without help, an unused help action, text/locale mismatch or broken link fails.
+The manifest hashes both files; failed builds remove both inventories.
+
+This covers four implemented button actions, not a complete Help Center. Native
+state-help disclosures retain their existing guidance. Role/permission inventories,
+search, onboarding, manuals, actual browser/screen-reader behavior and independent
+installed-product acceptance remain unfinished. `product_help_complete` stays
+false. See [action-help decision](action-help-adr.json) and its four C4 views.

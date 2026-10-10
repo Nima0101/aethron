@@ -1,3 +1,4 @@
+import {bindActionHelp} from './action-help.js';
 import {presentObservation, type Locale} from './presenter.js';
 
 const labels = {
@@ -37,8 +38,9 @@ export function mountObservationPanel(root: HTMLElement, readView: () => unknown
     button.textContent = language === 'en' ? 'English' : 'Svenska';
     const select = () => { if (!disposed) (requestLocale ?? setLocale)(language); };
     button.addEventListener('click', select);
-    controls.append(button);
-    return {button, language, select};
+    const help = bindActionHelp(button, `locale.${language}`, locale);
+    controls.append(button, help.element);
+    return {button, language, select, help};
   });
   section.append(controls, status, details);
   root.replaceChildren(section);
@@ -75,7 +77,9 @@ export function mountObservationPanel(root: HTMLElement, readView: () => unknown
     text(summary, copy.help);
     text(explanation, view.explanation);
     attribute(details, 'data-help-topic', view.helpId);
-    for (const {button, language} of buttons) attribute(button, 'aria-pressed', String(language === locale));
+    for (const {button, language, help} of buttons) {
+      attribute(button, 'aria-pressed', String(language === locale));help.setLocale(locale);
+    }
   }
   function setLocale(next: Locale): void {
     if (disposed) return;
@@ -88,7 +92,7 @@ export function mountObservationPanel(root: HTMLElement, readView: () => unknown
     if (disposed) return;
     disposed = true;
     latestRefresh = undefined;
-    for (const {button, select} of buttons) button.removeEventListener('click', select);
+    for (const {button, select, help} of buttons) {button.removeEventListener('click', select);help.dispose();}
     details.removeEventListener('toggle', onToggle);
     // Clear detached references as well as the visible root.
     for (const node of [title, current, observed, sources, explanation]) node.textContent = '';

@@ -1390,3 +1390,53 @@ acceptance remain open, as does the producer SSE-size contract handoff. The
 [source-bound evidence](evidence/phase3/p12-state-help-v1.json) preserves initial
 negative results and earlier failures. Next: action-level contextual help and
 coverage in the containing client. No completion marker is created.
+
+## P12 button descriptions and action-help inventory — 2026-10-10
+
+Baseline: `286e2df61d3ccf0735c1bf10deaa4b9cd37085a7`. The local controller commit,
+98 source hashes and six prior reports were verified before publishing it to PR
+#44. The single check snapshot still showed queued checks on `321a11b`; no CI
+polling or merge was attempted.
+
+The review restarted at the P3.3 generator, standalone validator and wire/session
+admission boundary, then revisited aggregate ownership, cancellation, source and
+P12 presenter/panel/lifecycle/connection composition through the browser builder.
+The reviewed guards still reject ambiguous data and withdraw unavailable state.
+The producer whole-event/payload size mismatch remains a peer-owned contract gap.
+No frozen time/resource threshold or peer implementation was changed. Existing
+scope limits and negative evidence remain applicable; no full-lane completion is
+inferred from the prior audit.
+
+FIX the four shipped buttons' missing action-level help. English, Svenska, Start
+and Stop now have visible fixed descriptions in both locales, short button names,
+unique `aria-describedby` links and stable feature IDs. The shared locale owner
+updates descriptions without starting a session. Stop's wording describes local
+withdrawal and requested cancellation, not confirmed remote removal. Description
+IDs identify DOM elements only. Disposal clears text and removes the links.
+
+KEEP TypeScript/native DOM for this synchronous text-only presentation boundary.
+The fresh domain comparison includes Lit custom elements, ReScript DOM bindings
+and Rust/wasm-bindgen: declarative custom-element lifecycles, a second typed JS
+binding boundary or Wasm memory/DOM interop do not materially address a missing
+requirement for four native controls. No throughput ranking is claimed. Official
+sources and all four C4 views are in the closed
+[action-help ADR](../../../examples/operator/action-help-adr.json).
+
+The build-time AST extractor now also emits `ACTION-HELP.json`, separately
+versioned from state guidance. Exact action/locale parity and literal text are
+required. The source hash, actual module hash and clean/dirty Git binding travel
+with the inventory and are included in the unsigned manifest. Tests traverse
+every real bundled button in both locales, resolve its description, compare text
+and labels, and execute all four actions offline. This detects new undocumented
+buttons, unused topics, language drift and broken contextual links. Full product
+help is explicitly incomplete; native browser/screen-reader and independent
+installed-product acceptance still require evidence.
+
+Seven initial missing-help/inventory failures were retained before implementation.
+A subsequent refresh-identity test caught unnecessary text-node replacement;
+conditional updates now preserve unchanged descriptions during refresh. Its
+initial failure is retained alongside the final regression check.
+Final counts and exact tested source/log/artifact hashes are in the
+[action-help evidence](evidence/phase3/p12-action-help-v1.json). No audit completion
+marker is created. Next: evaluate a bounded offline help-search contribution over
+the implemented public topics, while preserving role-sensitive product-help gates.

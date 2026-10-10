@@ -1,0 +1,48 @@
+{
+  "id": "P12-ACTION-HELP-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "KEEP TypeScript and native DOM for synchronous action descriptions; extend the build-only literal AST extractor with a separate action inventory.",
+  "constraints": [
+    "Four existing buttons, two locales, offline fixed public text, no extra transport/storage or authority.",
+    "Short visible button names plus visible paragraphs associated by unique aria-describedby IDs; synchronous locale changes and disposal.",
+    "Closed bilingual source extraction and exact executed-button to topic parity in the distributed ESM, with unsigned source/artifact binding."
+  ],
+  "alternatives": [
+    {
+      "technology": "TypeScript with native DOM",
+      "assessment": "Selected for direct synchronous mutation of standard button/paragraph nodes and native accessible descriptions. The runtime boundary already exposes DOM nodes; no scheduler, widget abstraction or foreign memory is needed."
+    },
+    {
+      "technology": "Lit and custom elements",
+      "assessment": "Credible declarative reactive-property support, but asynchronous update lifecycle and custom-element registration introduce a second lifecycle boundary without a current custom-element reuse requirement."
+    },
+    {
+      "technology": "ReScript with DOM/JS bindings",
+      "assessment": "Credible alternative static typing and JavaScript interoperability. Fixed literal text and four DOM mutations do not exhibit a data-model or effect-system gap that would materially improve this component through a second binding/compiler boundary."
+    },
+    {
+      "technology": "Rust with wasm-bindgen/web-sys",
+      "assessment": "Documented DOM manipulation through JavaScript bindings. There is no native numerical or memory-processing workload here; additional Wasm/JS artifact and DOM bindings do not address a demonstrated requirement."
+    }
+  ],
+  "sources": [
+    "https://www.w3.org/WAI/ARIA/apg/practices/names-and-descriptions/",
+    "https://developer.mozilla.org/en-US/docs/Web/API/Document/createElement",
+    "https://lit.dev/docs/components/properties/",
+    "https://rescript-lang.org/docs/manual/bind-to-js-function/",
+    "https://wasm-bindgen.github.io/wasm-bindgen/examples/dom.html"
+  ],
+  "limits": [
+    "Only four button actions are covered. Native details toggles retain existing state guidance; full route/permission/help-center coverage is not claimed.",
+    "Generated IDs identify DOM help elements only, not persons or observations. Host exclusively owns component DOM.",
+    "Structural DOM parity and source/hash bindings are not screen-reader, signed-release, security-certification or installed-product acceptance. product_help_complete remains false.",
+    "No timing benchmark or hard-real-time, hardware, MLS, CNSA or availability qualification."
+  ],
+  "c4": {
+    "context": "flowchart LR\nOperator --> Buttons[Four existing client buttons]\nButtons --> Help[Visible bilingual descriptions]\nHost[Authorized host adapter] --> Client[Read-only client]",
+    "containers": "flowchart LR\nSource[TypeScript literal text] --> Build[Node AST extractor]\nBuild --> Inventory[ACTION-HELP.json]\nSource --> ESM[Offline browser module]\nInventory --> Check[Offline artifact coverage]\nESM --> Check",
+    "components": "flowchart LR\nPanel[Locale buttons] --> Help[Native descriptions]\nConnection[Start and Stop] --> Help\nLocale[Shared locale owner] --> Help\nDispose[Component disposal] --> Clear[Remove descriptions and links]",
+    "code": "classDiagram\nclass ActionHelp {\n bindActionHelp(button, action, locale) binding\n setLocale(locale) void\n dispose() void\n}\nActionHelp --> HTMLButtonElement\nActionHelp --> HTMLParagraphElement\nActionHelpInventory --> SourceHashes"
+  }
+}

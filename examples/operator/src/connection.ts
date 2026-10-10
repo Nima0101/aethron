@@ -1,3 +1,4 @@
+import {bindActionHelp} from './action-help.js';
 import type {Locale} from './presenter.js';
 
 /** Trusted host adapter. start settles only after the session and cleanup finish.
@@ -45,9 +46,10 @@ export function mountConnectionControls(root: HTMLElement, operation: Connection
   const summary = document.createElement('summary'), guidance = document.createElement('p');
   const start = document.createElement('button'), stop = document.createElement('button');
   start.type = stop.type = 'button';
-  start.setAttribute('data-feature','connection.start');stop.setAttribute('data-feature','connection.stop');
+  const startHelp = bindActionHelp(start, 'connection.start', locale);
+  const stopHelp = bindActionHelp(stop, 'connection.stop', locale);
   status.setAttribute('role','status');status.setAttribute('aria-live','polite');status.setAttribute('aria-atomic','true');
-  details.append(summary,guidance);section.append(heading,status,start,stop,details);root.replaceChildren(section);
+  details.append(summary,guidance);section.append(heading,status,start,startHelp.element,stop,stopHelp.element,details);root.replaceChildren(section);
   let disposed = false, enabled = false, suspended = false, clearing = false, fault = false;
   let outcome: State = 'idle';
   type Run = {controller: AbortController; stopping: boolean};
@@ -62,6 +64,7 @@ export function mountConnectionControls(root: HTMLElement, operation: Connection
     heading.textContent = text.title;status.textContent = text[state][0];guidance.textContent = text[state][1];
     status.setAttribute('data-state',state);details.setAttribute('data-help-topic',`connection.${state}`);
     summary.textContent = text.help;start.textContent = text.start;stop.textContent = text.stop;
+    startHelp.setLocale(locale);stopHelp.setLocale(locale);
     start.disabled = fault || !!run || !enabled || !visible();stop.disabled = !run || run.stopping;
   }
   function withdraw(): void {
@@ -108,7 +111,7 @@ export function mountConnectionControls(root: HTMLElement, operation: Connection
     if (disposed) return;
     disposed = true;enabled = false;
     for (const [target,name,callback] of events) target.removeEventListener(name,callback);
-    cancel();run = undefined;
+    cancel();run = undefined;startHelp.dispose();stopHelp.dispose();
     for (const node of [heading,status,guidance,summary,start,stop]) node.textContent = '';
     section.remove();
   }

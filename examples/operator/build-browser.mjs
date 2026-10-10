@@ -6,7 +6,7 @@ import {execFileSync} from 'node:child_process';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const output=resolve(root,'examples/operator/browser-dist');
-const names=['manifest.json','aethron-observation.mjs','LICENSE','AJV-LICENSE','ESBUILD-LICENSE','STATE-HELP.json'];
+const names=['manifest.json','aethron-observation.mjs','LICENSE','AJV-LICENSE','ESBUILD-LICENSE','STATE-HELP.json','ACTION-HELP.json'];
 mkdirSync(output,{recursive:true});
 // Invalidate the previous component before any compiler or dependency can fail.
 for(const name of names) rmSync(resolve(output,name),{force:true});
@@ -27,7 +27,7 @@ try {
   });
   const allowed=new Set([
     'examples/operator/dist/browser.js','examples/operator/dist/presenter.js','examples/operator/dist/client.js',
-    'examples/operator/dist/panel.js','examples/operator/dist/lifecycle.js','examples/operator/dist/connection.js',
+    'examples/operator/dist/action-help.js','examples/operator/dist/panel.js','examples/operator/dist/lifecycle.js','examples/operator/dist/connection.js',
     'examples/clients/typescript/dist/client.js','examples/clients/typescript/dist/wire.js',
     'examples/clients/typescript/dist/session.js','examples/clients/typescript/dist/validators.cjs',
     'examples/clients/typescript/node_modules/ajv/dist/runtime/ucs2length.js',
@@ -40,11 +40,14 @@ try {
   }
   const afterRevision=revision();
   if(beforeRevision.head!==afterRevision.head) throw new Error('changed_build_revision');
-  const {createStateHelpInventory}=await import('./help-inventory.mjs');
+  const {createStateHelpInventory,createActionHelpInventory}=await import('./help-inventory.mjs');
   const help=createStateHelpInventory(Object.fromEntries(['presenter','connection'].map(name=>
     [name,readFileSync(new URL(`./src/${name}.ts`,import.meta.url),'utf8')])),result.outputFiles[0].contents,
     {head:beforeRevision.head,modified:beforeRevision.modified||afterRevision.modified});
+  const actionHelp=createActionHelpInventory(readFileSync(new URL('./src/action-help.ts',import.meta.url),'utf8'),
+    result.outputFiles[0].contents,{head:beforeRevision.head,modified:beforeRevision.modified||afterRevision.modified});
   const artifacts={
+    'ACTION-HELP.json':Buffer.from(JSON.stringify(actionHelp,null,2)+'\n'),
     'STATE-HELP.json':Buffer.from(JSON.stringify(help,null,2)+'\n'),
     'aethron-observation.mjs':result.outputFiles[0].contents,
     LICENSE:readFileSync(resolve(root,'LICENSE')),

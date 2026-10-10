@@ -85,3 +85,31 @@ export function createStateHelpInventory(sources,moduleBytes,revision) {
     locales,source_sha256:Object.fromEntries(Object.entries(sources).map(([name,text])=>[name,hash(text)])),
     module_sha256:hash(moduleBytes),topics:topics.sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0)};
 }
+
+/** Separate versioned inventory for the four shipped button actions. */
+export function createActionHelpInventory(source,moduleBytes,revision) {
+  if(!revision||!equal(Object.keys(revision),['head','modified'])||
+     typeof revision.head!=='string'||!/^[0-9a-f]{40}$/.test(revision.head)||typeof revision.modified!=='boolean') {
+    throw new Error('invalid_help_revision');
+  }
+  const tree=parse(source,'action-help'),actions=union(tree,'Action'),copy=dictionary(tree,'actionGuidance');
+  const locales=['en','sv-SE'];
+  if(!equal(Object.keys(copy),locales))invalid();
+  for(const locale of locales) {
+    if(!copy[locale]||Array.isArray(copy[locale])||typeof copy[locale]!=='object'||!equal(Object.keys(copy[locale]),actions))invalid();
+  }
+  const topics=actions.sort().map(id=>{
+    if(!/^[a-z]+\.[a-zA-Z-]+$/.test(id))invalid();
+    const translations=Object.fromEntries(locales.map(locale=>{
+      const pair=copy[locale][id];
+      if(!Array.isArray(pair)||pair.length!==2||pair.some(text=>typeof text!=='string'))invalid();
+      return [locale,{title:pair[0],body:pair[1]}];
+    }));
+    return {id,owner:'P12',status:'component-only',access:'public-action-guidance',translations};
+  });
+  return {format:'aethron-action-help-v1',ui_schema:'aethron-observation-component-v1',api_schema:'aethron-edge-v1',
+    source_revision:revision.head,source_modified:revision.modified,release_sha:revision.modified?null:revision.head,
+    product_help_complete:false,coverage_scope:'four-observation-client-buttons',locales,
+    remaining_coverage:['routes and role/permission inventory','search and onboarding','manuals and installed-product acceptance'],
+    source_sha256:{'action-help':hash(source)},module_sha256:hash(moduleBytes),topics};
+}

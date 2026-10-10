@@ -111,7 +111,7 @@ test('manifest binds a closed runtime input set and distributed license bytes',a
   assert.ok(!Object.keys(manifest.inputs).some(name=>name.includes('linkedom')));
 });
 test('failed rebuild withdraws old output; recovery reproduces every artifact byte',async()=>{
-  await bundle();const names=['aethron-observation.mjs','LICENSE','AJV-LICENSE','ESBUILD-LICENSE','STATE-HELP.json','manifest.json'];
+  await bundle();const names=['aethron-observation.mjs','LICENSE','AJV-LICENSE','ESBUILD-LICENSE','STATE-HELP.json','ACTION-HELP.json','manifest.json'];
   const before=names.map(name=>hash(read(name)));
   // Missing compiler command is a real child-process failure, not a mocked builder.
   try {
@@ -252,4 +252,39 @@ test('distributed state help exactly covers rendered bilingual component states 
    assert.deepEqual([...seen].sort(),inventory.topics.map(topic=>topic.id).sort());assert.ok(!root.textContent.includes('private_failure'));
   }finally{client.dispose();}
  }
+});
+
+test('packaged action help matches every actual button in both locales offline',async t=>{
+ const inventory=JSON.parse(read('ACTION-HELP.json'));
+ assert.equal(inventory.format,'aethron-action-help-v1');assert.equal(inventory.product_help_complete,false);
+ assert.equal(inventory.module_sha256,hash(read('aethron-observation.mjs')));
+ assert.equal(inventory.source_sha256['action-help'],hash(readFileSync(new URL('./src/action-help.ts',import.meta.url))));
+ assert.equal(inventory.release_sha,inventory.source_modified?null:inventory.source_revision);
+ t.mock.method(globalThis,'fetch',()=>assert.fail('action help must work offline'));
+ const {mountObservationClient}=await bundle(),{document,Event:DOMEvent}=parseHTML('<html><body><main></main></body></html>');
+ const window=new EventTarget();window.setInterval=()=>1;window.clearInterval=()=>{};
+ Object.defineProperty(document,'defaultView',{value:window});Object.defineProperty(document,'visibilityState',{value:'visible'});
+ let starts=0,signal,finish;const root=document.querySelector('main'),client=mountObservationClient(root,{
+  view:()=>null,disconnect(){},start(value){starts++;signal=value;return new Promise(resolve=>finish=resolve);},
+ });
+ const click=id=>root.querySelector(`[data-feature="${id}"]`).dispatchEvent(new DOMEvent('click'));
+ const check=locale=>{
+  const buttons=[...root.querySelectorAll('button')];
+  assert.deepEqual(buttons.map(b=>b.getAttribute('data-feature')).sort(),inventory.topics.map(t=>t.id));
+  assert.equal(root.querySelectorAll('[data-help-action]').length,buttons.length);
+  for(const button of buttons) {
+   const feature=button.getAttribute('data-feature'),topic=inventory.topics.find(t=>t.id===feature);
+   const description=document.getElementById(button.getAttribute('aria-describedby'));
+   assert.ok(description&&root.contains(description));assert.equal(description.getAttribute('data-help-action'),feature);
+   assert.equal(button.textContent,topic.translations[locale].title);assert.equal(description.textContent,topic.translations[locale].body);
+   assert.equal(description.lang,locale);assert.equal(description.hidden,false);
+  }
+ };
+ try {
+  check('en');assert.equal(starts,0);click('locale.sv-SE');check('sv-SE');assert.equal(starts,0);
+  client.setEnabled(true);click('connection.start');check('sv-SE');assert.equal(starts,1);
+  click('connection.stop');assert.equal(signal.aborted,true);check('sv-SE');finish();await new Promise(r=>setImmediate(r));
+  click('locale.en');check('en');assert.equal(starts,1);
+ }finally{client.dispose();finish?.();}
+ assert.equal(root.textContent,'');
 });
