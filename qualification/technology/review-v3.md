@@ -16,6 +16,8 @@ The [Node probe follow-up](node-source-observation-v3.md) checks module/vector
 observations around the experiments while retaining known parser failures.
 The [Java output correction](java-output-review-v3.md) makes UTF-8 delivery
 explicit and prevents output errors from appearing as successful probe execution.
+The [hosted retention correction](workflow-retention-review-v3.md) retains raw
+transport and tool/build observations without claiming execution attestation.
 
 The [measurement lifecycle correction](#follow-up-measurement-lifecycle--2026-10-10)
 qualifies the older allocation results and corrects all three measurement drivers.

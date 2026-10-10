@@ -109,17 +109,32 @@ jobs:
             -o "$RUNNER_TEMP/qualification-audit/jackson-core.jar"
           printf '%s  %s\n' b64b5874162b503a0e58a8f7758266e8dd9f91bf49e3a59ae0b5f47589a231b7 \
             "$RUNNER_TEMP/qualification-audit/jackson-core.jar" | sha256sum --check
+      - name: Record experiment inputs and tool versions
+        run: |
+          git rev-parse HEAD > "$RUNNER_TEMP/qualification-audit/checkout.txt"
+          java -XX:ActiveProcessorCount=1 -XX:+UseSerialGC -version > "$RUNNER_TEMP/qualification-audit/java-version.txt" 2>&1
+          javac -J-XX:ActiveProcessorCount=1 -J-XX:+UseSerialGC -version > "$RUNNER_TEMP/qualification-audit/javac-version.txt" 2>&1
+          python --version > "$RUNNER_TEMP/qualification-audit/python-version.txt"
+          node --v8-pool-size=1 --version > "$RUNNER_TEMP/qualification-audit/node-version.txt"
+          sha256sum qualification/technology/IngressProbe.java > "$RUNNER_TEMP/qualification-audit/source.sha256"
+          (cd "$RUNNER_TEMP/qualification-audit" && sha256sum jackson-core.jar > parser.sha256)
       - name: Compile bounded streaming probe
         run: |
           javac -J-XX:ActiveProcessorCount=1 -J-XX:+UseSerialGC -J-Xmx64m \
             -cp "$RUNNER_TEMP/qualification-audit/jackson-core.jar" \
             -d "$RUNNER_TEMP/qualification-audit" qualification/technology/IngressProbe.java
+          sha256sum --check "$RUNNER_TEMP/qualification-audit/source.sha256"
+          (cd "$RUNNER_TEMP/qualification-audit" && sha256sum --check parser.sha256 && sha256sum IngressProbe.class > compiled.sha256)
       - name: Compare ingress and semantic report preservation
         run: |
           python -m qualification.technology.compare_ingress --export > "$RUNNER_TEMP/qualification-audit/requests.hex"
+          sha256sum --check "$RUNNER_TEMP/qualification-audit/source.sha256"
+          (cd "$RUNNER_TEMP/qualification-audit" && sha256sum --check parser.sha256 compiled.sha256)
           java -Xint -XX:ActiveProcessorCount=1 -XX:+UseSerialGC -Xmx64m \
             -cp "$RUNNER_TEMP/qualification-audit:$RUNNER_TEMP/qualification-audit/jackson-core.jar" \
             IngressProbe < "$RUNNER_TEMP/qualification-audit/requests.hex" > "$RUNNER_TEMP/qualification-audit/responses.jsonl"
+          sha256sum --check "$RUNNER_TEMP/qualification-audit/source.sha256"
+          (cd "$RUNNER_TEMP/qualification-audit" && sha256sum --check parser.sha256 compiled.sha256)
           python -m qualification.technology.compare_ingress \
             --responses "$RUNNER_TEMP/qualification-audit/responses.jsonl" > "$RUNNER_TEMP/qualification-audit/comparison.json"
       - name: Retain empty request rows and enforce transport budget
@@ -156,6 +171,17 @@ jobs:
         if: always()
         with:
           name: qualification-ingress-audit
-          path: ${{ runner.temp }}/qualification-audit/*.json
+          path: |
+            ${{ runner.temp }}/qualification-audit/*.json
+            ${{ runner.temp }}/qualification-audit/requests.hex
+            ${{ runner.temp }}/qualification-audit/responses.jsonl
+            ${{ runner.temp }}/qualification-audit/checkout.txt
+            ${{ runner.temp }}/qualification-audit/java-version.txt
+            ${{ runner.temp }}/qualification-audit/javac-version.txt
+            ${{ runner.temp }}/qualification-audit/python-version.txt
+            ${{ runner.temp }}/qualification-audit/node-version.txt
+            ${{ runner.temp }}/qualification-audit/source.sha256
+            ${{ runner.temp }}/qualification-audit/parser.sha256
+            ${{ runner.temp }}/qualification-audit/compiled.sha256
           if-no-files-found: warn
           retention-days: 7

@@ -1,0 +1,201 @@
+{
+  "audit_policy_version": 3,
+  "baseline_commit": "79ff2942253cbc107e7b79e5efb67474673b7491",
+  "component": "P4/P15 hosted experiment retention",
+  "decision": "KEEP native workflow artifact selection; FIX raw transport retention and build observations",
+  "selection_red": {
+    "assertion_failures": 1,
+    "expected_files": 15,
+    "selected_files": 5,
+    "missing_files": 10,
+    "unexpected_files": 0
+  },
+  "selection_green": {
+    "expected_files": 15,
+    "selected_files": 15,
+    "missing_files": 0,
+    "unexpected_files": 0,
+    "exclusions": [
+      "jackson-core.jar",
+      "IngressProbe.class",
+      "unrelated.env"
+    ],
+    "always_upload_preserved": true,
+    "scope": "local glob selection fixture; not hosted uploader execution"
+  },
+  "execution": {
+    "steps_executed": [
+      "Record experiment inputs and tool versions",
+      "Compile bounded streaming probe",
+      "Compare ingress and semantic report preservation"
+    ],
+    "stable_inventory": {
+      "jackson-core.jar": {
+        "sha256": "b64b5874162b503a0e58a8f7758266e8dd9f91bf49e3a59ae0b5f47589a231b7",
+        "bytes": 594187
+      },
+      "checkout.txt": {
+        "sha256": "065d7440139de9791cc0d798cb1ff4268536aba248055479f4f4761f44a94823",
+        "bytes": 41
+      },
+      "java-version.txt": {
+        "sha256": "396eaa6c73c38012211ff4228112340c294c8c7639e11ce8494715249f959c09",
+        "bytes": 183
+      },
+      "javac-version.txt": {
+        "sha256": "3c36679af9bdd7b84cab0e6b33f833b83ab3dd3f8a67252813ba3924c1c27dea",
+        "bytes": 14
+      },
+      "python-version.txt": {
+        "sha256": "01870de7caca112afeefd77b3c3b4c5e263cf5539a33af3f3411100727fad7d3",
+        "bytes": 14
+      },
+      "node-version.txt": {
+        "sha256": "c42fcf0db5a550bda2f566fcdc21955df3e5a8ec3aeb90ac533f3776e7fce32a",
+        "bytes": 9
+      },
+      "source.sha256": {
+        "sha256": "f2798a33d9c479b5fa039a200b3e1e9f31d8956d23d189b7d324c30985b78b87",
+        "bytes": 109
+      },
+      "parser.sha256": {
+        "sha256": "57f770dac5502966a8cd70d6c24367e4db1e087b78c1d9a0694d88c6379b4b1b",
+        "bytes": 83
+      },
+      "IngressProbe.class": {
+        "sha256": "b8f73e8a0ca8c551166857f2e37f693e5616f56a69a84310fd3ee785ca708dfc",
+        "bytes": 5435
+      },
+      "compiled.sha256": {
+        "sha256": "f20a7be5cdcbb5151baf0deb09260589a4bf1e4c4f3fc37538c44c55fa1ee3ae",
+        "bytes": 85
+      },
+      "requests.hex": {
+        "sha256": "7c1ddc2d27791242716bfa836e681f0b3b8fa92e05350806b4536350620255e0",
+        "bytes": 562077
+      },
+      "responses.jsonl": {
+        "sha256": "5059be25311cb6c0e60f0c9e0636ccc3e62535d233661267ee152a5d5f55668f",
+        "bytes": 127211
+      },
+      "comparison.json": {
+        "sha256": "e606ee5082a4ea0d7f7fb0bc49bbedf62c54915bb6fe938746b73cc8470b48f5",
+        "bytes": 2159
+      }
+    },
+    "comparison": {
+      "audit_policy_version": 3,
+      "scope": "Java ingress with unchanged Python semantic oracle; not a Java validator",
+      "python": "3.13.5",
+      "ingress_cases": 18,
+      "semantic_requests": 63,
+      "mismatch_indices": [],
+      "report_mismatch_indices": [],
+      "document_mismatch_indices": [],
+      "all_reports_match": true,
+      "all_documents_match": true,
+      "request_transport_sha256": "7c1ddc2d27791242716bfa836e681f0b3b8fa92e05350806b4536350620255e0",
+      "response_transport_sha256": "5059be25311cb6c0e60f0c9e0636ccc3e62535d233661267ee152a5d5f55668f",
+      "python_65536_byte_measurement": {
+        "iterations": 20,
+        "elapsed_ns": [
+          9211268,
+          9196481,
+          72448898,
+          5726973,
+          6088163,
+          5620501,
+          5761212,
+          5592096,
+          5395256,
+          67218533,
+          11756294,
+          10774271,
+          10079166,
+          69391245,
+          16498494,
+          79906283,
+          5250754,
+          4884953,
+          4889214,
+          4747427
+        ],
+        "traced_peak_bytes_one_call": 73735,
+        "acceptance_threshold": null
+      },
+      "source_sha256": {
+        "qualification/technology/IngressProbe.java": "f3e814c0039f3aaec9d50003a908eca18feedcb3edba58be8530f73b56f8ffee",
+        "qualification/technology/compare_ingress.py": "f0318a6a1cfb96f49b7486e84a96ee4b74bfdbea97ca2bfeb4e4bd2d2cdf97ae",
+        "qualification/technology/measurement.py": "4c3e628661aaedefe3cc5b26e01bd887bb6303e13cb2099faf66382e31d7cf0a",
+        "qualification/technology/ingress-vectors-v1.json": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff",
+        "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "qualification/rigs/synthetic-v1.json": "0b68e3a27477d5d53bc616afac23d82568ac357fdf95ce2520f114ac2efb25ea",
+        "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+        "qualification/technology/source_snapshot.py": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365"
+      },
+      "source_observation": "equal_before_and_after_workload",
+      "physical_qualification_passed": false
+    },
+    "negative_controls": [
+      {
+        "file": "IngressProbe.class",
+        "mutation": "changed",
+        "exit_nonzero": true,
+        "no_response_or_comparison": true
+      },
+      {
+        "file": "jackson-core.jar",
+        "mutation": "changed",
+        "exit_nonzero": true,
+        "no_response_or_comparison": true
+      },
+      {
+        "file": "IngressProbe.class",
+        "mutation": "missing",
+        "exit_nonzero": true,
+        "no_response_or_comparison": true
+      }
+    ],
+    "java_version": [
+      "openjdk version \"21.0.11\" 2026-04-21",
+      "OpenJDK Runtime Environment (build 21.0.11+10-1-deb13u2-Debian)",
+      "OpenJDK 64-Bit Server VM (build 21.0.11+10-1-deb13u2-Debian, mixed mode, sharing)"
+    ],
+    "javac_version": "javac 21.0.11",
+    "python_version": "Python 3.13.5",
+    "node_version": "v22.23.2"
+  },
+  "static": {
+    "actionlint": "PASS",
+    "diff_check": "PASS"
+  },
+  "environment_failures": [
+    {
+      "step": "Record experiment inputs and tool versions",
+      "error": "python: command not found",
+      "resolution": "Prepend existing tooling interpreter directory to local PATH; hosted setup-python supplies python."
+    },
+    {
+      "operation": "git fetch origin main",
+      "error": "FETCH_HEAD: Read-only file system",
+      "cached_origin_main": "a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46"
+    }
+  ],
+  "source_sha256": {
+    ".github/workflows/aethron-qualification.yml": "26a7ddf1e88d60549290b9ceaaab2e952387c99199dd98ebd2f9576709ff214d",
+    "qualification/technology/workflow-retention-review-v3.md": "c6353b223e0e9a98718c4f6020baff61cb18b766c2dd766ebab30d07d79094cc",
+    "qualification/technology/review-v3.md": "9e538c2435a43da67720468f686449fad2195487c65631449000eb49e1ead4ca"
+  },
+  "limits": [
+    "Local command blocks use JDK21, not the configured hosted Java17.",
+    "Three post-compilation mutation controls reject before response/comparison creation.",
+    "Hashes, versions and artifacts are observations, not authenticated execution or full dependency closure.",
+    "Seven-day diagnostics and partial files do not constitute release acceptance."
+  ],
+  "hosted_result": "not established",
+  "audit_complete": false,
+  "product_acceptance_passed": false,
+  "physical_qualification_passed": false,
+  "source_state": "Working-copy workflow over baseline; checkout SHA alone does not bind edits."
+}
