@@ -1,5 +1,10 @@
 # P16 retrospective technology audit — policy 2
 
+Historical baseline only. Current component reviews are indexed in the
+[V3 inventory](../reviews/p16-p18-inventory-v3.md); this document does not establish
+current implementation or whole-lane completion. The comparison probe now refuses
+Python `-O`/`-OO` execution because those modes remove its evidence assertions.
+
 Audit date: 2026-10-10. Baseline: `6bcf4730358c9626f4456036ac19252ef02e97c4`,
 including the uncommitted envelope/policy schema increment. This replaces the older
 technology rationale for the audited components. It does not change frozen contracts.

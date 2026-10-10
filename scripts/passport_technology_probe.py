@@ -11,15 +11,18 @@ import time
 import tracemalloc
 from pathlib import Path
 
-from cryptography.exceptions import InvalidSignature
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from aethron.passports import _parse, pae, verify  # noqa: E402
 
 
 def main():
+    if sys.flags.optimize:
+        raise RuntimeError("optimized_probe_execution_forbidden")
+    # Optional tools load only after the evidence-integrity gate.
+    from cryptography.exceptions import InvalidSignature
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+
     cases = json.loads((ROOT / "examples/passports/vectors.json").read_bytes())["cases"]
     inputs, accepted, admissions = [], [], []
     for case in cases:

@@ -1,0 +1,127 @@
+{
+  "review_order_version": 3,
+  "baseline_head": "92293281386ebafa9895dda5863be179bc41525e",
+  "component": "P16 probe execution integrity and P16-P18 inventory",
+  "decision": "KEEP Python/Node comparison; FIX optimized evidence execution; CLARIFY inventory",
+  "runtime_modules_changed": false,
+  "checks": {
+    "red_comparison_modes": 2,
+    "red_mutation_modes": 2,
+    "green_optimized_mode_controls": 4,
+    "passport_family": 47,
+    "interop_family_before_tooling_change": 43,
+    "normal_comparison_cases": 6,
+    "normal_lexical_negatives": 5,
+    "normal_mutations_detected": 4,
+    "expected_mutation_assertion_failures": 8,
+    "ruff": "PASS",
+    "format": "PASS",
+    "actionlint": "PASS",
+    "bandit_unchanged_runtime": "PASS",
+    "bandit_comparison_tool": "PASS with B101/B404/B603 exclusions for assertions and controlled subprocess",
+    "diff": "PASS"
+  },
+  "normal_comparison_sample": {
+    "audit_policy_version": 2,
+    "python": "3.13.5",
+    "fixture_sha256": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "cases": 6,
+    "crypto_accepts": [
+      true,
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "admissions": [
+      "authenticated",
+      "rejected",
+      "rejected",
+      "rejected",
+      "rejected",
+      "rejected"
+    ],
+    "python_lexical_rejections": 5,
+    "python_hash_1mib_ms": 0.6489271763712168,
+    "python_verify_mean_ms_128": 1.0832736170414137,
+    "python_traced_peak_bytes": 412019,
+    "node_probe": {
+      "node": "v22.23.2",
+      "crypto_accepts": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "hash_digest": "bf718b6f653bebc184e1479f1935b8da974d701b893afcf49e701f3e2f9f9c5a",
+      "hash_1mib_ms": 1.6903879999999845,
+      "duplicate_keys_collapsed": true,
+      "float_lexemes_collapsed": true
+    },
+    "limits": "Single local sample; no hard real-time, RSS, platform or qualification claim. Node primitive probe is not a full verifier."
+  },
+  "normal_mutation_sample": {
+    "review_order_version": 3,
+    "python": "3.13.5",
+    "source_sha256": {
+      "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+      "tests/test_passports.py": "ec0c935252333fb4ee522969a428851dd363fdb5ad5ae5c5b8f384d4780a62ff",
+      "scripts/passport_trust_review.py": "e0a236c1a21e322f33202425dae1d4e80cb111580135964681eae782e7fb3598"
+    },
+    "mutations": [
+      {
+        "guard": "unselected_metadata",
+        "expected_assertion_failures": 5
+      },
+      {
+        "guard": "effective_expiry",
+        "expected_assertion_failures": 1
+      },
+      {
+        "guard": "evidence_revocation",
+        "expected_assertion_failures": 1
+      },
+      {
+        "guard": "rejection_metadata",
+        "expected_assertion_failures": 1
+      }
+    ],
+    "limit": "In-memory guard-removal tests; not a cryptographic validation or hardware qualification."
+  },
+  "source_sha256": {
+    ".github/workflows/aethron-passports.yml": "68953009a7616d914b012ca2f675c1d44caf9e44dcd666af41de92563e5c0cdd",
+    "docs/engineering/plans/p16-technology-audit-v2.md": "389c24b022ce139a7a971865dd58d48bffaf01e0058947b3d89fc05f21a29419",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "7936227308881e15253dc3f8f73dd1dac7e79d3fcdd360dd9f617a0bf15e1c0c",
+    "scripts/passport_technology_probe.py": "84daa5abf1b05faee111c0865b80b0c76ca14045c95ec29778390c94b5c405e6",
+    "scripts/passport_technology_probe.mjs": "3ac4a2cd06479cf484310717ec8ac7b7d8afde167af047d8c3938f391ec2f83b",
+    "scripts/passport_trust_review.py": "e0a236c1a21e322f33202425dae1d4e80cb111580135964681eae782e7fb3598",
+    "tests/test_passport_probe.py": "ca9e7e3c8f901a204d7dcd535b743c6d128e333fe0107383ead89da3780bfcf5",
+    "tests/test_passports.py": "ec0c935252333fb4ee522969a428851dd363fdb5ad5ae5c5b8f384d4780a62ff",
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6"
+  },
+  "negative_evidence": [
+    "Both scripts returned exit 0 under -O and -OO before their respective fixes.",
+    "Initial policy-read sandbox fork failed with EAGAIN; same complete read succeeded on retry.",
+    "Fetch failed at read-only FETCH_HEAD; no protection bypass attempted.",
+    "Initial push credential helper aborted on host pthread exhaustion; GOMAXPROCS=2 retry succeeded.",
+    "Uppercase HAVELSAN URL returned browser error; individual lowercase public pages were subsequently read."
+  ],
+  "publication": {
+    "pr": 35,
+    "head": "92293281386ebafa9895dda5863be179bc41525e",
+    "new_head_hosted_checks": "not inspected; pending verification"
+  },
+  "next_component": "Comparison-output type fidelity and retained evidence coverage",
+  "qualification": {
+    "hardware": false,
+    "real_time": false,
+    "mls": false,
+    "cnsa": false,
+    "availability": false
+  },
+  "audit_complete": false
+}

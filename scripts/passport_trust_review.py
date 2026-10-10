@@ -43,6 +43,8 @@ MUTATIONS = (
 
 
 def main():
+    if sys.flags.optimize:
+        raise RuntimeError("optimized_probe_execution_forbidden")
     source = (ROOT / "aethron/passports.py").read_text()
     results = []
     for name, old, new, method in MUTATIONS:
