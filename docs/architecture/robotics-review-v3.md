@@ -260,3 +260,34 @@ finding was corrected and the ten native harness methods rerun successfully.
 No production adapter, candidate implementation, corpus, timing threshold or
 process timeout changed. Historical results remain unchanged. The technology
 decision and earliest-component review remain incomplete.
+
+## Receipt-clock scope and suspend qualification
+
+CLARIFY the first component's receipt-age claim: `PassiveTelemetry` subtracts
+values from its supplied clock, defaulting to `time.monotonic_ns()`. On the
+reviewed Linux host, `get_clock_info("monotonic")` reports
+`clock_gettime(CLOCK_MONOTONIC)`, monotonic true, adjustable false and resolution
+1ns. Those are interface properties, not an accuracy measurement. Python also
+states that the adjustable flag does not describe gradual rate adjustments.
+The [kernel clock reference](https://www.kernel.org/doc/html/latest/core-api/timekeeping.html)
+states that CLOCK_MONOTONIC excludes system suspension; Python distinguishes
+[suspend-aware CLOCK_BOOTTIME](https://docs.python.org/3/library/time.html#time.CLOCK_BOOTTIME).
+This review does not change clock sources, authority epochs or the frozen TTL.
+
+The implementation checks nonnegative integer readings and rollback, then expires
+samples only when the clock difference exceeds 100000000ns. It does not measure
+clock rate or detect suspension. Therefore a receipt-age result is conditional on
+that clock and cannot qualify elapsed age across suspend/resume. An unchanging
+injected clock also cannot demonstrate real elapsed freshness merely by remaining
+nondecreasing. The README now states these conditions next to the receipt TTL.
+The earlier synthetic state comparisons exercise clock values; they provide no
+physical oscillator, suspend/resume or scheduler qualification in any language.
+
+[Source-bound evidence](../verification/robotics-receipt-clock-claims-v3.json)
+records the local clock description and three passing existing provenance,
+independent-expiry and rollback/closure tests. No new test freezes an unqualified
+platform behavior. No host suspension, OS clock change, transport or hardware
+experiment was performed. Production and test source bytes are unchanged.
+This documentation correction narrows the claim; it does not select a runtime or
+complete the first-component review. A language-only speed comparison cannot
+establish the missing clock/deployment evidence.

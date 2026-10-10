@@ -92,6 +92,18 @@ clock reads and OS scheduling also affect return time. Python's
 [socket timeout interface](https://docs.python.org/3/library/socket.html#socket.socket.settimeout)
 specifies blocking-operation behavior, not a hard-real-time service guarantee.
 The receipt TTL neither measures source capture age nor bounds transport latency.
+
+The 100ms comparison is in the supplied clock's units. The default is
+`time.monotonic_ns()`; the reviewed Linux host reports
+`clock_gettime(CLOCK_MONOTONIC)`. Linux documents that this clock stops during
+system suspend. Consequently, this API does not establish a 100ms elapsed-age
+limit spanning host suspension. A stopped or slow injected clock can likewise
+leave receipt age understated without a backward-time transition. The adapter
+checks integer/nonnegative/order properties, not clock rate or suspend history.
+The clock's advertised nanosecond resolution is not a measured accuracy or
+scheduler bound. No suspend/resume qualification is included. See the
+[Linux clock semantics](https://www.kernel.org/doc/html/latest/core-api/timekeeping.html)
+and Python's [clock information](https://docs.python.org/3/library/time.html#time.get_clock_info).
 See the [partial V3 review](../../../../docs/architecture/robotics-review-v3.md)
 for evidence limits; its first-component technology decision remains open.
 
