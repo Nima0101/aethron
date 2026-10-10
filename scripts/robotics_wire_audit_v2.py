@@ -56,6 +56,15 @@ def corpus():
         data = bytearray(full)
         data[offset] = value
         values.append((name, bytes(data), False, 30))
+    # V3 supplements preserve the original 17 fixtures. The old header edits
+    # also invalidated CRC, so rejection alone did not isolate routing checks.
+    for name, system, component in (
+        ("v3_sender_valid_crc", 2, 1),
+        ("v3_component_valid_crc", 1, 2),
+    ):
+        foreign = common.MAVLink(None, srcSystem=system, srcComponent=component)
+        data = common.MAVLink_attitude_message(10, 0.1, -0.2, 0.3, 0.4, -0.5, 0.6).pack(foreign)
+        values.append((name, data, False, 30))
     return [
         {"name": name, "hex": data.hex(), "accepted": accepted, "message": message}
         for name, data, accepted, message in values

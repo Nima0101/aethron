@@ -704,3 +704,14 @@ This scoped test-tool choice is not a production language winner or a new adapte
 The earliest component remains PENDING; signing/replay is the next later
 unreviewed component. No full audit marker, physical shutdown, weapon integration,
 real-time, MLS/CNSA or customer qualification follows from these diagnostics.
+
+## Isolate routing checks in comparator evidence
+
+The [comparator coverage review](../verification/robotics-comparator-coverage-v3.md)
+found that the old sender/component header mutations also invalidated CRC. Two
+additive CRC-valid fixtures now isolate those routing checks. A temporary C audit
+driver with routing guards omitted passes the old 17 cases and fails both new
+cases under the unchanged comparator. Production code and repository drivers
+are unchanged. The receipt preserves the initial inspection failure and incidental
+measurements. This corrects a coverage gap without claiming complete behavioral
+equivalence, a runtime winner or completion of the earliest component review.

@@ -52,6 +52,38 @@ class WireAuditTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "candidate_parity_failed"):
                 self.api.check_parity(expected, wrong)
 
+    def test_v3_routing_challenges_isolate_sender_checks_from_crc_rejection(self):
+        from aethron_edge.telemetry.mavlink import PassiveTelemetry
+
+        cases = {case["name"]: case for case in self.api.corpus()}
+        for name, system, component in (
+            ("v3_sender_valid_crc", 2, 1),
+            ("v3_component_valid_crc", 1, 2),
+        ):
+            with self.subTest(name=name):
+                self.assertIn(name, cases)
+                packet = bytes.fromhex(cases[name]["hex"])
+                self.assertEqual((packet[5], packet[6]), (system, component))
+                self.assertIs(cases[name]["accepted"], False)
+                # A matching route must admit this same packet through the real
+                # SDK CRC/layout checks, isolating the negative routing control.
+                matching = PassiveTelemetry(system, component, clock=lambda: 1_000_000_000)
+                rejected = PassiveTelemetry(1, 1, clock=lambda: 1_000_000_000)
+                try:
+                    matching.ingest(packet)
+                    accepted = matching.snapshot()
+                    self.assertEqual(accepted.state, "OBSERVED_UNVERIFIED")
+                    self.assertEqual(len(accepted.samples), 1)
+                    self.assertIs(accepted.perception_eligible, False)
+                    rejected.ingest(packet)
+                    status = rejected.snapshot()
+                    self.assertEqual(status.reason, "sender_mismatch")
+                    self.assertEqual(status.state, "UNKNOWN")
+                    self.assertEqual(status.samples, ())
+                finally:
+                    matching.close()
+                    rejected.close()
+
     def test_existing_output_is_refused_before_generation(self):
         with tempfile.TemporaryDirectory() as directory:
             out = Path(directory)
