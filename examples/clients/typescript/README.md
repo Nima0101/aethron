@@ -320,3 +320,10 @@ limits, profile normalization differences and a read failure after valid JSON.
 nonfatal decoding or an increased byte limit. It never edits source or `dist`.
 These checks establish local rejection behavior, not total transport-memory,
 deadline, platform or customer-release qualification.
+
+`npm run audit:cancellation` removes POST/GET abort signals from copied built
+modules and verifies that the native HTTP cancellation tests reject both copies.
+The tests fail if their five-second cleanup watchdog fires; forced socket cleanup
+cannot stand in for a functioning cancellation path. The watchdog is a test
+escape hatch, not a production latency guarantee. See the
+[cancellation test decision](cancellation-oracle-adr.json).

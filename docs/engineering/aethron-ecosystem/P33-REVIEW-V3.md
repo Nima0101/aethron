@@ -1605,3 +1605,35 @@ was also refused by read-only Git metadata; the stored origin/main snapshot is
 not a freshly fetched head. Next earliest review is session cancellation and
 observation lifecycle, before remaining P12/UI/help work. No lane-completion
 marker is created.
+
+
+## Fresh cancellation and observation lifecycle review
+
+Baseline `7f727087180f81c9d016b8d972e4068ba4a9279f`. Re-read the earliest
+contract/build and byte-admission components, then traced session creation,
+native Fetch cancellation, observation expiry/copying, source revocation,
+renderer failure and independent viewer deletion. Verified the preceding bridge
+commit against 20 source hashes and 11 report hashes.
+
+Found a verification defect: native caller-cancellation tests could pass after
+their cleanup watchdog forced a socket error. A copied POST implementation with
+its fetch signal removed passed the original selected test. The mutation audit
+correctly failed that false success before the test was changed. Native tests now
+reject any watchdog activation, while retaining the original five-second bound
+and cleanup. Copied POST and GET signal-loss variants each fail the watchdog
+assertion. Production transport and observation code are unchanged.
+
+The [closed component decision](../../../examples/clients/typescript/cancellation-oracle-adr.json)
+records current primary-source comparison of TypeScript/native Fetch, plain
+ECMAScript, Kotlin/JS and ReScript plus four C4 views. KEEP the direct host
+cancellation boundary; FIX the test oracle. Alternative language promises or
+bindings do not establish request cancellation. No alternate-runtime speed claim
+or production defect is inferred from the mutation result.
+
+Focused lifecycle checks cover fixed error disclosure, native request abort,
+unused-body cancellation, clock rollback, expiry, copying, reentrant admission,
+source disconnect and busy/restart gates. Source-bound final counts and negative
+evidence are in [the review record](evidence/phase3/p33-cancellation-oracle-v1.json).
+Next earliest component: endpoint/redirect admission and package/service consumer
+lifecycle, followed by remaining P12 display/help review. The SSE event-size
+producer handoff, browser/device qualification and P19 gaps remain open.

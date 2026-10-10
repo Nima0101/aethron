@@ -8,7 +8,7 @@ const session = {session: 'a'.repeat(32), source_profile: 'bench'};
 const reasons = [new Error('private_transport_marker', {cause: {token: 'private_cause_marker'}}),
   {address: 'private_endpoint_marker'}, 'private_string_marker'];
 
-for (const component of ['observer-setup', 'observer-revocation', 'render-publication']) test(`${component} decision uses a closed schema and four architecture views`, async () => {
+for (const component of ['observer-setup', 'observer-revocation', 'render-publication', 'cancellation-oracle']) test(`${component} decision uses a closed schema and four architecture views`, async () => {
   const {Ajv2020} = await import('ajv/dist/2020.js');
   const read = name => JSON.parse(readFileSync(new URL(name, import.meta.url), 'utf8'));
   const validate = new Ajv2020({strict:true}).compile(read(`./${component}-adr.schema.json`));
@@ -110,12 +110,16 @@ for (const [phase, point, expected] of [
       return response;
     });
     if (point === 'before') caller.abort(reason);
-    let watchdog;
+    let watchdog, watchdogFired = false;
     try {
       await new Promise((resolve, reject) => {server.once('error', reject); server.listen(0, '127.0.0.1', resolve);});
-      watchdog = setTimeout(() => {caller.abort(); server.closeAllConnections();}, 5000);
+      watchdog = setTimeout(() => {
+        watchdogFired = true;
+        caller.abort(); server.closeAllConnections();
+      }, 5000);
       const error = await observe(`http://127.0.0.1:${server.address().port}`, 'synthetic-token', 'bench',
         view => views.push(view), caller.signal).then(() => undefined, error => error);
+      assert.equal(watchdogFired, false, 'watchdog must not substitute for client cancellation');
       assert.ok(error instanceof Error);
       assert.equal(error.message, expected);
       assert.equal(error.cause, undefined);
