@@ -11,3 +11,16 @@ include requirements-passports.txt
 include requirements-passport-conformance.txt
 recursive-include contracts/interop *.json
 include requirements-passport-sensor-conformance.txt
+# Source inputs consumed by the published P16 conformance fixtures.
+include examples/passports/README.md
+include contracts/openapi/aethron-edge-v1.json
+include contracts/fixtures/v3/unknown-output.json
+include integrations/edge/aethron_edge/__init__.py
+include integrations/edge/aethron_edge/mailbox.py
+include integrations/edge/aethron_edge/sensors/__init__.py
+include integrations/edge/aethron_edge/sensors/geometry.py
+include integrations/edge/aethron_edge/sensors/packets.py
+include integrations/edge/aethron_edge/sensors/rectification.py
+include integrations/edge/aethron_edge/sensors/ros2.py
+include integrations/edge/aethron_edge/sources/__init__.py
+include integrations/edge/aethron_edge/sources/base.py

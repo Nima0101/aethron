@@ -5,6 +5,7 @@ on:
       - 'aethron/**'
       - 'tests/test_interop*.py'
       - 'tests/interop_consumers/**'
+      - 'tests/packaging/test_passport_manifest.py'
       - 'integrations/edge/aethron_edge/__init__.py'
       - 'integrations/edge/aethron_edge/sensors/__init__.py'
       - 'integrations/edge/aethron_edge/sensors/packets.py'
@@ -40,6 +41,7 @@ on:
       - 'aethron/**'
       - 'tests/test_interop*.py'
       - 'tests/interop_consumers/**'
+      - 'tests/packaging/test_passport_manifest.py'
       - 'integrations/edge/aethron_edge/__init__.py'
       - 'integrations/edge/aethron_edge/sensors/__init__.py'
       - 'integrations/edge/aethron_edge/sensors/packets.py'
@@ -82,7 +84,9 @@ jobs:
           python-version: '3.13'
       - run: |
           python -m pip install --only-binary=:all: -r requirements-passport-sensor-conformance.txt
+          python -m pip install --only-binary=:all: setuptools==84.0.0
       - run: python -m pip check
+      - run: python -m unittest discover -s tests/packaging -p test_passport_manifest.py -v
       - run: python -m unittest discover -s tests/interop_consumers -p 'test_*.py' -v
         env:
           PYTHONPATH: .:integrations/edge
