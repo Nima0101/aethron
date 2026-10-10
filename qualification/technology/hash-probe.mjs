@@ -1,5 +1,6 @@
 // Audit primitive only; this does not implement artifact admission or reports.
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const inputs = Array.from({ length: 4 }, (_, value) => Buffer.alloc(1048576, value));
 const samples = [];
@@ -16,6 +17,7 @@ const alias = mutable.subarray();
 const owned = Buffer.from(mutable);
 mutable[0] = 0;
 console.log(JSON.stringify({
+  audit_policy_version: 3,
   scope: 'native_sha256_and_ownership_probe_only',
   runtime: process.version,
   known_vectors: [digest(Buffer.alloc(0)), digest(Buffer.from('abc'))],
@@ -24,4 +26,7 @@ console.log(JSON.stringify({
   alias_changed: digest(alias) !== digest(owned),
   owned_preserved: digest(owned) === digest(Buffer.from('abc')),
   physical_qualification_passed: false,
+  source_sha256: {
+    'qualification/technology/hash-probe.mjs': digest(readFileSync(new URL(import.meta.url))),
+  },
 }, null, 2));

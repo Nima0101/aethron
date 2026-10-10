@@ -98,6 +98,9 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.2'
       - name: Acquire pinned audit-only parser
         run: |
           mkdir -p "$RUNNER_TEMP/qualification-audit"
@@ -139,6 +142,10 @@ jobs:
           assert python["artifact_counts"]["matched"] == 4
           assert python["physical_qualification_passed"] is False
           PY
+      - name: Check Node probe provenance and retained negatives
+        run: |
+          node --v8-pool-size=1 qualification/technology/ingress-probe.mjs > "$RUNNER_TEMP/qualification-audit/ingress-node.json"
+          python -m unittest qualification.tests.node_provenance -v
       - name: Compare campaign aggregation and duplicate mutation
         run: python -m qualification.technology.compare_campaign > "$RUNNER_TEMP/qualification-audit/campaign-comparison.json"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

@@ -1,0 +1,202 @@
+{
+  "audit_policy_version": 3,
+  "before_head": "d01e21e84ae99273e3d0f1d3486c4a5943cb61a2",
+  "python": "3.13.5",
+  "scope": "Node probe result emission and historical declared source-byte bindings",
+  "historical": {
+    "reports": 18,
+    "source_binding_entries": 185,
+    "matched_entries": 185,
+    "inventory": [
+      {
+        "report": "qualification/evidence/artifacts-verification-v1.json",
+        "report_sha256": "16880f056c5fe1a83262fc649f6c944684f6d3907e48bae15920707817dc16a4",
+        "publication_commit": "3bdcadc84d2bcca70f48724a57eb9497d89c8ccd",
+        "source_binding_entries": 5,
+        "matched_entries": 5
+      },
+      {
+        "report": "qualification/evidence/campaign-bundle-cli-verification-v1.json",
+        "report_sha256": "9303634cc6ed7c31962c2f0e1ea923bba81f0dd3ee4b6081b732236970e868d6",
+        "publication_commit": "c91306de5272737bf11689073e9167ae3f60560a",
+        "source_binding_entries": 12,
+        "matched_entries": 12
+      },
+      {
+        "report": "qualification/evidence/campaign-bundle-verification-v1.json",
+        "report_sha256": "f29bbc7852491e27bea78fc2607623a429e55cc491cc8bbc6f12f007ea02bc0b",
+        "publication_commit": "ad19b18cc7f79d3f94c9bc07af94abe06f3ad0fe",
+        "source_binding_entries": 10,
+        "matched_entries": 10
+      },
+      {
+        "report": "qualification/evidence/campaign-verification-v1.json",
+        "report_sha256": "f6385f497abc91ef95e83d3af76c8f707b511a1f5962b657f06cd7cde8629805",
+        "publication_commit": "8e76aad81d45f01e782de8ff1f8fbfa9b29a1280",
+        "source_binding_entries": 5,
+        "matched_entries": 5
+      },
+      {
+        "report": "qualification/evidence/reference-binding-verification-v1.json",
+        "report_sha256": "17cfd04a587af2e47f2440ff48d5ab2464f2569a495b1cf8f4c43a68727dfda6",
+        "publication_commit": "5f0f3a7f4ef25f185f8e0c0d07242a0ef4a94565",
+        "source_binding_entries": 8,
+        "matched_entries": 8
+      },
+      {
+        "report": "qualification/technology/artifact-review-v3.json",
+        "report_sha256": "c83288ed7440be8045c4d851b4f4fc69b1613c1ab95bf4b4c138b5a55636b581",
+        "publication_commit": "6797ef611340afe214a7e600ade0114b3aab507a",
+        "source_binding_entries": 7,
+        "matched_entries": 7
+      },
+      {
+        "report": "qualification/technology/audit-tool-review-v3.json",
+        "report_sha256": "77e10289e303241b7daee732dfa0c8d70f4c2c6b7f261a93e92ad6744f60ecab",
+        "publication_commit": "c541aa5564e6d5bd4bc16bfc35bd1aab6798ec39",
+        "source_binding_entries": 44,
+        "matched_entries": 44
+      },
+      {
+        "report": "qualification/technology/binding-python-result-v1.json",
+        "report_sha256": "1956282da6dac391c3fdf1c6423da55ed8a37555524fe3805e62538ffd248a7f",
+        "publication_commit": "cc2755ecafc60ee13d890af9245023277ae68f80",
+        "source_binding_entries": 3,
+        "matched_entries": 3
+      },
+      {
+        "report": "qualification/technology/campaign-review-v3.json",
+        "report_sha256": "f70a8c8d3175cf7d81de0cff1c91cc6c74fa08dcd8fcb1f5a537c9bd58ae1d4e",
+        "publication_commit": "a69d174facce1b163136f0442b82d94d06879443",
+        "source_binding_entries": 8,
+        "matched_entries": 8
+      },
+      {
+        "report": "qualification/technology/campaign-sql-result-v1.json",
+        "report_sha256": "5e5790301cfcb5976d6cb005b5b486801b3ecd3c433974034223ca294a09602c",
+        "publication_commit": "a515861760df4bc8a27a63792fd01f02b9466cc4",
+        "source_binding_entries": 8,
+        "matched_entries": 8
+      },
+      {
+        "report": "qualification/technology/cli-review-v3.json",
+        "report_sha256": "408ffa55acf347c9766253a49d0e2004df0339fb3c191418773ae1d37b484765",
+        "publication_commit": "61239c13facb2081357af7e81c6fbc3b4b877a51",
+        "source_binding_entries": 6,
+        "matched_entries": 6
+      },
+      {
+        "report": "qualification/technology/declaration-review-v3.json",
+        "report_sha256": "2cf3f51911d00b66f1503fc2ee12c8a28e2f0be0f544f1aa5d4a490f0b980cd5",
+        "publication_commit": "5c4185ad1111c8ea0513f90cab4ef5d1ccbc339c",
+        "source_binding_entries": 5,
+        "matched_entries": 5
+      },
+      {
+        "report": "qualification/technology/delivery-review-v3.json",
+        "report_sha256": "dccb3458e74fa98d75065a0d592112e07dccd85a1b158f2e14f061808ae3712b",
+        "publication_commit": "d01e21e84ae99273e3d0f1d3486c4a5943cb61a2",
+        "source_binding_entries": 23,
+        "matched_entries": 23
+      },
+      {
+        "report": "qualification/technology/document-fidelity-review-v3.json",
+        "report_sha256": "29c45988a0a78a33e6b6a8fab0e7da84a68925c7dcee08d9dd2202f821d7fb87",
+        "publication_commit": "992c987ca3d3cbb5b51425e11f129cfe78f45362",
+        "source_binding_entries": 12,
+        "matched_entries": 12
+      },
+      {
+        "report": "qualification/technology/hash-node-result-v1.json",
+        "report_sha256": "aa1912f0355b2a2e1c72d5eb985c31200724059ea7ab6b4d781f5776ffb9679b",
+        "publication_commit": "cc2755ecafc60ee13d890af9245023277ae68f80",
+        "source_binding_entries": 1,
+        "matched_entries": 1
+      },
+      {
+        "report": "qualification/technology/ingress-java-result-v1.json",
+        "report_sha256": "79dee9e09b66e7cddead1f8429f94b4be689d0414026a122aa7e0611fdfc58bf",
+        "publication_commit": "cc2755ecafc60ee13d890af9245023277ae68f80",
+        "source_binding_entries": 5,
+        "matched_entries": 5
+      },
+      {
+        "report": "qualification/technology/ingress-verification-v1.json",
+        "report_sha256": "c93a494ca9f2bbaf4e86c1391b99c2ebfd38e0b78ceeffcbf34bffdecab4b6cd",
+        "publication_commit": "ed8a6758c63099408f0f865b572427b2109f0f73",
+        "source_binding_entries": 6,
+        "matched_entries": 6
+      },
+      {
+        "report": "qualification/technology/measurement-review-v3.json",
+        "report_sha256": "27ee4284c994a8492aabe93c44af188f2c686a9236aba36e32aa9922771f95ea",
+        "publication_commit": "8534a2475c2119855ae0b151913d661ff119f49a",
+        "source_binding_entries": 17,
+        "matched_entries": 17
+      }
+    ]
+  },
+  "red": {
+    "methods": 2,
+    "assertion_failures": 2,
+    "errors": 0,
+    "skips": 0,
+    "reason": "Both raw Node reports omitted source_sha256."
+  },
+  "green": {
+    "node_methods": 2,
+    "bundle_process_methods": 4,
+    "combined_methods": 6,
+    "errors": 0,
+    "failures": 0,
+    "skips": 0
+  },
+  "earlier_baseline": {
+    "methods": 17,
+    "errors": 0,
+    "failures": 0,
+    "skips": 0,
+    "modules": [
+      "test_declaration_review",
+      "test_artifact_review",
+      "test_campaign_review",
+      "test_measurement_review"
+    ]
+  },
+  "retained_negative_ingress_cases": [
+    "duplicate-equal",
+    "duplicate-overwrite",
+    "duplicate-escaped",
+    "nested-duplicate"
+  ],
+  "source_sha256": {
+    "qualification/technology/ingress-probe.mjs": "7ef0f65a15b304b8bb444d8a4eb422713cb05c72dd8f4c291d05939645d2137d",
+    "qualification/technology/hash-probe.mjs": "ffeca4e548ab3f6df7981a1f5b625208085b713dac05db218ef000fcdbb5fd24",
+    "qualification/technology/ingress-vectors-v1.json": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff",
+    "qualification/tests/node_provenance.py": "6f194d8f5545e92d382cfa43087a6c55e795f01ab8f81c9d39f74887beb1f77e",
+    ".github/workflows/aethron-qualification.yml": "f8c851c251b066866498e0b79cbabe44823b6570b02ab4743fbbe3285dc710ab",
+    "qualification/technology/probe-provenance-v3.md": "b4e125c58fe0e3f9fdd0960c5a07e73571fca9e10789098ea2219112bb0978d4",
+    "qualification/campaign-references-v1.md": "77bfec75448002651001d4a9091ec3e942c48c23a65fb6b45e91a5e5979ede31",
+    "scripts/public_links.py": "6508cea597bd87b6086f6f13d26ac5dc50393a854a9c104f2625d9f6573c4a93"
+  },
+  "physical_qualification_passed": false,
+  "hosted_execution_verified": false,
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "node_syntax": "PASS for both probes",
+    "actionlint": "PASS with GOMAXPROCS=1",
+    "diff": "PASS",
+    "manual_boundary_review": "Fixed local module/vector reads; no user-supplied path, shell, network or qualification authority added."
+  },
+  "hosted_failure": {
+    "head": "d01e21e84ae99273e3d0f1d3486c4a5943cb61a2",
+    "job": "https://github.com/Nima0101/aethron/actions/runs/38045555721/job/114194246579",
+    "failed_command": "python scripts/public_links.py HEAD",
+    "source": "qualification/campaign-references-v1.md",
+    "reported_target": "qualification/\ntechnology/audit-tool-review-v3.json",
+    "correction": "Join the Markdown destination on one line.",
+    "changed_document_working_file_link_check": "PASS",
+    "post_commit_immutable_tree_check": "pending bridge commit"
+  }
+}

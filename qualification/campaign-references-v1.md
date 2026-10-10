@@ -46,8 +46,7 @@ declared digest or proves reference semantics.
 Select Python/native hashing for this boundary: the direct immutable representation
 and shared strict plan admission meet the actual contract without a second byte
 representation or additional parser. This is not based on installed tooling,
-familiarity or rewrite cost. The retained [current ownership/hash experiment](
-technology/audit-tool-review-v3.json) checks four larger 1 MiB inputs in Python and
+familiarity or rewrite cost. The retained [current ownership/hash experiment](technology/audit-tool-review-v3.json) checks four larger 1 MiB inputs in Python and
 Node; it supports digest/ownership behavior, not a runtime speed ranking. Native
 ABI or measured resource requirements would reopen the decision.
 
