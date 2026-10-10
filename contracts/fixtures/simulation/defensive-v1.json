@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "scope": "Synthetic software declarations only; no physical evidence",
+  "cases": [
+    {
+      "name": "present_stop",
+      "contract": "vehicle_stop",
+      "input_utf8": "{\"version\":1,\"at_ms\":100,\"expires_at_ms\":200,\"evidence\":\"synthetic\",\"state\":\"PRESENT\",\"clock_domain\":\"host_monotonic_ms\"}",
+      "now_ms": 100,
+      "expected": {
+        "accepted": true,
+        "state": "PRESENT",
+        "evidence": "synthetic",
+        "expires_at_ms": 200,
+        "action": "STOP",
+        "reasons": []
+      }
+    },
+    {
+      "name": "unknown_hover",
+      "contract": "drone_hover",
+      "input_utf8": "{\"version\":1,\"at_ms\":100,\"expires_at_ms\":200,\"evidence\":\"synthetic\",\"state\":\"UNKNOWN\",\"clock_domain\":\"host_monotonic_ms\"}",
+      "now_ms": 100,
+      "expected": {
+        "accepted": true,
+        "state": "UNKNOWN",
+        "action": "HOVER",
+        "reasons": []
+      }
+    },
+    {
+      "name": "expired_hover",
+      "contract": "drone_hover",
+      "input_utf8": "{\"version\":1,\"at_ms\":100,\"expires_at_ms\":200,\"evidence\":\"synthetic\",\"state\":\"PRESENT\",\"clock_domain\":\"host_monotonic_ms\"}",
+      "now_ms": 200,
+      "expected": {
+        "accepted": false,
+        "state": "UNKNOWN",
+        "evidence": null,
+        "expires_at_ms": 200,
+        "action": "HOVER",
+        "reasons": [
+          "timestamp"
+        ]
+      }
+    },
+    {
+      "name": "recorded_rejected",
+      "contract": "warn",
+      "input_utf8": "{\"version\":1,\"at_ms\":100,\"expires_at_ms\":200,\"evidence\":\"recorded\",\"state\":\"PRESENT\",\"clock_domain\":\"host_monotonic_ms\"}",
+      "now_ms": 100,
+      "expected": {
+        "accepted": false,
+        "state": "UNKNOWN",
+        "evidence": null,
+        "action": "WARN",
+        "reasons": [
+          "invalid_input"
+        ]
+      }
+    },
+    {
+      "name": "future_land",
+      "contract": "drone_land",
+      "input_utf8": "{\"version\":1,\"at_ms\":101,\"expires_at_ms\":200,\"evidence\":\"synthetic\",\"state\":\"PRESENT\",\"clock_domain\":\"host_monotonic_ms\"}",
+      "now_ms": 100,
+      "expected": {
+        "accepted": false,
+        "state": "UNKNOWN",
+        "action": "LAND",
+        "reasons": [
+          "timestamp"
+        ]
+      }
+    },
+    {
+      "name": "long_expiry_retreat",
+      "contract": "drone_retreat",
+      "input_utf8": "{\"version\":1,\"at_ms\":100,\"expires_at_ms\":301,\"evidence\":\"synthetic\",\"state\":\"PRESENT\",\"clock_domain\":\"host_monotonic_ms\"}",
+      "now_ms": 100,
+      "expected": {
+        "accepted": false,
+        "state": "UNKNOWN",
+        "action": "RETREAT",
+        "reasons": [
+          "timestamp"
+        ]
+      }
+    }
+  ]
+}
