@@ -14,9 +14,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from aethron.simulated_plan import SimulationPlan  # noqa: E402
+from aethron.simulated_route import SimulationRoute  # noqa: E402
 
 
-def run():
+def run(*, route=False):
     inputs = [
         json.dumps(
             {
@@ -27,7 +28,11 @@ def run():
                 "coordinate_frame": "synthetic_grid",
                 "clock_domain": "host_monotonic_ms",
                 "grid": [["free"] * 16 for _ in range(16)],
-                "path": [[14 + j % 2, 15] for j in range(64)],
+                **(
+                    {"start": [0, 0], "goal": [15, 15]}
+                    if route
+                    else {"path": [[14 + j % 2, 15] for j in range(64)]}
+                ),
             },
             separators=(",", ":"),
         ).encode()
@@ -36,7 +41,7 @@ def run():
     samples = []
     peak = 0
     for tracing in (False, True):
-        model = SimulationPlan("vehicle_stop")
+        model = (SimulationRoute if route else SimulationPlan)("vehicle_stop")
         if tracing:
             tracemalloc.start()
         try:
@@ -44,7 +49,12 @@ def run():
                 start = time.perf_counter()
                 out = model.step(data, now_ms=i * 100)
                 elapsed = (time.perf_counter() - start) * 1000
-                if not out["plan_admissible"] or out["recommendation"]["motion_authority"]:
+                valid = (
+                    out["route_found"] and len(out["path"]) == 31
+                    if route
+                    else out["plan_admissible"]
+                )
+                if not valid or out["recommendation"]["motion_authority"]:
                     raise ValueError("invalid_probe_result")
                 if not tracing:
                     samples.append(elapsed)
@@ -56,6 +66,7 @@ def run():
             model.close()
     sources = (
         "aethron/simulated_plan.py",
+        "aethron/simulated_route.py",
         "aethron/simulated_safety.py",
         "aethron/schema.py",
         "aethron/_json_bounds.py",
@@ -69,7 +80,8 @@ def run():
         "platform": platform.system() + " " + platform.machine(),
         "samples": 100,
         "grid_cells": 256,
-        "path_cells": 64,
+        "mode": "route" if route else "assessment",
+        "path_cells": 31 if route else 64,
         "workload_sha256": hashlib.sha256(b"\n".join(inputs)).hexdigest(),
         "source_sha256": {p: hashlib.sha256((ROOT / p).read_bytes()).hexdigest() for p in sources},
         "wall_samples_ms": samples,
@@ -86,8 +98,9 @@ def run():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=ROOT / "build/p6-world/plan-resource.json")
+    parser.add_argument("--route", action="store_true", help="Measure bounded route generation")
     args = parser.parse_args()
-    report = run()
+    report = run(route=args.route)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     print(
