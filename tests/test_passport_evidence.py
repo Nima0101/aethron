@@ -87,6 +87,24 @@ class EvidenceBindingTests(unittest.TestCase):
             with self.subTest(blobs=blobs):
                 self.rejected(blobs)
 
+    def test_result_digest_identifies_signed_payload_not_envelope(self):
+        expected = hashlib.sha256(fixtures.wire(self.signer.document)).hexdigest()
+        envelope_digest = hashlib.sha256(self.signer.envelope()).hexdigest()
+        result = self.verify()
+        self.assertEqual(result.status, "bound")
+        self.assertEqual(result.passport_sha256, expected)
+        self.assertNotEqual(result.passport_sha256, envelope_digest)
+
+    def test_policy_expiry_caps_result_and_revalidation(self):
+        self.signer.policy["expires_at"] = 1550
+        result = self.verify(now_s=1549)
+        self.assertEqual((result.status, result.expires_at), ("bound", 1550))
+        self.assertEqual(self.rejected(now_s=1550).reason, "passport_rejected")
+        # A saved result is metadata; it cannot refresh or authorize its later use.
+        self.assertEqual((result.status, result.expires_at), ("bound", 1550))
+        self.assertFalse(result.motion_authority)
+        self.assertFalse(result.evidence_verified)
+
     def test_every_signed_kind_and_outcome_preserves_reference_order(self):
         references = self.signer.document["evidence"]
         for reference, kind in zip(references, ("synthetic", "recorded", "external_unverified")):

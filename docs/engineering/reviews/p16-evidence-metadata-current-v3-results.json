@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "base_head": "202d952a3ec08d0d98f6866b78831fea4a8d1e09",
+  "scope": "Current evidence/task/bundle review; standalone evidence metadata coverage repair",
+  "runtime_changed": false,
+  "decisions": {
+    "evidence": "KEEP; add two standalone metadata tests",
+    "tasks": "KEEP; no new mismatch found",
+    "bundles": "KEEP; existing coverage includes both metadata properties"
+  },
+  "checks": {
+    "focused_methods": 35,
+    "focused_skips": 0,
+    "adr_methods": 4,
+    "adr_skips": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": {
+      "exit_code": 0,
+      "findings": 0,
+      "scope": "Three reviewed modules and their three test files; no exclusions"
+    }
+  },
+  "probes": {
+    "invalid_initial_probe": {
+      "baseline": {
+        "methods": 11,
+        "failures": 2,
+        "errors": 0,
+        "skips": 0
+      },
+      "missing_payload_digest": {
+        "methods": 11,
+        "failures": 2,
+        "errors": 0,
+        "skips": 0
+      },
+      "uncapped_expiry": {
+        "methods": 11,
+        "failures": 2,
+        "errors": 0,
+        "skips": 0
+      }
+    },
+    "before_new_tests": {
+      "baseline": {
+        "methods": 11,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      "missing_payload_digest": {
+        "methods": 11,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      "uncapped_expiry": {
+        "methods": 11,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      }
+    },
+    "after_new_tests": {
+      "baseline": {
+        "methods": 13,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      "missing_payload_digest": {
+        "methods": 13,
+        "failures": 1,
+        "errors": 0,
+        "skips": 0
+      },
+      "uncapped_expiry": {
+        "methods": 13,
+        "failures": 1,
+        "errors": 0,
+        "skips": 0
+      }
+    }
+  },
+  "probe_limits": [
+    "Initial copied-globals probe broke two existing hash-injection assertions even for unmodified code; invalid, not credited.",
+    "Corrected probe shares original module globals and replaces only function code in memory. Baseline passes before mutation results are credited.",
+    "No production defect found. Existing bundle tests already checked payload digest and policy expiry; missing coverage was in the standalone evidence suite."
+  ],
+  "source_sha256": {
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "tests/test_passport_evidence.py": "a8897c9cb44e6dce00bc78ca8676880c44536d6627390a51f135a4279cfb10c6",
+    "tests/test_interop_tasks.py": "2cbf9761590b24410bfed2026f504b720c97a58329ebbbe5d835021c48bbed97",
+    "tests/test_interop_bundles.py": "802af16ebe4c0f3a8c6836fd67ec36f3b63f321c366b0050dbc4f5eac74bbd60",
+    "tests/test_passports.py": "43f48e5813bc28e88c30bbf6982a02b902cf165cbc48b03855c84538c3dee29b",
+    "docs/architecture/interop/evidence-binding-v1.md": "d8b1242a44b0da6efd9eacc5803d5f52fd4c15d211f02f756527d385ffb1bdc8",
+    "docs/architecture/interop/task-v1.md": "5b5eb7215196f293813af2b6b5af0d0ee3b5fd0892c2f6858f2810b52db276ee",
+    "docs/architecture/interop/task-bundle-v1.md": "e1fc6b638906d6bba75fdc885ac636d50b4324c5e6a6e833c0d8c9dabc4f6765",
+    "docs/decisions/p16-evidence-metadata-current-v3.json": "d7b68b90bcfef31d95091b934c5b2cf77c56bc1400df83b359ef24d62ff95a6f",
+    "docs/engineering/reviews/p16-evidence-metadata-current-v3.md": "977026c0e65b833944eb8838cebe6b02c960e43760a0c20d398b65abed8889bb",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "3dc1e8d33745ae1cb2ab7f28cc83a0286bbff9b600aa486b171df90770ab64a1",
+    "docs/decisions/p16-task-metadata-review-v3.json": "c444d51f14b51bbf4947b56006c5b71641b2b0c5d5daaa2927657cd29a713d57",
+    "docs/decisions/p16-bundle-metadata-review-v3.json": "56a91400fe607cb6e4cfc8143c601fddcf73518fda19c5c223f252118a982311"
+  },
+  "runtime_log_sha256": {
+    "evidence-metadata-before.json": "2cd8036ad96dc5f7dcbc7aa969bb831697f93ee96a489e28e05bcdd682fa1808",
+    "evidence-metadata-baseline.json": "ff923b418278741e9005d746cd49ceb099ffcf60a755f3190f8302a2f924443b",
+    "evidence-metadata-after.json": "f6b2ab4befc403580a74d40007979bbf2f02caf7245029dde76b556418328612",
+    "evidence-metadata-focused.log": "f3f6a6c70bd008624655d96113b3f52e24b9aa3e87a427bf07a2d1b49b75c17f",
+    "evidence-metadata-adr.log": "159406ccc81ce832aa6778e0da7e415c5b7dc7414f2ae2643e347c118daca526",
+    "evidence-metadata-bandit.json": "84370941534b6d4d37281227b6a0f75944677308fab897b0cd18837049335c01",
+    "evidence_metadata_probe.py": "c6f5266b8acaa2b3231abd1ac8930aeb8d61ec2ee0c9a319f6e73c1d8699f095",
+    "evidence-metadata-adr-final.log": "e8180f7279a968a50a344d51345aa1f36d88d92f25d0011203222c3e050fb479"
+  },
+  "commands": [
+    "PYTHONPATH=tests:. python -m unittest test_passport_evidence test_interop_tasks test_interop_bundles -v",
+    "PYTHONPATH=tests:. python -m unittest test_passport_schemas.ArchitectureDecisionConformance -v",
+    "python -m ruff check aethron/passport_evidence.py aethron/interop_tasks.py aethron/interop_bundles.py tests/test_passport_evidence.py tests/test_interop_tasks.py tests/test_interop_bundles.py",
+    "python -m ruff format --check tests/test_passport_evidence.py",
+    "python -m bandit aethron/passport_evidence.py aethron/interop_tasks.py aethron/interop_bundles.py tests/test_passport_evidence.py tests/test_interop_tasks.py tests/test_interop_bundles.py -f json"
+  ],
+  "limits": [
+    "Source tests only; no new installed-distribution or hosted acceptance result.",
+    "Alternatives source-compared, not executed or benchmarked. No runtime superiority or target timing claim.",
+    "Listed hashes identify disk bytes only; not loaded-code attestation, atomic snapshot, dependency closure or signed provenance.",
+    "No P16-P19 completion, hardware, MLS/CNSA, availability or tactical qualification."
+  ]
+}

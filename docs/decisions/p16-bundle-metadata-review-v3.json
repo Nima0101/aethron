@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "decision": "KEEP",
+  "limits": [
+    "No alternative runtime was executed or benchmarked in this slice; no measured latency, memory or runtime superiority claim.",
+    "No MLS/CNSA, installed-product, hardware, availability or whole-lane qualification."
+  ],
+  "id": "p16-bundle-metadata-review-v3",
+  "component": "Offline task/envelope/policy/evidence bundle composition at current restart",
+  "constraints": [
+    "Three exact byte inputs of at most 65536 bytes each; zero to sixteen exact evidence blobs, each at most 65536 bytes and within the pinned task budget.",
+    "Validate all types/sizes before hashes, match exact envelope/policy pins and complete evidence sets, then revalidate current trust and return earliest task/passport/policy expiry.",
+    "Snapshot API without network, persistence, enrollment, scheduling or authority. No target-class real-time requirement is established."
+  ],
+  "alternatives": [
+    "Python immutable bytes/tuple composition through versioned public verifier APIs.",
+    "Rust owned or borrowed immutable snapshots with a conformant verification boundary.",
+    "Erlang/Elixir immutable binaries with OTP crypto and explicit local composition.",
+    "C#/F# owned snapshots with SHA256 and token-based task admission."
+  ],
+  "rationale": [
+    "KEEP after fresh code/contract review and twelve passing bundle methods: all three signed/pinned sets are matched and current expiry/revocations are rechecked; no new runtime or contract mismatch found.",
+    "Immutable input identity is decisive across admission, hashing and verification. Alternative runtimes can satisfy it, but replacing this composition does not add cancellation, replay protection or fresher clocks. No evidence of a material deployment benefit from migration is established."
+  ],
+  "evidence": [
+    "https://docs.python.org/3/library/stdtypes.html#bytes-objects",
+    "https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html",
+    "https://www.erlang.org/doc/apps/crypto/crypto.html",
+    "https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.sha256.hashdata"
+  ]
+}

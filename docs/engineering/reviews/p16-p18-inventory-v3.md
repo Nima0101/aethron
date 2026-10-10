@@ -1,6 +1,6 @@
 # P16–P18 review inventory v3
 
-Snapshot: `8e264e9f5137216dc6c881ad264e82556dc2794e`, plus floor cleanup correction, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `202d952a3ec08d0d98f6866b78831fea4a8d1e09`, plus evidence metadata coverage, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -10,8 +10,9 @@ Base64 review](p16-base64-current-v3.md) rechecks the parser/envelope boundary a
 fixes a guard-sensitivity gap: 33 alias cases now detect removed canonical equality.
 That review left runtime unchanged. The [current policy and persistence review](p16-floor-cleanup-current-v3.md)
 confirms pinned-policy admission and fixes the shared floor-store cleanup error boundary,
-including post-commit error semantics. Next earliest unreviewed component in this
-restart: evidence byte binding. Earlier rows below
+including post-commit error semantics. The [evidence/task/bundle review](p16-evidence-metadata-current-v3.md)
+confirms runtime behavior and adds standalone evidence metadata checks. Next earliest
+unreviewed component in this restart: direct federation, followed by inbox accounting. Earlier rows below
 remain evidence inputs and do not satisfy the remaining restart by themselves.
 
 The history of the owned runtime files starts with passport admission, then evidence,

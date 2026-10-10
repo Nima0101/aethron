@@ -41,12 +41,14 @@ the signed reference names their exact digest; empty evidence tuples are rejecte
 The signed `failed` and `unknown` outcomes must remain present in the result.
 
 Result: immutable `EvidenceBindingResult`, with status `bound` or `rejected`, a fixed
-reason, optional passport digest/revision/effective expiry (success only), and an immutable
+reason, optional signed-payload digest/revision/effective expiry (success only), and an immutable
 tuple of `EvidenceReference(sha256, kind, outcome)` in signed order (success only).
 `motion_authority` and `evidence_verified` are always false, including in dataclass
 serialization. `bound` means bytes match an authenticated assertion, not that its content,
 licensing, outcome, scientific merit or physical validity is established. No raw evidence
 bytes, caller identifiers, paths or exception details appear in the result.
+The returned `passport_sha256` identifies canonical signed payload bytes, not envelope
+bytes. Effective expiry is the minimum of passport and supplied policy expiry.
 Digest metadata is not anonymization or encryption: identical artifacts have identical
 digests, and guessed artifacts can be hashed for comparison. The caller owns appropriate
 handling of both input bytes and returned metadata. This API promises no secure memory
@@ -65,3 +67,6 @@ passports rejecting before any content hash call. All success/failure results de
 and evidence qualification. The hosted workflow is configured to use the optional
 passport crypto environment. A successful run must be established separately for the
 reviewed revision; see the [verification evidence boundary](verification-evidence-v1.md).
+
+The [current metadata review](../../engineering/reviews/p16-evidence-metadata-current-v3.md)
+adds standalone digest-identity and policy-expiry regression coverage without changing runtime.
