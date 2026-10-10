@@ -3,14 +3,16 @@ on:
   pull_request:
     paths:
       - 'qualification/**'
-      - 'aethron/_json_bounds.py'
+      - 'aethron/**'
+      - 'pyproject.toml'
       - 'requirements-dev.txt'
       - '.github/workflows/aethron-qualification.yml'
   push:
     branches: [main, 'parallel/p4-qualification-20261009']
     paths:
       - 'qualification/**'
-      - 'aethron/_json_bounds.py'
+      - 'aethron/**'
+      - 'pyproject.toml'
       - 'requirements-dev.txt'
       - '.github/workflows/aethron-qualification.yml'
   workflow_dispatch:
