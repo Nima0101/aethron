@@ -226,3 +226,37 @@ do not prove that a candidate measured them honestly, authenticate the host cloc
 or recover individual timing samples. Historical reports are not retroactively
 qualified by this correction. Resource/latency comparisons still have different
 deployment envelopes; no runtime winner or complete first-component review follows.
+
+## Lifecycle measurement metadata admission
+
+Managed and native comparisons checked result parity but copied unchecked RSS and
+runtime metadata into successful reports. Twenty-five retained negative assertions
+showed acceptance of boolean, negative, fractional, string or null RSS; missing
+metadata; invalid runtime labels; and extra fields. The managed `compare` and
+`run` paths and both native profiles now validate the declared report envelope
+before copying measurements. A shared helper requires nonnegative integer RSS,
+excluding booleans, and a nonempty string runtime label for Python/JavaScript.
+The Rust driver has no runtime-label field; its compiler description remains in
+the enclosing report. Exact field sets reject missing and undeclared metadata.
+Zero RSS remains accepted without inventing a hardware-dependent lower bound.
+
+This is a narrow offline evidence correction using the harness's existing typed
+JSON boundary, not a new production component or a runtime selection. The fields
+follow the unchanged drivers: Node documents integer
+[maxRSS in KiB](https://nodejs.org/api/process.html#processresourceusage), while
+Python exposes [getrusage integer fields](https://docs.python.org/3/library/resource.html#resource.getrusage).
+These declarations do not authenticate reported values, verify a runtime label,
+or establish portable RSS units. The current comparison was run on Linux;
+platform-specific measurement behavior still needs separate qualification.
+
+[Evidence](../verification/robotics-lifecycle-metadata-review-v3.json) records
+25 RED assertions, 30 passing focused methods, three actual managed process pairs
+and independent rechecks of their six outputs. The native report-admission tests
+use controlled process results and do not execute Rust. Eight archived outputs
+from hosted head `52509c7` also meet the new metadata shape; this is a historical
+artifact recheck, not current-head native qualification. A test closure lint
+finding was corrected and the ten native harness methods rerun successfully.
+
+No production adapter, candidate implementation, corpus, timing threshold or
+process timeout changed. Historical results remain unchanged. The technology
+decision and earliest-component review remain incomplete.

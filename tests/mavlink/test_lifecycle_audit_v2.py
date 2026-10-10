@@ -105,6 +105,48 @@ class LifecycleAuditTests(unittest.TestCase):
                 self.assertEqual(report["failure_type"], error.__name__)
                 self.assertEqual(report["failed_attempt"], "python-0")
 
+    def test_run_rejects_invalid_measurement_metadata_for_each_runtime(self):
+        cases = self.api.corpus()[:1]
+        expected = self.api.reference(cases)
+        valid = {"results": expected, "peak_rss_kib": 42, "runtime": "fixture-version"}
+        invalids = [dict(valid, peak_rss_kib=v) for v in (True, -1, 1.5, "42", None)]
+        invalids += [
+            {k: v for k, v in valid.items() if k != "peak_rss_kib"},
+            {k: v for k, v in valid.items() if k != "runtime"},
+            dict(valid, runtime=False),
+            dict(valid, runtime=""),
+            dict(valid, extra=0),
+        ]
+        for runtime in ("python", "javascript"):
+            for invalid in invalids:
+
+                def child(command, cases, *, label, invalid=invalid, runtime=runtime, **kwargs):
+                    value = invalid if label == runtime + "-0" else valid
+                    return json.loads(json.dumps(value)), 1
+
+                with (
+                    self.subTest(runtime=runtime, invalid=invalid),
+                    tempfile.TemporaryDirectory() as directory,
+                ):
+                    out = Path(directory) / "attempt"
+                    with patch.object(self.api, "corpus", return_value=cases):
+                        with patch.object(self.api, "_child", side_effect=child):
+                            with self.assertRaisesRegex(ValueError, "candidate_measurement_failed"):
+                                self.api.run(out)
+                    report = json.loads((out / "result.json").read_text())
+                    self.assertEqual(report["state"], "failed")
+                    self.assertEqual(report["failed_attempt"], runtime + "-0")
+
+    def test_compare_checks_metadata_and_preserves_zero_rss(self):
+        cases = self.api.corpus()[:1]
+        expected = self.api.reference(cases)
+        valid = {"results": expected, "peak_rss_kib": 0, "runtime": "fixture-version"}
+        with patch.object(self.api, "_child", return_value=(valid, 1)):
+            self.assertEqual(self.api.compare(cases)["candidate_peak_rss_kib"], 0)
+        with patch.object(self.api, "_child", return_value=(dict(valid, peak_rss_kib=False), 1)):
+            with self.assertRaisesRegex(ValueError, "candidate_measurement_failed"):
+                self.api.compare(cases)
+
     def test_parity_distinguishes_boolean_authority_from_numeric_zero(self):
         self.assertTrue(callable(getattr(self.api, "check_parity", None)))
         expected = [{"perception_eligible": False, "values": [1.0]}]

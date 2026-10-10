@@ -118,6 +118,54 @@ class NativeAuditTests(unittest.TestCase):
         self.assertEqual(value["results"][0]["values"], [0.10000000149011612])
         self.assertIs(type(value["peak_rss_kib"]), int)
 
+    def test_run_validates_measurements_in_both_profiles(self):
+        cases = [{"name": "empty", "steps": [{"op": "snapshot", "now": "0"}]}]
+        expected = self.api.lifecycle_api().reference(cases)
+
+        def process(command, out, label, **kwargs):
+            if label.endswith("-compiler"):
+                Path(command[-1]).write_bytes(b"fixture binary; never executed")
+            return subprocess.CompletedProcess(
+                command, 0, stdout=b"fixture compiler", stderr=b""
+            ), 1
+
+        for target in (
+            "checked-0-python",
+            "checked-0-rust",
+            "optimized-0-python",
+            "optimized-0-rust",
+            None,
+        ):
+
+            def child(command, cases, out, label, target=target):
+                value = {"results": expected, "peak_rss_kib": 0}
+                if label.endswith("-python"):
+                    value["runtime"] = "fixture-version"
+                if label == target:
+                    value["peak_rss_kib"] = False
+                return value, 1
+
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as directory:
+                out = Path(directory) / "attempt"
+                # Exercise report admission without claiming native compilation/execution.
+                with patch.object(self.api, "corpus", return_value=cases):
+                    with patch.object(self.api, "retained_process", side_effect=process):
+                        with patch.object(self.api, "child", side_effect=child):
+                            if target is None:
+                                report = self.api.run(out)
+                                self.assertEqual(report["state"], "compared")
+                                self.assertEqual(len(report["runs"]), 4)
+                                self.assertEqual(report["runs"][-1]["rust"]["peak_rss_kib"], 0)
+                            else:
+                                with self.assertRaisesRegex(
+                                    ValueError, "candidate_measurement_failed"
+                                ):
+                                    self.api.run(out)
+                report = json.loads((out / "result.json").read_text())
+                if target is not None:
+                    self.assertEqual(report["state"], "failed")
+                    self.assertEqual(report["failure_type"], "ValueError")
+
     def test_missing_compiler_is_failure_with_retained_receipt(self):
         with tempfile.TemporaryDirectory() as directory:
             out = Path(directory) / "attempt"

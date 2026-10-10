@@ -180,9 +180,23 @@ def check_parity(expected, actual):
         raise ValueError("managed_lifecycle_parity_failed")
 
 
+def check_measurement(value, *, runtime=True):
+    """Check the declared report envelope, not measurement authenticity."""
+    keys = {"results", "peak_rss_kib"}
+    if runtime:
+        keys.add("runtime")
+    if type(value) is not dict or value.keys() != keys:
+        raise ValueError("candidate_measurement_failed")
+    if type(value["peak_rss_kib"]) is not int or value["peak_rss_kib"] < 0:
+        raise ValueError("candidate_measurement_failed")
+    if runtime and (type(value["runtime"]) is not str or not value["runtime"]):
+        raise ValueError("candidate_measurement_failed")
+
+
 def compare(cases):
     expected = reference(cases)
     actual, elapsed = _child(["node", str(DRIVER)], cases)
+    check_measurement(actual)
     check_parity(expected, actual["results"])
     return {
         "parity": True,
@@ -209,6 +223,7 @@ def run(out):
                 attempt = f"{name}-{repetition}"
                 report["failed_attempt"] = attempt
                 result, elapsed = _child(command, cases, out=out, label=attempt)
+                check_measurement(result)
                 check_parity(expected, result.pop("results"))
                 pair[name] = {**result, "whole_process_ns": elapsed}
             runs.append(pair)

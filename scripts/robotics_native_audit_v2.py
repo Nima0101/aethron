@@ -193,6 +193,7 @@ def run(out, *, compiler="rustc"):
                     result, elapsed = child(command, cases, out, f"{profile}-{repeat}-{name}")
                     if name == "rust":
                         report["native_executed"] = True
+                    api.check_measurement(result, runtime=name == "python")
                     api.check_parity(expected, result.pop("results"))
                     pair[name] = {**result, "whole_process_ns": elapsed}
         report.update(
