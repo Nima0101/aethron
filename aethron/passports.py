@@ -9,7 +9,7 @@ import binascii
 import hashlib
 import json
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 
 from ._json_bounds import check as check_bounds
@@ -197,6 +197,58 @@ def _policy(value):
         _unique_tokens(key["capabilities"], 3, allowed=CAPABILITIES)
         keys[key["key_id"]] = key
     return value, keys
+
+
+@dataclass(frozen=True)
+class PolicyValidation:
+    """Snapshot validation against an external pin; not enrollment or authority."""
+
+    status: str
+    reason: str
+    policy_sha256: Optional[str] = None
+    policy_revision: Optional[int] = None
+    expires_at: Optional[int] = None
+    execution_authority: bool = field(default=False, init=False)
+    motion_authority: bool = field(default=False, init=False)
+    evidence_verified: bool = field(default=False, init=False)
+
+
+def validate_pinned_policy(
+    policy: bytes,
+    *,
+    expected_policy_sha256: str,
+    now_s: int,
+    minimum_time_s: int,
+    minimum_policy_revision: int,
+) -> PolicyValidation:
+    """Validate a complete v1 policy independently of passport acceptance.
+
+    The pin must come from authenticated configuration, not the policy's sender.
+    It binds exact bytes, including whitespace; canonical policy JSON is not required.
+    Caller-trusted time and revision floors remain mandatory. This function performs
+    no I/O, persists no floors and neither authenticates transport nor enrolls keys.
+    A validated policy may revoke every signer. It must still be rechecked at use.
+    """
+    try:
+        _token(expected_policy_sha256, _HEX)
+        _integer(now_s)
+        _integer(minimum_time_s)
+        _integer(minimum_policy_revision, 1)
+        if now_s < minimum_time_s:
+            return PolicyValidation("rejected", "time_rollback")
+        trust, _ = _policy(_parse(policy))
+        digest = hashlib.sha256(policy).hexdigest()
+        if digest != expected_policy_sha256:
+            return PolicyValidation("rejected", "policy_mismatch")
+        if trust["revision"] < minimum_policy_revision:
+            return PolicyValidation("rejected", "policy_rollback")
+        if not trust["issued_at"] <= now_s < trust["expires_at"]:
+            return PolicyValidation("rejected", "policy_not_current")
+        return PolicyValidation(
+            "validated", "policy_matches", digest, trust["revision"], trust["expires_at"]
+        )
+    except (ValueError, TypeError, KeyError, RecursionError):
+        return PolicyValidation("rejected", "invalid_input")
 
 
 @dataclass(frozen=True)

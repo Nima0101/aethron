@@ -81,8 +81,10 @@ The authenticated policy provider owns enrollment of valid publisher keys.
 `verify(envelope, policy, *, now_s, minimum_time_s, minimum_policy_revision, expected_subject_sha256)`
 requires caller-trusted UTC time, a persisted policy revision floor and the exact
 expected software artifact digest. The caller must persist the greatest accepted
-policy revision and time across calls/restarts; this stateless function cannot detect
-caller rollback. Pass the persisted time floor as `minimum_time_s`; time below it fails.
+policy revision and trusted time across calls/restarts, independently of whether an
+individual passport succeeds. A newer revocation policy can reject every affected
+passport and return no passport-result metadata. These stateless functions cannot
+detect caller rollback. Pass the persisted time floor as `minimum_time_s`; time below it fails.
 All intervals are half-open: issued/not-before <= now < expiry. The entire passport
 interval must fit the selected key interval. Reject unknown/revoked keys, issuer or
 capability scope mismatch, revoked passport or evidence, stale/future policy/passport,
@@ -95,6 +97,31 @@ canonical payload SHA-256 (authenticated only), policy revision and effective ex
 Every consumer must reverify at use time; a result is not an enduring authorization.
 Offline revocation is known only through the supplied unexpired snapshot, not globally
 current; missing freshness blocks verification, and shorter policy life may be chosen.
+
+## Independent pinned-policy validation
+
+`validate_pinned_policy(policy, *, expected_policy_sha256, now_s, minimum_time_s,
+minimum_policy_revision)` validates the complete existing v1 policy independently of
+any passport. The expected digest must come from authenticated configuration; computing
+it from an untrusted download does not establish trust. Validation checks immutable
+byte/depth/lexical bounds, every policy field and key metadata, exact SHA-256 equality,
+the revision floor, and the half-open policy interval against caller-trusted time.
+Policy JSON need not be canonical: whitespace changes require a different exact pin.
+The existing `verify` API and signature profile are unchanged.
+
+The frozen result has status `validated` and reason `policy_matches` on success,
+with `policy_sha256`, `policy_revision` and `expires_at`. On rejection these three
+metadata fields are null. Rejection reasons are `invalid_input`, `time_rollback`,
+`policy_mismatch`, `policy_rollback`, and `policy_not_current`. All results have
+`execution_authority`, `motion_authority` and `evidence_verified` false. Results are
+ordinary constructible application values, not unforgeable authorization tokens.
+
+A policy revoking all its signers can validate successfully. Validation neither proves
+key ownership nor requires an available crypto backend; it checks policy metadata and
+the externally provisioned content pin. This does not authenticate a policy transport,
+persist a floor, detect same-revision equivocation across calls, or enroll trust.
+Later consumers must use these exact policy bytes and recheck current time/floors.
+See the [decision and C4 boundary](../../engineering/reviews/p16-policy-admission-v3.md).
 
 ## Validation and limits
 

@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aethron.invalid/contracts/interop/architecture-decision-v1.schema.json",
+  "title": "P16 bounded architecture decision record v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "id",
+    "component",
+    "decision",
+    "constraints",
+    "alternatives",
+    "rationale",
+    "limits",
+    "evidence"
+  ],
+  "properties": {
+    "version": {
+      "const": 1,
+      "type": "integer"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[a-z0-9][a-z0-9._-]*(?![\\s\\S])"
+    },
+    "component": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "decision": {
+      "enum": [
+        "KEEP",
+        "MIGRATE"
+      ]
+    },
+    "constraints": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1200
+      }
+    },
+    "alternatives": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1200
+      }
+    },
+    "rationale": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1200
+      }
+    },
+    "limits": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1200
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "maxLength": 500,
+        "format": "uri",
+        "pattern": "^https://[a-z0-9]+(?:[.-][a-z0-9]+)*(?:/[^\\s]*)?(?![\\s\\S])"
+      }
+    }
+  }
+}

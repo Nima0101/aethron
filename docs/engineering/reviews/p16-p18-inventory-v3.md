@@ -1,7 +1,7 @@
 # P16–P18 review inventory v3
 
-Snapshot: `7cb3c7e50142bab0206dcf30c5073b4da5d5611c`, plus the trust-floor
-lifecycle clarification, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `526e8549bb46ed2ffbd896d60b42c715d634438f`, plus independent pinned-policy
+validation, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -14,6 +14,7 @@ remain historical inputs. The consumed JSON-bound helper belongs to the foundati
 |---|---|
 | Parser and canonicalization | [Review](p16-parser-v3.md): FIX pre-conversion integer bound; KEEP bounded offline parser. |
 | Signature, trust, expiry and revocation | [Review](p16-trust-v3.md): KEEP native crypto boundary; strengthen rejection tests and clarify provisioning limits. |
+| Independent pinned-policy validation | [Review](p16-policy-admission-v3.md): ADD complete policy validation against an external exact-byte pin, independent of passport success; no persistence or enrollment. |
 | Evidence bytes | [Review](p16-evidence-v3.md): KEEP immutable byte binding; clarify digest/privacy and qualification limits. |
 | Three passport schemas and conformance | [Review](p16-conformance-v3.md): KEEP structural schema tooling; FIX positive authentication control and dependency closure. |
 | Task/federation structural schemas | [Review](p16-interop-schemas-v3.md): FIX missing portable structural contracts; preserve runtime admission. |
