@@ -92,18 +92,25 @@ The SDK archive is tested for Node. `npm run build:browser --prefix examples/ope
 now recompiles the SDK and these components, then produces a self-contained
 `browser-dist/aethron-observation.mjs`. An authorized browser host can import
 `Observation`, `observe`, `createObservationSource`, `presentObservation`, `mountObservationPanel` and
-`mountObservationHost` from that module. It contains the existing generated
+`mountObservationHost`, `mountConnectionControls` and `mountObservationClient` from that module. It contains the existing generated
 validators; no CDN, package loader or runtime schema compiler is needed. The build
 tool is development-only and pinned in the lockfile. A populated npm cache permits
 offline dependency preparation with `npm ci --offline --ignore-scripts`.
 
-Deploy the component together with `LICENSE`, `AJV-LICENSE`, `ESBUILD-LICENSE` and
-`manifest.json`. The manifest binds compiled runtime inputs and output bytes; it
+Deploy the component together with `LICENSE`, `AJV-LICENSE`, `ESBUILD-LICENSE`,
+`STATE-HELP.json`, `ACTION-HELP.json` and `manifest.json`. The manifest hashes the exact compiled runtime bytes supplied to the bundler and
+output bytes; it
 does not attest the full source/toolchain closure or authorize a release. The build
 removes its previous named outputs before compiling, rejects changes to its
 explicit runtime dependency list, and writes the manifest last. An absent manifest
 means the build is incomplete. Do not serve the output directory during a build;
 copy a completed, verified artifact into the host's versioned distribution.
+
+Guidance sources are captured before compilation and checked again after compilation
+and bundling. A changed guidance source fails the build and removes all named
+artifacts; help generation uses the captured text. Use an exclusively owned,
+stable build workspace: these comparisons cannot detect transient edits reverted
+between checks, and they do not attest the compiler or full source tree.
 
 Tests import the bundle from a data URL without external-module resolution and
 with string code generation disabled, compare admission with the Node SDK, and

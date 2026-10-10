@@ -2,16 +2,16 @@
   "id": "P12-004",
   "version": 1,
   "status": "accepted-component-only",
-  "decision": "KEEP TypeScript admission and presentation; add pinned esbuild 0.28.2 as a development-only bundler for a self-contained browser ESM component.",
+  "decision": "KEEP pinned esbuild 0.28.2 with Node ESM orchestration; FIX compiled-input byte binding and reject guidance-source drift during the browser build.",
   "constraints": [
     "Offline component includes validators and Unicode helper without a package loader, CDN or schema compiler at runtime.",
     "Preserve SDK admission and withdrawal; browser and installed-product acceptance are separate gates.",
-    "Fresh compilation, closed bundled input set, byte hashes and licenses; no competing SDK or server changes."
+    "Fresh compilation, closed bundled input set, exact consumed-byte hashes and licenses; guidance captured before compilation and checked after compilation/bundling. No competing SDK or server changes."
   ],
   "alternatives": [
     {
       "technology": "Go / esbuild JavaScript API",
-      "assessment": "Selected: built-in CommonJS and ESM bundling, browser resolution, write:false and dependency metadata meet the single-output, closed-input contract without plugins. No speed ranking is claimed."
+      "assessment": "Retained: built-in CommonJS/ESM conversion, browser resolution, write:false, onLoad byte supply and dependency metadata support this closed twelve-input ESM artifact. One local loader callback captures the same bytes used for manifest hashes; no third-party bundler plugin. Executed drift cases support the decision, not a speed ranking."
     },
     {
       "technology": "JavaScript / Rollup with CommonJS and node-resolve plugins",
@@ -19,7 +19,7 @@
     },
     {
       "technology": "Rust / Rolldown",
-      "assessment": "Official repository describes a Rust bundler with Rollup-compatible APIs. No measured superiority or required Rollup integration establishes a material win here. Not installed or benchmarked; documentation host failed, official repository was read."
+      "assessment": "Credible Rust implementation with Rollup-compatible plugin APIs, including load hooks. Current official plugin documentation was accessible in this review. It can express this boundary; no required Rollup plugin integration or measured resource advantage establishes a material migration benefit for this single fixed ESM graph. Not installed or benchmarked."
     },
     {
       "technology": "AJV standalone ESM and native unbundled modules",
@@ -31,11 +31,14 @@
     "https://rollupjs.org/introduction/",
     "https://github.com/rollup/plugins/tree/master/packages/commonjs",
     "https://github.com/rolldown/rolldown",
-    "https://ajv.js.org/standalone.html"
+    "https://ajv.js.org/standalone.html",
+    "https://esbuild.github.io/plugins/#on-load",
+    "https://rollupjs.org/plugin-development/#load",
+    "https://rolldown.rs/apis/plugin-api"
   ],
   "limits": [
     "Node data-URL import and structural DOM tests do not qualify browsers, accessibility, CSP deployment, customer installation or hardware.",
-    "Manifest hashes compiled runtime inputs and artifacts. It is unsigned, not release-SHA attestation, toolchain closure or P19 acceptance.",
+    "Manifest hashes exact captured compiled runtime inputs and output artifacts. It remains unsigned, not a full source/toolchain attestation or P19 acceptance. Source drift comparisons require a trusted, exclusively owned build workspace; transient edits reverted between checks are not detected.",
     "ES2022 syntax does not polyfill APIs: strict ingress needs Fetch streams, structuredClone, TextDecoder and JSON.parse reviver context. Actual browsers require validation.",
     "Local byte reproduction is not cross-platform reproducibility or hard-real-time evidence.",
     "No weapon integration, actuation, MLS/CNSA qualification, DDS/Link16 interoperability or five-nines claim."
@@ -43,7 +46,7 @@
   "c4": {
     "context": "flowchart LR\nIntegrator --> Build[Component build]\nBuild --> Browser[Caller-authorized read-only host]",
     "containers": "flowchart LR\nSDK[Existing SDK] --> Compiler[Fresh compile]\nUI[Presenter panel lifecycle] --> Compiler\nCompiler --> Bundler[Pinned esbuild]\nBundler --> ESM[ESM and licenses]\nESM --> Host[Browser host]",
-    "components": "flowchart LR\nInvalidate[Remove previous named output] --> Compile[Compile SDK then UI]\nCompile --> Bundle[Bundle ESM]\nBundle --> Gate[Closed inputs and zero external imports]\nGate --> Output[Component and licenses]\nOutput --> Manifest[Hash manifest last]",
-    "code": "classDiagram\nclass BrowserComponent {\n Observation\n observe()\n presentObservation()\n mountObservationPanel()\n mountObservationHost()\n}\nclass Manifest {\n inputs\n artifacts\n external_imports\n qualified_browser false\n}\nBrowserComponent --> Manifest"
+    "components": "flowchart LR\nInvalidate[Remove named output] --> Capture[Capture guidance sources]\nCapture --> Compile[Compile SDK and UI]\nCompile --> Check[Reject changed guidance]\nCheck --> Load[Load and retain admitted runtime bytes]\nLoad --> Bundle[Build ESM from retained bytes]\nBundle --> Gate[Check graph revision and guidance]\nGate --> Output[ESM licenses and captured guidance]\nOutput --> Manifest[Hash retained bytes and write manifest last]",
+    "code": "classDiagram\nclass BrowserComponent {\n Observation\n observe()\n presentObservation()\n mountObservationPanel()\n mountObservationHost()\n mountConnectionControls()\n mountObservationClient()\n}\nclass Manifest {\n inputs\n artifacts\n external_imports\n qualified_browser false\n}\nBrowserComponent --> Manifest"
   }
 }

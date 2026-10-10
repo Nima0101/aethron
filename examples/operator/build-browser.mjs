@@ -1,6 +1,6 @@
 import {readFileSync, writeFileSync, mkdirSync, rmSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
-import {resolve} from 'node:path';
+import {resolve, relative, dirname, sep} from 'node:path';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 
@@ -14,17 +14,17 @@ try {
   const revision=()=>({head:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),
     modified:execFileSync('git',['status','--porcelain','--untracked-files=normal'],{cwd:root,encoding:'utf8'}).length!==0});
   const beforeRevision=revision();
+  const helpSources=Object.fromEntries(['presenter','connection','action-help'].map(name=>
+    [name,readFileSync(new URL(`./src/${name}.ts`,import.meta.url),'utf8')]));
+  const checkHelpSources=()=>{
+    for(const [name,text] of Object.entries(helpSources)) {
+      if(readFileSync(new URL(`./src/${name}.ts`,import.meta.url),'utf8')!==text) throw new Error('changed_help_source');
+    }
+  };
   for(const prefix of ['examples/clients/typescript','examples/operator']) {
     execFileSync('npm',['run','build','--prefix',prefix],{cwd:root,stdio:'inherit',timeout:60000});
   }
   const {build,version}=await import('esbuild');
-  const result=await build({
-    absWorkingDir:root,entryPoints:['examples/operator/dist/browser.js'],
-    outfile:'examples/operator/browser-dist/aethron-observation.mjs',
-    bundle:true,platform:'browser',format:'esm',target:'es2022',
-    write:false,metafile:true,sourcemap:false,minify:false,legalComments:'inline',
-    logLevel:'silent',
-  });
   const allowed=new Set([
     'examples/operator/dist/browser.js','examples/operator/dist/presenter.js','examples/operator/dist/client.js',
     'examples/operator/dist/action-help.js','examples/operator/dist/panel.js','examples/operator/dist/lifecycle.js','examples/operator/dist/connection.js',
@@ -32,19 +32,38 @@ try {
     'examples/clients/typescript/dist/session.js','examples/clients/typescript/dist/validators.cjs',
     'examples/clients/typescript/node_modules/ajv/dist/runtime/ucs2length.js',
   ]);
+  checkHelpSources();
+  // Supply and hash the same captured bytes, never a later filesystem reread.
+  const inputBytes=new Map();
+  const result=await build({
+    absWorkingDir:root,entryPoints:['examples/operator/dist/browser.js'],
+    outfile:'examples/operator/browser-dist/aethron-observation.mjs',
+    bundle:true,platform:'browser',format:'esm',target:'es2022',
+    write:false,metafile:true,sourcemap:false,minify:false,legalComments:'inline',
+    logLevel:'silent',
+    plugins:[{name:'captured-runtime-inputs',setup(builder){
+      builder.onLoad({filter:/.*/,namespace:'file'},({path})=>{
+        const name=relative(root,path).split(sep).join('/');
+        if(!allowed.has(name)) throw new Error('unsupported_browser_dependency_graph');
+        if(!inputBytes.has(name)) inputBytes.set(name,readFileSync(path));
+        return {contents:inputBytes.get(name),loader:'js',resolveDir:dirname(path)};
+      });
+    }}],
+  });
   const inputs=Object.keys(result.metafile.inputs).sort();
-  if(inputs.some(name=>!allowed.has(name)) || inputs.length!==allowed.size ||
+  if(inputs.some(name=>!allowed.has(name)) || inputs.length!==allowed.size || inputBytes.size!==allowed.size ||
      result.outputFiles.length!==1 || result.warnings.length!==0 ||
      Object.values(result.metafile.outputs).some(item=>item.imports.length!==0)) {
     throw new Error('unsupported_browser_dependency_graph');
   }
   const afterRevision=revision();
   if(beforeRevision.head!==afterRevision.head) throw new Error('changed_build_revision');
+  checkHelpSources();
   const {createStateHelpInventory,createActionHelpInventory}=await import('./help-inventory.mjs');
   const help=createStateHelpInventory(Object.fromEntries(['presenter','connection'].map(name=>
-    [name,readFileSync(new URL(`./src/${name}.ts`,import.meta.url),'utf8')])),result.outputFiles[0].contents,
+    [name,helpSources[name]])),result.outputFiles[0].contents,
     {head:beforeRevision.head,modified:beforeRevision.modified||afterRevision.modified});
-  const actionHelp=createActionHelpInventory(readFileSync(new URL('./src/action-help.ts',import.meta.url),'utf8'),
+  const actionHelp=createActionHelpInventory(helpSources['action-help'],
     result.outputFiles[0].contents,{head:beforeRevision.head,modified:beforeRevision.modified||afterRevision.modified});
   const artifacts={
     'ACTION-HELP.json':Buffer.from(JSON.stringify(actionHelp,null,2)+'\n'),
@@ -57,7 +76,7 @@ try {
   const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
   const manifest={format:'aethron-browser-component-v1',builder:{name:'esbuild',version},
     qualified_browser:false,external_imports:[],
-    inputs:Object.fromEntries(inputs.map(name=>[name,hash(readFileSync(resolve(root,name)))])),
+    inputs:Object.fromEntries(inputs.map(name=>[name,hash(inputBytes.get(name))])),
     artifacts:Object.fromEntries(Object.entries(artifacts).map(([name,bytes])=>[name,hash(bytes)])),
   };
   for(const [name,bytes] of Object.entries(artifacts)) writeFileSync(resolve(output,name),bytes);

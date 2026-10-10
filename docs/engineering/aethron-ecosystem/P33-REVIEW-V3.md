@@ -1932,3 +1932,62 @@ Verified bridge commit 745bf687 was fast-forward pushed to PR #44. Its single
 exact-head snapshot reported forty queued and one skipped check; no polling or
 merge. Next earliest unreviewed component: browser build/provenance, then remaining
 help coverage. Full lane and independent installed P19 acceptance remain incomplete.
+
+
+### P12 browser-build/provenance reassessment — 2026-10-10
+
+At `350e39bba445566d383a711b261e5eb4fd7560cd`, re-read the authoritative
+policy and V3 order, verified the bridge commit and all twelve prior source hashes,
+ten retained reports and twenty-one generated outputs. Reviewed the browser build,
+its closed runtime graph, manifest/help binding, compiler sequencing, failure cleanup,
+package entry point, tests and public claims. No peer or native client changed.
+
+KEEP the pinned Go/esbuild bundler with Node ESM orchestration under the closed
+[browser ADR](../../../examples/operator/browser-adr.json). Fresh official esbuild
+loader documentation specifies supplied byte contents; Rollup and Rust/Rolldown
+provide credible load-hook alternatives. Rolldown documentation was accessible
+this time, replacing the older unavailable-source note. The deciding requirements
+are one browser ESM with existing CommonJS validators, no runtime package loader,
+a closed twelve-module graph, in-memory output and explicit byte capture. Esbuild
+supports that contract with one local loader callback and no additional third-party
+plugin. No comparative benchmark establishes a runtime/resource winner and none
+is claimed. Native unbundled AJV ESM still needs helper resolution and another
+validator-format parity surface.
+
+FIX two provenance mismatches. The old manifest reread runtime files after esbuild
+had consumed them. A controlled change after the real bundler returned produced
+a manifest hash for the new file instead of the actual bundled input. The build
+also read guidance after compilation; a changed guidance source could be packaged
+with an older compiled module. Both intended assertions failed, while a stable
+control passed. The first fixture attempt failed for a separate setup reason:
+a symlinked AJV dependency resolved outside the fixture's admitted graph. That
+log is preserved and is not evidence of the production defects; copying the
+small helper/package/license files made the intended cases executable.
+
+The build now supplies each admitted module to esbuild from captured bytes and
+hashes those same bytes. Guidance text is captured before compilation, checked
+after compilation and bundling, and that captured text generates the inventories.
+Source drift removes all seven named outputs. The existing manifest format,
+source revision semantics and closed runtime graph remain unchanged. This is not
+a signed attestation or a compiler/full-source closure: a trusted, exclusive,
+stable build workspace is required, and edits reverted between comparisons are
+not detected. No hostile build-process isolation is claimed.
+
+Four bounded fixture cases exercise exact consumed-byte hashes, guidance drift at
+two build stages and stable artifact/help contracts; the fifth check validates
+the closed ADR/C4. These fixtures use the real build entry point and pinned
+esbuild with copied compiled modules; compilation alone is stubbed to isolate the
+provenance boundary. They are included in the package test command. README now
+lists all eight actual public exports and both distributed help inventories.
+The full component build succeeds. All five provenance/ADR checks and all 23
+standalone artifact checks pass, including failed-build withdrawal and byte-for-byte
+recovery. Eighteen prior generated files are byte-identical, including all fourteen
+operator compiled files and the 148568-byte bundle. The two help inventories differ
+only by source revision metadata; the manifest covers those revised inventories.
+Final component-build/artifact results and hashes are in
+[the evidence](evidence/phase3/p12-browser-provenance-review-v1.json).
+
+Verified bridge commit 350e39bb was fast-forward pushed to PR #44. Its one exact-head
+snapshot reported forty queued and one skipped check; no polling or merge. Next
+earliest unreviewed component: state/action help inventory and coverage enforcement.
+Full lane/P12/P19 and independent installed-product acceptance remain incomplete.
