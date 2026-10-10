@@ -157,12 +157,18 @@ class Registration:
             raise ValueError("invalid_validity")
         if type(clock_id) is not str or not 1 <= len(clock_id) <= 128:
             raise ValueError("invalid_clock_domain")
-        self.calibration = calibration
+        self._calibration = calibration
+        self._calibration_digest = calibration.digest
         self.clock_id = clock_id
         self.valid_until = now_ns + valid_for_ns
         self.last_now = now_ns
         self.closed = False
         self.pending_break = True
+
+    @property
+    def calibration(self):
+        """Validated snapshot; changing calibration requires a fresh binding."""
+        return self._calibration
 
     def close(self):
         self.closed = True
@@ -238,7 +244,7 @@ class Registration:
                 radius,
                 c.camera.range_m((x, y, z)),
                 c.target_frame,
-                c.digest,
+                self._calibration_digest,
                 min(self.valid_until, capture_ns + AGE_NS - uncertainty_ns),
                 self.pending_break,
             )
