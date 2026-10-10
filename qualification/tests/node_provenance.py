@@ -15,6 +15,78 @@ PREFIX = "qualification/technology/"
 
 
 class NodeProvenanceTests(unittest.TestCase):
+    def reject_hash_fault(self, hook):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            name = "hash-probe.mjs"
+            original = (ROOT / PREFIX / name).read_bytes()
+            (root / name).write_bytes(original)
+            (root / "driver.mjs").write_text(
+                "import { Hash } from 'node:crypto';\n"
+                "function injected() { process.stderr.write('FAULT_INJECTED\\n'); }\n"
+                + hook
+                + "\nawait import('./hash-probe.mjs');\n",
+                encoding="utf-8",
+            )
+            result = subprocess.run(
+                ["node", "--v8-pool-size=1", "driver.mjs"],
+                cwd=root,
+                env=dict(os.environ, UV_THREADPOOL_SIZE="1"),
+                capture_output=True,
+                timeout=15,
+                check=False,
+            )
+            self.assertEqual((root / name).read_bytes(), original)
+            self.assertIn(b"FAULT_INJECTED", result.stderr)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(result.stdout, b"")
+            self.assertIn(b"hash_probe_result_failed", result.stderr)
+
+    def digest_fault(self, size, ordinal):
+        self.reject_hash_fault(
+            "const update = Hash.prototype.update;\n"
+            "const digest = Hash.prototype.digest;\n"
+            "const sizes = new WeakMap(); let calls = 0;\n"
+            "Hash.prototype.update = function(bytes, ...args) {\n"
+            "  sizes.set(this, (sizes.get(this) || 0) + bytes.length);\n"
+            "  return update.call(this, bytes, ...args);\n"
+            "};\n"
+            "Hash.prototype.digest = function(...args) {\n"
+            "  const result = digest.apply(this, args);\n"
+            f"  if (sizes.get(this) === {size} && ++calls === {ordinal}) {{\n"
+            "    injected(); return '0'.repeat(64);\n"
+            "  }\n"
+            "  return result;\n"
+            "};\n"
+        )
+
+    def test_each_measured_digest_must_match_before_output(self):
+        for ordinal in range(1, 41):
+            with self.subTest(digest=ordinal):
+                self.digest_fault(1048576, ordinal)
+
+    def test_known_vector_failure_prevents_report(self):
+        for size in (0, 3):
+            with self.subTest(size=size):
+                self.digest_fault(size, 1)
+
+    def test_wrong_buffer_ownership_prevents_report(self):
+        for hook in (
+            "const from = Buffer.from;\n"
+            "Buffer.from = function(value, ...args) {\n"
+            "  if (Buffer.isBuffer(value) && value.length === 3) {\n"
+            "    injected(); return value;\n"
+            "  }\n"
+            "  return from(value, ...args);\n"
+            "};\n",
+            "const subarray = Buffer.prototype.subarray;\n"
+            "Buffer.prototype.subarray = function(...args) {\n"
+            "  injected(); return Buffer.from(subarray.apply(this, args));\n"
+            "};\n",
+        ):
+            with self.subTest(hook=hook):
+                self.reject_hash_fault(hook)
+
     def test_changed_corpus_prevents_parity_report(self):
         raw = (ROOT / PREFIX / "ingress-vectors-v1.json").read_bytes()
         for label, changed in changed_corpora(raw).items():
