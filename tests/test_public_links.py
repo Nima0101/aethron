@@ -2,6 +2,7 @@
 
 import json
 import os
+import stat
 import subprocess
 import sys
 import tempfile
@@ -126,8 +127,15 @@ class PublicLinks(unittest.TestCase):
         (self.root / "README.md").write_text("Synthetic document.\n", encoding="utf-8")
         tree = self.tree("README.md")
         oid = self.git("rev-parse", tree + ":README.md")
-        (self.root / ".git/objects" / oid[:2] / oid[2:]).unlink()
+        self.remove_fixture_object(oid)
         self.assert_invalid(tree)
+
+    def remove_fixture_object(self, oid):
+        obj = self.root / ".git/objects" / oid[:2] / oid[2:]
+        # Git loose objects are read-only; Windows refuses their deletion.
+        # Only the disposable fixture object gets its read-only bit cleared.
+        obj.chmod(stat.S_IREAD | stat.S_IWRITE)
+        obj.unlink()
 
     def assert_missing_promisor_object_stays_local(self, kind):
         (self.root / "README.md").write_text("Synthetic document.\n", encoding="utf-8")
@@ -151,7 +159,7 @@ class PublicLinks(unittest.TestCase):
         oid = {"commit": commit, "tree": tree, "blob": self.git("rev-parse", tree + ":README.md")}[
             kind
         ]
-        (self.root / ".git/objects" / oid[:2] / oid[2:]).unlink()
+        self.remove_fixture_object(oid)
         trace = self.root / "git-trace.log"
         # Explicitly permissive caller settings must not enable checker fetching.
         with mock.patch.dict(

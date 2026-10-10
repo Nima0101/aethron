@@ -1,0 +1,39 @@
+{
+  "id": "0029-verifier-child-review",
+  "review_order_version": 3,
+  "component": "P1.1 sequential developer verification children",
+  "source_revision": "66377190752e402b7a59b41dcc99827034b39917",
+  "source_sha256": "20a408439cb60232b19d91199d612d8ff1f71d5c48498290e0304b770ace2b56",
+  "decision": "KEEP",
+  "constraints": [
+    "Offline Linux/macOS/Windows developer verification using the selected Python interpreter. Five sequential fixed commands, inherited streams, explicit checkout directory, failure propagation and final completion reporting. This is not an untrusted job runner or real-time control boundary."
+  ],
+  "comparison": [
+    "Python subprocess.run accepts argument sequences and checked exit status, integrating child failures with the existing AST and manifest exceptions without a separate result protocol.",
+    "Rust Command also preserves literal arguments and returns process status. A native launcher would require an explicit selected-interpreter handoff and result boundary for the in-process Python checks, with no measured startup or memory constraint requiring that split.",
+    "PowerShell Start-Process is a credible cross-platform orchestration option; ArgumentList joins array elements into a string, requiring explicit quoting for embedded spaces. Its process management does not remove the Python interpreter/AST dependency. Neither alternative was benchmarked; no speed ranking is claimed."
+  ],
+  "rationale": [
+    "KEEP the current checked subprocess calls: direct interpreter identity and exception composition meet this developer boundary. Current code and docs correctly make no deadline or process-tree containment claim. No new arbitrary timeout is introduced without a whole-command execution requirement.",
+    "Improve verification of exact command order/arguments and propagation of launch errors and operator interruption. A hosted Windows failure separately exposed read-only loose-object deletion in test setup; clear only the disposable fixture object read-only attribute before deletion. Checker runtime and fail-closed assertions remain unchanged."
+  ],
+  "evidence": [
+    "73 focused verifier methods PASS on Linux CPython3.13.13;18 public-link fixture methods separately PASS. Product children are intercepted in verifier tests.",
+    "Three in-memory negative controls (omit consumer, replace interpreter, suppress launch/interruption exceptions) were rejected with12 assertion failures and0errors across3 test executions.",
+    "PR47 head2415d3606a859b0ae399436a47ab7dd9a8d02603 Windows3.9 job114298720984 failed with4 PermissionError WinError5 setup errors. Raw log retained; Windows repair validation remains pending hosted CI."
+  ],
+  "limits": [
+    "No product child timeout, process-tree cancellation, global output/CPU/memory budget or signed report is provided. An indefinitely running child can indefinitely delay local completion; failed or interrupted checks never justify PASS.",
+    "This review verifies launcher arguments and exception behavior with synthetic intercepted children, not real Windows process quoting or signal propagation. No full suite, hardware, weapon, field or release qualification. P1.1 inventory remains open."
+  ],
+  "revisit": [
+    "If unattended local execution needs a deadline or cancellation of descendants, define the cross-platform process supervisor contract and qualify cleanup separately. Next: reconcile source-bound P1.1 inventory before P1.2."
+  ],
+  "references": [
+    "https://docs.python.org/3.13/library/subprocess.html",
+    "https://doc.rust-lang.org/std/process/struct.Command.html",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-process?view=powershell-7.5",
+    "https://docs.python.org/3.9/library/os.html#os.chmod",
+    "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-deletefilew"
+  ]
+}

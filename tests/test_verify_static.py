@@ -14,7 +14,7 @@ from scripts import verify
 
 class StaticCheckClaims(unittest.TestCase):
     @contextlib.contextmanager
-    def fixture(self, source, failure=None):
+    def fixture(self, source, failure=None, child_error=None):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             manifests = root / "docs/verification"
@@ -42,6 +42,8 @@ class StaticCheckClaims(unittest.TestCase):
                 self.assertEqual(kwargs, {"cwd": root, "check": True})
                 calls.append(args)
                 if len(calls) == failure:
+                    if child_error is not None:
+                        raise child_error
                     raise subprocess.CalledProcessError(7, args)
 
             with (
@@ -117,3 +119,34 @@ class StaticCheckClaims(unittest.TestCase):
                 self.assertEqual(caught.exception.returncode, 7)
                 self.assertEqual(len(calls), failure)
                 self.assertEqual(output.getvalue(), "")
+
+    def test_child_commands_preserve_interpreter_arguments_and_order(self):
+        interpreter = "/synthetic directory/python"
+        with (
+            self.fixture("value = 1") as (_, calls),
+            patch.object(verify.sys, "executable", interpreter),
+        ):
+            verify.run()
+            self.assertEqual(
+                calls,
+                [
+                    [interpreter, "scripts/public_links.py", "HEAD"],
+                    [interpreter, "-m", "unittest", "discover", "-s", "tests"],
+                    [interpreter, "scripts/evaluate_dataset.py"],
+                    [interpreter, "scripts/consumer.py"],
+                    [interpreter, "scripts/temporal_e2e.py"],
+                ],
+            )
+
+    def test_child_launch_error_and_interruption_stop_completion(self):
+        for failure in range(1, 6):
+            for error in (OSError("synthetic launch failure"), KeyboardInterrupt()):
+                with (
+                    self.subTest(failure=failure, error=type(error).__name__),
+                    self.fixture("value = 1", failure, error) as (output, calls),
+                ):
+                    with self.assertRaises(type(error)) as caught:
+                        verify.run()
+                    self.assertIs(caught.exception, error)
+                    self.assertEqual(len(calls), failure)
+                    self.assertEqual(output.getvalue(), "")

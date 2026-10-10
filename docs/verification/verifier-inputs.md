@@ -66,10 +66,26 @@ outlive cleanup. No generic process-tree containment is claimed.
 
 These are admission limits, not total RSS, CPU, filesystem or whole-verifier
 bounds. Decoded text/parser allocations are additional. Source reads, other content
-reads, traversal and product child processes remain outside the Markdown budgets. The source syntax rules do not prove runtime security or
+reads and traversal have separate admission limits below. Product child processes
+remain outside these input budgets. The source syntax rules do not prove runtime security or
 termination. The final PASS names completed checks, not production qualification.
 
 The dedicated Markdown workflow exercises Linux/macOS/Windows and Python3.9/3.13.
 Workflow existence is not hosted evidence. ADR source revisions identify local
 pre-change baselines; source hashes bind the described files. Historical local
 results do not qualify a different delivery head or platform.
+
+Source/text admission v1 limits source input to 1 MiB per file and 16 MiB total;
+other selected non-Markdown text to 8 MiB per file and 64 MiB total. A shared
+counter admits 100,000 directory entries across source and content scans, including
+excluded entries and repeated visits. Depth beyond 64 relative to each scan root
+fails instead of pruning required coverage. Byte checks precede decoding. These
+limits do not bound AST allocations, filesystem latency or whole-process memory.
+See [scan admission](../decisions/0028-worktree-scan-admission.json).
+
+The five developer child commands run sequentially with the selected interpreter,
+literal argument lists and the checkout working directory. Nonzero status, launch
+errors and interruption prevent the final PASS. There is no child deadline or
+process-tree supervisor; a hanging child may indefinitely delay local completion.
+The launcher review uses intercepted children and does not qualify Windows process
+quoting or signal delivery. See [child review](../decisions/0029-verifier-child-review.json).

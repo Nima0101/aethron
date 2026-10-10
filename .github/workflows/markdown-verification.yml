@@ -30,4 +30,4 @@ jobs:
           python-version: ${{ matrix.python }}
       - run: 'python -m pip install --only-binary=:all: --require-hashes -r requirements-links.lock'
       - run: python -m unittest tests.test_markdown_resources tests.test_verify_links tests.test_verify_dependencies tests.test_public_links tests.test_public_link_limits
-      - run: python -m unittest tests.test_verify_markdown_limits tests.test_verify_paths tests.test_verify_content tests.test_verify_inventory tests.test_verify_discovery tests.test_verify_static tests.test_verify_freeze
+      - run: python -m unittest tests.test_verify_markdown_limits tests.test_verify_scan_limits tests.test_verify_paths tests.test_verify_content tests.test_verify_inventory tests.test_verify_discovery tests.test_verify_static tests.test_verify_freeze

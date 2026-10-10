@@ -41,6 +41,12 @@ MAX_WORKTREE_LOCAL_DESTINATIONS = 10000
 FREEZE_HASH_CHUNK_BYTES = 64 * 1024
 MAX_FREEZE_MANIFEST_BYTES = 1024 * 1024
 MAX_FREEZE_MANIFEST_ENTRIES = 10000
+MAX_SOURCE_BYTES = 1024 * 1024
+MAX_SOURCE_TOTAL_BYTES = 16 * 1024 * 1024
+MAX_OTHER_TEXT_BYTES = 8 * 1024 * 1024
+MAX_OTHER_TEXT_TOTAL_BYTES = 64 * 1024 * 1024
+MAX_TRAVERSAL_ENTRIES = 100000
+MAX_TRAVERSAL_DEPTH = 64
 
 
 def require_worktree_root():
@@ -171,7 +177,20 @@ def local_sha256(path):
     return digest.hexdigest()
 
 
-def working_files(base, *, included=None, recursive=True):
+class _TraversalBudget:
+    def __init__(self):
+        self.entries = 0
+
+    def admit(self, path, base):
+        self.entries += 1
+        if (
+            self.entries > MAX_TRAVERSAL_ENTRIES
+            or len(path.relative_to(base).parts) > MAX_TRAVERSAL_DEPTH
+        ):
+            raise ValueError("worktree_traversal_limit")
+
+
+def working_files(base, *, included=None, recursive=True, budget=None):
     """Enumerate selected files without suppressing filesystem errors."""
     base = local_path(base)
     try:
@@ -181,12 +200,15 @@ def working_files(base, *, included=None, recursive=True):
         return
     if not stat.S_ISDIR(mode):
         raise NotADirectoryError(str(base))
+    if budget is None:
+        budget = _TraversalBudget()
     pending = [base]
     while pending:
         directory = local_path(pending.pop())
         with os.scandir(directory) as entries:
             for entry in entries:
                 path = directory / entry.name
+                budget.admit(path, base)
                 relative = path.relative_to(ROOT)
                 if (
                     included is not None
@@ -232,10 +254,18 @@ def run():
                 else name
             )
             assert local_sha256(ROOT / actual) == digest, "freeze mismatch: " + name
-    for p in working_files(ROOT / "aethron"):
+    traversal_budget = _TraversalBudget()
+    source_bytes = 0
+    for p in working_files(ROOT / "aethron", budget=traversal_budget):
         if not p.match("*.py"):
             continue
-        source = local_bytes(p).decode("utf-8")
+        body = local_bytes(
+            p,
+            max_bytes=min(MAX_SOURCE_BYTES, MAX_SOURCE_TOTAL_BYTES - source_bytes),
+            limit_error="source_scan_limit",
+        )
+        source_bytes += len(body)
+        source = body.decode("utf-8")
         assert not re.search(r"\b(?:TO" + "DO|FIX" + r"ME)\b", source), p.name
         tree = ast.parse(source)
         for node in ast.walk(tree):
@@ -261,9 +291,12 @@ def run():
         parent.as_posix() for name in tracked for parent in PurePosixPath(name).parents
     }
     markdown_documents = markdown_bytes = local_destinations_seen = 0
+    other_text_bytes = 0
     # Scan only intended product files; never inspect local credentials/environment.
     for folder in (*SCAN_FOLDERS, ""):
-        for p in working_files(ROOT / folder, included=included, recursive=bool(folder)):
+        for p in working_files(
+            ROOT / folder, included=included, recursive=bool(folder), budget=traversal_budget
+        ):
             relative = p.relative_to(ROOT)
             if not content_candidate(relative):
                 continue
@@ -281,7 +314,15 @@ def run():
                 markdown_bytes += len(body)
                 text = body.decode("utf-8")
             else:
-                text = local_bytes(p).decode("utf-8")
+                body = local_bytes(
+                    p,
+                    max_bytes=min(
+                        MAX_OTHER_TEXT_BYTES, MAX_OTHER_TEXT_TOTAL_BYTES - other_text_bytes
+                    ),
+                    limit_error="content_scan_limit",
+                )
+                other_text_bytes += len(body)
+                text = body.decode("utf-8")
             for forbidden in [
                 "/Users/",
                 "/home/",
