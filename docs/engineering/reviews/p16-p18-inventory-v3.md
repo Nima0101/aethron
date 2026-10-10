@@ -1,19 +1,23 @@
 # P16–P18 review inventory v3
 
-Snapshot: `7e34cc66328d81281dccc802b8f3fed736bfb50e`, plus public claim reconciliation, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `8c6ccdb9c4e9fa4aa49f9644398e47e5305973da`, plus local policy-floor implementation, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
 
 The history of the owned runtime files starts with passport admission, then evidence,
-tasks, bundles, federation and inbox. Each has a current review; earlier policy-2 notes
-remain historical inputs. The consumed JSON-bound helper belongs to the foundation lane.
+tasks, bundles, federation and inbox. The entries below record prior review coverage;
+they do not complete the latest owner-ordered restart. The [current restart](p16-floor-current-v3.md)
+rechecks parser, signature and pinned policy, then corrects the pending floor-store
+slice. Evidence-byte binding is the next earliest unreviewed component of this restart.
+The consumed JSON-bound helper belongs to the foundation lane.
 
 | Component | Current evidence and decision |
 |---|---|
 | Parser and canonicalization | [Original V3 review](p16-parser-v3.md): FIX pre-conversion integer bound. [Fresh reassessment](p16-parser-reassessment-v3.md): KEEP lexical hooks; fourteen portable cases and bounded syntax comparison, no performance ranking. |
 | Signature, trust, expiry and revocation | [Original review](p16-trust-v3.md). [Fresh reassessment](p16-trust-reassessment-v3.md): KEEP bounded native crypto boundary; add real missing-package process checks, preserve provisioning limits and source-bound primitive evidence. |
 | Independent pinned-policy validation | [Original review](p16-policy-admission-v3.md). [Fresh reassessment](p16-policy-evidence-reassessment-v3.md): KEEP exact-byte external pin and complete metadata validation; existing tests detect removed pin comparison. No persistence or enrollment. |
+| Local policy-floor persistence | [Contract and technology decision](../../architecture/interop/policy-floor-store-v1.md): ADD single-scope SQLite transactions, independently observed time and pinned-policy revision/digest persistence. Real-file/process tests; whole-store restore remains outside protection. |
 | Evidence bytes | [Original review](p16-evidence-v3.md). [Fresh reassessment](p16-policy-evidence-reassessment-v3.md): KEEP immutable per-blob binding; existing tests detect weakened set comparison. No content qualification. [Kind preservation review](p16-evidence-kinds-v3.md): KEEP runtime, add full signed-reference assertion that detects a previously surviving kind-label mutation. |
 | Three passport schemas and conformance | [Review](p16-conformance-v3.md): KEEP structural schema tooling; FIX positive authentication control and dependency closure. [Fresh reassessment](p16-schema-reassessment-v3.md): KEEP standard contracts and offline checker; preserve lexical/authentication gaps. [Reference-integrity review](p16-schema-integrity-v3.md): KEEP contracts; add paired checks and guard-removal controls for selected-field uniqueness and complete references. |
 | Task/federation structural schemas | [Review](p16-interop-schemas-v3.md): FIX missing portable structural contracts; preserve runtime admission. |
@@ -34,7 +38,7 @@ external gates. No whole-phase completion can be inferred from the rows above.
 
 | Scope | State at this snapshot |
 |---|---|
-| P16 transport, enrollment and persistent rollback floors | Not implemented by the owned modules. Caller-provided pins/floors are assumptions, not these services. [Lifecycle traces](p16-trust-floor-v3.md) show why floors cannot be derived solely from successful passport results. [Fresh lifecycle review](p16-lifecycle-reassessment-v3.md) confirms both negative traces and reconciles 386 historical source bindings; no persistence implementation is implied. [Current lifecycle review](p16-consumer-current-v3.md) reruns both traces and eight policy methods after fresh technology comparison. |
+| P16 transport, enrollment and remaining rollback protection | Transport/enrollment, federation-floor persistence and independent whole-store rollback detection remain unfinished. The new policy-floor helper persists one scope only; clock/pin authenticity and protected storage remain caller assumptions. [Lifecycle traces](p16-trust-floor-v3.md) show why floors cannot be derived solely from successful passport results. [Fresh lifecycle review](p16-lifecycle-reassessment-v3.md) confirms both negative traces and reconciles 386 historical source bindings; no persistence implementation is implied. [Current lifecycle review](p16-consumer-current-v3.md) reruns both traces and eight policy methods after fresh technology comparison. |
 | P16 cross-phase conformance | [Edge UNKNOWN corpus](p16-edge-conformance-v3.md) checks one published API/fixture boundary; [P2 packet cases](p16-sensor-conformance-v3.md) exercise the published decoder and P16 binding independently; [encoding cases](p16-sensor-encoding-v3.md) add byte-order, padding and trailing-byte checks. [ROS diagnostic cases](p16-ros-status-v3.md) consume receipt/loss/fault status through real APIs. [Fresh consumer reassessment](p16-cross-phase-reassessment-v3.md): three scoped KEEP decisions, 14 focused methods and six sensitivity experiments. [Current consumer review](p16-consumer-current-v3.md): KEEP three consumer harnesses; add two missing rejection policy-revision assertions, verified by seven controlled assertion failures and current producer-source comparisons. Integrated P2/P3/P14 runtime qualification is not established. |
 | P17 common picture and operator collaboration | No owned implementation or integrated client evidence identified. |
 | P17 role/authority, intent, coordination and cancellation | No owned command workflow implementation; P16 verification tasks do not implement it. |

@@ -1,6 +1,7 @@
 # P16 verification evidence boundary
 
-P16 implements local software-statement verification and bounded in-memory buffering.
+P16 implements local software-statement verification, bounded in-memory buffering and
+an explicit single-scope local policy-floor store.
 Passing an example, a unit test or a configured CI job does not establish an installed
 customer product. This page describes how to interpret the existing checks; it adds no
 release gate implementation, transport, persistence or qualification claim.
@@ -16,9 +17,11 @@ release gate implementation, transport, persistence or qualification claim.
 | `verify_task_bundle` | Exact local inputs satisfy the task pins/budget and current supplied passport policy. | Freshness at use and independent authority; saved results do not expire themselves. |
 | `verify_federated_bundle` | The direct pinned federation table permits the statement under its selected peer row. | Provisioned domain aliases and pins; network identity, trust enrollment and floor persistence. |
 | `BoundedInbox` | Local quota/expiry accounting and opaque byte retention. | Authenticated peer aliases, trustworthy monotonic time and verification after dequeue. Closing does not revoke returned copies. |
+| `PolicyFloorStore` | Committed policy revision/digest and trusted-time floors on cooperating local storage. | Clock/pin authenticity, protected storage, independent detection of whole-store rollback, and fresh verification at use. |
 
-These are application values and checks, not unforgeable authorization tokens. P16
-does not fetch policy updates, persist rollback floors, provide durable synchronization,
+These are application values and checks, not unforgeable authorization tokens. The
+stateless verifiers do not persist floors; the separate [store](policy-floor-store-v1.md)
+requires explicit initialization and caller use. P16 does not fetch policy updates or provide durable synchronization,
 cancel work already taken by a consumer or sample a completion-time clock. Logical
 byte ceilings do not establish process-memory or worst-case execution-time bounds.
 
@@ -58,8 +61,9 @@ their own revisions and experiments; they do not automatically certify later HEA
 Source hashes establish listed-file byte identity only, not loaded-code identity,
 complete dependencies, signed release provenance or truth of the reported observations.
 
-Persistent provisioning/floors, remote transport and integrated runtime conformance
-remain unfinished P16 software. P17 command-platform, P18 physical/real-time and P19
+Provisioning, federation-floor persistence, independent whole-store rollback detection,
+remote transport and integrated runtime conformance remain unfinished P16 software.
+The local policy-floor helper does not close those gaps. P17 command-platform, P18 physical/real-time and P19
 installed-product/help acceptance are not established by these library checks. A
 similarly numbered phase-1 evidence file is not evidence for those later phase scopes.
 

@@ -8,6 +8,7 @@ recursive-include .github *.yml *.md
 include requirements-native.lock
 recursive-include aethron *.pxd
 include requirements-passports.txt
+include aethron/passport_floor_store.py
 include requirements-passport-conformance.txt
 recursive-include contracts/interop *.json
 include requirements-passport-sensor-conformance.txt

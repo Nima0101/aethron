@@ -11,6 +11,7 @@ from pathlib import Path
 MODULES = (
     "aethron.passports",
     "aethron.passport_evidence",
+    "aethron.passport_floor_store",
     "aethron.interop_tasks",
     "aethron.interop_bundles",
     "aethron.interop_federation",

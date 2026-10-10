@@ -123,6 +123,10 @@ persist a floor, detect same-revision equivocation across calls, or enroll trust
 Later consumers must use these exact policy bytes and recheck current time/floors.
 See the [decision and C4 boundary](../../engineering/reviews/p16-policy-admission-v3.md).
 
+The optional [local policy-floor store](policy-floor-store-v1.md) supplies explicit
+single-scope persistence for cooperating processes on protected local storage. It
+does not change these stateless APIs or establish trust in the clock, pin or storage.
+
 ## Validation and limits
 
 Use a published test-only signing seed; fixture keys are never deployment trust roots.
