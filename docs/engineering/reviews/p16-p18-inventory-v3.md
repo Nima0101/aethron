@@ -1,6 +1,6 @@
 # P16–P18 review inventory v3
 
-Snapshot: `202d952a3ec08d0d98f6866b78831fea4a8d1e09`, plus evidence metadata coverage, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `deba934f4f3dc745d2a4cdff31dbe4a068d3d3d2`, plus federation/inbox review, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -11,8 +11,10 @@ fixes a guard-sensitivity gap: 33 alias cases now detect removed canonical equal
 That review left runtime unchanged. The [current policy and persistence review](p16-floor-cleanup-current-v3.md)
 confirms pinned-policy admission and fixes the shared floor-store cleanup error boundary,
 including post-commit error semantics. The [evidence/task/bundle review](p16-evidence-metadata-current-v3.md)
-confirms runtime behavior and adds standalone evidence metadata checks. Next earliest
-unreviewed component in this restart: direct federation, followed by inbox accounting. Earlier rows below
+confirms runtime behavior and adds standalone evidence metadata checks. The
+[current federation/inbox review](p16-federation-inbox-recheck-v3.md) confirms direct
+federation, independent snapshot admission, inbox accounting and four delivery traces.
+Next earliest unreviewed group in this restart: schemas/conformance and assurance tooling. Earlier rows below
 remain evidence inputs and do not satisfy the remaining restart by themselves.
 
 The history of the owned runtime files starts with passport admission, then evidence,

@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "decision": "KEEP",
+  "limits": [
+    "No alternative implementation or benchmark executed; no language or scheduler performance ranking.",
+    "No network identity, execution authority, physical, hard-real-time, MLS/CNSA, availability or whole-lane qualification."
+  ],
+  "id": "p16-inbox-accounting-recheck-v3",
+  "component": "Process-local inbox quota, expiry, clock-fault and close accounting",
+  "constraints": [
+    "Synchronous producers/consumers; at most sixteen exact immutable payloads, 65536 bytes each and 1 MiB retained total, plus per-peer count bound. Reject incoming saturation without dropping older live entries.",
+    "Caller-monotonic safe-integer time, all-entry exclusive expiry, permanent close on clock fault. Explicit close clears queued references only; lock acquisition may block.",
+    "No transport or idle purge timer; no hard completion-time, fairness, RSS or shutdown-latency bound."
+  ],
+  "alternatives": [
+    "Python deque and one explicit lock for combined quota/expiry updates.",
+    "Rust crossbeam bounded channels plus a synchronized byte/peer/expiry ledger.",
+    "C#/F# bounded channels with explicit full behavior plus combined accounting.",
+    "Erlang/Elixir queue operations in a serialized process; filter can implement full-queue expiry, with explicit admission/backlog control."
+  ],
+  "rationale": [
+    "KEEP after twelve current methods including supervised concurrency, distinct admitted bytes, expiry behind a live head, clock faults and close limitations. No new mismatch found.",
+    "Count-bounded channels alone do not enforce aggregate bytes, peer quotas or expiry. Current single critical section covers all those predicates at fixed small count; immutable payloads retain identity without asynchronous staging.",
+    "OTP offers immutable queue/filter operations; a managed process adds a separate message-admission boundary. Native channels are credible for future native deployment, but no measured contention or target requirement establishes a material advantage here.",
+    "Changing exclusive expiry to inclusive expiry causes an existing assertion failure. This confirms selected test sensitivity, not a formal concurrency or hard-time proof."
+  ],
+  "evidence": [
+    "https://docs.python.org/3/library/threading.html#lock-objects",
+    "https://docs.python.org/3/library/collections.html#collections.deque",
+    "https://docs.rs/crossbeam-channel/latest/crossbeam_channel/fn.bounded.html",
+    "https://learn.microsoft.com/en-us/dotnet/core/extensions/channels",
+    "https://www.erlang.org/doc/apps/stdlib/queue.html"
+  ]
+}

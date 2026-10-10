@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "base_head": "deba934f4f3dc745d2a4cdff31dbe4a068d3d3d2",
+  "scope": "Direct federation, independent snapshot admission, inbox accounting and local delivery traces",
+  "runtime_changed": false,
+  "tests_changed": false,
+  "production_defect_demonstrated": false,
+  "decisions": {
+    "direct_federation": "KEEP",
+    "independent_snapshot_admission": "KEEP",
+    "inbox_accounting": "KEEP"
+  },
+  "checks": {
+    "focused_methods": 36,
+    "focused_failures": 0,
+    "focused_errors": 0,
+    "focused_skips": 0,
+    "adr_methods": 4,
+    "adr_skips": 0,
+    "ruff": "PASS",
+    "bandit": {
+      "exit_code": 1,
+      "low": 2,
+      "medium": 0,
+      "high": 0,
+      "production_findings": 0,
+      "notes": "Scanned two runtime modules and four test files with --ignore-nosec. Existing B404/B603 in fixed-code subprocess harness; no blanket exclusion."
+    }
+  },
+  "negative_controls": {
+    "peer_policy_pin": {
+      "baseline": {
+        "methods": 1,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      "weakened": {
+        "methods": 1,
+        "failures": 1,
+        "errors": 0,
+        "skips": 0
+      }
+    },
+    "snapshot_pin": {
+      "baseline": {
+        "methods": 1,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      "weakened": {
+        "methods": 1,
+        "failures": 1,
+        "errors": 0,
+        "skips": 0
+      }
+    },
+    "exclusive_expiry": {
+      "baseline": {
+        "methods": 1,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      "weakened": {
+        "methods": 1,
+        "failures": 1,
+        "errors": 0,
+        "skips": 0
+      }
+    }
+  },
+  "source_sha256": {
+    "aethron/interop_federation.py": "2ff7c09270d98a5b7a3aa0eea73981ea3a3f23f50381dc0b5f6b9ce04c4f7cd4",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "tests/test_interop_federation.py": "6dc97318721d6e634ec54abc1e95d245f06737401c35b6833714396acbf2958a",
+    "tests/test_interop_federation_policy.py": "452cc8feff782f8f3916b8c70a2cf3b82e9f386db63198aa86babb1ae865ce06",
+    "tests/test_interop_inbox.py": "12a4585bab47fd185f54dac18e80799fa25513032ac7965ff52c0f51ea945069",
+    "tests/test_interop_delivery.py": "451cd554b41cf592a96d3cff1b2209e6a1bb85101635aa98e3330fe4f234bebd",
+    "docs/architecture/interop/federation-v1.md": "c75ee949c57c0b51b0698c7853f9d802b94d65620323d97b0801dd84196ca651",
+    "docs/architecture/interop/federation-policy-v1.md": "6c1bf724731255e82a7e1678a03296574e1f303bdd3376a472683cc7aa869a80",
+    "docs/architecture/interop/inbox-v1.md": "bb6050d4ab9ddd222351a8a4bc212d8a27a9a22c140bf305bc79102d06454368",
+    "docs/decisions/p16-direct-federation-recheck-v3.json": "e60f21a7b6ac632067bfc20a244a4dee15ac130c252966d97947600a7fa45cda",
+    "docs/decisions/p16-federation-admission-recheck-v3.json": "30e09bd10509f79092d387936bb49deaa1e83b47796d7deb2a799be8a126155c",
+    "docs/decisions/p16-inbox-accounting-recheck-v3.json": "fe3fc5cee5ed5ce44b34426a8c2823dbe472193832efd6cae424f3cf96d6b767",
+    "docs/engineering/reviews/p16-federation-inbox-recheck-v3.md": "fa0f5e3a2ba62eda8a9797faeec0f062f82ef7ee82619ed7acbc402904f057d5",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "45ac8e3c2945931905c99756878cc458000f88a2aace933f86761881fe9ca695"
+  },
+  "runtime_log_sha256": {
+    "federation-inbox-current-focused.log": "c576fd9ab3ea1382234d81fe382e3be970e12b8ed14100b761b5127875eb528d",
+    "federation-inbox-current-negative.json": "dd82512374839454bb06628de2064e0cdde72abef36bc8a357a6cb480f7ccaf7",
+    "federation-inbox-current-adr.log": "9c679bd36b7a0388e3d0800651f3a85d387129dc1872f573bc6807967e8868f3",
+    "federation-inbox-current-bandit.json": "2de3c98c25594a10a1b5c4ac72f2ed7bf84265f238a952bf9064efe79b49f950",
+    "federation_inbox_current_probe.py": "9ac864f93f206940202d15e05a479502c9a0c4cd9cc7c3f819992588ac902876"
+  },
+  "commands": [
+    "PYTHONPATH=tests:. python -m unittest test_interop_federation test_interop_federation_policy test_interop_inbox test_interop_delivery -v",
+    "PYTHONPATH=tests:. python -m unittest test_passport_schemas.ArchitectureDecisionConformance -v",
+    "python -m ruff check aethron/interop_federation.py aethron/interop_inbox.py tests/test_interop_federation.py tests/test_interop_federation_policy.py tests/test_interop_inbox.py tests/test_interop_delivery.py",
+    "python -m bandit --ignore-nosec aethron/interop_federation.py aethron/interop_inbox.py tests/test_interop_federation.py tests/test_interop_federation_policy.py tests/test_interop_inbox.py tests/test_interop_delivery.py -f json"
+  ],
+  "limits": [
+    "Source tests and selected in-memory guard substitutions only; no exhaustive mutation, formal concurrency proof, new installed-distribution or hosted acceptance result.",
+    "Alternative technologies researched from official documentation, not executed or benchmarked; no performance superiority claim.",
+    "Hashes identify selected disk bytes only, not loaded-code attestation, atomic snapshots, dependency closure or signed provenance.",
+    "Stale supplied trust still authenticates; close cannot revoke returned copies; lock acquisition can block and no completion-time clock sample is taken.",
+    "No P16-P19 completion, physical, real-time, MLS/CNSA, availability or tactical qualification."
+  ]
+}
