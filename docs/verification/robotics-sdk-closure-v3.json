@@ -1,0 +1,205 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "891066a142798873ab9f343f1dd6569524372afb",
+  "component": "P3.1 passive diagnostic evidence: close from populated slots",
+  "decision": "FIX diagnostic evidence coverage; production technology decision PENDING",
+  "production_changed": false,
+  "source_sha256": {
+    "tests/mavlink/sdk_startup_probe_v3.py": "b48b2262cd51a90576495113e76408624242139fbdbb1b4720f26f28ddb88d80",
+    "tests/mavlink/test_sdk_startup_v3.py": "2a8ccbd6b279597dad1872ba8bbe827ab7ca268aa446bf9ef5c398e0991ba0b1",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "docs/verification/robotics-sdk-startup-v3.md": "5e53e18ff59495c302a940bdcf27f9741642fc47a075fe32ad007ec2a8f1a5d8",
+    "docs/architecture/robotics-review-v3.md": "1192587ff1c7719b86bc9ead31062f5b23cb2948c2be883c281206356e65baa1"
+  },
+  "records": [
+    {
+      "accepted_status": {
+        "perception_eligible": false,
+        "samples": [
+          {
+            "authenticated": false,
+            "capture_ns": null,
+            "evidence": "external_unverified",
+            "link_id": null,
+            "message": "ATTITUDE",
+            "signature_timestamp": null
+          },
+          {
+            "authenticated": false,
+            "capture_ns": null,
+            "evidence": "external_unverified",
+            "link_id": null,
+            "message": "LOCAL_POSITION_NED",
+            "signature_timestamp": null
+          }
+        ],
+        "state": "OBSERVED_UNVERIFIED"
+      },
+      "closed_reason": "closed",
+      "closure_status": {
+        "after_close": {
+          "perception_eligible": false,
+          "reason": "closed",
+          "samples": [],
+          "state": "UNKNOWN"
+        },
+        "after_readmission_attempt": {
+          "perception_eligible": false,
+          "reason": "closed",
+          "samples": [],
+          "state": "UNKNOWN"
+        },
+        "before_close_messages": [
+          "ATTITUDE",
+          "LOCAL_POSITION_NED"
+        ],
+        "before_close_state": "OBSERVED_UNVERIFIED"
+      },
+      "corrupt_reason": "invalid_packet",
+      "corrupt_samples": 0,
+      "corrupt_state": "UNKNOWN",
+      "crc_backend": "_x25crc_fast",
+      "fastcrc_loaded": true,
+      "initial_state": "UNKNOWN",
+      "isolated": true,
+      "lxml_loaded": false,
+      "messages": [
+        "ATTITUDE",
+        "LOCAL_POSITION_NED"
+      ],
+      "mode": "installed",
+      "module_sha256": {
+        "aethron_edge.telemetry.mavlink": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+        "fastcrc": "1d8336381f2c50570a7797d5af8e586b8f6814583eb120dc044e6cb4ab83a675",
+        "fastcrc.__info__": "18b1fab5f53c79c282ce2d6c7ec804c0fa4863ec65d983bc762ad5d1b25d27c1",
+        "fastcrc.crc16": "94f8acd3900533f7b0f9916a1cfef52dfe44ccfdaf78c795731e6a68276fde9f",
+        "fastcrc.crc32": "ff6837156182105966b10f2879ff42ca583bfcba4d281a57cfd5f3ffe6f3b37f",
+        "fastcrc.crc64": "86b02fd0a0826909758483d21e71da234dddefc9e70a67522564eec8b2497a1c",
+        "fastcrc.crc8": "a5a90b256eb0e09ec5902facd4f22755370accffc52f63e6e4014ca88caa3c02",
+        "fastcrc.fastcrc": "7a0e2b3d13c3cf21e211db63c91b5f2da4fc596e22e6b5987a4bc25059543c54",
+        "pymavlink": "8e990fcf3dabda06fcaa8c6abb0cb12c3f7683d78eccc8f2f52bd4cebce0ef23",
+        "pymavlink.dialects": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pymavlink.dialects.v20": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pymavlink.dialects.v20.common": "6c4dab96ad0faa3f3bb2796b3d62854eb02eb8e537315b82af773e9855d173a1"
+      },
+      "peak_rss_kib": 27420,
+      "perception_eligible": false,
+      "phase_ns": {
+        "adapter_import": 202746598,
+        "first_constructor": 228783067,
+        "second_constructor": 708822
+      },
+      "pymavlink_version": "2.4.50",
+      "python": "3.13.5",
+      "schema_version": 3
+    },
+    {
+      "accepted_status": {
+        "perception_eligible": false,
+        "samples": [
+          {
+            "authenticated": false,
+            "capture_ns": null,
+            "evidence": "external_unverified",
+            "link_id": null,
+            "message": "ATTITUDE",
+            "signature_timestamp": null
+          },
+          {
+            "authenticated": false,
+            "capture_ns": null,
+            "evidence": "external_unverified",
+            "link_id": null,
+            "message": "LOCAL_POSITION_NED",
+            "signature_timestamp": null
+          }
+        ],
+        "state": "OBSERVED_UNVERIFIED"
+      },
+      "closed_reason": "closed",
+      "closure_status": {
+        "after_close": {
+          "perception_eligible": false,
+          "reason": "closed",
+          "samples": [],
+          "state": "UNKNOWN"
+        },
+        "after_readmission_attempt": {
+          "perception_eligible": false,
+          "reason": "closed",
+          "samples": [],
+          "state": "UNKNOWN"
+        },
+        "before_close_messages": [
+          "ATTITUDE",
+          "LOCAL_POSITION_NED"
+        ],
+        "before_close_state": "OBSERVED_UNVERIFIED"
+      },
+      "corrupt_reason": "invalid_packet",
+      "corrupt_samples": 0,
+      "corrupt_state": "UNKNOWN",
+      "crc_backend": "_x25crc_slow",
+      "fastcrc_loaded": false,
+      "initial_state": "UNKNOWN",
+      "isolated": true,
+      "lxml_loaded": false,
+      "messages": [
+        "ATTITUDE",
+        "LOCAL_POSITION_NED"
+      ],
+      "mode": "blocked",
+      "module_sha256": {
+        "aethron_edge.telemetry.mavlink": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+        "pymavlink": "8e990fcf3dabda06fcaa8c6abb0cb12c3f7683d78eccc8f2f52bd4cebce0ef23",
+        "pymavlink.dialects": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pymavlink.dialects.v20": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pymavlink.dialects.v20.common": "6c4dab96ad0faa3f3bb2796b3d62854eb02eb8e537315b82af773e9855d173a1"
+      },
+      "peak_rss_kib": 26448,
+      "perception_eligible": false,
+      "phase_ns": {
+        "adapter_import": 160716347,
+        "first_constructor": 183688473,
+        "second_constructor": 983400
+      },
+      "pymavlink_version": "2.4.50",
+      "python": "3.13.5",
+      "schema_version": 3
+    }
+  ],
+  "checks": {
+    "command": "PYTHONPATH=integrations/edge:tests/mavlink .venv/bin/python -m unittest test_sdk_startup_v3 test_telemetry",
+    "red": {
+      "methods": 2,
+      "assertion_failures": 2,
+      "errors": 0,
+      "reason": "closure_status absent from schema-2 receipt; no production defect claimed"
+    },
+    "green": {
+      "methods": 14,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "seconds": 1.799
+    },
+    "ruff": "PASS",
+    "ruff_format": "PASS",
+    "bandit": "PASS"
+  },
+  "retained_file_sha256": {
+    "sdk-close-red.log": "849bb5461b11d8618c3199173c2789658423703c7c06c7745412849ef4e6f603",
+    "sdk-close-green.log": "3c1cf3f0f70c36d123b58d089cfcf8875fe6833d754cd32c5bd4c5530147098e",
+    "sdk-close-installed.stdout": "328cd3a152f9dccba4d15e38e689f9e3d2122f8f6f3034afa98754d69e7a31e9",
+    "sdk-close-installed.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-close-blocked.stdout": "e7526f482f3326288c38764c682860ffbf444d24c2718c85dafc6f3d552b419f",
+    "sdk-close-blocked.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "limitations": [
+    "Fixed unsigned synthetic packets and supplied constant clock only; no live transport",
+    "No physical kill-switch, shutdown, memory zeroization or caller-held snapshot erasure claim",
+    "No runtime ranking, timing guarantee or completed KEEP/MIGRATE review",
+    "Historical schema-2 evidence remains bound to 48de56cbd75954f3d4f790790cec807026e3a6b1",
+    "No actuation, weapon integration, cryptographic certification or customer qualification"
+  ]
+}

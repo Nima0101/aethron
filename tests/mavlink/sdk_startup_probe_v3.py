@@ -78,6 +78,25 @@ def probe(mode):
         first.close()
         closed_reason = first.snapshot().reason
 
+        # Exercise close with both slots populated, independently of the corrupt
+        # packet which already emptied the first receiver. Report actual states.
+        from dataclasses import asdict
+
+        second.ingest(attitude)
+        second.ingest(position)
+        before_close = second.snapshot()
+        second.close()
+        after_close = second.snapshot()
+        second.ingest(attitude)
+        second.ingest(position)
+        after_readmission = second.snapshot()
+        closure_status = {
+            "before_close_state": before_close.state,
+            "before_close_messages": [sample.message for sample in before_close.samples],
+            "after_close": asdict(after_close),
+            "after_readmission_attempt": asdict(after_readmission),
+        }
+
         # Hashing/metadata collection are outside all three timing intervals and
         # the RSS sample. Paths and arbitrary process modules are not exported.
         import hashlib
@@ -96,7 +115,7 @@ def probe(mode):
                     module_sha256[name] = hashlib.sha256(path.read_bytes()).hexdigest()
         common = sys.modules["pymavlink.dialects.v20.common"]
         return {
-            "schema_version": 2,
+            "schema_version": 3,
             "mode": mode,
             "isolated": bool(sys.flags.isolated),
             "python": sys.version.split()[0],
@@ -115,6 +134,7 @@ def probe(mode):
             "corrupt_samples": len(corrupt.samples),
             "perception_eligible": corrupt.perception_eligible,
             "closed_reason": closed_reason,
+            "closure_status": closure_status,
         }
     finally:
         for source in sources:

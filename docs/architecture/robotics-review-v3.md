@@ -672,3 +672,35 @@ the documentation and the focused existing checks; there is no invented RED
 result or newly discovered production defect. This documentation review does
 not advance the earliest component's PENDING technology decision or re-review
 the later signing/replay, worker, ROS, vendor or simulated-interface components.
+
+## Fresh earliest-component review: populated close evidence
+
+Restarted the owner review at the passive receiver on `891066a`, reading current
+policy, the safety/protocol/verification freezes, current source and prior receipts.
+FIX the installed diagnostic probe's evidence coverage: its earlier close check
+started from a receiver already emptied by corruption. Schema 3 now records close
+from two populated slots and an attempted readmission, using a separate receiver
+and real installed SDK in both CRC modes. Two RED assertions exposed the missing
+receipt field; all 14 focused methods then passed with no skips. The production
+receiver is unchanged. [Source-bound evidence](../verification/robotics-sdk-closure-v3.json)
+retains both isolated receipts and all incidental observations.
+
+The reviewed deployment constraints remain a bounded, optional Linux diagnostic
+with two unregistered message layouts, no transmitter and no perception authority.
+No target hardware, numerical startup/RAM budget, hard deadline or availability
+qualification has been supplied. The [current MAVLink generator catalog](https://mavlink.io/en/#language-generator-list)
+was revisited: C/C++, Rust, JavaScript, Python, Go, Kotlin and Clojure are serious
+domain candidates; their catalog entries alone do not prove this receiver's
+strict lifecycle/provenance behavior. Prior unequal prototype comparisons remain
+limited evidence, not a production KEEP or MIGRATE decision.
+
+This correction remains in the existing Python test probe because it observes
+the installed Python object's returned states. A C, Kotlin or JavaScript wrapper
+would still need to execute this object boundary to establish that behavior;
+replacing the receiver would test a different implementation. The
+[unittest assertion contract](https://docs.python.org/3/library/unittest.html#assert-methods)
+supports identity checks for false/null values alongside state/sample checks.
+This scoped test-tool choice is not a production language winner or a new adapter.
+The earliest component remains PENDING; signing/replay is the next later
+unreviewed component. No full audit marker, physical shutdown, weapon integration,
+real-time, MLS/CNSA or customer qualification follows from these diagnostics.

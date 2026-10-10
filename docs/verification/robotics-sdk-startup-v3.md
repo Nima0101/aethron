@@ -61,7 +61,7 @@ remained shared and filesystem caches uncontrolled. No readings are discarded
 and no timing threshold or runtime ranking is inferred. The initial run is
 historical evidence, not execution of the final probe bytes. The final probe
 bytes were captured before the six runs and checked unchanged afterward. Those
-source hashes identify the historical commit, not today's schema-2 probe.
+source hashes identify the historical commit, not today's schema-3 probe.
 
 The [schema-2 provenance results](robotics-sdk-provenance-v3.json) retain a fresh
 process in each mode, two RED assertions for the missing accepted-status field,
@@ -70,6 +70,21 @@ the original probe asserted message names and checked eligibility only after
 corruption. It did not directly test the accepted observations' provenance.
 No production defect or production-code change is claimed. The new raw receipts
 retain incidental timings without a comparison or performance conclusion.
+
+The [schema-3 closure results](robotics-sdk-closure-v3.json) correct a separate
+evidence gap. Earlier probes called close only after corrupt input had already
+emptied the first receiver, then exported its reason alone. That sequence did
+not demonstrate withdrawal of populated slots or refusal of later admission.
+The second receiver now accepts both fixed packets, closes, and receives the
+same packets again. `closure_status` records its populated precondition and
+the actual returned states after close and attempted readmission. Both must be
+empty UNKNOWN with reason `closed` and `perception_eligible=false`. The older
+`closed_reason` still describes the first receiver after corruption. Historical
+schema-1/2 receipts remain unchanged; schema 2 is bound to commit `48de56c`.
+This is informational-output lifecycle evidence only: no vehicle shutdown,
+remote kill-switch, memory zeroization or erasure of caller-held snapshots is
+demonstrated. The new checks run after all timing/RSS samples and do not alter
+their intervals. Incidental new timings are retained without ranking runtimes.
 
 The missing probe produced two RED test assertions. The completed probe and
 passive receiver tests pass with no Linux skips. The installed-source comparison

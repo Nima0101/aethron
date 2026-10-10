@@ -33,7 +33,19 @@ class SdkStartupTests(unittest.TestCase):
                 self.assertEqual(report["messages"], ["ATTITUDE", "LOCAL_POSITION_NED"])
                 self.assertIn("accepted_status", report)
                 accepted = report["accepted_status"]
-                self.assertEqual(report["schema_version"], 2)
+                self.assertIn("closure_status", report)
+                closure = report["closure_status"]
+                self.assertEqual(report["schema_version"], 3)
+                self.assertEqual(closure["before_close_state"], "OBSERVED_UNVERIFIED")
+                self.assertEqual(
+                    closure["before_close_messages"], ["ATTITUDE", "LOCAL_POSITION_NED"]
+                )
+                for stage in ("after_close", "after_readmission_attempt"):
+                    status = closure[stage]
+                    self.assertEqual(status["state"], "UNKNOWN")
+                    self.assertEqual(status["reason"], "closed")
+                    self.assertEqual(status["samples"], [])
+                    self.assertIs(status["perception_eligible"], False)
                 self.assertEqual(accepted["state"], "OBSERVED_UNVERIFIED")
                 self.assertIs(accepted["perception_eligible"], False)
                 self.assertEqual(
