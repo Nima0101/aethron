@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aethron:simulation:defensive:v1",
+  "title": "Simulation-only defensive recommendation v1",
+  "$comment": "Shape only. Enforce 2048-byte UTF-8 limit, depth 8, duplicate/nonfinite rejection, lexical integer tokens, time epoch and cross-field expiry/watermarks before admission. No physical evidence or motion authority.",
+  "$ref": "#/$defs/response",
+  "$defs": {
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "at_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254739992
+        },
+        "expires_at_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254739992
+        },
+        "evidence": {
+          "const": "synthetic"
+        },
+        "state": {
+          "enum": [
+            "PRESENT",
+            "UNKNOWN"
+          ]
+        },
+        "clock_domain": {
+          "const": "host_monotonic_ms"
+        }
+      },
+      "required": [
+        "version",
+        "at_ms",
+        "expires_at_ms",
+        "evidence",
+        "state",
+        "clock_domain"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "simulation_only": {
+          "const": true
+        },
+        "motion_authority": {
+          "const": false
+        },
+        "accepted": {
+          "type": "boolean"
+        },
+        "state": {
+          "enum": [
+            "PRESENT",
+            "UNKNOWN"
+          ]
+        },
+        "evidence": {
+          "enum": [
+            "synthetic",
+            null
+          ]
+        },
+        "at_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254739992
+        },
+        "expires_at_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254739992
+        },
+        "reasons": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 7,
+          "items": {
+            "enum": [
+              "invalid_input",
+              "invalid_clock",
+              "clock_regression",
+              "frame_regression",
+              "timestamp",
+              "acquisition_stalled",
+              "closed"
+            ]
+          }
+        },
+        "contract": {
+          "enum": [
+            "warn",
+            "vehicle_stop",
+            "drone_hover",
+            "drone_land",
+            "drone_retreat"
+          ]
+        },
+        "action": {
+          "enum": [
+            "WARN",
+            "STOP",
+            "HOVER",
+            "LAND",
+            "RETREAT"
+          ]
+        },
+        "reason": {
+          "const": "hazard_or_unknown"
+        },
+        "requires_independent_controller": {
+          "const": true
+        }
+      },
+      "required": [
+        "version",
+        "simulation_only",
+        "motion_authority",
+        "accepted",
+        "state",
+        "evidence",
+        "at_ms",
+        "expires_at_ms",
+        "reasons",
+        "contract",
+        "action",
+        "reason",
+        "requires_independent_controller"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "accepted": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidence": {
+                "const": "synthetic"
+              },
+              "reasons": {
+                "maxItems": 0
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "evidence": {
+                "type": "null"
+              },
+              "state": {
+                "const": "UNKNOWN"
+              },
+              "reasons": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "contract": {
+                "const": "warn"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "action": {
+                "const": "WARN"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "contract": {
+                "const": "vehicle_stop"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "action": {
+                "const": "STOP"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "contract": {
+                "const": "drone_hover"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "action": {
+                "const": "HOVER"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "contract": {
+                "const": "drone_land"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "action": {
+                "const": "LAND"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "contract": {
+                "const": "drone_retreat"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "action": {
+                "const": "RETREAT"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
