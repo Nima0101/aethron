@@ -9,7 +9,8 @@ const labels = {
 
 /** Host owns transport, authorization and refresh scheduling. Supply a fresh SDK
  * view reader and an exclusively owned root; no network, timers or storage here. */
-export function mountObservationPanel(root: HTMLElement, readView: () => unknown, locale: Locale = 'en') {
+export function mountObservationPanel(root: HTMLElement, readView: () => unknown, locale: Locale = 'en',
+  requestLocale?: (locale: Locale) => void) {
   // Reject unsupported locale before changing the host DOM or invoking its reader.
   presentObservation(null, locale);
   const document = root.ownerDocument;
@@ -34,7 +35,7 @@ export function mountObservationPanel(root: HTMLElement, readView: () => unknown
     const button = document.createElement('button');
     button.type = 'button'; button.lang = language;
     button.textContent = language === 'en' ? 'English' : 'Svenska';
-    const select = () => setLocale(language);
+    const select = () => { if (!disposed) (requestLocale ?? setLocale)(language); };
     button.addEventListener('click', select);
     controls.append(button);
     return {button, language, select};

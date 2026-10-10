@@ -20,7 +20,7 @@ async function bundle() {
 
 test('standalone ESM exports only the public observation and presentation boundary',async()=>{
   const module=await bundle();
-  assert.deepEqual(Object.keys(module).sort(),['Observation','createObservationSource','mountConnectionControls','mountObservationHost','mountObservationPanel','observe','presentObservation']);
+  assert.deepEqual(Object.keys(module).sort(),['Observation','createObservationSource','mountConnectionControls','mountObservationClient','mountObservationHost','mountObservationPanel','observe','presentObservation']);
   const result=module.presentObservation(new module.Observation().view(0),'en');
   assert.equal(result.state,'expired');
 });
@@ -204,4 +204,20 @@ test('bundled connection controls stay offline until explicit host-enabled start
  start.dispatchEvent(new DOMEvent('click'));assert.equal(calls,0);controls.setEnabled(true);start.dispatchEvent(new DOMEvent('click'));assert.equal(calls,1);
  stop.dispatchEvent(new DOMEvent('click'));assert.equal(signal.aborted,true);assert.equal(document.querySelector('[role=status]').getAttribute('data-state'),'stopping');
  finish();await new Promise(resolve=>setImmediate(resolve));assert.equal(document.querySelector('[role=status]').getAttribute('data-state'),'stopped');controls.dispose();assert.equal(document.querySelector('main').textContent,'');
+});
+
+test('standalone containing client shares locale and withdraws a stopped observation',async()=>{
+ const {mountObservationClient}=await bundle();const {document,Event:DOMEvent}=parseHTML('<main></main>');const window=new EventTarget();let tick,finish,signal;
+ Object.defineProperty(document,'defaultView',{value:window});Object.defineProperty(document,'visibilityState',{value:'visible'});
+ window.setInterval=callback=>{tick=callback;return 1;};window.clearInterval=()=>{};
+ const root=document.querySelector('main'),client=mountObservationClient(root,{
+  view:()=>({label:'delayed_observation',current_state:'UNKNOWN',observed_state:'PRESENT',sources:['lwir'],uncertainty:[[0.1,0.1]]}),
+  disconnect(){},start(value){signal=value;return new Promise(resolve=>finish=resolve);},
+ });
+ const click=selector=>root.querySelector(selector).dispatchEvent(new DOMEvent('click'));
+ try{
+  client.setEnabled(true);click('[data-feature="connection.start"]');tick();assert.ok(root.textContent.includes('lwir'));
+  click('button[lang="sv-SE"]');assert.deepEqual([...root.querySelectorAll('section')].map(n=>n.lang),['sv-SE','sv-SE']);assert.match(root.textContent,/Stoppa/);
+  click('[data-feature="connection.stop"]');assert.equal(signal.aborted,true);assert.ok(!root.textContent.includes('lwir'));finish();await new Promise(resolve=>setImmediate(resolve));
+ }finally{client.dispose();}
 });

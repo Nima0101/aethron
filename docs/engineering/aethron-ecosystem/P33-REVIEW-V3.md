@@ -1284,3 +1284,55 @@ reproduced every artifact byte. The manifest verifies ten compiled runtime input
 and four distributed artifacts. Syntax and diff checks pass. These are local
 software checks; the two earlier Chromium probe failures remain retained, and
 no native-browser or customer acceptance claim is added.
+
+## P12 containing client: one locale and explicit observation availability
+
+Baseline `56f0bdc7ee3832e2ed8c088ed412615df3fa4916`. The controller's commit,
+12 changed paths, noreply author/committer, 88 source hashes and seven report
+hashes were checked before publishing that baseline to PR 44. The source review
+restarted at the contract generator and admission, then read bounded wire/session
+parsing, Observation, shared transport, source ownership, presenter, panel,
+lifecycle, connection controls and the browser builder. No frozen schema or
+lease was changed. Forty-four focused generator/admission/wire/session/source
+checks pass on this baseline's unchanged SDK sources.
+
+| Component | Current decision and evidence boundary |
+| --- | --- |
+| Contract generator and standalone validators | KEEP ECMAScript generation and AJV standalone admission. Current official AJV standalone, Kotlin/JS and Dart interop references confirm runtime validation remains necessary across these alternatives. Generated drift and independent negative cases execute; no new runtime compiler or parallel schema definition is warranted. |
+| Bounded wire/session and observation ownership | KEEP native byte buffers and TypeScript/ECMAScript. Input byte/depth/numeric bounds, copied aggregate state and revocable fresh views remain exercised. ReScript/Kotlin/JS bindings would retain the same native byte/Fetch boundary; no material replacement is established. |
+| Transport and source lifetime | KEEP shared Fetch/AbortSignal implementation and single pending source. Review confirms fixed errors, redirect rejection, rechecked cancellation and independent best-effort cleanup. A callback that ignores cancellation remains an explicit host-contract limitation. |
+| Native presenter, panel, lifecycle and connection controls | KEEP synchronous native DOM boundary. FIX composition gap below. ReScript bindings, Elm ports and Lit lifecycle remain credible choices for broader applications; none removes the required synchronous source-withdrawal obligation at this small boundary. |
+| Browser packaging | KEEP pinned esbuild development-only bundling and closed runtime allowlist. Actual failed-build recovery, artifact hashes and no-string-code-generation import are checked. This is a browser component artifact, not a signed customer distribution. |
+
+Current official source refresh: [AJV standalone](https://ajv.js.org/standalone.html),
+[Kotlin/JS interop](https://kotlinlang.org/docs/js-to-kotlin-interop.html),
+[Dart interop](https://dart.dev/interop/js-interop/usage),
+[esbuild API](https://esbuild.github.io/api/), and the TypeScript/ReScript/Elm/Lit
+references in the closed [client ADR](../../../examples/operator/client-adr.json).
+These are interoperability/property comparisons, not cross-runtime speed rankings.
+No incumbent is retained on installed-tooling or familiarity grounds.
+
+The concrete gap: callers previously had to coordinate observation and connection
+locales and implement immediate display refresh on access withdrawal themselves.
+Eight missing-component assertions preceded `mountObservationClient`. The new
+composition owns one root, keeps both panels and help in the same locale, and
+reads a source only during an explicitly started enabled session. It revokes its
+local read gate before adapter cleanup and refreshes even if cleanup throws.
+Reentrant withdrawal cannot republish an older read; enabling again cannot revive
+an earlier observation. Three-argument panel/host consumers retain local language
+selection; an optional request callback supports the containing locale owner.
+
+Validation: 76 operator tests (including ten new client tests), 17 bundled tests
+with string code generation disabled, and 44 focused SDK tests pass with zero
+skips. Browser tests include byte-identical failed-build recovery. Eleven compiled
+runtime inputs produce one self-contained module plus licenses and unsigned hash
+manifest. TypeScript, JavaScript syntax and diff checks pass. The eight initial
+missing-component failures remain in the source-bound evidence. No native browser,
+physical or customer acceptance result is inferred from these checks.
+
+[Evidence](evidence/phase3/p12-client-integration-v1.json) binds current sources,
+logs and built artifact hashes. Full role-aware release-SHA help inventory/search,
+onboarding, accounts and independently installed product acceptance remain open;
+the next executable slice is the source-derived contextual help inventory. The
+producer whole-SSE-event boundary handoff and earlier negative evidence remain
+unchanged. No phase, lane, P19 or technology-audit completion marker is asserted.

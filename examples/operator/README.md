@@ -196,3 +196,42 @@ role-aware, release-SHA-bound P19 Help Center. Account workflows, actual browser
 keyboard/screen-reader acceptance and customer distribution remain unfinished.
 The [connection ADR](connection-adr.json) records the technology comparison and
 four architecture views; the bundle now admits ten explicit runtime modules.
+
+### One observation client view
+
+`mountObservationClient` composes the observation display, explicit connection
+controls and their bilingual contextual guidance into one owned root. It starts
+unavailable and reads no source until enabled **and** explicitly started. Its
+single language selector updates both panels; `setLocale` does the same.
+
+```js
+import {createObservationSource, mountObservationClient} from './browser-dist/aethron-observation.mjs';
+
+const source = createObservationSource();
+const client = mountObservationClient(document.querySelector('#observation-client'), {
+  view: () => source.view(),
+  disconnect: () => source.disconnect(),
+  start: signal => source.start(origin, token, profile, signal),
+}, 'en');
+// The containing application obtains origin/token/profile and enforces access.
+client.setEnabled(true); // Makes Start available; never starts automatically.
+// On logout/access loss, call client.setEnabled(false) before changing credentials.
+// On removal, call client.dispose(). A pending start remains gated through cleanup.
+```
+
+The adapter must exclusively own its source, honor the supplied signal, and settle
+`start` only after reception and cleanup. Stop, access loss and page suspension
+revoke the local view before invoking adapter cleanup. The display refresh runs
+even when cleanup throws, and failed cleanup disables further starts. Enabling
+again cannot revive old observations. This local gate does not replace host/service
+authorization and does not prove remote session deletion.
+
+For custom compositions, the optional fourth argument to `mountObservationPanel`
+and `mountObservationHost` is a locale-request callback. A button delegates to it;
+the containing owner must call `setLocale` to commit the selection. Without that
+argument the original local language selection remains unchanged.
+
+The component has no account UI, persistent state or complete release-bound help
+inventory. Full P19 search, onboarding, role coverage and independent installed
+browser/accessibility acceptance remain open. [Client decision](client-adr.json)
+and [scope](CLIENT-PLAN.md) describe this software boundary.

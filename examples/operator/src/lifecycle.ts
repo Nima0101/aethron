@@ -9,7 +9,8 @@ export interface ObservationSource {
 }
 
 /** Owns display scheduling only. The caller still owns ingress and authorization. */
-export function mountObservationHost(root: HTMLElement, source: ObservationSource, locale: Locale = 'en') {
+export function mountObservationHost(root: HTMLElement, source: ObservationSource, locale: Locale = 'en',
+  requestLocale?: (locale: Locale) => void) {
   presentObservation(null, locale); // Validate before mutating the host or source.
   const document = root.ownerDocument;
   const window = document.defaultView;
@@ -28,7 +29,7 @@ export function mountObservationHost(root: HTMLElement, source: ObservationSourc
     const ticket = epoch;
     const view = source.view();
     return disposed || !active || !visible() || epoch !== ticket ? expired() : view;
-  }, locale);
+  }, locale, requestLocale);
 
   function stopTimer(): void {
     const previous = timer; timer = undefined;
