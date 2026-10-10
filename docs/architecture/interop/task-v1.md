@@ -65,7 +65,8 @@ does not load the referenced bytes or validate their signatures. The existing
 trust against the caller's supplied policy snapshot. Consumers must supply trusted
 time and policy floors and apply their own authorization and replay policy. Repeating
 the same valid request succeeds again; there is no replay storage or exactly-once claim.
-The passport/evidence verifiers reject expired policy and revoked keys or statements
-listed in that policy. They do not discover a newer policy or independently revoke an
-evidence digest. Failed or unknown signed evidence outcomes remain metadata; binding
+The passport/evidence verifiers reject expired policy and entries in its `revoked_keys`,
+`revoked_passports` and `revoked_evidence` lists. They enforce those supplied lists;
+they do not discover a newer policy or decide which evidence should be revoked.
+Failed or unknown signed evidence outcomes remain metadata; binding
 bytes never converts them into a passed result or physical qualification.

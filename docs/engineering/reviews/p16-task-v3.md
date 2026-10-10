@@ -32,10 +32,16 @@ Preserve the v1 bytes for any later migration and require the same negative case
 ## Claim corrections and executable evidence
 
 The old prose incorrectly called the already-present bundle verifier a future consumer
-and suggested evidence revocation without specifying the actual key/statement policy
-lists. It also omitted that a saved successful result is just a snapshot: it does not
+and did not explain how evidence revocation depends on supplied policy. It also omitted
+that a saved successful result is just a snapshot: it does not
 expire itself, prevent replay, authenticate a caller or grant execution authority.
 Task IDs and digests are not privacy guarantees. The updated contract names these limits.
+
+Correction during the subsequent bundle review: the first version of this note named
+only key/statement revocation lists and was incomplete. `revoked_evidence` is implemented
+and enforced too. The task contract now names all three lists explicitly; the
+[bundle review](p16-bundle-v3.md) adds coverage for each list through both bundle kinds.
+The original task evidence record remains a historical record of its baseline bytes.
 
 Seven original task tests passed before changes. Three added tests check every public
 rejection reason for absent digest/expiry metadata and false authority, demonstrate

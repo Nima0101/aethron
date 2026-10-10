@@ -70,6 +70,10 @@ class TaskBundleTests(unittest.TestCase):
         )
         self.assertEqual(result.expires_at, 1700)
         self.assertEqual(result.policy_revision, 3)
+        self.assertEqual(
+            result.passport_sha256, digest(fixtures.fixtures.wire(self.fixture.signer.document))
+        )
+        self.assertNotEqual(result.passport_sha256, self.task["passport_sha256"])
         self.assertEqual(result, self.check(evidence=tuple(reversed(self.blobs))))
         for key in ("execution_authority", "motion_authority", "evidence_verified"):
             self.assertIs(dataclasses.asdict(result)[key], False)
@@ -148,6 +152,60 @@ class TaskBundleTests(unittest.TestCase):
         self.task["policy_sha256"] = digest(self.policy)
         self.assertEqual(self.check().expires_at, 1550)
         self.assertEqual(self.check(now_s=1550).reason, "passport_rejected")
+
+    def assert_rejected_without_metadata(self, result, reason):
+        self.assertEqual((result.status, result.reason), ("rejected", reason))
+        for name in ("task_sha256", "passport_sha256", "policy_revision", "expires_at"):
+            self.assertIsNone(getattr(result, name))
+        self.assertEqual(result.evidence, ())
+        for name in ("execution_authority", "motion_authority", "evidence_verified"):
+            self.assertIs(dataclasses.asdict(result)[name], False)
+
+    def test_all_revocation_lists_reject_both_kinds_after_positive_binding(self):
+        original = json.loads(self.policy)
+        revocations = {
+            "revoked_keys": original["keys"][0]["key_id"],
+            "revoked_passports": self.fixture.signer.document["passport_id"],
+            "revoked_evidence": self.task["evidence_sha256"][1],
+        }
+        for kind in ("evidence.bind.v1", "passport.verify.v1"):
+            if kind == "passport.verify.v1":
+                self.task.update(kind=kind, evidence_sha256=[], max_evidence_bytes=0)
+            blobs = self.blobs if kind == "evidence.bind.v1" else ()
+            for field, value in revocations.items():
+                with self.subTest(kind=kind, field=field):
+                    self.policy = fixtures.fixtures.wire(original)
+                    self.task["policy_sha256"] = digest(self.policy)
+                    self.assertEqual(self.check(evidence=blobs).status, "bound")
+                    self.policy = fixtures.fixtures.wire(dict(original, **{field: [value]}))
+                    self.task["policy_sha256"] = digest(self.policy)
+                    self.assert_rejected_without_metadata(
+                        self.check(evidence=blobs), "passport_rejected"
+                    )
+
+    def test_passport_expiry_caps_result_and_rejects_at_boundary(self):
+        self.fixture.signer.document["expires_at"] = 1600
+        self.envelope = self.fixture.signer.envelope()
+        self.task["passport_sha256"] = digest(self.envelope)
+        result = self.check(now_s=1599)
+        self.assertEqual((result.status, result.expires_at), ("bound", 1600))
+        self.assert_rejected_without_metadata(self.check(now_s=1600), "passport_rejected")
+
+    def test_late_digest_failure_discards_partial_result(self):
+        calls = 0
+
+        def failing_hash(raw):
+            nonlocal calls
+            calls += 1
+            if calls == 2 + len(self.blobs):
+                raise ValueError("private final blob")
+            return hashlib.sha256(raw)
+
+        with patch.object(interop_bundles, "sha256", side_effect=failing_hash):
+            result = self.check()
+        self.assertEqual(calls, 2 + len(self.blobs))
+        self.assert_rejected_without_metadata(result, "invalid_bundle")
+        self.assertNotIn("private final blob", repr(result))
 
     def test_passport_only_cannot_accept_evidence(self):
         self.task.update(kind="passport.verify.v1", evidence_sha256=[], max_evidence_bytes=0)
