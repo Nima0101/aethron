@@ -163,7 +163,7 @@ def decode_candidate(raw):
 def run(out):
     out.mkdir(parents=True, exist_ok=False)
     report = {
-        "audit_policy_version": 2,
+        "audit_policy_version": 3,
         "state": "failed",
         "decision": "PENDING",
         "scope": "fresh unsigned packet admission only; not lifecycle/signing parity",
@@ -175,6 +175,15 @@ def run(out):
         return _execute(command, timeout=timeout, out=out, label=label)
 
     try:
+        # Scoped repository sources, not an authenticated dependency attestation.
+        report["source_sha256"] = {
+            path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
+            for path in (
+                "scripts/robotics_wire_audit_v2.py",
+                "integrations/edge/aethron_edge/telemetry/mavlink.py",
+                "tests/mavlink/audit_v2/reference.c",
+            )
+        }
         if version("pymavlink") != "2.4.50":
             raise ValueError("unreviewed_sdk")
         xml = Path(common.__file__).with_suffix(".xml")

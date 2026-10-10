@@ -1,5 +1,6 @@
 """Native experiment ingress and negative evidence tests; no compiler download."""
 
+import hashlib
 import importlib.util
 import json
 import subprocess
@@ -11,6 +12,21 @@ from unittest.mock import patch
 
 
 class NativeAuditTests(unittest.TestCase):
+    def assert_source_receipt(self, report):
+        root = Path(__file__).resolve().parents[2]
+        paths = [
+            "scripts/robotics_native_audit_v2.py",
+            "integrations/edge/aethron_edge/telemetry/mavlink.py",
+            "tests/mavlink/audit_v2/native.rs",
+            "scripts/robotics_lifecycle_audit_v2.py",
+            "scripts/robotics_wire_audit_v2.py",
+        ]
+        expected = {path: hashlib.sha256((root / path).read_bytes()).hexdigest() for path in paths}
+        with self.subTest(field="source_sha256"):
+            self.assertEqual(report.get("source_sha256"), expected)
+        with self.subTest(field="audit_policy_version"):
+            self.assertEqual(report.get("audit_policy_version"), 3)
+
     def setUp(self):
         path = Path(__file__).resolve().parents[2] / "scripts/robotics_native_audit_v2.py"
         self.assertTrue(path.is_file(), "missing native lifecycle experiment")
@@ -154,6 +170,7 @@ class NativeAuditTests(unittest.TestCase):
                             if target is None:
                                 report = self.api.run(out)
                                 self.assertEqual(report["state"], "compared")
+                                self.assert_source_receipt(report)
                                 self.assertEqual(len(report["runs"]), 4)
                                 self.assertEqual(report["runs"][-1]["rust"]["peak_rss_kib"], 0)
                             else:
@@ -176,6 +193,7 @@ class NativeAuditTests(unittest.TestCase):
             self.assertEqual(result["state"], "failed")
             self.assertFalse(result["native_executed"])
             self.assertEqual(result["decision"], "PENDING")
+            self.assert_source_receipt(result)
             original = (out / "result.json").read_bytes()
             with self.assertRaises(FileExistsError):
                 self.api.run(out, compiler=missing)

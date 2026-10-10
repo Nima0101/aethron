@@ -208,8 +208,17 @@ def compare(cases):
 
 def run(out):
     out.mkdir(parents=True, exist_ok=False)
-    report = {"audit_policy_version": 2, "state": "failed", "decision": "PENDING"}
+    report = {"audit_policy_version": 3, "state": "failed", "decision": "PENDING"}
     try:
+        # Scoped repository sources, not an authenticated dependency attestation.
+        report["source_sha256"] = {
+            path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
+            for path in (
+                "scripts/robotics_lifecycle_audit_v2.py",
+                "integrations/edge/aethron_edge/telemetry/mavlink.py",
+                "tests/mavlink/audit_v2/managed.mjs",
+            )
+        }
         cases = corpus()
         expected = reference(cases)
         (out / "expected.json").write_text(json.dumps(expected) + "\n")

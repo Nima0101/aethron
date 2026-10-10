@@ -291,3 +291,41 @@ experiment was performed. Production and test source bytes are unchanged.
 This documentation correction narrows the claim; it does not select a runtime or
 complete the first-component review. A language-only speed comparison cannot
 establish the missing clock/deployment evidence.
+
+## Comparison source bindings and current review label
+
+FIX the three standalone comparison receipts: they still emitted
+`audit_policy_version: 2` during the current review and did not bind the production
+reference source. The native receipt also omitted the two Python helpers that
+produce its combined corpus and reference. Receipts now label the review as 3 and
+record a scoped `source_sha256` map before corpus generation or child execution.
+The C and JavaScript maps contain the harness, original candidate and production
+reference; the Rust map additionally contains both Python corpus helpers. Existing
+harness/driver/fixture digest fields remain compatible. The version in filenames
+identifies the historical experiment; it is not a completion marker.
+
+This correction uses the existing byte-digest mechanism; Python's
+[hashlib interface](https://docs.python.org/3/library/hashlib.html) accepts exact
+file bytes and emits hexadecimal SHA-256 digests. Requirements here are a small,
+portable JSON receipt and reproducible source identification, with no latency or
+hardware claim. A Git HEAD alone would omit working-copy differences; a detached
+shell hashing process would add process execution without identifying more inputs.
+Neither improves this narrow correction. This does not settle the open production
+language/runtime reassessment or introduce a new telemetry component.
+
+[Source-bound results](../verification/robotics-source-manifest-review-v3.json)
+retain 12 RED assertions and 31 passing focused methods, including source-map and
+review-version checks for successful and failed receipts in all three harnesses.
+Successful native receipt tests use controlled process results, not compilation.
+Actual local C normal/sanitized and managed comparisons succeeded; the native
+attempt failed because `rustc` is unavailable, and its failure receipt includes
+all five source bindings. A separate recheck verified 11 digest entries across
+those three new receipts. Host resource failures and the successful sequential
+retries remain recorded. Production, candidate and corpus behavior is unchanged.
+
+These maps identify selected repository bytes present when the run starts. They
+are not signed attestations, a complete dependency manifest, proof of loaded
+module origin, or protection against concurrent edits. Interpreter, SDK, compiler
+and host qualification remain separate. Historical reports are unchanged and do
+not acquire these bindings retroactively. No comparison winner, first-component
+completion or full V3 completion follows from this correction.

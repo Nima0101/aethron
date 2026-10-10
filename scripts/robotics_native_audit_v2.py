@@ -133,7 +133,7 @@ def child(command, cases, out, label):
 def run(out, *, compiler="rustc"):
     out.mkdir(parents=True, exist_ok=False)
     report = {
-        "audit_policy_version": 2,
+        "audit_policy_version": 3,
         "state": "failed",
         "decision": "PENDING",
         "native_executed": False,
@@ -142,6 +142,17 @@ def run(out, *, compiler="rustc"):
         "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     }
     try:
+        # Scoped repository sources, not an authenticated dependency attestation.
+        report["source_sha256"] = {
+            path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
+            for path in (
+                "scripts/robotics_native_audit_v2.py",
+                "integrations/edge/aethron_edge/telemetry/mavlink.py",
+                "tests/mavlink/audit_v2/native.rs",
+                "scripts/robotics_lifecycle_audit_v2.py",
+                "scripts/robotics_wire_audit_v2.py",
+            )
+        }
         api = lifecycle_api()
         cases = corpus()
         fixture = fixture_source(cases)

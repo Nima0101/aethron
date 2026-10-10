@@ -1,5 +1,6 @@
 """Executable managed-runtime parity experiment, with synthetic wire only."""
 
+import hashlib
 import importlib.util
 import json
 
@@ -13,6 +14,19 @@ from unittest.mock import patch
 
 
 class LifecycleAuditTests(unittest.TestCase):
+    def assert_source_receipt(self, report):
+        root = Path(__file__).resolve().parents[2]
+        paths = [
+            "scripts/robotics_lifecycle_audit_v2.py",
+            "integrations/edge/aethron_edge/telemetry/mavlink.py",
+            "tests/mavlink/audit_v2/managed.mjs",
+        ]
+        expected = {path: hashlib.sha256((root / path).read_bytes()).hexdigest() for path in paths}
+        with self.subTest(field="source_sha256"):
+            self.assertEqual(report.get("source_sha256"), expected)
+        with self.subTest(field="audit_policy_version"):
+            self.assertEqual(report.get("audit_policy_version"), 3)
+
     def setUp(self):
         path = Path(__file__).resolve().parents[2] / "scripts/robotics_lifecycle_audit_v2.py"
         self.assertTrue(path.is_file(), "missing managed lifecycle comparison")
@@ -76,6 +90,7 @@ class LifecycleAuditTests(unittest.TestCase):
             self.assertEqual(report["state"], "failed")
             self.assertEqual(report["failure_type"], "TimeoutExpired")
             self.assertEqual(report["failed_attempt"], "python-0")
+            self.assert_source_receipt(report)
 
     def test_run_retains_nonzero_exit_and_rejected_json_before_propagating(self):
         real_run = subprocess.run
@@ -136,6 +151,22 @@ class LifecycleAuditTests(unittest.TestCase):
                     report = json.loads((out / "result.json").read_text())
                     self.assertEqual(report["state"], "failed")
                     self.assertEqual(report["failed_attempt"], runtime + "-0")
+
+    def test_successful_receipt_binds_reference_and_driver_sources(self):
+        cases = self.api.corpus()[:1]
+        expected = self.api.reference(cases)
+
+        def child(*args, **kwargs):
+            return {"results": expected, "peak_rss_kib": 0, "runtime": "fixture-version"}, 1
+
+        with tempfile.TemporaryDirectory() as directory:
+            out = Path(directory) / "attempt"
+            with patch.object(self.api, "corpus", return_value=cases):
+                with patch.object(self.api, "_child", side_effect=child):
+                    report = self.api.run(out)
+            self.assertEqual(report["state"], "compared")
+            self.assert_source_receipt(report)
+            self.assertEqual(json.loads((out / "result.json").read_text()), report)
 
     def test_compare_checks_metadata_and_preserves_zero_rss(self):
         cases = self.api.corpus()[:1]

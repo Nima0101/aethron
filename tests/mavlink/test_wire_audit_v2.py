@@ -1,5 +1,6 @@
 """Bounded audit harness checks; no network, vehicle, or simulator access."""
 
+import hashlib
 import importlib.util
 import json
 
@@ -13,6 +14,19 @@ from unittest.mock import patch
 
 
 class WireAuditTests(unittest.TestCase):
+    def assert_source_receipt(self, report):
+        root = Path(__file__).resolve().parents[2]
+        paths = [
+            "scripts/robotics_wire_audit_v2.py",
+            "integrations/edge/aethron_edge/telemetry/mavlink.py",
+            "tests/mavlink/audit_v2/reference.c",
+        ]
+        expected = {path: hashlib.sha256((root / path).read_bytes()).hexdigest() for path in paths}
+        with self.subTest(field="source_sha256"):
+            self.assertEqual(report.get("source_sha256"), expected)
+        with self.subTest(field="audit_policy_version"):
+            self.assertEqual(report.get("audit_policy_version"), 3)
+
     def setUp(self):
         path = Path(__file__).resolve().parents[2] / "scripts/robotics_wire_audit_v2.py"
         self.assertTrue(path.is_file(), "missing executable technology comparison")
@@ -115,6 +129,7 @@ class WireAuditTests(unittest.TestCase):
             self.assertEqual(report["state"], "failed")
             self.assertEqual(report["failure_type"], "TimeoutExpired")
             self.assertEqual(report["failed_stage"], "compiler")
+            self.assert_source_receipt(report)
 
     def test_run_retains_real_nonzero_compiler_output(self):
         real_run = subprocess.run
@@ -211,6 +226,7 @@ class WireAuditTests(unittest.TestCase):
             self.assertEqual(report["state"], "compared")
             self.assertEqual(report["c"], benchmark)
             self.assertNotIn("failed_stage", report)
+            self.assert_source_receipt(report)
 
 
 if __name__ == "__main__":
