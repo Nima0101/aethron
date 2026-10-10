@@ -41,6 +41,46 @@ def check(raw, **updates):
 
 
 class TaskTests(unittest.TestCase):
+    def test_every_rejection_omits_admitted_metadata_and_authority(self):
+        raw = wire(document())
+        for arguments, reason in (
+            ({"expected_task_sha256": "f" * 64}, "task_mismatch"),
+            ({"expected_subject_sha256": "f" * 64}, "subject_mismatch"),
+            ({"now_s": 1300}, "task_not_current"),
+            ({"minimum_time_s": 1101}, "time_rollback"),
+            ({"expected_task_sha256": "invalid"}, "invalid_input"),
+        ):
+            with self.subTest(reason=reason):
+                result = check(raw, **arguments)
+                self.assertEqual((result.status, result.reason), ("rejected", reason))
+                self.assertIsNone(result.task_sha256)
+                self.assertIsNone(result.expires_at)
+                for field in ("execution_authority", "motion_authority", "evidence_verified"):
+                    self.assertIs(asdict(result)[field], False)
+
+    def test_canonicalization_is_not_freshness_or_pin_authentication(self):
+        raw = wire(document())
+        # Canonicalization has neither a trusted clock nor an authenticated pin.
+        self.assertEqual(canonicalize_task(raw), raw)
+        self.assertEqual(check(raw, now_s=1300).reason, "task_not_current")
+        changed = document()
+        changed.update(issued_at=1100, expires_at=1400)
+        replacement = canonicalize_task(wire(changed))
+        self.assertEqual(
+            check(replacement, expected_task_sha256=hashlib.sha256(raw).hexdigest()).reason,
+            "task_mismatch",
+        )
+
+    def test_result_is_snapshot_and_repeated_validation_is_not_replay_protection(self):
+        raw = wire(document())
+        first = check(raw)
+        self.assertEqual((first.status, first.expires_at), ("validated", 1300))
+        self.assertEqual(check(raw), first)
+        self.assertEqual(check(raw, now_s=1300).reason, "task_not_current")
+        # The saved object does not expire itself or become an execution token.
+        self.assertEqual(first.status, "validated")
+        self.assertIs(first.execution_authority, False)
+
     def test_portable_vectors(self):
         path = Path(__file__).resolve().parents[1] / "examples/interop/task-vectors-v1.json"
         for case in json.loads(path.read_bytes())["cases"]:
