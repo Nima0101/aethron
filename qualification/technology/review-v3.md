@@ -6,6 +6,9 @@ and includes the later CLI and audit-tool corrections accompanying this record.
 Earlier decisions are evidence inputs only. Review of the built components does
 not establish completion of all future qualification software or physical qualification.
 
+The [measurement lifecycle correction](#follow-up-measurement-lifecycle--2026-10-10)
+qualifies the older allocation results and corrects all three measurement drivers.
+
 | Historical component | Current review state |
 |---|---|
 | Rig, calibration, clock, environment declaration validator | KEEP implementation; FIX evidence coverage; CLARIFY claims |
@@ -389,3 +392,69 @@ has no wall-clock guarantee. Four new test methods retain eight negative asserti
 and a key-order/negative-zero positive control. See `document-fidelity-review-v3.json`
 for RED/GREEN, bypass-mutation and fresh Java composition evidence. No physical or
 production qualification follows.
+
+
+## Follow-up: measurement lifecycle — 2026-10-10
+
+The earliest declaration, artifact, campaign, command/comparison, reference and
+bundle boundaries were reread through `c91306d`; all 93 existing focused methods
+passed. The bundle CLI bridge and its twelve declared source hashes were verified.
+No new admission or physical-qualification defect was demonstrated in those APIs.
+Their bounded offline deployment constraints and component-specific KEEP decisions
+remain applicable. The review then found a measurement defect in `compare_ingress`,
+`measure_binding` and `compare_campaign`.
+
+An already-active process trace could include earlier allocations in each reported
+peak; each driver then stopped the caller's tracing. An exception from the measured
+function or peak reader left tracing active. Fresh processes may have avoided these
+conditions, but historical result files do not prove absence of external tracing.
+Those files remain unchanged and their allocation fields must not be treated as
+unconditionally isolated per-call measurements. Timing and allocation results were
+already descriptive, not acceptance thresholds or cross-runtime rankings.
+
+The actual measurement requirement is a finite Python-traced allocation peak around
+one call, excluding preconstructed input storage. It is not total resident memory,
+all native allocations, a leak detector, a steady-state distribution or a physical
+real-time bound. Options were reassessed against that scope:
+
+| Candidate | Metric and decisive limitation |
+|---|---|
+| CPython `tracemalloc` with explicit session ownership | Directly measures the declared Python allocation scope. Process-global state requires rejecting an existing trace and guaranteed cleanup of a newly started session. |
+| Unix `getrusage` / Python `resource` | Process resource statistics are useful for RSS qualification. They are not a resettable Python-allocation peak around a selected call and have platform-specific availability. |
+| C#/F# `Process.WorkingSet64` observer | Reports resident process pages, including shared pages; sampling needs refresh. This credible non-incumbent host measures a different quantity and does not replace Python allocation tracing. |
+| Memray | Tracks Python and native allocations for deeper profiling. Its richer instrumentation and output serve a broader requirement than this retained narrow field; a native-memory investigation should evaluate it separately. |
+| pyperf worker orchestration | Useful for controlled benchmark repetitions and process isolation. A sustained statistical benchmark is a separate workload; ten or twenty shared-host samples are not such a result. |
+
+**KEEP the declared Python tracing metric; FIX its lifecycle and current labels.**
+This decision preserves a precisely named observable rather than favoring an
+incumbent language or excluding native tools. A total-memory or target-hardware
+performance requirement would require a different protocol and measurements; it
+cannot be satisfied by relabeling this field. Primary sources consulted:
+[tracemalloc](https://docs.python.org/3.13/library/tracemalloc.html),
+[resource](https://docs.python.org/3.13/library/resource.html),
+[.NET working set](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.workingset64?view=net-9.0),
+[Memray overview](https://bloomberg.github.io/memray/overview.html), and
+[pyperf runner](https://pyperf.readthedocs.io/en/latest/runner.html).
+The suitability judgment is this review's analysis.
+
+Each measurement entry point now rejects pre-existing tracing before its workload
+or timing loop. Ingress export performs no measurement and remains available.
+The shared helper independently checks ownership before starting, stops its own
+trace in `finally` after success or callback/peak-reader failure, and never clears
+an existing caller trace. The synchronous tools require exclusive control of
+process tracing: this is not a lock or protection against another thread toggling
+tracing during execution. The measured window can include interpreter and harness
+allocations and excludes unregistered native allocations; it is not an RSS ceiling.
+
+All three generated reports now identify audit policy 3 and bind the shared helper
+in their source manifests. Four regression methods exercise all three drivers:
+caller trace preservation, failure during the measured call, peak-read failure,
+and successful current source/version metadata. The RED run retained twelve
+assertion failures and zero errors. Integration tests use synthetic ingress
+responses and do not establish Java execution or hardware qualification.
+
+After correction, all 97 focused qualification methods passed; the four lifecycle
+methods also passed under `python3 -O`. Ruff, formatting and targeted Bandit checks
+passed. Source bindings and retained RED counts are in
+[measurement-review-v3.json](measurement-review-v3.json). These checks establish
+software regression behavior, not hosted execution or physical qualification.

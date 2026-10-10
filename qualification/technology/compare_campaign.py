@@ -6,13 +6,13 @@ import json
 import platform
 import sqlite3
 import time
-import tracemalloc
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 from qualification.campaign import evaluate
 from qualification.technology import campaign_sql
+from qualification.technology.measurement import peak_bytes, require_untraced
 from qualification.tests.test_campaign import capture, plan_fixture
 from qualification.tests.test_campaign_audit import CampaignAuditTests
 from qualification.tests.test_evidence import encoded, fixture
@@ -23,6 +23,7 @@ def suite():
 
 
 def main():
+    require_untraced()
     stream = io.StringIO()
     runner = unittest.TextTestRunner(stream=stream)
     with patch.object(campaign_sql, "evaluate_sql", wraps=campaign_sql.evaluate_sql) as calls:
@@ -57,16 +58,13 @@ def main():
                 raise RuntimeError("campaign_maximum_parity_failed")
     allocations = {}
     for name, function in functions.items():
-        tracemalloc.start()
-        function(raw, rows)
-        _, allocations[name] = tracemalloc.get_traced_memory()
-        tracemalloc.stop()
+        allocations[name] = peak_bytes(function, raw, rows)
     root = Path(__file__).parents[2]
     print(
         json.dumps(
             {
                 "scope": "offline_campaign_aggregation_audit",
-                "audit_policy_version": 2,
+                "audit_policy_version": 3,
                 "python": platform.python_version(),
                 "sqlite": sqlite3.sqlite_version,
                 "test_methods": result.testsRun,
@@ -96,6 +94,7 @@ def main():
                         "qualification/tests/test_campaign_audit.py",
                         "qualification/technology/campaign_sql.py",
                         "qualification/technology/compare_campaign.py",
+                        "qualification/technology/measurement.py",
                     )
                 },
                 "physical_qualification_passed": False,

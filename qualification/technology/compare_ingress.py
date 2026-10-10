@@ -10,12 +10,12 @@ import io
 import json
 import platform
 import time
-import tracemalloc
 import unittest
 from pathlib import Path
 
 from aethron._json_bounds import check
 from qualification.evidence import _pairs, _parse_integer, validate
+from qualification.technology.measurement import peak_bytes, require_untraced
 from qualification.tests.test_evidence import EvidenceTests, encoded
 
 
@@ -92,6 +92,8 @@ def main():
     mode.add_argument("--export", action="store_true")
     mode.add_argument("--responses", type=Path)
     args = parser.parse_args()
+    if not args.export:
+        require_untraced()
     root = Path(__file__).parent
     vectors = json.loads((root / "ingress-vectors-v1.json").read_text())
     requests = [(bytes.fromhex(row["hex"]), 1050) for row in vectors] + collect()
@@ -132,12 +134,9 @@ def main():
         start = time.perf_counter_ns()
         validate(padded, now_ms=1050)
         samples.append(time.perf_counter_ns() - start)
-    tracemalloc.start()
-    validate(padded, now_ms=1050)
-    _, peak = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
+    peak = peak_bytes(validate, padded, now_ms=1050)
     report = {
-        "audit_policy_version": 2,
+        "audit_policy_version": 3,
         "scope": "Java ingress with unchanged Python semantic oracle; not a Java validator",
         "python": platform.python_version(),
         "ingress_cases": len(vectors),
@@ -160,6 +159,7 @@ def main():
             for path in (
                 root / "IngressProbe.java",
                 root / "compare_ingress.py",
+                root / "measurement.py",
                 root / "ingress-vectors-v1.json",
                 root.parent / "evidence.py",
                 root.parent.parent / "aethron/_json_bounds.py",

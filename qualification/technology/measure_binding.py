@@ -4,14 +4,15 @@ import hashlib
 import json
 import platform
 import time
-import tracemalloc
 from pathlib import Path
 
 from qualification.artifacts import verify
+from qualification.technology.measurement import peak_bytes, require_untraced
 from qualification.tests.test_evidence import encoded, fixture
 
 
 def main():
+    require_untraced()
     inputs = [bytes([value]) * 1048576 for value in range(4)]
     digests = [hashlib.sha256(value).hexdigest() for value in inputs]
     supplied = dict(zip(digests, inputs))
@@ -26,15 +27,13 @@ def main():
         samples.append(time.perf_counter_ns() - start)
         if not report["artifact_bytes_verified"] or report["physical_qualification_passed"]:
             raise RuntimeError("binding_measurement_failed")
-    tracemalloc.start()
-    verify(manifest, supplied, now_ms=1050)
-    _, peak = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
+    peak = peak_bytes(verify, manifest, supplied, now_ms=1050)
     root = Path(__file__).parents[2]
     print(
         json.dumps(
             {
                 "scope": "four_mib_production_artifact_binding",
+                "audit_policy_version": 3,
                 "python": platform.python_version(),
                 "hash_backend_module": type(hashlib.sha256()).__module__,
                 "four_mib_digests": digests,
@@ -51,6 +50,7 @@ def main():
                         "aethron/_json_bounds.py",
                         "qualification/tests/test_evidence.py",
                         "qualification/technology/measure_binding.py",
+                        "qualification/technology/measurement.py",
                     )
                 },
                 "physical_qualification_passed": False,
