@@ -7,19 +7,13 @@ key again; bind all immutable journal fields; reject expiry, rollback, stale
 revisions and missing signed provisioning permission. A competing floor writer
 must not advance between the final floor check and journal reservation.
 
-Select Python context-managed composition of the bounded private snapshot and
-SQLite writer transaction. A separate native service would introduce IPC and a
-second lifecycle without solving the cross-file commit boundary. Combining both
-records in one database would permit a single commit but requires a new storage
-schema and migration; this revision instead makes partial failures explicit and
-returns no claim unless both existing stores commit. No execution occurs within
-the transaction, so unresolved reservations safely block progress for recovery.
-
-Primary references: [SQLite transaction semantics](https://sqlite.org/lang_transaction.html)
-and [Python context manager exception semantics](https://docs.python.org/3/library/contextlib.html).
-`BEGIN IMMEDIATE` supplies writer serialization, while context exit commits or
-propagates failure. No throughput, wall-clock latency or physical durability
-qualification is inferred from those library contracts.
+The [V3 review](fleet-claim-review-v3.md) retains a synchronous Python adapter
+with native SQLite transactions after comparing Rust, C# and Erlang/Elixir
+alternatives. Native implementations need not use IPC. A single database could
+provide one commit, but would change the scope of the shared floor and per-plan
+stores; this API instead exposes partial outcomes and never promises cross-file
+atomicity. No runtime removes the need to check time after the last commit.
+There is no throughput, real-time or physical durability qualification.
 
 ## API
 
@@ -39,8 +33,10 @@ expected_revision, provisioning=False)` performs only synthetic/local bookkeepin
    rereads both floors and prepares their update. A higher competing floor rejects
    this claim. Under that lock, resample time and reserve the journal wave using
    its expected revision, then sample time again to reject post-reservation expiry.
-6. Commit floors when the guard exits. Return the slot tuple only after both
-   commits complete successfully.
+6. Commit floors when the guard exits. Then sample trusted time once more,
+   requiring a strict bounded integer no earlier than the post-reservation sample
+   and before exclusive expiry. Return slots only after this fifth sample passes.
+   This sample is checked, not persisted; both stores retain their earlier times.
 
 Lock order is floor writer, then journal writer. The floor database remains locked
 through journal commit, so ordinary floor writers cannot pass the final check and
@@ -55,15 +51,17 @@ its commit-before-return semantics.
 
 ## Failure and authority limits
 
-The stores still have separate commits. A journal reservation may commit before
-floor commit fails, before the final time sample expires, or before process exit.
-In these cases the gate returns no slots, the floor update rolls back, and the
-running journal slots remain unresolved. They must not be erased or automatically
-retried. A failed journal reservation rolls back the provisional floor update.
-Tests preserve and inspect both outcomes; no cross-file atomicity claim is made.
+The stores have separate commits. A journal reservation can commit before a
+pre-floor-commit time rejection or a floor commit failure; the uncommitted floor
+update rolls back while running journal slots remain. If the new final time
+check rejects **after floor commit**, both committed stores remain. A missing
+response or an error is not proof of rollback: inspect both stores and never
+clear reservations or lower floors to make a retry succeed. A failed journal
+reservation before its commit rolls back the provisional floor update. No
+cross-file atomicity or external exactly-once execution is claimed.
 
 Expected failures use `ValueError("invalid_fleet_claim")`. The caller owns trusted
-time, the protected pinned-key path and store locations. No external callback,
+time, the protected pinned-key path and store locations. No execution callback,
 installer, activation, transport, vehicle actuation or physical health assertion
 exists in this API. The return is a bounded reservation, not lasting execution
 authority: a real executor still needs its own operation capability, current trust
@@ -78,3 +76,11 @@ reservation, changed artifact/key, newer floors after verification, a competing
 writer during reservation, final floor commit failure, expiry before/after
 reservation, stale revisions, mismatched journal fields, same-version signed
 policy replacement, and positive/negative signed provisioning permission.
+
+The V3 correction adds the post-floor-commit sample. Three retained failing tests
+showed previously accepted late expiry, accepted clock exhaustion and a missing
+fifth observation. Fifteen claim tests now pass, with 49 focused claim/plan/floor
+tests in total. See [evidence](../verification/fleet-claim-review-v3.json). The
+changed-key test checks caller-selected trust, not a built-in revocation service.
+No MLS/CNSA, five-nines or tactical deployment qualification is established.
+Insufficient information for tactical deployment.

@@ -27,7 +27,7 @@ class FleetClaimTests(unittest.TestCase):
             clock=lambda: next(samples),
         )
 
-    def claim(self, times=(1003, 1004, 1005, 1006), **changes):
+    def claim(self, times=(1003, 1004, 1005, 1006, 1007), **changes):
         self.assertTrue(callable(getattr(fleet_plan, "claim_rollout_wave", None)))
         samples = iter(times)
         options = {
@@ -48,6 +48,37 @@ class FleetClaimTests(unittest.TestCase):
         self.assertEqual(self.claim(), (0, 1))
         self.assertEqual(self.plan.snapshot().states, ("running",) * 2 + ("pending",) * 8)
         self.assertEqual(self.store.read(), FleetFloors(3, 1004))
+
+    def test_expiry_after_floor_commit_returns_no_slots_and_preserves_both_stores(self):
+        self.reject((1996, 1997, 1998, 1999, 2000))
+        self.assertEqual(self.store.read(), FleetFloors(3, 1997))
+        self.assertEqual(self.plan.snapshot().revision, 1)
+        self.assertEqual(self.plan.snapshot().states[:2], ("running", "running"))
+
+    def test_missing_post_floor_commit_clock_returns_no_slots(self):
+        self.reject((1003, 1004, 1005, 1006))
+        self.assertEqual(self.store.read(), FleetFloors(3, 1004))
+        self.assertEqual(self.plan.snapshot().revision, 1)
+
+    def test_backward_post_floor_commit_time_preserves_both_stores(self):
+        self.reject((1003, 1004, 1005, 1006, 1005))
+        self.assertEqual(self.store.read(), FleetFloors(3, 1004))
+        self.assertEqual(self.plan.snapshot().revision, 1)
+
+    def test_final_clock_observes_committed_floor_and_journal(self):
+        samples = iter((1003, 1004, 1005, 1006, 1007))
+        observed = []
+
+        def clock():
+            now = next(samples)
+            observed.append(now)
+            if now == 1007:
+                self.assertEqual(FleetFloorStore(self.store.path).read(), FleetFloors(3, 1004))
+                self.assertEqual(fleet_plan.RolloutJournal(self.journal).snapshot().revision, 1)
+            return now
+
+        self.assertEqual(self.claim(clock=clock), (0, 1))
+        self.assertEqual(observed, [1003, 1004, 1005, 1006, 1007])
 
     def test_mutated_source_and_revoked_key_cannot_claim_existing_plan(self):
         (self.bundle / "fleet-artifact.bin").write_bytes(b"changed")
@@ -160,7 +191,7 @@ class FleetClaimTests(unittest.TestCase):
             floor_store=self.store,
             clock=lambda: next(samples),
         )
-        self.assertEqual(self.claim((1006, 1007, 1008, 1009), provisioning=True), (0, 1))
+        self.assertEqual(self.claim((1006, 1007, 1008, 1009, 1010), provisioning=True), (0, 1))
         self.assertEqual(self.plan.snapshot().revision, 1)
 
     def test_same_version_signed_policy_change_cannot_rebind_an_existing_plan(self):

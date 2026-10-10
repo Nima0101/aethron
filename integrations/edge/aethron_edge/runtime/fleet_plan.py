@@ -151,7 +151,10 @@ def claim_rollout_wave(
         ):
             claimed_at = _time(clock(), verified_at, policy.expires_unix_s - 1)
             slots = journal.claim(expected_revision=expected_revision, now_unix_s=claimed_at)
-            _time(clock(), claimed_at, policy.expires_unix_s - 1)
+            reserved_at = _time(clock(), claimed_at, policy.expires_unix_s - 1)
+        # Floor commit can block after the journal's final check. On late
+        # rejection preserve both committed stores and unresolved reservations.
+        _time(clock(), reserved_at, policy.expires_unix_s - 1)
         return slots
     except (OSError, ValueError, TypeError, RuntimeError, StopIteration):
         raise ValueError("invalid_fleet_claim") from None

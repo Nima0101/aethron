@@ -1,0 +1,41 @@
+{
+  "audit_policy_version": 3,
+  "component": "P3.4 signed local wave claim",
+  "reviewed_head": "8ca703399fc3494643a7b83edb1cae9147101746",
+  "decision": "KEEP synchronous native composition; FIX post-floor-commit time validation",
+  "production_change": true,
+  "required_migrations": [],
+  "source_sha256": {
+    "integrations/edge/aethron_edge/runtime/fleet_plan.py": "ed7c7dcc1ff1c16c25c00f8dc4242a86b8c883ac8e325e47b6f191fb3f9b769c",
+    "tests/integration/test_fleet_claim.py": "e942a6609dc788494bcb044129629a1f2898e24f85b6bba5e51c412611d01647"
+  },
+  "red": {
+    "tests": 3,
+    "failures": 3,
+    "errors": 0,
+    "elapsed_seconds": 0.615,
+    "observations": [
+      "Final expiry 2000 did not raise ValueError",
+      "Clock exhaustion after four samples did not raise ValueError",
+      "Observed [1003,1004,1005,1006], expected additional 1007"
+    ]
+  },
+  "green": {
+    "claim_methods": 15,
+    "plan_methods": 16,
+    "floor_methods": 18,
+    "total": 49,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_seconds": 11.109,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_production": "PASS; no findings"
+  },
+  "correction": "Save post-journal-commit sample; check strict monotonic nonexpired fifth sample after floor guard exits. Preserve both committed stores on late rejection.",
+  "limits": [
+    "Final sample not persisted; no lasting execution authority.",
+    "No cross-file atomicity, automatic retry or external execution.",
+    "No candidate speed benchmark, hardware timing or durability qualification."
+  ]
+}
