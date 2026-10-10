@@ -1,0 +1,236 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_commit": "401452e6240027dffe9c04e79fc44e6338cac6fc",
+  "component": "P4/P15 hosted verification scheduling",
+  "decision": "KEEP native Actions scheduling; FIX independent failure retention with prerequisite and cancellation gates",
+  "baseline_workflow_sha256": "26a7ddf1e88d60549290b9ceaaab2e952387c99199dd98ebd2f9576709ff214d",
+  "red_configuration_inspection": {
+    "scope": "static configuration audit against documented Actions semantics; not hosted execution",
+    "baseline": "401452e6240027dffe9c04e79fc44e6338cac6fc",
+    "issues": [
+      "contracts: sibling cancellation enabled",
+      "contracts: Exercise declaration review negative controls skipped after unrelated failure",
+      "contracts: Exercise artifact review negative controls skipped after unrelated failure",
+      "contracts: Exercise campaign review negative controls skipped after unrelated failure",
+      "contracts: Reproduce synthetic declaration report skipped after unrelated failure",
+      "contracts: Preserve expired calibration failure skipped after unrelated failure",
+      "contracts: Reproduce campaign coverage and rejected duplicate reports skipped after unrelated failure",
+      "static: ruff format --check qualification skipped after unrelated failure",
+      "static: bandit -r qualification -x qualification/tests skipped after unrelated failure",
+      "ingress-audit: Retain empty request rows and enforce transport budget skipped after unrelated failure",
+      "ingress-audit: Reproduce byte ownership and hash primitive comparison skipped after unrelated failure",
+      "ingress-audit: Check Node probe provenance and retained negatives skipped after unrelated failure",
+      "ingress-audit: Compare campaign aggregation and duplicate mutation skipped after unrelated failure"
+    ],
+    "issue_count": 13
+  },
+  "green_configuration_and_commands": {
+    "scope": "Local static config inspection plus trusted workflow commands; no hosted scheduling or cancellation execution",
+    "workflow_sha256": "9f91ebb3a968caa8cf747386375b40d7ca0d56d0216ecf9a1805a51ea3bab3d6",
+    "static_settings_checked": 13,
+    "conditional_steps": [
+      {
+        "job": "contracts",
+        "step": "Exercise declaration review negative controls",
+        "requires": "contract-runtime"
+      },
+      {
+        "job": "contracts",
+        "step": "Exercise artifact review negative controls",
+        "requires": "contract-runtime"
+      },
+      {
+        "job": "contracts",
+        "step": "Exercise campaign review negative controls",
+        "requires": "contract-runtime"
+      },
+      {
+        "job": "contracts",
+        "step": "Reproduce synthetic declaration report",
+        "requires": "contract-runtime"
+      },
+      {
+        "job": "contracts",
+        "step": "Preserve expired calibration failure",
+        "requires": "contract-runtime"
+      },
+      {
+        "job": "contracts",
+        "step": "Reproduce campaign coverage and rejected duplicate reports",
+        "requires": "contract-runtime"
+      },
+      {
+        "job": "static",
+        "step": "ruff format --check qualification",
+        "requires": "static-tools"
+      },
+      {
+        "job": "static",
+        "step": "bandit -r qualification -x qualification/tests",
+        "requires": "static-tools"
+      },
+      {
+        "job": "ingress-audit",
+        "step": "Reproduce byte ownership and hash primitive comparison",
+        "requires": "audit-inputs"
+      },
+      {
+        "job": "ingress-audit",
+        "step": "Check Node probe provenance and retained negatives",
+        "requires": "audit-inputs"
+      },
+      {
+        "job": "ingress-audit",
+        "step": "Compare campaign aggregation and duplicate mutation",
+        "requires": "audit-inputs"
+      },
+      {
+        "job": "ingress-audit",
+        "step": "Retain empty request rows and enforce transport budget",
+        "requires": "compiled-probe"
+      }
+    ],
+    "preserved": {
+      "job_timeouts_minutes": 5,
+      "no_continue_on_error": true,
+      "uploads_always": true
+    },
+    "command_execution": {
+      "injected_prior_exit": 7,
+      "commands": [
+        {
+          "step": "Exercise declaration review negative controls",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "step": "Exercise artifact review negative controls",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "step": "Exercise campaign review negative controls",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "step": "Reproduce synthetic declaration report",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "step": "Preserve expired calibration failure",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "step": "Reproduce campaign coverage and rejected duplicate reports",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "step": "Reproduce byte ownership and hash primitive comparison",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "step": "Check Node probe provenance and retained negatives",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "test_changed_corpus_prevents_parity_report (qualification.tests.node_provenance.NodeProvenanceTests.test_changed_corpus_prevents_parity_report) ... ok\ntest_changed_module_prevents_report (qualification.tests.node_provenance.NodeProvenanceTests.test_changed_module_prevents_report) ... ok\ntest_changed_vectors_prevent_report (qualification.tests.node_provenance.NodeProvenanceTests.test_changed_vectors_prevent_report) ... ok\ntest_each_measured_digest_must_match_before_output (qualification.tests.node_provenance.NodeProvenanceTests.test_each_measured_digest_must_match_before_output) ... ok\ntest_hash_probe_binds_source_without_changing_known_vectors (qualification.tests.node_provenance.NodeProvenanceTests.test_hash_probe_binds_source_without_changing_known_vectors) ... ok\ntest_ingress_binds_source_and_vectors_without_erasing_negatives (qualification.tests.node_provenance.NodeProvenanceTests.test_ingress_binds_source_and_vectors_without_erasing_negatives) ... ok\ntest_known_vector_failure_prevents_report (qualification.tests.node_provenance.NodeProvenanceTests.test_known_vector_failure_prevents_report) ... ok\ntest_removed_sources_prevent_report (qualification.tests.node_provenance.NodeProvenanceTests.test_removed_sources_prevent_report) ... ok\ntest_wrong_buffer_ownership_prevents_report (qualification.tests.node_provenance.NodeProvenanceTests.test_wrong_buffer_ownership_prevents_report) ... ok\n\n----------------------------------------------------------------------\nRan 9 tests in 24.776s\n\nOK\n"
+        },
+        {
+          "step": "Compare campaign aggregation and duplicate mutation",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "output_observations": {
+        "artifact-review-v3.json": {
+          "sha256": "60ae46feb23a03b41e5f54f0890a1aac98ce500e5cd04e43dc8c724ee704f9e4",
+          "bytes": 1480
+        },
+        "campaign-review-v3.json": {
+          "sha256": "d689a74d7a9ea5463b9447a22944cf42d67905e4beff21f4139c2df590e8dc4f",
+          "bytes": 1865
+        },
+        "declaration-review-v3.json": {
+          "sha256": "80e7a3bf69069c6a49f54b8c0743f71068faaddc88e7b58c6758763e7102cd2f",
+          "bytes": 1389
+        },
+        "expired.json": {
+          "sha256": "ebb63392fd6d48fdadd860091438f2181569fdcbf569130651b3e974b2981133",
+          "bytes": 393
+        },
+        "first.json": {
+          "sha256": "4351cfca35268ef684f16c6cd98f8de3a41e5020fa10479c7b760fd46b4c1f35",
+          "bytes": 370
+        },
+        "qualification-audit/binding-python.json": {
+          "sha256": "cf34ab6ab4aebc9ad7e9ec3084e75120b89af0f467961e19289d153ddded9477",
+          "bytes": 1959
+        },
+        "qualification-audit/campaign-comparison.json": {
+          "sha256": "79aab2f15dcbd4da357b903a7813823e11d417b89d652b94d9404578f851839c",
+          "bytes": 4541
+        },
+        "qualification-audit/hash-node.json": {
+          "sha256": "179655b41bb2a8955349b2295164ba5b783c2b9d7b3cae22903af934b3e69202",
+          "bytes": 1157
+        },
+        "qualification-audit/ingress-node.json": {
+          "sha256": "a266ee904fb898b45178e6568907b177e65f870d75fae75463f5ca9170a96b3e",
+          "bytes": 2790
+        },
+        "second.json": {
+          "sha256": "4351cfca35268ef684f16c6cd98f8de3a41e5020fa10479c7b760fd46b4c1f35",
+          "bytes": 370
+        }
+      }
+    },
+    "limits": [
+      "The local command driver deliberately continues after injected exit 7; it does not implement or test GitHub scheduling.",
+      "Static lint and documented expression analysis do not establish hosted PASS.",
+      "Java transport and static scanner commands were not executed by this bounded command driver."
+    ],
+    "physical_qualification_passed": false
+  },
+  "static": {
+    "actionlint": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "bandit": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "diff_check": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "ruff": "PASS; 81 files formatting checked",
+    "security_review": "Conditions add no untrusted interpolation, permissions, actions, commands or error suppression; artifact selection unchanged."
+  },
+  "source_sha256": {
+    ".github/workflows/aethron-qualification.yml": "9f91ebb3a968caa8cf747386375b40d7ca0d56d0216ecf9a1805a51ea3bab3d6",
+    "qualification/technology/workflow-failure-review-v3.md": "1aa74c26f8cc5e625889c463603391e132d4264352c9955d144fafdbb77a76dd",
+    "qualification/technology/review-v3.md": "74f1bb3df162b4394d82ca6df0af2db2fcf84f93fda7055b652d7aeb9d88c7c7"
+  },
+  "source_observation": "Working-copy bytes, not execution attestation; no hosted result established",
+  "physical_qualification_passed": false,
+  "product_acceptance_passed": false,
+  "full_reaudit_complete": false,
+  "next_review": "Close remaining source-bound P4/P15 review inventory before non-executing procedure-content implementation"
+}

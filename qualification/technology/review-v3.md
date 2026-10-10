@@ -45,6 +45,8 @@ checks all twenty timed results and the traced return against a complete fixed
 declaration report before publishing measurements.
 The [Node hash result correction](node-hash-results-v3.md) checks every measured
 digest, known vector and ownership result before publishing the primitive report.
+The [hosted failure retention correction](workflow-failure-review-v3.md) allows
+independent checks after failures while requiring preparation and respecting cancellation.
 
 The [measurement lifecycle correction](#follow-up-measurement-lifecycle--2026-10-10)
 qualifies the older allocation results and corrects all three measurement drivers.
