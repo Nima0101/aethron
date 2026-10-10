@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import math
 import platform
 import shutil
 
@@ -97,11 +98,36 @@ def retained_process(command, out, label, *, timeout, input_bytes=None):
     return completed, elapsed
 
 
+def unique_members(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate_json_member")
+        result[key] = value
+    return result
+
+
+def finite_number(token):
+    value = float(token)
+    if not math.isfinite(value):
+        raise ValueError("nonfinite_json_number")
+    return value
+
+
+def decode_candidate(raw):
+    return json.loads(
+        raw,
+        object_pairs_hook=unique_members,
+        parse_constant=finite_number,
+        parse_float=finite_number,
+    )
+
+
 def child(command, cases, out, label):
     completed, elapsed = retained_process(
         command, out, label, timeout=10, input_bytes=json.dumps(cases).encode("utf-8")
     )
-    return json.loads(completed.stdout), elapsed
+    return decode_candidate(completed.stdout), elapsed
 
 
 def run(out, *, compiler="rustc"):

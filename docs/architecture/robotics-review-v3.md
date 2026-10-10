@@ -46,3 +46,34 @@ has no locally executed qualification; its presence in CI is not a passing resul
 No hard-real-time, CNSA/MLS, availability, tactical deployment or hardware claim is
 established here. The audit cursor remains at the first component until its
 remaining evidence and technology questions are resolved.
+
+## Hosted evidence inspection and JSON admission correction
+
+The completed passive-wire job at `52509c7` supplied artifact `11655342381`.
+The [retained review](../verification/robotics-native-hosted-review-v3.json) binds
+its archive digest, workflow run, recorded source hashes and reproduced corpus /
+fixture hashes. All eight Python/Rust output logs were independently decoded and
+compared again against the production reference for 33 cases / 65 transitions.
+The Rust checked and optimized profiles executed successfully on that hosted
+runner. This supersedes any inference that the prototype had never executed;
+it does not imply local Rust compilation or current-head hosted qualification.
+
+The original JSON loader could silently discard repeated object members and
+accept NaN/Infinity in metadata. This weakened the claim that candidate output
+was faithfully checked. Four negative subprocess cases reproduced that gap.
+The loader now rejects repeated members at every object depth and non-finite
+numbers, including exponent overflow. Exact rejected stdout remains in the
+failure logs. A positive case preserves boolean authority, decimal-string clocks
+and binary32 values promoted to JSON numbers. Nine focused harness tests pass.
+The repair uses Python's documented
+[object-pair and number hooks](https://docs.python.org/3/library/json.html#standard-compliance-and-interoperability);
+it introduces no new production runtime or transport.
+
+Hosted timings and RSS remain in the original result with their limitations.
+The native candidate embeds fixture inputs, fixes the sender tuple, omits signed
+replay and packaging, and uses a finite integer-clock domain. Python imports the
+full SDK and reads JSON input. These are different deployment envelopes, so this
+review does not turn the comparison into a production speedup, hard-real-time
+claim or unconditional language ranking. No production adapter was changed.
+The first-component technology decision and later-component V3 reviews remain
+open; no completion marker is justified.

@@ -86,6 +86,38 @@ class NativeAuditTests(unittest.TestCase):
             self.assertEqual(report["failure_type"], "CalledProcessError")
             self.assertFalse(report["native_executed"])
 
+    def test_candidate_json_cannot_hide_duplicate_members_or_nonfinite_numbers(self):
+        for label, payload, reason in (
+            ("duplicate", '{"results": [], "results": [1]}', "duplicate_json_member"),
+            (
+                "nested",
+                '{"results": [{"perception_eligible": true, "perception_eligible": false}]}',
+                "duplicate_json_member",
+            ),
+            ("nan", '{"results": [], "peak_rss_kib": NaN}', "nonfinite_json_number"),
+            ("overflow", '{"results": [], "peak_rss_kib": 1e999}', "nonfinite_json_number"),
+            ("infinity", '{"results": [], "peak_rss_kib": Infinity}', "nonfinite_json_number"),
+        ):
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as directory:
+                out = Path(directory)
+                with self.assertRaisesRegex(ValueError, reason):
+                    self.api.child(
+                        [sys.executable, "-c", "import sys; print(sys.argv[1])", payload],
+                        [],
+                        out,
+                        label,
+                    )
+                self.assertEqual((out / f"{label}-stdout.log").read_text(), payload + "\n")
+
+    def test_candidate_json_preserves_valid_types_and_fractional_values(self):
+        value = self.api.decode_candidate(
+            b'{"results": [{"perception_eligible": false, "receive_ns": "9007199254740993", "values": [0.10000000149011612]}], "peak_rss_kib": 42}'
+        )
+        self.assertIs(value["results"][0]["perception_eligible"], False)
+        self.assertEqual(value["results"][0]["receive_ns"], "9007199254740993")
+        self.assertEqual(value["results"][0]["values"], [0.10000000149011612])
+        self.assertIs(type(value["peak_rss_kib"]), int)
+
     def test_missing_compiler_is_failure_with_retained_receipt(self):
         with tempfile.TemporaryDirectory() as directory:
             out = Path(directory) / "attempt"
