@@ -1,6 +1,5 @@
 """Fresh bounded declaration review, including negative-finding mutations."""
 
-import hashlib
 import io
 import json
 import platform
@@ -9,6 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from qualification import evidence
+from qualification.technology.source_snapshot import capture, verify
 from qualification.tests.test_declaration_review import DeclarationReviewTests
 
 
@@ -18,6 +18,18 @@ def run_tests():
 
 
 def main():
+    root = Path(__file__).parents[2]
+    sources = capture(
+        root,
+        (
+            "aethron/_json_bounds.py",
+            "qualification/evidence.py",
+            "qualification/tests/test_evidence.py",
+            "qualification/tests/test_declaration_review.py",
+            "qualification/technology/review_declarations.py",
+            "qualification/technology/source_snapshot.py",
+        ),
+    )
     baseline = run_tests()
     if (
         not baseline.wasSuccessful()
@@ -57,7 +69,7 @@ def main():
         or restored.expectedFailures
     ):
         raise RuntimeError("declaration_review_restore_failed")
-    root = Path(__file__).parents[2]
+    verify(root, sources)
     print(
         json.dumps(
             {
@@ -70,16 +82,8 @@ def main():
                 "restored_baseline_passed": True,
                 "scope": "synthetic offline declarations; not live admission or authentication",
                 "physical_qualification_passed": False,
-                "source_sha256": {
-                    name: hashlib.sha256((root / name).read_bytes()).hexdigest()
-                    for name in (
-                        "aethron/_json_bounds.py",
-                        "qualification/evidence.py",
-                        "qualification/tests/test_evidence.py",
-                        "qualification/tests/test_declaration_review.py",
-                        "qualification/technology/review_declarations.py",
-                    )
-                },
+                "source_sha256": sources,
+                "source_observation": "equal_before_and_after_controls",
             },
             indent=2,
         )

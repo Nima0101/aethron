@@ -10,6 +10,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from qualification import artifacts
+from qualification.technology.source_snapshot import capture, verify
 from qualification.tests.test_artifact_review import ArtifactReviewTests
 from qualification.tests.test_artifacts import ABC
 
@@ -24,6 +25,20 @@ def run_tests(name=None):
 
 
 def main():
+    root = Path(__file__).parents[2]
+    sources = capture(
+        root,
+        (
+            "qualification/artifacts.py",
+            "qualification/evidence.py",
+            "aethron/_json_bounds.py",
+            "qualification/tests/test_evidence.py",
+            "qualification/tests/test_artifacts.py",
+            "qualification/tests/test_artifact_review.py",
+            "qualification/technology/review_artifacts.py",
+            "qualification/technology/source_snapshot.py",
+        ),
+    )
     baseline = run_tests()
     if (
         not baseline.wasSuccessful()
@@ -82,7 +97,7 @@ def main():
         or restored.expectedFailures
     ):
         raise RuntimeError("artifact_review_restore_failed")
-    root = Path(__file__).parents[2]
+    verify(root, sources)
     print(
         json.dumps(
             {
@@ -95,18 +110,8 @@ def main():
                 "mutations": mutations,
                 "restored_baseline_passed": True,
                 "physical_qualification_passed": False,
-                "source_sha256": {
-                    name: hashlib.sha256((root / name).read_bytes()).hexdigest()
-                    for name in (
-                        "qualification/artifacts.py",
-                        "qualification/evidence.py",
-                        "aethron/_json_bounds.py",
-                        "qualification/tests/test_evidence.py",
-                        "qualification/tests/test_artifacts.py",
-                        "qualification/tests/test_artifact_review.py",
-                        "qualification/technology/review_artifacts.py",
-                    )
-                },
+                "source_sha256": sources,
+                "source_observation": "equal_before_and_after_controls",
             },
             indent=2,
         )

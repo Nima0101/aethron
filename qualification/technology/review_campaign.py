@@ -1,6 +1,5 @@
 """Finite campaign aggregation controls; no physical qualification."""
 
-import hashlib
 import io
 import json
 import platform
@@ -12,6 +11,7 @@ from unittest.mock import patch
 
 from qualification import campaign
 from qualification.technology import campaign_sql
+from qualification.technology.source_snapshot import capture, verify
 from qualification.tests.test_campaign_review import CampaignReviewTests
 
 
@@ -22,6 +22,21 @@ def run_tests():
 
 
 def main():
+    root = Path(__file__).parents[2]
+    sources = capture(
+        root,
+        (
+            "aethron/_json_bounds.py",
+            "qualification/evidence.py",
+            "qualification/campaign.py",
+            "qualification/technology/campaign_sql.py",
+            "qualification/tests/test_evidence.py",
+            "qualification/tests/test_campaign.py",
+            "qualification/tests/test_campaign_review.py",
+            "qualification/technology/review_campaign.py",
+            "qualification/technology/source_snapshot.py",
+        ),
+    )
     baseline = run_tests()
     if (
         not baseline.wasSuccessful()
@@ -72,7 +87,7 @@ def main():
         or restored.expectedFailures
     ):
         raise RuntimeError("campaign_review_restore_failed")
-    root = Path(__file__).parents[2]
+    verify(root, sources)
     print(
         json.dumps(
             {
@@ -90,19 +105,8 @@ def main():
                     "No authenticated preregistration, clock, procedure or domain evidence.",
                 ],
                 "physical_qualification_passed": False,
-                "source_sha256": {
-                    name: hashlib.sha256((root / name).read_bytes()).hexdigest()
-                    for name in (
-                        "aethron/_json_bounds.py",
-                        "qualification/evidence.py",
-                        "qualification/campaign.py",
-                        "qualification/technology/campaign_sql.py",
-                        "qualification/tests/test_evidence.py",
-                        "qualification/tests/test_campaign.py",
-                        "qualification/tests/test_campaign_review.py",
-                        "qualification/technology/review_campaign.py",
-                    )
-                },
+                "source_sha256": sources,
+                "source_observation": "equal_before_and_after_controls",
             },
             indent=2,
         )

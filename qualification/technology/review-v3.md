@@ -6,6 +6,10 @@ and includes the later CLI and audit-tool corrections accompanying this record.
 Earlier decisions are evidence inputs only. Review of the built components does
 not establish completion of all future qualification software or physical qualification.
 
+The [source observation correction](source-observation-v3.md) brackets the three
+review drivers with before/after file checks and qualifies historical source-hash
+claims. Source hashes alone are not proof of executed code.
+
 The [measurement lifecycle correction](#follow-up-measurement-lifecycle--2026-10-10)
 qualifies the older allocation results and corrects all three measurement drivers.
 
