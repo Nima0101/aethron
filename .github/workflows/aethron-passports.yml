@@ -8,6 +8,7 @@ on:
       - 'examples/interop/**'
       - 'aethron/_json_bounds*'
       - 'tests/test_passport*.py'
+      - 'scripts/passport_install_check.py'
       - 'examples/passports/**'
       - 'contracts/interop/**'
       - 'pyproject.toml'
@@ -23,6 +24,7 @@ on:
       - 'examples/interop/**'
       - 'aethron/_json_bounds*'
       - 'tests/test_passport*.py'
+      - 'scripts/passport_install_check.py'
       - 'examples/passports/**'
       - 'contracts/interop/**'
       - 'pyproject.toml'
@@ -59,6 +61,8 @@ jobs:
       - run: python -m pip install -c requirements-passports.txt '.[passports]'
       # The import assertion prevents optional-backend skips from masquerading as a pass.
       - run: python -c "from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey"
+      - name: Bind installed P16 modules to reviewed source
+        run: python -I scripts/passport_install_check.py
       - run: python -m unittest discover -s tests -p 'test_passport*.py' -v
       - run: python -m unittest discover -s tests -p 'test_interop*.py' -v
       - name: Verify installed package with source imports disabled

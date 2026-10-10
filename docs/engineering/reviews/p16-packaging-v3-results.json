@@ -1,0 +1,56 @@
+{
+  "review_order_version": 3,
+  "baseline_head": "74931e5a9dd58f6113a6dbe6f76aeab64ebab02d",
+  "component": "P16 installed-package evidence",
+  "decision": "KEEP standard wheel packaging; FIX installed-source evidence gap",
+  "runtime_modules_changed": false,
+  "checks": {
+    "red_negative_controls": 4,
+    "green_checker_tests": 5,
+    "isolated_passport_tests": 46,
+    "isolated_interop_tests": 43,
+    "isolated_file_comparisons": 7,
+    "nonisolated_cli": "expected rejection, exit 1",
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_checker": "PASS",
+    "actionlint": "PASS",
+    "diff": "PASS"
+  },
+  "wheel": {
+    "name": "aethron-0.2.0-py3-none-any.whl",
+    "bytes": 76868,
+    "sha256": "58bc307df8bc13d8c6225d7da0a80fdd2dcf690e4d7cece54d310a0683a54e04",
+    "build": "pip wheel --no-index --no-deps --no-build-isolation",
+    "install": "existing lane test environment; no-index/no-deps; not a clean-environment test"
+  },
+  "retained_negative_evidence": [
+    "Four initial assertion failures against empty checker; zero test errors.",
+    "Non-isolated CLI rejected.",
+    "Initial meson-python documentation URL failed; official mesonbuild.com documentation read instead.",
+    "pip reported unwritable shared cache and disabled it; build and installation succeeded."
+  ],
+  "source_sha256": {
+    ".github/workflows/aethron-passports.yml": "c7a062fa447c605d12db6adeffc045132b64d41e16acdecc3b374779102c2a64",
+    "scripts/passport_install_check.py": "3076a99f15db9b7d2065ef998c4bd09a553f2bda830c412ed96eb17075a03cc2",
+    "tests/test_passport_install_check.py": "60f108baab71fd89bed62420abf7d3478de4cbe1006674b4970b086c1349e0fd",
+    "docs/engineering/reviews/p16-packaging-v3.md": "3cf6d131ad4a03e12ed3e7eb868fb68b5362270dd1ada0b4f0805b6caaac5192",
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "pyproject.toml": "c5e3d4d7dd65acd3d3c04baf7f53b49b5ef99db6231fa610f1e144f17eec4b0e"
+  },
+  "limits": [
+    "No publisher authentication or whole-distribution attestation.",
+    "No loaded-bytecode or transitive-dependency identity claim.",
+    "No hostile-artifact sandbox; imports execute code.",
+    "No reproducibility, clean clone or fresh-environment qualification.",
+    "No hosted macOS/Windows result.",
+    "No physical, real-time, MLS, CNSA or availability qualification."
+  ],
+  "next_component": "Remaining P16/P17/P18 inventory and qualification claims"
+}
