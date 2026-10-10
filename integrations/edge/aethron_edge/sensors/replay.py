@@ -98,7 +98,12 @@ def _object(pairs):
 
 
 def read_frames(stream: BinaryIO):
-    """Yield validated raw frames; retain at most one record, never replay as live."""
+    """Yield individually validated recorded frames; callers own total stream limits.
+
+    A yielded prefix does not certify the unread suffix. Generator locals and
+    caller-held frames may retain payload bytes while the next record is read.
+    This function neither closes the caller stream nor imposes an I/O deadline.
+    """
     previous = None
     while (prefix := _read(stream, 4, allow_eof=True)) is not None:
         size = struct.unpack(">I", prefix)[0]

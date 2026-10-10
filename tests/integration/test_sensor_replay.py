@@ -112,6 +112,21 @@ class SensorReplay(unittest.TestCase):
         self.assertFalse(frames[0].live_evidence)
         self.assertEqual(list(self.api().read_frames(io.BytesIO())), [])
 
+    def test_valid_prefix_is_not_whole_recording_or_live_certification(self):
+        for suffix in (self.packet(sequence=2)[:-1], self.packet(sequence=2)[:-1] + b"X"):
+            with self.subTest(suffix_size=len(suffix)):
+                stream = io.BytesIO(self.packet() + suffix)
+                frames = self.api().read_frames(stream)
+                first = next(frames)
+                self.assertEqual(first.header.sequence, 1)
+                self.assertIs(first.live_evidence, False)
+                with self.assertRaises(ValueError):
+                    next(frames)
+                self.assertIs(first.live_evidence, False)
+                frames.close()
+                self.assertFalse(stream.closed)
+                stream.close()
+
     def test_rejects_truncated_tampered_and_oversized_records(self):
         api = self.api()
         data = self.packet()

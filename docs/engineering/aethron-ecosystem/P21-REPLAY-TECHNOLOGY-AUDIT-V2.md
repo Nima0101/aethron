@@ -1,8 +1,9 @@
 # P2.1 C02 binary replay — retrospective audit policy v2
 
 Decision: **KEEP Python strict header validation and incremental framing; replace
-unconditional buffer copying with a checked immutable complete-read path.** C01
-and C02 are assessed; C03–C09 remain pending. Forward expansion stays paused.
+unconditional buffer copying with a checked immutable complete-read path.** This
+is the historical C02 policy-v2 checkpoint, not current V3 completion. The
+[V3 qualification review](P21-REPLAY-CLAIMS-REVIEW-V3.md) is separate evidence.
 This reassesses both original v1 and the already-built variable-count v2 reader.
 
 ## Operational constraints
@@ -13,7 +14,11 @@ validated layouts bound each payload to 8 MiB and clouds to 4096 samples. The
 reader is incremental and does not itself bound total stream length. Appliance
 and inspector callers own whole-recording limits and digest admission. A valid
 prefix can be yielded before a corrupt suffix fails; this is not whole-file
-certification. There is no hard-real-time or physical qualification claim.
+certification. Generator locals may still retain the previous raw payload while
+the next payload is read; callers can retain arbitrarily many returned frames.
+Per-record bounds are not a total process-memory bound. Closing the generator
+does not close its caller-owned stream. The reader imposes no I/O deadline.
+There is no hard-real-time or physical qualification claim.
 
 Stream adapters may implement only bounded `read(n)`, with short reads and no
 seek, descriptor or `readinto` method. EOF before a prefix differs from truncated
