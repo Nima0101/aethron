@@ -1,6 +1,6 @@
 {
   "review_order_version": 3,
-  "scope": "C08 and C09 historical working-copy source retrieval",
+  "scope": "C01 historical packet snapshot and C08/C09 working-copy source retrieval",
   "decision": "CLARIFY",
   "full_component_review_complete": false,
   "records": [
@@ -39,14 +39,32 @@
     "protected_main_source_bytes_verified": 3,
     "original_reports_modified": false,
     "product_sources_modified": false,
-    "runtime_tests_rerun": false
+    "runtime_tests_rerun": false,
+    "historical_packet_report_bytes_verified": 1,
+    "historical_packet_source_bytes_verified": 4
   },
   "limits": [
     "Bindings identify publicly retrievable bytes, not authenticated execution.",
     "Original working-copy review notes and prior negative evidence remain unchanged.",
-    "No new KEEP/MIGRATE, sensor performance, boot/soak or hardware qualification."
+    "No new KEEP/MIGRATE, sensor performance, boot/soak or hardware qualification.",
+    "C01 public binding identifies the final source snapshot only; superseded experiment source snapshots and historical execution are not verified."
   ],
   "documentation_sha256": {
-    "docs/engineering/aethron-ecosystem/P21-WORKING-COPY-PROVENANCE-V3.md": "b37aaf9808f1995c25d50394ce2c2f5e0d0cb7e32a5a285ccb2fbcfc555d7114"
+    "docs/engineering/aethron-ecosystem/P21-WORKING-COPY-PROVENANCE-V3.md": "1f2929397b832eb1dfae28d3ff13d485ee8ff360b00e7b3682f4921e88eac288"
+  },
+  "historical_packet_binding": {
+    "report": "docs/engineering/aethron-ecosystem/evidence/phase2/technology-v2-packets.json",
+    "report_commit": "7f2d87abcceea0592da587d371a2f8924d7c0cd8",
+    "report_sha256": "3942a17d8d11487e932dab183d6f3dd8858fec2343aea10745e51e8a281dbaf9",
+    "source_commit": "7f2d87abcceea0592da587d371a2f8924d7c0cd8",
+    "source_sha256": {
+      "integrations/edge/aethron_edge/sensors/packets.py": "ed6b46b44e9cc93814cd0080e443dbbaf173eaf555f9840904ad361820af1695",
+      "tests/integration/test_sensor_packets.py": "d30c9d9ca7aff298f5ae0442744cc4aea88a2b38363997c4a9aecc99e78cb2a3",
+      "scripts/probes/sensor_packet_audit/compare.py": "4fc4dcfbc46ef170965502f7a7e52462f2f72ef6ce409b782734978bdab1674f",
+      "scripts/probes/sensor_packet_audit/buffer_worker.cjs": "827b7c4fda88ff7b717983eb2309684956f22ba5007a3ce6de2e024cb9bf04fa"
+    },
+    "superseded_experiment_source_bindings": "unverified",
+    "raw_timing_samples": "not retained in this report",
+    "execution_attested": false
   }
 }

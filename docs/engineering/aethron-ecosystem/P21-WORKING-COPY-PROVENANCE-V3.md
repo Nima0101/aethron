@@ -35,3 +35,22 @@ test, installed-package reproduction, boot soak, hardware measurement or
 technology comparison is claimed. Existing failures and qualification limits
 remain unchanged. This supplement resolves these three retrieval references;
 it does not complete the full V3 reassessment, whose cursor remains C01.
+
+## C01 historical packet report retrieval
+
+The C01 V2 report records four source hashes without an immutable retrieval
+reference. The prior timing review checked those hashes against the original
+local review commit; this supplement additionally binds them to public delivery
+commit `7f2d87abcceea0592da587d371a2f8924d7c0cd8`. At that commit, the report
+bytes and all four source files match the retained hashes. The sources are the
+packet module, packet tests, comparison harness and Node comparison worker.
+The supplemental JSON records each path and digest under
+`historical_packet_binding`; later harness revisions must not be substituted.
+
+This verifies retrieval of the report's final source snapshot. It does not bind
+the three superseded experiments to their earlier source snapshots, recover raw
+timing samples, authenticate execution, or show which code was loaded during a
+historical run. Those limits remain open. The original report is unchanged,
+including the mixed-width alternative advantage, omitted worker pipe-I/O CPU,
+shared-host timing and previous latency/startup failures. No new benchmark,
+production change or fresh KEEP/MIGRATE decision is included.
