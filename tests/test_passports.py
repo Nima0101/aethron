@@ -87,6 +87,21 @@ class PassportSchemaTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "^invalid_passport$"):
                     passports.canonicalize(raw)
 
+    def test_integer_tokens_rejected_before_shape_validation(self):
+        for token in (b"9" * 3000, b"9" * 17, b"9007199254740992", b"-1"):
+            raw = wire(payload()).replace(b'"version":1', b'"version":' + token)
+            with self.subTest(length=len(token)):
+                with patch.object(
+                    passports, "_payload", side_effect=AssertionError("integer reached schema")
+                ):
+                    with self.assertRaisesRegex(ValueError, "^invalid_passport$"):
+                        passports.canonicalize(raw)
+
+    def test_safe_integer_lexical_boundaries(self):
+        self.assertEqual(passports._parse(b"9007199254740991"), passports.MAX_INTEGER)
+        self.assertEqual(passports._parse(b"0"), 0)
+        self.assertEqual(passports._parse(b"-0"), 0)
+
     def test_bounds_before_json_allocation(self):
         with patch.object(passports.json, "loads", side_effect=AssertionError("allocated")):
             for raw in (b" " * 65537, b"[" * 9):

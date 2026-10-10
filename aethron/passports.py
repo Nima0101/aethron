@@ -68,12 +68,23 @@ def _not_integer(_value):
     raise ValueError("invalid_passport")
 
 
+def _bounded_integer(value):
+    # JSON supplies the lexical token. Bound it before arbitrary-precision conversion.
+    # Preserve the existing unsigned-zero canonicalization of the JSON token -0.
+    if value == "-0":
+        return 0
+    _require(value[0] != "-" and len(value) <= 16)
+    _require(len(value) < 16 or value <= "9007199254740991")
+    return int(value)
+
+
 def _parse(raw):
     _require(check_bounds(raw))
     # Decode explicitly: json.loads(bytes) otherwise accepts UTF-16/UTF-32.
     return json.loads(
         raw.decode("utf-8"),
         object_pairs_hook=_pairs,
+        parse_int=_bounded_integer,
         parse_float=_not_integer,
         parse_constant=_not_integer,
     )

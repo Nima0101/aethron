@@ -33,7 +33,9 @@ checks below remain normative and require the full verifier.
 
 Every input is exact UTF-8 bytes, at most 65536 bytes and depth 8; reject duplicate or
 unknown fields, floats (including exponent notation), nonfinite values and boolean
-integers. Root objects are closed. Identifiers match `[a-z0-9][a-z0-9._-]{0,63}`;
+integers. Integer tokens are range-checked lexically before numeric conversion;
+only values 0 through 9007199254740991 are admitted. The token `-0` retains its
+existing canonicalization to `0`; signed payloads must still be canonical. Root objects are closed. Identifiers match `[a-z0-9][a-z0-9._-]{0,63}`;
 digests and raw public keys are 64 lowercase hex characters. No URLs, paths, free text,
 biometric identifiers, precise hidden-person data, accreditation or restricted interfaces.
 
@@ -99,3 +101,13 @@ limits before decoding, and seeded bounded parser mutation. Missing crypto must 
 Default dependency-free installs retain the parser and fail closed on signature checks;
 install the `passports` extra for Ed25519. Hosted checks exercise this extra separately.
 No hardware, certification, live evidence, production, or complete revocation claim.
+
+## Deployment claim boundary
+
+This offline Ed25519/DSSE profile does not implement an MLS system, a cross-domain
+guard, encrypted transport, or CNSA qualification. Neither a valid signature nor a
+capability name establishes those properties. It has no hard real-time deadline,
+five-nines availability evidence, target-hardware latency qualification, or tactical
+interoperability accreditation. Insufficient information for tactical deployment.
+A future qualified cryptographic profile needs a distinct version and independently
+verified deployment evidence; this profile must not silently change algorithms.
