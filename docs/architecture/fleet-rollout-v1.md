@@ -1,5 +1,10 @@
 # Bounded local rollout journal v1
 
+The [technology audit v2](fleet-rollout-technology-audit-v2.md) supersedes the
+initial technology rationale and FULL synchronization recommendation below.
+Connections now require verified DELETE journaling and EXTRA synchronization.
+The schema, revision/state contract, limits and no-retry semantics are unchanged.
+
 ## Technology decision (2026-10-10)
 
 Requirements: one immutable plan, up to 1024 anonymous slots, restart persistence,

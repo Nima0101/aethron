@@ -1,7 +1,11 @@
 """Bounded synthetic rollout records; no installers or transport."""
 
 import importlib.util
+import itertools
+import json
 import sqlite3
+import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import closing
@@ -198,6 +202,112 @@ class FleetRolloutTests(unittest.TestCase):
         self.assertEqual(journal.snapshot().revision, 0)
         self.assertEqual(journal.snapshot().states, ("pending",) * 5)
 
+    def test_every_commit_uses_verified_delete_extra_profile(self):
+        original = sqlite3.connect
+        observed = []
+
+        class ObservedCommit(sqlite3.Connection):
+            def execute(self, sql, parameters=()):
+                if sql == "COMMIT":
+                    observed.append(
+                        (
+                            super().execute("PRAGMA journal_mode").fetchone()[0],
+                            super().execute("PRAGMA synchronous").fetchone()[0],
+                        )
+                    )
+                return super().execute(sql, parameters)
+
+        def connect(*args, **kwargs):
+            return original(*args, factory=ObservedCommit, **kwargs)
+
+        with patch("aethron_edge.runtime.fleet_rollout.sqlite3.connect", connect):
+            journal = self.create()
+            journal.claim(expected_revision=0, now_unix_s=1001)
+            self.finish(journal, 0, outcome="failed")
+        self.assertEqual(observed, [("delete", 3)] * 3)
+
+    def test_unavailable_durability_profile_rejects_before_mutation(self):
+        original = sqlite3.connect
+        for setting in ("synchronous", "journal_mode"):
+            with self.subTest(setting=setting):
+                self.path = self.path.with_name(setting + ".db")
+                journal = self.create()
+                before = journal.snapshot()
+
+                class WeakerProfile(sqlite3.Connection):
+                    def execute(self, sql, parameters=(), *, selected=setting):
+                        if sql.startswith("PRAGMA " + selected + "="):
+                            sql = (
+                                "PRAGMA synchronous=OFF"
+                                if selected == "synchronous"
+                                else "PRAGMA journal_mode=MEMORY"
+                            )
+                        return super().execute(sql, parameters)
+
+                def connect(*args, **kwargs):
+                    return original(*args, factory=WeakerProfile, **kwargs)
+
+                with patch("aethron_edge.runtime.fleet_rollout.sqlite3.connect", connect):
+                    self.reject(journal.claim, expected_revision=0, now_unix_s=1001)
+                self.assertEqual(journal.snapshot(), before)
+
+    def test_process_exit_at_commit_keeps_atomic_reservations_and_failure(self):
+        program = """
+import os, sqlite3, sys
+from pathlib import Path
+from unittest.mock import patch
+from aethron_edge.runtime.fleet_rollout import RolloutJournal
+original = sqlite3.connect
+mode, operation = sys.argv[2:]
+class ExitAtCommit(sqlite3.Connection):
+    def execute(self, sql, parameters=()):
+        if sql == "COMMIT" and mode == "before":
+            os._exit(91)
+        result = super().execute(sql, parameters)
+        if sql == "COMMIT" and mode == "after":
+            os._exit(92)
+        return result
+def connect(*args, **kwargs):
+    return original(*args, factory=ExitAtCommit, **kwargs)
+journal = RolloutJournal(Path(sys.argv[1]))
+with patch("aethron_edge.runtime.fleet_rollout.sqlite3.connect", connect):
+    if operation == "claim":
+        journal.claim(expected_revision=0, now_unix_s=1001)
+    else:
+        journal.record(slot=0, outcome="failed", policy_sha256="a"*64,
+                       artifact_sha256="b"*64, expected_revision=1, now_unix_s=1002)
+raise RuntimeError("commit injection was not reached")
+"""
+        for operation in ("claim", "record"):
+            for mode in ("before", "after"):
+                with self.subTest(operation=operation, mode=mode):
+                    self.path = self.path.with_name(operation + "-" + mode + ".db")
+                    journal = self.create()
+                    if operation == "record":
+                        journal.claim(expected_revision=0, now_unix_s=1001)
+                    before = journal.snapshot()
+                    child = subprocess.run(
+                        [sys.executable, "-c", program, str(self.path), mode, operation],
+                        capture_output=True,
+                        timeout=10,
+                        check=False,
+                    )
+                    self.assertEqual(child.returncode, 91 if mode == "before" else 92, child.stderr)
+                    recovered = self.module().RolloutJournal(self.path)
+                    if mode == "before":
+                        self.assertEqual(recovered.snapshot(), before)
+                    else:
+                        snapshot = recovered.snapshot()
+                        self.assertEqual(snapshot.revision, before.revision + 1)
+                        self.assertEqual(
+                            snapshot.states,
+                            ("running" if operation == "claim" else "failed", "running")
+                            + ("pending",) * 3,
+                        )
+                        self.reject(
+                            recovered.claim, expected_revision=snapshot.revision, now_unix_s=1003
+                        )
+
     def test_maximum_capacity_and_lock_contention_are_bounded(self):
         journal = self.create(slot_count=1024, batch_size=32)
         with closing(sqlite3.connect(self.path)) as writer, writer:
@@ -205,6 +315,56 @@ class FleetRolloutTests(unittest.TestCase):
             self.reject(journal.claim, expected_revision=0, now_unix_s=1001)
         self.assertEqual(journal.claim(expected_revision=0, now_unix_s=1001), tuple(range(32)))
         self.assertLess(self.path.stat().st_size, 1024 * 1024)
+
+    def test_small_state_space_matches_independent_transition_exploration(self):
+        self.create(slot_count=4, batch_size=1)
+        with closing(sqlite3.connect(self.path)) as db:
+            template = json.loads(db.execute("SELECT payload FROM rollout").fetchone()[0])
+        module = self.module()
+        for batch in range(1, 5):
+            # Enumerate executable transitions, not the validator's count formula.
+            initial = (("pending",) * 4, 0)
+            reachable = {initial}
+            todo = [initial]
+            while todo:
+                states, revision = todo.pop()
+                successors = []
+                if "running" not in states and "failed" not in states and "pending" in states:
+                    updated = list(states)
+                    remaining = batch
+                    for slot, state in enumerate(states):
+                        if state == "pending" and remaining:
+                            updated[slot] = "running"
+                            remaining -= 1
+                    successors.append(tuple(updated))
+                for slot, state in enumerate(states):
+                    if state == "running":
+                        for outcome in ("succeeded", "failed"):
+                            updated = list(states)
+                            updated[slot] = outcome
+                            successors.append(tuple(updated))
+                for states in successors:
+                    candidate = (states, revision + 1)
+                    if candidate not in reachable:
+                        reachable.add(candidate)
+                        todo.append(candidate)
+            for states in itertools.product(
+                ("pending", "running", "succeeded", "failed"), repeat=4
+            ):
+                for revision in range(9):
+                    value = template | {
+                        "batch_size": batch,
+                        "states": list(states),
+                        "revision": revision,
+                    }
+                    try:
+                        module._validate(value)
+                        admitted = True
+                    except ValueError:
+                        admitted = False
+                    self.assertEqual(
+                        admitted, (states, revision) in reachable, (batch, states, revision)
+                    )
 
     def test_deeply_nested_corrupt_payload_uses_fixed_error(self):
         journal = self.create()

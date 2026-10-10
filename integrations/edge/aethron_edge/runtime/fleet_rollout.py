@@ -159,8 +159,11 @@ class RolloutJournal:
             )
             db.setlimit(sqlite3.SQLITE_LIMIT_LENGTH, 32768)
             db.execute("PRAGMA trusted_schema=OFF")
-            db.execute("PRAGMA journal_mode=DELETE")
-            db.execute("PRAGMA synchronous=FULL")
+            if db.execute("PRAGMA journal_mode=DELETE").fetchone() != ("delete",):
+                raise ValueError()
+            db.execute("PRAGMA synchronous=EXTRA")
+            if db.execute("PRAGMA synchronous").fetchone() != (3,):
+                raise ValueError()
             db.execute("PRAGMA max_page_count=256")
             yield db
         except (OSError, TypeError, ValueError, RecursionError, sqlite3.Error):
