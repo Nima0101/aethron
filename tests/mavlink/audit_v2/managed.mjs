@@ -1,5 +1,6 @@
 // Original audit-only strict subset, GPL-3.0-only. No network or transmit API.
-import { readFileSync } from 'node:fs';
+import { readSync } from 'node:fs';
+import { TextDecoder } from 'node:util';
 
 const layouts = new Map([
   [30, ['ATTITUDE', 'body_euler', ['roll', 'pitch', 'yaw', 'rollspeed', 'pitchspeed', 'yawspeed'],
@@ -77,9 +78,18 @@ class Receiver {
   }
 }
 
-const raw = readFileSync(0);
-if (raw.length > 65536) throw new Error('audit_input_limit');
-const cases = JSON.parse(raw);
+// One bounded input buffer, including an over-limit sentinel; tolerate short reads.
+const raw = Buffer.alloc(65537);
+let used = 0;
+while (true) {
+  const count = readSync(0, raw, used, raw.length - used, null);
+  if (count === 0) break;
+  used += count;
+  if (used > 65536) throw new Error('audit_input_limit');
+}
+// Preserve a BOM for JSON rejection, and never substitute malformed UTF-8.
+const decoder = new TextDecoder('utf-8', {fatal: true, ignoreBOM: true});
+const cases = JSON.parse(decoder.decode(raw.subarray(0, used)));
 if (!Array.isArray(cases) || cases.length < 1 || cases.length > 64) {
   throw new Error('audit_case_limit');
 }

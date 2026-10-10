@@ -4,6 +4,7 @@ import asyncio
 import hashlib
 import importlib.util
 import json
+import shutil
 
 # Fixed local Python fixtures; no shell or external input.
 import subprocess  # nosec B404
@@ -34,6 +35,8 @@ class LifecycleAuditTests(unittest.TestCase):
         spec = importlib.util.spec_from_file_location("lifecycle_audit", path)
         self.api = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(self.api)
+        self.node = shutil.which("node")
+        self.assertIsNotNone(self.node, "Node is required for managed-runtime comparison")
 
     def test_managed_candidate_matches_state_values_and_provenance(self):
         cases = self.api.corpus()
@@ -172,6 +175,84 @@ class LifecycleAuditTests(unittest.TestCase):
         self.assertIn(f"Some({2**128 - 1}u128)", fixture)
         self.assertEqual(fixture.count("now: None"), 2)
         self.assertIn("packet: &[" + ",".join(["171"] * 320) + "]", fixture)
+
+    def test_managed_input_stops_after_over_limit_sentinel(self):
+        payload = json.dumps(self.api.corpus()).encode().ljust(65536, b" ")
+        with tempfile.TemporaryFile(buffering=0) as source:
+            source.write(payload + b" " * 4097)
+            source.seek(0)
+            result = subprocess.run(  # nosec B603
+                [self.node, str(self.api.DRIVER)],
+                stdin=source,
+                capture_output=True,
+                timeout=10,
+                check=False,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn(b"audit_input_limit", result.stderr)
+            self.assertEqual(result.stdout, b"")
+            self.assertEqual(source.tell(), 65537, "oversize rejection must leave the tail unread")
+
+    def test_managed_input_rejects_invalid_utf8_before_execution(self):
+        for payload in (
+            b'[{"name":"\xff","steps":[{"op":"snapshot","now":"0"}]}]',
+            b"\xef\xbb\xbf" + json.dumps(self.api.corpus()).encode(),
+        ):
+            with self.subTest(prefix=payload[:3]):
+                result = subprocess.run(  # nosec B603
+                    [self.node, str(self.api.DRIVER)],
+                    input=payload,
+                    capture_output=True,
+                    timeout=10,
+                    check=False,
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(result.stdout, b"")
+
+    def test_managed_input_preserves_utf8_and_inclusive_size_boundary(self):
+        cases = self.api.corpus()
+        cases[0]["name"] = "syntetisk mätning"
+        payload = json.dumps(cases, ensure_ascii=False).encode("utf-8")
+        for raw in (payload, payload.ljust(65536, b" ")):
+            with self.subTest(size=len(raw)):
+                result = subprocess.run(  # nosec B603
+                    [self.node, str(self.api.DRIVER)],
+                    input=raw,
+                    capture_output=True,
+                    timeout=10,
+                    check=True,
+                )
+                self.api.check_parity(
+                    self.api.reference(cases), json.loads(result.stdout)["results"]
+                )
+
+    def test_managed_input_handles_short_reads(self):
+        # Exercise the real driver through the documented builtin export bridge.
+        wrapper = """
+import fs from 'node:fs';
+import { syncBuiltinESMExports } from 'node:module';
+import { pathToFileURL } from 'node:url';
+const original = fs.readSync;
+let calls = 0;
+fs.readSync = (fd, buffer, offset, length, position) => {
+  if (fd === 0) { calls++; length = Math.min(length, 17); }
+  return original(fd, buffer, offset, length, position);
+};
+syncBuiltinESMExports();
+await import(pathToFileURL(process.argv[1]));
+process.stderr.write(JSON.stringify({read_calls: calls}));
+"""
+        cases = self.api.corpus()
+        payload = json.dumps(cases).encode()
+        result = subprocess.run(  # nosec B603
+            [self.node, "--input-type=module", "-e", wrapper, str(self.api.DRIVER)],
+            input=payload,
+            capture_output=True,
+            timeout=10,
+            check=True,
+        )
+        self.assertGreater(json.loads(result.stderr)["read_calls"], len(payload) // 17)
+        self.api.check_parity(self.api.reference(cases), json.loads(result.stdout)["results"])
 
     def reference_cli(self, payload):
         return subprocess.run(  # nosec B603

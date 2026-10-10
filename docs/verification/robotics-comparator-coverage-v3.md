@@ -342,3 +342,43 @@ This does not establish independent JavaScript raw JSON admission, bounded stdin
 allocation, actual Rust execution at this revision, arbitrary clock-callback
 parity or hardware timing. Production adapter code is unchanged, runtime
 reassessment remains PENDING, and later components remain unreviewed.
+
+## Managed CLI byte admission
+
+Reviewed baseline: `17b8ca0bb6e189259e94d5fd56795c793f14867e`.
+The independent JavaScript comparison driver used `readFileSync(0)` and applied
+its 65536-byte input limit afterwards. An oversized input was fully consumed;
+implicit Buffer decoding also replaced invalid UTF-8 before JSON parsing. These
+are experiment boundary defects, not production telemetry packet defects.
+
+The driver now reads into a single 65537-byte buffer and rejects immediately when
+the extra sentinel byte arrives. Each read is limited to the remaining capacity;
+short reads continue until EOF or overflow. Only the initialized prefix is decoded.
+Fatal UTF-8 decoding rejects malformed sequences, and BOM preservation lets JSON
+parsing reject a leading BOM, matching the Python reference CLI.
+
+For this small synchronous audit subprocess, bounded
+[Node readSync](https://nodejs.org/api/fs.html#fsreadsyncfd-buffer-offset-length-position)
+provides explicit destination size and byte counts. A stream/chunk accumulator
+would require equivalent aggregate bounds and additional retained chunks; a new
+runtime or parser would not remove that requirement. The standard
+[TextDecoder options](https://nodejs.org/api/util.html#new-textdecoderencoding-options)
+provide explicit error and BOM behavior. These choices repair the existing
+candidate experiment and do not establish a production KEEP/MIGRATE decision.
+
+The [receipt](robotics-managed-input-v3.json) retains two expected RED failures:
+the old driver consumed 69633 rather than 65537 bytes of a small temporary file,
+and accepted an invalid UTF-8 name. Valid ordinary and exactly 65536-byte inputs
+preserve Python/Node lifecycle parity, including a multibyte label. A wrapper
+using Node's builtin export synchronization forces reads of at most 17 bytes;
+the real driver preserves corpus results and makes multiple reads. A separate
+negative control preserves BOM rejection. The unchanged original corpus is also
+covered by the existing managed parity test.
+
+59 focused audit methods pass; the four input methods pass again after resolving
+four initial Bandit partial-executable-path warnings by resolving Node explicitly.
+Ruff, formatting, Bandit and Node syntax checks pass. Raw input allocation is
+bounded, but this is not a whole-process memory limit or independent stdin
+deadline: the invoking audit runner retains its subprocess timeout. JavaScript
+JSON duplicate-member rejection remains unresolved. There is no new Rust run,
+hardware latency result, production qualification or completed lane reassessment.

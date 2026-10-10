@@ -800,3 +800,14 @@ Boolean invalid-clock sentinels and all original corpora are preserved.
 [Evidence](../verification/robotics-operation-values-v3.json) records 29 expected
 RED assertions and 39 passing focused methods. Production telemetry and the
 production runtime decision are unchanged.
+
+## Bound managed experiment input before decoding
+
+The [managed input review](../verification/robotics-comparator-coverage-v3.md#managed-cli-byte-admission)
+found that the JavaScript driver read all stdin before checking its size and
+silently replaced invalid UTF-8. It now fills one bounded buffer, stops at the
+over-limit sentinel, and decodes with fatal UTF-8 validation. Two RED regressions
+became green; 59 focused audit methods pass, with four input methods rerun after
+test-launcher cleanup. [Evidence](../verification/robotics-managed-input-v3.json)
+records the checks and source hashes. This corrects experiment admission;
+production telemetry and its pending technology decision are unchanged.
