@@ -35,6 +35,56 @@ def first_case():
 
 @unittest.skipIf(Draft202012Validator is None, "install optional passport conformance requirements")
 class PassportSchemaConformance(unittest.TestCase):
+    def test_payload_claim_vocabulary_has_positive_controls(self):
+        check = validator("passport-v1.schema.json")
+        original = json.loads(
+            json.loads((ROOT / "examples/passports/vectors.json").read_bytes())["canonical_payload"]
+        )
+        for capability in ("perception.direct.v3", "presence.coarse.v2", "evidence.offline.v1"):
+            for kind in ("synthetic", "recorded", "external_unverified"):
+                for outcome in ("passed", "failed", "unknown"):
+                    doc = copy.deepcopy(original)
+                    doc["capabilities"][0]["name"] = capability
+                    doc["evidence"][0].update(kind=kind, outcome=outcome)
+                    with self.subTest(capability=capability, kind=kind, outcome=outcome):
+                        check.validate(doc)
+                        self.assertEqual(
+                            json.loads(passports.canonicalize(json.dumps(doc).encode())), doc
+                        )
+                        self.assertIs(doc["motion_authority"], False)
+                        self.assertEqual(doc["assurance"], "self_declared")
+
+    def test_payload_rejects_unsupported_claims_in_schema_and_runtime(self):
+        check = validator("passport-v1.schema.json")
+        original = json.loads(
+            json.loads((ROOT / "examples/passports/vectors.json").read_bytes())["canonical_payload"]
+        )
+        cases = (
+            (("motion_authority",), True),
+            (("motion_authority",), 0),
+            (("motion_authority",), None),
+            (("motion_authority",), "false"),
+            (("assurance",), "qualified"),
+            (("assurance",), False),
+            (("capabilities", 0, "name"), "unsupported.v1"),
+            (("capabilities", 0, "name"), False),
+            (("evidence", 0, "kind"), "qualified"),
+            (("evidence", 0, "kind"), False),
+            (("evidence", 0, "outcome"), "verified"),
+            (("evidence", 0, "outcome"), False),
+        )
+        for path, value in cases:
+            doc = copy.deepcopy(original)
+            item = doc
+            for key in path[:-1]:
+                item = item[key]
+            item[path[-1]] = value
+            with self.subTest(path=path, value=value):
+                with self.assertRaises(ValidationError):
+                    check.validate(doc)
+                with self.assertRaisesRegex(ValueError, "^invalid_passport$"):
+                    passports.canonicalize(json.dumps(doc).encode())
+
     def test_payload_structural_uniqueness_does_not_replace_reference_integrity(self):
         check = validator("passport-v1.schema.json")
         original = json.loads(

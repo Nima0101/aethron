@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "id": "p16-interop-schema-recheck-v3",
+  "component": "Task and federation structural schemas",
+  "decision": "KEEP",
+  "constraints": [
+    "Portable closed task/federation documents, conditional task budgets, bounded peer rows, safe integers and offline validation; preserve v1 runtime byte identity.",
+    "No schema-derived authority, enrollment, transport, persistence, interval relationship validation or selected-field uniqueness claim."
+  ],
+  "alternatives": [
+    "Draft 2020-12 with python-jsonschema and an explicit offline referencing registry; direct calls into the current runtime expose semantic distinctions.",
+    "JavaScript/TypeScript Ajv 2020 validator; Java/Kotlin networknt validator as independent standard-schema consumers.",
+    "CUE declarations with JSON Schema interchange for constraint authoring; Pydantic strict models for application validation and schema generation."
+  ],
+  "rationale": [
+    "KEEP standard schema declarations with direct runtime comparisons. Six current interop methods check bounded collections, task-kind budgets, invalid scalars and shapes, portable cases and deliberately schema-valid runtime rejections.",
+    "No new schema or runtime mismatch demonstrated. Alternative validators can consume the publication; changing declaration language does not replace runtime pin, canonical-byte or complete-table checks."
+  ],
+  "limits": [
+    "Alternative tools were researched from their official documentation, not executed or benchmarked. No speed, memory or universal language ranking is claimed.",
+    "The selected checker tests the published artifact directly and compares actual runtime behavior in process. Generated application models would require additional exact-wire checks and independent artifact validation.",
+    "No whole-lane completion, installed-distribution acceptance, physical, real-time, MLS/CNSA or availability qualification."
+  ],
+  "evidence": [
+    "https://json-schema.org/draft/2020-12/json-schema-validation",
+    "https://python-jsonschema.readthedocs.io/en/stable/referencing/",
+    "https://ajv.js.org/json-schema.html",
+    "https://cuelang.org/docs/concept/how-cue-works-with-json-schema/",
+    "https://github.com/networknt/json-schema-validator",
+    "https://docs.pydantic.dev/latest/concepts/strict_mode/"
+  ]
+}

@@ -53,6 +53,13 @@ this describes configuration, not an observed hosted success. See the
 comparison must authenticate a known-good fixture and reject negative fixtures for
 their expected reasons; an unavailable or always-rejecting backend cannot pass it.
 
+The [current claim-vocabulary review](../../engineering/reviews/p16-schema-claims-current-v3.md)
+adds paired schema/runtime checks for all 27 single-reference capability/kind/outcome
+combinations and 12 unsupported or type-confused claims. These are structural and
+canonicalization controls, not authentication or qualification of those assertions.
+Five independently removed payload constraints previously survived the passport-schema
+tests; each is now detected. Published schemas and runtime behavior remain unchanged.
+
 ## Task and federation coverage
 
 The [task schema](../../../contracts/interop/task-v1.schema.json) enforces the two
