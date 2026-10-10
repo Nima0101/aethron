@@ -28,7 +28,13 @@ state and sensor source types from API-v1. These are compile-time descriptions
 of the returned view, not runtime authorization or transport freshness checks.
 `npm run test:package` also packs and installs the archive offline in an external
 temporary project, then compiles a consumer of its public declarations. Prepare
-the locked dependency cache first; the consumer fixture is never executed.
+the locked dependency cache first; the TypeScript consumer fixture is never executed.
+An additional JavaScript consumer checks observation admission, copying, expiry,
+disconnect and the public import boundary with synthetic data. The test removes
+the package using `npm uninstall`, checks removal from the manifest, lock and
+module resolution, then reinstalls the same archive offline and repeats those
+checks in a fresh process. This verifies same-version reinstall, not an upgrade
+between releases or removal of state retained by an already-running application.
 
 The build generates `dist/validators.cjs` from the unchanged versioned schema.
 Runtime imports do not compile schemas or use string code generation. AJV remains

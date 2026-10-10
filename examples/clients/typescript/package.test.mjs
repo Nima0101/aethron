@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
-import {copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
+import {copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -42,7 +42,7 @@ test('package contains the unchanged repository license text', () => {
   assert.deepEqual(license, readFileSync(new URL('../../../LICENSE', import.meta.url)));
 });
 
-test('installed public declarations preserve UNKNOWN and discriminate expiry', () => {
+test('installed public declarations and offline uninstall/reinstall preserve the client boundary', () => {
   const npm = process.env.npm_execpath;
   assert.ok(npm, 'Run through npm run test:package');
   const work = mkdtempSync(join(tmpdir(), 'aethron-client-types-'));
@@ -63,6 +63,25 @@ test('installed public declarations preserve UNKNOWN and discriminate expiry', (
     } catch (error) {
       assert.fail(error.stdout || error.message);
     }
+    copyFileSync(new URL('./installed-runtime.mjs', import.meta.url), join(work, 'consumer.mjs'));
+    copyFileSync(new URL('../../../contracts/fixtures/v3/blackout-output.json', import.meta.url),
+      join(work, 'fixture.json'));
+    const runConsumer = () => JSON.parse(execFileSync(process.execPath,
+      ['--disallow-code-generation-from-strings', 'consumer.mjs'], {...options, cwd: work}));
+    assert.deepEqual(runConsumer(), {checks: 8, current_state: 'UNKNOWN'});
+    execFileSync(process.execPath, [npm, 'uninstall', '--offline', '--ignore-scripts',
+      '--no-audit', '--no-fund', '--save', 'aethron-edge-client-example'], {...options, cwd: work});
+    assert.equal(existsSync(join(work, 'node_modules/aethron-edge-client-example')), false);
+    const manifest = JSON.parse(readFileSync(join(work, 'package.json'), 'utf8'));
+    const lock = JSON.parse(readFileSync(join(work, 'package-lock.json'), 'utf8'));
+    assert.equal(manifest.dependencies?.['aethron-edge-client-example'], undefined);
+    assert.equal(lock.packages['node_modules/aethron-edge-client-example'], undefined);
+    execFileSync(process.execPath, ['--input-type=module', '-e',
+      "import assert from 'node:assert/strict'; await assert.rejects(import('aethron-edge-client-example'), {code:'ERR_MODULE_NOT_FOUND'});"],
+    {...options, cwd: work});
+    execFileSync(process.execPath, [npm, 'install', '--offline', '--ignore-scripts',
+      '--no-audit', '--no-fund', join(work, packed[0].filename)], {...options, cwd: work});
+    assert.deepEqual(runConsumer(), {checks: 8, current_state: 'UNKNOWN'});
   } finally {
     rmSync(work, {recursive: true, force: true});
   }

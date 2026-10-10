@@ -46,9 +46,9 @@ its versioned schema; this review does not rewrite that peer interface.
 | --- | --- |
 | Generated contract admission | Reviewed above and in numeric slice; 5 validation tests pass, including 14 independent negative cases |
 | Observation projection and local clocks | Reviewed below; host-clock exception correction and claim clarification |
-| HTTP/session/stream/renderer lifecycle | Pending full V3 review; in-flight cancellation safety fix retained with four RED-to-GREEN regressions |
-| Package distribution and fixtures | Manifest/privacy slice reviewed below; source generation and broader distribution review remain open |
-| Android/JVM, desktop lifecycle, P12 operator application | No completed implementation identified in the previous inventory; fresh inventory and justified implementation decisions remain outstanding |
+| HTTP/session/stream/renderer lifecycle | Reviewed in the third-component slices below; bounded admission, cancellation, redirect, error and numeric corrections retained; producer SSE-size reconciliation remains open |
+| Package distribution and fixtures | Manifest, generator, installed declarations and service smoke reviewed below; offline removal/reinstall coverage added; cross-version upgrade remains unverified |
+| Android/JVM, desktop lifecycle, P12 operator application | Fresh file inventory found no owned implementation; platform selection and implementation remain executable work |
 
 No completion marker is created. The session-response admission slice below
 resolves the previously open response limit. Integer wire forms are corrected in
@@ -688,3 +688,42 @@ and the P12 operator application. The existing camera demonstration is not P12
 completion. Review and implementation of those owned boundaries, the producer
 SSE-size mismatch and the P19 UI/help contribution remain outstanding. This slice
 does not issue an audit completion marker or customer/physical qualification.
+
+## Fourth component, offline installed lifecycle coverage
+
+Baseline `2c316fb17fca17aacd4fa09fff635c8df7a422d8`. The previous package
+tests exercised install, types and a service smoke but did not verify uninstall
+or reinstall. This is a coverage gap; no production defect or production RED
+is claimed. The initial review-status table also still described transport and
+generator corrections as pending even though later sections recorded them. The
+table is corrected; historical baseline sections remain evidence of their time.
+
+Constraints: use the package consumers actually install, exercise npm manifest,
+lockfile and module resolution semantics in an external directory, avoid registry
+requests and lifecycle scripts, and check runtime behavior in fresh Node processes.
+**KEEP Node/npm for this distribution check; FIX executable lifecycle coverage.**
+[npm uninstall](https://docs.npmjs.com/cli/v11/commands/npm-uninstall/) owns the
+installed-package and dependency-record removal behavior. A Python or PowerShell
+runner can invoke it, but still needs Node to test the public ESM import boundary;
+neither provides a different installation or isolation guarantee. Another package
+manager would test a different consumer contract. The choice follows the actual
+artifact boundary, without a speed or universal language-superiority claim.
+[Node exports](https://nodejs.org/api/packages.html#package-entry-points) controls
+package subpath imports; it is not an operating-system access control boundary.
+
+The external runtime fixture uses the existing synthetic blackout result and
+checks default UNKNOWN, admission at the inclusive lease boundary, detached
+copies, expiry, invalid-input withdrawal, disconnect and blocked internal subpath
+imports. It runs with string compilation disabled before removal and after
+same-archive offline reinstall. Removal checks the package directory, dependency
+manifest, lock entry and module resolution in a fresh process. The temporary
+consumer is removed in `finally`; each child retains a 30-second timeout and
+1 MiB output cap. The fixture requires a nonempty observation and prints success
+only after all assertions. No runtime source or frozen threshold changes.
+
+This does not establish cross-version upgrade, global uninstall, removal of an
+already-imported module from another process, cache erasure, a desktop installer,
+Android support or P12/P19 acceptance. The safe embedded engineering addendum was
+read; its informational UNKNOWN and documented-interface requirements apply to
+these client boundaries, with no weapon-specific integration. The next owned
+work remains platform lifecycle and P12 readiness. No audit completion marker.
