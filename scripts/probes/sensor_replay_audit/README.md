@@ -37,3 +37,13 @@ PYTHONPATH=integrations/edge:tests/integration \
 These tests deliberately fail the first candidate in each measurement pass and
 require no report output. They do not rerun the performance matrix or requalify
 historical reports. The full current technology reassessment remains incomplete.
+
+New comparison reports include `source_sha256` for the harness and the actual
+imported replay module's on-disk file, and `payload_sha256` for the complete
+synthetic payload. Hashing occurs before temporary-file creation and outside
+measurement passes. Unreadable source files abort report generation. Labels omit
+absolute paths. These fingerprints are not authentication, executable
+attestation, a complete dependency closure or an atomic snapshot; run with stable
+trusted sources. The separate JSON counterexample probe is not executed by this
+comparison and is not covered by its manifest. Historical reports remain
+unchanged. See the [partial provenance review](../../../docs/engineering/aethron-ecosystem/P21-REPLAY-SOURCE-EVIDENCE-V3.md).

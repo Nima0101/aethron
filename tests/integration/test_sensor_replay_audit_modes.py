@@ -1,21 +1,83 @@
 """Evidence checks must not disappear under interpreter optimization."""
 
 import contextlib
+import hashlib
 import io
+import json
 import os
 import runpy
 import subprocess
 import sys
+import tempfile
 import tracemalloc
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
+
+from aethron_edge.sensors import replay
 
 ROOT = Path(__file__).resolve().parents[2]
 PROBE = ROOT / "scripts/probes/sensor_replay_audit/compare.py"
 
 
 class ReplayAuditModeTests(unittest.TestCase):
+    def diagnostic_report(self):
+        main = runpy.run_path(str(PROBE))["main"]
+        payload = b"x" * (1024 * 1024)
+        output = io.StringIO()
+        fake_trace = SimpleNamespace(
+            is_tracing=lambda: False,
+            start=Mock(),
+            stop=Mock(),
+            get_traced_memory=lambda: (0, 0),
+        )
+        with (
+            patch.dict(
+                main.__globals__,
+                {
+                    **{
+                        name: lambda *args: payload
+                        for name in ("baseline", "direct", "readinto", "_read")
+                    },
+                    "time": SimpleNamespace(process_time_ns=lambda: 0, perf_counter_ns=lambda: 0),
+                    "tracemalloc": fake_trace,
+                    "tempfile": SimpleNamespace(TemporaryFile=io.BytesIO),
+                },
+            ),
+            contextlib.redirect_stdout(output),
+        ):
+            main()
+        return json.loads(output.getvalue())
+
+    def test_report_pins_harness_and_actual_imported_module(self):
+        with tempfile.TemporaryDirectory() as directory:
+            installed = Path(directory) / "replay.py"
+            installed.write_bytes(b"abc")
+            with patch.object(replay, "__file__", str(installed)):
+                report = self.diagnostic_report()
+        self.assertIn("source_sha256", report)
+        self.assertEqual(
+            report["source_sha256"],
+            {
+                "compare.py": hashlib.sha256(PROBE.read_bytes()).hexdigest(),
+                "aethron_edge.sensors.replay": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            },
+        )
+        self.assertNotIn(directory, json.dumps(report))
+
+    def test_report_binds_exact_payload(self):
+        report = self.diagnostic_report()
+        self.assertIn("payload_sha256", report)
+        self.assertEqual(report["payload_sha256"], hashlib.sha256(b"x" * (1024 * 1024)).hexdigest())
+        self.assertEqual(report["payload_bytes"], 1024 * 1024)
+
+    def test_missing_source_prevents_report_emission(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(replay, "__file__", str(Path(directory) / "missing.py")):
+                with self.assertRaises(FileNotFoundError):
+                    self.diagnostic_report()
+
     def test_existing_trace_session_rejects_before_fixture_creation(self):
         module = runpy.run_path(str(PROBE))
         output = io.StringIO()

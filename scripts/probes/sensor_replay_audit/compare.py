@@ -1,12 +1,15 @@
 """Bounded replay I/O comparison; synthetic data, not end-to-end qualification."""
 
+import hashlib
 import io
 import json
 import statistics
 import tempfile
 import time
 import tracemalloc
+from pathlib import Path
 
+from aethron_edge.sensors import replay
 from aethron_edge.sensors.replay import _read
 
 # Both timing and allocation passes require byte-equality assertions.
@@ -69,7 +72,19 @@ def main():
         raise ValueError("replay_audit_tracing_active")
     data = b"x" * (1024 * 1024)
     functions = {"baseline": baseline, "direct": direct, "readinto": readinto, "production": _read}
-    report = {"payload_bytes": len(data), "samples": 15, "cases": {}}
+    report = {
+        "source_sha256": {
+            name: hashlib.sha256(path.read_bytes()).hexdigest()
+            for name, path in {
+                "compare.py": Path(__file__),
+                "aethron_edge.sensors.replay": Path(replay.__file__),
+            }.items()
+        },
+        "payload_sha256": hashlib.sha256(data).hexdigest(),
+        "payload_bytes": len(data),
+        "samples": 15,
+        "cases": {},
+    }
     with tempfile.TemporaryFile() as file:
         file.write(data)
         for name, stream in (
