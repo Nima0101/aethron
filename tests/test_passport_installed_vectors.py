@@ -4,6 +4,7 @@ import importlib.util
 import json
 import tempfile
 import unittest
+from dataclasses import asdict
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -27,7 +28,42 @@ class InstalledVectorTests(unittest.TestCase):
                         RUNNER.run(Path("missing-fixture-root"))
 
     def test_current_corpora_execute_all_checks(self):
-        self.assertEqual(RUNNER.run(ROOT), 40)
+        self.assertEqual(RUNNER.run(ROOT), 50)
+
+    def test_policy_corpus_is_executed_with_real_api(self):
+        from aethron.passports import validate_pinned_policy
+
+        relative = "examples/passports/policy-vectors-v1.json"
+        self.assertIn(relative, RUNNER.CORPORA)
+        with patch.object(
+            RUNNER, "validate_pinned_policy", wraps=validate_pinned_policy, create=True
+        ) as validator:
+            self.assertEqual(RUNNER.run(ROOT), 50)
+            self.assertEqual(validator.call_count, 10)
+
+    def test_wrong_policy_result_fields_prevent_success(self):
+        from aethron.passports import validate_pinned_policy
+
+        # Inject one incorrect boundary result while executing the real runner.
+        for field, value in (
+            ("status", "wrong"),
+            ("reason", "wrong"),
+            ("policy_sha256", "0" * 64),
+            ("policy_revision", 99),
+            ("expires_at", 9999),
+            ("execution_authority", True),
+            ("motion_authority", True),
+            ("evidence_verified", True),
+        ):
+
+            def changed(*args, changed_field=field, changed_value=value, **kwargs):
+                result = validate_pinned_policy(*args, **kwargs)
+                return SimpleNamespace(**(asdict(result) | {changed_field: changed_value}))
+
+            with self.subTest(field=field):
+                with patch.object(RUNNER, "validate_pinned_policy", changed, create=True):
+                    with self.assertRaises(AssertionError):
+                        RUNNER.run(ROOT)
 
     def test_missing_or_changed_cases_reject_for_every_corpus(self):
         with tempfile.TemporaryDirectory() as directory:

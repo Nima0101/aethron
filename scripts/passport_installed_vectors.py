@@ -10,10 +10,14 @@ from aethron.interop_federation import verify_federated_bundle
 from aethron.interop_inbox import BoundedInbox
 from aethron.interop_tasks import validate_task
 from aethron.passport_evidence import verify_evidence
-from aethron.passports import verify
+from aethron.passports import validate_pinned_policy, verify
 
 # Reviewed fixture bytes; changes require deliberate coverage review.
 CORPORA = {
+    "examples/passports/policy-vectors-v1.json": (
+        "8014f8c76f795e15169c891a36c0b32f01f3de384d5ee6f9a9d7f1aae7b61afa",
+        10,
+    ),
     "examples/interop/inbox-vectors-v1.json": (
         "0c3cb8ce0c8c2ce10525a63158e2ca0b6970c3953b6a09c386b133b0dace5ec3",
         4,
@@ -115,6 +119,19 @@ def run(root):
         assert (result.status, result.reason) == (case["status"], case["reason"]), case["name"]
         assert [item.outcome for item in result.evidence] == case["outcomes"]
         assert result.motion_authority is False and result.evidence_verified is False
+    vectors = load_vectors(root, "examples/passports/policy-vectors-v1.json")
+    for case in vectors["cases"]:
+        result = validate_pinned_policy(bytes.fromhex(case["policy_hex"]), **case["arguments"])
+        expected = case["expected"]
+        assert (result.status, result.reason) == (expected["status"], expected["reason"]), case[
+            "name"
+        ]
+        assert result.policy_sha256 == expected["policy_sha256"], case["name"]
+        assert result.policy_revision == expected["policy_revision"], case["name"]
+        assert result.expires_at == expected["expires_at"], case["name"]
+        assert result.execution_authority is False
+        assert result.motion_authority is False
+        assert result.evidence_verified is False
     return sum(count for _, count in CORPORA.values())
 
 
