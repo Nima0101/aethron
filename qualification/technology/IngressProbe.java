@@ -56,9 +56,16 @@ public final class IngressProbe {
         // Bounded trusted test transport, not the production evidence interface.
         byte[] input = System.in.readNBytes(8 * 1024 * 1024 + 1);
         if (input.length > 8 * 1024 * 1024) throw new IllegalArgumentException();
-        String[] rows = new String(input, StandardCharsets.US_ASCII).split("\n");
-        if (rows.length > 256) throw new IllegalArgumentException();
-        for (String row : rows) {
+        // Count before splitting: blank requests still consume the row budget.
+        // One terminal LF ends a row; it does not start an extra empty request.
+        int count = input.length > 0 && input[input.length - 1] != '\n' ? 1 : 0;
+        for (byte value : input) {
+            if (value == '\n') count++;
+            if (count > 256) throw new IllegalArgumentException();
+        }
+        String[] rows = new String(input, StandardCharsets.US_ASCII).split("\n", -1);
+        for (int index = 0; index < count; index++) {
+            String row = rows[index];
             try {
                 byte[] document = admitted(HexFormat.of().parseHex(row));
                 System.out.println("{\"accepted\":true,\"document\":"

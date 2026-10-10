@@ -1,0 +1,265 @@
+{
+  "audit_policy_version": 3,
+  "baseline_commit": "b65783d9198f456d405025d6a8cf612ce456cbdb",
+  "scope": "P4/P15 audit-only Java transport correction and SQL aggregation reassessment",
+  "decisions": {
+    "java_ingress_probe": "KEEP runtime; FIX blank request framing",
+    "campaign_production": "KEEP Python bounded multiplicity aggregation",
+    "campaign_sql_probe": "KEEP independent relational aggregation; shared admission limits remain"
+  },
+  "verification": {
+    "baseline_methods_passed": 24,
+    "java_transport_methods": 6,
+    "baseline_assertion_failures": 5,
+    "baseline_errors": 0,
+    "corrected_methods_passed": 6,
+    "skips": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "actionlint": "PASS on sequential retry",
+    "baseline_immutable_tree_links": "PASS",
+    "bandit_sql": "PASS",
+    "changed_markdown_links": "PASS",
+    "diff": "PASS",
+    "invocation_errors": "Two mistyped optional test module names caused import errors; corrected invocation recorded separately.",
+    "ingress_and_audit_report_methods_passed": 11,
+    "focused_methods_passed": 41
+  },
+  "environment_failures": [
+    "Initial javac native-thread EAGAIN; -Xint retry passed.",
+    "Concurrent post-fix JVM tests hit thread exhaustion: 8 assertion failures; sequential 6-method retry passed.",
+    "Concurrent actionlint could not start OS thread; sequential GOMAXPROCS=1 retry passed."
+  ],
+  "ingress_comparison": {
+    "audit_policy_version": 3,
+    "scope": "Java ingress with unchanged Python semantic oracle; not a Java validator",
+    "python": "3.13.5",
+    "ingress_cases": 18,
+    "semantic_requests": 63,
+    "mismatch_indices": [],
+    "report_mismatch_indices": [],
+    "document_mismatch_indices": [],
+    "all_reports_match": true,
+    "all_documents_match": true,
+    "request_transport_sha256": "7c1ddc2d27791242716bfa836e681f0b3b8fa92e05350806b4536350620255e0",
+    "response_transport_sha256": "5059be25311cb6c0e60f0c9e0636ccc3e62535d233661267ee152a5d5f55668f",
+    "python_65536_byte_measurement": {
+      "iterations": 20,
+      "elapsed_ns": [
+        12567982,
+        5645268,
+        4566874,
+        4495819,
+        4470398,
+        4856390,
+        67589865,
+        11446535,
+        5774301,
+        4611497,
+        4419893,
+        4781670,
+        71239424,
+        9260349,
+        5582440,
+        4916231,
+        4688908,
+        4835526,
+        67169201,
+        5027896
+      ],
+      "traced_peak_bytes_one_call": 73798,
+      "acceptance_threshold": null
+    },
+    "source_sha256": {
+      "qualification/technology/IngressProbe.java": "a80beabc94ee985a0f1cb6db95424926d52c88a335e44564caf32e7bdf0c7601",
+      "qualification/technology/compare_ingress.py": "86ef4e961121383878e994da16710a070cf6e1f1ca8331ce2976ad63618a79ea",
+      "qualification/technology/measurement.py": "4c3e628661aaedefe3cc5b26e01bd887bb6303e13cb2099faf66382e31d7cf0a",
+      "qualification/technology/ingress-vectors-v1.json": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff",
+      "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+      "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+      "qualification/rigs/synthetic-v1.json": "0b68e3a27477d5d53bc616afac23d82568ac357fdf95ce2520f114ac2efb25ea",
+      "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034"
+    },
+    "physical_qualification_passed": false
+  },
+  "campaign_comparison": {
+    "scope": "offline_campaign_aggregation_audit",
+    "audit_policy_version": 3,
+    "python": "3.13.5",
+    "sqlite": "3.46.1",
+    "test_methods": 11,
+    "candidate_calls": 48,
+    "all_contract_tests_passed": true,
+    "duplicate_mutant_failures": 3,
+    "duplicate_mutant_errors": 0,
+    "maximum_cases": 16,
+    "maximum_submissions": 64,
+    "maximum_workload_report": {
+      "version": 1,
+      "plan_sha256": "e5d41a943710f3e18d879037e231fc7da7e378c3bea5cf3faa6664042ec90b9b",
+      "captures_sha256": "9297849b54d145970ee979df3cb1b2aad5bd066352e8302d67c0d34a4c9f66e2",
+      "capture_counts": {
+        "submitted": 64,
+        "eligible": 64,
+        "rejected": 0
+      },
+      "cases": [
+        {
+          "case_index": 0,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 1,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 2,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 3,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 4,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 5,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 6,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 7,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 8,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 9,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 10,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 11,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 12,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 13,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 14,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 15,
+          "required": 4,
+          "eligible": 4
+        }
+      ],
+      "findings": [],
+      "declaration_coverage_complete": true,
+      "domain_verified": false,
+      "procedure_verified": false,
+      "artifact_authenticity_verified": false,
+      "physical_qualification_passed": false
+    },
+    "elapsed_ns": {
+      "python": [
+        79147076,
+        19352169,
+        77317288,
+        16719819,
+        16848779,
+        77385143,
+        21238925,
+        79442015,
+        17318319,
+        78116240
+      ],
+      "sqlite": [
+        22152168,
+        80541384,
+        17764892,
+        18835768,
+        77587138,
+        17603567,
+        84660161,
+        18970147,
+        78769245,
+        18527007
+      ]
+    },
+    "python_traced_peak_bytes": {
+      "python": 39369,
+      "sqlite": 49255
+    },
+    "measurement_limits": [
+      "Shared host, ten alternating-order repetitions; descriptive only.",
+      "Both paths share admission and declaration semantics; SQL aggregation is independent.",
+      "Tracing excludes preconstructed inputs and native SQLite allocations.",
+      "Whitespace-distinct bytes test input capacity, not independent physical evidence."
+    ],
+    "source_sha256": {
+      "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+      "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+      "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+      "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+      "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+      "qualification/tests/test_campaign_audit.py": "65938f530a0025d2f060b1f450f15ce3150bd27dcf6cb8ab9598da9f7f3bf3e0",
+      "qualification/technology/campaign_sql.py": "4deb710665852d208c1b8170a5963cc649a73e0536116d88926eff99074259c3",
+      "qualification/technology/compare_campaign.py": "84ee115742e5c51e65b583a64bfa4cca66794ffad2c4a7e86a083c78b45f51e9",
+      "qualification/technology/measurement.py": "4c3e628661aaedefe3cc5b26e01bd887bb6303e13cb2099faf66382e31d7cf0a"
+    },
+    "physical_qualification_passed": false
+  },
+  "artifact_sha256": {
+    "jackson-core-2.21.5.jar": "b64b5874162b503a0e58a8f7758266e8dd9f91bf49e3a59ae0b5f47589a231b7",
+    "IngressProbe.class": "59b52bf7133e80cf6f08f7ebae6c292d1b603d58ecf5ae9086ad23fbbe316354",
+    "transport-review-requests.hex": "7c1ddc2d27791242716bfa836e681f0b3b8fa92e05350806b4536350620255e0",
+    "transport-review-responses.jsonl": "5059be25311cb6c0e60f0c9e0636ccc3e62535d233661267ee152a5d5f55668f",
+    "java-transport-red.log": "a9144f6b6dc317ba2a1eebdf91ea9d5faf33c7466f3e319b0d25372ad25a5dca"
+  },
+  "source_sha256": {
+    "qualification/technology/IngressProbe.java": "a80beabc94ee985a0f1cb6db95424926d52c88a335e44564caf32e7bdf0c7601",
+    "qualification/tests/java_transport.py": "7d5d0702016a9e2d34c72035908015897dffb3ea016a287fffa052249c86a490",
+    ".github/workflows/aethron-qualification.yml": "62e2dbed01bc30d45e520d5625e7a757b4667ba08004e8d7947152cd7fe22c2a",
+    "qualification/technology/java-transport-review-v3.md": "447fa3cd006c8043acc1d12aa9b2cfda2c1a165fdba35d5303a8e4fd74818f38"
+  },
+  "limitations": [
+    "Fingerprints do not authenticate execution.",
+    "Java semantic oracle and SQL admission helpers are shared with production.",
+    "Six transport controls do not exhaust all Jackson behavior.",
+    "No physical, field, hard real-time or certification qualification."
+  ],
+  "physical_qualification_passed": false,
+  "audit_complete": false
+}

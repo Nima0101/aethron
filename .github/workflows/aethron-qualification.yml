@@ -122,6 +122,10 @@ jobs:
             IngressProbe < "$RUNNER_TEMP/qualification-audit/requests.hex" > "$RUNNER_TEMP/qualification-audit/responses.jsonl"
           python -m qualification.technology.compare_ingress \
             --responses "$RUNNER_TEMP/qualification-audit/responses.jsonl" > "$RUNNER_TEMP/qualification-audit/comparison.json"
+      - name: Retain empty request rows and enforce transport budget
+        run: |
+          QUALIFICATION_AUDIT_CLASSPATH="$RUNNER_TEMP/qualification-audit:$RUNNER_TEMP/qualification-audit/jackson-core.jar" \
+            python -m unittest qualification.tests.java_transport -v
       - name: Reproduce byte ownership and hash primitive comparison
         run: |
           node --v8-pool-size=1 qualification/technology/hash-probe.mjs > "$RUNNER_TEMP/qualification-audit/hash-node.json"
