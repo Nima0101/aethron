@@ -5,6 +5,7 @@ import importlib.util
 import json
 import unittest
 from contextlib import contextmanager
+from pathlib import Path
 from unittest.mock import patch
 
 import test_fleet_policy as fixtures
@@ -204,6 +205,26 @@ class FleetPlanTests(unittest.TestCase):
         self.assertEqual(requests, [65536, 65536, 65536, 17, 1])
         self.assertEqual((snapshot / artifact.name).read_bytes(), payload)
         self.assertEqual(pins[artifact.name], hashlib.sha256(payload).hexdigest())
+
+    def test_snapshot_cleanup_error_prevents_both_durable_updates(self):
+        module = self.module()
+        original = module.tempfile.TemporaryDirectory
+        removed = []
+
+        @contextmanager
+        def failed_cleanup(*args, **kwargs):
+            with original(*args, **kwargs) as temporary:
+                yield temporary
+            if kwargs.get("prefix") == "aethron-fleet-plan-":
+                removed.append(temporary)
+                raise OSError("private cleanup diagnostic")
+
+        with patch.object(module.tempfile, "TemporaryDirectory", failed_cleanup):
+            self.reject()
+        self.assertEqual(len(removed), 1)
+        self.assertFalse(Path(removed[0]).exists())
+        self.assertFalse(self.journal.exists())
+        self.assertEqual(self.store.read(), FleetFloors(1, 900))
 
     def test_floor_commit_failure_cannot_publish_journal(self):
         with patch.object(self.store, "advance", side_effect=ValueError("injected")):

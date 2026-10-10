@@ -1,30 +1,26 @@
 # Authenticated rollout plan binding v1
 
-The [technology audit v2](fleet-plan-technology-audit-v2.md) supersedes the initial
-technology rationale and adds a trusted-time check after journal initialization.
-Late rejection preserves both committed stores; it never deletes the journal to
-make a retry succeed. The public API, signed format and size/time limits remain.
+The [fresh V3 review](fleet-plan-review-v3.md) confirms bounded streaming and
+corrects the technology and cleanup claims. The [V2 audit](fleet-plan-technology-audit-v2.md)
+retains evidence of the post-journal-commit timing correction. The API, signed
+format and size/time limits remain unchanged.
 
-## Requirements and technology decision (2026-10-10)
+## Requirements and technology decision
 
 Bind signed policy fields and exact software artifact bytes to journal pins, with
-bounded local I/O, restart rollback floors, untrusted source paths and no execution
-side effects. The source directory may change while it is being inspected.
+bounded local I/O, restart rollback floors, mutable source paths and no execution
+side effects. The synchronous Python adapter combines bounded native file reads,
+incremental SHA-256 and private temporary storage. Rust/native and C# adapters can
+implement the same interface without a service or IPC; Erlang/Elixir is also a
+credible candidate. The V3 assessment finds no demonstrated material migration
+winner under this local contract. Tool availability and rewrite cost are not
+selection criteria. No comparative speed or hardware qualification is claimed.
 
-Select a Python adapter with standard-library private temporary directories,
-64KiB streaming copies and the existing OpenSSL verifier. A native Go/Rust
-snapshot service could enforce equivalent file bounds but would add executable
-packaging, IPC and another trust-boundary serialization for this small local
-operation. Direct verification of a mutable directory leaves a second-read
-binding problem. A bounded private snapshot avoids that problem without inventing
-a new signature format or replacing the verifier. Files are removed after checking;
-this component is not a retained artifact cache or installation service.
-
-Primary sources: [Python temporary file/directory semantics](https://docs.python.org/3/library/tempfile.html)
-and [TUF client workflow](https://theupdateframework.github.io/specification/latest/).
-The latter informs authentication, rollback and expiry checks; this component
-makes no TUF conformance claim. Snapshot guarantees assume the trusted local
-process, pinned key and OS temporary-directory isolation remain intact.
+Private copied bytes are checked and hashed; verifying the mutable source and
+then reopening it would leave a binding problem. Snapshot guarantees assume the
+trusted process, pinned key and OS directory isolation remain intact. Cleanup is
+attempted before persistence. This is neither a retained artifact cache nor an
+installation service, and temporary-file deletion is not secure erasure.
 
 ## Input and API
 
@@ -58,13 +54,19 @@ original directory later changes; no directory immutability claim is made.
 5. Resample time again, then exclusively create the bounded journal with the
    copied policy/artifact hashes and authenticated policy version, capacity,
    batch size and validity window.
+6. After journal initialization returns, resample time and require a strict integer
+   no earlier than the creation sample and before exclusive expiry. Return the
+   journal only after this check. This fourth sample is checked, not persisted.
 
 The two durable files are **not a cross-file atomic transaction**. If final expiry,
 exclusive creation or journal persistence fails after the floor commit, floors
 stay advanced. An existing journal and its failures are never overwritten. A
 failed journal initialization may leave an unusable file requiring explicit local
 recovery. Failures use `ValueError("invalid_fleet_plan")`; no lower floor is restored
-to make a retry succeed. Private snapshot cleanup precedes durable success state.
+to make a retry succeed. Expected cleanup failure prevents both durable updates. Successful context exit
+precedes persistence, but a crash or actual removal failure may leave temporary
+files. The trusted host must protect any residue; this API neither guarantees
+secure deletion nor performs a broad temporary-directory sweep.
 
 ## What the result means
 
@@ -81,7 +83,9 @@ I/O stalls may outlast a sampled validity window. Plan creation and reservation
 therefore confer no lasting operation authority. Execution needs its own current
 trust/time/floor checks, content binding and capability admission. Database-backup
 rollback protection, key rotation, recovery of unfinished reservations, network
-fabric, real activation and physical qualification remain separate work.
+fabric and physical qualification remain outside this API. No MLS/CNSA,
+hard-real-time or five-nines assurance is established. Insufficient information
+for tactical deployment.
 
 ## Focused tests
 
@@ -90,3 +94,9 @@ after snapshot copying, artifact/signature tampering, malformed and backward tim
 expiry before and after floor commit, floor commit rejection, existing-journal
 preservation, and missing/link/extra/oversized input members. A sparse oversized
 file tests the size rejection; no large artifact processing or hardware job runs.
+
+Sixteen focused plan tests pass in the V3 review. The added test injects an error
+at snapshot context exit after actual temporary cleanup, verifying the fixed
+public error, no journal and unchanged floors. This validates failure ordering,
+not successful removal under every filesystem fault or process crash. See the
+[source-bound evidence](../verification/fleet-plan-review-v3.json).

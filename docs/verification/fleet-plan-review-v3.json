@@ -1,0 +1,41 @@
+{
+  "audit_policy_version": 3,
+  "component": "P3.4 authenticated snapshot-to-plan binding",
+  "reviewed_head": "3a38b82bedd82bf4c92707d4fec011e27890b192",
+  "decision": "KEEP bounded synchronous streaming; FIX documentation and cleanup failure coverage",
+  "production_change": false,
+  "required_migrations": [],
+  "source_sha256": {
+    "integrations/edge/aethron_edge/runtime/fleet_plan.py": "33078d619070e9407b39f150684ce536f9055b919a98f7fabb6d3ee4f2417911",
+    "tests/integration/test_fleet_plan.py": "46bbb701f1df429a7a8977c5feab10a04ce64e70dde5c4b402ccfff148943216"
+  },
+  "tests": {
+    "plan_methods": 16,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_seconds": 2.622
+  },
+  "new_case": {
+    "name": "test_snapshot_cleanup_error_prevents_both_durable_updates",
+    "injection": "OSError at plan temporary-directory context exit after real removal; nested key context unaffected",
+    "public_error": "invalid_fleet_plan",
+    "journal_created": false,
+    "floors": [
+      1,
+      900
+    ],
+    "temporary_directory_removed": true
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_production": "PASS; no findings"
+  },
+  "retained_negative_evidence": "docs/verification/fleet-plan-technology-audit-v2.json",
+  "limitations": [
+    "No production defect demonstrated; no artificial red-to-green claim.",
+    "Injected context-exit error does not qualify filesystem deletion failures, secure erasure or crash cleanup.",
+    "No candidate speed benchmark or target hardware timing/memory qualification.",
+    "Signed claim function in the same module remains a separate pending review."
+  ]
+}
