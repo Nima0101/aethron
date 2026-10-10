@@ -617,3 +617,17 @@ and [Rust SDK](https://github.com/mavlink/rust-mavlink) were revisited; SDK supp
 does not turn these original prototypes into SDK qualification. No numerical
 deployment memory/startup budget is established. The earliest passive component
 remains PENDING; signing/replay is the next later unreviewed component.
+
+## Identify the SDK backend before interpreting startup costs
+
+VERIFY the earliest passive decoder's dependency and startup boundary with the
+[installed SDK probe](../verification/robotics-sdk-startup-v3.md). The pinned SDK
+selects native CRC acceleration in the ordinary installed path and Python CRC
+when the acceleration import is deliberately blocked. Both reject corruption
+and preserve UNKNOWN/perception-ineligible semantics in the fixed synthetic
+checks. Incremental import/constructor timings, peak RSS and loaded file hashes
+are retained per process, including all slow observations. Installed dependencies
+and actually imported modules are distinguished; no cold-machine, WCET, production
+language winner or completed review is inferred. The safe-embedded addendum was
+read at this checkpoint. Its non-actuating evidence requirements reinforce these
+qualification limits and do not transfer P18/P19 ownership to this lane.
