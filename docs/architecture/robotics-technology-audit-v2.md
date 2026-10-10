@@ -163,3 +163,68 @@ memory-safe native candidate at this same cursor before KEEP/MIGRATE. A larger
 runtime is not justified merely by a shorter synthetic run, and current Python
 is not retained merely because it is deployed. No forward feature work or audit
 completion marker is authorized by these intermediate results.
+
+## Native lifecycle experiment prepared — execution pending
+
+Rust is the next candidate because native bounded storage and language-enforced
+memory safety address the allocation/safety tradeoff left open by the C and
+JavaScript experiments. The [MAVLink Rust project](https://github.com/mavlink/rust-mavlink)
+provides a maintained domain ecosystem, including separately selectable transport
+and signing features. This motivates evaluation, not adoption. The experiment is
+an original two-message implementation, **not a qualification of rust-mavlink**.
+It neither downloads nor incorporates that SDK.
+
+`tests/mavlink/audit_v2/native.rs` uses two fixed sample slots, safe checked slices,
+explicit little-endian conversion, finite-float admission, sequence/clock latches
+and the same provenance fields. `#![forbid(unsafe_code)]` excludes unsafe Rust in
+this crate. Rust's documented
+[`f32::from_le_bytes`](https://doc.rust-lang.org/std/primitive.f32.html#method.from_le_bytes)
+and conversion to f64 preserve the decoded wire value before JSON output. The
+prototype has no network or transmit API. Its Linux RSS measurement reads only
+`/proc/self/status`, outside the receiver implementation.
+
+```sh
+PYTHONPATH=integrations/edge python scripts/robotics_native_audit_v2.py --out build/native-audit-fresh
+```
+
+The harness combines the existing lifecycle and wire corpora: 33 cases and 65
+transitions, including fractional binary32 values and one-byte zero-trimmed
+payloads. Generated Rust constants contain validated inputs only, never expected
+results. The fixture generator rejects source-injection strings, invalid
+operations, excessive sizes and integers beyond its explicitly limited u128
+clock domain. Invalid boolean clock fixtures remain invalid rather than becoming
+numeric timestamps. This finite clock domain is an experiment limitation, not a
+change to the production Python contract.
+
+The hosted job uses its existing compiler, records its verbose version and binary
+hashes, and performs checked and optimized builds with overflow checks and
+warnings-as-errors. Compiler execution is bounded to 30 seconds and each candidate
+process to 10 seconds. Both profiles must pass complete typed state/value/
+provenance parity; the optimized profile has three fresh-process repetitions.
+Failed compiler logs, candidate stdout/stderr, expected outputs and partial
+measurement receipts are retained. Existing output directories cannot be reused.
+The [hosted runner inventory](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md)
+is discovery evidence only: an absent or failing compiler fails this job, never
+silently skips it or installs an unreviewed toolchain.
+
+**Local native execution has not occurred.** This Linux lane has no Rust compiler;
+three attempted runs failed before compilation. The
+[negative receipts](../verification/robotics-native-audit-v2-results.json) retain
+that fact and source hashes. Five native-harness tests pass alongside six prior
+audit methods; the first three native-harness methods were RED before the harness
+existed. Ruff lint/format, Bandit and workflow YAML parsing pass. An initial Ruff
+thread-spawn failure and YAML process-spawn failure on the shared host are retained
+as environment failures; a bounded retry succeeded. Lint also found two omitted
+explicit subprocess `check` flags and an import-order issue, which were fixed.
+These results validate the local Python harness and prior experiments, **not Rust
+syntax, compilation, parity or performance**.
+
+Even after execution, startup results will need careful interpretation: native
+inputs are compiled constants while Python reads JSON and imports the whole SDK
+and corpus encoder. Runtime calls use `black_box` to impede folding input decode
+away. RSS uses Linux VmHWM for Rust versus getrusage for Python; neither is an
+allocation count. No signing/replay, UDP, installed packaging, full integer-domain
+parity, real-time bound or physical qualification is included. Source evidence
+and preliminary code do not establish a production winner. The audit stays at
+component 1, decision **PENDING**, until actual native evidence is reviewed and
+any winning migration is implemented. No completion marker is written.

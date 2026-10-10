@@ -41,9 +41,11 @@ jobs:
         run: python -m unittest test_diagnostic_v1 test_datagram_v1 test_telemetry -v
       - name: Bounded retrospective technology comparisons
         run: |
-          python -m unittest test_wire_audit_v2 test_lifecycle_audit_v2 -v
+          python -m unittest test_wire_audit_v2 test_lifecycle_audit_v2 test_native_audit_v2 -v
           python scripts/robotics_wire_audit_v2.py --out build/robotics-audit/wire
           python scripts/robotics_lifecycle_audit_v2.py --out build/robotics-audit/lifecycle
+      - name: Bounded native lifecycle comparison with hosted compiler
+        run: python scripts/robotics_native_audit_v2.py --out build/robotics-audit/native
       - name: Lint adapter and fixtures
         run: |
           python -m pip install ruff==0.16.10
@@ -56,5 +58,8 @@ jobs:
         if: always()
         with:
           name: bounded-robotics-technology-comparison
-          path: build/robotics-audit/*/result.json
+          path: |
+            build/robotics-audit/*/result.json
+            build/robotics-audit/native/*.log
+            build/robotics-audit/native/expected.json
           if-no-files-found: warn
