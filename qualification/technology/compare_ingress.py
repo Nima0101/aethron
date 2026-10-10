@@ -15,6 +15,7 @@ from pathlib import Path
 
 from aethron._json_bounds import check
 from qualification.evidence import _pairs, _parse_integer, validate
+from qualification.technology import source_snapshot
 from qualification.technology.measurement import peak_bytes, require_untraced
 from qualification.tests.test_evidence import EvidenceTests, encoded
 
@@ -101,12 +102,27 @@ def main():
     if not args.export:
         require_untraced()
     root = Path(__file__).parent
+    sources = source_snapshot.capture(
+        root.parent.parent,
+        (
+            "qualification/technology/IngressProbe.java",
+            "qualification/technology/compare_ingress.py",
+            "qualification/technology/measurement.py",
+            "qualification/technology/ingress-vectors-v1.json",
+            "qualification/evidence.py",
+            "aethron/_json_bounds.py",
+            "qualification/rigs/synthetic-v1.json",
+            "qualification/tests/test_evidence.py",
+            "qualification/technology/source_snapshot.py",
+        ),
+    )
     vectors = json.loads((root / "ingress-vectors-v1.json").read_text())
     requests = [(bytes.fromhex(row["hex"]), 1050) for row in vectors] + collect()
     transport = "\n".join(raw.hex() for raw, _ in requests) + "\n"
     if len(requests) > 256 or len(transport) > 8 * 1024 * 1024:
         raise RuntimeError("audit_transport_budget")
     if args.export:
+        source_snapshot.verify(root.parent.parent, sources)
         print(transport, end="")
         return 0
     with args.responses.open("rb") as source:
@@ -141,6 +157,7 @@ def main():
         validate(padded, now_ms=1050)
         samples.append(time.perf_counter_ns() - start)
     peak = peak_bytes(validate, padded, now_ms=1050)
+    source_snapshot.verify(root.parent.parent, sources)
     report = {
         "audit_policy_version": 3,
         "scope": "Java ingress with unchanged Python semantic oracle; not a Java validator",
@@ -160,19 +177,8 @@ def main():
             "traced_peak_bytes_one_call": peak,
             "acceptance_threshold": None,
         },
-        "source_sha256": {
-            str(path.relative_to(root.parent.parent)): hashlib.sha256(path.read_bytes()).hexdigest()
-            for path in (
-                root / "IngressProbe.java",
-                root / "compare_ingress.py",
-                root / "measurement.py",
-                root / "ingress-vectors-v1.json",
-                root.parent / "evidence.py",
-                root.parent.parent / "aethron/_json_bounds.py",
-                root.parent / "rigs/synthetic-v1.json",
-                root.parent / "tests/test_evidence.py",
-            )
-        },
+        "source_sha256": sources,
+        "source_observation": "equal_before_and_after_workload",
         "physical_qualification_passed": False,
     }
     print(json.dumps(report, indent=2))

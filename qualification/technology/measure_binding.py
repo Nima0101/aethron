@@ -7,12 +7,26 @@ import time
 from pathlib import Path
 
 from qualification.artifacts import verify
+from qualification.technology import source_snapshot
 from qualification.technology.measurement import peak_bytes, require_untraced
 from qualification.tests.test_evidence import encoded, fixture
 
 
 def main():
     require_untraced()
+    root = Path(__file__).parents[2]
+    sources = source_snapshot.capture(
+        root,
+        (
+            "qualification/artifacts.py",
+            "qualification/evidence.py",
+            "aethron/_json_bounds.py",
+            "qualification/tests/test_evidence.py",
+            "qualification/technology/measure_binding.py",
+            "qualification/technology/measurement.py",
+            "qualification/technology/source_snapshot.py",
+        ),
+    )
     inputs = [bytes([value]) * 1048576 for value in range(4)]
     digests = [hashlib.sha256(value).hexdigest() for value in inputs]
     supplied = dict(zip(digests, inputs))
@@ -28,7 +42,7 @@ def main():
         if not report["artifact_bytes_verified"] or report["physical_qualification_passed"]:
             raise RuntimeError("binding_measurement_failed")
     peak = peak_bytes(verify, manifest, supplied, now_ms=1050)
-    root = Path(__file__).parents[2]
+    source_snapshot.verify(root, sources)
     print(
         json.dumps(
             {
@@ -42,17 +56,8 @@ def main():
                 "input_storage_excluded_from_tracing": True,
                 "artifact_counts": report["artifact_counts"],
                 "manifest_sha256": hashlib.sha256(manifest).hexdigest(),
-                "source_sha256": {
-                    name: hashlib.sha256((root / name).read_bytes()).hexdigest()
-                    for name in (
-                        "qualification/artifacts.py",
-                        "qualification/evidence.py",
-                        "aethron/_json_bounds.py",
-                        "qualification/tests/test_evidence.py",
-                        "qualification/technology/measure_binding.py",
-                        "qualification/technology/measurement.py",
-                    )
-                },
+                "source_sha256": sources,
+                "source_observation": "equal_before_and_after_workload",
                 "physical_qualification_passed": False,
             },
             indent=2,

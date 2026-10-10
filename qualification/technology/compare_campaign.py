@@ -1,6 +1,5 @@
 """Bounded SQL aggregation comparison; no physical or hard-real-time claims."""
 
-import hashlib
 import io
 import json
 import platform
@@ -11,7 +10,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from qualification.campaign import evaluate
-from qualification.technology import campaign_sql
+from qualification.technology import campaign_sql, source_snapshot
 from qualification.technology.measurement import peak_bytes, require_untraced
 from qualification.tests.test_campaign import capture, plan_fixture
 from qualification.tests.test_campaign_audit import CampaignAuditTests
@@ -24,6 +23,22 @@ def suite():
 
 def main():
     require_untraced()
+    root = Path(__file__).parents[2]
+    sources = source_snapshot.capture(
+        root,
+        (
+            "aethron/_json_bounds.py",
+            "qualification/evidence.py",
+            "qualification/campaign.py",
+            "qualification/tests/test_evidence.py",
+            "qualification/tests/test_campaign.py",
+            "qualification/tests/test_campaign_audit.py",
+            "qualification/technology/campaign_sql.py",
+            "qualification/technology/compare_campaign.py",
+            "qualification/technology/measurement.py",
+            "qualification/technology/source_snapshot.py",
+        ),
+    )
     stream = io.StringIO()
     runner = unittest.TextTestRunner(stream=stream)
     with patch.object(campaign_sql, "evaluate_sql", wraps=campaign_sql.evaluate_sql) as calls:
@@ -71,7 +86,7 @@ def main():
     allocations = {}
     for name, function in functions.items():
         allocations[name] = peak_bytes(function, raw, rows)
-    root = Path(__file__).parents[2]
+    source_snapshot.verify(root, sources)
     print(
         json.dumps(
             {
@@ -95,20 +110,8 @@ def main():
                     "Tracing excludes preconstructed inputs and native SQLite allocations.",
                     "Whitespace-distinct bytes test input capacity, not independent physical evidence.",
                 ],
-                "source_sha256": {
-                    name: hashlib.sha256((root / name).read_bytes()).hexdigest()
-                    for name in (
-                        "aethron/_json_bounds.py",
-                        "qualification/evidence.py",
-                        "qualification/campaign.py",
-                        "qualification/tests/test_evidence.py",
-                        "qualification/tests/test_campaign.py",
-                        "qualification/tests/test_campaign_audit.py",
-                        "qualification/technology/campaign_sql.py",
-                        "qualification/technology/compare_campaign.py",
-                        "qualification/technology/measurement.py",
-                    )
-                },
+                "source_sha256": sources,
+                "source_observation": "equal_before_and_after_workload",
                 "physical_qualification_passed": False,
             },
             indent=2,

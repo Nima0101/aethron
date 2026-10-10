@@ -9,6 +9,9 @@ not establish completion of all future qualification software or physical qualif
 The [source observation correction](source-observation-v3.md) brackets the three
 review drivers with before/after file checks and qualifies historical source-hash
 claims. Source hashes alone are not proof of executed code.
+The [comparison/measurement follow-up](comparison-source-observation-v3.md)
+applies the same bounded claim to ingress report/export, artifact measurement
+and SQL comparison workloads.
 
 The [measurement lifecycle correction](#follow-up-measurement-lifecycle--2026-10-10)
 qualifies the older allocation results and corrects all three measurement drivers.
