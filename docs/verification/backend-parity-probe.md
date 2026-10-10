@@ -17,6 +17,16 @@ inspect ZIP/metadata and create installation environments through their native
 interfaces; the backend candidates include the Rust implementation in uv_build.
 This fixture is not a comparison of arbitrary runtime languages.
 
+The pure-wheel probe hashes and validates one captured byte snapshot using
+[ZIP file-like input](https://docs.python.org/3/library/zipfile.html#zipfile.ZipFile),
+then supplies its digest to pip's
+[hash-checking mode](https://pip.pypa.io/en/stable/topics/secure-installs/).
+Replacement after the read or contract validation must fail installation before
+the console check or candidate result is emitted. Synthetic mutation tests model
+that admission boundary; four real backend runs passed after this correction.
+This binding does not authenticate the publisher or protect installed files from
+later modification. Native wheel/source-archive snapshot binding remains open.
+
 On 2026-10-10, all four backends passed on Linux x86_64 / CPython 3.13.13.
 Two wall-time samples per backend are diagnostic observations, not a performance
 ranking. Cached state, concurrent load and this small fixture prevent a general

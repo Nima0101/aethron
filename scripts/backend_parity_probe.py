@@ -4,6 +4,7 @@ import argparse
 import configparser
 import email.parser
 import hashlib
+import io
 import json
 import os
 import subprocess
@@ -11,6 +12,7 @@ import sys
 import time
 import zipfile
 from pathlib import Path
+from typing import BinaryIO, Union
 
 BACKENDS = {
     "setuptools": (
@@ -28,7 +30,7 @@ PAYLOAD = {
 }
 
 
-def validate_wheel(wheel: Path, license_bytes: bytes) -> list[str]:
+def validate_wheel(wheel: Union[Path, BinaryIO], license_bytes: bytes) -> list[str]:
     with zipfile.ZipFile(wheel) as archive:
         names = archive.namelist()
         assert len(names) == len(set(names))
@@ -124,8 +126,9 @@ def main() -> None:
             wheels = list(out.glob("*.whl"))
             assert len(wheels) == 1
             wheel = wheels[0]
-            hashes.append(hashlib.sha256(wheel.read_bytes()).hexdigest())
-            payloads.append(validate_wheel(wheel, LICENSE.read_bytes()))
+            wheel_bytes = wheel.read_bytes()
+            hashes.append(hashlib.sha256(wheel_bytes).hexdigest())
+            payloads.append(validate_wheel(io.BytesIO(wheel_bytes), LICENSE.read_bytes()))
         assert hashes[0] == hashes[1], name
         environment = project / "installed"
         subprocess.run(
@@ -145,7 +148,9 @@ def main() -> None:
                 "install",
                 "--no-index",
                 "--no-deps",
-                str(wheel),
+                "--force-reinstall",
+                "--require-hashes",
+                wheel.as_uri() + "#sha256=" + hashes[-1],
             ],
             cwd=ROOT,
             capture_output=True,

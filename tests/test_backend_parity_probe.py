@@ -1,11 +1,18 @@
 """Negative controls for synthetic build evidence, without loading backends."""
 
+import contextlib
+import hashlib
+import io
+import json
 import subprocess
 import sys
 import tempfile
 import unittest
 import zipfile
 from pathlib import Path
+from unittest.mock import patch
+from urllib.parse import urlsplit
+from urllib.request import url2pathname
 
 from scripts import backend_parity_probe as probe
 
@@ -77,3 +84,91 @@ class BackendParityProbe(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("probe_requires_assertions", result.stderr)
             self.assertFalse(output.exists())
+
+    def test_contract_install_and_report_share_snapshot(self):
+        license_bytes = (Path(probe.__file__).resolve().parents[1] / "LICENSE").read_bytes()
+        contents = self.contents()
+        contents["probe_package-0.0.1.dist-info/licenses/LICENSE"] = license_bytes
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w") as archive:
+            for name, body in contents.items():
+                archive.writestr(name, body)
+        original_bytes = buffer.getvalue()
+        digest = hashlib.sha256(original_bytes).hexdigest()
+        read_bytes = Path.read_bytes
+        validate = probe.validate_wheel
+        for mutation in (None, "after_read", "after_validation"):
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as directory:
+                out = Path(directory) / "out # space"
+                wheel = out / "setuptools-fixture/b/probe_package-0.0.1-py3-none-any.whl"
+                installs = []
+                consoles = []
+
+                def read_snapshot(path, mutation=mutation, wheel=wheel):
+                    data = read_bytes(path)
+                    if path == wheel and mutation == "after_read":
+                        path.write_bytes(b"changed after digest read")
+                    return data
+
+                def validate_snapshot(value, license_bytes, mutation=mutation, wheel=wheel):
+                    members = validate(value, license_bytes)
+                    if mutation == "after_validation" and wheel.exists():
+                        wheel.write_bytes(b"changed after contract validation")
+                    return members
+
+                def process(args, installs=installs, consoles=consoles, **kwargs):
+                    if args[1:3] == ["-I", "-c"]:
+                        (Path(args[-1]) / "probe_package-0.0.1-py3-none-any.whl").write_bytes(
+                            original_bytes
+                        )
+                    elif args[1:3] == ["-m", "venv"]:
+                        pass
+                    elif args[1:3] == ["-m", "pip"]:
+                        installs.append(args)
+                        # Model pip's hash admission; a real-pip negative control is retained
+                        # separately. No backend, installer or product is executed here.
+                        url = urlsplit(args[-1])
+                        if url.fragment.startswith("sha256="):
+                            actual = hashlib.sha256(
+                                read_bytes(Path(url2pathname(url.path)))
+                            ).hexdigest()
+                            if actual != url.fragment.removeprefix("sha256="):
+                                return subprocess.CompletedProcess(args, 1, "", "hash mismatch")
+                    else:
+                        consoles.append(args)
+                        return subprocess.CompletedProcess(args, 0, "synthetic-ok\n", "")
+                    return subprocess.CompletedProcess(args, 0, "", "")
+
+                with (
+                    patch.object(
+                        sys,
+                        "argv",
+                        [
+                            probe.__file__,
+                            "--tools",
+                            directory,
+                            "--out",
+                            str(out),
+                            "--backend",
+                            "setuptools",
+                        ],
+                    ),
+                    patch.object(Path, "read_bytes", read_snapshot),
+                    patch.object(probe, "validate_wheel", validate_snapshot),
+                    patch.object(probe.subprocess, "run", side_effect=process),
+                    contextlib.redirect_stdout(io.StringIO()),
+                ):
+                    if mutation:
+                        with self.assertRaises(subprocess.CalledProcessError):
+                            probe.main()
+                        self.assertFalse((out / "results.json").exists())
+                        self.assertEqual(consoles, [])
+                    else:
+                        probe.main()
+                        self.assertEqual(
+                            json.loads((out / "results.json").read_text())[0]["sha256"], digest
+                        )
+                    self.assertEqual(len(installs), 1)
+                    self.assertEqual(installs[0][-1], wheel.as_uri() + "#sha256=" + digest)
+                    self.assertIn("--require-hashes", installs[0])
+                    self.assertIn("--force-reinstall", installs[0])
