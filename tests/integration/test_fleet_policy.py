@@ -1,5 +1,6 @@
 """Signed fleet configuration admission, without deployment or host operations."""
 
+import base64
 import hashlib
 import json
 import subprocess
@@ -109,6 +110,87 @@ class FleetPolicyTests(unittest.TestCase):
     def test_corrupt_signature_never_loads(self):
         self.sign()
         (self.bundle / "manifest.sig").write_bytes(bytes(64))
+        self.rejected()
+
+    def test_same_length_rsa_signature_cannot_select_a_different_algorithm(self):
+        # Synthetic weak key only: demonstrates that 64 bytes do not imply Ed25519.
+        self.run_crypto(
+            "genpkey",
+            "-algorithm",
+            "RSA",
+            "-pkeyopt",
+            "rsa_keygen_bits:512",
+            "-out",
+            str(self.private),
+        )
+        self.run_crypto("pkey", "-in", str(self.private), "-pubout", "-out", str(self.public))
+        self.sign()
+        self.assertEqual((self.bundle / "manifest.sig").stat().st_size, 64)
+        self.rejected()
+
+    def test_verifier_uses_pinned_key_bytes_when_original_path_changes(self):
+        self.sign()
+        other_private = self.root / "other-key"
+        other_public = self.root / "other-public"
+        self.run_crypto("genpkey", "-algorithm", "ED25519", "-out", str(other_private))
+        self.run_crypto("pkey", "-in", str(other_private), "-pubout", "-out", str(other_public))
+
+        def replace_original_key(bundle, key):
+            self.public.write_bytes(other_public.read_bytes())
+            return verify_bundle(bundle, key)
+
+        with patch("aethron_edge.runtime.fleet_policy.verify_bundle", replace_original_key):
+            self.assertEqual(self.load().bundle_version, 3)
+
+    def test_key_profile_rejects_malformed_or_ambiguous_input_before_verification(self):
+        self.sign()
+        valid = self.public.read_bytes()
+        der = base64.b64decode(b"".join(valid.splitlines()[1:-1]))
+
+        def pem(value):
+            return (
+                b"-----BEGIN PUBLIC KEY-----\n"
+                + base64.b64encode(value)
+                + b"\n-----END PUBLIC KEY-----\n"
+            )
+
+        encoded = base64.b64encode(der)
+        alphabet = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+        noncanonical = encoded[:-2] + bytes([alphabet[alphabet.index(encoded[-2]) + 1]]) + b"="
+        cases = [
+            b"",
+            valid.replace(encoded, b"!" + encoded[1:]),
+            valid.replace(encoded, noncanonical),
+            valid + valid,
+            b"comment\n" + valid,
+            valid + b"comment\n",
+            valid.ljust(1025),
+            valid.replace(b"PUBLIC KEY", b"PRIVATE KEY"),
+            pem(der[:8] + b"\x6e" + der[9:]),  # X25519 OID, not Ed25519.
+            pem(der + b"\x00"),
+            pem(der[:-1]),
+            pem(bytes.fromhex("302c300706032b65700500032100") + der[12:]),
+            pem(der[:11] + b"\x01" + der[12:]),  # Nonzero unused-bit count.
+        ]
+        for raw in cases:
+            with self.subTest(size=len(raw)):
+                self.public.write_bytes(raw)
+                with patch("aethron_edge.runtime.fleet_policy.verify_bundle") as verifier:
+                    self.rejected()
+                    verifier.assert_not_called()
+
+    def test_regular_key_file_required_and_pem_line_wrapping_is_preserved(self):
+        self.sign()
+        valid = self.public.read_bytes()
+        lines = valid.splitlines()
+        self.public.write_bytes(
+            b"\r\n".join([lines[0], lines[1][:20], lines[1][20:], lines[2]]) + b"\r\n"
+        )
+        self.assertEqual(self.load().bundle_version, 3)
+        self.public.unlink()
+        target = self.root / "key-target"
+        target.write_bytes(valid)
+        self.public.symlink_to(target)
         self.rejected()
 
     def test_policy_must_be_a_signed_bundle_member(self):

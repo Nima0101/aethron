@@ -1,6 +1,8 @@
 """Signed local fleet-policy admission; no transport, installation or actuation."""
 
+import base64
 import hashlib
+import tempfile
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -27,6 +29,31 @@ def _integer(value, low, high):
     return type(value) is int and low <= value <= high
 
 
+def _ed25519_public_key(path: Path) -> bytes:
+    """Admit only the fixed RFC 8410 Ed25519 SPKI shape, not generic ASN.1."""
+    with regular_reader(path, 1024) as (stream, _):
+        raw = stream.read(1025)
+    lines = raw.splitlines()
+    if (
+        len(raw) > 1024
+        or len(lines) < 3
+        or lines[0] != b"-----BEGIN PUBLIC KEY-----"
+        or lines[-1] != b"-----END PUBLIC KEY-----"
+    ):
+        raise ValueError()
+    encoded = b"".join(lines[1:-1])
+    der = base64.b64decode(encoded, validate=True)
+    # SEQUENCE { SEQUENCE { OID 1.3.101.112 }, BIT STRING (0 unused bits, 32 bytes) }.
+    # Parameters must be absent. No alternate algorithm, trailing DER or BER lengths.
+    if (
+        len(der) != 44
+        or der[:12] != bytes.fromhex("302a300506032b6570032100")
+        or base64.b64encode(der) != encoded
+    ):
+        raise ValueError()
+    return b"-----BEGIN PUBLIC KEY-----\n" + encoded + b"\n-----END PUBLIC KEY-----\n"
+
+
 @dataclass(frozen=True)
 class FleetPolicy:
     """Configuration only: execution must reverify trust, time and rollback state."""
@@ -47,7 +74,13 @@ def load_fleet_policy(
         if not _integer(now_unix_s, 0, 2**53 - 1) or not _integer(minimum_version, 1, 2**31 - 1):
             raise ValueError()
         bundle = Path(bundle)
-        manifest = verify_bundle(bundle, Path(public_key))
+        key = _ed25519_public_key(Path(public_key))
+        # Bind the admitted algorithm and bytes to the verifier's actual input.
+        # Reading the caller's key path again would reopen the selection race.
+        with tempfile.TemporaryDirectory(prefix="aethron-fleet-key-") as temporary:
+            pinned_key = Path(temporary) / "public.pem"
+            pinned_key.write_bytes(key)
+            manifest = verify_bundle(bundle, pinned_key)
         expected = manifest["files"]["fleet-policy.json"]
         with regular_reader(bundle / "fleet-policy.json", 2048) as (stream, _):
             raw = stream.read(2049)
