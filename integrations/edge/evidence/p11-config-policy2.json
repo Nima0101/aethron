@@ -1,0 +1,71 @@
+{
+  "audit_policy_version": 2,
+  "constraints": [
+    "Offline administrator-local UTF-8 configuration; one bounded read of at most 65537 bytes, 65536-byte admission, depth eight before JSON allocation.",
+    "Reject ambiguous duplicate keys including escaped equivalents, noninteger versions and malformed replay paths before opening recording; fixed errors without input echo.",
+    "Preserve installed core Session/replay semantics and valid report bytes; no sensor threshold or qualification change."
+  ],
+  "decision": "KEEP CPython stdlib JSON with duplicate-preserving object_pairs_hook for offline CLI configuration admission only",
+  "limits": [
+    "Synthetic timings on a shared Linux host are illustrative, not latency qualification or a throughput ranking.",
+    "Nuitka standalone compilation is a credible deployment alternative; not compiled in this bounded configuration-decoder slice and not ruled out for P1.1 packaging.",
+    "No P1.1 completion claim: installed packaging, replay orchestration and native bounds must still be reassessed under policy v2.",
+    "No hosted CI or physical qualification claimed."
+  ],
+  "msgspec": "0.22.0",
+  "official_sources": [
+    "https://docs.python.org/3/library/json.html",
+    "https://github.com/msgspec/msgspec",
+    "https://github.com/ijl/orjson",
+    "https://tc39.es/ecma262/multipage/structured-data.html#sec-json.parse",
+    "https://nuitka.net/user-documentation/user-manual.html"
+  ],
+  "orjson": "3.13.0",
+  "python": "3.13.13",
+  "qualified": false,
+  "rationale": "Native C msgspec and Rust/C orjson decode faster on this tiny input but lose duplicate-key information. A measured semantics-preserving adapter parses twice and has no advantage for a once-per-invocation configuration. ECMAScript JSON.parse also collapses duplicates. KEEP is specific to this configuration boundary, not the runtime or full P1.1 milestone.",
+  "results": {
+    "msgspec_C": {
+      "duplicate_admission": [
+        "accept",
+        "accept"
+      ],
+      "median_us_per_decode": 0.2507059834897518,
+      "stdlib_duplicate_guard_plus_codec_us": 45.11576355434954
+    },
+    "node_ECMAScript": {
+      "duplicate_admission": [
+        "accept",
+        "accept"
+      ],
+      "version": "v22.23.2"
+    },
+    "orjson_Rust_C": {
+      "duplicate_admission": [
+        "accept",
+        "accept"
+      ],
+      "median_us_per_decode": 0.3250839654356241,
+      "stdlib_duplicate_guard_plus_codec_us": 8.163728518411517
+    },
+    "stdlib_pairs": {
+      "duplicate_admission": [
+        "reject",
+        "reject"
+      ],
+      "median_us_per_decode": 5.711541511118412
+    }
+  },
+  "scope": "P1.1 CLI configuration decoder only",
+  "source_sha256": {
+    "integrations/edge/aethron_edge/cli.py": "ea808d8b5a75571dcc82414d6ce4d48cda701debf9f22760d09e9cbbc3decd08",
+    "integrations/edge/requirements-json-probe.lock": "418979c02513c2df98ff35959a059c4c7eee274ecf152147cd21cec11eb846cd",
+    "scripts/edge_replay_config_profile.py": "2489441a36700b3c6fcf89af4818991a6a736e9de00b7b63e05698eadf5ba710",
+    "tests/integration/test_replay_config.py": "4e3abb350b57880c28e7b2848eac55b12d014881869342cd16934ead1abc0e36"
+  },
+  "verification": {
+    "checks": "Ruff check/format, Bandit production scan and diff whitespace checked separately; hosted workflow extended, pending execution.",
+    "regression": "Initial four methods: ten failing subtests and twelve errors; retained locally in build/technology-p11-policy2/red.log. Final five admission methods PASS; six existing replay contract methods PASS.",
+    "security": "Bandit 1.9.4: unchanged pre-existing B606 LOW os.execv in run/update branch, before line108 / after line143; zero new findings. Fixed-error and pre-allocation admission regressions PASS. Existing finding retained, not suppressed."
+  }
+}

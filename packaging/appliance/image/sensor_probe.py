@@ -1,4 +1,13 @@
-"""Bounded guest-only raw sensor observations; no frame storage or semantic claims."""
+"""Guest-only raw sensor diagnostics; no frame storage or semantic claims.
+
+At most four profiles are retained, but aggregate counters grow with the run.
+Trusted callers supply mappings and monotonic integer milliseconds in one clock
+domain. This observer does not authenticate status or validate its host clock.
+``processing_at_end`` means progress was reported within the inclusive preceding
+2000 ms; a later fault, stalled counter or invalid sample does not clear that
+recent-activity window. Recovery/update flags retain historical observations.
+These fields do not establish continuous availability or current device health.
+"""
 
 import re
 
