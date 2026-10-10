@@ -28,6 +28,8 @@ worker queues or asynchronous producers. No speed superiority, lock fairness, ha
 real-time, RSS bound or P18 hardware qualification is claimed. Reopen selection for
 native deployment or measured contention. Capacity and lifecycle contract tests are the
 decisive executable evidence, not interpreter availability or existing language usage.
+The [V3 review](../../engineering/reviews/p16-inbox-v3.md) rechecks the technology choice
+and documents the retention, rejection and shutdown limits.
 
 ## API and frozen bounds
 
@@ -44,13 +46,25 @@ head), then applies quotas or takes one item. Equal timestamps are valid. Invali
 or rollback clears held references and permanently closes the inbox; recovery requires
 a new instance and an independently trusted clock. `close()` clears references and is
 idempotent. No physical memory-erasure guarantee is made.
+Closing affects this inbox's queued references only. It neither cancels consumer work
+nor erases payloads held in previously returned results or other caller references.
 
 Full queues reject incoming entries without dropping older live entries. Rejected
 payloads are not retained. Invalid peer/payload/deadline returns a fixed error. Reports
-include current item/payload-byte counts; only successful `take` includes payload and
+from rejected `put` calls can reflect purged entries and an advanced clock floor: clock
+validation and expiry processing precede payload validation. Rejection does not roll
+back those lifecycle updates. An invalid/rolled-back clock closes the inbox even when
+the accompanying incoming payload is invalid.
+Reports include current item/payload-byte counts; only successful `take` includes payload and
 peer. All reports have `execution_authority=false`, `motion_authority=false`, and
 `evidence_verified=false`. This is logical retained-byte accounting,
 not an allocator/RSS or systemwide rate limit. At most 16 entries are inspected per call.
-Capacity operations do not wait for free capacity; the short state lock can contend.
+Capacity operations do not wait for free capacity; acquiring the state lock can block,
+including in `close()`. There is no lock-wait or shutdown-latency bound.
 Concurrent calls are serialized by lock acquisition, without a fairness guarantee.
 Expiry is checked at admission/dequeue; an idle instance does not run a purge timer.
+The supplied time is not refreshed after lock acquisition or before return. Consumers
+must recheck freshness at use. Counts are operation snapshots, and exclude dequeued
+payloads retained elsewhere. Suppressing payload in `repr` is not general redaction:
+`dataclasses.asdict` includes the payload. Do not log/serialize whole results as though
+they were metadata-only reports. Peer aliases are not authenticated by this primitive.

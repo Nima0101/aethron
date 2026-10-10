@@ -3,6 +3,7 @@
 import json
 import unittest
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import asdict
 from pathlib import Path
 from threading import Barrier
 
@@ -10,6 +11,46 @@ from aethron.interop_inbox import BoundedInbox
 
 
 class InboxTests(unittest.TestCase):
+    def test_rejected_put_still_purges_and_advances_clock(self):
+        q = BoundedInbox()
+        q.put("peer", b"expired", now_ms=0, expires_at_ms=10)
+        q.put("peer", b"current", now_ms=0, expires_at_ms=20)
+        result = q.put("peer", b"", now_ms=10, expires_at_ms=20)
+        self.assertEqual(
+            (result.reason, result.items, result.payload_bytes), ("invalid_input", 1, 7)
+        )
+        self.assertIsNone(result.payload)
+        self.assertEqual(q.take(now_ms=10).payload, b"current")
+        self.assertEqual(q.take(now_ms=9).reason, "clock_fault")
+        self.assertEqual(q.take(now_ms=10).reason, "closed")
+
+    def test_close_does_not_erase_previously_dequeued_bytes(self):
+        q = BoundedInbox()
+        payload = b"public synthetic artifact"
+        q.put("peer", payload, now_ms=0, expires_at_ms=10)
+        taken = q.take(now_ms=1)
+        self.assertEqual((taken.status, taken.items, taken.payload_bytes), ("dequeued", 0, 0))
+        q.close()
+        closed = q.take(now_ms=2)
+        self.assertEqual((closed.reason, closed.items, closed.payload_bytes), ("closed", 0, 0))
+        self.assertIsNone(closed.payload)
+        self.assertEqual(taken.payload, payload)
+        # repr suppression is not redaction for other serialization methods.
+        self.assertNotIn(payload.decode(), repr(taken))
+        self.assertEqual(asdict(taken)["payload"], payload)
+        for field in ("execution_authority", "motion_authority", "evidence_verified"):
+            self.assertIs(asdict(taken)[field], False)
+
+    def test_invalid_put_clock_closes_without_retaining_incoming_payload(self):
+        q = BoundedInbox()
+        q.put("peer", b"old", now_ms=10, expires_at_ms=20)
+        result = q.put("peer", b"new", now_ms=9, expires_at_ms=20)
+        self.assertEqual((result.reason, result.items, result.payload_bytes), ("clock_fault", 0, 0))
+        self.assertIsNone(result.payload)
+        self.assertIsNone(result.peer)
+        self.assertIsNone(result.expires_at_ms)
+        self.assertEqual(q.take(now_ms=11).reason, "closed")
+
     def test_concurrent_admission_cannot_overbook(self):
         q = BoundedInbox(max_items=8, max_bytes=8, max_per_peer=8)
         barrier = Barrier(2)
