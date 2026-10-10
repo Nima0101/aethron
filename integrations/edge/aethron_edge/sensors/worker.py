@@ -13,7 +13,9 @@ def replay_worker(profile, send, stop):
 
     Cancellation is cooperative; blocking file I/O or a send callback has no
     deadline here. Supervisor termination is separate. A failing fault-message
-    sink can raise, so this function does not guarantee delivery of a final fault.
+    sink can propagate private exception text and the original error context.
+    Interrupts can escape without a final fault. Only the diagnostic message is
+    sanitized; callers must not expose propagated exceptions as public output.
     """
     batches = 0
     provider = None
@@ -88,7 +90,7 @@ def replay_worker(profile, send, stop):
             if stop.wait(0.05):
                 return
     except Exception:
-        # No source paths, raw payload, calibration or exception details leave worker.
+        # Fixed message fields omit input details; callback exceptions may propagate.
         publish("fault")
     finally:
         if provider is not None:
