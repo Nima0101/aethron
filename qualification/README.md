@@ -83,6 +83,10 @@ report = evaluate(
 )
 ```
 
+The separate [campaign reference byte checker](campaign-references-v1.md) matches
+supplied domain/procedure bytes to the plan's hashes. It does not authenticate
+those references, approve their contents or change campaign qualification flags.
+
 ## Technology decision and execution plan
 
 The [current declaration review](technology/review-v3.md) records deployment
