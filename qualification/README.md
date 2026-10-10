@@ -79,16 +79,18 @@ report = evaluate(
 
 ## Technology decision and execution plan
 
-Requirements: portable offline execution, bounded untrusted JSON, duplicate-key
-rejection, exact scalar types, cross-record rig/time binding and zero additional
-runtime dependencies. The [Python JSON documentation](https://docs.python.org/3.13/library/json.html)
-provides duplicate-pair and nonfinite hooks; explicit byte/depth limits are still
-needed. [JSON Schema object validation](https://json-schema.org/understanding-json-schema/reference/object)
-can reject extra properties but needs separate cross-record logic. A compiled
-Rust parser is another option but adds a build step without a demonstrated
-throughput requirement for a 64 KiB offline document. Choose Python standard
-library with an explicit versioned schema and semantic checks. Sources reviewed
-2026-10-09. No generic JSON Schema conformance is claimed.
+The [current declaration review](technology/review-v3.md) records deployment
+constraints, technology alternatives, executable evidence and limitations. The
+earlier [policy-2 experiments](technology/retrospective-v2.md) remain evidence,
+not completion of the current review. A language is not excluded because it
+requires compilation. No generic JSON Schema conformance is claimed.
+
+Declaration success is not live sensor admission. Record age is assessed at
+capture end, and capture age at the supplied evaluation instant; those separate
+100 ms windows can total 200 ms. The v1 input hash binds manifest bytes only,
+not that evaluation instant. A reviewer must retain the supplied instant and
+its clock-domain provenance separately. The digest neither authenticates an
+instrument nor establishes access-control, encryption or certification claims.
 
 Implementation uses `qualification/evidence.py` for parsing/reporting,
 `qualification/__main__.py` for bounded stdin, and `qualification/tests/` for
