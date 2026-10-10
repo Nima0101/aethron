@@ -1,6 +1,6 @@
 # P16–P18 review inventory v3
 
-Snapshot: `8b4bdb04aef99a8c3b6de839f4133c079257efbd`, plus the comparison timing
+Snapshot: `eb324cb2ba0def30766c52c1b77d424dfcdf2759`, plus the mutation evidence
 correction, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
@@ -22,7 +22,7 @@ remain historical inputs. The consumed JSON-bound helper belongs to the foundati
 | Direct federation | [Review](p16-federation-v3.md): KEEP closed pinned table; no enrollment or distributed consensus. |
 | Inbox resource accounting | [Review](p16-inbox-v3.md): KEEP local bounded queue; no transport or hard real-time guarantee. |
 | Packaging evidence | [Review](p16-packaging-v3.md): FIX installed/source identity comparison and [package input coverage](p16-packaging-inputs-v3.md); no full-distribution attestation. |
-| Comparison and mutation probes | FIX optimized-mode evidence loss; [response types](p16-probe-response-v3.md); [capture bounds](p16-probe-capture-v3.md); [tracing lifecycle](p16-probe-tracing-v3.md); [source consistency](p16-probe-snapshot-v3.md); [timing accounting](p16-probe-timing-v3.md); historical source-manifest correction below. |
+| Comparison and mutation probes | FIX optimized-mode evidence loss; [response types](p16-probe-response-v3.md); [capture bounds](p16-probe-capture-v3.md); [tracing lifecycle](p16-probe-tracing-v3.md); [source consistency](p16-probe-snapshot-v3.md); [timing accounting](p16-probe-timing-v3.md); [mutation integrity](p16-mutation-integrity-v3.md); historical source-manifest correction below. |
 
 ## Missing implementation and unsupported claims
 
@@ -151,3 +151,8 @@ of the five listed files, and hashes the captured fixture bytes it parsed. See t
 [source consistency review](p16-probe-snapshot-v3.md) for remaining race, loaded-code
 and dependency limits. The historical post-execution-only behavior above remains a
 record of the earlier implementation; the trust mutation runner is unchanged here.
+
+The mutation runner now also captures listed source bytes, rejects observable changes,
+and requires the four selected baseline methods to pass before crediting guard-removal
+failures. The [mutation integrity review](p16-mutation-integrity-v3.md) records remaining
+loaded-code and isolation limits; the earlier post-execution-only behavior is historical.

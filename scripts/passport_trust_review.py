@@ -42,26 +42,22 @@ MUTATIONS = (
 )
 
 
+def _run(source, methods):
+    # Contexts restore the imported test verifier and module table on every exit.
+    module = types.ModuleType("aethron._passport_review_mutant")
+    module.__package__ = "aethron"
+    with patch.dict(sys.modules, {module.__name__: module}):
+        exec(compile(source, "<passport-review-mutant>", "exec"), module.__dict__)
+        with patch.object(test_passports, "passports", module):
+            suite = unittest.TestSuite(
+                test_passports.PassportVerificationTests(method) for method in methods
+            )
+            return unittest.TextTestRunner(stream=io.StringIO()).run(suite)
+
+
 def main():
     if sys.flags.optimize:
         raise RuntimeError("optimized_probe_execution_forbidden")
-    source = (ROOT / "aethron/passports.py").read_text()
-    results = []
-    for name, old, new, method in MUTATIONS:
-        assert source.count(old) == 1, "mutation no longer maps uniquely to source"
-        # Alter an isolated module in memory; production files are never rewritten.
-        mutant = types.ModuleType("aethron._passport_review_mutant")
-        mutant.__package__ = "aethron"
-        with patch.dict(sys.modules, {mutant.__name__: mutant}):
-            exec(
-                compile(source.replace(old, new), "<passport-review-mutant>", "exec"),
-                mutant.__dict__,
-            )
-            with patch.object(test_passports, "passports", mutant):
-                suite = unittest.TestSuite([test_passports.PassportVerificationTests(method)])
-                result = unittest.TextTestRunner(stream=io.StringIO()).run(suite)
-        assert result.failures and not result.errors and not result.skipped, name
-        results.append({"guard": name, "expected_assertion_failures": len(result.failures)})
     paths = (
         "aethron/passports.py",
         "aethron/_json_bounds.py",
@@ -69,15 +65,33 @@ def main():
         "scripts/passport_trust_review.py",
         "examples/passports/vectors.json",
     )
+    sources = {path: (ROOT / path).read_bytes() for path in paths}
+    source = sources["aethron/passports.py"].decode("utf-8")
+    baseline = _run(source, [method for _, _, _, method in MUTATIONS])
+    if (
+        not baseline.wasSuccessful()
+        or baseline.skipped
+        or baseline.expectedFailures
+        or baseline.testsRun != len(MUTATIONS)
+    ):
+        raise RuntimeError("mutation_baseline_failed")
+    results = []
+    for name, old, new, method in MUTATIONS:
+        assert source.count(old) == 1, "mutation no longer maps uniquely to source"
+        # Alter an isolated module in memory; production files are never rewritten.
+        result = _run(source.replace(old, new), [method])
+        assert result.failures and not result.errors and not result.skipped, name
+        results.append({"guard": name, "expected_assertion_failures": len(result.failures)})
+    if any((ROOT / path).read_bytes() != raw for path, raw in sources.items()):
+        raise RuntimeError("mutation_source_changed")
     print(
         json.dumps(
             {
                 "review_order_version": 3,
                 "python": platform.python_version(),
-                "source_sha256": {
-                    p: hashlib.sha256((ROOT / p).read_bytes()).hexdigest() for p in paths
-                },
-                "source_scope": "Listed project files read after execution; not an atomic snapshot, loaded-code attestation or dependency closure.",
+                "baseline_tests": baseline.testsRun,
+                "source_sha256": {p: hashlib.sha256(raw).hexdigest() for p, raw in sources.items()},
+                "source_scope": "Listed project files matched before/after execution; mutants compiled from captured passport source. Not an atomic snapshot, loaded-code attestation or dependency closure; transient changes restored between reads are not detected.",
                 "mutations": results,
                 "limit": "In-memory guard-removal tests; not a cryptographic validation or hardware qualification.",
             },

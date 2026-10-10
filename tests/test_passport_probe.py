@@ -45,6 +45,92 @@ class ProbeExecutionTests(unittest.TestCase):
         self.assertEqual(result.stdout, "")
 
 
+class MutationSourceTests(unittest.TestCase):
+    def setUp(self):
+        self.root = Path(__file__).resolve().parents[1]
+        self.main = runpy.run_path(str(self.root / "scripts/passport_trust_review.py"))["main"]
+
+    def test_broken_baseline_cannot_be_credited_as_detected_mutation(self):
+        fixtures = self.main.__globals__["test_passports"]
+        original = fixtures.passports
+        output = io.StringIO()
+
+        def broken_test(case):
+            case.fail("fixture failure unrelated to mutation")
+
+        with (
+            patch.object(
+                fixtures.PassportVerificationTests,
+                "test_unselected_key_metadata_is_not_ignored",
+                broken_test,
+            ),
+            contextlib.redirect_stdout(output),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "mutation_baseline_failed"):
+                self.main()
+        self.assertIs(fixtures.passports, original)
+        self.assertEqual(output.getvalue(), "")
+
+    def test_changed_mutation_source_emits_no_evidence(self):
+        read = Path.read_bytes
+        run = unittest.TextTestRunner.run
+        paths = (
+            "aethron/passports.py",
+            "aethron/_json_bounds.py",
+            "tests/test_passports.py",
+            "scripts/passport_trust_review.py",
+            "examples/passports/vectors.json",
+        )
+        for name in paths:
+            with self.subTest(path=name):
+                state = {"changed": False}
+                output = io.StringIO()
+
+                def run_then_change(runner, suite, phase=state):
+                    result = run(runner, suite)
+                    phase["changed"] = True
+                    return result
+
+                def read_after_change(path, selected=name, phase=state):
+                    raw = read(path)
+                    return raw + b" " if phase["changed"] and path == self.root / selected else raw
+
+                with (
+                    patch.object(unittest.TextTestRunner, "run", run_then_change),
+                    patch.object(Path, "read_bytes", read_after_change),
+                    contextlib.redirect_stdout(output),
+                ):
+                    with self.assertRaisesRegex(RuntimeError, "mutation_source_changed"):
+                        self.main()
+                self.assertEqual(output.getvalue(), "")
+
+    def test_runner_exception_restores_original_verifier(self):
+        fixtures = self.main.__globals__["test_passports"]
+        original = fixtures.passports
+        module_name = "aethron._passport_review_mutant"
+        sentinel = object()
+        for failure in (RuntimeError("runner failed"), KeyboardInterrupt()):
+            with self.subTest(failure=type(failure).__name__):
+                output = io.StringIO()
+
+                def fail_inside_mutation(runner, suite, error=failure):
+                    self.assertIsNot(fixtures.passports, original)
+                    self.assertIs(sys.modules[module_name], fixtures.passports)
+                    raise error
+
+                with (
+                    patch.dict(sys.modules, {module_name: sentinel}),
+                    patch.object(unittest.TextTestRunner, "run", fail_inside_mutation),
+                    contextlib.redirect_stdout(output),
+                ):
+                    with self.assertRaises(type(failure)) as raised:
+                        self.main()
+                    self.assertIs(raised.exception, failure)
+                    self.assertIs(sys.modules[module_name], sentinel)
+                    self.assertIs(fixtures.passports, original)
+                self.assertEqual(output.getvalue(), "")
+
+
 class ProbeResponseTests(unittest.TestCase):
     def setUp(self):
         root = Path(__file__).resolve().parents[1]
@@ -224,6 +310,19 @@ class ProbeResponseTests(unittest.TestCase):
         with contextlib.redirect_stdout(output):
             main()
         report = json.loads(output.getvalue())
+        self.assertEqual(report["baseline_tests"], 4)
+        self.assertEqual(
+            [item["guard"] for item in report["mutations"]],
+            [
+                "unselected_metadata",
+                "effective_expiry",
+                "evidence_revocation",
+                "rejection_metadata",
+            ],
+        )
+        self.assertEqual(
+            sum(item["expected_assertion_failures"] for item in report["mutations"]), 8
+        )
         paths = {
             "aethron/passports.py",
             "aethron/_json_bounds.py",
