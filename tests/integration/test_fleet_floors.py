@@ -2,6 +2,8 @@
 
 import os
 import sqlite3
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -46,6 +48,82 @@ class FleetFloorTests(unittest.TestCase):
             store.read()
         with self.assertRaisesRegex(ValueError, "^invalid_fleet_floor$"):
             store.advance(minimum_version=4, minimum_time_s=2000)
+
+    def test_commits_require_delete_journal_and_extra_synchronization(self):
+        connect = sqlite3.connect
+        observed = []
+
+        class InspectCommit(sqlite3.Connection):
+            def execute(self, sql, parameters=()):
+                if sql == "COMMIT":
+                    observed.append(
+                        (
+                            super().execute("PRAGMA journal_mode").fetchone()[0],
+                            super().execute("PRAGMA synchronous").fetchone()[0],
+                        )
+                    )
+                return super().execute(sql, parameters)
+
+        with patch(
+            "aethron_edge.runtime.fleet_floors.sqlite3.connect",
+            side_effect=lambda *a, **kw: connect(*a, **kw, factory=InspectCommit),
+        ):
+            store = self.initialize()
+            store.advance(minimum_version=4, minimum_time_s=2000)
+        self.assertEqual(observed, [("delete", 3), ("delete", 3)])
+
+    def test_unavailable_durability_settings_reject_before_floor_changes(self):
+        store = self.initialize()
+        connect = sqlite3.connect
+        for ignored in ("synchronous", "journal_mode"):
+
+            class WeakenSettings(sqlite3.Connection):
+                def execute(self, sql, parameters=(), *, setting=ignored):
+                    if sql.startswith(f"PRAGMA {setting}="):
+                        sql = f"PRAGMA {setting}=" + (
+                            "OFF" if setting == "synchronous" else "MEMORY"
+                        )
+                    return super().execute(sql, parameters)
+
+            with self.subTest(ignored=ignored):
+                with patch(
+                    "aethron_edge.runtime.fleet_floors.sqlite3.connect",
+                    side_effect=lambda *a, **kw: connect(*a, **kw, factory=WeakenSettings),
+                ):
+                    with self.assertRaisesRegex(ValueError, "^invalid_fleet_floor$"):
+                        store.advance(minimum_version=4, minimum_time_s=2000)
+                self.assertEqual(
+                    (store.read().minimum_version, store.read().minimum_time_s), (3, 1000)
+                )
+
+    def test_abrupt_process_exit_preserves_only_committed_pair(self):
+        store = self.initialize()
+        program = """
+import os, sys
+from pathlib import Path
+from aethron_edge.runtime.fleet_floors import FleetFloorStore
+store = FleetFloorStore(Path(sys.argv[1]))
+if sys.argv[2] == 'before_commit':
+    with store.guarded_advance(minimum_version=5, minimum_time_s=2000):
+        os._exit(73)
+else:
+    store.advance(minimum_version=5, minimum_time_s=2000)
+    os._exit(74)
+"""
+        for phase, code, expected in (
+            ("before_commit", 73, (3, 1000)),
+            ("after_commit", 74, (5, 2000)),
+        ):
+            with self.subTest(phase=phase):
+                child = subprocess.run(
+                    [sys.executable, "-c", program, str(self.path), phase],
+                    timeout=10,
+                    check=False,
+                    capture_output=True,
+                )
+                self.assertEqual(child.returncode, code, child.stderr.decode())
+                floor = store.read()
+                self.assertEqual((floor.minimum_version, floor.minimum_time_s), expected)
 
     def test_reopen_preserves_both_committed_floors(self):
         store = self.initialize()

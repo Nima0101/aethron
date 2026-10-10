@@ -74,8 +74,13 @@ class FleetFloorStore:
             )
             connection.setlimit(sqlite3.SQLITE_LIMIT_LENGTH, 4096)
             connection.execute("PRAGMA trusted_schema=OFF")
-            connection.execute("PRAGMA journal_mode=DELETE")
-            connection.execute("PRAGMA synchronous=FULL")
+            if connection.execute("PRAGMA journal_mode=DELETE").fetchone() != ("delete",):
+                raise ValueError()
+            # DELETE-mode durability also requires syncing the journal directory
+            # after unlink. FULL alone can lose the last acknowledged transaction.
+            connection.execute("PRAGMA synchronous=EXTRA")
+            if connection.execute("PRAGMA synchronous").fetchone() != (3,):
+                raise ValueError()
             connection.execute("PRAGMA max_page_count=256")
             yield connection
         except (OSError, sqlite3.Error, ValueError):
