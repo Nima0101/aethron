@@ -1,7 +1,7 @@
 # P16–P18 review inventory v3
 
-Snapshot: `eb324cb2ba0def30766c52c1b77d424dfcdf2759`, plus the mutation evidence
-correction, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `009eb01fe054db5d48cec2d5298fa71e4d85aa6c`, plus inbox/federation
+composition tests, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -21,6 +21,7 @@ remain historical inputs. The consumed JSON-bound helper belongs to the foundati
 | Bundle verification | [Review](p16-bundle-v3.md): KEEP snapshot composition; all revocation lists rechecked. |
 | Direct federation | [Review](p16-federation-v3.md): KEEP closed pinned table; no enrollment or distributed consensus. |
 | Inbox resource accounting | [Review](p16-inbox-v3.md): KEEP local bounded queue; no transport or hard real-time guarantee. |
+| Inbox/federation composition | [Review](p16-delivery-boundary-v3.md): KEEP primitives; ADD real-API expiry, revocation, revision-floor and close traces. Caller refresh and in-flight cancellation are not implemented. |
 | Packaging evidence | [Review](p16-packaging-v3.md): FIX installed/source identity comparison and [package input coverage](p16-packaging-inputs-v3.md); no full-distribution attestation. |
 | Comparison and mutation probes | FIX optimized-mode evidence loss; [response types](p16-probe-response-v3.md); [capture bounds](p16-probe-capture-v3.md); [tracing lifecycle](p16-probe-tracing-v3.md); [source consistency](p16-probe-snapshot-v3.md); [timing accounting](p16-probe-timing-v3.md); [mutation integrity](p16-mutation-integrity-v3.md); historical source-manifest correction below. |
 
@@ -42,6 +43,7 @@ external gates. No whole-phase completion can be inferred from the rows above.
 | P18 timestamp reconciliation and synchronization health | Caller-supplied times in P16 do not establish device clock provenance or synchronization. |
 | P18 scheduling, backpressure and overload | Local inbox accounting does not establish a deterministic end-to-end processing pipeline. |
 | P18 latency/jitter and hardware-in-loop evidence | No identified target hardware class, workload or retained target measurements. Desktop probe samples are insufficient. |
+| P19 enterprise product acceptance, including P19.7 Help Center | Newly assigned integration scope; no integrated installed-distribution acceptance or offline bilingual help coverage established. Software delivery remains unfinished; final qualification also depends on earlier applicable gates. |
 | MLS, CNSA, five-nines and zero-SPOF claims | None established by the owned software/tests. Insufficient information for tactical deployment. |
 | Targeting, weapon integration, unauthorized radio operations and durable person re-identification | Excluded; not represented as pending implementable features. Independent defensive assurance remains available. |
 
