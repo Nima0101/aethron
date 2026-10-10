@@ -23,6 +23,13 @@ abbreviated time options are rejected with exit 2, including repeated identical
 values. This prevents an appended option from silently replacing the instant.
 The stdin byte limit bounds admission size, not how long a pipe may take to
 produce input; callers own process supervision and input/output deadlines.
+The command flushes its report before returning a declaration status. Its `main()`
+maps write/flush errors to status 2 and the fixed diagnostic when stderr is writable.
+Output is not atomic: a failed write or flush can leave partial or complete JSON.
+Consumers must check process status and parse a complete report. Interpreter
+shutdown or failed stderr can independently alter the final process status or
+diagnostics; flushing is not durable storage or downstream acknowledgement.
+See the [output boundary review](technology/report-output-review-v3.md).
 
 Reports contain the input SHA-256 and aggregate counts, not rig/sensor IDs,
 device digests, timestamps, measurements or input error text. The input digest

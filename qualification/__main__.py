@@ -25,10 +25,12 @@ def main():
     try:
         args = parser.parse_args()
         report = validate(sys.stdin.buffer.read(MAX_BYTES + 1), now_ms=args.now_ms)
+        print(
+            json.dumps(report, sort_keys=True, separators=(",", ":"), allow_nan=False), flush=True
+        )
     except (ValueError, OSError):
         print("invalid_qualification_manifest", file=sys.stderr)
         return 2
-    print(json.dumps(report, sort_keys=True, separators=(",", ":"), allow_nan=False))
     return 0 if report["declaration_checks_passed"] else 1
 
 
