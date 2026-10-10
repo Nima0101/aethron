@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline": "5d9c0bcfefacf2fd3c7388c0ed1c2a21938db345",
+  "component": "hosted archive-to-install conformance gate",
+  "finding": "Archive inspection and checkout installation existed separately; no archive installation stage.",
+  "validation": {
+    "focused_methods": 22,
+    "adr_methods": 4,
+    "skips": 0,
+    "existing_installed_cases": 50,
+    "actionlint": "PASS",
+    "new_runtime_red_test": false,
+    "hosted_archive_install": "UNOBSERVED"
+  },
+  "source_sha256": {
+    ".github/workflows/aethron-passports.yml": "7dfc38283541ad2990182612cdedb732d6d1569f1b5ee06589ddcd17fa5abc76",
+    "scripts/passport_install_check.py": "83e38c1e33df2dd7f9178ae2a60a90d5f08ec362e3f9613ba0743f0756ca60d9",
+    "scripts/passport_installed_vectors.py": "4712d6acce39300be12e47f35cd79ac7a7583bbbf7dd2c5d4a6c2cbaa49533e3",
+    "scripts/passport_sdist_check.py": "6550689de5eafb0ca35d4dc6399f16c73f9746e470d0844048c6773abeae8f3e",
+    "pyproject.toml": "c5e3d4d7dd65acd3d3c04baf7f53b49b5ef99db6231fa610f1e144f17eec4b0e",
+    "setup.py": "3225e55c87758412823021749c2f4219103b77cf2de8ab7ee18199551bd02071",
+    "requirements-passport-sensor-conformance.txt": "b6b85e1f3f15fa42ee3d3676bd1a95b0800a672c38106a9a1d8366f818f3393d",
+    "requirements-passports.txt": "f6a456c822fb9de2a51699bdbacf232070362b51371790526c4a33b2a09fd801",
+    "docs/decisions/p16-sdist-install-v3.json": "611ccb62b99098e26997afc932946dd810b5773a5d371bc14b0a59d14660bc97",
+    "docs/engineering/reviews/p16-sdist-install-v3.md": "6a59ddc1e32a524321c25ab4295f228296ae19aed994842e02163536f83ed3fd",
+    "tests/test_passport_install_check.py": "c1cda03dab42b3ff48afb537d363154cfc219f6f1948ab329b23c972f8f0e520",
+    "tests/packaging/test_passport_manifest.py": "30d35a49196113c09cb1745a26a9201cc18e6270e6f7653c2c340029977f69cf",
+    "tests/packaging/test_passport_sdist.py": "5a41f7517791c9e6691a0a99004c2258b5b40901d51ff1cd7e82d04e5ee89819",
+    "tests/test_passport_schemas.py": "494e0b7345892bb2cfea3109f8c05735e8328f0cbf4de5b5319913a585ee0cb7"
+  },
+  "runtime_log_sha256": {
+    "sdist-install-actionlint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdist-install-adr.log": "17e59c2d1e469c433b3592543a89286594d09aa4fb18de6b46bed4f9e452ee6a",
+    "sdist-install-existing-vectors.json": "e503b80eaf33004a70cdaa3ea788cffb330f6781c1bc9304af21bbe884c19857",
+    "sdist-install-focused.log": "822e81ffc84438b4bb16165018e6258ed0af49f74b8a3f4710c31212b3782737"
+  },
+  "limits": [
+    "Configuration and reused checker tests only; no new local build/install or hosted execution.",
+    "Not full release reproducibility, customer installation, signing or qualification.",
+    "Other OS/Python checkout-install results cannot qualify this archive path.",
+    "No whole-phase technology audit completion."
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "id": "p16-sdist-install-v3",
+  "component": "Hosted source archive installation evidence",
+  "decision": "KEEP",
+  "constraints": [
+    "Consume the inspected source archive rather than build an unrelated checkout wheel; Python 3.13 Ubuntu hosted job, ten-minute job budget.",
+    "Use already installed pinned build and optional verification dependencies; avoid package-index lookup and wheel-cache reuse during archive installation. No local full build or qualification."
+  ],
+  "alternatives": [
+    "Python pip archive installation through the selected interpreter and existing build backend.",
+    "PyPA build wheel-from-sdist workflow followed by a separate wheel installer.",
+    "Rust uv package installation with explicit environment selection."
+  ],
+  "rationale": [
+    "KEEP standard pip archive installation: its documented build/install path consumes the archive directly and installs into the interpreter used for isolated checks.",
+    "A separate build-wheel frontend is valid when retaining a wheel artifact is required, but the present gate checks installation from the archive. Rust uv is a credible package manager; neither alternate changes the required evidence assertions or establishes an isolation/performance advantage for this single-package gate. No comparative performance claim.",
+    "The prior workflow inspected selected archive bytes but did not install that artifact. Add a hosted archive install followed by dependency consistency, selected installed-source/RECORD/static-identity checks and all fifty pinned passport cases.",
+    "No new runtime or validator implementation; the existing scripts supply rejection behavior. Actionlint and focused checker tests validate configuration and reused checks locally, not execution of the new hosted build/install sequence."
+  ],
+  "limits": [
+    "The new hosted installation path has not run in observed evidence; no local source archive build or installation was performed.",
+    "Initial job setup and source archive creation still use network-enabled tooling. no-index is a pip lookup option, not a network sandbox for build backends.",
+    "Only Linux Python 3.13 is configured for this archive path. The separate checkout install matrix does not qualify archive installation on other platforms.",
+    "No complete dependency closure, reproducible build, clean customer install, signed release or phase completion claim."
+  ],
+  "evidence": [
+    "https://pip.pypa.io/en/stable/cli/pip_install/",
+    "https://build.pypa.io/en/stable/",
+    "https://docs.astral.sh/uv/pip/packages/"
+  ]
+}
