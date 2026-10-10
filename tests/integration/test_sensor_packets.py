@@ -1,11 +1,63 @@
 """P2 packet tests use synthetic bytes, not physical sensor evidence."""
 
 import importlib.util
+import math
 import struct
+import sys
 import unittest
 
 
 class SensorPackets(unittest.TestCase):
+    def test_cloud_uses_at_most_one_binary_unpack_per_sample(self):
+        api = self.api()
+        spec = self.cloud()
+        spec.update(width=32, row_step=32 * 16)
+        raw = struct.pack("<4f", 1, 2, 3, -4) * 32
+        calls = 0
+
+        def profile(frame, event, function):
+            nonlocal calls
+            if event == "c_call" and getattr(function, "__name__", "") == "unpack_from":
+                calls += 1
+
+        previous = sys.getprofile()
+        try:
+            sys.setprofile(profile)
+            result = api.decode_cloud(spec, raw)
+        finally:
+            sys.setprofile(previous)
+        self.assertEqual(len(result.points), 32)
+        self.assertEqual(result.points[0].xyz_m, (1, 2, 3))
+        self.assertLessEqual(calls, 32, "per-field decoding exceeds the per-sample work budget")
+
+    def test_cloud_mixed_unaligned_fields_preserve_ordinals_and_signed_zero(self):
+        api = self.api()
+        spec = {
+            "width": 2,
+            "height": 2,
+            "point_step": 32,
+            "row_step": 68,
+            "is_bigendian": True,
+            "fields": [
+                {"name": "radial_velocity", "offset": 22, "datatype": 8, "count": 1},
+                {"name": "x", "offset": 9, "datatype": 8, "count": 1},
+                {"name": "z", "offset": 17, "datatype": 7, "count": 1},
+                {"name": "y", "offset": 1, "datatype": 7, "count": 1},
+            ],
+        }
+        data = bytearray([127] * 136)
+        for i, offset in enumerate((0, 32, 68, 100)):
+            struct.pack_into(">d", data, offset + 9, float("nan") if i == 2 else i + 0.25)
+            struct.pack_into(">f", data, offset + 1, -0.0)
+            struct.pack_into(">f", data, offset + 17, 3.5)
+            struct.pack_into(">d", data, offset + 22, float("inf") if i == 1 else -2.0)
+        result = api.decode_cloud(spec, bytes(data))
+        self.assertEqual(result.invalid_points, 2)
+        self.assertEqual(result.sample_points[1:3], (None, None))
+        self.assertEqual([p.xyz_m for p in result.points], [(0.25, -0.0, 3.5), (3.25, -0.0, 3.5)])
+        self.assertEqual([p.radial_velocity_mps for p in result.points], [-2.0, -2.0])
+        self.assertEqual(math.copysign(1, result.points[0].xyz_m[1]), -1)
+
     def api(self):
         self.assertIsNotNone(
             importlib.util.find_spec("aethron_edge.sensors"), "sensor packet implementation missing"
