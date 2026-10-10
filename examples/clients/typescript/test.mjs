@@ -60,6 +60,33 @@ test('fractional monotonic clocks preserve the frozen inclusive lease boundary',
  assert.equal(o.view(100.501).label,'expired');
 });
 
+test('ordinary object serialization does not disclose the retained scene',()=>{
+ const input=structuredClone(envelope);
+ input.session='e'.repeat(32);input.result.tracks[0].id='ephemeral-test-only';
+ const o=new Observation();o.accept(input,0);
+ const reflected=JSON.stringify(Object.getOwnPropertyDescriptors(o));
+ assert.ok(!reflected.includes(input.session),'reflection must not export the transport handle');
+ assert.ok(!JSON.stringify(o).includes('ephemeral-test-only'),'serialization must not export a track identifier');
+ assert.equal(o.view(50).label,'delayed_observation');
+});
+test('a JavaScript property collision cannot extend the accepted lease',()=>{
+ const o=new Observation();o.accept(envelope,0);
+ o.received=50;
+ assert.equal(o.view(101).label,'expired');
+});
+test('a JavaScript property collision cannot replace an admitted scene',()=>{
+ const o=new Observation();o.accept(envelope,0);
+ const expected=o.view(0);
+ o.scene={...envelope,result:{...result,state:'FORGED'}};
+ assert.deepEqual(o.view(50),expected);
+});
+test('a failing input getter cannot leave a reentrant observation admitted',()=>{
+ const o=new Observation();
+ const input={get result(){o.accept(envelope,0);throw new Error('input details');}};
+ assert.throws(()=>o.accept(input,0),{message:'invalid_event'});
+ assert.equal(o.view(0).label,'expired');
+});
+
 test('observer deletes its session even when the final display callback throws',async t=>{
  const {observe}=await import('./dist/client.js');
  const requests=[];

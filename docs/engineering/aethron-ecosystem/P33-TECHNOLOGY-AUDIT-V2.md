@@ -16,7 +16,7 @@ baseline. Their absence is outstanding software work, not an external gate.
 | Component, in dependency/history order | Policy-2 status |
 | --- | --- |
 | Versioned contract consumption and runtime admission | MIGRATE to generated AJV validators; executable evidence below |
-| Observation ownership, clocks and projection | Pending reassessment; existing regression suite retained |
+| Observation ownership, clocks and projection | KEEP TypeScript/host clock; MIGRATE ordinary fields/full scene to native private fields/minimal projection; evidence below |
 | Authenticated stream/session/renderer lifecycle | Pending reassessment; existing regression suite retained |
 | Package distribution and contract fixture tooling | Pending reassessment; migration package verification below is a regression check |
 
@@ -96,3 +96,66 @@ the first combined verification/probe attempt; and an initial npm pack failure
 using the read-only default cache. Focused checks were rerun sequentially with
 bounded Node resources and a workspace cache. No full repository, VM, Docker,
 device, browser or live-server qualification is claimed.
+
+## Second component: observation ownership, clocks and projection
+
+Baseline: `bb36aafed2e90e271dc46935c9f2f1b888dd8172`. Requirements are a synchronous
+Node/JavaScript class, runtime isolation of admitted state from caller property
+writes, finite nonnegative local fractional milliseconds, irreversible expiry
+and rollback clearing, independent output arrays, and no unnecessary identifiers
+retained by the display object. Preserve the inclusive wire lease and UNKNOWN
+current state. The work is bounded projection of at most 32 tracks, without
+native hardware or a numerical kernel. A foreign runtime would still need an
+explicit JS value and clock boundary.
+
+The timing source must remain local. [High Resolution Time](https://www.w3.org/TR/hr-time-3/)
+distinguishes a monotonic clock from adjustable wall time and warns that timer
+callbacks may be throttled. Rendering checks elapsed time itself. Explicit clock
+arguments remain a trusted integration/testing input, not a freshness proof.
+No OS-suspend, browser scheduling or hard-real-time guarantee follows from these
+tests. A queued callback cannot promise immediate clearing while JS is suspended.
+
+Candidates researched 2026-10-10:
+
+| Candidate | Decisive comparison |
+| --- | --- |
+| TypeScript ordinary `private` fields | [TypeScript documents that these are not runtime-private](https://www.typescriptlang.org/docs/handbook/2/classes.html). Executed property-write and reflection counterexamples reject this representation. |
+| ECMAScript native private fields | Same reference supports runtime privacy for `#` fields. Node's supported target emits these directly. This preserves the exported class/prototype interface with shared methods; admission and output copying remain explicit. |
+| ECMAScript closure or WeakMap storage | Both hide state from ordinary properties. The executed closure candidate passes the trace and collision checks, but allocates per-instance methods and changes the direct class/prototype model. WeakMap would preserve shared methods with external storage; it adds a separate lookup/store without an established need at this target. |
+| ReScript | [Immutable bindings and explicit mutable references](https://rescript-lang.org/docs/manual/latest/mutation) can describe the state machine clearly. A record/ref exported into JavaScript is not by itself the required runtime boundary; a hidden closure/module boundary and copy-out are still needed. No stronger runtime guarantee over the executed host primitives was established. |
+| Kotlin/JS | [Monotonic time sources](https://kotlinlang.org/docs/time-measurement.html) are platform-specific: Node uses `process.hrtime`, while browser fallback can use wall time. A migration must pin the clock and JS export semantics, not assume the abstraction proves freshness. Cross-platform duration types offer no demonstrated benefit for this single-host millisecond contract. |
+| Dart/JS | [Library privacy](https://dart.dev/language/libraries) and [Stopwatch](https://api.dart.dev/dart-core/Stopwatch-class.html) are credible ownership/time tools. Node-facing JS interop still requires an explicit exported boundary and unit conversion. No Dart platform code or duration arithmetic is required by this component. |
+
+Decision: **KEEP TypeScript and the local host monotonic clock; MIGRATE the state
+representation to native private fields holding only the display projection.**
+The decision rests on runtime encapsulation, minimal retained data and the
+existing class contract, not compiler availability. Alternative-language emitted
+artifacts were not measured and are not ranked by speed. Host closure storage is
+a viable alternative; the benchmark actually favored it for this small workload.
+It did not establish a resource constraint requiring the class/API adaptation.
+
+Before implementation, 35 client cases passed and four new regressions failed:
+reflection disclosed the handle, a public `received` property extended expiry,
+a public `scene` property replaced validated state, and a throwing input getter
+left a reentrant observation active. After migration all 39 pass. Clone/validation
+failure now clears state again before returning the fixed `invalid_event` error.
+The projection contains only observed state, distinct sources, covariance and
+lease duration; two private local timestamps complete the state. Input cloning
+and returned-array copying remain. Private fields do not sandbox arbitrary code
+running in the same process or guarantee physical memory zeroization.
+
+`audit-observation.mjs` retains a JS transcription of the baseline and a closure
+candidate solely for the audit. All three match across 45 deterministic traces
+and 162 views, including exact/fractional expiry, rollback, non-finite clocks,
+input mutation and disconnect. Four intentional ownership corrections are
+covered separately. The `--check` path is part of `npm test` and skips timings.
+The bounded probe runs three rounds, each with 100 accepts and 2,000 views of
+32 synthetic tracks. Median totals were 173.10 ms (legacy), 30.12 ms (closure),
+and 91.00 ms (native private projection). This combined strategy comparison runs
+in one process on a shared host; JIT/order effects remain. It neither isolates
+private-field access cost nor establishes portable performance thresholds.
+Raw measurements, hashes, failures and package verification are in the
+[observation audit record](evidence/phase3/p33-observation-audit-v2.json).
+
+The next cursor is authenticated stream/session/renderer lifecycle. Distribution
+and shared producer reconciliation also remain; no audit completion is claimed.

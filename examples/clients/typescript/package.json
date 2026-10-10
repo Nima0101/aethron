@@ -6,7 +6,7 @@
   "license": "GPL-3.0-only",
   "scripts": {
     "build": "node generate-validators.mjs && tsc -p tsconfig.json",
-    "test": "npm run build && node --test test.mjs validation.test.mjs"
+    "test": "npm run build && node --test test.mjs validation.test.mjs && node --disallow-code-generation-from-strings audit-observation.mjs --check"
   },
   "dependencies": {
     "ajv": "8.20.0"

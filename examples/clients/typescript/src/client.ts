@@ -4,35 +4,51 @@ import type {HealthEvent, SceneEnvelope} from './types.js';
 const {validateScene: validate, validateHealth} = validators;
 
 export class Observation {
-  private scene: SceneEnvelope | null = null;
-  private received = 0;
-  private lastViewed = 0;
+  // Retain only the displayed aggregate, never the transport handle or track IDs.
+  #projection: {
+    validForMs: number;
+    observedState: SceneEnvelope['result']['state'];
+    sources: SceneEnvelope['result']['tracks'][number]['sources'];
+    uncertainty: number[][];
+  } | null = null;
+  #received = 0;
+  #lastViewed = 0;
 
   accept(value: unknown, now = performance.now()): void {
     this.disconnect();
     if (!Number.isFinite(now) || now < 0) throw new Error('invalid_clock');
     // Validate an owned snapshot: callers must not mutate an admitted lease.
     let snapshot: unknown;
-    try { snapshot = structuredClone(value); }
-    catch { throw new Error('invalid_event'); }
-    if (!validate(snapshot)) throw new Error('invalid_event');
-    this.scene = snapshot as SceneEnvelope;
-    this.received = now;
-    this.lastViewed = now;
+    try {
+      snapshot = structuredClone(value);
+      if (!validate(snapshot)) throw new Error('invalid_event');
+    } catch {
+      // structuredClone can invoke input getters, including reentrant callers.
+      this.disconnect();
+      throw new Error('invalid_event');
+    }
+    const scene = snapshot as SceneEnvelope;
+    this.#projection = {
+      validForMs: scene.clock.valid_for_ms, observedState: scene.result.state,
+      sources: [...new Set(scene.result.tracks.flatMap(t => t.sources))],
+      uncertainty: scene.result.tracks.map(t => [...t.covariance]),
+    };
+    this.#received = now;
+    this.#lastViewed = now;
   }
 
-  disconnect(): void { this.scene = null; }
+  disconnect(): void { this.#projection = null; this.#received = 0; this.#lastViewed = 0; }
 
   view(now = performance.now()) {
-    if (!this.scene || !Number.isFinite(now) || now < 0 || now < this.lastViewed ||
-        now - this.received > this.scene.clock.valid_for_ms) {
+    if (!this.#projection || !Number.isFinite(now) || now < 0 || now < this.#lastViewed ||
+        now - this.#received > this.#projection.validForMs) {
       this.disconnect();
       return {label: 'expired', current_state: 'UNKNOWN', observed_state: 'UNKNOWN', sources: [], uncertainty: []};
     }
-    this.lastViewed = now;
-    return {label: 'delayed_observation', current_state: 'UNKNOWN', observed_state: this.scene.result.state,
-      sources: [...new Set(this.scene.result.tracks.flatMap(t => t.sources))],
-      uncertainty: this.scene.result.tracks.map(t => [...t.covariance])};
+    this.#lastViewed = now;
+    return {label: 'delayed_observation', current_state: 'UNKNOWN', observed_state: this.#projection.observedState,
+      sources: [...this.#projection.sources],
+      uncertainty: this.#projection.uncertainty.map(covariance => [...covariance])};
   }
 }
 

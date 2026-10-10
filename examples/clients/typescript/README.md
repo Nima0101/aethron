@@ -40,6 +40,16 @@ Invalid receipt clocks clear the observation and throw `invalid_clock`. Invalid
 or backwards render clocks clear it and return expired/UNKNOWN. A new acceptance
 starts a new local lease; it does not establish transport freshness.
 
+The accepted state uses native JavaScript private fields. Public property names
+cannot overwrite its lease or scene, and ordinary reflection/JSON serialization
+does not expose the observation. Only the displayed state, sources, covariance
+and local lease are retained after admission; transport handles, track IDs and
+geometry are discarded from this observation object. This is encapsulation and
+data minimization, not process isolation or guaranteed memory erasure. Failed
+input cloning clears any observation admitted by a reentrant input getter.
+`node audit-observation.mjs` reproduces the bounded legacy/closure/private-field
+comparison; `npm test` includes its deterministic timing trace checks.
+
 Teardown attempts authenticated session deletion even if the final display
 callback throws or aborts the caller's signal. Deletion uses its own two-second
 timeout and remains best effort when the server cannot be reached.
