@@ -1,5 +1,6 @@
 """The comparison probe must not emit evidence with assertions disabled."""
 
+import asyncio
 import contextlib
 import hashlib
 import io
@@ -46,7 +47,7 @@ class ProbeResponseTests(unittest.TestCase):
     def invoke(self, raw, output):
         with (
             patch("shutil.which", return_value="node"),
-            patch("subprocess.run", return_value=subprocess.CompletedProcess([], 0, raw)),
+            patch.dict(self.main.__globals__, {"_capture": lambda *args: raw}),
             contextlib.redirect_stdout(output),
         ):
             self.main()
@@ -102,6 +103,59 @@ class ProbeResponseTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     self.invoke(raw, output)
                 self.assertEqual(output.getvalue(), "")
+
+
+class ProbeCaptureTests(unittest.TestCase):
+    def setUp(self):
+        root = Path(__file__).resolve().parents[1]
+        self.capture = runpy.run_path(str(root / "scripts/passport_technology_probe.py"))[
+            "_capture"
+        ]
+
+    def child(self, code, payload=b"", timeout=3):
+        return self.capture([sys.executable, "-I", "-c", code], payload, timeout=timeout)
+
+    def test_exact_limit_and_input_round_trip(self):
+        self.assertEqual(
+            self.child("import sys; sys.stdout.buffer.write(sys.stdin.buffer.read())", b"a" * 4096),
+            b"a" * 4096,
+        )
+
+    def test_each_output_stream_is_capped(self):
+        for stream in ("stdout", "stderr"):
+            with self.subTest(stream=stream):
+                with self.assertRaisesRegex(RuntimeError, "comparison_output_limit"):
+                    self.child(f"import sys; sys.{stream}.buffer.write(b'x' * 4097)")
+
+    def test_nonzero_exit_discards_success_shaped_output(self):
+        with self.assertRaises(Exception) as failed:
+            self.child("import sys; print('{}'); sys.exit(7)")
+        self.assertIsInstance(failed.exception, RuntimeError)
+        self.assertEqual(str(failed.exception), "comparison_exit")
+
+    def test_timeout_does_not_return_partial_output(self):
+        transports = []
+        launch = asyncio.BaseEventLoop.subprocess_exec
+
+        async def observed(loop, *args, **kwargs):
+            result = await launch(loop, *args, **kwargs)
+            transports.append(result[0])
+            return result
+
+        with patch.object(asyncio.BaseEventLoop, "subprocess_exec", observed):
+            with self.assertRaises(Exception) as failed:
+                self.child("import time; print('{}', flush=True); time.sleep(2)", timeout=0.2)
+        self.assertIsInstance(failed.exception, RuntimeError)
+        self.assertEqual(str(failed.exception), "comparison_timeout")
+        self.assertEqual(len(transports), 1)
+        self.assertIsNotNone(transports[0].get_returncode())
+        self.assertTrue(transports[0].is_closing())
+
+    def test_oversize_input_rejected_before_launch(self):
+        with patch("asyncio.run") as launch:
+            with self.assertRaisesRegex(ValueError, "comparison_input_size"):
+                self.capture([sys.executable], b"a" * 65537)
+            launch.assert_not_called()
 
 
 if __name__ == "__main__":

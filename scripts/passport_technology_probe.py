@@ -1,12 +1,12 @@
 """Bounded local audit evidence; not a verifier, benchmark gate or qualification."""
 
+import asyncio
 import base64
 import hashlib
 import json
 import platform
 import re
 import shutil
-import subprocess
 import sys
 import time
 import tracemalloc
@@ -77,6 +77,81 @@ def _comparison_response(raw):
     return result
 
 
+async def _capture_async(command, payload, timeout):
+    loop = asyncio.get_running_loop()
+    result, closed = loop.create_future(), loop.create_future()
+
+    class Capture(asyncio.SubprocessProtocol):
+        def __init__(self):
+            self.output = bytearray()
+            self.sizes = {1: 0, 2: 0}
+
+        def connection_made(self, transport):
+            self.transport = transport
+
+        def fail(self, reason):
+            if not result.done():
+                result.set_exception(RuntimeError(reason))
+            self.transport.close()
+
+        def pipe_data_received(self, fd, data):
+            if result.done():
+                return
+            self.sizes[fd] += len(data)
+            if self.sizes[fd] > 4096:
+                self.fail("comparison_output_limit")
+            elif fd == 1:
+                self.output.extend(data)
+
+        def pipe_connection_lost(self, fd, error):
+            if error is not None:
+                self.fail("comparison_pipe")
+
+        def connection_lost(self, error):
+            if not closed.done():
+                closed.set_result(None)
+            if not result.done():
+                if error is not None or self.transport.get_returncode() != 0:
+                    result.set_exception(RuntimeError("comparison_exit"))
+                else:
+                    result.set_result(bytes(self.output))
+
+    # Creation is OS-dependent and is not covered by the subsequent exchange timeout.
+    transport, _ = await loop.subprocess_exec(
+        Capture,
+        *command,
+        stdin=asyncio.subprocess.PIPE,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    try:
+        stdin = transport.get_pipe_transport(0)
+        stdin.write(payload)
+        stdin.close()
+        try:
+            return await asyncio.wait_for(asyncio.shield(result), timeout)
+        except asyncio.TimeoutError:
+            raise RuntimeError("comparison_timeout") from None
+    finally:
+        if not result.done():
+            result.cancel()
+        else:
+            result.exception()  # Retrieve any concurrent failure before closing the loop.
+        transport.close()  # Closes pipes and kills the direct child if still running.
+        try:
+            await asyncio.wait_for(closed, 5)
+        except asyncio.TimeoutError:
+            raise RuntimeError("comparison_cleanup_timeout") from None
+
+
+def _capture(command, payload, *, timeout=15):
+    if type(payload) is not bytes or len(payload) > 65536:
+        raise ValueError("comparison_input_size")
+    if type(timeout) not in (int, float) or not 0 < timeout <= 15:
+        raise ValueError("comparison_timeout_value")
+    return asyncio.run(_capture_async(command, payload, timeout))
+
+
 def main():
     if sys.flags.optimize:
         raise RuntimeError("optimized_probe_execution_forbidden")
@@ -113,13 +188,10 @@ def main():
     if node is None:
         raise RuntimeError("Node is required for the explicit comparison; do not count a skip")
     compared = _comparison_response(
-        subprocess.run(  # noqa: S603
+        _capture(
             [node, "--v8-pool-size=1", str(ROOT / "scripts/passport_technology_probe.mjs")],
-            input=json.dumps(inputs).encode(),
-            capture_output=True,
-            check=True,
-            timeout=15,
-        ).stdout
+            json.dumps(inputs).encode(),
+        )
     )
     assert compared["crypto_accepts"] == accepted
     assert accepted == [True, True, True, True, False, True]
