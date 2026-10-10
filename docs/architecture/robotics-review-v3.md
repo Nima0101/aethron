@@ -329,3 +329,32 @@ module origin, or protection against concurrent edits. Interpreter, SDK, compile
 and host qualification remain separate. Historical reports are unchanged and do
 not acquire these bindings retroactively. No comparison winner, first-component
 completion or full V3 completion follows from this correction.
+
+## Supplied-clock exception negative evidence
+
+RETRACT/CLARIFY any general interpretation of clock-fault latching at the first
+passive boundary. `_now()` checks the type, sign and ordering of values returned
+by its clock, but calls that clock before those checks and without an exception
+handler. Python's [exception handling rules](https://docs.python.org/3/tutorial/errors.html#handling-exceptions)
+explain propagation when there is no matching handler. The runtime source and a
+bounded in-process probe confirm the distinction; this is not inferred from a
+successful rollback test.
+
+Two independent synthetic instances first admitted one packet at a fixed receipt
+clock, then raised `RuntimeError` from the supplied clock during `snapshot()` or
+`ingest()`. Both calls propagated the exception. After the clock resumed its
+original value, each next snapshot still contained one `OBSERVED_UNVERIFIED`
+sample with perception eligibility false. Explicit closure then returned UNKNOWN
+with reason `closed`. The probe deliberately exited nonzero because general
+clock-exception withdrawal/latching was not established. It used no socket,
+vehicle, OS clock modification, timing benchmark or private data.
+
+[Retained evidence](../verification/robotics-clock-exception-claims-v3.json)
+records source digests, the exact synthetic conditions, both observed outcomes,
+and three passing existing provenance/expiry/rollback methods. Those methods
+cover different conditions and do not cancel this negative result. The README
+now explicitly distinguishes returned invalid clock values from raised clock
+exceptions. Production and test sources remain unchanged; this corrects the
+qualification claim only. The failure-handling gap remains open, so no general
+fail-closed clock claim, runtime KEEP/MIGRATE decision, first-component completion
+or forward feature expansion is justified by this change.
