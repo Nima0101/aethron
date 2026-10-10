@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "decision": "KEEP",
+  "limits": [
+    "Source-based candidate comparison, not an executed alternate implementation or performance ranking.",
+    "No supplied target hardware, throughput SLA or hard deadline. No MLS/CNSA, physical, availability or lane-completion qualification. Insufficient information for tactical deployment."
+  ],
+  "id": "p16-federation-current-v3",
+  "component": "P16 closed direct-peer software metadata scope",
+  "constraints": [
+    "At most sixteen direct peers, canonical bounded UTF-8 bytes, caller-authenticated pins, all-row validation and exact issuer/capability scope.",
+    "No delegation, policy authoring language, dynamic hierarchy, enrollment, transport or authority grant; caller time and separate revision floors required."
+  ],
+  "alternatives": [
+    "Python explicit closed table with shared bounded lexical parser and public bundle verification.",
+    "Cedar scoped authorization policies and entity relations.",
+    "OPA/Rego declarative structured-data policy evaluation."
+  ],
+  "rationale": [
+    "KEEP the direct table: this contract needs exact bounded relations rather than a general rule interpreter. Cedar and Rego provide richer policy expression, but they still require the external byte, trust and freshness boundary.",
+    "All eleven federation methods pass with real signed fixtures, including unselected malformed rows, complete capability scope, expiry and discarded partial metadata. No new production mismatch found.",
+    "No measured or requirements-derived migration advantage is established. Incumbent language, installed tooling and rewrite cost are not retention criteria."
+  ],
+  "evidence": [
+    "https://docs.cedarpolicy.com/overview/terminology.html",
+    "https://www.openpolicyagent.org/docs/policy-language"
+  ]
+}

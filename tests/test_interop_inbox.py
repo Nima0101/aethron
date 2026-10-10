@@ -21,15 +21,21 @@ from aethron.interop_inbox import BoundedInbox
 q = BoundedInbox(max_items=8, max_bytes=8, max_per_peer=8)
 barrier = Barrier(2)
 
-def producer():
+def producer(identity):
     barrier.wait(timeout=5)
-    return [q.put("peer", b"x", now_ms=0, expires_at_ms=20) for _ in range(8)]
+    results = []
+    for index in range(8):
+        payload = bytes([identity * 8 + index])
+        results.append((payload, q.put("peer", payload, now_ms=0, expires_at_ms=20)))
+    return results
 
 with ThreadPoolExecutor(max_workers=2) as pool:
-    futures = [pool.submit(producer) for _ in range(2)]
+    futures = [pool.submit(producer, identity) for identity in range(2)]
     results = [result for future in futures for result in future.result(timeout=10)]
 print(json.dumps({
-    "results": [[r.status, r.items, r.payload_bytes] for r in results],
+    "results": [[r.status, r.items, r.payload_bytes] for _, r in results],
+    "attempted_payloads": [payload.hex() for payload, _ in results],
+    "admitted_payloads": [payload.hex() for payload, r in results if r.status == "queued"],
     "payloads": [q.take(now_ms=1).payload.hex() for _ in range(8)],
     "tail_status": q.take(now_ms=1).status,
 }))
@@ -97,8 +103,13 @@ class InboxTests(unittest.TestCase):
         results = report["results"]
         self.assertEqual(len(results), 16)
         self.assertEqual(sum(status == "queued" for status, _, _ in results), 8)
-        self.assertTrue(all(items <= 8 and size <= 8 for _, items, size in results))
-        self.assertEqual(report["payloads"], [b"x".hex()] * 8)
+        self.assertTrue(all(0 <= items <= 8 and 0 <= size <= 8 for _, items, size in results))
+        self.assertEqual(
+            sorted(report["attempted_payloads"]), [bytes([i]).hex() for i in range(16)]
+        )
+        self.assertEqual(len(report["admitted_payloads"]), 8)
+        # Lock acquisition order can vary; each admitted byte must emerge exactly once.
+        self.assertEqual(sorted(report["payloads"]), sorted(report["admitted_payloads"]))
         self.assertEqual(report["tail_status"], "empty")
 
     def test_deadlocked_concurrency_probe_is_terminated(self):

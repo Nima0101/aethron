@@ -127,3 +127,52 @@ qualification is claimed. No complete-audit marker is issued.
 Next earliest remaining review: installed packaging identity and conformance evidence,
 then remaining assurance tooling. P17–P19 implementation and qualification remain
 unfinished; unsafe weapon/targeting/radio subcomponents stay excluded.
+
+
+## Fresh source review and payload coverage at 9400ad7
+
+Baseline `9400ad7ae4403dc4f55252443ee0b2a61aa5c6ae`, reviewed 2026-10-10 after
+rereading current policy and the earliest parser boundary. Complete federation/inbox
+code, tests and contracts were inspected. The closed federation table and queue runtime
+match their documented limitations. Fresh decisions are [KEEP federation](../../decisions/p16-federation-current-v3.json)
+and [KEEP inbox accounting; fix assurance](../../decisions/p16-inbox-payloads-v3.json).
+Current Cedar, Rego, Python lock, Crossbeam, .NET Channels and Erlang documentation
+was consulted. A general policy language is not required by the closed relation;
+count-bounded channels still need byte/peer/expiry accounting. No material migration
+advantage follows from this component's present constraints. No alternate runtime was
+benchmarked and no choice rests on familiarity or installed tooling.
+
+A test-coverage mismatch was demonstrated: every concurrent producer submitted `b"x"`.
+A test-only wrapper around the real child queue's `take` replaced each returned payload
+with that same byte. The old test passed. The producer now submits sixteen distinct
+one-byte synthetic payloads, records the eight admissions, and checks exact multiset
+equality with the eight dequeued payloads. Attempted-byte coverage and nonnegative
+counters are checked too. Acquisition order is deliberately not assumed.
+
+The same child substitution now causes one expected assertion failure, zero errors or
+skips. This is a sensitivity control, not a production corruption finding. The source
+queue file remains unchanged. The [current result record](p16-federation-inbox-current-v3-results.json)
+records both observations, source hashes and local log hashes.
+
+Fresh verification: 28 focused methods (one lexical, eleven federation, twelve inbox,
+four delivery-composition) pass without skips. Four ADR validation methods, targeted
+Ruff/format and Bandit pass. Existing B404/B603 exclusions remain limited to the trusted
+child-test harness. No new exclusion was added.
+
+The C4 context and containers above are unchanged. The assurance components now send
+attempted/admitted payload identifiers along with counters. The code-level assertion is:
+```mermaid
+flowchart LR
+  Producers[Two producers with sixteen unique synthetic bytes] --> Admission[Real locked queue]
+  Admission --> Accepted[Eight admitted payloads]
+  Admission --> Dequeue[Eight dequeued payloads]
+  Accepted --> Compare[Compare sorted payload lists]
+  Dequeue --> Compare
+  Compare --> Parent[Parent unittest assertion]
+```
+
+This finite trace does not prove all interleavings, fairness, concurrent-consumer
+behavior or linearizability. The timeout remains a test-runner protection, not a
+production shutdown guarantee. Local log hashes are not public logs, dependency closure
+or loaded-code attestation. No hosted result, physical qualification or whole-lane
+completion is claimed. Next earliest review: packaging identity and assurance tooling.

@@ -1,0 +1,70 @@
+{
+  "baseline_commit": "9400ad7ae4403dc4f55252443ee0b2a61aa5c6ae",
+  "review_order_version": 3,
+  "decisions": {
+    "federation": "KEEP",
+    "inbox": "KEEP runtime; FIX test payload discrimination"
+  },
+  "production_changed": false,
+  "production_red": false,
+  "checks": {
+    "baseline_methods": 28,
+    "final_focused_methods": 28,
+    "adr_methods": 4,
+    "skips": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS with existing B404/B603 trusted subprocess exclusions only"
+  },
+  "substitution": "In child test process, wrap real BoundedInbox.take and replace dequeued payload with b-x; retain other result fields.",
+  "old_test_control": {
+    "methods": 1,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "source_sha256": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "source_unchanged": true
+  },
+  "new_test_control": {
+    "methods": 1,
+    "failures": 1,
+    "errors": 0,
+    "skips": 0,
+    "source_sha256": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "source_unchanged": true
+  },
+  "baseline_test_sha256": "f126a8b302f1ca5ca0432810a2c62ad9a5172c60b088e9a725a3768c180a7564",
+  "source_sha256": {
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "tests/test_interop_inbox.py": "12a4585bab47fd185f54dac18e80799fa25513032ac7965ff52c0f51ea945069",
+    "tests/test_interop_federation.py": "377a0b31b252dfd9aca8983c65e5c718aff7b3d72164a25808f37f1cd23fd0c0",
+    "tests/test_interop_delivery.py": "d7142d775869f91a124ba81fc179c7b7b9912b6044c6188e98ca53a28b497fed",
+    "docs/architecture/interop/inbox-v1.md": "bb6050d4ab9ddd222351a8a4bc212d8a27a9a22c140bf305bc79102d06454368",
+    "docs/architecture/interop/federation-v1.md": "91762aa7ae923dc6cbf5da8ed1663f96ef4a09c875550378df60ddce6274ab62",
+    "docs/decisions/p16-federation-current-v3.json": "90c0f352134d240b4b1a4a9d1f4a259051f8f914c8c79e53294a934b6014b8dc",
+    "docs/decisions/p16-inbox-payloads-v3.json": "34d02fd0e55fe98d8037b794ab6ab55d0aedd555c64c29cc8a65eb2ecc8e17bc"
+  },
+  "runtime_evidence_sha256": {
+    "federation-inbox-current-adr.log": "637ca179bddc3664d84f62af9f630e5e35163d7d561791c7bf2ba5addb037172",
+    "federation-inbox-current-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "federation-inbox-current-baseline.log": "2eceead603079931878b6c191c300aa39c7085b222281a66c1c88194522bb6e8",
+    "federation-inbox-current-focused.log": "9d277cbfdbaf2cfd4bcbd6dbbd00e4db3c6a0f483242d32b39ffaa835fb78287",
+    "federation-inbox-current-format.log": "eee76f865de5a9f2456950f710ae5d5f9b5bd0ea02aa54f614c5eed6642a0bfd",
+    "federation-inbox-current-new-control.log": "d396109544a816106722578250e86b99543049208cab630980a3a837609cf91d",
+    "federation-inbox-current-old-control.log": "b11f2c288a498a31e9e7b43e5ac45c89c44ea41e46d9fdec52123bcd3d96ced1",
+    "federation-inbox-current-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+  },
+  "runtime_probe_sha256": "647ebe8c3585b9749e44c47ff2366f55ac7c75952c291af52d91fc07c3a49194",
+  "limits": [
+    "Finite two-producer trace; not every interleaving, concurrent consumers, fairness, linearizability or a real-time bound.",
+    "Listed file digests are not dependency closure, an atomic snapshot or loaded-code attestation.",
+    "Local logs and control driver are retained in lane runtime, not public artifacts.",
+    "No alternate-runtime benchmark, hosted result, physical qualification or whole-lane completion."
+  ]
+}
