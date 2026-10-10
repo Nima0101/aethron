@@ -85,6 +85,15 @@ const results = cases.map(c => {
   const receiver = new Receiver();
   if (c.steps.length > 64) throw new Error('audit_step_limit');
   return c.steps.map(step => {
+    if (step === null || typeof step !== 'object' || Array.isArray(step)) {
+      throw new Error('audit_operation_record');
+    }
+    if (!['ingest', 'snapshot', 'close'].includes(step.op)) throw new Error('audit_operation');
+    const fields = step.op === 'ingest' ? ['op', 'now', 'hex'] : ['op', 'now'];
+    const keys = Object.keys(step);
+    if (keys.length !== fields.length || !fields.every(key => Object.hasOwn(step, key))) {
+      throw new Error('audit_operation_record');
+    }
     const now = typeof step.now === 'string' ? BigInt(step.now) : step.now;
     if (step.op === 'ingest') receiver.ingest(Buffer.from(step.hex, 'hex'), now);
     else if (step.op === 'close') receiver.close();

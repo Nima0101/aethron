@@ -51,6 +51,22 @@ class LifecycleAuditTests(unittest.TestCase):
         self.assertEqual(results["boot_reset"][-1]["reason"], "source_clock_reset")
         self.assertEqual(results["closed"][-1]["reason"], "closed")
 
+    def test_operation_records_reject_unknown_or_ignored_fields(self):
+        for step in (
+            {"op": "snapsho", "now": "0"},
+            {"op": False, "now": "0"},
+            {"op": "snapshot", "now": "0", "ignored": True},
+            {"op": "close", "now": "0", "hex": ""},
+            {"op": "ingest", "now": "0", "hex": "", "ignored": True},
+        ):
+            cases = [{"name": "malformed", "steps": [step]}]
+            with self.subTest(runtime="python", step=step):
+                with self.assertRaisesRegex(ValueError, "audit_operation"):
+                    self.api.reference(cases)
+            with self.subTest(runtime="javascript", step=step):
+                with self.assertRaises(subprocess.CalledProcessError):
+                    self.api._child(["node", str(self.api.DRIVER)], cases)
+
     def test_run_records_cancellation_without_swallowing_it(self):
         for error_type in (KeyboardInterrupt, SystemExit, asyncio.CancelledError):
             with (

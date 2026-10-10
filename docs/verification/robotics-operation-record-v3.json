@@ -1,0 +1,75 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "2ae36d82653276f0aa043dcb478c6cd0b4c0e33e",
+  "component": "passive lifecycle experiment operation admission",
+  "decision": "FIX malformed experiment admission; production technology PENDING",
+  "production_adapter_changed": false,
+  "source_sha256": {
+    "scripts/robotics_lifecycle_audit_v2.py": "2a162fce033311d311c2b80db20abc10cac20d96565c775d8dc617771a8af020",
+    "scripts/robotics_native_audit_v2.py": "5454e7253512493f8a5ff20a09d9541b7e2d92bf62ee51fd4af8ba4e77cc3f81",
+    "tests/mavlink/test_lifecycle_audit_v2.py": "d41e812ae9d3a95fc1aeba81a871af4e0fed3537b53b4b378ad61f515120848b",
+    "tests/mavlink/test_native_audit_v2.py": "4f8a18ac0247717496e0764eae5c57e1e0cf1752bdb8d4431618c2208e257191",
+    "tests/mavlink/audit_v2/managed.mjs": "5b7441ad93748260f3b1b4c67c48a5fe526c5b2ae14fb1ffc531cd4697567346",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "tests/mavlink/audit_v2/native.rs": "a694176e7110765d8c19242953fd8d9fb9a41140e5c071cb9cbd5037be96ab88",
+    "docs/architecture/robotics-review-v3.md": "623b181689d2edad52bf2d3dfdc9ef0d9cb85322e2ca251850b520b19672493b",
+    "docs/verification/robotics-comparator-coverage-v3.md": "67f91fa7687819dfe1d404eeba95954a6832c3edd59f8b95d89dae11ecec7825"
+  },
+  "checks": {
+    "red": {
+      "methods": 2,
+      "failures": 12,
+      "errors": 0,
+      "reason": "unknown operations or ignored/missing fields accepted"
+    },
+    "green": {
+      "methods": 31,
+      "skips": 0,
+      "seconds": 4.78,
+      "modules": [
+        "tests.mavlink.test_lifecycle_audit_v2",
+        "tests.mavlink.test_native_audit_v2"
+      ]
+    },
+    "ruff_check": "PASS",
+    "ruff_format": "PASS",
+    "bandit": "PASS",
+    "node_syntax": "PASS",
+    "preservation": {
+      "baseline_head": "2ae36d82653276f0aa043dcb478c6cd0b4c0e33e",
+      "lifecycle_cases": 16,
+      "lifecycle_steps": 48,
+      "lifecycle_records_unchanged": true,
+      "lifecycle_outputs_unchanged": true,
+      "native_cases": 40,
+      "native_steps": 72,
+      "native_fixture_unchanged": true,
+      "native_compiled": false,
+      "lifecycle_corpus_sha256": "7870b95b978b86a62abd45749453f1549329c3a456643aeb28c26cb043269125",
+      "native_fixture_sha256": "36c80096df538990da4f68cf5c2f131c586b86f9304cb8d7babeb2efb47c3db7"
+    }
+  },
+  "retained_file_sha256": {
+    "operation-record-v3-green.log": "d253e1c1cc0bf9aac192e77e527b6bf8fdb8590f1158d95faee8943d2e6dead0",
+    "operation-record-v3-preservation.json": "b68f60c7352cd70779a6fe451abf074d84ce27670a90f7310c2573138afeeb9e",
+    "operation-record-v3-red.log": "dc438dd33c985283969fa886c28176b9b5046c585cec350e22fe427516ad2a23"
+  },
+  "sources": [
+    {
+      "url": "https://json-schema.org/understanding-json-schema/reference/object#additionalproperties",
+      "accessed": "2026-10-10",
+      "claim": "Closed-object field rejection can be expressed with additionalProperties false."
+    },
+    {
+      "url": "https://docs.pydantic.dev/latest/concepts/models/#extra-data",
+      "accessed": "2026-10-10",
+      "claim": "Pydantic extra-field behavior is explicitly configurable."
+    }
+  ],
+  "limits": [
+    "Post-decoding operation fields only, not complete input/schema admission",
+    "Clock/hex value domains not changed by this correction",
+    "Real Node checks and native fixture generation only; no new Rust execution",
+    "No production runtime winner, deployment or complete technology audit claim"
+  ]
+}

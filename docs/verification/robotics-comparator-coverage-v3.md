@@ -176,3 +176,45 @@ An initial formatting failure is retained in the validation record. The real
 managed parity method still runs the unchanged 16-case/48-step corpus; no native
 compilation, full-suite, performance or deployment qualification is claimed.
 The earliest runtime choice remains PENDING and signing/replay remains unreviewed.
+
+## Closed lifecycle operation records
+
+Reviewed baseline: `2ae36d82653276f0aa043dcb478c6cd0b4c0e33e`.
+The Python oracle treated unknown operation names as snapshots. The Python/JS
+paths also ignored additional operation fields; the native input generator
+ignored extra fields and synthesized an empty payload for a missing ingest `hex`.
+This could allow a malformed experiment to produce ordinary results.
+
+The existing operation record now has explicit admission rules: a dictionary
+with operation `ingest`, `snapshot` or `close`; exactly `op`, `now`, `hex` for
+ingest and exactly `op`, `now` for the other operations. The Python oracle and
+native fixture generator share a non-coercing check; the JS driver independently
+enforces the same field presence and operation set. Unknown operations and record
+shapes raise fixed audit errors. Clock and packet value semantics remain with the
+existing paths: notably, boolean clock fixtures remain available to exercise the
+receiver's invalid-clock behavior. This is not a complete JSON ingress validator.
+
+For this small existing experiment contract, direct checks were selected over a
+new schema runtime or cross-language validator process. [JSON Schema closed-object
+rules](https://json-schema.org/understanding-json-schema/reference/object#additionalproperties)
+and [Pydantic extra-field controls](https://docs.pydantic.dev/latest/concepts/models/#extra-data)
+can express field rejection too. Their default permissive handling must be
+configured explicitly. Here, direct operation/field checks preserve the supplied
+clock test objects and fixed error surface without adding serialization or another
+runtime to the experiment. The decision is scoped to fixture admission, not a
+production receiver language choice. No speed or memory advantage is claimed.
+
+The [source-bound receipt](robotics-operation-record-v3.json) records 12 RED
+assertions across Python reference, real Node driver and native fixture-generator
+checks, followed by 31 passing focused methods without skips. Python lint/format,
+Bandit and Node syntax checks pass. Comparing with the reviewed HEAD confirms all
+16 lifecycle cases/48 steps and their reference outputs are unchanged. The native
+40-case/72-step corpus and generated Rust constants are also unchanged; there was
+no new Rust compilation. The managed parity test still runs its real candidate.
+Production telemetry and the Rust/C decoder drivers are unchanged.
+
+This correction validates operation records after JSON has been decoded. It does
+not establish duplicate-member rejection, canonical clock/hex syntax, complete
+case/root shape validation, callback-exception equivalence, or full lifecycle
+qualification. Those boundaries remain distinct. The earliest production runtime
+decision stays PENDING and later component reassessments remain incomplete.

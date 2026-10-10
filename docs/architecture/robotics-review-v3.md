@@ -755,3 +755,15 @@ checks now include asyncio cancellation; production adapter and candidate driver
 are unchanged. [Evidence](../verification/robotics-cancellation-receipt-v3.json)
 retains failure and validation records. The production technology reassessment
 and subsequent components remain incomplete.
+
+## Reject malformed lifecycle operation records
+
+The [operation-record review](../verification/robotics-comparator-coverage-v3.md#closed-lifecycle-operation-records)
+found silent unknown-operation fallback in the Python oracle and ignored operation
+fields across comparison paths. Shared Python admission and independent JS checks
+now require the exact fields for each of the three supported operations. Twelve
+RED assertions became green; 31 focused methods pass. Existing lifecycle records,
+reference outputs and generated native constants are unchanged. [Evidence](../verification/robotics-operation-record-v3.json)
+records source hashes and preservation checks. This corrects fixture admission;
+production telemetry, the production runtime decision and later review cursor
+remain unchanged.

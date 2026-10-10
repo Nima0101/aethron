@@ -56,6 +56,16 @@ class NativeAuditTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 self.api.fixture_source(cases)
 
+    def test_fixture_rejects_ignored_or_missing_operation_fields(self):
+        for step in (
+            {"op": "snapshot", "now": "0", "ignored": True},
+            {"op": "close", "now": "0", "hex": ""},
+            {"op": "ingest", "now": "0", "hex": "", "ignored": True},
+            {"op": "ingest", "now": "0"},
+        ):
+            with self.subTest(step=step), self.assertRaisesRegex(ValueError, "audit_operation"):
+                self.api.fixture_source([{"steps": [step]}])
+
     def test_combined_corpus_checks_fractional_values_and_trimmed_payloads(self):
         cases = self.api.corpus()
         self.api.fixture_source(cases)

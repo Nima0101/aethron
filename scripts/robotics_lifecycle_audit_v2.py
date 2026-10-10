@@ -84,6 +84,19 @@ def corpus():
     return [{"name": name, "steps": steps} for name, steps in cases.items()]
 
 
+def validate_operation(step):
+    """Validate the closed experiment record without coercing clock test values."""
+    if type(step) is not dict:
+        raise ValueError("audit_operation_record")
+    op = step.get("op")
+    if type(op) is not str or op not in ("ingest", "snapshot", "close"):
+        raise ValueError("audit_operation")
+    fields = {"op", "now", "hex"} if op == "ingest" else {"op", "now"}
+    if step.keys() != fields:
+        raise ValueError("audit_operation_record")
+    return op
+
+
 def reference(cases):
     results = []
     for case in cases:
@@ -92,11 +105,12 @@ def reference(cases):
         steps = []
         try:
             for step in case["steps"]:
+                op = validate_operation(step)
                 now = int(step["now"]) if type(step["now"]) is str else step["now"]
                 current[0] = now
-                if step["op"] == "ingest":
+                if op == "ingest":
                     source.ingest(bytes.fromhex(step["hex"]))
-                elif step["op"] == "close":
+                elif op == "close":
                     source.close()
                 value = asdict(source.snapshot())
                 for sample in value["samples"]:

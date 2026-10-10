@@ -49,12 +49,14 @@ def fixture_source(cases):
         raise ValueError("audit_case_limit")
     lines = ["const CASES: &[&[Step]] = &["]
     operations = {"ingest": 0, "snapshot": 1, "close": 2}
+    validate_operation = lifecycle_api().validate_operation
     for case in cases:
         steps = case["steps"]
         if type(steps) is not list or not 1 <= len(steps) <= 64:
             raise ValueError("audit_step_limit")
         lines.append("&[")
         for step in steps:
+            op = validate_operation(step)
             now = step["now"]
             if type(now) is bool:  # Preserve the invalid-clock test, not numeric 0/1.
                 timestamp = "None"
@@ -65,9 +67,6 @@ def fixture_source(cases):
                 timestamp = f"Some({value}u128)"
             else:
                 raise ValueError("audit_clock_domain")
-            op = step["op"]
-            if op not in operations:
-                raise ValueError("audit_operation")
             raw = step.get("hex", "")
             if type(raw) is not str or len(raw) > 640:
                 raise ValueError("audit_packet_limit")
