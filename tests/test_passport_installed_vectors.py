@@ -21,6 +21,40 @@ HAS_CRYPTO = importlib.util.find_spec("cryptography") is not None
 
 
 class InstalledVectorTests(unittest.TestCase):
+    def test_federation_admission_uses_real_api_without_crypto(self):
+        from aethron.interop_federation import validate_pinned_federation
+
+        with patch.object(
+            RUNNER, "validate_pinned_federation", wraps=validate_pinned_federation, create=True
+        ) as validator:
+            RUNNER.check_federation_policy(ROOT)
+            self.assertEqual(validator.call_count, 10)
+
+    def test_federation_admission_wrong_metadata_prevents_success(self):
+        from aethron.interop_federation import validate_pinned_federation
+
+        for status in ("validated", "rejected"):
+            for field, value in (
+                ("federation_sha256", "e" * 64),
+                ("federation_revision", 999),
+                ("expires_at", 999),
+                ("execution_authority", True),
+                ("motion_authority", True),
+                ("evidence_verified", True),
+            ):
+
+                def changed(*args, status=status, field=field, value=value, **kwargs):
+                    result = validate_pinned_federation(*args, **kwargs)
+                    values = asdict(result)
+                    if result.status == status:
+                        values[field] = value
+                    return SimpleNamespace(**values)
+
+                with self.subTest(status=status, field=field):
+                    with patch.object(RUNNER, "validate_pinned_federation", changed, create=True):
+                        with self.assertRaises(AssertionError):
+                            RUNNER.check_federation_policy(ROOT)
+
     def test_floor_persistence_is_executed_with_real_api(self):
         from aethron.passport_floor_store import PolicyFloorStore
 
@@ -142,7 +176,11 @@ class InstalledVectorTests(unittest.TestCase):
 
     @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
     def test_current_corpora_execute_all_checks(self):
-        self.assertEqual(RUNNER.run(ROOT), 51)
+        with patch.object(
+            RUNNER, "check_federation_policy", wraps=RUNNER.check_federation_policy
+        ) as admission:
+            self.assertEqual(RUNNER.run(ROOT), 61)
+            admission.assert_called_once_with(ROOT)
         from aethron.passport_floor_store import FloorStoreError
 
         # A failed floor scenario must prevent the complete runner reporting success.
@@ -161,7 +199,7 @@ class InstalledVectorTests(unittest.TestCase):
         with patch.object(
             RUNNER, "validate_pinned_policy", wraps=validate_pinned_policy, create=True
         ) as validator:
-            self.assertEqual(RUNNER.run(ROOT), 51)
+            self.assertEqual(RUNNER.run(ROOT), 61)
             self.assertEqual(validator.call_count, 10)
 
     @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")

@@ -46,6 +46,59 @@ def _snapshot(value):
 
 
 @dataclass(frozen=True)
+class FederationValidation:
+    """Complete snapshot admission; neither peer acceptance nor authority."""
+
+    status: str
+    reason: str
+    federation_sha256: Optional[str] = None
+    federation_revision: Optional[int] = None
+    expires_at: Optional[int] = None
+    execution_authority: bool = field(default=False, init=False)
+    motion_authority: bool = field(default=False, init=False)
+    evidence_verified: bool = field(default=False, init=False)
+
+
+def validate_pinned_federation(
+    federation: bytes,
+    *,
+    expected_federation_sha256: str,
+    local_domain: str,
+    now_s: int,
+    minimum_time_s: int,
+    minimum_federation_revision: int,
+) -> FederationValidation:
+    """Validate even a deny-all table independently of any bundle.
+
+    Pins, domain and time/floors come from trusted configuration. No I/O,
+    signature verification, peer policy validation or persistence is performed.
+    A result is a snapshot, not an authorization token; revalidate at use.
+    """
+    try:
+        _token(expected_federation_sha256, _HEX)
+        _token(local_domain)
+        _integer(minimum_federation_revision, 1)
+        _integer(now_s)
+        _integer(minimum_time_s)
+        snapshot, _ = _snapshot(_parse(federation))
+        _require(_canonical(snapshot) == federation)
+        digest = sha256(federation).hexdigest()
+        if digest != expected_federation_sha256:
+            return FederationValidation("rejected", "federation_mismatch")
+        if snapshot["local_domain"] != local_domain:
+            return FederationValidation("rejected", "local_domain_mismatch")
+        if now_s < minimum_time_s or snapshot["revision"] < minimum_federation_revision:
+            return FederationValidation("rejected", "federation_rollback")
+        if not snapshot["issued_at"] <= now_s < snapshot["expires_at"]:
+            return FederationValidation("rejected", "federation_not_current")
+        return FederationValidation(
+            "validated", "federation_matches", digest, snapshot["revision"], snapshot["expires_at"]
+        )
+    except (ValueError, TypeError, KeyError, RecursionError):
+        return FederationValidation("rejected", "invalid_federation")
+
+
+@dataclass(frozen=True)
 class FederationVerification:
     status: str
     reason: str

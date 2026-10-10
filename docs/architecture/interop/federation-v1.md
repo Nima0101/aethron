@@ -70,3 +70,10 @@ Time checks use the supplied `now_s`, not an internal clock or a completion-time
 Saved results are snapshots and require freshness/trust revalidation at use. Repeated
 calls are not replay prevention. Byte/count bounds do not establish a process-memory,
 hard-real-time, MLS, CNSA or availability qualification.
+
+## Independent configuration admission
+
+The additive [pinned snapshot validator](federation-policy-v1.md) validates the same
+complete table without selecting a peer or invoking bundle authentication. A deny-all
+table can therefore supply revision metadata for caller persistence. Validation itself
+persists nothing and does not change this bundle API or its rejection reasons.

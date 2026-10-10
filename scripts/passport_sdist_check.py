@@ -20,6 +20,8 @@ def required_inputs(root):
         "requirements-passports.txt",
         "tests/test_passport_schemas.py",
         "tests/test_passport_floor_store.py",
+        "tests/test_interop_federation_policy.py",
+        "examples/interop/federation-policy-vectors-v1.json",
         "aethron/passport_floor_store.py",
         "tests/interop_consumers/test_sensor_packets.py",
         "tests/interop_consumers/test_ros_status.py",

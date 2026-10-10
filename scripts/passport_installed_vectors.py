@@ -7,7 +7,7 @@ from hashlib import sha256
 from pathlib import Path
 
 from aethron.interop_bundles import verify_task_bundle
-from aethron.interop_federation import verify_federated_bundle
+from aethron.interop_federation import validate_pinned_federation, verify_federated_bundle
 from aethron.interop_inbox import BoundedInbox
 from aethron.interop_tasks import validate_task
 from aethron.passport_evidence import verify_evidence
@@ -16,6 +16,10 @@ from aethron.passports import validate_pinned_policy, verify
 
 # Reviewed fixture bytes; changes require deliberate coverage review.
 CORPORA = {
+    "examples/interop/federation-policy-vectors-v1.json": (
+        "74cd12782e8e418e3e2270c4a0c578a75062e6863211da0311a7b9b34ac6087d",
+        10,
+    ),
     "examples/passports/policy-vectors-v1.json": (
         "8014f8c76f795e15169c891a36c0b32f01f3de384d5ee6f9a9d7f1aae7b61afa",
         10,
@@ -56,6 +60,24 @@ def load_vectors(root, relative):
     if type(data["cases"]) is not list or len(data["cases"]) != expected_count:
         raise ValueError("invalid_vector_coverage")
     return data
+
+
+def check_federation_policy(root):
+    """Pinned configuration admission, including denial of every peer."""
+    vectors = load_vectors(root, "examples/interop/federation-policy-vectors-v1.json")
+    for case in vectors["cases"]:
+        raw = case["federation"].encode()
+        result = validate_pinned_federation(raw, **case["arguments"])
+        assert (result.status, result.reason) == (case["status"], case["reason"]), case["name"]
+        expected = (
+            (sha256(raw).hexdigest(), 5, 1600)
+            if case["status"] == "validated"
+            else (None, None, None)
+        )
+        assert (result.federation_sha256, result.federation_revision, result.expires_at) == expected
+        assert result.execution_authority is False
+        assert result.motion_authority is False
+        assert result.evidence_verified is False
 
 
 def check_floor_persistence(root):
@@ -200,6 +222,7 @@ def run(root):
         assert result.execution_authority is False
         assert result.motion_authority is False
         assert result.evidence_verified is False
+    check_federation_policy(root)
     check_floor_persistence(root)
     return sum(count for _, count in CORPORA.values()) + 1
 
