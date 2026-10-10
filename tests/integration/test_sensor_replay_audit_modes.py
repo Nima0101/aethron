@@ -1,6 +1,5 @@
 """Evidence checks must not disappear under interpreter optimization."""
 
-import contextlib
 import hashlib
 import io
 import json
@@ -11,6 +10,7 @@ import sys
 import tempfile
 import tracemalloc
 import unittest
+from functools import partial
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
@@ -22,7 +22,23 @@ PROBE = ROOT / "scripts/probes/sensor_replay_audit/compare.py"
 
 
 class ReplayAuditModeTests(unittest.TestCase):
-    def diagnostic_report(self, output=None, on_close=None, harness_path=PROBE):
+    def setUp(self):
+        self.shared_bindings = (
+            replay.__file__,
+            sys.stdout,
+            tempfile.TemporaryFile,
+            tracemalloc.get_traced_memory,
+        )
+
+    def assert_shared_bindings_unchanged(self):
+        for actual, expected in zip(
+            (replay.__file__, sys.stdout, tempfile.TemporaryFile, tracemalloc.get_traced_memory),
+            self.shared_bindings,
+            strict=True,
+        ):
+            self.assertIs(actual, expected)
+
+    def diagnostic_report(self, output=None, on_close=None, harness_path=PROBE, replay_path=None):
         main = runpy.run_path(str(PROBE))["main"]
         payload = b"x" * (1024 * 1024)
         output = io.StringIO() if output is None else output
@@ -49,13 +65,17 @@ class ReplayAuditModeTests(unittest.TestCase):
                         for name in ("baseline", "direct", "readinto", "_read")
                     },
                     "__file__": str(harness_path),
+                    "replay": SimpleNamespace(
+                        __file__=replay.__file__ if replay_path is None else str(replay_path)
+                    ),
+                    "print": partial(print, file=output),
                     "time": SimpleNamespace(process_time_ns=lambda: 0, perf_counter_ns=lambda: 0),
                     "tracemalloc": fake_trace,
                     "tempfile": SimpleNamespace(TemporaryFile=ClosingBuffer),
                 },
             ),
-            contextlib.redirect_stdout(output),
         ):
+            self.assert_shared_bindings_unchanged()
             main()
         return json.loads(output.getvalue())
 
@@ -67,11 +87,13 @@ class ReplayAuditModeTests(unittest.TestCase):
                     (root / filename).write_bytes(b"before")
                 mutation = Mock(side_effect=lambda target=root / name: target.write_bytes(b"after"))
                 output = io.StringIO()
-                with patch.object(replay, "__file__", str(root / "replay.py")):
-                    with self.assertRaisesRegex(RuntimeError, "^replay_audit_source_changed$"):
-                        self.diagnostic_report(
-                            on_close=mutation, harness_path=root / "compare.py", output=output
-                        )
+                with self.assertRaisesRegex(RuntimeError, "^replay_audit_source_changed$"):
+                    self.diagnostic_report(
+                        on_close=mutation,
+                        harness_path=root / "compare.py",
+                        output=output,
+                        replay_path=root / "replay.py",
+                    )
                 mutation.assert_called_once_with()
                 self.assertEqual(output.getvalue(), "")
 
@@ -83,11 +105,13 @@ class ReplayAuditModeTests(unittest.TestCase):
                     (root / filename).write_bytes(b"before")
                 removal = Mock(side_effect=lambda target=root / name: target.unlink())
                 output = io.StringIO()
-                with patch.object(replay, "__file__", str(root / "replay.py")):
-                    with self.assertRaises(FileNotFoundError):
-                        self.diagnostic_report(
-                            on_close=removal, harness_path=root / "compare.py", output=output
-                        )
+                with self.assertRaises(FileNotFoundError):
+                    self.diagnostic_report(
+                        on_close=removal,
+                        harness_path=root / "compare.py",
+                        output=output,
+                        replay_path=root / "replay.py",
+                    )
                 removal.assert_called_once_with()
                 self.assertEqual(output.getvalue(), "")
 
@@ -95,8 +119,7 @@ class ReplayAuditModeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             installed = Path(directory) / "replay.py"
             installed.write_bytes(b"abc")
-            with patch.object(replay, "__file__", str(installed)):
-                report = self.diagnostic_report()
+            report = self.diagnostic_report(replay_path=installed)
         self.assertIn("source_sha256", report)
         self.assertEqual(
             report["source_sha256"],
@@ -115,9 +138,8 @@ class ReplayAuditModeTests(unittest.TestCase):
 
     def test_missing_source_prevents_report_emission(self):
         with tempfile.TemporaryDirectory() as directory:
-            with patch.object(replay, "__file__", str(Path(directory) / "missing.py")):
-                with self.assertRaises(FileNotFoundError):
-                    self.diagnostic_report()
+            with self.assertRaises(FileNotFoundError):
+                self.diagnostic_report(replay_path=Path(directory) / "missing.py")
 
     def test_existing_trace_session_rejects_before_fixture_creation(self):
         module = runpy.run_path(str(PROBE))
@@ -125,9 +147,15 @@ class ReplayAuditModeTests(unittest.TestCase):
         tracemalloc.start()
         retained = bytearray(32)
         try:
-            with patch.object(module["tempfile"], "TemporaryFile") as create_file:
-                create_file.side_effect = RuntimeError("fixture_creation_entered")
-                with contextlib.redirect_stdout(output):
+            create_file = Mock(side_effect=RuntimeError("fixture_creation_entered"))
+            with patch.dict(
+                module["main"].__globals__,
+                {
+                    "tempfile": SimpleNamespace(TemporaryFile=create_file),
+                },
+            ):
+                with patch.dict(module["main"].__globals__, {"print": partial(print, file=output)}):
+                    self.assert_shared_bindings_unchanged()
                     try:
                         module["main"]()
                     except Exception as exc:
@@ -158,7 +186,10 @@ class ReplayAuditModeTests(unittest.TestCase):
                 output = io.StringIO()
                 try:
                     with patch.dict(module["main"].__globals__, baseline=candidate):
-                        with contextlib.redirect_stdout(output):
+                        with patch.dict(
+                            module["main"].__globals__, {"print": partial(print, file=output)}
+                        ):
+                            self.assert_shared_bindings_unchanged()
                             with self.assertRaisesRegex(
                                 failure_type, "synthetic_candidate_failure"
                             ):
@@ -176,12 +207,23 @@ class ReplayAuditModeTests(unittest.TestCase):
             with patch.dict(
                 module["main"].__globals__, baseline=lambda stream, size: stream.read(size)
             ):
-                with patch.object(
-                    tracemalloc,
-                    "get_traced_memory",
-                    side_effect=RuntimeError("synthetic_peak_failure"),
+                with patch.dict(
+                    module["main"].__globals__,
+                    {
+                        "tracemalloc": SimpleNamespace(
+                            is_tracing=tracemalloc.is_tracing,
+                            start=tracemalloc.start,
+                            stop=tracemalloc.stop,
+                            get_traced_memory=Mock(
+                                side_effect=RuntimeError("synthetic_peak_failure")
+                            ),
+                        ),
+                    },
                 ):
-                    with contextlib.redirect_stdout(output):
+                    with patch.dict(
+                        module["main"].__globals__, {"print": partial(print, file=output)}
+                    ):
+                        self.assert_shared_bindings_unchanged()
                         with self.assertRaisesRegex(RuntimeError, "synthetic_peak_failure"):
                             module["main"]()
             self.assertEqual(output.getvalue(), "")
@@ -229,7 +271,10 @@ class ReplayAuditModeTests(unittest.TestCase):
 
                 output = io.StringIO()
                 with patch.dict(module["main"].__globals__, baseline=candidate):
-                    with contextlib.redirect_stdout(output):
+                    with patch.dict(
+                        module["main"].__globals__, {"print": partial(print, file=output)}
+                    ):
+                        self.assert_shared_bindings_unchanged()
                         with self.assertRaises(AssertionError):
                             module["main"]()
                 self.assertEqual(len(calls), fail_at)
