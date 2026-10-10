@@ -1,0 +1,74 @@
+{
+  "audit_policy_version": 2,
+  "component": "bounded content-pinned rollout journal",
+  "subject_parent": "19e36c427a2b3be3fb4912f6129977b5e8196ff9",
+  "decision": "KEEP native SQLite with synchronous Python state adapter; require verified DELETE/EXTRA profile",
+  "required_language_migrations": [],
+  "source_sha256": {
+    "integrations/edge/aethron_edge/runtime/fleet_rollout.py": "dd3c692c2befc732e5883fb6008f961a5418b30ae7510d10ca7c4caccd7e55cc",
+    "tests/integration/test_fleet_rollout.py": "f04fa9ff10cb795b616e288a942e71aa644cff763c393c93015fb7c3aa98ddee"
+  },
+  "environment": {
+    "python": "3.13.5",
+    "sqlite": "3.46.1",
+    "os": "Linux"
+  },
+  "red": {
+    "commit_profile": "Creation, claim and result each observed delete/2 instead of delete/3.",
+    "weaker_profile": "Both injected OFF synchronization and MEMORY journaling allowed claim success; two failing subcases."
+  },
+  "green": {
+    "journal_methods": 14,
+    "journal_plan_claim_methods": 34,
+    "resource_warnings": "No ResourceWarning observed with error filter enabled",
+    "state_space_comparisons": 9216,
+    "state_space_domain": {
+      "slots": 4,
+      "batch_sizes": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "revisions": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "states": [
+        "pending",
+        "running",
+        "succeeded",
+        "failed"
+      ]
+    },
+    "process_exit_cases": {
+      "before_claim_commit": "exit 91; original pending snapshot recovered",
+      "after_claim_commit": "exit 92 before caller response; running wave and revision 1 recovered, new claim rejected",
+      "before_receipt_commit": "exit 91; original running snapshot recovered",
+      "after_receipt_commit": "exit 92 before caller response; failed slot and revision 2 recovered, new claim rejected"
+    },
+    "ruff": "PASS after removing unused test variable",
+    "format": "PASS",
+    "bandit_production": "PASS, zero findings",
+    "diff_check": "PASS"
+  },
+  "reproduction": "PYTHONPATH=integrations/edge:build/fleet-linux-deps:tests/integration python3 -W error::ResourceWarning -m unittest test_fleet_rollout test_fleet_plan test_fleet_claim -q",
+  "retained_negative_evidence": [
+    "FULL/EXTRA power-loss distinction is documented by SQLite, not reproduced through a physical power failure.",
+    "Initial Ruff F841 unused test variable removed without suppression."
+  ],
+  "limits": [
+    "Child process death leaves OS caches available; no power-loss qualification.",
+    "State-space comparison covers four slots, not an exhaustive proof for 1024.",
+    "No native/managed candidate speed ranking or hardware guarantee.",
+    "No reset, automatic retry, receipt authentication or external exactly-once execution.",
+    "No full local matrix, full fuzz, VM/Docker, clean clone or large download."
+  ]
+}

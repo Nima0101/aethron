@@ -1,0 +1,59 @@
+{
+  "audit_policy_version": 2,
+  "component": "authenticated admission coordinated with committed floors",
+  "subject_parent": "37dad34e11067ca8cb21570fbe5a33a55d289f20",
+  "decision": "KEEP synchronous Python adapter with native OpenSSL/SQLite; add post-commit trusted-time validation",
+  "required_language_migrations": [],
+  "source_sha256": {
+    "integrations/edge/aethron_edge/runtime/fleet_policy.py": "1ea88dcd1fa38d87298dcd127eda82a1c6576f593a0b8676ad8ef7bccb01505f",
+    "tests/integration/test_fleet_admission.py": "eeae6ba8229e3c8d6af58d7882dbef5acdc1e2833d268f8ebf5587a1a29cf361"
+  },
+  "environment": {
+    "python": "3.13.5",
+    "sqlite": "3.46.1",
+    "os": "Linux"
+  },
+  "red": {
+    "initial_admission_suite": "15 methods ran; four failures: final expiry, missing third observation, ignored bad clock and ignored exhausted clock",
+    "corrected_bad_clock_loop": "All six final samples True, 1002.0, null, -1, 2**53 and 1000 were ignored before implementation; six failing subcases",
+    "test_correction": "Repeated attempts now begin at committed time 1001; initial 1000 masked later cases through early rollback rejection"
+  },
+  "green": {
+    "admission_methods": 15,
+    "policy_floor_admission_methods": 49,
+    "ruff_check": "PASS",
+    "ruff_format": "PASS, two files unchanged",
+    "bandit_production": "PASS, zero findings",
+    "diff_check": "PASS"
+  },
+  "reproduction": "PYTHONPATH=integrations/edge:build/fleet-linux-deps:tests/integration python3 -m unittest test_fleet_policy test_fleet_floors test_fleet_admission -q",
+  "observed_success_trace": {
+    "clock_samples": [
+      1000,
+      1001,
+      1999
+    ],
+    "floors_seen_by_independent_connections": [
+      [
+        1,
+        900
+      ],
+      [
+        1,
+        900
+      ],
+      [
+        3,
+        1001
+      ]
+    ],
+    "returned_policy_version": 3
+  },
+  "post_commit_rejection": "No configuration returned; committed pair preserved. Failed COMMIT still does not advance the pair.",
+  "limits": [
+    "Final clock sample is checked but not persisted; floor retains pre-commit verified time.",
+    "Return can be delayed after final sample; result is not lasting execution authority.",
+    "No language speed ranking, power-loss qualification, hardware claim or formal proof.",
+    "No local full repository matrix, VM/Docker, full fuzz or clean clone."
+  ]
+}

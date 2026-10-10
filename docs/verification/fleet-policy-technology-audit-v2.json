@@ -1,0 +1,34 @@
+{
+  "audit_policy_version": 2,
+  "component": "signed fleet policy admission",
+  "subject_parent": "746b1e3a92f13599261e06408f4d3c1b8422dede",
+  "decision": "KEEP Python/OpenSSL composition with implemented Ed25519 key-profile correction",
+  "required_language_migrations": [],
+  "production_correction": "Bound, validate and privately snapshot the Ed25519 public-key input before the shared verifier consumes it.",
+  "source_sha256": {
+    "integrations/edge/aethron_edge/runtime/fleet_policy.py": "4cd1b6c0130c1be5cdc8ec6deabf93889749fe768a27c2eefec3f56f1b056da9",
+    "tests/integration/test_fleet_policy.py": "2da4d98e8b1899147ba885601156a3b7e37fd823ae0c948a6e9685e097987631"
+  },
+  "environment": {
+    "python": "3.13.5",
+    "openssl": "OpenSSL 3.5.6 7 Apr 2026 (Library: OpenSSL 3.5.6 7 Apr 2026)"
+  },
+  "red": {
+    "test_same_length_rsa_signature_cannot_select_a_different_algorithm": "FAIL: expected rejection was not raised; valid synthetic RSA-512 signature length was 64 bytes.",
+    "test_verifier_uses_pinned_key_bytes_when_original_path_changes": "ERROR: invalid_fleet_policy because verifier reread replaced original key path."
+  },
+  "green": {
+    "policy_tests": 17,
+    "policy_admission_plan_claim_tests": 48,
+    "additional_encoding_subcases": "13 malformed/ambiguous key inputs rejected before shared verification; malformed Base64 and noncanonical padding rerun after addition.",
+    "ruff": "PASS",
+    "bandit": "PASS, production fleet_policy.py, no suppressions"
+  },
+  "limits": [
+    "No hardware, realtime, worst-case latency or deployment-rate claim.",
+    "No native speed comparison or formal proof performed.",
+    "Shared bundle verifier remains upstream-owned and unchanged.",
+    "A supplied RSA trust root reproduced the profile mismatch; no Ed25519 forgery demonstrated.",
+    "Full repository matrix, fuzz, Docker and clean-clone checks not run locally."
+  ]
+}

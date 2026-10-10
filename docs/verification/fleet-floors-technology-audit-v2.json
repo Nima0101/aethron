@@ -1,0 +1,41 @@
+{
+  "audit_policy_version": 2,
+  "component": "persistent paired fleet floors",
+  "subject_parent": "7c9107528ad18fb0a201548f0deb3686197582d0",
+  "decision": "KEEP SQLite native engine with Python binding; implement verified EXTRA/DELETE durability profile",
+  "required_language_migrations": [],
+  "source_sha256": {
+    "integrations/edge/aethron_edge/runtime/fleet_floors.py": "6c0f374e3629d6c00e420e07869d85c14672965e8bc92dfbc6092f182058bf9a",
+    "tests/integration/test_fleet_floors.py": "c7236cc91986472cfa6c63f768e09246dbfc8371a1b445016057db6b7a4da659"
+  },
+  "environment": {
+    "python": "3.13.5",
+    "sqlite": "3.46.1",
+    "os": "Linux"
+  },
+  "red": {
+    "test_commits_require_delete_journal_and_extra_synchronization": "Observed [('delete', 2), ('delete', 2)] instead of EXTRA (3).",
+    "test_unavailable_durability_settings_reject_before_floor_changes": "Both injected OFF synchronization and MEMORY journal settings returned success instead of rejecting; 2 failed subcases."
+  },
+  "green": {
+    "floor_tests": 17,
+    "floor_admission_plan_claim_tests": 48,
+    "abrupt_process_exit": {
+      "before_commit": "exit 73; old pair (3, 1000) recovered",
+      "after_commit": "exit 74; new pair (5, 2000) recovered"
+    },
+    "ruff": "PASS after binding loop setting in test adapter",
+    "bandit": "PASS production module, no suppressions"
+  },
+  "retained_negative_evidence": [
+    "FULL versus EXTRA directory durability distinction established from SQLite documentation, not local power-failure reproduction.",
+    "Initial Ruff B023 late-binding test-adapter warnings fixed explicitly."
+  ],
+  "limits": [
+    "Process exit is not power failure; OS caches remained available.",
+    "No throughput ranking, platform qualification or formal proof.",
+    "No concurrent-path-replacement or old-backup-restore protection.",
+    "Rollout journal audit remains pending; no cross-database atomicity claim.",
+    "No full repository suite, VM/Docker, full fuzz or clean clone run locally."
+  ]
+}

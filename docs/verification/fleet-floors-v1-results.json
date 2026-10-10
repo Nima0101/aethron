@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "base_commit": "6a22dd23f91c13cbe6129d89273e43a846622ae6",
+  "source_binding": "Candidate file SHA-256; local source-tree checks only",
+  "files": {
+    ".github/workflows/aethron-fleet-policy.yml": "64a62ed60e95521d5902ff4c705fd0556554e1b2d050bc2ddacd19478656bd9f",
+    "docs/architecture/fleet-floors-v1.md": "90c59a8e83baa77863ce8e3ae3734cb59556d94ea202d8677404c60829f16abd",
+    "integrations/edge/aethron_edge/runtime/fleet_floors.py": "541705e7f0ff97c122a2c9ff4296215e44c0b5e2f2ca16f771488b93b684ca5d",
+    "tests/integration/test_fleet_floors.py": "36207c96b447c84eeebfc472228184094748ff1ed5b207e16e6c8a430a58f22b"
+  },
+  "runtime": "CPython 3.13.5, Linux x86_64",
+  "verification": {
+    "command": "PYTHONPATH=integrations/edge:build/fleet-linux-deps python3 -m unittest discover -s tests/integration -p test_fleet_floors.py -v",
+    "tests_passed": 14,
+    "tests_failed": 0,
+    "ruff_0_16_10_check": "PASS",
+    "ruff_format_check": "PASS",
+    "bandit_1_9_4_module_scan": "PASS, no findings",
+    "workflow_yaml_parse": "PASS",
+    "candidate_private_path_and_key_scan": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "retained_negative_evidence": [
+    "RED: module import failed before implementation (ModuleNotFoundError).",
+    "RED: invalid path inputs leaked TypeError in four subtests before constructor error normalization.",
+    "Initial Ruff format check required formatting; final check passed."
+  ],
+  "covered_boundaries": [
+    "Reopen persistence and private creation mode",
+    "Paired monotonic floors and competing instances",
+    "Injected COMMIT failure with rollback verified by reopening",
+    "Real SQLite writer lock contention",
+    "Missing, corrupt, oversized, symbolic-link and special files",
+    "Closed schema and strict scalar bounds"
+  ],
+  "not_run": [
+    "Hosted installed-wheel CI",
+    "Full repository matrix, fuzz or clean clone",
+    "Physical crash or power-loss tests",
+    "Policy/executor integration and network fabric"
+  ],
+  "limits": "Committed local floors only; protected local directory and trustworthy callers required. No backup rollback protection, remote authentication, deployment authority or hardware durability claim."
+}

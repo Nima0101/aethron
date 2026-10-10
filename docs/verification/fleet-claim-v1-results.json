@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "base_commit": "9d9d5f1bda16b1f8a04372d62262681306de5cc6",
+  "source_binding": "Candidate file SHA-256; local source-tree evidence only",
+  "files": {
+    ".github/workflows/aethron-fleet-policy.yml": "f78c4cb47c128b82e9188a44e8db6b4efd105fd59296d7e6b2c1ac36df8da478",
+    "docs/architecture/fleet-claim-v1.md": "51dfb6f06bb667dd657ab998337f23e7a53873af58662159b3e611390babd81c",
+    "integrations/edge/aethron_edge/runtime/fleet_floors.py": "2bd329eeb6e17989bb620eeaa5a1126e50c0fd6e60ea35e43518de634c61d1fb",
+    "integrations/edge/aethron_edge/runtime/fleet_plan.py": "209fd9faf1e8b2fc7b43fc0836c956b909a9c7d793a28036f3a841360e3c4c6e",
+    "tests/integration/test_fleet_claim.py": "a080ee783aaa1459a0017776e28ff6a52b20d0aa67dcab10ba1672962b7a4a5c",
+    "tests/integration/test_fleet_rollout.py": "c6d0354cd971cc9674336873fb1742c6f8d649830f4d2e520d0d2cfc513d7b10"
+  },
+  "runtime": "CPython 3.13.5, Linux x86_64, OpenSSL 3.5.6",
+  "verification": {
+    "command": "PYTHONPATH=integrations/edge:build/fleet-linux-deps python3 -W always::ResourceWarning -m unittest discover -s tests/integration -p 'test_fleet_*.py' -q",
+    "fleet_tests_passed": 83,
+    "claim_tests_passed": 11,
+    "tests_failed": 0,
+    "resource_warnings_final_run": 0,
+    "ruff_0_16_10": "lint and format PASS",
+    "bandit_1_9_4": "zero production findings in floor and plan modules",
+    "workflow_yaml_and_private_marker_scan": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "retained_negative_evidence": [
+    "RED: callable assertion failed before claim_rollout_wave existed.",
+    "Initial 83-test run passed but reported an unclosed SQLite connection. Claim and rollout fixture connections now explicitly close; final warnings-enabled run passed without resource warnings."
+  ],
+  "not_run": [
+    "Hosted installed-wheel checks for this candidate",
+    "Full repository matrix, fuzz, clean clone or hardware testing",
+    "External execution, installation, activation or remote receipt authentication"
+  ],
+  "limits": "A reservation can persist if final floor commit or post-reservation timing check fails; no slots are returned and no retry/reset is automatic. No cross-file atomicity or lasting execution authority. Signed provisioning permission is checked for synthetic reservation only."
+}

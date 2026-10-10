@@ -1,0 +1,312 @@
+{
+  "audit_policy_version": 2,
+  "component": "fleet_health",
+  "source_sha256": "75e284acbea0193f7499ff4c20d5def7cc0195875855f7e1e13a4c61b609c15d",
+  "environment": {
+    "python": "3.13.5",
+    "node": "v22.23.2",
+    "os": "Linux",
+    "architecture": "x86_64"
+  },
+  "scope": "Synthetic single-process probes; no worst-case, contention, or hardware qualification",
+  "cases": [
+    {
+      "name": "valid",
+      "expected": true,
+      "python": true,
+      "node_strict": true,
+      "node_default_object_validation": true
+    },
+    {
+      "name": "duplicate",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": true
+    },
+    {
+      "name": "escaped_duplicate",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": true
+    },
+    {
+      "name": "float_version",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": true
+    },
+    {
+      "name": "exponent_time",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": true
+    },
+    {
+      "name": "bool_time",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": false
+    },
+    {
+      "name": "nonfinite",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": false
+    },
+    {
+      "name": "future",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": false
+    },
+    {
+      "name": "expired",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": false
+    },
+    {
+      "name": "over_lifetime",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": false
+    },
+    {
+      "name": "extra",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": false
+    },
+    {
+      "name": "nested_state",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": false
+    },
+    {
+      "name": "escaped_key",
+      "expected": true,
+      "python": true,
+      "node_strict": true,
+      "node_default_object_validation": true
+    },
+    {
+      "name": "escaped_state",
+      "expected": true,
+      "python": true,
+      "node_strict": true,
+      "node_default_object_validation": true
+    },
+    {
+      "name": "whitespace_boundary",
+      "expected": true,
+      "python": true,
+      "node_strict": true,
+      "node_default_object_validation": true
+    },
+    {
+      "name": "oversize",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": false
+    },
+    {
+      "name": "trailing_comma",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": false
+    },
+    {
+      "name": "trailing_value",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": false
+    },
+    {
+      "name": "utf8_bom",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": false
+    },
+    {
+      "name": "invalid_utf8",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": false
+    },
+    {
+      "name": "array",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": false
+    },
+    {
+      "name": "null",
+      "expected": false,
+      "python": false,
+      "node_strict": false,
+      "node_default_object_validation": false
+    }
+  ],
+  "measurements": {
+    "python_decode_validate": {
+      "unit": "microseconds",
+      "iterations_per_sample": 2000,
+      "samples": [
+        37.550563000000004,
+        11.4792025,
+        7.32628,
+        41.6158815,
+        7.7367285
+      ],
+      "median": 11.4792025,
+      "max_sample": 41.6158815
+    },
+    "python_1024_ingest_and_snapshot": {
+      "unit": "microseconds",
+      "iterations_per_sample": 1,
+      "samples": [
+        277898.152,
+        205293.623,
+        215585.872,
+        266520.793,
+        201141.753
+      ],
+      "median": 215585.872,
+      "max_sample": 277898.152
+    },
+    "python_full_snapshot": {
+      "unit": "microseconds",
+      "iterations_per_sample": 500,
+      "samples": [
+        442.954344,
+        412.817812,
+        563.9538299999999,
+        417.853884,
+        422.161428
+      ],
+      "median": 422.161428,
+      "max_sample": 563.9538299999999
+    }
+  },
+  "node_decode_validate": {
+    "unit": "microseconds",
+    "iterations_per_sample": 2000,
+    "samples": [
+      69.37584849999999,
+      97.69889599999999,
+      12.808590000000038,
+      42.70228750000001,
+      107.0056535
+    ],
+    "median": 69.37584849999999,
+    "max_sample": 107.0056535
+  },
+  "memory": {
+    "python_traced_retained_bytes": 227079,
+    "python_traced_peak_bytes": 229045,
+    "python_process_peak_rss_kib": 21696,
+    "node_process_peak_rss_kib": 56952
+  },
+  "limitations": [
+    "Node candidate covers decoder only, not state machine or thread safety.",
+    "Timing excludes interpreter startup, IPC and contention; runs are not interleaved.",
+    "Traced allocation excludes interpreter and native allocator overhead.",
+    "Peak RSS includes probe overhead; runtimes do different work and RSS is not a ranking."
+  ],
+  "decision": "KEEP",
+  "subject_commit": "a8276225c0da9952a2629a704be3b42bb4614fd7",
+  "earlier_run": {
+    "source_sha256": "75e284acbea0193f7499ff4c20d5def7cc0195875855f7e1e13a4c61b609c15d",
+    "measurements": {
+      "python_decode_validate": {
+        "unit": "microseconds",
+        "iterations_per_sample": 2000,
+        "samples": [
+          49.564131,
+          46.206678999999994,
+          15.7834705,
+          40.081809500000006,
+          8.766832
+        ],
+        "median": 40.081809500000006,
+        "max_sample": 49.564131
+      },
+      "python_1024_ingest_and_snapshot": {
+        "unit": "microseconds",
+        "iterations_per_sample": 1,
+        "samples": [
+          192398.24,
+          183012.739,
+          197542.048,
+          219919.793,
+          194763.355
+        ],
+        "median": 194763.355,
+        "max_sample": 219919.793
+      },
+      "python_full_snapshot": {
+        "unit": "microseconds",
+        "iterations_per_sample": 500,
+        "samples": [
+          391.448994,
+          386.575174,
+          385.05386,
+          434.283328,
+          573.18992
+        ],
+        "median": 391.448994,
+        "max_sample": 573.18992
+      }
+    },
+    "node_decode_validate": {
+      "unit": "microseconds",
+      "iterations_per_sample": 2000,
+      "samples": [
+        198.53578299999998,
+        54.440046499999994,
+        9.922390500000004,
+        86.69891150000001,
+        13.737815500000012
+      ],
+      "median": 54.440046499999994,
+      "max_sample": 198.53578299999998
+    },
+    "memory": {
+      "python_traced_retained_bytes": 235755,
+      "python_traced_peak_bytes": 237723,
+      "python_process_peak_rss_kib": 21960,
+      "node_process_peak_rss_kib": 56820
+    }
+  },
+  "verification": {
+    "health_tests": "15 PASS against exported committed module",
+    "decoder_contract": "22/22 PASS for Python and strict Node",
+    "negative_control": "Relaxed Node output fails candidate_contract_failure",
+    "ruff": "PASS",
+    "node_syntax": "PASS",
+    "bandit": "PASS after removing subprocess orchestration from probe; no suppressions",
+    "retained_failures": [
+      "Initial probe failed because candidate file did not yet exist.",
+      "Initial Bandit scan reported B404/B603/B607 for subprocess orchestration; replaced with explicit file-based evidence input."
+    ],
+    "qualification": "No full matrix, platform timing, deployment-rate or hardware qualification"
+  }
+}
