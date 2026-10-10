@@ -114,3 +114,11 @@ redirect-based routing is unsupported. A rejected creation/stream redirect rejec
 best effort. This uses the host fetch redirect policy, not a check after following
 the redirect. The caller still owns initial endpoint trust and transport security;
 this does not restrict arbitrary caller-supplied base URLs or certify TLS/MLS/CNSA.
+
+Unused HTTP response bodies are explicitly cancelled: unsuccessful session creation,
+unsuccessful event responses, and all DELETE replies. The client neither reads
+these bodies into memory nor waits for their source cleanup to finish. Rejected
+cancellation promises are observed without replacing the primary result. Native
+fetch cancellation is exercised against stalled loopback responses; this does
+not prove termination of an arbitrary source that ignores cancellation, remote
+handle deletion, or a production cleanup deadline.

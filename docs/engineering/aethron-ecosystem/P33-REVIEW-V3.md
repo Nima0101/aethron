@@ -192,3 +192,50 @@ lexical integer forms and producer payload/wire-size reconciliation. No new
 command, hardware, identity or authority surface is introduced. The parent review
 and lane are incomplete. Evidence is recorded in
 [the redirect record](evidence/phase3/p33-redirect-review-v3.json).
+
+## Third component, unused HTTP response ownership slice
+
+Baseline `d1f927461ecacae72b3bb36176c1d223caaf98a0`. The earliest generated
+admission, projection and clock controls were rerun with the transport suite.
+The review found no explicit disposal of failed POST/GET bodies or DELETE replies.
+Native GET already received cancellation through the existing event abort in
+`finally`; that passing negative-evidence control is retained. Native POST and
+DELETE with no response EOF remained open beyond observer completion on baseline.
+Eight controlled-source cases additionally expose omitted body cancellation and
+exercise pending/rejected cleanup without relying on socket timing.
+
+Requirements: release interest in unused untrusted response bytes, avoid complete
+body buffering or an unbounded drain, preserve the original error/success result,
+and avoid delaying session cleanup on an arbitrary source promise. Node ESM,
+existing authenticated fetch routes and the public API remain the deployment
+boundary. There is no real-time, remote-deletion or upstream allocation guarantee.
+
+Current primary-source comparison (2026-10-10):
+
+| Candidate | Decisive property |
+| --- | --- |
+| TypeScript/native fetch with explicit cancellation | [Undici guidance](https://github.com/nodejs/undici#garbage-collection) calls for consuming or cancelling bodies rather than relying on garbage collection. [Streams cancellation](https://streams.spec.whatwg.org/#rs-cancel) expresses lost interest and invokes the source cleanup mechanism. The host API already supplies the required operation. |
+| Complete-body read or drain to EOF | A streaming or buffered drain still depends on EOF from an untrusted peer. The no-EOF fixtures make it unsuitable for bodies this client does not need. No parse or retained payload is necessary here. |
+| Kotlin/Ktor | [Scoped response streaming](https://ktor.io/docs/client-responses.html#streaming) makes resource ownership explicit. A separate Kotlin client is credible, but it still needs cancellation/error policy and would change this Node distribution boundary without a demonstrated resource or latency advantage. |
+| Dart streams | [Subscription cancellation](https://api.dart.dev/dart-async/StreamSubscription/cancel.html) separates stopping events from the future reporting resource cleanup. It still requires a decision about pending/rejected cleanup; selecting Dart alone would not remove that responsibility. |
+
+**KEEP TypeScript/native fetch; FIX unused response disposal.** The helper invokes
+body cancellation where there is no reader and observes rejection without waiting.
+Existing reader-owned cancellation paths are unchanged. No body logging, buffering,
+retry, schema change, authority or runtime dependency is added. All original
+session/stream errors and best-effort DELETE behavior are preserved.
+
+Fourteen controls pass after correction: eight controlled-source cases, three
+null-body controls, and three actual native-fetch loopback cases. The corrected
+baseline has ten assertion failures and four passes. The initial test incorrectly
+used a null successful GET body in a DELETE fixture; that run is retained, and
+only that fixture was corrected before the production edit. The native one-second
+check is a bounded regression timeout chosen below the request-abort deadlines;
+it is not a deployment performance claim. Socket tests complement controlled
+streams, which independently detect awaiting or losing the cleanup promise.
+
+Parent transport review remains open for initial endpoint trust, native fetch
+error disclosure, caller abort across all phases, and the lexical-number and
+producer event-cap issues. Distribution/tooling and the remaining client inventory
+have not completed V3 review. No completion marker is created. Source/report/artifact
+bindings are in [the disposal record](evidence/phase3/p33-disposal-review-v3.json).

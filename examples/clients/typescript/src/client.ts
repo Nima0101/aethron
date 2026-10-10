@@ -11,6 +11,11 @@ function localNow(): number {
   catch { return NaN; }
 }
 
+function discardResponse(response: Response): void {
+  // Do not drain untrusted bodies or wait for an underlying cleanup promise.
+  void response.body?.cancel().catch(() => {});
+}
+
 export class Observation {
   // Retain only the displayed aggregate, never the transport handle or track IDs.
   #projection: {
@@ -66,7 +71,10 @@ export async function observe(base: string, token: string, profile: string,
   const headers = {Authorization: `Bearer ${token}`, 'Content-Type': 'application/json'};
   const request = await fetch(`${base}/api/v1/sessions`, {method: 'POST', headers, redirect: 'error',
     body: JSON.stringify({source_profile: profile, contract: 'warn'}), signal});
-  if (!request.ok) throw new Error('session_unavailable');
+  if (!request.ok) {
+    discardResponse(request);
+    throw new Error('session_unavailable');
+  }
   const handle = await readSession(request, profile);
   const value = new Observation();
   const stop = new AbortController();
@@ -84,7 +92,10 @@ export async function observe(base: string, token: string, profile: string,
   }, 20);
   try {
     const response = await fetch(`${base}/api/v1/sessions/${handle}/events`, {headers, signal: eventSignal, redirect: 'error'});
-    if (!response.ok || !response.body) throw new Error('stream_unavailable');
+    if (!response.ok || !response.body) {
+      discardResponse(response);
+      throw new Error('stream_unavailable');
+    }
     const reader = response.body.getReader();
     const decoder = new WireDecoder();
     let lastSequence = -1;
@@ -121,7 +132,8 @@ export async function observe(base: string, token: string, profile: string,
     clearInterval(timer); stop.abort(); value.disconnect();
     try { if (!renderFailed) display(value.view()); }
     finally {
-      await fetch(`${base}/api/v1/sessions/${handle}`, {method: 'DELETE', headers, signal: AbortSignal.timeout(2000), redirect: 'error'}).catch(() => {});
+      await fetch(`${base}/api/v1/sessions/${handle}`, {method: 'DELETE', headers, signal: AbortSignal.timeout(2000), redirect: 'error'})
+        .then(discardResponse).catch(() => {});
     }
   }
 }
