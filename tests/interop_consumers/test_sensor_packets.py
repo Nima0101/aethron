@@ -129,6 +129,7 @@ class SensorPacketConformance(unittest.TestCase):
                 else:
                     self.assertIsNone(result.task_sha256)
                     self.assertIsNone(result.passport_sha256)
+                    self.assertIsNone(result.policy_revision)
                     self.assertIsNone(result.expires_at)
                     self.assertEqual(result.evidence, ())
 

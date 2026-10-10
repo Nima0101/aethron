@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "id": "p16-ros-consumer-current-v3",
+  "component": "Current published ROS ingress diagnostic status consumer",
+  "decision": "KEEP",
+  "constraints": [
+    "Exercise synthetic message receipt, loss and discontinuity through the published in-process API, compare exact status bytes and independently authenticate their binding.",
+    "No ROS graph, DDS transport, live device, actuation or qualification; monotonic source times do not become UTC evidence expiry."
+  ],
+  "alternatives": [
+    "Python unittest calls into actual public APIs with portable JSON vectors.",
+    "Robot Framework keyword libraries driving the actual APIs.",
+    "Java/Kotlin JUnit driving an explicit subprocess adapter.",
+    "Rust proptest generating and shrinking inputs through a language boundary."
+  ],
+  "rationale": [
+    "KEEP direct actual-API traces and exact portable status fixtures. They observe the producer transition results without implementing a second state machine.",
+    "Robot Framework keywords or JUnit process orchestration can drive integration systems, but no such external system exists in this test boundary. Proptest could expand generated sequences; it would complement rather than replace these fixed diagnostic cases.",
+    "Three ROS status methods pass, including rejection policy_revision absence already covered by this consumer. Source bytes match the fetched main snapshot. No new test or runtime mismatch was demonstrated for this component."
+  ],
+  "limits": [
+    "Scope is offline developer conformance, not selection of producer, transport or deployed runtime technology. No target timing or memory requirement was supplied.",
+    "Alternatives were compared from official sources, not executed or benchmarked. No runtime speed ranking, formal proof or superiority based on installed tooling, familiarity or rewrite cost.",
+    "No hardware, tactical, MLS/CNSA, availability, product acceptance or whole-lane qualification. Source hashes do not attest loaded code or dependency closure."
+  ],
+  "evidence": [
+    "https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html",
+    "https://docs.junit.org/6.1.3/overview.html",
+    "https://docs.rs/proptest/latest/proptest/"
+  ]
+}
