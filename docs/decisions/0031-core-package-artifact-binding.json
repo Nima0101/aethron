@@ -1,0 +1,33 @@
+{
+  "id": "0031-core-package-artifact-binding",
+  "review_order_version": 3,
+  "component": "P1.1 core package checker: compared artifact, installer and report binding",
+  "source_revision": "c2d006b2864ba185c8ee25a3826d189d40058942",
+  "source_sha256": "2a48223f30bd6326c86dab464ae0eeb95f2805c39f9887dc56b911f59d83b96d",
+  "decision": "KEEP",
+  "constraints": [
+    "Offline Python wheel consumer; retain the exact compared bytes through pip installation and evidence output; no new runtime dependency or measured hard-real-time requirement."
+  ],
+  "comparison": [
+    "Python hashlib.sha256 hashes the already-compared immutable bytes directly. RustCrypto sha2 can implement the same digest through a native boundary; external hash tools can hash files but require another read unless explicitly supplied the retained bytes. Neither alternative removes the existing Python/pip installation boundary."
+  ],
+  "rationale": [
+    "KEEP Python orchestration with its native-backed stdlib hashlib for this narrow observer: same-buffer hashing and hash-enforced pip admission provide the required binding without an additional serialization, subprocess or FFI boundary. No throughput comparison or global language preference is claimed."
+  ],
+  "evidence": [
+    "Three mutation subcases failed before the correction. The checker now captures compared bytes once, pins pip with a SHA-256 file URL plus --require-hashes/--force-reinstall, and reports that retained digest. Tests cover changes after comparison read, before install and after install, including URI-escaped spaces and #.",
+    "Ten focused core package methods passed. Separate real pip controls installed a harmless synthetic wheel with its correct hash and rejected an incorrect hash before installation. Product consumers are mocked in regression tests; no product runtime was executed."
+  ],
+  "limits": [
+    "source_sha256 binds the pre-correction observer at source_revision. Tests and updated observer accompany this decision. A matching hash authenticates the compared artifact, not its publisher or source tree.",
+    "This does not establish source-tree immutability, installed-file tamper resistance, CLI wrapper coverage, cross-platform release qualification or completion of P1.1-P1.7. Existing dependency_installation=false means --no-deps, not inspected absence of dependency metadata."
+  ],
+  "revisit": [
+    "Continue P1.1 installed CLI/source binding review, including synthetic backend observers; qualify actual consumers on the exact delivery head before release."
+  ],
+  "references": [
+    "https://pip.pypa.io/en/stable/topics/secure-installs/",
+    "https://docs.python.org/3.13/library/hashlib.html",
+    "https://docs.rs/sha2/latest/sha2/"
+  ]
+}
