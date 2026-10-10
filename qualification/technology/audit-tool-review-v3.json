@@ -1,0 +1,737 @@
+{
+  "review_order_version": 3,
+  "scope": "synthetic offline audit-tool review; no hardware or authentication claim",
+  "baseline_head": "61239c13facb2081357af7e81c6fbc3b4b877a51",
+  "python": "3.13.5",
+  "observed_red": {
+    "methods": 5,
+    "assertion_failures": 8,
+    "errors": 1,
+    "error": "KeyError for missing document"
+  },
+  "after": {
+    "methods": 6,
+    "passed": true,
+    "errors": 0,
+    "skips": 0,
+    "campaign_goldens_reproduced": 2
+  },
+  "java_parser_artifact": {
+    "size_bytes": 594187,
+    "sha256": "b64b5874162b503a0e58a8f7758266e8dd9f91bf49e3a59ae0b5f47589a231b7"
+  },
+  "java_composition": {
+    "audit_policy_version": 2,
+    "scope": "Java ingress with unchanged Python semantic oracle; not a Java validator",
+    "python": "3.13.5",
+    "ingress_cases": 18,
+    "semantic_requests": 63,
+    "mismatch_indices": [],
+    "all_reports_match": true,
+    "request_transport_sha256": "7c1ddc2d27791242716bfa836e681f0b3b8fa92e05350806b4536350620255e0",
+    "response_transport_sha256": "5059be25311cb6c0e60f0c9e0636ccc3e62535d233661267ee152a5d5f55668f",
+    "python_65536_byte_measurement": {
+      "iterations": 20,
+      "elapsed_ns": [
+        5370209,
+        67938976,
+        10121863,
+        11412403,
+        9593498,
+        65470476,
+        5276696,
+        5643355,
+        5313516,
+        5302903,
+        5427983,
+        5458326,
+        67227935,
+        5805802,
+        5467933,
+        5461975,
+        5680356,
+        5921000,
+        5518292,
+        65189055
+      ],
+      "traced_peak_bytes_one_call": 73615,
+      "acceptance_threshold": null
+    },
+    "source_sha256": {
+      "qualification/technology/IngressProbe.java": "abbe803c05d3d10039d68e3e044d1c8578f5259733bd1bf554dc8486433fd4d3",
+      "qualification/technology/compare_ingress.py": "c4187c38a3d631a0a472e08fd02f39974e044a6175a78279ea01be59be131a17",
+      "qualification/technology/ingress-vectors-v1.json": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff",
+      "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+      "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+      "qualification/rigs/synthetic-v1.json": "0b68e3a27477d5d53bc616afac23d82568ac357fdf95ce2520f114ac2efb25ea",
+      "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034"
+    },
+    "physical_qualification_passed": false
+  },
+  "python_binding": {
+    "scope": "four_mib_production_artifact_binding",
+    "python": "3.13.5",
+    "hash_backend_module": "_hashlib",
+    "four_mib_digests": [
+      "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58",
+      "ee78cd29d3a534713b36e6ff6fa3668c8a8f851a542d5eb2401c25ca4e057d02",
+      "2fa4430272111c7854b204001461e16f2c73725b07dde2b6d1dc4f2aa8fe18da",
+      "9ed3b916b5b6b1dbe61b8844c8130657b9bc4f7ff80a07c7835989c911ad430a"
+    ],
+    "verify_elapsed_ns": [
+      85580079,
+      2793070,
+      2705556,
+      2744960,
+      2643402,
+      2903931,
+      2513133,
+      81135866,
+      2562351,
+      2382066
+    ],
+    "traced_peak_bytes_one_call": 10949,
+    "input_storage_excluded_from_tracing": true,
+    "artifact_counts": {
+      "referenced": 4,
+      "supplied": 4,
+      "matched": 4,
+      "missing": 0,
+      "mismatched": 0,
+      "unreferenced": 0,
+      "supplied_bytes": 4194304
+    },
+    "manifest_sha256": "11e2cdcb0c5511aa2132f6136bf36033d6bae99f7935f33baa90eee722e55ef7",
+    "source_sha256": {
+      "qualification/artifacts.py": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+      "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+      "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+      "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+      "qualification/technology/measure_binding.py": "824d211e99f39dfac1bee37e7a0e2af92a21342587941170c814e2a06180acb8"
+    },
+    "physical_qualification_passed": false
+  },
+  "node_ingress": {
+    "scope": "ingress_token_probe_only_no_schema_or_semantic_validation",
+    "runtime": "v22.23.2",
+    "source_aware_reviver": true,
+    "cases": [
+      {
+        "id": "valid-incomplete",
+        "accepted": true,
+        "expected_accepted": true,
+        "matches": true
+      },
+      {
+        "id": "integer-negative-zero",
+        "accepted": true,
+        "expected_accepted": true,
+        "matches": true
+      },
+      {
+        "id": "escaped-key-valid",
+        "accepted": true,
+        "expected_accepted": true,
+        "matches": true
+      },
+      {
+        "id": "float-integral",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "exponent-integral",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "float-underflow",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "nonfinite",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "infinite",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "oversized-number",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "duplicate-equal",
+        "accepted": true,
+        "expected_accepted": false,
+        "matches": false
+      },
+      {
+        "id": "duplicate-overwrite",
+        "accepted": true,
+        "expected_accepted": false,
+        "matches": false
+      },
+      {
+        "id": "duplicate-escaped",
+        "accepted": true,
+        "expected_accepted": false,
+        "matches": false
+      },
+      {
+        "id": "nested-duplicate",
+        "accepted": true,
+        "expected_accepted": false,
+        "matches": false
+      },
+      {
+        "id": "utf8-bom",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "invalid-utf8",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "utf16",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "trailing-document",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "malformed",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      }
+    ],
+    "parity": false,
+    "physical_qualification_passed": false
+  },
+  "node_hash": {
+    "scope": "native_sha256_and_ownership_probe_only",
+    "runtime": "v22.23.2",
+    "known_vectors": [
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+    ],
+    "four_mib_digests": [
+      "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58",
+      "ee78cd29d3a534713b36e6ff6fa3668c8a8f851a542d5eb2401c25ca4e057d02",
+      "2fa4430272111c7854b204001461e16f2c73725b07dde2b6d1dc4f2aa8fe18da",
+      "9ed3b916b5b6b1dbe61b8844c8130657b9bc4f7ff80a07c7835989c911ad430a"
+    ],
+    "copy_and_hash_elapsed_ns": [
+      6937846,
+      88476556,
+      5856226,
+      7449322,
+      84942357,
+      5908520,
+      6048003,
+      89655731,
+      7633490,
+      6623035
+    ],
+    "alias_changed": true,
+    "owned_preserved": true,
+    "physical_qualification_passed": false
+  },
+  "negative_controls": {
+    "review_declarations": {
+      "review_order_version": 3,
+      "component": "declaration_validation",
+      "python": "3.13.5",
+      "baseline_tests": 4,
+      "baseline_passed": true,
+      "negative_finding_mutations": {
+        "capture_stale": {
+          "failures": 2,
+          "errors": 0
+        },
+        "record_stale": {
+          "failures": 1,
+          "errors": 0
+        },
+        "clock_pair_skew": {
+          "failures": 1,
+          "errors": 0
+        },
+        "clock_domain_mismatch": {
+          "failures": 1,
+          "errors": 0
+        }
+      },
+      "restored_baseline_passed": true,
+      "scope": "synthetic offline declarations; not live admission or authentication",
+      "physical_qualification_passed": false,
+      "source_sha256": {
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+        "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+        "qualification/tests/test_declaration_review.py": "f2b1798f19ee679868cf50e7f08e5c94bae5950a7bf6412e80611094e97a03c1",
+        "qualification/technology/review_declarations.py": "cce2daa5acf2c333fb96171f38fe51109fa4cd21fe598fce86f6747d61fb02bb"
+      }
+    },
+    "review_artifacts": {
+      "review_order_version": 3,
+      "component": "artifact_byte_binding",
+      "python": "3.13.5",
+      "hash_backend_module": "_hashlib",
+      "baseline_tests": 4,
+      "baseline_passed": true,
+      "mutations": {
+        "constant_digest": {
+          "failures": 1,
+          "errors": 0
+        },
+        "erased_declaration_negatives": {
+          "failures": 1,
+          "errors": 0
+        },
+        "relaxed_total_budget": {
+          "failures": 1,
+          "errors": 0
+        }
+      },
+      "restored_baseline_passed": true,
+      "physical_qualification_passed": false,
+      "source_sha256": {
+        "qualification/artifacts.py": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+        "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+        "qualification/tests/test_artifacts.py": "b0e4a20dc2a92a0b0773b0d6749a15495e0e8361b89da3e46197f88267077563",
+        "qualification/tests/test_artifact_review.py": "00c5afdbba6c71fe6f9ebe1ea9057ea3c7a80688ba04b0130f13a6608ae17d1b",
+        "qualification/technology/review_artifacts.py": "7e52ebb63464198cc1b6070e3316baaea8e4e925ebfc4f5a147b0cd78d16ad94"
+      }
+    },
+    "review_campaign": {
+      "review_order_version": 3,
+      "component": "campaign_coverage_and_procedures",
+      "python": "3.13.5",
+      "sqlite": "3.46.1",
+      "baseline_tests": 5,
+      "baseline_passed": true,
+      "mutations": {
+        "duplicate_counts_erased": {
+          "failures": 2,
+          "errors": 0
+        },
+        "commitment_multiplicity_erased": {
+          "failures": 1,
+          "errors": 0
+        },
+        "sql_duplicates_admitted": {
+          "failures": 1,
+          "errors": 0
+        }
+      },
+      "restored_baseline_passed": true,
+      "limits": [
+        "SQL aggregation is independent; admission and capture semantics are shared.",
+        "Finite synthetic controls do not demonstrate scientific sample independence.",
+        "No authenticated preregistration, clock, procedure or domain evidence."
+      ],
+      "physical_qualification_passed": false,
+      "source_sha256": {
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+        "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+        "qualification/technology/campaign_sql.py": "4deb710665852d208c1b8170a5963cc649a73e0536116d88926eff99074259c3",
+        "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+        "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+        "qualification/tests/test_campaign_review.py": "f3bc5240549e6cd79d1861e54ad3e3e41196da176aa98ea5fbb27958b55406ed",
+        "qualification/technology/review_campaign.py": "678d80924f29663e3e4545fc4a990e6515197946aa3fed30c459615b50378b6c"
+      }
+    }
+  },
+  "historical_source_bindings": [
+    {
+      "report": "qualification/evidence/artifacts-verification-v1.json",
+      "bindings": [
+        {
+          "source": "qualification/artifacts.py",
+          "sha256": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/artifacts-v1.md",
+          "sha256": "f4ee973eaf665186e65e61d414fca5b0fe20485ea0d0bbf27bb04cb85130d598",
+          "anchor": "3bdcadc84d2bcca70f48724a57eb9497d89c8ccd"
+        },
+        {
+          "source": "qualification/tests/test_artifacts.py",
+          "sha256": "b0e4a20dc2a92a0b0773b0d6749a15495e0e8361b89da3e46197f88267077563",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/evidence.py",
+          "sha256": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/tests/test_evidence.py",
+          "sha256": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+          "anchor": "current"
+        }
+      ]
+    },
+    {
+      "report": "qualification/evidence/campaign-verification-v1.json",
+      "bindings": [
+        {
+          "source": "qualification/campaign.py",
+          "sha256": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/campaign-v1.md",
+          "sha256": "3cbcb05cb4aaf7372f7f327b64c0348cb1af69d9485531b7c16dddb5d7dafeab",
+          "anchor": "8e76aad81d45f01e782de8ff1f8fbfa9b29a1280"
+        },
+        {
+          "source": "qualification/tests/test_campaign.py",
+          "sha256": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/plans/synthetic-campaign-v1.json",
+          "sha256": "0522b38fcc206d0ee4e55d27387efea9c81ff31de949e3674644e799d9c1373e",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/evidence.py",
+          "sha256": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+          "anchor": "current"
+        }
+      ]
+    },
+    {
+      "report": "qualification/technology/ingress-verification-v1.json",
+      "bindings": [
+        {
+          "source": "qualification/evidence.py",
+          "sha256": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+          "anchor": "current"
+        },
+        {
+          "source": "aethron/_json_bounds.py",
+          "sha256": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/tests/test_ingress_audit.py",
+          "sha256": "f79c83bd9aa0a4c89d3488c6ee7f0f05fb7d722e2dccaf6ff8e4731a07321338",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/technology/ingress-probe.mjs",
+          "sha256": "05d762763df94a878b91209499c5d51e47fb9bbec81747bcba39ef6637db50b8",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/technology/ingress-vectors-v1.json",
+          "sha256": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/technology/ingress-node-result-v1.json",
+          "sha256": "9759f25130c6a6e4c060d766c7c0c2c89bf820459719bfd71377ba53cdffe4e2",
+          "anchor": "current"
+        }
+      ]
+    },
+    {
+      "report": "qualification/technology/ingress-java-result-v1.json",
+      "bindings": [
+        {
+          "source": "qualification/technology/IngressProbe.java",
+          "sha256": "abbe803c05d3d10039d68e3e044d1c8578f5259733bd1bf554dc8486433fd4d3",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/technology/compare_ingress.py",
+          "sha256": "706bb7386936f55c06260c2d72e77ce51e63196adec05193d0c868adba3a448b",
+          "anchor": "cc2755ecafc60ee13d890af9245023277ae68f80"
+        },
+        {
+          "source": "qualification/technology/ingress-vectors-v1.json",
+          "sha256": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/evidence.py",
+          "sha256": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/tests/test_evidence.py",
+          "sha256": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+          "anchor": "current"
+        }
+      ]
+    },
+    {
+      "report": "qualification/technology/hash-node-result-v1.json",
+      "bindings": [
+        {
+          "source": "qualification/technology/hash-probe.mjs",
+          "sha256": "010f2925a1a8abae567a0030f89abb27ebf97ed429ad35e1697ecda278bb5c1e",
+          "anchor": "current"
+        }
+      ]
+    },
+    {
+      "report": "qualification/technology/binding-python-result-v1.json",
+      "bindings": [
+        {
+          "source": "qualification/artifacts.py",
+          "sha256": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/tests/test_evidence.py",
+          "sha256": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/technology/measure_binding.py",
+          "sha256": "fc9881911f6c26cf7dc6ee9793103a03813bb834aff8be33588810e5d973e99d",
+          "anchor": "cc2755ecafc60ee13d890af9245023277ae68f80"
+        }
+      ]
+    },
+    {
+      "report": "qualification/technology/campaign-sql-result-v1.json",
+      "bindings": [
+        {
+          "source": "aethron/_json_bounds.py",
+          "sha256": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/evidence.py",
+          "sha256": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/campaign.py",
+          "sha256": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/tests/test_evidence.py",
+          "sha256": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/tests/test_campaign.py",
+          "sha256": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/tests/test_campaign_audit.py",
+          "sha256": "65938f530a0025d2f060b1f450f15ce3150bd27dcf6cb8ab9598da9f7f3bf3e0",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/technology/campaign_sql.py",
+          "sha256": "4deb710665852d208c1b8170a5963cc649a73e0536116d88926eff99074259c3",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/technology/compare_campaign.py",
+          "sha256": "e1500c6ffedcc339c3f213eabc533382bd9627b201b96061e28cbe9668722a18",
+          "anchor": "current"
+        }
+      ]
+    },
+    {
+      "report": "qualification/technology/declaration-review-v3.json",
+      "bindings": [
+        {
+          "source": "aethron/_json_bounds.py",
+          "sha256": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/evidence.py",
+          "sha256": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/tests/test_evidence.py",
+          "sha256": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/tests/test_declaration_review.py",
+          "sha256": "f2b1798f19ee679868cf50e7f08e5c94bae5950a7bf6412e80611094e97a03c1",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/technology/review_declarations.py",
+          "sha256": "cce2daa5acf2c333fb96171f38fe51109fa4cd21fe598fce86f6747d61fb02bb",
+          "anchor": "current"
+        }
+      ]
+    },
+    {
+      "report": "qualification/technology/artifact-review-v3.json",
+      "bindings": [
+        {
+          "source": "qualification/artifacts.py",
+          "sha256": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/evidence.py",
+          "sha256": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+          "anchor": "current"
+        },
+        {
+          "source": "aethron/_json_bounds.py",
+          "sha256": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/tests/test_evidence.py",
+          "sha256": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/tests/test_artifacts.py",
+          "sha256": "b0e4a20dc2a92a0b0773b0d6749a15495e0e8361b89da3e46197f88267077563",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/tests/test_artifact_review.py",
+          "sha256": "00c5afdbba6c71fe6f9ebe1ea9057ea3c7a80688ba04b0130f13a6608ae17d1b",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/technology/review_artifacts.py",
+          "sha256": "7e52ebb63464198cc1b6070e3316baaea8e4e925ebfc4f5a147b0cd78d16ad94",
+          "anchor": "current"
+        }
+      ]
+    },
+    {
+      "report": "qualification/technology/campaign-review-v3.json",
+      "bindings": [
+        {
+          "source": "aethron/_json_bounds.py",
+          "sha256": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/evidence.py",
+          "sha256": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/campaign.py",
+          "sha256": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/technology/campaign_sql.py",
+          "sha256": "4deb710665852d208c1b8170a5963cc649a73e0536116d88926eff99074259c3",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/tests/test_evidence.py",
+          "sha256": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/tests/test_campaign.py",
+          "sha256": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/tests/test_campaign_review.py",
+          "sha256": "f3bc5240549e6cd79d1861e54ad3e3e41196da176aa98ea5fbb27958b55406ed",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/technology/review_campaign.py",
+          "sha256": "678d80924f29663e3e4545fc4a990e6515197946aa3fed30c459615b50378b6c",
+          "anchor": "current"
+        }
+      ]
+    },
+    {
+      "report": "qualification/technology/cli-review-v3.json",
+      "bindings": [
+        {
+          "source": "qualification/__main__.py",
+          "sha256": "92864f32de4bbee186a1c6f8bf77596facc3e2e83d2c1de879a8869a9816ac60",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/evidence.py",
+          "sha256": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/tests/test_cli_review.py",
+          "sha256": "6e10783f1e9f53f6412479956beba3070f3949846677c9f570445ac60c5b644f",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/tests/test_evidence.py",
+          "sha256": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/evidence/synthetic-report-v1.json",
+          "sha256": "4351cfca35268ef684f16c6cd98f8de3a41e5020fa10479c7b760fd46b4c1f35",
+          "anchor": "current"
+        },
+        {
+          "source": "qualification/evidence/expired-calibration-report-v1.json",
+          "sha256": "ebb63392fd6d48fdadd860091438f2181569fdcbf569130651b3e974b2981133",
+          "anchor": "current"
+        }
+      ]
+    }
+  ],
+  "source_sha256": {
+    "qualification/technology/compare_ingress.py": "c4187c38a3d631a0a472e08fd02f39974e044a6175a78279ea01be59be131a17",
+    "qualification/technology/measure_binding.py": "824d211e99f39dfac1bee37e7a0e2af92a21342587941170c814e2a06180acb8",
+    "qualification/technology/review_declarations.py": "cce2daa5acf2c333fb96171f38fe51109fa4cd21fe598fce86f6747d61fb02bb",
+    "qualification/technology/review_artifacts.py": "7e52ebb63464198cc1b6070e3316baaea8e4e925ebfc4f5a147b0cd78d16ad94",
+    "qualification/technology/review_campaign.py": "678d80924f29663e3e4545fc4a990e6515197946aa3fed30c459615b50378b6c",
+    "qualification/technology/compare_campaign.py": "e1500c6ffedcc339c3f213eabc533382bd9627b201b96061e28cbe9668722a18",
+    "qualification/technology/campaign_sql.py": "4deb710665852d208c1b8170a5963cc649a73e0536116d88926eff99074259c3",
+    "qualification/technology/hash-probe.mjs": "010f2925a1a8abae567a0030f89abb27ebf97ed429ad35e1697ecda278bb5c1e",
+    "qualification/technology/ingress-probe.mjs": "05d762763df94a878b91209499c5d51e47fb9bbec81747bcba39ef6637db50b8",
+    "qualification/technology/IngressProbe.java": "abbe803c05d3d10039d68e3e044d1c8578f5259733bd1bf554dc8486433fd4d3",
+    "qualification/tests/test_audit_reports.py": "39a5933e3ae50803457d1f28f4da5bcc9383b580b1cb7bbd617347f8e1d45723",
+    ".github/workflows/aethron-qualification.yml": "3fc774844433798b9adf086b3046037b385a2bf929ef85442b014ab008990f2f"
+  },
+  "physical_qualification_passed": false,
+  "hosted_execution_verified": false
+}

@@ -47,6 +47,8 @@ def main():
                     name: hashlib.sha256((root / name).read_bytes()).hexdigest()
                     for name in (
                         "qualification/artifacts.py",
+                        "qualification/evidence.py",
+                        "aethron/_json_bounds.py",
                         "qualification/tests/test_evidence.py",
                         "qualification/technology/measure_binding.py",
                     )

@@ -29,6 +29,19 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: python -m unittest discover -s qualification/tests -v
+      - name: Exercise declaration review negative controls
+        run: python -m qualification.technology.review_declarations > declaration-review-v3.json
+      - name: Exercise artifact review negative controls
+        run: python -m qualification.technology.review_artifacts > artifact-review-v3.json
+      - name: Exercise campaign review negative controls
+        run: python -m qualification.technology.review_campaign > campaign-review-v3.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: qualification-review-${{ matrix.python }}
+          path: '*-review-v3.json'
+          if-no-files-found: warn
+          retention-days: 7
       - name: Reproduce synthetic declaration report
         run: |
           python -m qualification --now-ms 1050 < qualification/rigs/synthetic-v1.json > first.json

@@ -14,7 +14,7 @@ import tracemalloc
 import unittest
 from pathlib import Path
 
-from qualification.evidence import validate
+from qualification.evidence import _pairs, _parse_integer, validate
 from qualification.tests.test_evidence import EvidenceTests, encoded
 
 
@@ -45,6 +45,29 @@ def collect():
     return requests
 
 
+def _response(raw):
+    """Validate an audit-only response envelope before interpreting its flag."""
+    try:
+
+        def invalid_constant(_):
+            raise ValueError("invalid_audit_response")
+
+        row = json.loads(
+            raw.decode("utf-8"),
+            object_pairs_hook=_pairs,
+            parse_int=_parse_integer,
+            parse_constant=invalid_constant,
+        )
+        if type(row) is not dict or type(row.get("accepted")) is not bool:
+            raise ValueError("invalid_audit_response")
+        keys = {"accepted", "document"} if row["accepted"] else {"accepted"}
+        if set(row) != keys:
+            raise ValueError("invalid_audit_response")
+        return row
+    except (ValueError, UnicodeError, RecursionError):
+        raise ValueError("invalid_audit_response") from None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -64,9 +87,10 @@ def main():
         response_bytes = source.read(8 * 1024 * 1024 + 1)
     if len(response_bytes) > 8 * 1024 * 1024:
         raise RuntimeError("audit_response_budget")
-    rows = [json.loads(row) for row in response_bytes.splitlines()]
-    if len(rows) != len(requests):
+    lines = response_bytes.splitlines()
+    if len(lines) != len(requests):
         raise RuntimeError("audit_row_count")
+    rows = [_response(row) for row in lines]
     mismatches = []
     for index, ((raw, now_ms), row) in enumerate(zip(requests, rows)):
         expected = outcome(raw, now_ms)
@@ -114,6 +138,8 @@ def main():
                 root / "compare_ingress.py",
                 root / "ingress-vectors-v1.json",
                 root.parent / "evidence.py",
+                root.parent.parent / "aethron/_json_bounds.py",
+                root.parent / "rigs/synthetic-v1.json",
                 root.parent / "tests/test_evidence.py",
             )
         },

@@ -1,16 +1,17 @@
-# Qualification implementation review v3 — in progress
+# Qualification implementation review v3
 
 This is an implementation review record, not a replacement governance policy.
 The review starts at the earliest declaration component in commit `eebfad47`
-and includes the later review corrections through `6797ef61`. Earlier decisions are evidence
-inputs only. No audit-complete marker or physical qualification is asserted.
+and includes the later CLI and audit-tool corrections accompanying this record.
+Earlier decisions are evidence inputs only. Review of the built components does
+not establish completion of all future qualification software or physical qualification.
 
 | Historical component | Current review state |
 |---|---|
 | Rig, calibration, clock, environment declaration validator | KEEP implementation; FIX evidence coverage; CLARIFY claims |
 | Artifact byte binding | KEEP implementation; FIX evidence coverage; CLARIFY report lifetime |
 | P15 campaign coverage and procedures | KEEP implementation; FIX evidence coverage; CLARIFY unknown-case and provenance claims |
-| CLI/report delivery and verification tooling, including audit probes | CLI KEEP/FIX; remaining audit-tool and hosted-evidence review pending |
+| CLI/report delivery and verification tooling, including audit probes | KEEP configured runtimes; FIX CLI/response admission, source bindings and hosted controls |
 
 ## Declaration deployment and technology decision
 
@@ -256,6 +257,73 @@ Invalid argument errors remain fixed and contain no supplied text. JSON schema,
 freshness thresholds and library behavior are unchanged. `cli-review-v3.json`
 records the before/after evidence and source bindings.
 
-Next earliest unfinished component: audit probes, workflow dependency closure and
-retained report-evidence integrity. Their source has been inspected, but that does
-not complete executable verification. No audit-complete marker is warranted yet.
+## Audit probes, evidence integrity and hosted verification
+
+This final historical component runs finite synthetic corpora, compares parser/hash/
+aggregation candidates, distinguishes assertion failures from execution errors, and
+emits source-bound JSON. It has no device interface, latency acceptance deadline or
+external artifact authenticity claim. The source-checkout Python 3.9/3.13 test
+boundary and GitHub-hosted checks are actual deployment requirements. Small local
+probes are permitted; no full clone, repository matrix, VM, long fuzz or soak is used.
+
+Fresh technology comparison:
+
+| Candidate | Decisive properties |
+|---|---|
+| Python unittest and explicit JSON orchestration | Directly exercises the reviewed Python APIs and their typed failure results. Finite mutation controls can distinguish assertion failures, errors and restored behavior without encoding API objects through another runtime. |
+| pytest | Can execute unittest cases and offers fixtures and parametrization. Those capabilities are credible but do not replace strict response parsing, source binding or independent assertions; the current finite harness needs no additional fixture/plugin lifecycle. |
+| Node test runner | Provides another structured test/reporting ecosystem. It is appropriate for JavaScript-native boundaries; driving these Python semantic APIs needs an explicit adapter and preservation of error/byte semantics. |
+| JVM/JUnit or .NET/NUnit | Typed assertions and test engines are credible alternatives, including C# outside the present probe languages. They do not remove the need for a checked Python bridge or independently implemented semantic oracle. |
+| GitHub workflow YAML | The selected hosted platform consumes this format. Generating it from another language adds an unchecked generation boundary unless separately verified; no such generation requirement exists here. |
+
+Primary sources inspected 2026-10-10:
+[unittest results](https://docs.python.org/3.13/library/unittest.html#unittest.TestResult.wasSuccessful),
+[pytest unittest support](https://docs.pytest.org/en/stable/how-to/unittest.html),
+[Node test runner](https://nodejs.org/api/test.html),
+[JUnit platform](https://docs.junit.org/6.1.3/overview.html),
+[NUnit assertions](https://docs.nunit.org/articles/nunit/writing-tests/assertions/assertions.html),
+and [GitHub artifact retention](https://docs.github.com/en/actions/tutorials/store-and-share-data).
+Suitability conclusions are this review's analysis, not claims made by those sources.
+
+**KEEP Python orchestration, Java/Jackson streaming and Node primitive probes,
+SQL comparison, and native workflow YAML; FIX evidence boundaries.** The configured
+languages directly expose the properties under comparison. Python's direct API
+and result access best fits the orchestration contract; replacing the harness
+framework does not fix ambiguous response interpretation. Java remains an audit
+parser with a shared Python semantic oracle, SQL an independently implemented
+aggregation with shared admission/semantics, and Node a limited primitive/negative
+probe. No probe becomes production admission through this decision. No migration
+has demonstrated a missing required capability or material measured improvement.
+This is not an installation, compilation-cost or familiarity preference.
+
+Six new audit-report methods cover source dependencies, exact Boolean response
+flags, duplicate/unknown/missing response fields, malformed transport values,
+response row counts and an always-rejecting candidate. The initial five-method
+RED run had eight assertion failures and one `KeyError` for a missing document.
+The corrected reader requires exact envelope keys and rejects duplicate JSON keys;
+it checks the row count before parsing rows. The existing 8 MiB response-file cap
+remains unchanged. This is a trusted synthetic test transport, not a newly exposed
+general-purpose input service. A valid response envelope does not authenticate its
+producer or prove which executable generated it.
+
+Ingress evidence now also binds the shared byte/depth guard and padded benchmark
+fixture; artifact measurement binds the declaration evaluator and byte/depth guard.
+These hashes cover the listed application dependencies, not a complete operating
+system, interpreter or cryptographic supply-chain attestation. Historical records
+remain unchanged. All 59 declared source bindings in eleven retained reports were
+matched against current bytes or a recorded Git version; a historical match is not
+a current-source test pass.
+
+Fresh bounded execution retained Java composition parity for all 81 requests,
+Node's four known duplicate-key failures, four-payload Python/Node hash agreement,
+and all ten V3 negative controls. The pinned 594,187-byte Jackson artifact was
+hash-checked before local compilation. Timings remain descriptive shared-host
+measurements; no cross-runtime ranking, real-time bound or hardware claim follows.
+The aggregate result and source hashes are in `audit-tool-review-v3.json`.
+
+The hosted workflow now executes all three V3 negative-control drivers for each
+supported Python version and retains their reports for seven days, alongside the
+existing pinned parser and primitive comparisons. Workflow configuration and local
+actionlint success do not establish hosted execution success. The current review
+is caught up through these built components; physical/legal review, authenticated
+evidence and further qualification software remain separate work.
