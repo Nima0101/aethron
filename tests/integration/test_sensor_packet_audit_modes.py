@@ -9,13 +9,94 @@ import sys
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[2]
 PROBE = ROOT / "scripts/probes/sensor_packet_audit/compare.py"
 
 
 class PacketAuditModeTests(unittest.TestCase):
+    def test_failed_worker_startup_releases_process_and_pipes(self):
+        for failure in (b"\0", TimeoutError("startup_timeout"), KeyboardInterrupt()):
+            with self.subTest(failure=type(failure).__name__):
+                module = runpy.run_path(str(PROBE))
+                worker = SimpleNamespace(
+                    stdin=io.BytesIO(),
+                    stdout=io.BytesIO(),
+                    stderr=io.BytesIO(),
+                    wait=Mock(),
+                    poll=Mock(return_value=0),
+                    kill=Mock(),
+                    pid=123,
+                )
+                reader = (
+                    Mock(return_value=failure)
+                    if isinstance(failure, bytes)
+                    else Mock(side_effect=failure)
+                )
+                expected = AssertionError if isinstance(failure, bytes) else type(failure)
+                with (
+                    patch.object(module["subprocess"], "Popen", return_value=worker),
+                    patch.object(module["Node"], "read", reader),
+                ):
+                    with self.assertRaises(expected):
+                        module["Node"]({})
+                self.assertTrue(worker.stdin.closed)
+                self.assertTrue(worker.stdout.closed)
+                self.assertTrue(worker.stderr.closed)
+                worker.wait.assert_called_once_with(timeout=5)
+                worker.kill.assert_not_called()
+
+    def test_failed_startup_metadata_releases_worker(self):
+        module = runpy.run_path(str(PROBE))
+        worker = SimpleNamespace(
+            stdin=io.BytesIO(),
+            stdout=io.BytesIO(),
+            stderr=io.BytesIO(),
+            wait=Mock(),
+            poll=Mock(return_value=0),
+            kill=Mock(),
+            pid=123,
+        )
+        with (
+            patch.object(module["subprocess"], "Popen", return_value=worker),
+            patch.object(module["Node"], "read", return_value=b"\1"),
+            patch.object(Path, "exists", return_value=True),
+            patch.object(Path, "read_text", return_value="VmRSS: invalid kB"),
+        ):
+            with self.assertRaises(ValueError):
+                module["Node"]({})
+        self.assertTrue(worker.stdin.closed)
+        self.assertTrue(worker.stdout.closed)
+        self.assertTrue(worker.stderr.closed)
+        worker.wait.assert_called_once_with(timeout=5)
+
+    def test_successful_startup_keeps_worker_available_until_close(self):
+        module = runpy.run_path(str(PROBE))
+        worker = SimpleNamespace(
+            stdin=io.BytesIO(),
+            stdout=io.BytesIO(),
+            stderr=io.BytesIO(),
+            wait=Mock(),
+            poll=Mock(return_value=0),
+            kill=Mock(),
+            pid=123,
+        )
+        with (
+            patch.object(module["subprocess"], "Popen", return_value=worker),
+            patch.object(module["Node"], "read", return_value=b"\1"),
+            patch.object(Path, "exists", return_value=False),
+        ):
+            node = module["Node"]({})
+        worker.wait.assert_not_called()
+        self.assertFalse(worker.stdin.closed)
+        self.assertIsNone(node.rss_kib)
+        self.assertGreaterEqual(node.startup_ms, 0)
+        node.close()
+        self.assertTrue(worker.stdin.closed)
+        self.assertTrue(worker.stdout.closed)
+        self.assertTrue(worker.stderr.closed)
+
     def decode_worker_timing(self, duration):
         node_type = runpy.run_path(str(PROBE))["Node"]
         node = node_type.__new__(node_type)

@@ -27,6 +27,13 @@ Worker-reported CPU duration must be finite and nonnegative before it can enter
 the comparison. This admission check does not authenticate the worker's clock or
 prove a plausible upper bound. Historical reports are not requalified by it.
 
+After a worker is created, handshake or startup-metadata failures now invoke
+the existing `close()` path before constructor failure propagates. This includes
+interrupts. Focused tests use fake processes and in-memory pipes; they do not
+qualify OS shutdown behavior. Cleanup can itself fail and supersede the startup
+error (with exception context retained). The existing shutdown path still has
+an untimed wait after killing the child; it is not a hard shutdown deadline.
+
 The retained original scalar decoder is the baseline. `production` invokes the
 real installed/source decoder; `compiled_struct` is an independent prototype of
 the selected mechanism. The comparison only informs this existing object ABI;

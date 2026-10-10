@@ -116,14 +116,18 @@ class Node:
             stderr=subprocess.PIPE,
             env=dict(os.environ, UV_THREADPOOL_SIZE="1"),
         )
-        assert self.read(1) == b"\1"
-        self.startup_ms = (time.perf_counter_ns() - start) / 1e6
-        self.rss_kib = None
-        status = Path(f"/proc/{self.worker.pid}/status")
-        if status.exists():
-            for line in status.read_text().splitlines():
-                if line.startswith("VmRSS:"):
-                    self.rss_kib = int(line.split()[1])
+        try:
+            assert self.read(1) == b"\1"
+            self.startup_ms = (time.perf_counter_ns() - start) / 1e6
+            self.rss_kib = None
+            status = Path(f"/proc/{self.worker.pid}/status")
+            if status.exists():
+                for line in status.read_text().splitlines():
+                    if line.startswith("VmRSS:"):
+                        self.rss_kib = int(line.split()[1])
+        except BaseException:
+            self.close()
+            raise
 
     def read(self, size):
         result = bytearray()
