@@ -73,6 +73,18 @@ jobs:
           from aethron.interop_tasks import validate_task
           from aethron.interop_bundles import verify_task_bundle
           from aethron.interop_federation import verify_federated_bundle
+          from aethron.interop_inbox import BoundedInbox
+          vectors = json.loads(Path("examples/interop/inbox-vectors-v1.json").read_bytes())
+          for case in vectors["cases"]:
+              inbox = BoundedInbox(**case["limits"])
+              for operation in case["operations"]:
+                  args = dict(operation["arguments"])
+                  if "payload_hex" in args:
+                      args["payload"] = bytes.fromhex(args.pop("payload_hex"))
+                  result = getattr(inbox, operation["method"])(**args)
+                  assert [result.status, result.reason, result.items, result.payload_bytes] == operation["expected"], case["name"]
+                  assert (result.payload.hex() if result.payload is not None else None) == operation["payload_hex"]
+                  assert result.motion_authority is False
           vectors = json.loads(Path("examples/interop/federation-vectors-v1.json").read_bytes())
           for case in vectors["cases"]:
               result = verify_federated_bundle(
