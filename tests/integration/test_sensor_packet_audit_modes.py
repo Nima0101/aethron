@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from functools import partial
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, call, patch
@@ -21,7 +22,40 @@ PROBE = ROOT / "scripts/probes/sensor_packet_audit/compare.py"
 
 
 class PacketAuditModeTests(unittest.TestCase):
-    def diagnostic_report(self, worker_exit=0, output=None, on_close=None, harness_path=PROBE):
+    def setUp(self):
+        # Check while fixtures are active: teardown restoration alone hides interference.
+        self.shared_bindings = (
+            subprocess.check_output,
+            subprocess.Popen,
+            Path.exists,
+            Path.read_text,
+            packets.__file__,
+            sys.stdout,
+        )
+
+    def assert_shared_bindings_unchanged(self):
+        for actual, expected in zip(
+            (
+                subprocess.check_output,
+                subprocess.Popen,
+                Path.exists,
+                Path.read_text,
+                packets.__file__,
+                sys.stdout,
+            ),
+            self.shared_bindings,
+            strict=True,
+        ):
+            self.assertIs(actual, expected)
+
+    def diagnostic_report(
+        self,
+        worker_exit=0,
+        output=None,
+        on_close=None,
+        harness_path=PROBE,
+        packet_path=None,
+    ):
         main = runpy.run_path(str(PROBE))["main"]
         worker = SimpleNamespace(
             decode=Mock(),
@@ -37,6 +71,11 @@ class PacketAuditModeTests(unittest.TestCase):
                 main.__globals__,
                 {
                     "__file__": str(harness_path),
+                    "packets": SimpleNamespace(
+                        __file__=packets.__file__ if packet_path is None else str(packet_path)
+                    ),
+                    "subprocess": SimpleNamespace(check_output=Mock(return_value="synthetic-node")),
+                    "print": partial(print, file=output),
                     "fixture": Mock(side_effect=fixtures),
                     "scalar_baseline": Mock(
                         return_value=SimpleNamespace(
@@ -47,9 +86,8 @@ class PacketAuditModeTests(unittest.TestCase):
                     "measure_all": Mock(side_effect=[{"node_buffer": {}}, {"node_buffer": {}}]),
                 },
             ),
-            patch("subprocess.check_output", return_value="synthetic-node"),
-            patch("sys.stdout", output),
         ):
+            self.assert_shared_bindings_unchanged()
             main()
         return json.loads(output.getvalue())
 
@@ -61,11 +99,13 @@ class PacketAuditModeTests(unittest.TestCase):
                     (root / filename).write_bytes(b"before")
                 mutation = Mock(side_effect=lambda target=root / name: target.write_bytes(b"after"))
                 output = io.StringIO()
-                with patch.object(packets, "__file__", str(root / "packets.py")):
-                    with self.assertRaisesRegex(RuntimeError, "^audit_source_changed$"):
-                        self.diagnostic_report(
-                            on_close=mutation, harness_path=root / "compare.py", output=output
-                        )
+                with self.assertRaisesRegex(RuntimeError, "^audit_source_changed$"):
+                    self.diagnostic_report(
+                        on_close=mutation,
+                        harness_path=root / "compare.py",
+                        output=output,
+                        packet_path=root / "packets.py",
+                    )
                 self.assertEqual(mutation.call_count, 2)
                 self.assertEqual(output.getvalue(), "")
 
@@ -79,11 +119,13 @@ class PacketAuditModeTests(unittest.TestCase):
                     side_effect=lambda target=root / name: target.unlink(missing_ok=True)
                 )
                 output = io.StringIO()
-                with patch.object(packets, "__file__", str(root / "packets.py")):
-                    with self.assertRaises(FileNotFoundError):
-                        self.diagnostic_report(
-                            on_close=removal, harness_path=root / "compare.py", output=output
-                        )
+                with self.assertRaises(FileNotFoundError):
+                    self.diagnostic_report(
+                        on_close=removal,
+                        harness_path=root / "compare.py",
+                        output=output,
+                        packet_path=root / "packets.py",
+                    )
                 self.assertEqual(removal.call_count, 2)
                 self.assertEqual(output.getvalue(), "")
 
@@ -91,13 +133,17 @@ class PacketAuditModeTests(unittest.TestCase):
         main = runpy.run_path(str(PROBE))["main"]
         fixture, worker = Mock(), Mock()
         output = io.StringIO()
-        with (
-            patch.dict(main.__globals__, {"fixture": fixture, "Node": worker}),
-            patch(
-                "subprocess.check_output", side_effect=subprocess.TimeoutExpired("node", 5)
-            ) as query,
-            patch("sys.stdout", output),
+        query = Mock(side_effect=subprocess.TimeoutExpired("node", 5))
+        with patch.dict(
+            main.__globals__,
+            {
+                "fixture": fixture,
+                "Node": worker,
+                "subprocess": SimpleNamespace(check_output=query),
+                "print": partial(print, file=output),
+            },
         ):
+            self.assert_shared_bindings_unchanged()
             with self.assertRaises(subprocess.TimeoutExpired):
                 main()
         query.assert_called_once_with(["node", "--version"], text=True, timeout=5)
@@ -115,11 +161,16 @@ class PacketAuditModeTests(unittest.TestCase):
                 main = runpy.run_path(str(PROBE))["main"]
                 fixture, worker = Mock(), Mock()
                 output = io.StringIO()
-                with (
-                    patch.dict(main.__globals__, {"fixture": fixture, "Node": worker}),
-                    patch("subprocess.check_output", side_effect=failure),
-                    patch("sys.stdout", output),
+                with patch.dict(
+                    main.__globals__,
+                    {
+                        "fixture": fixture,
+                        "Node": worker,
+                        "subprocess": SimpleNamespace(check_output=Mock(side_effect=failure)),
+                        "print": partial(print, file=output),
+                    },
                 ):
+                    self.assert_shared_bindings_unchanged()
                     with self.assertRaises(type(failure)) as result:
                         main()
                 self.assertIs(result.exception, failure)
@@ -144,8 +195,7 @@ class PacketAuditModeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             installed = Path(directory) / "packets.py"
             installed.write_bytes(b"abc")
-            with patch.object(packets, "__file__", str(installed)):
-                report = self.diagnostic_report()
+            report = self.diagnostic_report(packet_path=installed)
         self.assertIn("source_sha256", report)
         self.assertEqual(
             report["source_sha256"],
@@ -183,9 +233,8 @@ class PacketAuditModeTests(unittest.TestCase):
 
     def test_missing_source_prevents_report_emission(self):
         with tempfile.TemporaryDirectory() as directory:
-            with patch.object(packets, "__file__", str(Path(directory) / "missing.py")):
-                with self.assertRaises(FileNotFoundError):
-                    self.diagnostic_report()
+            with self.assertRaises(FileNotFoundError):
+                self.diagnostic_report(packet_path=Path(directory) / "missing.py")
 
     def diagnostic_node(self):
         node_type = runpy.run_path(str(PROBE))["Node"]
@@ -279,9 +328,17 @@ class PacketAuditModeTests(unittest.TestCase):
                 )
                 expected = AssertionError if isinstance(failure, bytes) else type(failure)
                 with (
-                    patch.object(module["subprocess"], "Popen", return_value=worker),
+                    patch.dict(
+                        module["Node"].__init__.__globals__,
+                        {
+                            "subprocess": SimpleNamespace(
+                                Popen=Mock(return_value=worker), PIPE=subprocess.PIPE
+                            ),
+                        },
+                    ),
                     patch.object(module["Node"], "read", reader),
                 ):
+                    self.assert_shared_bindings_unchanged()
                     with self.assertRaises(expected):
                         module["Node"]({})
                 self.assertTrue(worker.stdin.closed)
@@ -302,11 +359,30 @@ class PacketAuditModeTests(unittest.TestCase):
             pid=123,
         )
         with (
-            patch.object(module["subprocess"], "Popen", return_value=worker),
+            patch.dict(
+                module["Node"].__init__.__globals__,
+                {
+                    "subprocess": SimpleNamespace(
+                        Popen=Mock(return_value=worker), PIPE=subprocess.PIPE
+                    ),
+                },
+            ),
             patch.object(module["Node"], "read", return_value=b"\1"),
-            patch.object(Path, "exists", return_value=True),
-            patch.object(Path, "read_text", return_value="VmRSS: invalid kB"),
+            patch.dict(
+                module["Node"].__init__.__globals__,
+                {
+                    "Path": Mock(
+                        side_effect=[
+                            PROBE,
+                            SimpleNamespace(
+                                exists=lambda: True, read_text=lambda: "VmRSS: invalid kB"
+                            ),
+                        ]
+                    ),
+                },
+            ),
         ):
+            self.assert_shared_bindings_unchanged()
             with self.assertRaises(ValueError):
                 module["Node"]({})
         self.assertTrue(worker.stdin.closed)
@@ -326,10 +402,23 @@ class PacketAuditModeTests(unittest.TestCase):
             pid=123,
         )
         with (
-            patch.object(module["subprocess"], "Popen", return_value=worker),
+            patch.dict(
+                module["Node"].__init__.__globals__,
+                {
+                    "subprocess": SimpleNamespace(
+                        Popen=Mock(return_value=worker), PIPE=subprocess.PIPE
+                    ),
+                },
+            ),
             patch.object(module["Node"], "read", return_value=b"\1"),
-            patch.object(Path, "exists", return_value=False),
+            patch.dict(
+                module["Node"].__init__.__globals__,
+                {
+                    "Path": Mock(side_effect=[PROBE, SimpleNamespace(exists=lambda: False)]),
+                },
+            ),
         ):
+            self.assert_shared_bindings_unchanged()
             node = module["Node"]({})
         worker.wait.assert_not_called()
         self.assertFalse(worker.stdin.closed)
