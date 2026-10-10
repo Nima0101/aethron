@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_commit": "9e0fcbd5f5a04ce461bdf8c9898957c03dc5527a",
+  "python": "3.13.5",
+  "platform": "Linux",
+  "decision": "KEEP Python byte-preserving commands; FIX process-owned stdout finalization after failure.",
+  "input_contracts_changed": false,
+  "report_bytes_changed": false,
+  "physical_qualification_passed": false,
+  "red": {
+    "methods": 2,
+    "assertion_failures": 4,
+    "errors": 0,
+    "skips": 0,
+    "observed_exit": 120,
+    "expected_exit": 2,
+    "unexpected_diagnostic": "Exception ignored on flushing sys.stdout: BrokenPipeError",
+    "positive_and_negative_report_cases": 4,
+    "malformed_input_controls_passed": 2
+  },
+  "focused_cli_green": {
+    "methods": 12,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "command": "python3 -m unittest qualification.tests.test_cli_shutdown qualification.tests.test_report_output qualification.tests.test_bundle_process qualification.tests.test_cli_review -v"
+  },
+  "reference_bundle_green": {
+    "methods": 28,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "command": "python3 -m unittest qualification.tests.test_campaign_references qualification.tests.test_campaign_bundle qualification.tests.test_campaign_bundle_cli qualification.tests.test_bundle_artifact_integration -q"
+  },
+  "early_baseline": {
+    "methods": 23,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "static": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_production": "PASS zero findings",
+    "bandit_new_test": {
+      "exit": 1,
+      "low_findings": [
+        "B404",
+        "B603"
+      ],
+      "disposition": "Retained and reviewed: fixed module arguments, sys.executable, no shell, anonymous pipe, ten-second timeout. No suppression."
+    },
+    "diff": "PASS"
+  },
+  "source_sha256": {
+    "qualification/_process_exit.py": "52b1c86ea7ae795caafbfe9a5c6162b3ec01f42a1905504378c4b8115e6c52f9",
+    "qualification/__main__.py": "a5700fa70f5ec658a3da7c9dc092e8bca7f01a100ab39ba9c238fdc9ce88903d",
+    "qualification/campaign_bundle_cli.py": "0131e719f6b24d386a8553b910b57c199138a99976144e44b080345b1622cd52",
+    "qualification/campaign_references.py": "ffae611838d8627c036c68bd3e6988dab9656cbc6aee8f7032857a34199e6686",
+    "qualification/campaign_bundle.py": "1584e531f994fde5c612dce52eafc993adfe51044d9338b5db27d97fe843e32e",
+    "qualification/tests/test_cli_shutdown.py": "817b5b42aaac0cd9d49b49dbba4e8ca0dad493fef111b8cdb0fe6e20d56964b1",
+    "qualification/tests/test_report_output.py": "2f42746ada76ed5537db98e4eeea0a5e95080c59a8f6d19ecc4c3d7f6548b2ca",
+    "qualification/tests/test_cli_review.py": "6e10783f1e9f53f6412479956beba3070f3949846677c9f570445ac60c5b644f",
+    "qualification/tests/test_bundle_process.py": "20547364dc7e9d184be3b413293867e7366ae103d33c6a08c9428fbed94663c2",
+    "qualification/tests/test_campaign_bundle_cli.py": "f1faaf6f7c2e80978f89dd24ca0a7744ec82b58d2eacd8b96eabb9238b2a5cb4"
+  },
+  "source_observation": "Post-check observations, not execution attestation.",
+  "limits": [
+    "Closed-pipe verification on Linux CPython 3.13.5 only.",
+    "No full repository matrix, large fuzz, clean-clone, installed-product or hardware execution.",
+    "Unwritable stderr and unrelated interpreter teardown failures remain outside the tested guarantee.",
+    "Close and flush are not bounded by a wall-clock deadline; supervisor owns timeouts.",
+    "No durability, downstream acknowledgement, physical qualification or production-readiness claim."
+  ],
+  "lane_complete": false,
+  "next_review": "Portable consumer evidence and remaining audit tooling/hosted verification configuration"
+}

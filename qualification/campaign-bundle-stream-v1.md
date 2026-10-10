@@ -48,6 +48,13 @@ leave partial output, so consumers must require successful exit and complete JSO
 Writable stderr is required to deliver the fixed diagnostic. Digests and counts
 are linkable, and the unauthenticated report must not be treated as an approval.
 
+Module execution closes process-owned stdout after status 2. This preserves the
+fixed failure in the tested closed-pipe case instead of permitting a buffered
+shutdown flush to replace it with exit 120 and an interpreter diagnostic. Direct
+`main()` calls retain caller ownership of streams. Other teardown failures and
+unwritable stderr remain outside that guarantee; see the
+[process shutdown review](technology/cli-shutdown-review-v3.md).
+
 ## Technology decision — 2026-10-10
 
 Requirements are bounded local byte transport into the reviewed synchronous

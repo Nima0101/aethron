@@ -4,6 +4,7 @@ import argparse
 import json
 import sys
 
+from ._process_exit import finish
 from .evidence import MAX_BYTES, validate
 
 
@@ -35,4 +36,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(finish(main()))

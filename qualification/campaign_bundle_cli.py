@@ -4,6 +4,7 @@ import json
 import struct
 import sys
 
+from ._process_exit import finish
 from .campaign import MAX_CAPTURES
 from .campaign_bundle import evaluate
 from .campaign_references import MAX_REFERENCE_BYTES
@@ -66,4 +67,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(finish(main()))

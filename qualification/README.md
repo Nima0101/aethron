@@ -26,10 +26,14 @@ produce input; callers own process supervision and input/output deadlines.
 The command flushes its report before returning a declaration status. Its `main()`
 maps write/flush errors to status 2 and the fixed diagnostic when stderr is writable.
 Output is not atomic: a failed write or flush can leave partial or complete JSON.
-Consumers must check process status and parse a complete report. Interpreter
-shutdown or failed stderr can independently alter the final process status or
-diagnostics; flushing is not durable storage or downstream acknowledgement.
-See the [output boundary review](technology/report-output-review-v3.md).
+Consumers must check process status and parse a complete report. Module execution
+closes process-owned stdout after status 2, preserving the fixed failure for the
+tested closed-pipe path instead of retrying its buffered flush during shutdown.
+Direct calls to `main()` leave caller-owned streams open. Failed stderr or other
+interpreter teardown failures can still alter final status or diagnostics;
+flushing is not durable storage or downstream acknowledgement. See the historical
+[output boundary review](technology/report-output-review-v3.md) and the
+[process shutdown correction](technology/cli-shutdown-review-v3.md).
 
 Reports contain the input SHA-256 and aggregate counts, not rig/sensor IDs,
 device digests, timestamps, measurements or input error text. The input digest
