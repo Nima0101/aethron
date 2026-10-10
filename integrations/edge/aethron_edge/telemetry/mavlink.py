@@ -158,15 +158,21 @@ class PassiveTelemetry:
         if message is None:
             return
         name, frame, fields, units = _LAYOUTS[message_id]
-        values = tuple(float(getattr(message, field)) for field in fields)
-        if not all(math.isfinite(value) for value in values):
-            self._withdraw("invalid_values")
-            return
+        try:
+            values = tuple(float(getattr(message, field)) for field in fields)
+            if not all(math.isfinite(value) for value in values):
+                self._withdraw("invalid_values")
+                return
+            boot = message.time_boot_ms
+        except BaseException:
+            # SDK field access/conversion is part of decoding too. A failure
+            # must not leave observations from before this failed attempt live.
+            self._withdraw("decoder_fault", latch=True)
+            raise
         sequence = packet[4]
         if self._sequence is not None and not 1 <= (sequence - self._sequence) % 256 <= 127:
             self._withdraw("packet_order")
             return
-        boot = message.time_boot_ms
         if message_id in self._boot and boot <= self._boot[message_id]:
             # Identical acquisition timestamps are replay/duplicates, not a new
             # observation; reset/wrap needs explicit fresh session provisioning.

@@ -146,15 +146,20 @@ evidence; the [correction record](../../../../docs/verification/robotics-clock-w
 binds the new tests and source. These synthetic callable faults establish neither
 physical clock recovery nor scheduler/transport behavior.
 
-An unexpected exception from the decoder hook now clears both cached samples,
+An unexpected exception from the decoder hook or decoded field extraction
+(including numeric conversion and boot timestamp access) clears both cached samples,
 latches `decoder_fault`, and re-raises the same exception, including interruption
 and cancellation. Later calls return empty `UNKNOWN` until a new instance is
-created. The expected SDK `MAVError` still withdraws with `invalid_packet` and
+created. The expected SDK `MAVError` from the decoder call still withdraws with `invalid_packet` and
 permits a later valid packet; malformed traffic alone does not permanently disable
-the session. This covers the decoder call, not every operation in `ingest()` or
+the session. A field-access `MAVError` indicates an SDK/interface fault and
+latches `decoder_fault`; it is not treated as malformed wire input. This covers
+the decoder call and extraction, not every operation in `ingest()` or
 interruption of cleanup itself. Caller-held snapshots remain immutable historical
 values. The [decoder fault record](../../../../docs/verification/robotics-decoder-fault-v3.json)
-retains both the failing regression and recovery controls.
+retains both the failing regression and recovery controls. The
+[field extraction record](../../../../docs/verification/robotics-field-fault-v3.json)
+covers failures after the decoder has returned a message.
 
 See the [partial V3 review](../../../../docs/architecture/robotics-review-v3.md)
 for evidence limits; its first-component technology decision remains open.

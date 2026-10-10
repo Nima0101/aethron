@@ -926,3 +926,42 @@ not evidence of Rust compilation or output parity.
 local missing-compiler failure. No runtime-fed native measurements are claimed.
 Production adapters are unchanged. The audit cursor remains at passive wire;
 signing/replay is the next later unreviewed component.
+
+## Decoded-field extraction fault boundary
+
+Review baseline: `935f00c150e56ae6b3ce4ce0a0078d74e4dcfa45`. The prior decoder
+exception correction covered the call into the SDK. Once that call returned,
+field lookup, conversion to float and boot timestamp lookup were outside the
+cleanup boundary. Twenty-four injected exceptions reproduced a subsequent
+`OBSERVED_UNVERIFIED` status containing both earlier observations.
+
+Extraction now clears both slots and latches the existing `decoder_fault` reason
+before re-raising the identical exception. SDK `MAVError` from the decode call
+still follows recoverable packet rejection. The same exception raised during
+field access denotes an SDK/interface fault and is propagated with a latch.
+Finite-value rejection remains recoverable. Boot time is read within extraction,
+before sequence admission; ordinary SDK fields and valid packet behavior are
+unchanged. Exceptions during later boot comparison, replay commit, observation
+construction or cleanup itself are outside this narrow correction.
+
+This is a FIX to the existing SDK boundary, not a language KEEP decision.
+[pymavlink](https://github.com/ArduPilot/pymavlink) supplies the current generated
+message interface. The broader candidate comparison above remains open, including
+native typed records and [Kotlin Multiplatform](https://github.com/divyanshupundir/mavlink-kotlin)
+serialization. Another runtime may avoid dynamic field conversion, but a
+replacement must still withdraw information when its own decoding boundary fails.
+Python's [exception hierarchy](https://docs.python.org/3/library/exceptions.html#BaseException)
+explains the explicit cleanup-and-rethrow handling of interruption and exit;
+these exceptions are not converted into successful processing or silently retried.
+No new schema engine, runtime dependency or temporal threshold is introduced.
+
+The [receipt](../verification/robotics-field-fault-v3.json) retains 24 RED failures
+and 80 passing focused telemetry/signing/datagram/lifecycle methods. Four methods
+were rerun after binding fault-injection closure variables explicitly and applying
+formatting. Tests cover two numeric field positions, numeric conversion and boot
+access, across ordinary failures, SDK errors, interruption, exit and cancellation.
+Caller-owned earlier snapshots remain unchanged; future snapshots stay UNKNOWN
+after the injected failure. Ruff and Bandit pass. These are synthetic SDK fault
+injections, not evidence that malformed wire packets cause these SDK exceptions,
+native exception parity, or hardware qualification. Runtime selection stays
+PENDING at passive wire; signing/replay remains the next later unreviewed component.

@@ -191,6 +191,57 @@ class TelemetryTests(unittest.TestCase):
                 finally:
                     source.close()
 
+    def test_decoded_field_fault_withdraws_before_propagating(self):
+        # Removing extraction cleanup must expose the previous two observations.
+        for point in ("pitch", "yawspeed", "float_conversion", "time_boot_ms"):
+            for error_type in (
+                AttributeError,
+                ValueError,
+                common.MAVError,
+                KeyboardInterrupt,
+                SystemExit,
+                asyncio.CancelledError,
+            ):
+                with self.subTest(point=point, error_type=error_type.__name__):
+                    source = PassiveTelemetry(1, 1, clock=lambda: self.now)
+                    try:
+                        source.ingest(self.packet())
+                        source.ingest(self.packet(sequence=1, kind="position"))
+                        previous = source.snapshot()
+                        self.assertEqual(len(previous.samples), 2)
+                        failure = error_type("private-field-detail")
+                        decoded = common.MAVLink_attitude_message(11, 1, 2, 3, 4, 5, 6)
+
+                        class FailedNumber:
+                            def __float__(self, failure=failure):
+                                raise failure
+
+                        class FaultyMessage:
+                            def __getattr__(
+                                self, name, point=point, failure=failure, decoded=decoded
+                            ):
+                                if name == point:
+                                    raise failure
+                                if name == "pitch" and point == "float_conversion":
+                                    return FailedNumber()
+                                return getattr(decoded, name)
+
+                        with patch.object(source._decoder, "decode", return_value=FaultyMessage()):
+                            with self.assertRaises(error_type) as caught:
+                                source.ingest(self.packet(sequence=2, boot=11))
+                        self.assertIs(caught.exception, failure)
+                        status = source.snapshot()
+                        self.assertEqual(status.state, "UNKNOWN")
+                        self.assertEqual(status.reason, "decoder_fault")
+                        self.assertEqual(status.samples, ())
+                        self.assertFalse(status.perception_eligible)
+                        self.assertNotIn("private-field-detail", repr(status))
+                        source.ingest(self.packet(sequence=3, boot=12))
+                        self.assertEqual(source.snapshot(), status)
+                        self.assertEqual(len(previous.samples), 2)
+                    finally:
+                        source.close()
+
     def test_expected_decoder_rejection_remains_recoverable(self):
         self.source.ingest(self.packet())
         with patch.object(
