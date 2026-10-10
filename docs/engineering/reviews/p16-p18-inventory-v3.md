@@ -1,6 +1,6 @@
 # P16–P18 review inventory v3
 
-Snapshot: `53b1ba412794ba7efc3fbd1bc37b567f601fe551`, plus fresh packaging technology
+Snapshot: `ba7f2c754342893c2c80fe18c6de2bf07b81a8e7`, plus fresh comparison/mutation technology
 reassessment, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
@@ -25,7 +25,7 @@ remain historical inputs. The consumed JSON-bound helper belongs to the foundati
 | Inbox/federation composition | [Review](p16-delivery-boundary-v3.md): KEEP primitives; ADD real-API expiry, revocation, revision-floor and close traces. Caller refresh and in-flight cancellation are not implemented. Four composition methods freshly rechecked in the [federation/inbox reassessment](p16-federation-inbox-reassessment-v3.md). |
 | Packaging evidence | [Review](p16-packaging-v3.md): FIX installed/source identity comparison, [package input coverage](p16-packaging-inputs-v3.md) and [installed fixture coverage](p16-installed-corpus-v3.md) and [installed policy API cases](p16-installed-policy-v3.md); no full-distribution attestation. [Fresh reassessment](p16-packaging-reassessment-v3.md): KEEP portable packaging/direct inspection; FIX three omitted installed-result flag assertions, with five rejection controls. |
 | ADR publication tooling | [Review](p16-adr-publication-v3.md): FIX schema/record test discovery and ADR-only workflow triggers; structure is not evidence truth. [Fresh reassessment](p16-schema-reassessment-v3.md): FIX reference character profile; raw controls and malformed percent escapes rejected without optional format validation. |
-| Comparison and mutation probes | FIX optimized-mode evidence loss; [response types](p16-probe-response-v3.md); [capture bounds](p16-probe-capture-v3.md); [tracing lifecycle](p16-probe-tracing-v3.md); [source consistency](p16-probe-snapshot-v3.md); [timing accounting](p16-probe-timing-v3.md); [mutation integrity](p16-mutation-integrity-v3.md); historical source-manifest correction below. |
+| Comparison and mutation probes | FIX optimized-mode evidence loss; [response types](p16-probe-response-v3.md); [capture bounds](p16-probe-capture-v3.md); [tracing lifecycle](p16-probe-tracing-v3.md); [source consistency](p16-probe-snapshot-v3.md); [timing accounting](p16-probe-timing-v3.md); [mutation integrity](p16-mutation-integrity-v3.md); historical source-manifest correction below. [Fresh reassessment](p16-probe-reassessment-v3.md): KEEP direct bounded diagnostics; current tests and in-memory sensitivity controls confirm source-change rejection. No new defect demonstrated. |
 
 ## Missing implementation and unsupported claims
 

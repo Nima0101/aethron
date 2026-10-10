@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "id": "p16-mutation-reassessment-v3",
+  "component": "P16 fixed defensive mutation evidence and scoped module restoration",
+  "decision": "KEEP",
+  "constraints": [
+    "Four named trusted local source substitutions and four selected unittest methods; no automatic mutation discovery, arbitrary uploaded code or concurrent execution.",
+    "Compile captured source in a temporary module, require a successful complete unmodified baseline, restore two replaced bindings, reject visible listed-source changes."
+  ],
+  "alternatives": [
+    "Direct Python compile/exec and scoped unittest.mock patch contexts.",
+    "mutmut automatic Python mutation discovery with fork/forkserver isolation.",
+    "Java/JVM PIT mutation testing for a JVM implementation.",
+    "Separate Python process for each selected mutation, supervised by Python, Node or Java."
+  ],
+  "rationale": [
+    "KEEP direct Python mutation execution for the exact four source substitutions and actual tests under review. No cross-language source or semantic adapter is necessary.",
+    "mutmut provides broader discovery and POSIX process isolation; neither is the declared experiment. PIT would mutate JVM code rather than these Python function bodies. Neither supplies a demonstrated material advantage for this fixed diagnostic.",
+    "Per-experiment processes are appropriate if independent global-state isolation becomes required. Here trusted sequential tests restore two explicit bindings, with RuntimeError and KeyboardInterrupt controls; no sandbox or full-side-effect restoration is claimed.",
+    "Fresh live execution passes four baseline methods and observes eight assertion failures across four selected mutations. Removing source-change rejection in memory causes five existing regression assertions to fail. No new runtime or evidence mismatch demonstrated."
+  ],
+  "limits": [
+    "The four substitutions are not a comprehensive mutation score, proof of causal completeness or cryptographic validation.",
+    "Captured source is compiled, but imported helpers/tests and unlisted dependencies are not attested. Before/after checks are not atomic.",
+    "Bounded experiment count does not impose a runtime deadline on arbitrary tests; this is trusted developer tooling, not a process supervisor.",
+    "Alternative tools were researched, not benchmarked. No migration winner is deferred; no choice rests on installed tooling, familiarity or rewrite cost."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/unittest.mock.html#patch-dict",
+    "https://mutmut.readthedocs.io/en/latest/",
+    "https://pitest.org/",
+    "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Process.html"
+  ]
+}
