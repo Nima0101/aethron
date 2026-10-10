@@ -1,0 +1,144 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "bc2112d0cc7907b987885f91f3e0fa7ff98c8065",
+  "component": "passive_wire comparator header coverage",
+  "decision": "FIX evidence gap; production technology PENDING",
+  "production_changed": false,
+  "source_sha256": {
+    "scripts/robotics_wire_audit_v2.py": "eb9dd285ceeee722e76d0020be94ebf0e7bef35f61ba3e7966e588af391175aa",
+    "tests/mavlink/test_wire_audit_v2.py": "089553b241b0a20616d512917508565ff7ba1040e8afa25ca9d33c60772c38ed",
+    "scripts/robotics_native_audit_v2.py": "2a327603388d1c59d255311752b9c5a5daa42e769b2ad1a453b76362584f2e5d",
+    "scripts/robotics_lifecycle_audit_v2.py": "d763fa9c0c51a447d8f06c26032023561b5b35906fc7a4ecfb854664a5adef7a",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "tests/mavlink/audit_v2/reference.c": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483",
+    "docs/architecture/robotics-review-v3.md": "3fd86e5dd4e1fa2710ba1a0ad794d7ff06b6ec82c30e1388e06f1f088bb95b2b",
+    "docs/verification/robotics-comparator-coverage-v3.md": "ff48fc424ef188fd589c6f7ec2d770917590ea960f71d9c26e12abbc05a90076"
+  },
+  "checks": {
+    "red": {
+      "methods": 1,
+      "expected_failures": 4,
+      "errors": 0,
+      "reason": "missing four additive header-control fixtures"
+    },
+    "green": {
+      "methods": 43,
+      "skips": 0,
+      "seconds": 22.842,
+      "modules": [
+        "tests.mavlink.test_wire_audit_v2",
+        "tests.mavlink.test_native_audit_v2",
+        "tests.mavlink.test_lifecycle_audit_v2"
+      ]
+    },
+    "ruff_check": "PASS",
+    "ruff_format": "PASS",
+    "bandit": "PASS",
+    "prior_20_fixture_records_unchanged": true,
+    "native_fixture_generation": {
+      "cases": 40,
+      "steps": 72,
+      "execution": false
+    }
+  },
+  "wire_run": {
+    "audit_policy_version": 3,
+    "state": "compared",
+    "decision": "PENDING",
+    "scope": "fresh unsigned packet admission only; not lifecycle/signing parity",
+    "source_sha256": {
+      "scripts/robotics_wire_audit_v2.py": "eb9dd285ceeee722e76d0020be94ebf0e7bef35f61ba3e7966e588af391175aa",
+      "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+      "tests/mavlink/audit_v2/reference.c": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483"
+    },
+    "corpus_cases": 24,
+    "parity": true,
+    "sanitized_parity": true,
+    "python": {
+      "samples": 512,
+      "accepted": 66,
+      "p50_ns": 28969,
+      "p95_ns": 121642,
+      "max_ns": 64100041
+    },
+    "c": {
+      "samples": 512,
+      "accepted": 66,
+      "p50_ns": 32,
+      "p95_ns": 322,
+      "max_ns": 11552
+    },
+    "python_version": "3.13.5",
+    "machine": "x86_64",
+    "system": "Linux",
+    "compiler": "cc (Debian 14.2.0-19) 14.2.0",
+    "xml_sha256": "fbac92d0689c9b1bc03b49ebc5cdf989f3fc23026c3c856f7224e4b9af1b5f53",
+    "driver_sha256": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483",
+    "harness_sha256": "eb9dd285ceeee722e76d0020be94ebf0e7bef35f61ba3e7966e588af391175aa",
+    "corpus_sha256": "4a7200803cbb8766681ec57b1df91a0cba47126d7bf83b70210e6cd28f5ae2fc",
+    "pymavlink": "2.4.50",
+    "limitations": [
+      "512 mixed valid/invalid probes; no hard-real-time claim",
+      "Python constructor excluded; C stack setup included",
+      "C omits state, provenance objects and persistent replay",
+      "No memory, cold-start, signed, UDP or SITL comparison"
+    ]
+  },
+  "retained_file_sha256": {
+    "header-coverage-v3-green.log": "74a3f2c9d34a14bfe1e2841c7d2e3437dc21106fc6b78d21417f0812b544fa92",
+    "header-coverage-v3-red.log": "0fd265bf69bd1dcc781063af8f70236a2ff078d4a4a5bb6aadc14d07a7d44272",
+    "header-coverage-v3-wire/candidate-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "header-coverage-v3-wire/candidate-stdout.log": "0205fa773ed568939a1bbb7d0f23a0e204fec79478649aa33d969100cb667311",
+    "header-coverage-v3-wire/compiler-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "header-coverage-v3-wire/compiler-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "header-coverage-v3-wire/compiler-version-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "header-coverage-v3-wire/compiler-version-stdout.log": "78fc11ae2c3ff7c235eb18ed90989d18f6cc864fb27027f839368cd0888deebc",
+    "header-coverage-v3-wire/corpus.json": "4a7200803cbb8766681ec57b1df91a0cba47126d7bf83b70210e6cd28f5ae2fc",
+    "header-coverage-v3-wire/expected.json": "0b386547a9f3a05669ef802cfca495069bd6333511b84296decd244938218725",
+    "header-coverage-v3-wire/generated/checksum.h": "8d6cac8dee37e6d619f5aee9fdbbe83b837b8e05a645c5d44b0578ba45a09924",
+    "header-coverage-v3-wire/generated/mavlink_conversions.h": "374fcaae7eba6314bef2ab97a2394707f92925f4c899172ed3f9ad65c8d44765",
+    "header-coverage-v3-wire/generated/mavlink_get_info.h": "d64af08c57384019a6b1bad3940928717a60f18a13f627dc849d638b40ec08ee",
+    "header-coverage-v3-wire/generated/mavlink_helpers.h": "20c83c437488d53c6a9825fd1b180e643fccfd767a408107715d7056c3f6d8fb",
+    "header-coverage-v3-wire/generated/mavlink_sha256.h": "2f9e6610227896776a4414127c22cf4f3a579e51055c95b6dea65afa32ad8340",
+    "header-coverage-v3-wire/generated/mavlink_types.h": "407273090067c0da447a0b94646cae2fe580c1fa4c2accddb13efb7270f06962",
+    "header-coverage-v3-wire/generated/protocol.h": "056d529ef936895085700c9ad12ff0a500cb88db913df3163dbee4eabd1c8a63",
+    "header-coverage-v3-wire/generated/subset/mavlink.h": "9df7a62dbb836a6ddc2f4bbffc7448723e71475b94c902e08019159d10014b56",
+    "header-coverage-v3-wire/generated/subset/mavlink_msg_attitude.h": "13c5971979ef7cd2b6ef042c13ce32764b2709c6ac5c2f6ed7c7b58bd32068d7",
+    "header-coverage-v3-wire/generated/subset/mavlink_msg_local_position_ned.h": "2b083abc2ea32b653138b7c27979c930825328e799d3a4d3216375a132f6a1e3",
+    "header-coverage-v3-wire/generated/subset/subset.h": "0fa00cf0b9de1836dd4c3a4e346403f25cb67533f82ff22193f0abf524dfd455",
+    "header-coverage-v3-wire/generated/subset/testsuite.h": "f6bffbcec4320ea4acee0642095cddaf047162f73ddef1cf1d21087d8852946e",
+    "header-coverage-v3-wire/generated/subset/version.h": "d73c6dab7398078dac3f649caa009c4217eaf45ff60d80aa971e03878bff4381",
+    "header-coverage-v3-wire/generation.log": "48b759dec3636e7e0c6ab614ff3847aa851ec9dd41ea82191479c4f86cb637c1",
+    "header-coverage-v3-wire/native-fixtures.rs": "36c80096df538990da4f68cf5c2f131c586b86f9304cb8d7babeb2efb47c3db7",
+    "header-coverage-v3-wire/reference": "da706b9e42d6f2ce73131887a2d60215bc628ff0f3a9fbad8205582951dc5860",
+    "header-coverage-v3-wire/reference-sanitized": "2b8312441be1178e40c14eb7503d5536a3a60d185fe18600ac399fcea80892dd",
+    "header-coverage-v3-wire/result.json": "e5d6f901bf253f3314cb26414006f0b575008b5cfa991be9c45c37f32e47424e",
+    "header-coverage-v3-wire/sanitized-candidate-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "header-coverage-v3-wire/sanitized-candidate-stdout.log": "b3225a35ba5b713d47f6a663aec746b6a5928e5a6da53947365c09751c64c9ee",
+    "header-coverage-v3-wire/sanitized-compiler-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "header-coverage-v3-wire/sanitized-compiler-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "header-coverage-v3-wire/subset.xml": "8bde772f61056776b3d9a781e9bddd9f98b5997bae07429ed1a0836a2c588de9",
+    "header-coverage-v3-wire/vectors.h": "4173f29a48400f069abf057827fd49cc8649b607d0674ebe082d87a50d946f8e",
+    "header-coverage-v3-wire.log": "e5d6f901bf253f3314cb26414006f0b575008b5cfa991be9c45c37f32e47424e"
+  },
+  "sources": [
+    {
+      "url": "https://mavlink.io/en/guide/serialization.html",
+      "accessed": "2026-10-10",
+      "claim": "Distinct v1/v2 layouts, optional 13-byte trailer, unknown incompatibility flag rejection."
+    },
+    {
+      "url": "https://mavlink.io/en/mavgen_python/message_signing.html",
+      "accessed": "2026-10-10",
+      "claim": "SDK signing configuration for offline synthetic fixture control."
+    }
+  ],
+  "limits": [
+    "No transmit/actuation path; public synthetic key only",
+    "SDK positive controls do not qualify signed receiver or replay storage",
+    "Fresh C admission parity does not isolate every individual guard",
+    "Native fixtures generated but no new Rust execution",
+    "Finite corpus, unequal work and missing target constraints do not establish production runtime winner",
+    "No hard-real-time, MLS/CNSA, hardware, uptime or customer qualification"
+  ]
+}

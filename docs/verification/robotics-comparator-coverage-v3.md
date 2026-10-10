@@ -63,7 +63,7 @@ requirement: the [official serialization specification](https://mavlink.io/en/gu
 allows implementations to ignore unknown compatibility flags. That narrower
 profile must not be described as complete protocol compatibility.
 
-All previous 19 fixture records are unchanged. The wire corpus now contains
+All previous 19 fixture records are unchanged. At that revision the wire corpus contains
 20 cases; generated native fixtures contain 36 cases/68 steps. No new Rust
 execution is claimed; the separate managed corpus remains 16 cases/48 steps.
 The [flag coverage receipt](robotics-flag-coverage-v3.json) retains the absent-case
@@ -85,3 +85,49 @@ unreviewed. Remaining old header mutations should not be interpreted as isolated
 checks: the unknown incompatibility flag and unsupported message also alter CRC;
 the signed-flag mutation also lacks its signature trailer; and the v1 marker
 mutation is not a valid v1 frame.
+
+## Remaining header controls
+
+Reviewed baseline: `bc2112d0cc7907b987885f91f3e0fa7ff98c8065`.
+Four additive cases correct the remaining misleading header-coverage inference.
+All earlier 20 records remain byte-for-byte identical; current wire coverage is
+24 cases. None of these fixtures opens a connection or invokes a send method.
+
+| New fixture | Independent fixture checks | Passive adapter result |
+| --- | --- | --- |
+| `v3_v1_valid_frame` | SDK-encoded v1 frame, correct v1 length/CRC, direct SDK decode | `unsupported_packet` |
+| `v3_signed_valid_frame` | SDK-encoded v2 frame with full 13-byte trailer, correct CRC, direct SDK decode with one good signature under a public synthetic test key | `unsupported_packet` |
+| `v3_unknown_incompat_valid_crc` | Correct v2 length and rebuilt CRC, incompatibility flag value 2 | `unsupported_packet` |
+| `v3_heartbeat_valid_frame` | SDK-encoded HEARTBEAT with its own layout and CRC extra, direct SDK decode | `unsupported_message` |
+
+The [MAVLink serialization specification](https://mavlink.io/en/guide/serialization.html)
+defines the distinct v1/v2 headers, optional signature trailer and rejection of
+unknown incompatibility flags. CRC correctness does not make the unknown-flag
+case protocol-valid. The [pymavlink signing API](https://mavlink.io/en/mavgen_python/message_signing.html)
+is used only to construct and check an offline fixture; the key is an openly
+specified byte sequence, not deployment key material. This does not review or
+qualify the separate signed receiver, persistent replay protection or source
+identity. Production adapters and all candidate drivers are unchanged.
+
+The new Python control first populates a receiver with an ordinary ATTITUDE
+packet, then checks that each rejection withdraws all samples and returns
+UNKNOWN with perception eligibility false. The C wire experiment continues to
+compare only fresh-packet admission and decoded values. Its two-message SDK can
+also reject HEARTBEAT independently of the outer allowlist. Likewise version,
+signature and length restrictions can overlap. These results therefore do not
+prove that every individual candidate guard is necessary or complete.
+
+The [source-bound receipt](robotics-header-coverage-v3.json) records four expected
+absent-fixture RED assertions, 43 passing focused methods without skips, Ruff and
+Bandit checks, and normal/ASan/UBSan parity over 24 cases. Native input constants
+were generated for 40 cases/72 steps; no new Rust execution is claimed. The
+managed lifecycle corpus remains 16 cases/48 steps. Incidental benchmark values
+are retained without a runtime ranking. Historical receipts remain bound to their
+older source revisions and corpora.
+
+The existing Python SDK test harness is retained for this fixture correction:
+its purpose is to exercise the installed SDK API and the current Python object
+boundary. Using a C, Rust or Kotlin wrapper would still require those same calls
+to establish this evidence. This scoped tooling choice does not settle the
+production technology decision, which remains PENDING. No forward feature
+expansion or full-lane audit completion follows from the corrected finite corpus.

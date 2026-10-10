@@ -73,6 +73,23 @@ def corpus():
     checksum.accumulate(bytes([common.MAVLink_attitude_message.crc_extra]))
     flagged[-2:] = checksum.crc.to_bytes(2, "little")
     values.append(("v3_compatibility_flag_valid_crc", bytes(flagged), False, 30))
+    attitude = common.MAVLink_attitude_message(10, 0.1, -0.2, 0.3, 0.4, -0.5, 0.6)
+    values.append(("v3_v1_valid_frame", attitude.pack(encoder, force_mavlink1=True), False, 30))
+    # Public synthetic key for offline fixtures only; encoder has no writer.
+    signed_encoder = common.MAVLink(None, srcSystem=1, srcComponent=1)
+    signed_encoder.signing.secret_key = bytes(range(32))
+    signed_encoder.signing.link_id = 1
+    signed_encoder.signing.timestamp = 1
+    signed_encoder.signing.sign_outgoing = True
+    values.append(("v3_signed_valid_frame", attitude.pack(signed_encoder), False, 30))
+    incompatible = bytearray(full)
+    incompatible[2] = 2
+    checksum = common.x25crc(incompatible[1:-2])
+    checksum.accumulate(bytes([common.MAVLink_attitude_message.crc_extra]))
+    incompatible[-2:] = checksum.crc.to_bytes(2, "little")
+    values.append(("v3_unknown_incompat_valid_crc", bytes(incompatible), False, 30))
+    heartbeat = common.MAVLink_heartbeat_message(0, 0, 0, 0, 0, 3).pack(encoder)
+    values.append(("v3_heartbeat_valid_frame", heartbeat, False, 0))
     return [
         {"name": name, "hex": data.hex(), "accepted": accepted, "message": message}
         for name, data, accepted, message in values

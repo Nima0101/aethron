@@ -110,6 +110,61 @@ class WireAuditTests(unittest.TestCase):
         finally:
             source.close()
 
+    def test_v3_header_challenges_have_valid_framing_and_crc(self):
+        from aethron_edge.telemetry.mavlink import PassiveTelemetry
+        from pymavlink.dialects.v20 import common
+
+        cases = {case["name"]: case for case in self.api.corpus()}
+        for name, message_id, reason in (
+            ("v3_v1_valid_frame", 30, "unsupported_packet"),
+            ("v3_signed_valid_frame", 30, "unsupported_packet"),
+            ("v3_unknown_incompat_valid_crc", 30, "unsupported_packet"),
+            ("v3_heartbeat_valid_frame", 0, "unsupported_message"),
+        ):
+            with self.subTest(name=name):
+                self.assertIn(name, cases)
+                case = cases[name]
+                packet = bytes.fromhex(case["hex"])
+                self.assertIs(case["accepted"], False)
+                self.assertEqual(case["message"], message_id)
+                v1 = name == "v3_v1_valid_frame"
+                signed = name == "v3_signed_valid_frame"
+                self.assertEqual(packet[0], 0xFE if v1 else 0xFD)
+                self.assertEqual(len(packet), packet[1] + (8 if v1 else 12) + 13 * signed)
+                checksum_end = len(packet) - 13 * signed
+                checksum = common.x25crc(packet[1 : checksum_end - 2])
+                checksum.accumulate(bytes([common.mavlink_map[message_id].crc_extra]))
+                self.assertEqual(
+                    int.from_bytes(packet[checksum_end - 2 : checksum_end], "little"),
+                    checksum.crc,
+                )
+                if name == "v3_unknown_incompat_valid_crc":
+                    self.assertEqual(packet[2], 2)
+                    # Unknown incompatible semantics must not be admitted. CRC
+                    # validation above is deliberately not a protocol-validity claim.
+                else:
+                    decoder = common.MAVLink(None)
+                    if signed:
+                        self.assertEqual(packet[2], 1)
+                        decoder.signing.secret_key = bytes(range(32))
+                    decoded = decoder.decode(bytearray(packet))
+                    self.assertEqual(decoded.get_msgId(), message_id)
+                    if signed:
+                        self.assertEqual(decoder.signing.goodsig_count, 1)
+                source = PassiveTelemetry(1, 1, clock=lambda: 1_000_000_000)
+                try:
+                    # Rejection must withdraw a previously populated receiver.
+                    source.ingest(bytes.fromhex(cases["attitude"]["hex"]))
+                    self.assertEqual(len(source.snapshot().samples), 1)
+                    source.ingest(packet)
+                    status = source.snapshot()
+                    self.assertEqual(status.reason, reason)
+                    self.assertEqual(status.state, "UNKNOWN")
+                    self.assertEqual(status.samples, ())
+                    self.assertIs(status.perception_eligible, False)
+                finally:
+                    source.close()
+
     def test_existing_output_is_refused_before_generation(self):
         with tempfile.TemporaryDirectory() as directory:
             out = Path(directory)

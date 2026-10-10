@@ -728,3 +728,17 @@ retains the RED assertion and initial wrong-module invocation failure. This
 strict local profile is narrower than MAVLink's permitted handling of unknown
 compatibility flags. No production code, candidate driver, runtime decision or
 qualification status changes.
+
+## Separate valid controls from malformed header mutations
+
+At `bc2112d`, the earliest passive-wire review found that the original version,
+signing, incompatibility and message-ID mutations did not establish rejection
+of otherwise correctly framed packets. Four [additive controls](../verification/robotics-comparator-coverage-v3.md#remaining-header-controls)
+now exercise valid v1, fully signed synthetic v2, CRC-correct unknown-incompatibility
+and valid HEARTBEAT packets. Tests verify the fixture properties and withdrawal
+from a populated receiver; the C comparison remains fresh-packet-only. All prior
+20 fixtures are preserved. Production and candidate drivers are unchanged.
+[Retained evidence](../verification/robotics-header-coverage-v3.json) records the
+four RED assertions, 43 passing methods and 24-case normal/sanitized C parity.
+Native fixtures are generated only. This is a coverage correction, not a
+production KEEP/MIGRATE decision or a review of signing/replay integration.
