@@ -1,6 +1,9 @@
 # Qualification implementation review v3
 
 This is an implementation review record, not a replacement governance policy.
+The [domain declaration contract](../domains-v1.md), [decision](domain-decision-v1.json)
+and [verification](domain-verification-v1.json) add bounded joint-profile coverage.
+They do not extend physical domain claims or reinterpret earlier v1 reports.
 After the source coverage checkpoint, the [procedure checklist contract](../procedures-v1.md)
 adds a separately versioned non-executing API. Its [technology decision](procedure-decision-v1.json)
 and [verification record](procedure-verification-v1.json) cover this new component;

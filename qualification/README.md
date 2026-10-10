@@ -105,6 +105,11 @@ case/check declarations against the same plan and preserves missing, unknown and
 unverified states. It runs no procedure and does not validate referenced method
 contents or human approval. [Synthetic vectors](fixtures/procedures-v1.json)
 include complete-but-unverified, unknown, missing and conflicting declarations.
+The [domain declaration API](domains-v1.md) compares whole lighting/sensor/evidence
+profiles with campaign cases in both directions. Null fields never act as
+wildcards, and matching columns separately cannot invent a supported combination.
+Its [synthetic vectors](fixtures/domains-v1.json) retain unknown, empty and joint
+mismatch cases. These checks do not establish field suitability or domain approval.
 The [campaign bundle report](campaign-bundle-v1.md) computes both coverage and
 reference matching from raw inputs against one plan. Its software result requires
 both checks; capture artifact verification and physical qualification remain false.

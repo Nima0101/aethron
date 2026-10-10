@@ -1,0 +1,48 @@
+{
+  "$schema": "./domain-decision-v1.schema.json",
+  "version": 1,
+  "id": "qualification-domain-declarations-v1",
+  "decision": "KEEP",
+  "technology": "Python bounded JSON admission and whole-tuple indexing",
+  "constraints": [
+    "Offline in-process source-checkout API",
+    "Two immutable UTF-8 messages, each at most 65536 bytes and depth eight",
+    "At most sixteen domain profiles and sixteen campaign cases",
+    "Exact sensor-set equality, explicit nulls, bidirectional coverage",
+    "No target ABI, hard deadline, independent policy distribution or persistent store requirement"
+  ],
+  "alternatives": [
+    {
+      "technology": "CUE",
+      "source": "https://cuelang.org/docs/concept/how-cue-enables-data-validation/",
+      "assessment": "Closed structs and constraints suit profile shape, but raw token admission and both report relations still need a host boundary."
+    },
+    {
+      "technology": "Dhall",
+      "source": "https://dhall-lang.org/",
+      "assessment": "Typed configuration and semantic hashes are useful for authoring. This boundary accepts no expressions or imports and commits raw bytes, not normalized expressions."
+    },
+    {
+      "technology": "Rego",
+      "source": "https://www.openpolicyagent.org/docs/policy-language",
+      "assessment": "Set relations are a credible fit. An independent policy engine does not remove strict raw-token admission, and no independently deployed rules are required here."
+    },
+    {
+      "technology": "C# Utf8JsonReader and Rust Serde",
+      "source": "qualification/procedures-v1.md",
+      "assessment": "Native streaming or typed admission remains credible if a target ABI or measured resource deficit becomes decisive. Neither is currently required."
+    }
+  ],
+  "rationale": "Python pair and numeric-token hooks preserve strict admission before normalization. Immutable bytes retain exact commitments. Whole tuple indexing implements both coverage directions without Cartesian products or null wildcards. Select on these concrete mechanisms, not incumbency; no comparative performance claim.",
+  "source": "https://docs.python.org/3.13/library/json.html",
+  "reopen_when": [
+    "A target native ABI is required",
+    "Measured resource limits are unmet",
+    "Rules require independent policy distribution"
+  ],
+  "validation": [
+    "qualification.tests.test_domains",
+    "qualification/fixtures/domains-v1.json"
+  ],
+  "physical_qualification_passed": false
+}
