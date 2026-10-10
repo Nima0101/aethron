@@ -789,3 +789,14 @@ The original corpora, reference outputs and generated Rust constants are unchang
 [Retained evidence](../verification/robotics-case-envelope-v3.json) records 23 RED
 assertions and 37 passing focused methods. This fixes experiment admission, not
 the production adapter or the still-pending runtime selection.
+
+## Align experiment clock and packet-text domains
+
+The [operation-value review](../verification/robotics-comparator-coverage-v3.md#lifecycle-operation-value-domains)
+found that runtime conversion defaults could truncate or normalize malformed
+fixture text. Explicit ASCII decimal/u128 and even-length bounded hex admission
+now precede conversion in the reference, native generator and managed driver.
+Boolean invalid-clock sentinels and all original corpora are preserved.
+[Evidence](../verification/robotics-operation-values-v3.json) records 29 expected
+RED assertions and 39 passing focused methods. Production telemetry and the
+production runtime decision are unchanged.

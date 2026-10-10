@@ -109,6 +109,16 @@ const results = cases.map(c => {
     if (keys.length !== fields.length || !fields.every(key => Object.hasOwn(step, key))) {
       throw new Error('audit_operation_record');
     }
+    if (typeof step.now !== 'boolean' &&
+        (typeof step.now !== 'string' || step.now.length < 1 || step.now.length > 39 ||
+         /[^0-9]/.test(step.now) || BigInt(step.now) >= (1n << 128n))) {
+      throw new Error('audit_clock_domain');
+    }
+    if (step.op === 'ingest' &&
+        (typeof step.hex !== 'string' || step.hex.length > 640 || step.hex.length % 2 !== 0 ||
+         /[^0-9a-fA-F]/.test(step.hex))) {
+      throw new Error('audit_packet_domain');
+    }
     const now = typeof step.now === 'string' ? BigInt(step.now) : step.now;
     if (step.op === 'ingest') receiver.ingest(Buffer.from(step.hex, 'hex'), now);
     else if (step.op === 'close') receiver.close();

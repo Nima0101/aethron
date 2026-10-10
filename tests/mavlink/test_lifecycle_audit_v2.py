@@ -133,6 +133,46 @@ class LifecycleAuditTests(unittest.TestCase):
                     else:
                         self.api.check_parity(expected, value)
 
+    def test_operation_values_reject_runtime_specific_coercion(self):
+        invalids = [
+            {"op": "snapshot", "now": now}
+            for now in ("", " 1", "1\n", "+1", "-1", "1_0", "١", "0x10", str(2**128), "0" * 40, 0)
+        ]
+        invalids += [
+            {"op": "ingest", "now": "0", "hex": raw}
+            for raw in ("a", "aaZ", "aa bb", "aa\n", "gg", "00" * 321)
+        ]
+        for name, adapter in self.case_adapters().items():
+            for index, step in enumerate(invalids):
+                with self.subTest(adapter=name, case=index):
+                    with self.assertRaises((ValueError, subprocess.CalledProcessError)):
+                        adapter([{"name": "value", "steps": [step]}])
+
+    def test_operation_values_preserve_boundaries_and_invalid_clock_sentinels(self):
+        cases = [
+            {"name": "maximum_clock", "steps": [{"op": "snapshot", "now": str(2**128 - 1)}]},
+            {"name": "padded_decimal", "steps": [{"op": "snapshot", "now": "00"}]},
+            {"name": "false_clock", "steps": [{"op": "snapshot", "now": False}]},
+            {"name": "true_clock", "steps": [{"op": "snapshot", "now": True}]},
+            {"name": "empty_packet", "steps": [{"op": "ingest", "now": "0", "hex": ""}]},
+            {
+                "name": "maximum_fixture_packet",
+                "steps": [{"op": "ingest", "now": "0", "hex": "Ab" * 320}],
+            },
+        ]
+        expected = self.api.reference(cases)
+        self.assertEqual(expected[0][0]["reason"], "no_observation")
+        for index in (2, 3):
+            self.assertEqual(expected[index][0]["reason"], "local_clock_invalid")
+        for index in (4, 5):
+            self.assertEqual(expected[index][0]["reason"], "invalid_packet")
+        adapters = self.case_adapters()
+        self.api.check_parity(expected, adapters["javascript"](cases)[0]["results"])
+        fixture = adapters["native_fixture"](cases)
+        self.assertIn(f"Some({2**128 - 1}u128)", fixture)
+        self.assertEqual(fixture.count("now: None"), 2)
+        self.assertIn("packet: &[" + ",".join(["171"] * 320) + "]", fixture)
+
     def reference_cli(self, payload):
         return subprocess.run(  # nosec B603
             [sys.executable, str(Path(self.api.__file__)), "--reference"],

@@ -297,3 +297,48 @@ checks pass; three envelope methods were rerun after formatting. No new native
 compilation, hardware qualification or timing ranking is claimed. Operation value
 domains and independent JavaScript duplicate-member rejection remain separate
 boundaries. Production runtime selection and later-component review are pending.
+
+## Lifecycle operation value domains
+
+Reviewed baseline: `71b401b1f5eb0daab6b9a7c051909e13c0b81a61`.
+The native generator already required unsigned ASCII decimal clocks fitting u128
+and at most 640 packet-text characters. Python reference and JavaScript admission
+did not enforce that domain. Conversion behavior also differed: Python hex
+decoding ignores ASCII whitespace, while Node hex conversion can silently truncate
+at invalid characters or an unmatched trailing digit. These defaults could alter
+the experimental input instead of rejecting it.
+
+All comparison operation checks now accept a boolean invalid-clock sentinel or
+an ASCII decimal string of 1–39 digits with numeric value below 2^128. Leading
+zeros remain accepted within the length bound. For ingest, `hex` must be a string
+of 0–640 ASCII hex digits in complete byte pairs; both cases are accepted, with
+no whitespace, prefix or partial byte. Validation happens before numeric/byte
+conversion. Python native preparation consumes the same validator as the oracle;
+JavaScript independently implements these predicates. The native timestamp
+emitter no longer duplicates the shared checks.
+
+These are audit fixture domains, not production clock or packet thresholds. The
+320-byte fixture maximum deliberately exceeds the receiver's 280-byte packet
+limit so negative packet tests still reach receiver rejection. Empty packet and
+boolean clock fixtures also remain valid experiment inputs. Production Python
+clock integers are not restricted to u128 by this change.
+
+The [Python bytes documentation](https://docs.python.org/3/library/stdtypes.html#bytes.fromhex)
+and [Node Buffer documentation](https://nodejs.org/api/buffer.html#buffers-and-character-encodings)
+explain why conversion alone is not common validation. Direct length, alphabet
+and numeric-range checks establish the existing small experiment domain before
+conversion; a new schema runtime would still require equivalent predicates.
+This correction adds no production runtime winner or comparative speed claim.
+
+The [receipt](robotics-operation-values-v3.json) retains 29 expected RED assertions
+and 39 passing focused methods. Boundary controls cover maximum u128, leading
+zeros, both booleans, empty hex and mixed-case 320-byte input. Python/Node outputs
+are compared; native input constants are inspected without claiming compilation.
+All original 16 lifecycle cases/48 steps and reference outputs are unchanged;
+the combined 40-case/72-step generated native fixture is byte-identical. Ruff,
+formatting, Bandit and Node syntax checks pass.
+
+This does not establish independent JavaScript raw JSON admission, bounded stdin
+allocation, actual Rust execution at this revision, arbitrary clock-callback
+parity or hardware timing. Production adapter code is unchanged, runtime
+reassessment remains PENDING, and later components remain unreviewed.

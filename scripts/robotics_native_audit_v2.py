@@ -56,18 +56,9 @@ def fixture_source(cases):
         for step in steps:
             op = validate_operation(step)
             now = step["now"]
-            if type(now) is bool:  # Preserve the invalid-clock test, not numeric 0/1.
-                timestamp = "None"
-            elif type(now) is str and now.isascii() and now.isdecimal() and len(now) <= 39:
-                value = int(now)
-                if value >= 2**128:
-                    raise ValueError("audit_clock_domain")
-                timestamp = f"Some({value}u128)"
-            else:
-                raise ValueError("audit_clock_domain")
+            # validate_operation already checks the shared u128/boolean domain.
+            timestamp = "None" if type(now) is bool else f"Some({int(now)}u128)"
             raw = step.get("hex", "")
-            if type(raw) is not str or len(raw) > 640:
-                raise ValueError("audit_packet_limit")
             packet = bytes.fromhex(raw)
             values = ",".join(str(value) for value in packet)
             lines.append(f"Step {{ op: {operations[op]}, now: {timestamp}, packet: &[{values}] }},")

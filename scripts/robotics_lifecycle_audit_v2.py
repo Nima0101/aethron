@@ -94,6 +94,25 @@ def validate_operation(step):
     fields = {"op", "now", "hex"} if op == "ingest" else {"op", "now"}
     if step.keys() != fields:
         raise ValueError("audit_operation_record")
+    now = step["now"]
+    # Booleans deliberately exercise invalid-clock handling in each receiver.
+    if type(now) is not bool and (
+        type(now) is not str
+        or not 1 <= len(now) <= 39
+        or not now.isascii()
+        or not now.isdecimal()
+        or int(now) >= 2**128
+    ):
+        raise ValueError("audit_clock_domain")
+    if op == "ingest":
+        raw = step["hex"]
+        if (
+            type(raw) is not str
+            or len(raw) > 640
+            or len(raw) % 2
+            or any(char not in "0123456789abcdefABCDEF" for char in raw)
+        ):
+            raise ValueError("audit_packet_domain")
     return op
 
 
