@@ -72,6 +72,17 @@ jobs:
           from aethron.passport_evidence import verify_evidence
           from aethron.interop_tasks import validate_task
           from aethron.interop_bundles import verify_task_bundle
+          from aethron.interop_federation import verify_federated_bundle
+          vectors = json.loads(Path("examples/interop/federation-vectors-v1.json").read_bytes())
+          for case in vectors["cases"]:
+              result = verify_federated_bundle(
+                  case["federation"].encode(), case["task"].encode(), case["envelope"].encode(),
+                  case["policy"].encode(), tuple(bytes.fromhex(value) for value in case["evidence_hex"]),
+                  **case["arguments"])
+              assert (result.status, result.reason) == (case["status"], case["reason"]), case["name"]
+              assert [item.outcome for item in result.evidence] == case["outcomes"]
+              assert result.execution_authority is False and result.motion_authority is False
+              assert result.evidence_verified is False
           vectors = json.loads(Path("examples/interop/bundle-vectors-v1.json").read_bytes())
           for case in vectors["cases"]:
               result = verify_task_bundle(
