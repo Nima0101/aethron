@@ -5,6 +5,7 @@ import importlib.util
 import io
 import json
 import struct
+import tracemalloc
 import unittest
 
 
@@ -42,6 +43,67 @@ class SensorReplay(unittest.TestCase):
         raw = json.dumps(header).encode()
         return struct.pack(">I", len(raw)) + raw + data
 
+    def test_complete_read_does_not_duplicate_immutable_payload(self):
+        api = self.api()
+        payload = b"x" * (1024 * 1024)
+
+        class Complete:
+            def read(self, size):
+                self.requested = size
+                return payload
+
+        source = Complete()
+        tracemalloc.start()
+        try:
+            result = api._read(source, len(payload))
+            _, peak = tracemalloc.get_traced_memory()
+        finally:
+            tracemalloc.stop()
+        self.assertEqual(result, payload)
+        self.assertEqual(source.requested, len(payload))
+        self.assertLess(peak, len(payload), "complete immutable read was duplicated")
+
+    def test_stream_contract_failures_and_empty_payload(self):
+        api = self.api()
+
+        class Supplied:
+            def __init__(self, blocks):
+                self.blocks = iter(blocks)
+
+            def read(self, size):
+                return next(self.blocks)
+
+        for blocks in ([None], [bytearray(b"ab")], [b"abc"], [b"a", b"bc"], [b"a", b""]):
+            with self.subTest(blocks=blocks), self.assertRaises(ValueError):
+                api._read(Supplied(blocks), 2)
+        self.assertIsNone(api._read(Supplied([b""]), 2, allow_eof=True))
+        with self.assertRaises(ValueError):
+            api._read(Supplied([b"a", b""]), 2, allow_eof=True)
+        self.assertEqual(api._read(Supplied([]), 0), b"")
+        self.assertEqual(api._read(Supplied([b"a", b"b"]), 2), b"ab")
+
+    def test_header_parser_preserves_int64_and_rejects_decoded_duplicate_keys(self):
+        api = self.api()
+        limit = 2**63 - 1
+        records = self.packet(sequence=limit - 1, acquisition_ns=limit - 1)
+        records += self.packet(sequence=limit, acquisition_ns=limit)
+        frames = list(api.read_frames(io.BytesIO(records)))
+        self.assertEqual([f.header.sequence for f in frames], [limit - 1, limit])
+        self.assertEqual([f.header.acquisition_ns for f in frames], [limit - 1, limit])
+        record = self.packet()
+        size = struct.unpack(">I", record[:4])[0]
+        header, payload = record[4 : 4 + size], record[4 + size :]
+        for bad in (
+            b'{"sequence":2,' + header[1:],
+            b'{"seq\\u0075ence":2,' + header[1:],
+            header.replace(b'"width": 2', b'"width": 1, "width": 2'),
+        ):
+            with (
+                self.subTest(header=bad),
+                self.assertRaisesRegex(ValueError, "duplicate_header_key"),
+            ):
+                list(api.read_frames(io.BytesIO(struct.pack(">I", len(bad)) + bad + payload)))
+
     def test_replays_pixels_with_recorded_provenance(self):
         frames = list(self.api().read_frames(io.BytesIO(self.packet())))
         self.assertEqual(len(frames), 1)
@@ -49,6 +111,21 @@ class SensorReplay(unittest.TestCase):
         self.assertEqual(frames[0].header.acquisition_ns, 123456)
         self.assertFalse(frames[0].live_evidence)
         self.assertEqual(list(self.api().read_frames(io.BytesIO())), [])
+
+    def test_valid_prefix_is_not_whole_recording_or_live_certification(self):
+        for suffix in (self.packet(sequence=2)[:-1], self.packet(sequence=2)[:-1] + b"X"):
+            with self.subTest(suffix_size=len(suffix)):
+                stream = io.BytesIO(self.packet() + suffix)
+                frames = self.api().read_frames(stream)
+                first = next(frames)
+                self.assertEqual(first.header.sequence, 1)
+                self.assertIs(first.live_evidence, False)
+                with self.assertRaises(ValueError):
+                    next(frames)
+                self.assertIs(first.live_evidence, False)
+                frames.close()
+                self.assertFalse(stream.closed)
+                stream.close()
 
     def test_rejects_truncated_tampered_and_oversized_records(self):
         api = self.api()

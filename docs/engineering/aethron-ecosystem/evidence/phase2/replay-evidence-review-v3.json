@@ -1,0 +1,33 @@
+{
+  "review_order_version": 3,
+  "component": "C02_comparison_evidence_integrity",
+  "decision": "FIX",
+  "full_component_review_complete": false,
+  "reviewed_head": "68a38bcdc9cb9e902e1b570b0f647a1d96852b4b",
+  "runtime_sensor_processing_changed": false,
+  "checks": {
+    "red_assertion_failures": 4,
+    "red_execution_errors": 0,
+    "green_methods": 2,
+    "optimized_subcases": 4,
+    "normal_wrong_result_cases": 2,
+    "previous_comparison_ast_unchanged": true,
+    "ruff": "PASS after import ordering and loop bindings",
+    "format": "PASS",
+    "bandit": "two existing LOW B101 findings; zero added",
+    "new_benchmarks": false,
+    "hardware_checks": false
+  },
+  "limitations": [
+    "No complete comparison or Node parser probe executed.",
+    "No new runtime KEEP/MIGRATE decision.",
+    "Historical reports retain their existing source bindings and limitations."
+  ],
+  "sha256": {
+    "docs/engineering/aethron-ecosystem/P21-REPLAY-EVIDENCE-REVIEW-V3.md": "5c2b3c47ef114e07f418f100fcaa4c00b02e2105a67634786985eae544a218b6",
+    "scripts/probes/sensor_replay_audit/compare.py": "240b8f3a318139c75d49e5c40cb9e7c663ef43a1e89410846b95ee995ab61746",
+    "scripts/probes/sensor_replay_audit/README.md": "a9626cf8e4229d3ab5e149d6309ff8922b4769f0b2914600970107d6bbf5d646",
+    "scripts/probes/sensor_replay_audit/json_candidate.cjs": "05ff94ac56e06c1c460b6c45d6a526faaa926b3165f9650f968a802380b344ee",
+    "tests/integration/test_sensor_replay_audit_modes.py": "d93ebd8f381a3b961a34f294ab63cc61b246098f74a92a829f87580085411b7d"
+  }
+}

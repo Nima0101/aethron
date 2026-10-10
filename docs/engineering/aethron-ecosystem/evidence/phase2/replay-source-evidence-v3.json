@@ -1,0 +1,35 @@
+{
+  "review_order_version": 3,
+  "component": "C02_comparison_source_fingerprints",
+  "decision": "FIX",
+  "full_component_review_complete": false,
+  "reviewed_head": "017f9e4e2ac0282d9fc2d2ff4d8ef7a0bdc1be7f",
+  "production_changed": false,
+  "checks": {
+    "red_assertion_failures": 3,
+    "red_execution_errors": 0,
+    "new_methods": 3,
+    "green_methods": 8,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "Two LOW findings identical to baseline by rule/severity/message",
+    "candidate_stream_asts_and_main_except_report_assignment": "UNCHANGED"
+  },
+  "limitations": [
+    "Candidates, clocks, tracing and temporary file substituted in new report tests; no actual benchmark result.",
+    "On-disk hashes do not attest loaded code or authenticate reports.",
+    "No atomic snapshot or complete dependency closure.",
+    "Separate JSON counterexample probe not part of comparison manifest.",
+    "Historical evidence unchanged; full production reassessment incomplete at C01."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/hashlib.html",
+    "https://nodejs.org/api/crypto.html"
+  ],
+  "sha256": {
+    "scripts/probes/sensor_replay_audit/compare.py": "ac3d4d1a16520be68e45a43408bd64c1d53c860dc7f1ac6f8c736d057625a793",
+    "scripts/probes/sensor_replay_audit/README.md": "890f79e0e0e9cdfa831171d93353a4d3f385845b611c4f42f62eae75c269cd99",
+    "tests/integration/test_sensor_replay_audit_modes.py": "eb50b2b11851f8b25bb39301990b16fafa7d35022d2fb16410fc9417accfb9eb",
+    "docs/engineering/aethron-ecosystem/P21-REPLAY-SOURCE-EVIDENCE-V3.md": "3dde6561285360ded0a1ab33beae42074da994bf9dfd6c7eba5e8a93036882b8"
+  }
+}

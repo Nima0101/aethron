@@ -1,0 +1,26 @@
+{
+  "review_order_version": 3,
+  "component": "C02_binary_replay",
+  "decision": "CLARIFY",
+  "scope": "qualification claims and negative coverage only",
+  "full_component_review_complete": false,
+  "reviewed_head": "2e5055d02e8af755c16c8075e0c38d4e79c1a9b1",
+  "production_behavior_changed": false,
+  "checks": {
+    "docstring_stripped_ast_equal": true,
+    "focused_tests_passed": 4,
+    "new_test_methods": 1,
+    "suffix_negative_cases": [
+      "truncated",
+      "tampered"
+    ],
+    "new_benchmarks": false,
+    "hardware_checks": false
+  },
+  "sha256": {
+    "integrations/edge/aethron_edge/sensors/replay.py": "0b22d7c1f469097e23d03100fe5b6a9fa1e249c9a8bf4edf4282087975cd9c94",
+    "tests/integration/test_sensor_replay.py": "a854d79d5e9dbac392d94b53d62019c02a47f366c90e664002c6deb5746e3fa1",
+    "docs/engineering/aethron-ecosystem/P21-REPLAY-TECHNOLOGY-AUDIT-V2.md": "585ad7959f312f29c6d23c55cde6e2fae321e2f103a0d5d8d0f5a38782440379",
+    "docs/engineering/aethron-ecosystem/P21-REPLAY-CLAIMS-REVIEW-V3.md": "e0535d37145b6b577b9b32c339b71e75be64c45c3b4ab233eec05c7b92bf9910"
+  }
+}
