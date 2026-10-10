@@ -1,5 +1,6 @@
 """Negative controls for portable count types; no production evaluator is replaced."""
 
+import hashlib
 import json
 import tempfile
 import unittest
@@ -60,7 +61,13 @@ class ConsumerVectorTypeTests(unittest.TestCase):
                     with tempfile.TemporaryDirectory() as directory:
                         changed = Path(directory) / "vectors.json"
                         changed.write_text(json.dumps(corpus), encoding="utf-8")
-                        with patch.object(runner, "CORPUS", changed):
+                        # Deliberately admit this fixture to isolate the type
+                        # assertion from the separate exact-corpus binding gate.
+                        with patch.multiple(
+                            runner,
+                            CORPUS=changed,
+                            CORPUS_SHA256=hashlib.sha256(changed.read_bytes()).hexdigest(),
+                        ):
                             self.require_result(run_bundle_case(), rejected=True)
                     self.require_result(run_bundle_case(), rejected=False)
 

@@ -37,6 +37,9 @@ both candidates' timed and allocation-traced calls.
 The [CLI shutdown correction](cli-shutdown-review-v3.md) closes process-owned
 stdout after failure so the tested closed-pipe report path retains exit 2 and
 the fixed diagnostic through interpreter shutdown.
+The [portable corpus binding correction](consumer-corpus-binding-v3.md) pins the
+reviewed inputs and expectations so named negative cases cannot be silently
+replaced with internally consistent passing cases.
 
 The [measurement lifecycle correction](#follow-up-measurement-lifecycle--2026-10-10)
 qualifies the older allocation results and corrects all three measurement drivers.

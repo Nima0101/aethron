@@ -9,6 +9,7 @@ from qualification.artifacts import verify
 from qualification.campaign_bundle import evaluate
 
 CORPUS = Path(__file__).resolve().parents[1] / "fixtures/consumer-vectors-v1.json"
+CORPUS_SHA256 = "8c3f345a6e8e3b947ca94ca4b4e0817e2d3961ff43bade6cff2adc5f2b4daff9"
 CASE_IDS = {
     "complete",
     "stale",
@@ -31,6 +32,7 @@ class ConsumerVectorTests(unittest.TestCase):
         with CORPUS.open("rb") as stream:
             raw = stream.read(32769)
         self.assertLessEqual(len(raw), 32768)
+        self.assertEqual(hashlib.sha256(raw).hexdigest(), CORPUS_SHA256)
         corpus = json.loads(raw)
         self.assertEqual(set(corpus), {"version", "plan_utf8", "manifests_utf8", "cases"})
         self.assertIs(type(corpus["version"]), int)

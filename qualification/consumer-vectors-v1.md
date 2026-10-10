@@ -57,6 +57,14 @@ so an empty or shortened corpus cannot silently pass. This is a trusted,
 repository-owned fixture loader, not a hardened parser for arbitrary test uploads.
 Malformed fixtures fail the test; the loader does not promise fixed private errors.
 
+The reference runner also pins the complete v1 corpus bytes to SHA-256
+`8c3f345a6e8e3b947ca94ca4b4e0817e2d3961ff43bade6cff2adc5f2b4daff9`
+after its size check and before parsing. Case names and mutually consistent inputs
+and expectations alone cannot establish that the reviewed negative cases remain.
+The pin includes outer whitespace; a changed corpus requires a separately reviewed
+version and pin. This is a repository regression check, not source authentication.
+See [corpus binding review](technology/consumer-corpus-binding-v3.md).
+
 ```sh
 python3 -m unittest qualification.tests.test_consumer_vectors -v
 ```
