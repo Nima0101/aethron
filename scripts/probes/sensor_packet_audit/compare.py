@@ -1,5 +1,6 @@
 """Bounded technology audit; synthetic packets and complete Python result conversion."""
 
+import hashlib
 import json
 import math
 import os
@@ -13,6 +14,7 @@ from itertools import chain
 from pathlib import Path
 
 import numpy as np
+from aethron_edge.sensors import packets
 from aethron_edge.sensors.packets import Cloud, CloudLayout, Point, decode_cloud
 
 # Assertions also consume the worker handshake and execute warm-up candidates.
@@ -241,6 +243,14 @@ def measure_all(functions, layout, data, expected, node):
 
 def main():
     report = {
+        "source_sha256": {
+            name: hashlib.sha256(path.read_bytes()).hexdigest()
+            for name, path in {
+                "compare.py": Path(__file__),
+                "buffer_worker.cjs": Path(__file__).with_name("buffer_worker.cjs"),
+                "aethron_edge.sensors.packets": Path(packets.__file__),
+            }.items()
+        },
         "python": platform.python_version(),
         "numpy": np.__version__,
         "node": subprocess.check_output(["node", "--version"], text=True).strip(),
@@ -252,6 +262,14 @@ def main():
         expected = scalar_baseline(layout, data)
         assert len(expected.sample_points) == 4096 and expected.invalid_points == 241
         case = {"bigendian": big, "mixed_unaligned": mixed, "bytes": len(data), "parity": True}
+        case["fixture_sha256"] = {
+            "payload": hashlib.sha256(data).hexdigest(),
+            "layout_json": hashlib.sha256(
+                json.dumps(layout, sort_keys=True, separators=(",", ":"), allow_nan=False).encode(
+                    "utf-8"
+                )
+            ).hexdigest(),
+        }
         node = Node(layout)
         try:
             case.update(

@@ -54,3 +54,15 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
   PYTHONPATH=integrations/edge:tests/integration \
   python -m unittest test_sensor_packet_audit_modes
 ```
+
+New reports include `source_sha256` for this harness, its worker and the actual
+imported packet module's on-disk file. Labels are logical names, with no absolute
+installation paths. Each case includes `fixture_sha256.payload` for its exact
+bytes and `fixture_sha256.layout_json` for UTF-8 JSON with sorted keys, compact
+separators and nonfinite values rejected. Hashing occurs outside timed samples.
+Unreadable source files abort report generation instead of emitting incomplete
+source bindings. These are on-disk fingerprints, not executable attestation,
+authentication, a dependency closure or a race-free snapshot. Keep the installed
+sources stable during a run. Historical reports are unchanged and are not
+retroactively source-bound by this addition. See the
+[partial source-binding review](../../../docs/engineering/aethron-ecosystem/P21-PACKET-SOURCE-EVIDENCE-V3.md).

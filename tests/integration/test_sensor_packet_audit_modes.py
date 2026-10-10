@@ -1,21 +1,98 @@
 """Evidence checks must not disappear under interpreter optimization."""
 
+import hashlib
 import io
+import json
 import os
 import runpy
 import struct
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, call, patch
+
+from aethron_edge.sensors import packets
 
 ROOT = Path(__file__).resolve().parents[2]
 PROBE = ROOT / "scripts/probes/sensor_packet_audit/compare.py"
 
 
 class PacketAuditModeTests(unittest.TestCase):
+    def diagnostic_report(self):
+        main = runpy.run_path(str(PROBE))["main"]
+        worker = SimpleNamespace(decode=Mock(), startup_ms=0, rss_kib=None, close=Mock())
+        fixtures = [({"marker": "first"}, b"abc"), ({"marker": "second"}, b"abd")]
+        output = io.StringIO()
+        with (
+            patch.dict(
+                main.__globals__,
+                {
+                    "fixture": Mock(side_effect=fixtures),
+                    "scalar_baseline": Mock(
+                        return_value=SimpleNamespace(
+                            sample_points=[None] * 4096, invalid_points=241
+                        )
+                    ),
+                    "Node": Mock(return_value=worker),
+                    "measure_all": Mock(side_effect=[{"node_buffer": {}}, {"node_buffer": {}}]),
+                },
+            ),
+            patch("subprocess.check_output", return_value="synthetic-node"),
+            patch("sys.stdout", output),
+        ):
+            main()
+        return json.loads(output.getvalue())
+
+    def test_report_pins_probe_worker_and_actual_imported_module(self):
+        with tempfile.TemporaryDirectory() as directory:
+            installed = Path(directory) / "packets.py"
+            installed.write_bytes(b"abc")
+            with patch.object(packets, "__file__", str(installed)):
+                report = self.diagnostic_report()
+        self.assertIn("source_sha256", report)
+        self.assertEqual(
+            report["source_sha256"],
+            {
+                "compare.py": hashlib.sha256(PROBE.read_bytes()).hexdigest(),
+                "buffer_worker.cjs": hashlib.sha256(
+                    PROBE.with_name("buffer_worker.cjs").read_bytes()
+                ).hexdigest(),
+                "aethron_edge.sensors.packets": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            },
+        )
+        self.assertNotIn(directory, json.dumps(report))
+
+    def test_report_binds_each_exact_fixture_payload_and_layout(self):
+        report = self.diagnostic_report()
+        for case, marker, payload in zip(
+            report["cases"], ("first", "second"), (b"abc", b"abd"), strict=True
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn("fixture_sha256", case)
+                self.assertEqual(
+                    case["fixture_sha256"],
+                    {
+                        "payload": hashlib.sha256(payload).hexdigest(),
+                        "layout_json": hashlib.sha256(
+                            json.dumps(
+                                {"marker": marker},
+                                sort_keys=True,
+                                separators=(",", ":"),
+                                allow_nan=False,
+                            ).encode("utf-8")
+                        ).hexdigest(),
+                    },
+                )
+
+    def test_missing_source_prevents_report_emission(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(packets, "__file__", str(Path(directory) / "missing.py")):
+                with self.assertRaises(FileNotFoundError):
+                    self.diagnostic_report()
+
     def diagnostic_node(self):
         node_type = runpy.run_path(str(PROBE))["Node"]
         node = node_type.__new__(node_type)
