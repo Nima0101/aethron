@@ -63,7 +63,12 @@ separators and nonfinite values rejected. Hashing occurs outside timed samples.
 Unreadable source files abort report generation instead of emitting incomplete
 source bindings. These are on-disk fingerprints, not executable attestation,
 authentication, a dependency closure or a race-free snapshot. Keep the installed
-sources stable during a run. Historical reports are unchanged and are not
+sources stable during a run. The three captured paths are hashed again after all
+comparison workers close and before report emission. A differing digest raises
+`audit_source_changed`; an unreadable file propagates its read error. Neither
+case emits a JSON report. This comparison cannot detect a change restored between
+reads, a change after the final read, or differences from already loaded code.
+Historical reports are unchanged and are not
 retroactively source-bound by this addition. See the
 [partial source-binding review](../../../docs/engineering/aethron-ecosystem/P21-PACKET-SOURCE-EVIDENCE-V3.md).
 

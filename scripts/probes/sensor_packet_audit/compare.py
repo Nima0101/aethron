@@ -242,14 +242,15 @@ def measure_all(functions, layout, data, expected, node):
 
 
 def main():
+    source_paths = {
+        "compare.py": Path(__file__),
+        "buffer_worker.cjs": Path(__file__).with_name("buffer_worker.cjs"),
+        "aethron_edge.sensors.packets": Path(packets.__file__),
+    }
     report = {
         "source_sha256": {
             name: hashlib.sha256(path.read_bytes()).hexdigest()
-            for name, path in {
-                "compare.py": Path(__file__),
-                "buffer_worker.cjs": Path(__file__).with_name("buffer_worker.cjs"),
-                "aethron_edge.sensors.packets": Path(packets.__file__),
-            }.items()
+            for name, path in source_paths.items()
         },
         "python": platform.python_version(),
         "numpy": np.__version__,
@@ -293,6 +294,9 @@ def main():
         if node.worker.returncode != 0:
             raise RuntimeError("audit_worker_exit")
         report["cases"].append(case)
+    for name, path in source_paths.items():
+        if hashlib.sha256(path.read_bytes()).hexdigest() != report["source_sha256"][name]:
+            raise RuntimeError("audit_source_changed")
     print(json.dumps(report, indent=2))
 
 

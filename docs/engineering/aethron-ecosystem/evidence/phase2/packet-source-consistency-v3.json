@@ -1,0 +1,33 @@
+{
+  "review_order_version": 3,
+  "component": "C01_source_fingerprint_consistency",
+  "decision": "FIX",
+  "full_component_review_complete": false,
+  "reviewed_head": "26e025b2f280612da8f15eaaaa2cc6655b0de285",
+  "production_sensor_behavior_changed": false,
+  "checks": {
+    "red_assertion_failures": 6,
+    "red_errors": 0,
+    "new_methods": 2,
+    "green_methods": 22,
+    "post_lint_fix_methods": 2,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "11 unchanged LOW findings across harness and tests"
+  },
+  "limitations": [
+    "New controls use temporary files and mocked comparison/worker outcomes; no operational benchmark.",
+    "Before/after reads do not attest loaded code or provide an immutable snapshot.",
+    "Full technology reassessment incomplete at C01; no runtime decision.",
+    "Historical reports unchanged and not requalified."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/hashlib.html"
+  ],
+  "sha256": {
+    "scripts/probes/sensor_packet_audit/compare.py": "5fbcec07edbc7a5b20aaab0b8b2340745a9126308d73721b5620d80c80b23351",
+    "tests/integration/test_sensor_packet_audit_modes.py": "0d457c0d727f7b6a6ee6cb86b9e3450a75126e8b6ab1f6cafe8aa9216455205c",
+    "scripts/probes/sensor_packet_audit/README.md": "57d59fe86c2c573d75ad9e9c36cfce83ef1dc27491ff4b368180fc0b830dd00c",
+    "docs/engineering/aethron-ecosystem/P21-PACKET-SOURCE-CONSISTENCY-V3.md": "8fa589cae9e139970070353ff14ff529a1527193a523af3f0f40902573917ffa"
+  }
+}

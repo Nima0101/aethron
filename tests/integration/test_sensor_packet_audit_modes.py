@@ -21,13 +21,13 @@ PROBE = ROOT / "scripts/probes/sensor_packet_audit/compare.py"
 
 
 class PacketAuditModeTests(unittest.TestCase):
-    def diagnostic_report(self, worker_exit=0, output=None):
+    def diagnostic_report(self, worker_exit=0, output=None, on_close=None, harness_path=PROBE):
         main = runpy.run_path(str(PROBE))["main"]
         worker = SimpleNamespace(
             decode=Mock(),
             startup_ms=0,
             rss_kib=None,
-            close=Mock(),
+            close=Mock(side_effect=on_close),
             worker=SimpleNamespace(returncode=worker_exit),
         )
         fixtures = [({"marker": "first"}, b"abc"), ({"marker": "second"}, b"abd")]
@@ -36,6 +36,7 @@ class PacketAuditModeTests(unittest.TestCase):
             patch.dict(
                 main.__globals__,
                 {
+                    "__file__": str(harness_path),
                     "fixture": Mock(side_effect=fixtures),
                     "scalar_baseline": Mock(
                         return_value=SimpleNamespace(
@@ -51,6 +52,40 @@ class PacketAuditModeTests(unittest.TestCase):
         ):
             main()
         return json.loads(output.getvalue())
+
+    def test_changed_source_during_comparison_prevents_report(self):
+        for name in ("compare.py", "buffer_worker.cjs", "packets.py"):
+            with self.subTest(source=name), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                for filename in ("compare.py", "buffer_worker.cjs", "packets.py"):
+                    (root / filename).write_bytes(b"before")
+                mutation = Mock(side_effect=lambda target=root / name: target.write_bytes(b"after"))
+                output = io.StringIO()
+                with patch.object(packets, "__file__", str(root / "packets.py")):
+                    with self.assertRaisesRegex(RuntimeError, "^audit_source_changed$"):
+                        self.diagnostic_report(
+                            on_close=mutation, harness_path=root / "compare.py", output=output
+                        )
+                self.assertEqual(mutation.call_count, 2)
+                self.assertEqual(output.getvalue(), "")
+
+    def test_removed_source_during_comparison_prevents_report(self):
+        for name in ("compare.py", "buffer_worker.cjs", "packets.py"):
+            with self.subTest(source=name), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                for filename in ("compare.py", "buffer_worker.cjs", "packets.py"):
+                    (root / filename).write_bytes(b"before")
+                removal = Mock(
+                    side_effect=lambda target=root / name: target.unlink(missing_ok=True)
+                )
+                output = io.StringIO()
+                with patch.object(packets, "__file__", str(root / "packets.py")):
+                    with self.assertRaises(FileNotFoundError):
+                        self.diagnostic_report(
+                            on_close=removal, harness_path=root / "compare.py", output=output
+                        )
+                self.assertEqual(removal.call_count, 2)
+                self.assertEqual(output.getvalue(), "")
 
     def test_version_query_requests_finite_timeout(self):
         main = runpy.run_path(str(PROBE))["main"]
