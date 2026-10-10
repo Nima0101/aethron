@@ -1,10 +1,14 @@
 # P2.1 C03 pinhole geometry — retrospective technology audit v2
 
-**KEEP** the scalar Python boundary with the native `math.hypot` range kernel.
+This document records a **historical V2 checkpoint**, not current V3 completion.
+See the [partial V3 qualification review](P21-GEOMETRY-CLAIMS-REVIEW-V3.md).
+
+The V2 decision was **KEEP** the scalar Python boundary with the native
+`math.hypot` range kernel.
 No production migration wins on the evidence below. Executable challenger and
 numeric regression tests substantiate that decision; this is not an automatic
-endorsement of every numerical component. C04–C09 remain unaudited. Forward
-feature expansion stays paused.
+endorsement of every numerical component. At that checkpoint C04–C09 were
+unaudited. These historical statements do not advance the fresh V3 review.
 
 ## Deployment and actual workload
 
@@ -13,7 +17,9 @@ range. It does not fit calibration, transform extrinsics, compensate distortion,
 process whole rasters or qualify sensors. Width/height are bounded to 1920/1080;
 positive focal lengths are bounded to 100000. Deprojection requires in-image
 pixels and depth in (0,500]; range requires a finite positive result <=500 m.
-Projection requires positive Z and an in-image result. The methods reject boolean
+Projection requires positive Z and an in-image result; it does not itself
+enforce the range limit. The 500 m checks define numerical acceptance only,
+not measured sensor reach or calibration accuracy. The methods reject boolean
 coordinates, nonfinite or malformed input and nonfinite arithmetic results.
 
 The observed registration caller projects one already-transformed point, then
@@ -23,7 +29,8 @@ methods; full-raster numerical work is a separate audited component. The current
 public interface returns tuples/scalars, not array views. Correct abstention at
 image boundaries, float64 arithmetic, bounded allocations and deterministic
 exceptions matter more here than matrix throughput. Linux offline deployment
-has no required device SDK or background service; the shared host has 6.3 GiB RAM.
+has no required device SDK or background service; the historical shared host
+reported 6.3 GiB RAM. This is not a deployment memory guarantee.
 
 ## Independent technology candidates
 
@@ -79,7 +86,9 @@ and error categories must agree exactly.
 
 These are synthetic, shared-host observations, not frozen deadline qualification,
 RSS accounting or a vectorized NumPy throughput comparison. Warm calls exclude
-imports and camera construction. The existing C01 import probe also observed
+imports and camera construction. The retained JSON contains medians rather than
+the individual timing samples; it cannot independently reproduce their spread
+or establish worst-case execution time. The existing C01 import probe also observed
 additional NumPy residency, but no memory measurement is fabricated for Julia,
 Eigen or OpenCV.
 

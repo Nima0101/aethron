@@ -1,0 +1,33 @@
+{
+  "review_order_version": 3,
+  "component": "C03_pinhole_geometry",
+  "decision": "CLARIFY",
+  "scope": "Historical status, numerical versus physical qualification and measurement limitations only",
+  "full_component_review_complete": false,
+  "reviewed_head": "fa270bc30148f29c11cb1ffd272534bc03e0cbaa",
+  "production_behavior_changed": false,
+  "test_implementation_changed": false,
+  "checks": {
+    "historical_source_bindings_verified": 3,
+    "focused_existing_negative_test_methods_passed": 2,
+    "new_benchmarks": false,
+    "hardware_checks": false
+  },
+  "limitations": [
+    "Historical medians do not retain individual timing samples or establish worst-case execution.",
+    "Numerical range acceptance is not physical sensor reach or calibration validation.",
+    "No new runtime ranking or completed V3 technology decision."
+  ],
+  "sha256": {
+    "integrations/edge/aethron_edge/sensors/geometry.py": "24dbd7e248990f426d985d05e9add08615621381f4391209a85682102f50d02b",
+    "tests/integration/test_sensor_geometry_numeric.py": "cf5e7cf076878f9207141d251e34c53bcdc85649cc772688e6acecd2f1c3dc2d",
+    "scripts/probes/sensor_geometry_audit/compare.py": "68c5d27f8e9688ec344a4d9c72b1936c76ca4944032414ebf151557ed3d90e57",
+    "docs/engineering/aethron-ecosystem/P21-GEOMETRY-TECHNOLOGY-AUDIT-V2.md": "5ebb463df47879d4b985ae17bb89c0cde8f0b009cf63ce827e438c30a365e616",
+    "docs/engineering/aethron-ecosystem/P21-GEOMETRY-CLAIMS-REVIEW-V3.md": "1e983669703ad9fc420e75c358e119c1b8c72beb89ac6b108c78ae8f44125804",
+    "docs/engineering/aethron-ecosystem/evidence/phase2/technology-v2-geometry.json": "36afb276b6cbe5683db6e123ab997fc4e2f4e0095e14ad0baf3ae25d797080a4"
+  },
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/math.html#math.hypot",
+    "https://docs.python.org/3.13/library/tracemalloc.html"
+  ]
+}
