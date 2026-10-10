@@ -2,16 +2,17 @@
   "id": "P12-CLIENT-001",
   "version": 1,
   "status": "accepted-component-only",
-  "decision": "SELECT TypeScript/native DOM composition; KEEP the reviewed generated admission, bounded SDK and existing native display/control components.",
+  "decision": "KEEP TypeScript/native DOM composition after source-bound re-review; FIX the shared adapter withdrawal gate across display and connection lifetimes.",
   "constraints": [
     "One explicitly requested, host-authorized read-only observation session; no view reads before start or after revocation. Synchronous local withdrawal must survive a failing adapter clear.",
     "One locale owner for all observation, connection and contextual guidance. Native controls, offline bundled ESM, no account service, credentials, persistent state, new timer or server contract.",
-    "Single pending session through cleanup; explicit restart only. Preserve source freshness uncertainty and UNKNOWN current state."
+    "Single pending session through cleanup; explicit restart only. Preserve source freshness uncertainty and UNKNOWN current state.",
+    "Both lifecycle and connection controls may withdraw the same adapter. A synchronous adapter callback must not start a session while either withdrawal is in progress; recursive adapter clearing fails closed."
   ],
   "alternatives": [
     {
       "technology": "TypeScript/native DOM",
-      "assessment": "Selected: typed host callbacks, direct AbortSignal and synchronous view withdrawal fit this two-component lifetime boundary. No additional render scheduler or application runtime is required. Tests exercise source-read reentry and locale coordination, not assumed static-type security."
+      "assessment": "Retained: typed native callbacks and AbortSignal interop with direct synchronous shared-source gating. Executed pageshow/resume regressions show why composition needs its own gate even when both child components have local gates. Types alone do not enforce runtime ordering."
     },
     {
       "technology": "Checked ECMAScript",
@@ -32,7 +33,7 @@
   ],
   "sources": [
     "https://www.typescriptlang.org/docs/handbook/2/functions.html",
-    "https://rescript-lang.org/docs/manual/bind-to-js-function/",
+    "https://www.rescript-lang.org/docs/manual/bind-to-js-function/",
     "https://guide.elm-lang.org/interop/ports.html",
     "https://lit.dev/docs/components/lifecycle/"
   ],
@@ -41,12 +42,13 @@
     "No cross-language benchmark or hard-real-time claim. Existing browser timer scheduling limits and independent device/accessibility/customer acceptance gates remain.",
     "The optional panel/host locale-request callback delegates user language choice to a containing owner. Existing three-argument callers retain local selection.",
     "This bounded client composition has contextual guidance but does not provide the complete P19 release-SHA-bound Help Center, role inventory, search, onboarding or installed customer distribution.",
-    "No targeting, weapon integration, physical actuation, identity histories or tactical/cryptographic/availability qualification."
+    "No targeting, weapon integration, physical actuation, identity histories or tactical/cryptographic/availability qualification.",
+    "Reviewed 2026-10-10 against official TypeScript, ReScript, Elm and Lit sources. These compare ecosystem interoperation and scheduling properties, not alternate-language benchmark results. Host callbacks remain trusted integration code."
   ],
   "c4": {
     "context": "flowchart LR\nOperator --> Client[Read-only client]\nHost[Authorized application] --> Client\nClient --> Adapter[Host session adapter]\nAdapter --> Service[Existing service]",
     "containers": "flowchart LR\nBrowser --> Client[Native DOM composition]\nClient --> SDK[Versioned host source interface]\nClient --> Panels[Observation and connection panels]\nPanels --> Help[Bundled bilingual guidance]",
-    "components": "flowchart LR\nLanguage --> Owner[Single locale owner]\nOwner --> Display\nOwner --> Controls\nStart --> Gate[Enabled explicit session]\nGate --> Read[Fresh source view]\nRevoke --> Withdraw[Revoke view before clearing adapter]\nStop --> Withdraw\nWithdraw --> Refresh[Refresh display even if clear fails]",
+    "components": "flowchart LR\nLanguage --> Owner[Single locale owner]\nOwner --> Display\nOwner --> Controls\nStart --> Gate[Enabled explicit session and no shared withdrawal]\nGate --> Read[Fresh source view]\nRevoke --> Withdraw[Revoke view before clearing adapter]\nStop --> Withdraw\nWithdraw --> Refresh[Refresh display even if clear fails]\nLifecycle[Page lifecycle reset] --> Withdraw\nWithdraw --> Guard[Reject nested adapter clear and session start]",
     "code": "classDiagram\nclass ObservationSession {\n view() unknown\n disconnect() void\n start(signal) Promise\n}\nclass ObservationClient {\n setEnabled(boolean)\n setLocale(Locale)\n dispose()\n}\nObservationClient --> ObservationSession\nObservationClient --> ObservationHost\nObservationClient --> ConnectionControls"
   }
 }

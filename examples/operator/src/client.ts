@@ -19,15 +19,17 @@ export function mountObservationClient(root: HTMLElement, session: ObservationSe
   const observationRoot = root.ownerDocument.createElement('div');
   const connectionRoot = root.ownerDocument.createElement('div');
   container.append(observationRoot, connectionRoot);root.replaceChildren(container);
-  let disposed = false, enabled = false, observing = false;
+  let disposed = false, enabled = false, observing = false, clearing = false;
   let epoch: object = {};
   let host: ReturnType<typeof mountObservationHost> | undefined;
   let controls: ReturnType<typeof mountConnectionControls> | undefined;
   const expired = () => ({label:'expired',current_state:'UNKNOWN',observed_state:'UNKNOWN',sources:[],uncertainty:[]});
   function disconnect(): void {
     observing = false;epoch = {};
+    if (clearing) throw new Error('source_withdrawal_in_progress');
+    clearing = true;
     try {session.disconnect();}
-    finally {host?.refresh();}
+    finally {clearing = false;host?.refresh();}
   }
   function setLocale(next: Locale): void {
     if (disposed) return;
@@ -49,8 +51,9 @@ export function mountObservationClient(root: HTMLElement, session: ObservationSe
       }, disconnect,
     }, locale, setLocale);
     controls = mountConnectionControls(connectionRoot, {
-      start(signal) {
-        if (disposed || !enabled || signal.aborted) throw new Error('session_unavailable');
+      // Rejections settle through the Promise contract after synchronous withdrawal.
+      async start(signal) {
+        if (disposed || clearing || !enabled || signal.aborted) throw new Error('session_unavailable');
         observing = true;epoch = {};
         return session.start(signal);
       }, disconnect,

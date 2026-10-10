@@ -63,3 +63,20 @@ test('client ADR rejects unknown claims at root and architecture boundaries',asy
  const adr=read('./client-adr.json'),validate=new Ajv2020({strict:true}).compile(read('./client-adr.schema.json'));
  assert.equal(validate(adr),true,JSON.stringify(validate.errors));assert.equal(validate({...adr,production_qualified:true}),false);assert.equal(validate({...adr,c4:{...adr.c4,certified:true}}),false);
 });
+
+for (const event of ['pageshow','resume']) {
+ test(`containing client rejects Start during ${event} source withdrawal`,async()=>{
+  const s=setup();s.client.setEnabled(true);let attempt=true;
+  s.session.disconnect=()=>{
+   if(!attempt)return;attempt=false;
+   s.client.setEnabled(true);s.click('connection.start');s.tick();
+  };
+  (event==='pageshow'?s.window:s.document).dispatchEvent(new (event==='pageshow'?Event:s.DOMEvent)(event));
+  assert.equal(s.starts(),0,'adapter must not start inside the shared source clearer');
+  assert.equal(s.reads(),0,'withdrawal must not admit a source read');
+  await turn();assert.equal(s.observation(),'observation.expired');
+  s.click('connection.start');assert.equal(s.starts(),1,'an independent later Start is allowed');
+  s.tick();assert.equal(s.observation(),'observation.delayed');
+  s.settle();await turn();s.client.dispose();
+ });
+}

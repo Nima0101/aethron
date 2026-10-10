@@ -1876,3 +1876,59 @@ Verified bridge commit 4c658ce7 was fast-forward pushed to PR #44. One exact-hea
 snapshot reported 40 queued and one skipped check; no polling or merge. Next earliest
 unreviewed component: the containing P12 client and browser build, then remaining
 help coverage. Full lane and installed P19 acceptance remain incomplete.
+
+
+### P12 containing-client reassessment — 2026-10-10
+
+At `745bf68740efece34fcb1b6a28e8fcb4ef6b8366`, re-read the authoritative
+policy/V3 order, verified the bridge commit and thirteen prior source hashes,
+six reports and twenty-one compiled/distribution outputs. Reviewed the client
+composition, both child lifetimes, locale ownership, source-read epoch, disposal,
+public interface, tests, ADR and documentation. Earlier evidence is retained.
+
+KEEP TypeScript/native DOM under the closed
+[client ADR](../../../examples/operator/client-adr.json). Browser ESM, direct
+AbortSignal interoperation, synchronous local source withdrawal and a single
+Promise-owned session are decisive constraints. Fresh official ecosystem research
+compares checked ECMAScript, ReScript bindings, Elm ports and Lit lifecycle.
+ReScript can bind these callbacks; Elm still requires a JavaScript adapter for
+the native session; Lit reactive rendering still needs a synchronous gate.
+No measured performance or stronger interoperation result supports migration of
+this small boundary. This is an engineering decision, not a cross-language
+benchmark. The current ReScript binding page is linked directly; the older
+`/latest/` path resolved to unrelated site content during this review.
+
+FIX shared-adapter withdrawal ordering. The display host registers its lifecycle
+handlers before the connection controls. During pageshow/resume, its adapter
+clearer could synchronously enable and click Start before the connection controls
+processed that same event. Each original source and bundled regression invoked
+one adapter start instead of zero. A containing-client clearing gate now prevents
+that call and rejects recursive adapter clearing. The wrapper consistently returns
+a Promise, so denial cleanup occurs after the current synchronous withdrawal.
+The first guard-only implementation blocked the start but synchronously reentered
+cleanup and latched failure: both later-restart assertions failed. That intermediate
+negative result is retained; the final tests require an independent explicit
+restart after successful cleanup and settlement.
+
+The view is still revoked before adapter cleanup and refreshed in finally. This
+is enforcement of component callback ordering, not authentication or containment
+of hostile host code. No peer module, SDK wire contract, current-state vocabulary,
+help topic/action, timer threshold, identity feature or physical interface changes.
+The four C4 views, runtime interface limits and README describe the shared gate.
+
+All 72 focused client/connection/lifecycle/help checks and ten Node standalone
+bundle checks pass without skips or cancellations. The two source and two bundled
+regressions cover both denial and later restart. Thirteen compiled operator files
+remain byte-identical; only client.js changes. The rebuilt 148568-byte ESM has
+twelve admitted inputs and zero external imports. These are structural DOM/Node
+checks, not actual browser, screen-reader, service or customer qualification.
+Source/artifact hashes are recorded in
+[the client evidence](evidence/phase3/p12-client-review-v1.json). One browser rebuild
+failed with the SDK wrapper's generic client_build_failed and removed the browser
+outputs. The wrapper did not expose the underlying cause; no timeout attribution
+or changed limit is justified. The failure log remains alongside the bounded retry.
+
+Verified bridge commit 745bf687 was fast-forward pushed to PR #44. Its single
+exact-head snapshot reported forty queued and one skipped check; no polling or
+merge. Next earliest unreviewed component: browser build/provenance, then remaining
+help coverage. Full lane and independent installed P19 acceptance remain incomplete.

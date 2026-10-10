@@ -249,6 +249,13 @@ even when cleanup throws, and failed cleanup disables further starts. Enabling
 again cannot revive old observations. This local gate does not replace host/service
 authorization and does not prove remote session deletion.
 
+The containing client guards the shared adapter while either child withdraws it.
+A Start dispatched by a synchronous cleanup callback cannot reach the session
+adapter, including during page reactivation before connection controls process
+the same event. Recursive adapter clearing fails closed. After successful cleanup
+and settlement, an independent explicit Start can proceed. These guarantees cover
+component callback ordering, not independent operations performed by host code.
+
 For custom compositions, the optional fourth argument to `mountObservationPanel`
 and `mountObservationHost` is a locale-request callback. A button delegates to it;
 the containing owner must call `setLocale` to commit the selection. Without that

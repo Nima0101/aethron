@@ -304,3 +304,19 @@ test('packaged action help matches every actual button in both locales offline',
  }finally{client.dispose();finish?.();}
  assert.equal(root.textContent,'');
 });
+
+for(const event of ['pageshow','resume'])test(`bundled containing client rejects Start during ${event} withdrawal`,async()=>{
+ const {mountObservationClient}=await bundle();const {document,Event:DOMEvent}=parseHTML('<main></main>');const window=new EventTarget();let tick,finish,calls=0,reads=0,attempt=true;
+ Object.defineProperty(document,'defaultView',{value:window});Object.defineProperty(document,'visibilityState',{value:'visible'});
+ window.setInterval=callback=>{tick=callback;return 1;};window.clearInterval=()=>{};
+ const root=document.querySelector('main'),session={view(){reads++;return null;},disconnect(){},start(){calls++;return new Promise(resolve=>finish=resolve);}};
+ const client=mountObservationClient(root,session),start=()=>root.querySelector('[data-feature="connection.start"]').dispatchEvent(new DOMEvent('click'));
+ try{
+  client.setEnabled(true);
+  session.disconnect=()=>{if(!attempt)return;attempt=false;client.setEnabled(true);start();tick();};
+  (event==='pageshow'?window:document).dispatchEvent(new (event==='pageshow'?Event:DOMEvent)(event));
+  assert.equal(calls,0);assert.equal(reads,0);
+  await new Promise(resolve=>setImmediate(resolve));
+  start();assert.equal(calls,1);finish();await new Promise(resolve=>setImmediate(resolve));
+ }finally{session.disconnect=()=>{};client.dispose();finish?.();}
+});
