@@ -66,6 +66,7 @@ class PassportSchemaConformance(unittest.TestCase):
             "passport-policy-v1.schema.json",
             "task-v1.schema.json",
             "federation-v1.schema.json",
+            "architecture-decision-v1.schema.json",
         ):
             self.assertTrue((ROOT / "contracts/interop" / name).is_file(), name)
             schema = validator(name).schema
@@ -481,6 +482,72 @@ class EdgeEvidenceConformance(unittest.TestCase):
         self.assertEqual(result.evidence[0].outcome, "unknown")
         self.assertIs(result.evidence_verified, False)
         self.assertEqual(json.loads(source), doc)
+
+
+@unittest.skipIf(Draft202012Validator is None, "install optional passport conformance requirements")
+class ArchitectureDecisionConformance(unittest.TestCase):
+    def document(self):
+        return json.loads((ROOT / "docs/decisions/p16-policy-admission-v1.json").read_bytes())
+
+    def test_published_decisions_validate_offline(self):
+        paths = sorted((ROOT / "docs/decisions").glob("p16-*.json"))
+        self.assertTrue(paths, "no P16 decision records were checked")
+        check = validator("architecture-decision-v1.schema.json")
+        for path in paths:
+            with self.subTest(path=path.name):
+                check.validate(json.loads(path.read_bytes()))
+
+    def test_decisions_reject_missing_extra_and_unbounded_fields(self):
+        check = validator("architecture-decision-v1.schema.json")
+        original = self.document()
+        for field in original:
+            doc = copy.deepcopy(original)
+            del doc[field]
+            with self.subTest(missing=field):
+                with self.assertRaises(ValidationError):
+                    check.validate(doc)
+        for field, value in (
+            ("extra", True),
+            ("version", True),
+            ("version", 2),
+            ("decision", "APPROVED"),
+            ("id", "decision\n"),
+            ("component", "x" * 161),
+            ("alternatives", []),
+            ("constraints", [""]),
+            ("rationale", ["x"] * 2),
+            ("limits", [str(i) for i in range(17)]),
+            ("evidence", []),
+        ):
+            doc = copy.deepcopy(original)
+            doc[field] = value
+            with self.subTest(field=field, value=value):
+                with self.assertRaises(ValidationError):
+                    check.validate(doc)
+
+    def test_references_reject_without_optional_format_checker(self):
+        check = validator("architecture-decision-v1.schema.json")
+        self.assertIsNone(check.format_checker)
+        for reference in (
+            "not a URI",
+            "http://example.com/",
+            "https://example.com/\n",
+            "https://example.com/\u2028",
+            "https://example.com/" + "x" * 500,
+        ):
+            doc = self.document()
+            doc["evidence"] = [reference]
+            with self.subTest(reference=reference):
+                with self.assertRaises(ValidationError):
+                    check.validate(doc)
+        # Demonstrate sensitivity to the regression seen in the manual check.
+        # This mutates only a local schema copy; no project file is rewritten.
+        weakened = copy.deepcopy(check.schema)
+        del weakened["properties"]["evidence"]["items"]["pattern"]
+        doc = self.document()
+        doc["evidence"] = ["not a URI"]
+        self.assertTrue(check.evolve(schema=weakened).is_valid(doc))
+        self.assertFalse(check.is_valid(doc))
 
 
 if __name__ == "__main__":

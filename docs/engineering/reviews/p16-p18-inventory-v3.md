@@ -1,7 +1,7 @@
 # P16–P18 review inventory v3
 
-Snapshot: `526e8549bb46ed2ffbd896d60b42c715d634438f`, plus independent pinned-policy
-validation, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `97eaef42df8298e38359bf91287118ef7a659efd`, plus continuous ADR
+metadata validation, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -24,6 +24,7 @@ remain historical inputs. The consumed JSON-bound helper belongs to the foundati
 | Inbox resource accounting | [Review](p16-inbox-v3.md): KEEP local bounded queue; no transport or hard real-time guarantee. |
 | Inbox/federation composition | [Review](p16-delivery-boundary-v3.md): KEEP primitives; ADD real-API expiry, revocation, revision-floor and close traces. Caller refresh and in-flight cancellation are not implemented. |
 | Packaging evidence | [Review](p16-packaging-v3.md): FIX installed/source identity comparison, [package input coverage](p16-packaging-inputs-v3.md) and [installed fixture coverage](p16-installed-corpus-v3.md); no full-distribution attestation. |
+| ADR publication tooling | [Review](p16-adr-publication-v3.md): FIX schema/record test discovery and ADR-only workflow triggers; structure is not evidence truth. |
 | Comparison and mutation probes | FIX optimized-mode evidence loss; [response types](p16-probe-response-v3.md); [capture bounds](p16-probe-capture-v3.md); [tracing lifecycle](p16-probe-tracing-v3.md); [source consistency](p16-probe-snapshot-v3.md); [timing accounting](p16-probe-timing-v3.md); [mutation integrity](p16-mutation-integrity-v3.md); historical source-manifest correction below. |
 
 ## Missing implementation and unsupported claims
