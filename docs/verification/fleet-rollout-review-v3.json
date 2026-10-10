@@ -1,0 +1,45 @@
+{
+  "audit_policy_version": 3,
+  "component": "P3.4 bounded local rollout journal",
+  "reviewed_head": "aef388b58a7a3895a85811e5dad186895af26e34",
+  "decision": "KEEP SQLite/Python; FIX documentation and acknowledgment-error coverage",
+  "production_change": false,
+  "required_migrations": [],
+  "source_sha256": {
+    "integrations/edge/aethron_edge/runtime/fleet_rollout.py": "dd3c692c2befc732e5883fb6008f961a5418b30ae7510d10ca7c4caccd7e55cc",
+    "tests/integration/test_fleet_rollout.py": "17686b760c27b11fb5453867e5920e5f43048addc00cd518ace65bf1f7a824d4"
+  },
+  "environment": {
+    "python": "3.13.5",
+    "sqlite": "3.46.1",
+    "os": "Linux"
+  },
+  "tests": {
+    "methods": 15,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_seconds": 5.693,
+    "state_space_comparisons": 9216,
+    "process_death_cases": 4,
+    "new_acknowledgment_error_cases": 4
+  },
+  "new_case": {
+    "name": "test_commit_acknowledgment_errors_require_snapshot_reconciliation",
+    "injection": "SQLite connection wrapper raises OperationalError before or after actual COMMIT for claim and failed result recording",
+    "before_commit": "Original snapshot retained",
+    "after_commit": "New whole state and revision retained; duplicate claim denied; failure cannot become success; settling sibling preserves failure",
+    "qualification": "Simulated acknowledgment ambiguity, not exhaustive SQLite I/O fault or physical power-loss evidence"
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS after one formatting correction",
+    "bandit_production": "PASS; no findings"
+  },
+  "retained_negative_evidence": "docs/verification/fleet-rollout-technology-audit-v2.json",
+  "limitations": [
+    "No production defect demonstrated; no artificial red-to-green claim.",
+    "No candidate throughput benchmark or 1024-slot exhaustive proof.",
+    "Caller authentication, replay-resistant backup recovery and real-time/uptime guarantees are absent.",
+    "No installation or actuation authority; no MLS/CNSA or hardware qualification."
+  ]
+}

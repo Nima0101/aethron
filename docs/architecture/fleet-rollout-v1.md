@@ -1,24 +1,21 @@
 # Bounded local rollout journal v1
 
-The [technology audit v2](fleet-rollout-technology-audit-v2.md) supersedes the
-initial technology rationale and FULL synchronization recommendation below.
-Connections now require verified DELETE journaling and EXTRA synchronization.
-The schema, revision/state contract, limits and no-retry semantics are unchanged.
+The [fresh V3 review](fleet-rollout-review-v3.md) confirms the current SQLite /
+bounded Python implementation and corrects durability, recovery and privacy
+wording. The [V2 audit](fleet-rollout-technology-audit-v2.md) remains historical
+evidence, including the failing durability tests. The schema and bounds are
+unchanged. Connections require verified DELETE journaling and EXTRA synchronization.
 
-## Technology decision (2026-10-10)
+## Technology decision
 
-Requirements: one immutable plan, up to 1024 anonymous slots, restart persistence,
-serialized competing writers, atomic reservation/result updates, bounded state,
-no network/service dependency and no installer or hardware assumptions.
-
-[SQLite transactions](https://sqlite.org/lang_transaction.html) supply a local
-writer transaction and explicit commit. [Rust redb](https://docs.rs/redb/latest/redb/)
-offers embedded transactional storage; [Go bbolt](https://pkg.go.dev/go.etcd.io/bbolt)
-is another embedded transactional option. Select SQLite through Python's standard
-binding for this bounded SQL record: the alternative bindings would add a new
-executable or extension distribution without improving the required single-writer
-semantics. This is a requirements-based choice, not a hardware benchmark result.
-No database server, message broker, remote job service or platform updater is needed.
+One immutable plan needs bounded state, restart persistence and atomic
+reservation/result updates across local writers. No network service, installer,
+hardware identity or distributed scheduler is required. The V3 assessment
+compares native SQLite bindings in Python, Rust and C#, normalized SQL, Rust redb
+and Erlang/Elixir Mnesia. It retains the native transaction engine plus a
+synchronous whole-record validator. Other bindings need not introduce IPC, and
+neither installed tooling nor rewrite expense is a selection criterion. No
+comparative speed, real-time or hardware qualification is claimed.
 
 ## Contract
 
@@ -32,7 +29,9 @@ has no public network endpoint and must not receive unauthenticated receipts.
 A plan has lower-case 64-character SHA-256 pins, version 1..2^31-1, 1..1024 slots,
 batch size 1..min(32, slots), and an exclusive validity window of at most 86400
 seconds. Times are strict integers in 0..2^53-1. Each journal represents one plan;
-slot indices are local ordinals, never durable device or person identities.
+slot indices are local ordinals, not device or person identity fields. This does
+not guarantee anonymity: a caller-held mapping can associate a slot with a device.
+Protect the journal and avoid exporting such mappings or per-slot results.
 
 `claim(expected_revision, now_unix_s)` commits the next ascending wave of pending
 slots and returns its ordinals. Only one wave may be running. No new claims are
@@ -62,10 +61,15 @@ consistency. No timestamps or per-slot histories are accumulated.
 
 The administrator supplies a protected local directory, never NFS. Existing files
 are never overwritten; missing/corrupt/link/special files are not initialized on
-reopen. SQLite uses DELETE journaling, FULL synchronous mode, a 100ms busy timeout,
+reopen. SQLite verifies DELETE journaling and EXTRA synchronous mode on every connection,
+with a 100ms busy timeout,
 a 1MiB database admission bound and a 16KiB JSON record bound. The timeout is not a
 wall-clock deadline under host scheduling or filesystem stalls. Transactions
-close without commit on rejection; injected commit failure preserves old state.
+close without commit on pre-commit rejection. A failure injected before the real
+COMMIT preserves old state; an exception after the real COMMIT preserves the new
+state. An error or absent response is not proof of rollback. Reopen and inspect
+state; never reset the journal or repeat external work based on a missing response.
+These file/record caps are not a process-memory or temporary-file quota.
 Expected input/storage errors use `ValueError("invalid_fleet_rollout")`.
 
 There is no automatic reset, cleanup, retry, cancellation or failure override.
@@ -82,6 +86,11 @@ physical platform compatibility and real deployment qualification are unclaimed.
 Synthetic transitions cover successive bounded waves, restart persistence, sticky
 failure, stale writers, both content pins, strict inputs, expiry/time rollback,
 foreign schemas, missing/corrupt/link state, maximum capacity, real lock contention
-and an injected failed COMMIT. The signed-policy workflow runs the journal tests
-against installed wheels. Authentication-to-journal binding and recovery remain
-separate executable work; they are not inferred from these primitive tests.
+and errors before/after COMMIT. Fifteen journal tests pass, including four
+process-death cases and 9216 bounded state/revision comparisons. The signed-policy
+workflow includes installed-wheel journal tests; this review ran focused source
+tests only. Signed plan and claim adapters exist as separate components and remain
+subject to their own V3 review. No receipt authentication or automated recovery
+is inferred from these primitive tests. No MLS/CNSA, five-nines or physical
+durability qualification is established. Insufficient information for tactical
+deployment.

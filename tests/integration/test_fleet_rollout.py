@@ -202,6 +202,55 @@ class FleetRolloutTests(unittest.TestCase):
         self.assertEqual(journal.snapshot().revision, 0)
         self.assertEqual(journal.snapshot().states, ("pending",) * 5)
 
+    def test_commit_acknowledgment_errors_require_snapshot_reconciliation(self):
+        original = sqlite3.connect
+        for operation in ("claim", "record"):
+            for committed in (False, True):
+                with self.subTest(operation=operation, committed=committed):
+                    self.path = self.path.with_name(f"ack-{operation}-{committed}.db")
+                    journal = self.create()
+                    if operation == "record":
+                        journal.claim(expected_revision=0, now_unix_s=1001)
+                    before = journal.snapshot()
+
+                    class LostAcknowledgment(sqlite3.Connection):
+                        def execute(self, sql, parameters=(), *, after_commit=committed):
+                            if sql == "COMMIT":
+                                if after_commit:
+                                    super().execute(sql, parameters)
+                                raise sqlite3.OperationalError("private injected detail")
+                            return super().execute(sql, parameters)
+
+                    def connect(*args, factory=LostAcknowledgment, **kwargs):
+                        return original(*args, factory=factory, **kwargs)
+
+                    with patch("aethron_edge.runtime.fleet_rollout.sqlite3.connect", connect):
+                        if operation == "claim":
+                            self.reject(journal.claim, expected_revision=0, now_unix_s=1001)
+                        else:
+                            self.reject(self.finish, journal=journal, slot=0, outcome="failed")
+                    reopened = self.module().RolloutJournal(self.path)
+                    snapshot = reopened.snapshot()
+                    if not committed:
+                        self.assertEqual(snapshot, before)
+                    else:
+                        self.assertEqual(snapshot.revision, before.revision + 1)
+                        self.assertEqual(
+                            snapshot.last_time_s, 1001 if operation == "claim" else 1002
+                        )
+                        self.assertEqual(
+                            snapshot.states,
+                            ("running" if operation == "claim" else "failed", "running")
+                            + ("pending",) * 3,
+                        )
+                        self.reject(
+                            reopened.claim, expected_revision=snapshot.revision, now_unix_s=1003
+                        )
+                        if operation == "record":
+                            self.reject(self.finish, journal=reopened, slot=0, now=1003)
+                            self.finish(reopened, 1, now=1003)
+                            self.assertEqual(reopened.snapshot().states[0], "failed")
+
     def test_every_commit_uses_verified_delete_extra_profile(self):
         original = sqlite3.connect
         observed = []
