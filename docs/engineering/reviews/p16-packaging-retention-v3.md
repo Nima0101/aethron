@@ -77,3 +77,41 @@ This correction is software assurance only; no command, communication, intellige
 surveillance or reconnaissance feature is introduced. No MLS/CNSA, real-time,
 availability or physical qualification follows. Insufficient information for tactical
 deployment. Full audit, release and phase completion remain unestablished.
+
+## Public claim review at 7e34cc6
+
+Reviewed 2026-10-10 at `7e34cc66328d81281dccc802b8f3fed736bfb50e` after
+rereading current policy, the earliest parser, seven public interop contracts,
+the examples and configured workflow. The prior bridge's parent, nine file hashes
+and noreply identity were verified before publishing it. No CI was polled.
+
+CLARIFY: three public profiles described hosted checks in present tense without
+distinguishing configured behavior from observed results. They now state that these
+are configured jobs and link the [evidence boundary](../../architecture/interop/verification-evidence-v1.md).
+That page maps seven APIs to their actual guarantees and caller responsibilities,
+and maps all three jobs to their source/installed/optional-dependency boundaries.
+The sensor job's final consumer tests use checkout imports, not installed producer
+modules. Diagnostic artifacts do not contain the archive or wheel and can exist
+after failed checks. Historical evidence remains unchanged.
+
+This is documentation reconciliation, not a new runtime, test framework or technology
+selection. Existing component decisions retain their stated scopes and limitations;
+no new migration benefit or runtime defect was demonstrated. No duplicate contract,
+language, service or assertion-only documentation regression test was introduced.
+
+Eight selected methods pass with zero skips: one lexical method, four real delivery
+traces, two independent-floor counterexamples and one actual-signature method.
+Both existing README Python snippets execute successfully with current source imports;
+they report `authenticated`/`bound` while denying motion authority and evidence
+qualification. This does not rerun installation instructions or a hosted job.
+Twenty relative file links in the four affected public pages resolve locally.
+Whitespace checks pass. No source/configuration changed, so runtime lint/security
+results from earlier revisions are not relabeled as new checks.
+
+The [current result record](p16-claims-current-v3-results.json) binds the reviewed
+files and local logs. Source hashes are not loaded-code attestation or dependency
+closure. C4 assurance views above remain descriptions of configured components;
+they do not prove execution or deployment. The next executable work is to derive
+requirements and compare technologies for the missing P16 durable caller-floor
+boundary, after reconciling this documentation correction. Full lane completion
+and tactical qualification remain unestablished.

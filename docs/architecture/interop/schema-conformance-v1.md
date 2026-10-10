@@ -46,8 +46,10 @@ resource bounds, invalid base64, trailing newlines, and intentionally well-shape
 expired/revoked/forged statements that the runtime must still reject. External `$ref`
 retrieval is forbidden by the test registry. The normal dependency-free runtime test
 suite may skip the optional schema tool. Install `requirements-passport-conformance.txt`
-to run these comparisons; it includes the pinned passport crypto closure. The hosted
-job explicitly imports both schema and crypto backends before running. The runtime
+to run these comparisons; it includes the pinned passport crypto closure. The workflow
+configures a job that explicitly imports both schema and crypto backends before running;
+this describes configuration, not an observed hosted success. See the
+[verification evidence boundary](verification-evidence-v1.md). The runtime
 comparison must authenticate a known-good fixture and reject negative fixtures for
 their expected reasons; an unavailable or always-rejecting backend cannot pass it.
 

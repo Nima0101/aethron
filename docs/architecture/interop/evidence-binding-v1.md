@@ -62,4 +62,6 @@ Exercise actual signatures; known SHA-256 vectors; failed and unknown evidence r
 input permutation; missing/extra/substituted/duplicate content; exact and exceeded resource
 bounds; non-bytes/custom containers; missing crypto; expiry/revocation; and invalid
 passports rejecting before any content hash call. All success/failure results deny motion
-and evidence qualification. Hosted tests use the optional passport crypto environment.
+and evidence qualification. The hosted workflow is configured to use the optional
+passport crypto environment. A successful run must be established separately for the
+reviewed revision; see the [verification evidence boundary](verification-evidence-v1.md).

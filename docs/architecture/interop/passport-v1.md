@@ -130,7 +130,9 @@ Retain tampered, expired, revoked, future, unknown-key, scope, authority and mal
 negative cases. Test actual Ed25519 signatures and a golden DSSE PAE vector, resource
 limits before decoding, and seeded bounded parser mutation. Missing crypto must reject.
 Default dependency-free installs retain the parser and fail closed on signature checks;
-install the `passports` extra for Ed25519. Hosted checks exercise this extra separately.
+install the `passports` extra for Ed25519. The workflow configures separate checks of
+this extra; configuration alone is not evidence that a hosted run passed. See the
+[verification evidence boundary](verification-evidence-v1.md).
 No hardware, certification, live evidence, production, or complete revocation claim.
 
 ## Deployment claim boundary
