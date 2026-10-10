@@ -40,6 +40,32 @@ class WireAuditTests(unittest.TestCase):
                 self.api.run(out)
             self.assertEqual((out / "result.json").read_text(), "prior negative evidence")
 
+    def test_parity_rejects_boolean_numeric_substitution(self):
+        expected = {"accepted": True, "message": 30, "boot": 0, "values": [0.0] * 6}
+        for field, value in (
+            ("accepted", 1),
+            ("accepted", 1.0),
+            ("boot", False),
+            ("values", [False] * 6),
+        ):
+            with self.subTest(field=field, value=value):
+                with self.assertRaisesRegex(ValueError, "candidate_parity_failed"):
+                    self.api.check_parity([expected], [dict(expected, **{field: value})])
+        with self.assertRaisesRegex(ValueError, "candidate_parity_failed"):
+            self.api.check_parity([{"accepted": False}], [{"accepted": 0}])
+
+    def test_parity_requires_integer_metadata_and_preserves_finite_numeric_values(self):
+        expected = {"accepted": True, "message": 30, "boot": 10, "values": [1.0] * 6}
+        self.api.check_parity([expected], [dict(expected, values=[1] * 6)])
+        for field, value in (("message", 30.0), ("boot", 10.0)):
+            with self.subTest(field=field):
+                with self.assertRaisesRegex(ValueError, "candidate_parity_failed"):
+                    self.api.check_parity([expected], [dict(expected, **{field: value})])
+        for value in (float("nan"), float("inf"), -float("inf")):
+            with self.subTest(nonfinite=value):
+                with self.assertRaisesRegex(ValueError, "candidate_parity_failed"):
+                    self.api.check_parity([expected], [dict(expected, values=[value] * 6)])
+
 
 if __name__ == "__main__":
     unittest.main()

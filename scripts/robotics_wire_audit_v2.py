@@ -93,11 +93,13 @@ def check_parity(expected, actual):
         for key in left:
             if key == "values":
                 if len(left[key]) != len(right[key]) or not all(
-                    math.isclose(x, y, rel_tol=1e-8, abs_tol=1e-9)
+                    type(y) in (int, float)
+                    and math.isfinite(y)
+                    and math.isclose(x, y, rel_tol=1e-8, abs_tol=1e-9)
                     for x, y in zip(left[key], right[key])
                 ):
                     raise ValueError("candidate_parity_failed")
-            elif left[key] != right[key]:
+            elif type(left[key]) is not type(right[key]) or left[key] != right[key]:
                 raise ValueError("candidate_parity_failed")
 
 

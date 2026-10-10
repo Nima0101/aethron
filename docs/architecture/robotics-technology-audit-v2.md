@@ -1,5 +1,9 @@
 # Robotics implementation reassessment v2 — in progress
 
+This is a historical v2 record. The [incomplete v3 review](robotics-review-v3.md)
+records later hosted execution and evidence-integrity corrections. Preparation-time
+status and test counts below are not current-head qualification or audit completion.
+
 This audit starts from published checkpoint `2c206c4`, which contains the earlier
 robotics components, and follows additions through `c665db7`. Publication history
 is squashed before that checkpoint; it does not establish the internal creation
@@ -164,7 +168,13 @@ runtime is not justified merely by a shorter synthetic run, and current Python
 is not retained merely because it is deployed. No forward feature work or audit
 completion marker is authorized by these intermediate results.
 
-## Native lifecycle experiment prepared — execution pending
+## Native lifecycle experiment — preparation checkpoint
+
+Execution was pending when this section was written. The later
+[hosted evidence review](../verification/robotics-native-hosted-review-v3.json)
+confirms checked/optimized prototype execution at `52509c7`; local missing-compiler
+failures below remain valid historical evidence. Neither establishes current-head
+qualification or a production runtime decision.
 
 Rust is the next candidate because native bounded storage and language-enforced
 memory safety address the allocation/safety tradeoff left open by the C and

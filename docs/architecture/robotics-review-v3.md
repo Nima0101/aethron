@@ -141,3 +141,32 @@ measurements. No prior result is rewritten and no performance improvement is cla
 records 16 passing tests, six retained/rechecked successful output pairs and the
 initial failures/static findings. This is an evidence-integrity repair only, not a
 production runtime decision or completion of the first-component V3 review.
+
+## C comparison type fidelity and historical status
+
+The earliest C comparison still used ordinary Python equality for metadata and
+numeric closeness without a type check for sample values. Seven retained failing
+assertions showed that this could accept numeric booleans, boolean sample values
+and floating-point integer metadata. FIX: metadata must preserve the reference
+JSON type; sample values must be finite integers/floats, excluding booleans. The
+existing numeric tolerance is unchanged and equivalent finite sample numbers
+such as `1` and `1.0` remain accepted. Python documents both
+[cross-type numeric equality](https://docs.python.org/3/library/stdtypes.html#numeric-types-int-float-complex)
+and [numeric closeness](https://docs.python.org/3/library/math.html#math.isclose);
+neither alone establishes JSON type fidelity. This is a correction to the offline
+checker, not a new runtime or a migration decision.
+
+[Verification evidence](../verification/robotics-wire-types-review-v3.json)
+binds the changed checker/tests, seven initial failures, 21 passing focused
+harness methods and a bounded rerun of the unchanged 17-case C experiment. Normal
+and AddressSanitizer/UndefinedBehaviorSanitizer builds pass the corrected parity
+check. The new measurement receipt is retained separately; historical results
+are not rewritten and no speedup or hardware claim is inferred.
+
+CLARIFY: the v2 document now labels its native execution-pending section as a
+preparation checkpoint and links the later hosted review. The wire corpus's
+header mutations do not recompute CRC, so their rejection does not independently
+prove each named header guard; the fixture names are not isolated guard coverage.
+The C runner's JSON member admission and subprocess diagnostic retention have not
+received the later managed/native corrections. Those evidence limitations remain
+open, as do the first-component technology decision and subsequent V3 reviews.
