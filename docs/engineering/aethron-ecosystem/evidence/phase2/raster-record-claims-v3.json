@@ -1,0 +1,31 @@
+{
+  "review_order_version": 3,
+  "component": "C06_result_record_claims",
+  "decision": "CLARIFY",
+  "full_component_review_complete": false,
+  "reviewed_head": "46914c6ee1efacc015a71d4611d2a3a57501874d",
+  "production_behavior_changed": false,
+  "checks": {
+    "new_methods": 2,
+    "new_controls_passed_before_docstring_change": true,
+    "green_methods": 3,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "zero findings across module and tests",
+    "production_executable_ast": "UNCHANGED"
+  },
+  "limitations": [
+    "Direct records only in new controls; no remapping improvement.",
+    "No failing production defect claimed.",
+    "No runtime KEEP/MIGRATE or completed technology audit.",
+    "Historical negative evidence remains unchanged."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/dataclasses.html"
+  ],
+  "sha256": {
+    "integrations/edge/aethron_edge/sensors/raster_rectification.py": "ab3cc72b4e72ebb266007569b8971a8ff03ae21386068f167496f410dd61bed8",
+    "tests/integration/test_sensor_raster_rectification.py": "75c0149f360ab2bea3013de9f4d40a4f70b19d1335f6c4aebe4dd885ff8bddc2",
+    "docs/engineering/aethron-ecosystem/P21-RASTER-RECORD-CLAIMS-V3.md": "acf9ea561a64aec57b336d0c32ae1397eb2aff2a9614defbfe220ca2c9b09583"
+  }
+}

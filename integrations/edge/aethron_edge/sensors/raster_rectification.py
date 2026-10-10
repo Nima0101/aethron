@@ -1,4 +1,10 @@
-"""Recorded intensity count remapping v1; no live admission or calibration claim."""
+"""Recorded intensity count remapping v1; no live admission or calibration claim.
+
+Handled validation failures expose a fixed message with suppressed context display,
+not erased exception context or traceback state. Do not serialize exception objects
+or traceback locals as privacy-safe diagnostics. Unexpected runtime failures and
+process-control exceptions propagate; the fixed message does not cover all faults.
+"""
 
 import math
 from dataclasses import dataclass, field
@@ -12,6 +18,17 @@ MAX_OUTPUT_PIXELS = 640 * 512
 
 @dataclass(frozen=True)
 class _RectifiedCounts:
+    """Recorded counts with a geometric sampling mask, not a sensor-quality score.
+
+    Neither remapping nor repr suppression anonymizes image content. Generic
+    dataclass serialization includes both buffers; callers own disclosure policy.
+    Zero counts do not establish absence, temperature, or physical calibration.
+    Direct construction does not validate dimensions, modality or buffer types;
+    frozen fields do not freeze caller-supplied mutable buffers. The remapping
+    functions produce immutable bytes. Dataclass conversion omits the version
+    and live_evidence properties and is not a versioned evidence envelope.
+    """
+
     width: int
     height: int
     modality: str
