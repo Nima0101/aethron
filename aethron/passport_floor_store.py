@@ -136,7 +136,12 @@ class _FloorStore:
         finally:
             if db is not None:
                 # Closing an uncommitted connection rolls back, including interruptions.
-                db.close()
+                # A cleanup failure can follow COMMIT; never report it as success or
+                # expose backend details. The caller must not infer non-commit.
+                try:
+                    db.close()
+                except (sqlite3.Error, OSError):
+                    raise FloorStoreError("store_unavailable") from None
 
     def _row(self, db):
         if (

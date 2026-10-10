@@ -210,6 +210,36 @@ class FederationFloorStoreTests(unittest.TestCase):
                 self.accept(store, wire(changed))
         self.assertEqual(self.reopen().read(), before)
 
+    def test_close_failure_after_deny_all_commit_returns_no_success(self):
+        store = self.create()
+        changed = json.loads(self.raw)
+        changed.update(revision=6, peers=[])
+        raw = wire(changed)
+        connect = sqlite3.connect
+
+        class FailClose(sqlite3.Connection):
+            def close(self):
+                super().close()
+                raise sqlite3.OperationalError("synthetic storage diagnostic")
+
+        def failing(*args, **kwargs):
+            return connect(*args, **kwargs, factory=FailClose)
+
+        with patch.object(api.sqlite3, "connect", failing):
+            try:
+                self.accept(store, raw)
+            except Exception as error:
+                self.assertIs(type(error), api.FloorStoreError)
+                self.assertEqual(str(error), "store_unavailable")
+                self.assertTrue(error.__suppress_context__)
+            else:
+                self.fail("cleanup failure returned success")
+        row = self.reopen().read()
+        self.assertEqual((row.federation_revision, row.minimum_time_s), (6, 1501))
+        self.assertEqual(row.federation_sha256, hashlib.sha256(raw).hexdigest())
+        with self.assertRaises(api.FloorStoreError):
+            self.accept(store, self.raw, 1502)
+
     def test_changed_schema_row_and_format_are_rejected(self):
         self.create()
         original = Path(self.path).read_bytes()

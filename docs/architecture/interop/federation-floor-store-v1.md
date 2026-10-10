@@ -31,7 +31,12 @@ execution path. No language or storage latency ranking is inferred from desktop 
 
 All results have execution authority, motion authority and evidence verification false.
 Exceptions use fixed reason strings; storage errors and immediate lock contention
-produce `store_unavailable`, never success metadata or zero/default floors.
+produce `store_unavailable`, never success metadata or zero/default floors. Connection
+close is attempted on every opened transaction; SQLite/OS cleanup errors use the same
+fixed reason with backend exception context suppressed. A cleanup error after COMMIT
+can leave the new revision, including a deny-all policy, persisted. An exception is
+not proof of rollback. Never reset or re-bootstrap because of that assumption;
+reopening under trusted configuration can inspect the state but may also fail.
 
 Both stores share internal transaction and row-validation code, with fixed SQL and
 bound data parameters. Policy v1 retains its schema and application ID `0x41544631`.
@@ -120,10 +125,13 @@ PYTHONPATH=tests:. python -m unittest test_interop_federation_floor_store test_p
 [Source-bound result record](../../engineering/reviews/p16-federation-floor-v1-results.json)
 retains failures, commands, scope and limitations. No phase-completion marker is issued.
 
-At this snapshot, 68 focused methods and one optional-dependency regression pass;
+At the original federation-floor implementation snapshot, 68 focused methods and one optional-dependency regression pass;
 33 selected persistence/runner methods also pass in an isolated no-site interpreter
 without cryptography. Ruff and formatting pass. The unexcluded Bandit scan reports
 42 low-severity runner assertion warnings and four low-severity test subprocess
 warnings; production persistence has no reported finding. The subprocess tests use
 a fixed trusted interpreter/code with no shell. The complete runner rejects optimized
 execution. These retained warnings are not represented as a clean security scan.
+
+The [current cleanup review](../../engineering/reviews/p16-floor-cleanup-current-v3.md)
+records the shared cleanup correction and additional real-file fault-injection tests.

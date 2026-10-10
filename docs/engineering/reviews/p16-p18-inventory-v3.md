@@ -1,6 +1,6 @@
 # P16–P18 review inventory v3
 
-Snapshot: `b1301a1f57c16325ae893942e70afb51da047798`, plus canonical Base64 coverage, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `8e264e9f5137216dc6c881ad264e82556dc2794e`, plus floor cleanup correction, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -8,8 +8,10 @@ approval, qualification statement or lane-completion marker.
 The latest owner-ordered restart begins again at passport admission. The [current
 Base64 review](p16-base64-current-v3.md) rechecks the parser/envelope boundary and
 fixes a guard-sensitivity gap: 33 alias cases now detect removed canonical equality.
-Runtime is unchanged. Next earliest unreviewed component in this restart: independent
-pinned-policy validation, then persistence and evidence binding. Earlier rows below
+That review left runtime unchanged. The [current policy and persistence review](p16-floor-cleanup-current-v3.md)
+confirms pinned-policy admission and fixes the shared floor-store cleanup error boundary,
+including post-commit error semantics. Next earliest unreviewed component in this
+restart: evidence byte binding. Earlier rows below
 remain evidence inputs and do not satisfy the remaining restart by themselves.
 
 The history of the owned runtime files starts with passport admission, then evidence,

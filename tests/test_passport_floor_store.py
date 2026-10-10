@@ -10,7 +10,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from contextlib import closing
+from contextlib import closing, contextmanager
 from pathlib import Path
 from unittest.mock import patch
 
@@ -45,6 +45,58 @@ class PolicyFloorStoreTests(unittest.TestCase):
 
     def reopen(self):
         return self.api.PolicyFloorStore(self.path, scope="local")
+
+    @contextmanager
+    def fail_close(self, error_type):
+        connect = sqlite3.connect
+
+        class FailClose(sqlite3.Connection):
+            def close(self):
+                super().close()  # Real teardown; inject only the reported failure.
+                raise error_type("synthetic storage diagnostic")
+
+        def failing(*args, **kwargs):
+            return connect(*args, **kwargs, factory=FailClose)
+
+        with patch.object(self.api.sqlite3, "connect", failing):
+            yield
+
+    def assert_storage_failure(self, operation):
+        try:
+            operation()
+        except Exception as error:
+            self.assertIs(type(error), self.api.FloorStoreError)
+            self.assertEqual(str(error), "store_unavailable")
+            self.assertTrue(error.__suppress_context__)
+        else:
+            self.fail("cleanup failure returned success")
+
+    def test_close_failure_after_commit_is_fixed_and_does_not_imply_rollback(self):
+        store = self.create()
+        for error_type in (sqlite3.OperationalError, OSError):
+            with self.subTest(error=error_type.__name__):
+                with self.fail_close(error_type):
+                    self.assert_storage_failure(lambda: store.observe_time(now_s=1800))
+                # The commit precedes cleanup; an error is not proof of non-commit.
+                self.assertEqual(self.reopen().read().minimum_time_s, 1800)
+                with self.fail_close(error_type):
+                    self.assert_storage_failure(store.read)
+
+    def test_close_failure_after_rejection_preserves_existing_floor(self):
+        store = self.create()
+        before = store.read()
+        for error_type in (sqlite3.OperationalError, OSError):
+            with self.subTest(error=error_type.__name__):
+                with self.fail_close(error_type):
+                    self.assert_storage_failure(lambda: store.observe_time(now_s=1499))
+                self.assertEqual(self.reopen().read(), before)
+
+    def test_close_failure_during_create_does_not_reset_committed_store(self):
+        with self.fail_close(sqlite3.OperationalError):
+            self.assert_storage_failure(self.create)
+        self.assertEqual(self.reopen().read().minimum_time_s, 1500)
+        with self.assertRaises(self.api.FloorStoreError):
+            self.create()
 
     def test_original_v1_disk_format_remains_readable_and_writable(self):
         # Literal original schema/markers: independent of the implementation constants.

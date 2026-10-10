@@ -61,8 +61,13 @@ in the helper's failure message.
 ## Transaction, resource and rollback limits
 
 Each operation opens a connection, uses `BEGIN IMMEDIATE`, validates the current row
-and commits before returning. Connections are closed after success or failure;
-uncommitted work rolls back on close. No state is cached between operations.
+and commits before returning. Connection close is attempted after success or failure;
+successful close rolls back uncommitted work. SQLite/OS errors during close produce
+`store_unavailable` with the backend exception context suppressed. Cleanup failure
+may occur after COMMIT: an error does not prove that the operation rolled back.
+Callers must not reset or re-bootstrap on that assumption. Reopen under the same
+trusted configuration to inspect persisted state; reopening can itself fail. No
+resource-release guarantee is made when close fails. No state is cached between operations.
 Cooperating processes use SQLite locks. Busy timeout is zero; the helper does not
 retry contention. Disk calls, locks and operating-system scheduling still have no
 hard-real-time bound. Even `read()` needs an immediate transaction and can fail on
@@ -134,7 +139,7 @@ control, communications, intelligence, surveillance or reconnaissance service.
 
 ## Focused evidence
 
-Sixteen tests exercise real local files: reopen, exclusive initialization, same-revision
+The original sixteen tests exercise real local files: reopen, exclusive initialization, same-revision
 conflict, revoked policies, independent trusted time, malformed inputs/stores, lock
 contention, a second process, effective page limits and commit-failure rollback. The commit fault uses a
 SQLite connection subclass that performs the real update but raises at commit; it is
@@ -145,3 +150,6 @@ tamper resistance. Current logs and source digests are in the
 ```sh
 PYTHONPATH=tests:. python -m unittest test_passport_floor_store test_passport_policy -v
 ```
+
+The [current cleanup review](../../engineering/reviews/p16-floor-cleanup-current-v3.md)
+adds injected close-failure coverage and documents post-commit error ambiguity.

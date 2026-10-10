@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "decision": "KEEP",
+  "id": "p16-policy-current-v3",
+  "component": "Independent pinned-policy validation at the current review restart",
+  "constraints": [
+    "Immutable input up to 65536 bytes and depth eight; exact external SHA-256 pin, complete key/revocation metadata, half-open expiry and safe-integer revision/time floors.",
+    "Offline side-effect-free validation, fixed rejection results, no enrollment, persistence or authority. Trusted digest and clock are caller preconditions.",
+    "No identified deployment throughput, memory SLA or hard deadline; bounded input is not a whole-process memory guarantee."
+  ],
+  "alternatives": [
+    "Python JSON lexical hooks and native-backed hashlib with explicit closed-profile checks.",
+    "Rust Serde custom visitors plus SHA-256 with an exact lexical adapter.",
+    "Erlang/Elixir OTP JSON callbacks and crypto digest primitives with a closed-profile validator.",
+    "C#/F# token-oriented .NET JSON and SHA-256 with explicit lexical and field validation."
+  ],
+  "rationale": [
+    "KEEP after fresh source and eight focused policy methods: exact-byte pin comparison precedes complete metadata admission; no new mismatch found.",
+    "The existing lexical interface retains integer-token and duplicate-member checks before model conversion. Native hashing handles bounded immutable bytes without implementing digest arithmetic.",
+    "The credible alternatives can implement this contract, but none establishes a material improvement in its decisive properties from the evidence reviewed. No alternative implementation or performance ranking is claimed.",
+    "This choice is scoped to offline policy admission; it does not select a P18 real-time runtime."
+  ],
+  "limits": [
+    "Caller-authenticated pin/time remain external preconditions; a matching digest is not enrollment or proof of content truth.",
+    "Fresh tests are source-level evidence, not product installation, complete security validation or whole-lane completion."
+  ],
+  "evidence": [
+    "https://docs.python.org/3/library/json.html",
+    "https://docs.python.org/3/library/hashlib.html",
+    "https://serde.rs/impl-deserialize.html",
+    "https://www.erlang.org/doc/apps/stdlib/json.html",
+    "https://learn.microsoft.com/en-us/dotnet/api/system.text.json.utf8jsonreader"
+  ]
+}
