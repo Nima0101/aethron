@@ -23,6 +23,10 @@ separately. Combined CPU includes Python parent and Node decode/encode kernel,
 avoids flattening copies; list/result conversion is measured. Wall p95 is the
 largest of 15 samples. Shared-host timing is not a deadline guarantee.
 
+Worker-reported CPU duration must be finite and nonnegative before it can enter
+the comparison. This admission check does not authenticate the worker's clock or
+prove a plausible upper bound. Historical reports are not requalified by it.
+
 The retained original scalar decoder is the baseline. `production` invokes the
 real installed/source decoder; `compiled_struct` is an independent prototype of
 the selected mechanism. The comparison only informs this existing object ABI;

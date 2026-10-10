@@ -141,7 +141,10 @@ class Node:
         self.worker.stdin.write(data)
         self.worker.stdin.flush()
         result = self.read(s.width * s.height * 33 + 8)
-        self.last_kernel_cpu_ms = struct.unpack_from("<d", result)[0]
+        duration = struct.unpack_from("<d", result)[0]
+        if not math.isfinite(duration) or duration < 0:
+            raise ValueError("invalid_worker_cpu_duration")
+        self.last_kernel_cpu_ms = duration
         samples, points = [], []
         radial = any(f.name == "radial_velocity" for f in s.fields)
         for valid, x, y, z, velocity in struct.iter_unpack("<Bdddd", memoryview(result)[8:]):
