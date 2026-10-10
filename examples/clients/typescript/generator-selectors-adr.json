@@ -1,0 +1,46 @@
+{
+  "id": "P33-GENERATOR-SELECTORS-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "KEEP ECMAScript build-time declaration projection; FIX selector validation so unsupported siblings and malformed scalar unions fail before output.",
+  "constraints": [
+    "Generate TypeScript declarations and a canonical JSON Schema bundle from the committed API-v1 schema, offline on Node/Linux and Windows.",
+    "Reject unsupported schema shapes explicitly; preserve current output bytes and AJV standalone runtime validation. This build tool processes a repository-owned contract, not incoming sensor data.",
+    "Do not silently widen a declaration by ignoring sibling assertions. Static types do not replace runtime numeric, string, provenance or timing checks."
+  ],
+  "alternatives": [
+    {
+      "technology": "ECMAScript closed-subset generator",
+      "assessment": "KEEP with explicit selector guards: directly emits the required host declaration and canonical JSON artifacts. Twelve counterexamples establish the former gap and its correction; committed-output equality establishes local compatibility. No runtime dependency is added."
+    },
+    {
+      "technology": "openapi-typescript",
+      "assessment": "Official tool supports OpenAPI 3.0/3.1 to TypeScript and can handle wider schema coverage. That broader acceptance does not itself enforce this component's deliberately closed vocabulary and fixed tuple limits; an independent contract guard would still be required. Reassess for broader SDK generation."
+    },
+    {
+      "technology": "quicktype",
+      "assessment": "Official multi-language schema/type/converter generator is credible if multiple owned SDKs share a generation boundary. This component requires TypeScript declarations plus a preserved schema bundle and explicit unsupported-shape rejection; replacing it would not remove that guard. No cross-language output requirement is implemented here."
+    },
+    {
+      "technology": "Rust typify",
+      "assessment": "Credible schema-to-Rust code generation with native typed output. Its documented output is Rust types, while this boundary requires TypeScript declarations; a separate TS emitter and Node packaging integration would remain. No native parsing throughput requirement justifies migration of this small offline build step."
+    }
+  ],
+  "sources": [
+    "https://json-schema.org/understanding-json-schema/structuring",
+    "https://openapi-ts.dev/introduction",
+    "https://github.com/glideapps/quicktype",
+    "https://docs.rs/typify/latest/typify/"
+  ],
+  "limits": [
+    "Only the supported selector subset is corrected; this is not a complete JSON Schema metaschema validator or general intersection engine.",
+    "References and anyOf permit title/description annotations only. const/enum additionally permit matching scalar type; sibling assertions require an explicit future design. Enum values must be nonempty, unique, finite JSON scalars.",
+    "No alternative compiler benchmark or universal language ranking; selection follows output format and rejection semantics. No browser, hardware, hard-real-time or certification evidence is created."
+  ],
+  "c4": {
+    "context": "flowchart LR\nContract[Versioned API contract] --> Build[SDK build]\nBuild --> Consumer[Read-only client consumer]",
+    "containers": "flowchart LR\nNode[Node generator] --> TS[TypeScript declarations]\nNode --> JSON[Canonical schema bundle]\nJSON --> AJV[Standalone runtime validators]",
+    "components": "flowchart LR\nSchema --> Vocabulary[Keyword checks]\nVocabulary --> Selector[Selector sibling and scalar checks]\nSelector --> Emitter[Declaration emitter]\nSelector --> Bundle[Reference relocation]\nUnsupported --> Reject[Fixed build failure]",
+    "code": "classDiagram\nclass ContractGenerator {\n renderContract(spec) outputs\n checkGenerated(outputs, directory) void\n}\nContractGenerator --> SelectorGuard\nSelectorGuard --> FixedFailure\nContractGenerator --> CanonicalBundle"
+  }
+}

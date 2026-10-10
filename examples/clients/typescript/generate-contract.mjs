@@ -29,10 +29,38 @@ export function renderContract(spec) {
   const type = schema => {
     if (!schema || typeof schema !== 'object' || Array.isArray(schema) ||
         Object.keys(schema).some(key => !keywords.has(key))) invalid();
-    if ('$ref' in schema) return reference(schema.$ref);
-    if ('const' in schema) return literal(schema.const);
-    if ('enum' in schema) return schema.enum.map(literal).join(' | ');
-    if ('anyOf' in schema) return schema.anyOf.map(type).join(' | ');
+    // Selector branches must not silently discard validation siblings. This is
+    // a closed declaration subset, not a general JSON Schema intersection engine.
+    const only = keys => {
+      if (Object.keys(schema).some(key => !['title', 'description', ...keys].includes(key))) invalid();
+    };
+    const scalar = value => {
+      const rendered = literal(value);
+      if ('type' in schema && !(schema.type === 'null' ? value === null :
+          schema.type === 'integer' ? Number.isInteger(value) :
+          ['string', 'number', 'boolean'].includes(schema.type) && typeof value === schema.type)) invalid();
+      return rendered;
+    };
+    if ('$ref' in schema) {
+      only(['$ref']);
+      return reference(schema.$ref);
+    }
+    if ('const' in schema) {
+      only(['const', 'type']);
+      return scalar(schema.const);
+    }
+    if ('enum' in schema) {
+      only(['enum', 'type']);
+      if (!Array.isArray(schema.enum) || schema.enum.length === 0) invalid();
+      const values = schema.enum.map(scalar);
+      if (new Set(values).size !== values.length) invalid();
+      return values.join(' | ');
+    }
+    if ('anyOf' in schema) {
+      only(['anyOf']);
+      if (!Array.isArray(schema.anyOf) || schema.anyOf.length === 0) invalid();
+      return schema.anyOf.map(type).join(' | ');
+    }
     if (schema.type === 'array') {
       const item = type(schema.items);
       if (schema.minItems !== undefined && schema.minItems === schema.maxItems) {

@@ -1,0 +1,105 @@
+{
+  "baseline": "c3ca1e8cb7229db29b64a9c0960e6d8728cdf91e",
+  "component": "P3.3 declaration generator selector shapes",
+  "review_order_version": 3,
+  "audit_complete": false,
+  "decision": "KEEP ECMAScript projection; FIX ignored selector siblings and malformed scalar unions.",
+  "adr": "examples/clients/typescript/generator-selectors-adr.json",
+  "source_sha256": {
+    "contracts/openapi/aethron-edge-v1.json": "4d562382b803e59dac1ab24a7ead52cd2cdbbc9533aa6d9dc68fca9f6e9b0b83",
+    "examples/clients/typescript/generate-contract.mjs": "8de5fb478981dbaf6e8b8a267c7694b94a0b3e3a4e54b40fc55c6eaa148cf8fe",
+    "examples/clients/typescript/generate-validators.mjs": "e438372169d9d34f312541922b2d98c3078a27fdcfcd0ada4afc4c69636d986e",
+    "examples/clients/typescript/generation.test.mjs": "c532028c5b95b72e02667240e081d50ac6486398bd848297348bec25a78857f2",
+    "examples/clients/typescript/validation.test.mjs": "529415dc7f4eb69dea567d57e4dc1c5a3ec19b3c47eec0cd96bb147ac682b084",
+    "examples/clients/typescript/src/types.ts": "849fc85341150f634fba6f18e862175ad502b191c1a431a191f4471ca95b2c9b",
+    "examples/clients/typescript/src/scene.schema.json": "57547fac9399c84cd7db554faf14055c8a7bad9a8efa3232ccc6f62da0f2c417",
+    "examples/clients/typescript/contract-types.test.ts": "e7f08071f5bc0f3fc286b40583820319237c95d78a7ecfcaf23df8b9544384a3",
+    "examples/clients/typescript/package.json": "f4e18c0605670b8e9a9d8095f8a787a5589b678ff8963ab82868ca4f53d108cd",
+    "examples/clients/typescript/package-lock.json": "e9851168f26e274480aa106a84f447bbd5429cf9c3e8462ec44c58c2158666c1",
+    "examples/clients/typescript/generator-selectors-adr.json": "b053ab6d2b26b662487ab39b11f25f88fddd07549162a308d3e124d75df15352",
+    "examples/clients/typescript/generator-selectors-adr.schema.json": "de4090c413a9e3883632a496ab362c90eba6405b042dd79b8f80ec72677d7b48",
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "a19e53a15a9a6b7c631356a8657061e8ffee2333e0a6b3c5378e5637b7e4bad0"
+  },
+  "log_directory": "build/p33-sdk-linux",
+  "report_sha256": {
+    "generator-selectors-red.log": "1848bd9f872fe06d6936429410d0db50d9baa0f7f79ee59a6eefffbe4da6e53c",
+    "generator-selectors-green.log": "01fad54fa3462219721259051815eb468354ab9b666dad8bb8d297b61694f785",
+    "generator-selectors-focused.log": "bee3d69c10a88129d604cf60af4fa436bd7f0f4a0cf1293f86a83b1914b91dc5",
+    "generator-selectors-build.log": "61dc5213e9f94cd6d9700cc19b377fcb1e103973520542ddaf922658fd853508",
+    "generator-selectors-types.log": "09bed08b0097b741cf6e066ffc9f4450002fd80dea7afd73cd195017c9513e43",
+    "generator-selectors-runtime.log": "602f7589d8be31bf7de793678628f9f107359667eb57bc3ce8183f0e9caef8ee",
+    "ci-packed-bfc2124.log": "6ab4bd4007d00e53a19d3d32040372196eff6b98547e30129dbdf2bb606293e4",
+    "ci-development-bfc2124.log": "4ad8b1f93227a887563b078faf11bd7d3d25e1128940a4fbb6f7f9546fcb87ca"
+  },
+  "red": {
+    "tests": 22,
+    "passed": 10,
+    "failed": 12,
+    "cause": "Unsupported selector shapes were accepted or raised incidental TypeError rather than the documented fixed error."
+  },
+  "green": {
+    "focused_tests": 33,
+    "failed": 0,
+    "skipped": 0,
+    "build": "PASS",
+    "public_type_checks": "PASS",
+    "string_code_generation_disabled": "PASS",
+    "syntax_diff": "PASS",
+    "published_generated_outputs": "byte-identical"
+  },
+  "security_review": [
+    "No transport, dependency or runtime validation changes. Reject selector assertion siblings instead of silently discarding them.",
+    "Malformed non-array/empty/duplicate enum or union input rejects before outputs; scalar type mismatch rejects; no external reference fetching.",
+    "This is a repository-contract build boundary, not a general metaschema validator or untrusted in-process object sandbox."
+  ],
+  "negative_evidence": {
+    "current": "Twelve baseline regressions retained; previous-head CI offline metadata and formatting failures retained.",
+    "previous": {
+      "current": "Hosted Linux/Windows ENOTCACHED, three formatting errors, four missing-helper assertions and local source-drift rejection retained.",
+      "previous": {
+        "current": "Seven initial missing-description/inventory failures and one refresh text-node identity failure retained; conditional writes corrected the latter.",
+        "previous": {
+          "current": "Eleven missing-component assertions retained; deliberate source mutations reject unsupported coverage.",
+          "previous": {
+            "previous": {
+              "missing_module": "Ten initial assertions retained.",
+              "initial_compiler": "Run type narrowing failure retained.",
+              "historical": {
+                "initial_package_passes": 1,
+                "initial_package_failures": 2,
+                "cause": "Operator invocation error: direct node execution omitted npm_execpath; entry-point guards rejected before packaging. Correct documented npm invocation passed with unchanged limits.",
+                "historical": {
+                  "prior_package_timeout": {
+                    "initial_package_passes": 2,
+                    "initial_package_failures": 1,
+                    "failure": "External installed consumer TypeScript compiler: spawnSync node ETIMEDOUT at unchanged 30000 ms timeout.",
+                    "retry": "One isolated retry passed with unchanged timeout; original failure preserved. Cause not established."
+                  },
+                  "browser": "Two historical Chromium probes timed out; no actual browser acceptance.",
+                  "current_red_logs": "Missing component and initial new-source reentry failures retained; final focused checks pass."
+                }
+              }
+            },
+            "current": "Eight missing-module assertions retained. Initial evidence-reader lookup omitted log_directory; corrected path lookup verified all seven baseline logs before publication."
+          }
+        }
+      }
+    }
+  },
+  "publication": {
+    "pr": 44,
+    "published_head": "c3ca1e8cb7229db29b64a9c0960e6d8728cdf91e",
+    "observed_ci_head": "bfc2124938ff97c505d59ab3a8352e379bd0638a",
+    "observed_failures": {
+      "114283560854": "packed-client-service ENOTCACHED registry.npmjs.org/ajv",
+      "114283560689": "development: three Python files would be reformatted"
+    },
+    "new_head_checked": false,
+    "polling": false
+  },
+  "limits": [
+    "Full retrospective review remains incomplete; next earliest component is remaining generator structural forms and standalone validator boundary.",
+    "No alternative compiler execution or speed ranking. No browser, physical, hard-real-time, MLS/CNSA or customer qualification.",
+    "P12/P19 full help and UI remain unfinished; historical limitations retained."
+  ]
+}

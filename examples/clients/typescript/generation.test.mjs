@@ -50,3 +50,50 @@ for (const [name, mutate] of [
     assert.throws(() => renderContract(input), /unsupported_contract_schema/);
   });
 }
+
+for (const [name, schema] of [
+  ['reference validation sibling', {$ref: '#/components/schemas/Clock', type: 'string'}],
+  ['reference nested unsupported schema', {$ref: '#/components/schemas/Clock', anyOf: [{type: 'constructor'}]}],
+  ['constant type conflict', {const: 'fixed', type: 'integer'}],
+  ['constant validation sibling', {const: 1, type: 'integer', minimum: 2}],
+  ['enum type conflict', {enum: ['fixed', 2], type: 'string'}],
+  ['enum validation sibling', {enum: ['fixed'], type: 'string', pattern: '^other$'}],
+  ['empty enum', {enum: [], type: 'string'}],
+  ['non-array enum', {enum: 'fixed', type: 'string'}],
+  ['duplicate enum', {enum: ['fixed', 'fixed'], type: 'string'}],
+  ['empty union', {anyOf: []}],
+  ['non-array union', {anyOf: {type: 'string'}}],
+  ['union validation sibling', {anyOf: [{type: 'string'}], type: 'number'}],
+]) {
+  test(`generator rejects unsupported selector shape: ${name}`, () => {
+    const input = structuredClone(spec);
+    input.components.schemas.Probe = schema;
+    assert.throws(() => renderContract(input), {message: 'unsupported_contract_schema'});
+  });
+}
+
+test('supported selector annotations and scalar literals preserve declaration output', () => {
+  const input = structuredClone(spec);
+  Object.assign(input.components.schemas, {
+    ProbeRef: {$ref: '#/components/schemas/Clock', title: 'Clock alias', description: 'description'},
+    ProbeConst: {const: null, type: 'null'},
+    ProbeEnum: {enum: [0, 1], type: 'integer'},
+    ProbeUnion: {anyOf: [{type: 'string'}, {type: 'null'}], title: 'Nullable'},
+  });
+  const result = renderContract(input);
+  assert.match(result['types.ts'], /export type ProbeRef = Clock;/);
+  assert.match(result['types.ts'], /export type ProbeConst = null;/);
+  assert.match(result['types.ts'], /export type ProbeEnum = 0 \| 1;/);
+  assert.match(result['types.ts'], /export type ProbeUnion = string \| null;/);
+});
+
+
+test('generator selector decision uses a closed component-only schema', async () => {
+  const {Ajv2020} = await import('ajv/dist/2020.js');
+  const read = name => JSON.parse(readFileSync(new URL(name, import.meta.url)));
+  const validate = new Ajv2020({strict: true}).compile(read('./generator-selectors-adr.schema.json'));
+  const decision = read('./generator-selectors-adr.json');
+  assert.equal(validate(decision), true, JSON.stringify(validate.errors));
+  assert.equal(validate({...decision, production_qualified: true}), false);
+  assert.equal(validate({...decision, c4: {...decision.c4, certified: true}}), false);
+});
