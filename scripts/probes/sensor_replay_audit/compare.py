@@ -72,13 +72,14 @@ def main():
         raise ValueError("replay_audit_tracing_active")
     data = b"x" * (1024 * 1024)
     functions = {"baseline": baseline, "direct": direct, "readinto": readinto, "production": _read}
+    source_paths = {
+        "compare.py": Path(__file__),
+        "aethron_edge.sensors.replay": Path(replay.__file__),
+    }
     report = {
         "source_sha256": {
             name: hashlib.sha256(path.read_bytes()).hexdigest()
-            for name, path in {
-                "compare.py": Path(__file__),
-                "aethron_edge.sensors.replay": Path(replay.__file__),
-            }.items()
+            for name, path in source_paths.items()
         },
         "payload_sha256": hashlib.sha256(data).hexdigest(),
         "payload_bytes": len(data),
@@ -120,6 +121,9 @@ def main():
                 }
                 for key, s in samples.items()
             }
+    for name, path in source_paths.items():
+        if hashlib.sha256(path.read_bytes()).hexdigest() != report["source_sha256"][name]:
+            raise RuntimeError("replay_audit_source_changed")
     print(json.dumps(report, indent=2))
 
 

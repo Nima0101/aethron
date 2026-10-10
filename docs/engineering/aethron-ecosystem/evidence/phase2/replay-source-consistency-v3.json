@@ -1,0 +1,33 @@
+{
+  "review_order_version": 3,
+  "component": "C02_source_fingerprint_consistency",
+  "decision": "FIX",
+  "full_component_review_complete": false,
+  "reviewed_head": "8daabe64bdebd31c25318f2a725c2cd3d3283c42",
+  "production_sensor_behavior_changed": false,
+  "checks": {
+    "red_assertion_failures": 4,
+    "red_errors": 0,
+    "new_methods": 2,
+    "green_methods": 10,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "4 unchanged LOW findings across harness and tests",
+    "ast": "Non-main code and measurement/context block unchanged"
+  },
+  "limitations": [
+    "New cases use temporary files, constant candidate results and fake clocks/tracing; no performance comparison.",
+    "Before/after source reads do not attest loaded code or provide immutable execution.",
+    "Full technology reassessment incomplete at C01; no runtime decision.",
+    "Historical reports unchanged and not requalified."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/hashlib.html"
+  ],
+  "sha256": {
+    "scripts/probes/sensor_replay_audit/compare.py": "69e812714fdbd840c2c3a93bad89fd08a81621eb4e1f8342c1489fb26fd89bff",
+    "tests/integration/test_sensor_replay_audit_modes.py": "48ccb8cc2df39e34d858258f8eae0c659cb21e3cc65cf241584d998a342996d8",
+    "scripts/probes/sensor_replay_audit/README.md": "3bab2d10f7dbeedf2abbc94318677faac31c0be0c3c166da60c3fe7c0d72ecb5",
+    "docs/engineering/aethron-ecosystem/P21-REPLAY-SOURCE-CONSISTENCY-V3.md": "a431fdc20fc098b3b4f01db6919ca934ad4e1d3bb39f5daa4d2511726c4fb830"
+  }
+}

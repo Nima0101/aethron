@@ -22,10 +22,18 @@ PROBE = ROOT / "scripts/probes/sensor_replay_audit/compare.py"
 
 
 class ReplayAuditModeTests(unittest.TestCase):
-    def diagnostic_report(self):
+    def diagnostic_report(self, output=None, on_close=None, harness_path=PROBE):
         main = runpy.run_path(str(PROBE))["main"]
         payload = b"x" * (1024 * 1024)
-        output = io.StringIO()
+        output = io.StringIO() if output is None else output
+
+        class ClosingBuffer(io.BytesIO):
+            def __exit__(self, *args):
+                result = super().__exit__(*args)
+                if on_close is not None:
+                    on_close()
+                return result
+
         fake_trace = SimpleNamespace(
             is_tracing=lambda: False,
             start=Mock(),
@@ -40,15 +48,48 @@ class ReplayAuditModeTests(unittest.TestCase):
                         name: lambda *args: payload
                         for name in ("baseline", "direct", "readinto", "_read")
                     },
+                    "__file__": str(harness_path),
                     "time": SimpleNamespace(process_time_ns=lambda: 0, perf_counter_ns=lambda: 0),
                     "tracemalloc": fake_trace,
-                    "tempfile": SimpleNamespace(TemporaryFile=io.BytesIO),
+                    "tempfile": SimpleNamespace(TemporaryFile=ClosingBuffer),
                 },
             ),
             contextlib.redirect_stdout(output),
         ):
             main()
         return json.loads(output.getvalue())
+
+    def test_changed_source_during_comparison_prevents_report(self):
+        for name in ("compare.py", "replay.py"):
+            with self.subTest(source=name), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                for filename in ("compare.py", "replay.py"):
+                    (root / filename).write_bytes(b"before")
+                mutation = Mock(side_effect=lambda target=root / name: target.write_bytes(b"after"))
+                output = io.StringIO()
+                with patch.object(replay, "__file__", str(root / "replay.py")):
+                    with self.assertRaisesRegex(RuntimeError, "^replay_audit_source_changed$"):
+                        self.diagnostic_report(
+                            on_close=mutation, harness_path=root / "compare.py", output=output
+                        )
+                mutation.assert_called_once_with()
+                self.assertEqual(output.getvalue(), "")
+
+    def test_removed_source_during_comparison_prevents_report(self):
+        for name in ("compare.py", "replay.py"):
+            with self.subTest(source=name), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                for filename in ("compare.py", "replay.py"):
+                    (root / filename).write_bytes(b"before")
+                removal = Mock(side_effect=lambda target=root / name: target.unlink())
+                output = io.StringIO()
+                with patch.object(replay, "__file__", str(root / "replay.py")):
+                    with self.assertRaises(FileNotFoundError):
+                        self.diagnostic_report(
+                            on_close=removal, harness_path=root / "compare.py", output=output
+                        )
+                removal.assert_called_once_with()
+                self.assertEqual(output.getvalue(), "")
 
     def test_report_pins_harness_and_actual_imported_module(self):
         with tempfile.TemporaryDirectory() as directory:
