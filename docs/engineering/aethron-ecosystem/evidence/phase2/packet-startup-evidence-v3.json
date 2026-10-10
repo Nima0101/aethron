@@ -1,0 +1,35 @@
+{
+  "review_order_version": 3,
+  "component": "C01_comparison_worker_startup_cleanup",
+  "decision": "FIX",
+  "full_component_review_complete": false,
+  "reviewed_head": "d6aeb6a460849a90e5b1b271c95591d160cc0cc0",
+  "production_changed": false,
+  "checks": {
+    "red_assertion_failures": 4,
+    "red_execution_errors": 0,
+    "new_methods": 3,
+    "green_methods": 8,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "Nine existing LOW findings",
+    "non_constructor_functions_ast": "UNCHANGED"
+  },
+  "additional_review": "C04 comparison has no allocation tracing; preceding tracing defect does not apply. No full review claim.",
+  "limitations": [
+    "Fake processes and memory pipes only; no Node execution or geometry benchmark.",
+    "Cleanup failures can supersede startup failure with exception context retained.",
+    "Existing cleanup closes stdin before wait/finally and has untimed post-kill wait; not qualified here.",
+    "Historical reports unchanged; full technology audit incomplete at C01."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3/library/subprocess.html"
+  ],
+  "sha256": {
+    "scripts/probes/sensor_packet_audit/compare.py": "7b3a4198c2c16a11ed0a5ad0be2d4cba745c8c4f35225a0821021e0b4d418d93",
+    "scripts/probes/sensor_packet_audit/README.md": "1b571d667864e53cd3f2cd89196b6ae0acae14a6e04238d76584455865aaa8d8",
+    "tests/integration/test_sensor_packet_audit_modes.py": "ef2ed06b55cd68a86d20812415b1525bd016cf329bfdf6a8e20c9141987143ba",
+    "docs/engineering/aethron-ecosystem/P21-PACKET-STARTUP-EVIDENCE-V3.md": "718b8a5db927c2522cf4744f0424a6877ee214ec7f868e93c51a4127b246e758",
+    "scripts/probes/sensor_registration_audit/compare.py": "510c2732b22f4bcd2f4db4c31a8735e155f971cfd53e4eacecb7e41fe8094ca5"
+  }
+}

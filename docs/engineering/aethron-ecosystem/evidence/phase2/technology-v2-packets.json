@@ -1,0 +1,362 @@
+{
+  "audit_policy_version": 2,
+  "component": "C01_raw_packets",
+  "decision": "KEEP",
+  "implementation_change": "Replace per-field scalar unpack/dictionary with one compiled standard-endian record unpack per sample. Preserve strict metadata and immutable result boundary.",
+  "qualification": "Synthetic software evidence only; audit incomplete; no hardware or deadline qualification.",
+  "environment": {
+    "os": "Linux",
+    "shared_host_memory_gib": 6.3,
+    "python": "3.13.13",
+    "numpy_probe_only": "2.3.5",
+    "node_probe_only": "v22.23.2",
+    "numpy_supply": "Existing requirements-vision.lock hash pin, official PyPI, require-hashes, isolated probe environment; no product dependency added."
+  },
+  "method": "Two 4096-point fixtures, 241 invalid ordinals each, 15 rotated samples/candidate; includes schema validation and full Python result conversion. Node CPU excludes worker pipe I/O. RSS probe is one observation.",
+  "current_comparison": {
+    "python": "3.13.13",
+    "numpy": "2.3.5",
+    "node": "v22.23.2",
+    "method": "15 rotated paired samples; worker kernel CPU added to parent CPU, worker pipe I/O CPU excluded",
+    "cases": [
+      {
+        "bigendian": false,
+        "mixed_unaligned": false,
+        "bytes": 131904,
+        "parity": true,
+        "baseline": {
+          "wall_p50_ms": 83.870028,
+          "wall_p95_ms": 181.466751,
+          "parent_cpu_p50_ms": 13.325949,
+          "cpu_with_worker_kernel_p50_ms": 13.325949
+        },
+        "production": {
+          "wall_p50_ms": 6.110817,
+          "wall_p95_ms": 80.403295,
+          "parent_cpu_p50_ms": 5.982238,
+          "cpu_with_worker_kernel_p50_ms": 5.982238
+        },
+        "compiled_struct": {
+          "wall_p50_ms": 6.167407,
+          "wall_p95_ms": 75.729755,
+          "parent_cpu_p50_ms": 6.115932,
+          "cpu_with_worker_kernel_p50_ms": 6.115932
+        },
+        "numpy_view": {
+          "wall_p50_ms": 6.857791,
+          "wall_p95_ms": 78.371342,
+          "parent_cpu_p50_ms": 6.633459,
+          "cpu_with_worker_kernel_p50_ms": 6.633459
+        },
+        "node_buffer": {
+          "wall_p50_ms": 9.088154,
+          "wall_p95_ms": 80.821747,
+          "parent_cpu_p50_ms": 5.142488,
+          "cpu_with_worker_kernel_p50_ms": 7.85868,
+          "startup_ms": 262.233659,
+          "worker_rss_kib": 42224
+        }
+      },
+      {
+        "bigendian": true,
+        "mixed_unaligned": true,
+        "bytes": 131904,
+        "parity": true,
+        "baseline": {
+          "wall_p50_ms": 80.395144,
+          "wall_p95_ms": 104.142369,
+          "parent_cpu_p50_ms": 14.843366,
+          "cpu_with_worker_kernel_p50_ms": 14.843366
+        },
+        "production": {
+          "wall_p50_ms": 6.463301,
+          "wall_p95_ms": 73.819416,
+          "parent_cpu_p50_ms": 6.194132,
+          "cpu_with_worker_kernel_p50_ms": 6.194132
+        },
+        "compiled_struct": {
+          "wall_p50_ms": 5.801341,
+          "wall_p95_ms": 74.421758,
+          "parent_cpu_p50_ms": 5.742657,
+          "cpu_with_worker_kernel_p50_ms": 5.742657
+        },
+        "numpy_view": {
+          "wall_p50_ms": 5.550838,
+          "wall_p95_ms": 72.113935,
+          "parent_cpu_p50_ms": 5.537842,
+          "cpu_with_worker_kernel_p50_ms": 5.537842
+        },
+        "node_buffer": {
+          "wall_p50_ms": 8.490774,
+          "wall_p95_ms": 93.623792,
+          "parent_cpu_p50_ms": 4.132964,
+          "cpu_with_worker_kernel_p50_ms": 5.694964000000001,
+          "startup_ms": 118.069386,
+          "worker_rss_kib": 42308
+        }
+      }
+    ]
+  },
+  "import_memory": {
+    "baseline_peak_rss_kib": 29312,
+    "with_numpy_peak_rss_kib": 42752,
+    "numpy": "2.3.5"
+  },
+  "superseded_experiments": [
+    {
+      "reason": "Initial sequential windows; Node worker CPU unaccounted; contended wall times. Not decisive.",
+      "report": {
+        "python": "3.13.13",
+        "numpy": "2.3.5",
+        "cases": [
+          {
+            "bigendian": false,
+            "mixed_unaligned": false,
+            "bytes": 131904,
+            "parity": true,
+            "baseline": {
+              "wall_p50_ms": 16.212232,
+              "wall_p95_ms": 187.130816,
+              "parent_cpu_p50_ms": 13.154143
+            },
+            "compiled_struct": {
+              "wall_p50_ms": 8.695097,
+              "wall_p95_ms": 65.699338,
+              "parent_cpu_p50_ms": 7.529138
+            },
+            "numpy_view": {
+              "wall_p50_ms": 9.172236,
+              "wall_p95_ms": 91.687468,
+              "parent_cpu_p50_ms": 8.644593
+            },
+            "node_buffer": {
+              "wall_p50_ms": 75.743971,
+              "wall_p95_ms": 163.227759,
+              "parent_cpu_p50_ms": 6.318125,
+              "startup_ms": 1129.606028,
+              "worker_rss_kib": 42204
+            }
+          },
+          {
+            "bigendian": true,
+            "mixed_unaligned": true,
+            "bytes": 131904,
+            "parity": true,
+            "baseline": {
+              "wall_p50_ms": 79.528452,
+              "wall_p95_ms": 111.117696,
+              "parent_cpu_p50_ms": 19.804105
+            },
+            "compiled_struct": {
+              "wall_p50_ms": 45.065563,
+              "wall_p95_ms": 105.582114,
+              "parent_cpu_p50_ms": 13.7002
+            },
+            "numpy_view": {
+              "wall_p50_ms": 15.261905,
+              "wall_p95_ms": 132.165952,
+              "parent_cpu_p50_ms": 13.392097
+            },
+            "node_buffer": {
+              "wall_p50_ms": 13.557212,
+              "wall_p95_ms": 99.590189,
+              "parent_cpu_p50_ms": 3.362637,
+              "startup_ms": 367.128575,
+              "worker_rss_kib": 42324
+            }
+          }
+        ]
+      }
+    },
+    {
+      "reason": "Rotated comparison; earlier conversion paths. Retained, superseded by final fairer conversion.",
+      "report": {
+        "python": "3.13.13",
+        "numpy": "2.3.5",
+        "node": "v22.23.2",
+        "method": "15 rotated paired samples; worker kernel CPU added to parent CPU, worker pipe I/O CPU excluded",
+        "cases": [
+          {
+            "bigendian": false,
+            "mixed_unaligned": false,
+            "bytes": 131904,
+            "parity": true,
+            "baseline": {
+              "wall_p50_ms": 20.894166,
+              "wall_p95_ms": 100.593664,
+              "parent_cpu_p50_ms": 16.236957,
+              "cpu_with_worker_kernel_p50_ms": 16.236957
+            },
+            "compiled_struct": {
+              "wall_p50_ms": 68.147412,
+              "wall_p95_ms": 83.481007,
+              "parent_cpu_p50_ms": 8.067591,
+              "cpu_with_worker_kernel_p50_ms": 8.067591
+            },
+            "numpy_view": {
+              "wall_p50_ms": 8.589375,
+              "wall_p95_ms": 272.48972,
+              "parent_cpu_p50_ms": 8.573801,
+              "cpu_with_worker_kernel_p50_ms": 8.573801
+            },
+            "node_buffer": {
+              "wall_p50_ms": 20.806755,
+              "wall_p95_ms": 96.550755,
+              "parent_cpu_p50_ms": 4.931625,
+              "cpu_with_worker_kernel_p50_ms": 9.259625,
+              "startup_ms": 172.195529,
+              "worker_rss_kib": 42376
+            }
+          },
+          {
+            "bigendian": true,
+            "mixed_unaligned": true,
+            "bytes": 131904,
+            "parity": true,
+            "baseline": {
+              "wall_p50_ms": 32.526099,
+              "wall_p95_ms": 388.344728,
+              "parent_cpu_p50_ms": 19.937562,
+              "cpu_with_worker_kernel_p50_ms": 19.937562
+            },
+            "compiled_struct": {
+              "wall_p50_ms": 35.985424,
+              "wall_p95_ms": 175.438467,
+              "parent_cpu_p50_ms": 11.134888,
+              "cpu_with_worker_kernel_p50_ms": 11.134888
+            },
+            "numpy_view": {
+              "wall_p50_ms": 13.096751,
+              "wall_p95_ms": 95.614787,
+              "parent_cpu_p50_ms": 11.728107,
+              "cpu_with_worker_kernel_p50_ms": 11.728107
+            },
+            "node_buffer": {
+              "wall_p50_ms": 76.152879,
+              "wall_p95_ms": 183.05232,
+              "parent_cpu_p50_ms": 5.716646,
+              "cpu_with_worker_kernel_p50_ms": 18.159531,
+              "startup_ms": 170.088402,
+              "worker_rss_kib": 42372
+            }
+          }
+        ]
+      }
+    },
+    {
+      "reason": "Production added, before removing NumPy flatten copy and prebinding Node readers. Not final candidate comparison.",
+      "report": {
+        "python": "3.13.13",
+        "numpy": "2.3.5",
+        "node": "v22.23.2",
+        "method": "15 rotated paired samples; worker kernel CPU added to parent CPU, worker pipe I/O CPU excluded",
+        "cases": [
+          {
+            "bigendian": false,
+            "mixed_unaligned": false,
+            "bytes": 131904,
+            "parity": true,
+            "baseline": {
+              "wall_p50_ms": 74.344185,
+              "wall_p95_ms": 102.067592,
+              "parent_cpu_p50_ms": 15.654343,
+              "cpu_with_worker_kernel_p50_ms": 15.654343
+            },
+            "production": {
+              "wall_p50_ms": 6.831306,
+              "wall_p95_ms": 81.558367,
+              "parent_cpu_p50_ms": 6.051626,
+              "cpu_with_worker_kernel_p50_ms": 6.051626
+            },
+            "compiled_struct": {
+              "wall_p50_ms": 8.502569,
+              "wall_p95_ms": 119.677408,
+              "parent_cpu_p50_ms": 7.936606,
+              "cpu_with_worker_kernel_p50_ms": 7.936606
+            },
+            "numpy_view": {
+              "wall_p50_ms": 8.099211,
+              "wall_p95_ms": 84.565688,
+              "parent_cpu_p50_ms": 7.780323,
+              "cpu_with_worker_kernel_p50_ms": 7.780323
+            },
+            "node_buffer": {
+              "wall_p50_ms": 9.200872,
+              "wall_p95_ms": 102.625891,
+              "parent_cpu_p50_ms": 4.003878,
+              "cpu_with_worker_kernel_p50_ms": 7.900062999999999,
+              "startup_ms": 160.931759,
+              "worker_rss_kib": 42308
+            }
+          },
+          {
+            "bigendian": true,
+            "mixed_unaligned": true,
+            "bytes": 131904,
+            "parity": true,
+            "baseline": {
+              "wall_p50_ms": 73.881105,
+              "wall_p95_ms": 87.977843,
+              "parent_cpu_p50_ms": 14.846649,
+              "cpu_with_worker_kernel_p50_ms": 14.846649
+            },
+            "production": {
+              "wall_p50_ms": 9.192059,
+              "wall_p95_ms": 80.860169,
+              "parent_cpu_p50_ms": 6.166249,
+              "cpu_with_worker_kernel_p50_ms": 6.166249
+            },
+            "compiled_struct": {
+              "wall_p50_ms": 9.638688,
+              "wall_p95_ms": 94.294907,
+              "parent_cpu_p50_ms": 8.437484,
+              "cpu_with_worker_kernel_p50_ms": 8.437484
+            },
+            "numpy_view": {
+              "wall_p50_ms": 8.952517,
+              "wall_p95_ms": 88.823737,
+              "parent_cpu_p50_ms": 8.126164,
+              "cpu_with_worker_kernel_p50_ms": 8.126164
+            },
+            "node_buffer": {
+              "wall_p50_ms": 13.977397,
+              "wall_p95_ms": 82.593202,
+              "parent_cpu_p50_ms": 4.39904,
+              "cpu_with_worker_kernel_p50_ms": 10.822773999999999,
+              "startup_ms": 181.911874,
+              "worker_rss_kib": 42312
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "negative_evidence": [
+    "Initial system Python probe failed importing Pydantic before measurements; reran in isolated lane environment.",
+    "NumPy and Node outperform production CPU on the final mixed-width fixture; production outperforms both on float32. No universal performance superiority claimed.",
+    "Production wall p95 remains 73.8\u201380.4 ms on this shared host. No frozen timing gate cleared.",
+    "Historic frozen T10 p95 143.527 ms >100 ms and signed radar startup timeout are not cleared by these checks.",
+    "Java ByteBuffer and Kaitai are source comparisons, not measured prototypes."
+  ],
+  "checks": {
+    "red": "32 samples caused 128 unpack calls; new work-budget regression failed before change.",
+    "focused_tests": "29 passed: packets, replay (including 2000 seeded corruptions), cloud replay v2, cloud inspection.",
+    "installed_wheel": "10 packet tests passed outside source import path.",
+    "lint": "Ruff lint and format passed for production, tests and Python probe.",
+    "security": "Bandit production packets.py: zero findings; bounded offsets, strict schema and exact byte-length checks retained.",
+    "javascript": "node --check passed."
+  },
+  "source_sha256": {
+    "integrations/edge/aethron_edge/sensors/packets.py": "ed6b46b44e9cc93814cd0080e443dbbaf173eaf555f9840904ad361820af1695",
+    "tests/integration/test_sensor_packets.py": "d30c9d9ca7aff298f5ae0442744cc4aea88a2b38363997c4a9aecc99e78cb2a3",
+    "scripts/probes/sensor_packet_audit/compare.py": "4fc4dcfbc46ef170965502f7a7e52462f2f72ef6ce409b782734978bdab1674f",
+    "scripts/probes/sensor_packet_audit/buffer_worker.cjs": "827b7c4fda88ff7b717983eb2309684956f22ba5007a3ce6de2e024cb9bf04fa"
+  },
+  "primary_sources": [
+    "https://docs.python.org/3/library/struct.html#struct.Struct",
+    "https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html",
+    "https://nodejs.org/api/buffer.html",
+    "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/ByteBuffer.html",
+    "https://doc.kaitai.io/user_guide.html"
+  ]
+}

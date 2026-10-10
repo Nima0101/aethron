@@ -1,0 +1,33 @@
+{
+  "review_order_version": 3,
+  "component": "C01_comparison_worker_completion",
+  "decision": "FIX",
+  "full_component_review_complete": false,
+  "reviewed_head": "ac6de2d8c01a69616695f64456dd590cb1bef622",
+  "production_sensor_behavior_changed": false,
+  "checks": {
+    "red_assertion_failures": 3,
+    "red_errors": 0,
+    "new_methods": 2,
+    "green_methods": 18,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "11 unchanged LOW findings across harness and tests",
+    "harness_ast": "Only post-cleanup worker exit admission guard added"
+  },
+  "limitations": [
+    "New report tests use inert fixtures, measurements and worker; no Node or sensor benchmark.",
+    "No historical reports requalified.",
+    "Full technology reassessment incomplete at C01; no runtime decision.",
+    "No hard-real-time, physical or release qualification."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/subprocess.html#subprocess.Popen.returncode"
+  ],
+  "sha256": {
+    "scripts/probes/sensor_packet_audit/compare.py": "92c37e7b7590233ba6738ee057f533f49cbb80e0f1e8acb36c36f37a5608a356",
+    "tests/integration/test_sensor_packet_audit_modes.py": "21012cd73b6143a432bc1eb661c462ea07d4b00f87150a4be6a174ba05d32a4e",
+    "scripts/probes/sensor_packet_audit/README.md": "7a11aad0dab57a1fe9c7f1d0509e1b086995da9f65471a8c2a3a4f5c2304210f",
+    "docs/engineering/aethron-ecosystem/P21-PACKET-EXIT-EVIDENCE-V3.md": "d105ce0d55fc0c46a372a7c15da91b8d509bf4ac592933205132068cfb35c7fb"
+  }
+}

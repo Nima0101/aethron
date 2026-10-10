@@ -1,0 +1,23 @@
+{
+  "review_order_version": 3,
+  "component": "C01_raw_packets",
+  "scope": "qualification and ownership claims only",
+  "decision": "CLARIFY",
+  "component_review_complete": false,
+  "local_head": "c084b37692ed446824b51e0d9e850b05f8e2eac6",
+  "protected_main_observed": "a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46",
+  "production_changed": false,
+  "checks": {
+    "test_command": "PYTHONPATH=integrations/edge:tests/integration python -m unittest test_sensor_packets.SensorPackets.test_images_reject_malformed_or_identity_metadata test_sensor_packets.SensorPackets.test_cloud_rejects_unknown_overlapping_truncated_and_huge_layouts test_sensor_packets.SensorPackets.test_depth_scale_invalid_depth_and_nir_are_distinct",
+    "tests_passed": 3,
+    "new_tests": 0,
+    "new_performance_measurements": false,
+    "hardware_qualification": false
+  },
+  "sha256": {
+    "integrations/edge/aethron_edge/sensors/packets.py": "ed6b46b44e9cc93814cd0080e443dbbaf173eaf555f9840904ad361820af1695",
+    "tests/integration/test_sensor_packets.py": "d30c9d9ca7aff298f5ae0442744cc4aea88a2b38363997c4a9aecc99e78cb2a3",
+    "docs/engineering/aethron-ecosystem/P21-TECHNOLOGY-AUDIT-V2.md": "ae7a5bbeefca07e107766b6bf3ea0db027c19e14635034ddaa0884b565aa29b6",
+    "docs/engineering/aethron-ecosystem/P21-PACKET-CLAIMS-REVIEW-V3.md": "7a17b8266be9552a34555a349aa99974001321671b84a6e3ae822c394ebbc06a"
+  }
+}
