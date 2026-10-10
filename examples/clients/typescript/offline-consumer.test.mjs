@@ -56,11 +56,13 @@ test('offline consumer decision is closed and does not permit qualification exte
  assert.equal(validate({...value,production_qualified:true}),false);assert.equal(validate({...value,c4:{...value.c4,certified:true}}),false);
 });
 
- test('transport and install review uses a closed schema',async()=>{
+for (const name of ['transport-install', 'service-harness']) {
+ test(`${name} review uses a closed schema`,async()=>{
   const {Ajv2020}=await import('ajv/dist/2020.js');
-  const validate=new Ajv2020({strict:true}).compile(read('./transport-install-adr.schema.json'));
-  const value=read('./transport-install-adr.json');
+  const validate=new Ajv2020({strict:true}).compile(read(`./${name}-adr.schema.json`));
+  const value=read(`./${name}-adr.json`);
   assert.equal(validate(value),true,JSON.stringify(validate.errors));
   assert.equal(validate({...value,production_qualified:true}),false);
   assert.equal(validate({...value,c4:{...value.c4,certified:true}}),false);
  });
+}

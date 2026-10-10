@@ -1681,3 +1681,46 @@ polling or merge. This correction still requires its own local bridge commit.
 Next: finish service-harness technology reassessment, then resume the remaining
 P12 display/help review. The full lane audit, producer/consumer SSE byte-boundary
 handoff and P19 installed-product/help gates remain unfinished.
+
+
+### Service-harness reassessment — 2026-10-10
+
+At `1947a1d6d758cd98acb313790b03ae1fd481b3dc`, re-read the early generator/build
+and session admission, then inspected the complete packed-consumer driver,
+controlled rejection tests, producing HTTP fixture and hosted workflow. Verified
+17 prior source hashes, nine report hashes and ten unchanged SDK build outputs.
+
+KEEP Python stdlib orchestration and the shared Node offline adapter under the
+[service-harness ADR](../../../examples/clients/typescript/service-harness-adr.json)
+and closed schema. Compare native Python fixture ownership against Node,
+PowerShell 7 and Dart orchestration; Python directly owns the already-required
+service lifecycle without a new interprocess fixture-control protocol. This is a
+source-based deployment decision with executable contract checks, not a language
+throughput benchmark or a preference based on installed tools.
+
+FIX the count-only result assertion. Seventeen negative child-result cases
+produced 13 failing assertions and four errors before correction. Nine cases
+incorrectly accepted a contradictory/malformed result; the remaining cases
+exposed assertion, type or JSON diagnostics. A duplicate-aware JSON parser and
+explicit exact-field/type/value gate now admit only integer display callback
+counts >=3, UNKNOWN and installed_client true. The gate remains active with
+Python optimization. Invalid results produce invalid_consumer_result, leave no
+success artifact and still tear down the admitted service.
+
+PASS: all 17 controlled harness methods, including the 17-case result regression;
+an additional optimized-interpreter run of that regression; and all 20 Node
+lock/closed-ADR methods. Python compilation and diff checks pass. The service
+fixture is read only in this correction. No SDK runtime, transport bound,
+subprocess timeout or immutable capability threshold changed.
+
+The current interpreter has no httpx/uvicorn/starlette/pydantic; no fresh actual
+production-service execution is claimed. Controlled npm/server substitutions
+verify orchestration and selected actual Node/SDK paths, not physical or installed
+customer acceptance. The report does not authenticate hostile local executables
+or attest every producer/toolchain dependency. Retain the full source/log evidence
+in [this result](evidence/phase3/p33-service-harness-review-v1.json).
+
+Verified bridge commit 1947a1d6 was fast-forward pushed to PR #44. One snapshot
+reported 37 queued, two running, one success and one skipped check; no waiting,
+polling or merge. Next earliest unreviewed component: P12 display presenter/panel,
+then lifecycle and help coverage. Full lane and P19 completion remain unclaimed.

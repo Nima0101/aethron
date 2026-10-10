@@ -340,3 +340,13 @@ received a request; other phases and the direct request control still pass.
 Production source and build outputs remain unchanged by this audit. See the
 [transport/install review](transport-install-adr.json) and its
 [closed schema](transport-install-adr.schema.json).
+
+The service-smoke driver admits a closed child result before publishing evidence:
+an integer display-callback count of at least three, `current_state: UNKNOWN`,
+and `installed_client: true`. Duplicate, missing and extra fields, wrong types
+and malformed JSON produce `invalid_consumer_result`, including with Python
+optimization enabled. Failure still tears down the admitted service and removes
+old success evidence. Counts are display callbacks, not unique events. This
+check does not authenticate a hostile local executable. See the
+[service-harness decision](service-harness-adr.json) and its
+[closed schema](service-harness-adr.schema.json).

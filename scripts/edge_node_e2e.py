@@ -32,6 +32,33 @@ def client_inputs():
     return {path.relative_to(ROOT).as_posix(): digest(path) for path in sorted(paths)}
 
 
+def consumer_result(text):
+    """Admit only the child smoke program's closed result, including under -O."""
+
+    def unique_object(pairs):
+        value = {}
+        for key, item in pairs:
+            if key in value:
+                raise ValueError
+            value[key] = item
+        return value
+
+    try:
+        record = json.loads(text, object_pairs_hook=unique_object)
+        if (
+            not isinstance(record, dict)
+            or set(record) != {"display_callbacks", "current_state", "installed_client"}
+            or type(record["display_callbacks"]) is not int
+            or record["display_callbacks"] < 3
+            or record["current_state"] != "UNKNOWN"
+            or record["installed_client"] is not True
+        ):
+            raise ValueError
+        return record
+    except (ValueError, TypeError, RecursionError):
+        raise ValueError("invalid_consumer_result") from None
+
+
 def run():
     output = ROOT / "build/ecosystem-phase1/node-consumer.json"
     output.unlink(missing_ok=True)
@@ -141,8 +168,7 @@ console.log(JSON.stringify({
                 text=True,
                 timeout=20,
             )
-            record = json.loads(result.stdout)
-            assert record["display_callbacks"] >= 3
+            record = consumer_result(result.stdout)
         finally:
             HTTPService.tearDownClass()
         check_inputs()

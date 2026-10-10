@@ -46,6 +46,7 @@ class NodeConsumerSmoke(unittest.TestCase):
         self.pack_metadata = [{"filename": "test-client-1.0.0.tgz"}]
         self.actions = []
         self.after_install = lambda: None
+        self.consumer_stdout = None
         self.lifecycle = []
         lifecycle = self.lifecycle
 
@@ -99,6 +100,8 @@ class NodeConsumerSmoke(unittest.TestCase):
             self.assertEqual(arguments[0], "node")
             if arguments[1].endswith("offline-consumer.mjs"):
                 self.actions.append("lock")
+            elif self.consumer_stdout is not None:
+                return subprocess.CompletedProcess(arguments, 0, stdout=self.consumer_stdout)
             return RUN(arguments, **kwargs)
 
         with (
@@ -119,6 +122,33 @@ class NodeConsumerSmoke(unittest.TestCase):
         self.assertNotIn("events", record)
         self.assertEqual(record["current_state"], "UNKNOWN")
         self.assertEqual(self.lifecycle, ["start", "stop"])
+
+    def test_invalid_child_result_never_publishes_success(self):
+        valid = {"display_callbacks": 3, "current_state": "UNKNOWN", "installed_client": True}
+        records = [
+            {**valid, "current_state": "PRESENT"},
+            {**valid, "installed_client": False},
+            {**valid, "installed_client": 1},
+            {**valid, "qualified": True},
+            {"display_callbacks": 3},
+            *({**valid, "display_callbacks": count} for count in [2, True, 3.5, 3.0, "3", None]),
+            [], None,
+        ]
+        payloads = [json.dumps(record) for record in records] + [
+            '{"display_callbacks":0,"display_callbacks":3,"current_state":"UNKNOWN","installed_client":true}',
+            '{"display_callbacks":Infinity,"current_state":"UNKNOWN","installed_client":true}',
+            '{"display_callbacks":NaN,"current_state":"UNKNOWN","installed_client":true}',
+            '{"private-marker":',
+        ]
+        for payload in payloads:
+            with self.subTest(payload=payload):
+                self.lifecycle.clear()
+                self.output.write_text('{"old_success":true}')
+                self.consumer_stdout = payload
+                with self.assertRaisesRegex(ValueError, "^invalid_consumer_result$"):
+                    self.invoke(EMIT)
+                self.assertFalse(self.output.exists())
+                self.assertEqual(self.lifecycle, ["start", "stop"])
 
     def test_display_count_is_not_reported_as_events(self):
         self.invoke(EMIT)

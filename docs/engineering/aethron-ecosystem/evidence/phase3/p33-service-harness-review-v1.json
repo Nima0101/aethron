@@ -1,0 +1,93 @@
+{
+  "baseline": "1947a1d6d758cd98acb313790b03ae1fd481b3dc",
+  "component": "P3.3 installed Node consumer service-harness orchestration and report admission",
+  "review_order_version": 3,
+  "audit_complete": false,
+  "decision": "KEEP Python lifecycle orchestration/shared Node adapter; FIX count-only result admission. SDK runtime unchanged.",
+  "adr": "examples/clients/typescript/service-harness-adr.json",
+  "source_sha256": {
+    "scripts/edge_node_e2e.py": "bb7521f4a58d32368671a5628a4a45ad0e19f8c3f1d2c0e5c6c98247b178fbbf",
+    "tests/integration/test_node_consumer_smoke.py": "90331d25a569b68c21df43be14e755c10c3966b599621d75152fd510c1368193",
+    "examples/clients/typescript/README.md": "572870b5d6f5a9a572c4b800403568f8ea869acd3ac1590eb5374ec9bc375edf",
+    "examples/clients/typescript/offline-consumer.test.mjs": "04a589d8893ed09aaabf7d9283b3092dae8c31d0a8b6ce0118b7fe6c1b79be1b",
+    "examples/clients/typescript/service-harness-adr.json": "877bce66b74b1b5c8a83896735dbcd498c4093bc14d12a8ad3b2ee5016f5e666",
+    "examples/clients/typescript/service-harness-adr.schema.json": "f76c10ee9d0f1fa3ece6ace19f52f310ac6535bdaad4356a83cc188a0d59789a",
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "3d553bfdb33e1b7a8c0169228850ccc3401fa99b663f055fb71acd870d26b7ab",
+    "tests/integration/test_edge_http.py": "fbe24603bd55375a5edd05bf6dac40bafa29dc6b78173ccf1f8ffc50f5c19ffb",
+    ".github/workflows/aethron-typescript-client.yml": "4514e589dbdc585d278c208ad37c9802c9da7bb1f02d667046fcdfa9d3778094",
+    "examples/clients/typescript/offline-consumer.mjs": "056a97f71e2b8138765d882426e0ce9c4511e2ff86e80ab3117778321258d359",
+    "examples/clients/typescript/src/client.ts": "2ad3ccf7651ae6dfb7da865b110b0161959878d56d5a64364066a4440ad79bc5",
+    "examples/clients/typescript/package.json": "38b4e8d4b39102063c7e76604938161dbfc08f9045cb581eeb4584fc882c30bf",
+    "examples/clients/typescript/package-lock.json": "e9851168f26e274480aa106a84f447bbd5429cf9c3e8462ec44c58c2158666c1"
+  },
+  "log_directory": "build/p33-sdk-linux",
+  "report_sha256": {
+    "service-result-red.log": "2371975266a0ec2d01baa84b50a59b42d4af771115c244a4320312b7db6b7a8e",
+    "service-result-green.log": "3875a10f10f6b5c6118d50316baebe274d91897bf6fae690c4616c29f1aafd24",
+    "service-result-optimized.log": "763715f9cad11381fd6a82f817b02d13b6dfbcf69853c8e98d88fdecbcf1c32d",
+    "service-harness-adr.log": "b410917d652bdaf9abce87d8fd4e564f9aef6214f0dee6416d99c9ef4e3acaf1",
+    "service-harness-pr44.json": "2a20b97a1d89ea29444c55f15fa4843102bc4d40da8f69109717c9312a8f2bfb",
+    "service-harness-environment.json": "b8dccda544d9bfeec01cf80502afbac08ddc4642248ffb0079fade9336ce3458"
+  },
+  "distribution_sha256": {
+    "examples/clients/typescript/dist/client.d.ts": "af30b39d8e1db5983826abc2a17d3875fa06aaa3dbedb41c25e39e91c691ffc3",
+    "examples/clients/typescript/dist/client.js": "fd1fd0155e3f20d107b2bd039fed69e52507a6a7fca6ca2a07f0b51fbfae62c9",
+    "examples/clients/typescript/dist/scene.schema.json": "39d0180c8c3d8ec0376c029b7e2e2724668343f58d4695d27cd1613bb96b460a",
+    "examples/clients/typescript/dist/session.d.ts": "c371ffcdfef108e3e49ea04fb333c8c18f799eee2aa1cfd51d526ae3a586aa87",
+    "examples/clients/typescript/dist/session.js": "30d353bfb91747d72426b6f47ea148b3d5e92cbe36f2c9b9d510f411d54778db",
+    "examples/clients/typescript/dist/types.d.ts": "acd854e2abeca3ed1c2849e2a5e1d563944c78cdfc33d9ffcd9eafaef0e63338",
+    "examples/clients/typescript/dist/types.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "examples/clients/typescript/dist/validators.cjs": "7046fcbc5f655e1f6768207d366ff0cac69502dd7147457bed0ebe4e512fdec3",
+    "examples/clients/typescript/dist/wire.d.ts": "58023ff80c20e478e5a951255687883542e91e1cccfb7bbcdc8af663fdd5a238",
+    "examples/clients/typescript/dist/wire.js": "55d6ee1a9cc38a898195027880b1752650ae8786af806ea7693f7c13b638940c"
+  },
+  "red": {
+    "command": "python3 -m unittest discover -s tests/integration -p test_node_consumer_smoke.py -k invalid_child_result",
+    "methods": 1,
+    "subcases": 17,
+    "failures": 13,
+    "errors": 4,
+    "incorrectly_accepted_reports": 9,
+    "reason": "Count-only gate accepted contradictory/missing/extra/duplicate fields and numeric forms; other rejected inputs exposed uncontrolled diagnostics."
+  },
+  "checks": {
+    "controlled_harness_methods": 17,
+    "controlled_harness_failures": 0,
+    "new_negative_result_cases": 17,
+    "optimized_regression_methods": 1,
+    "optimized_failures": 0,
+    "node_lock_adr_methods": 20,
+    "node_failures": 0,
+    "node_skips": 0,
+    "python_compile_diff": "PASS",
+    "unchanged_sdk_distribution_files": 10,
+    "previous_source_hashes_verified": 17,
+    "previous_report_hashes_verified": 9,
+    "actual_production_service": "NOT RUN: current interpreter lacks required service modules"
+  },
+  "security_review": [
+    "Closed result keys, integer count excluding bool/float/string, exact UNKNOWN and boolean true; duplicate decoded object keys rejected. Fixed ValueError with suppressed exception chaining.",
+    "Invalid child reports leave no success file and still close the admitted fixture. Existing child exit, source/archive recheck, offline install and lifecycle-script denial remain in force.",
+    "No promise to authenticate hostile local executables, contain descendants or strictly bound captured child output; this is source-controlled CI orchestration.",
+    "Only lane-owned driver/tests/docs changed; peer HTTP service fixture inspected read-only. No credentials/private configuration inspected or service dependencies installed."
+  ],
+  "publication": {
+    "pr": "https://github.com/Nima0101/aethron/pull/44",
+    "published_head": "1947a1d6d758cd98acb313790b03ae1fd481b3dc",
+    "push": "PASS fast-forward previously verified commit",
+    "observed_ci": {
+      "QUEUED": 37,
+      "IN_PROGRESS": 2,
+      "SUCCESS": 1,
+      "SKIPPED": 1
+    },
+    "merge": "Not attempted; pending checks not polled. Current correction not yet committed."
+  },
+  "previous_evidence": "docs/engineering/aethron-ecosystem/evidence/phase3/p33-transport-install-review-v1.json",
+  "next_earliest_unreviewed": "P12 display presenter/panel, then lifecycle and help coverage",
+  "limits": [
+    "Controlled harness tests substitute npm/server fixtures; no fresh production-service run or customer-distribution qualification.",
+    "The actual SDK did not demonstrate contradictory output; this finding concerns harness admission under controlled child-result substitutions.",
+    "Full lane and P19 audit incomplete. No timing, hardware, MLS/CNSA or uptime qualification. Insufficient information for tactical deployment."
+  ]
+}
