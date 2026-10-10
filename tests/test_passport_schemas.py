@@ -35,6 +35,46 @@ def first_case():
 
 @unittest.skipIf(Draft202012Validator is None, "install optional passport conformance requirements")
 class PassportSchemaConformance(unittest.TestCase):
+    def test_payload_structural_uniqueness_does_not_replace_reference_integrity(self):
+        check = validator("passport-v1.schema.json")
+        original = json.loads(
+            json.loads((ROOT / "examples/passports/vectors.json").read_bytes())["canonical_payload"]
+        )
+        original["evidence"] = [
+            {"sha256": digest, "kind": "synthetic", "outcome": "unknown"}
+            for digest in ("a" * 64, "b" * 64)
+        ]
+        original["capabilities"] = [
+            {"name": "evidence.offline.v1", "evidence_sha256": ["a" * 64, "b" * 64]}
+        ]
+        check.validate(original)
+        self.assertEqual(
+            json.loads(passports.canonicalize(json.dumps(original).encode())), original
+        )
+
+        duplicate_name = copy.deepcopy(original)
+        duplicate_name["capabilities"] = [
+            {"name": "evidence.offline.v1", "evidence_sha256": [digest]}
+            for digest in ("a" * 64, "b" * 64)
+        ]
+        duplicate_digest = copy.deepcopy(original)
+        duplicate_digest["evidence"].append(dict(original["evidence"][0], outcome="failed"))
+        missing_reference = copy.deepcopy(original)
+        missing_reference["capabilities"][0]["evidence_sha256"].append("c" * 64)
+        unreferenced_evidence = copy.deepcopy(original)
+        unreferenced_evidence["capabilities"][0]["evidence_sha256"].pop()
+        for name, doc in (
+            ("duplicate capability name", duplicate_name),
+            ("duplicate evidence digest", duplicate_digest),
+            ("missing referenced evidence", missing_reference),
+            ("unreferenced evidence", unreferenced_evidence),
+        ):
+            with self.subTest(case=name):
+                # uniqueItems compares whole objects, not selected fields or joins.
+                check.validate(doc)
+                with self.assertRaisesRegex(ValueError, "^invalid_passport$"):
+                    passports.canonicalize(json.dumps(doc).encode())
+
     def test_runtime_comparison_detects_always_rejecting_verifier(self):
         with patch.object(
             passports,
