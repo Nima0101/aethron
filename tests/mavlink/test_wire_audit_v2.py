@@ -10,7 +10,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 
 class WireAuditTests(unittest.TestCase):
@@ -227,6 +227,48 @@ class WireAuditTests(unittest.TestCase):
             self.assertEqual(report["c"], benchmark)
             self.assertNotIn("failed_stage", report)
             self.assert_source_receipt(report)
+
+    def test_measured_baseline_disagreement_or_exception_fails_and_closes_source(self):
+        cases = self.api.corpus()
+        results = [self.api.python_result(bytes.fromhex(c["hex"])) for c in cases]
+        by_packet = {bytes.fromhex(c["hex"]): result for c, result in zip(cases, results)}
+        accepted = sum(results[i % len(results)]["accepted"] for i in range(512))
+        benchmark = {"samples": 512, "accepted": accepted, "p50_ns": 0, "p95_ns": 0, "max_ns": 0}
+
+        def execute(command, **kwargs):
+            if command[0] == "cc":
+                return "fixture compiler"
+            return json.dumps({"results": results, "benchmark": benchmark})
+
+        for name, value in (
+            ("admission", {"accepted": False}),
+            ("values", dict(results[0], values=[100.0] * 6)),
+            ("exception", RuntimeError("synthetic_baseline_failure")),
+        ):
+            source = Mock()
+            timed = (
+                Mock(side_effect=value)
+                if isinstance(value, Exception)
+                else Mock(return_value=value)
+            )
+            error = RuntimeError if isinstance(value, Exception) else ValueError
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as directory:
+                out = Path(directory) / "attempt"
+                with (
+                    patch("pymavlink.generator.mavgen.mavgen", return_value=True),
+                    patch.object(self.api, "_execute", side_effect=execute),
+                    patch.object(self.api, "python_result", side_effect=by_packet.__getitem__),
+                    patch.object(self.api, "PassiveTelemetry", return_value=source),
+                    patch.object(self.api, "_result", timed),
+                ):
+                    with self.assertRaises(error):
+                        self.api.run(out)
+                source.close.assert_called_once_with()
+                report = json.loads((out / "result.json").read_text())
+                self.assertEqual(report["state"], "failed")
+                self.assertEqual(report["failed_stage"], "baseline")
+                self.assertEqual(report["failure_type"], error.__name__)
+                self.assertNotIn("parity", report)
 
 
 if __name__ == "__main__":

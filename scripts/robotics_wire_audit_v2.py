@@ -261,11 +261,19 @@ def run(out):
         timings, accepted = [], 0
         for index in range(512):
             source = PassiveTelemetry(1, 1, clock=lambda: 1_000_000_000)
-            begin = time.monotonic_ns()
-            result = _result(source, packets[index % len(packets)])
-            timings.append(time.monotonic_ns() - begin)
-            accepted += result["accepted"]
-            source.close()
+            try:
+                begin = time.monotonic_ns()
+                result = _result(source, packets[index % len(packets)])
+                timings.append(time.monotonic_ns() - begin)
+                # Validate each measured observation outside the timed interval.
+                # Initial corpus parity cannot certify later benchmark results.
+                try:
+                    check_parity([expected[index % len(packets)]], [result])
+                except ValueError as error:
+                    raise ValueError("baseline_contract_failed") from error
+                accepted += result["accepted"]
+            finally:
+                source.close()
         timings.sort()
         report.update(
             state="compared",

@@ -376,3 +376,34 @@ binds the document, historical receipt, unchanged production source and this
 review. Historical evidence bytes remain unchanged. This documentation addition
 does not fix clock exception handling, select a production runtime, qualify any
 hardware or complete the earliest component review.
+
+
+## Measured Python baseline validation and cleanup
+
+FIX the offline C comparison's measured reference path. Initial Python corpus
+results were checked, but the 512 subsequent timed results were only counted.
+Controlled changes to admission or numeric values therefore still allowed a
+`compared` receipt. A raised exception also skipped that probe's `close()` call.
+The measured path now applies the existing typed parity comparator after each
+timed observation, and always closes the source in `finally`. Disagreement emits
+a failed baseline receipt; it cannot inherit the earlier corpus's parity result.
+
+This is a correction to an existing offline evidence harness, not a new runtime
+component. The result and owning source are already in this Python process;
+reusing its comparator avoids a second oracle or a cross-runtime conversion that
+could erase type distinctions. The production runtime choice remains pending.
+Python's [cleanup semantics](https://docs.python.org/3/tutorial/errors.html#defining-clean-up-actions)
+provide the required cleanup on normal and exceptional paths. Validation and
+cleanup remain outside the timed interval. That preserves the interval definition,
+not comparability across runs or immunity from host scheduling.
+
+[Source-bound results](../verification/robotics-measured-baseline-review-v3.json)
+retain three RED assertions, 12 passing focused methods, and an actual local
+normal/sanitized C comparison over 17 cases and 512 probes. Regression controls
+use inert candidate outputs and a synthetic reference object to isolate report
+admission and cleanup; the actual compiler run is recorded separately. The raw
+Python maximum of 57,659,283 ns remains in the receipt. This is not a hardware
+latency bound or a fair production-runtime ranking: C still omits the Python
+reference's state and provenance work. Production adapter and C candidate bytes
+are unchanged, the supplied-clock exception gap remains open, and the first
+component review is not complete.
