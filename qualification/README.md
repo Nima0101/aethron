@@ -89,6 +89,8 @@ those references, approve their contents or change campaign qualification flags.
 The [campaign bundle report](campaign-bundle-v1.md) computes both coverage and
 reference matching from raw inputs against one plan. Its software result requires
 both checks; capture artifact verification and physical qualification remain false.
+The [stdin bundle command](campaign-bundle-stream-v1.md) accepts one bounded binary
+frame, preserves original evidence bytes, and emits the same report with exit 0/1/2.
 
 ## Technology decision and execution plan
 
