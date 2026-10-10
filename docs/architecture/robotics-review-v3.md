@@ -869,3 +869,60 @@ and Bandit. The independent native/managed experiments do not inject Python SDK
 exceptions, so their parity results do not prove this newly tested behavior.
 This narrow exception cleanup does not promise atomic handling of every possible
 interruption in ingest, cleanup, transport or caller-owned immutable snapshots.
+
+## Identical runtime input for the native experiment
+
+Review baseline: `5481a767be5a2484f6bf3e54ccee70bad8025890`. The earliest
+passive-wire comparison still had a material asymmetry: Rust received compiled
+fixture constants while Python parsed runtime JSON. The optional
+`robotics_native_audit_v2.py --runtime-input` experiment now supplies identical
+binary stdin bytes to both processes. The original static experiment remains
+available and its historical measurements remain qualified as static-input results.
+
+The format decision is limited to this synthetic experiment. Requirements are
+exact u128 timestamps, an invalid-clock sentinel, opaque packet bytes, no external
+packages, bounded parsing and no execution before complete admission. JSON is
+already exercised by the managed experiment but adds decimal/hex and duplicate-key
+rules to this comparison. [CBOR](https://datatracker.ietf.org/doc/html/rfc8949)
+is a credible standardized alternative with binary values and extended integer
+representations; accepting a broader item grammar is unnecessary for these three
+fixed operations. A versioned fixed-width little-endian envelope makes the audit
+input domain explicit. Python standard-library byte conversion and Rust checked
+slices implement the same grammar; this choice gives neither production language
+a KEEP decision. Rust input reading handles partial reads and interrupted reads
+under its [Read contract](https://doc.rust-lang.org/std/io/trait.Read.html).
+
+The `aethron-audit-v3` grammar is deliberately not a public sensor or SDK protocol:
+
+| Field | Encoding and admission |
+| --- | --- |
+| Magic | Eight bytes `AETHAUD3` |
+| Cases | Little-endian u16, 1–64 |
+| Steps per case | Little-endian u16, 1–64 |
+| Operation per step | u8: 0 ingest, 1 snapshot, 2 close |
+| Clock validity | u8: 0 invalid sentinel, 1 valid |
+| Receipt clock | Little-endian u128; must be zero for invalid sentinel |
+| Packet length | Little-endian u16, 0–320; zero for snapshot/close |
+| Packet | Exactly the specified number of bytes |
+
+Total input is at most 65,536 bytes. Both readers request at most one over-limit
+sentinel byte, and the parent retains its ten-second subprocess timeout. Trailing
+bytes, truncation, unknown tags and out-of-range counts are rejected before any
+receiver runs. Case names are reconstructed by index; decimal leading zeros and
+the two invalid boolean sentinels are normalized without changing observations.
+Rust borrows packet slices from the admitted input; Python reconstructs reference
+operation dictionaries and hex strings. This remaining representation difference,
+full Python SDK/import costs and the native two-layout subset remain part of the
+whole-process comparison, not an isolated decoder benchmark.
+
+The hosted workflow runs four Rust parser tests before the runtime comparison,
+retains the input and parser sources, and binds both new sources in the result
+receipt. Checked and optimized profiles compare against the original reference
+outputs. Python contract tests execute the real reference CLI; harness wiring is
+also checked with explicitly mocked compiler/process results. Mocked tests are
+not evidence of Rust compilation or output parity.
+
+[Current evidence](../verification/robotics-runtime-input-v3.json) preserves the
+local missing-compiler failure. No runtime-fed native measurements are claimed.
+Production adapters are unchanged. The audit cursor remains at passive wire;
+signing/replay is the next later unreviewed component.

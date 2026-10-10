@@ -115,14 +115,18 @@ def decode_candidate(raw):
     )
 
 
-def child(command, cases, out, label):
+def child(command, cases, out, label, *, input_bytes=None):
     completed, elapsed = retained_process(
-        command, out, label, timeout=10, input_bytes=json.dumps(cases).encode("utf-8")
+        command,
+        out,
+        label,
+        timeout=10,
+        input_bytes=json.dumps(cases).encode("utf-8") if input_bytes is None else input_bytes,
     )
     return decode_candidate(completed.stdout), elapsed
 
 
-def run(out, *, compiler="rustc"):
+def run(out, *, compiler="rustc", runtime_input=False):
     out.mkdir(parents=True, exist_ok=False)
     report = {
         "audit_policy_version": 3,
@@ -147,8 +151,32 @@ def run(out, *, compiler="rustc"):
                 "scripts/robotics_wire_audit_v2.py",
             )
         }
+        input_bytes = None
+        runtime_flags = []
+        reference_path = ROOT / "scripts/robotics_lifecycle_audit_v2.py"
         api = lifecycle_api()
         cases = corpus()
+        if runtime_input:
+            reference_path = ROOT / "scripts/robotics_runtime_input_v3.py"
+            spec = importlib.util.spec_from_file_location("runtime_input", reference_path)
+            codec = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(codec)
+            input_bytes = codec.encode(cases)
+            (out / "runtime-input.bin").write_bytes(input_bytes)
+            runtime_flags = ["--cfg", "runtime_input"]
+            shutil.copyfile(DRIVER.with_name("runtime_input_v3.rs"), out / "runtime_input_v3.rs")
+            report.update(
+                report_schema_version=3,
+                input_format="aethron-audit-v3",
+                input_sha256=hashlib.sha256(input_bytes).hexdigest(),
+            )
+            for path in (
+                "scripts/robotics_runtime_input_v3.py",
+                "tests/mavlink/audit_v2/runtime_input_v3.rs",
+            ):
+                report["source_sha256"][path] = hashlib.sha256(
+                    (ROOT / path).read_bytes()
+                ).hexdigest()
         fixture = fixture_source(cases)
         (out / "native-fixture.rs").write_text(fixture)
         shutil.copyfile(DRIVER, out / "native.rs")
@@ -158,6 +186,25 @@ def run(out, *, compiler="rustc"):
             [compiler, "--version", "--verbose"], out, "compiler-version", timeout=10
         )
         report["compiler"] = version.stdout.decode("utf-8").strip()
+        if runtime_input:
+            test_binary = out.resolve() / "runtime-input-tests"
+            retained_process(
+                [
+                    compiler,
+                    "--edition=2021",
+                    "-Dwarnings",
+                    *runtime_flags,
+                    "--test",
+                    str(out / "native.rs"),
+                    "-o",
+                    str(test_binary),
+                ],
+                out,
+                "runtime-input-test-compiler",
+                timeout=30,
+            )
+            retained_process([str(test_binary)], out, "runtime-input-tests", timeout=10)
+            report["runtime_input_tests_passed"] = True
         expected = api.reference(cases)
         (out / "expected.json").write_text(json.dumps(expected, indent=2) + "\n")
         report.update(cases=len(cases), steps=sum(len(c["steps"]) for c in cases), runs=[])
@@ -172,6 +219,7 @@ def run(out, *, compiler="rustc"):
                     "--edition=2021",
                     "-Dwarnings",
                     *flags,
+                    *runtime_flags,
                     str(out / "native.rs"),
                     "-o",
                     str(binary),
@@ -189,7 +237,7 @@ def run(out, *, compiler="rustc"):
                         "python",
                         [
                             sys.executable,
-                            str(ROOT / "scripts/robotics_lifecycle_audit_v2.py"),
+                            str(reference_path),
                             "--reference",
                         ],
                     ),
@@ -201,7 +249,10 @@ def run(out, *, compiler="rustc"):
                         # is not evidence of non-execution; preserve earlier confirmation.
                         if report["native_executed"] is False:
                             report["native_executed"] = None
-                    result, elapsed = child(command, cases, out, f"{profile}-{repeat}-{name}")
+                    options = {"input_bytes": input_bytes} if runtime_input else {}
+                    result, elapsed = child(
+                        command, cases, out, f"{profile}-{repeat}-{name}", **options
+                    )
                     if name == "rust":
                         report["native_executed"] = True
                     api.check_measurement(result, runtime=name == "python")
@@ -212,7 +263,11 @@ def run(out, *, compiler="rustc"):
             parity=True,
             limitations=[
                 "Original Rust strict subset, not rust-mavlink SDK qualification",
-                "Static input constants omit candidate input JSON parsing; Python consumes JSON",
+                (
+                    "Both candidates consume the same bounded versioned binary input at runtime"
+                    if runtime_input
+                    else "Static input constants omit candidate input JSON parsing; Python consumes JSON"
+                ),
                 "Python includes pymavlink and corpus encoder import; native uses two layouts",
                 "Finite corpus only; native clock domain u128, Python integers are unbounded",
                 "Linux VmHWM versus Python getrusage RSS; shared scheduling and warm caches",
@@ -232,4 +287,6 @@ def run(out, *, compiler="rustc"):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", required=True, type=Path)
-    print(json.dumps(run(parser.parse_args().out), indent=2))
+    parser.add_argument("--runtime-input", action="store_true")
+    args = parser.parse_args()
+    print(json.dumps(run(args.out, runtime_input=args.runtime_input), indent=2))

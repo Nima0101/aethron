@@ -9,13 +9,16 @@ struct Sample {
     receive: u128,
 }
 
-struct Step {
+struct Step<'a> {
     op: u8,
     now: Option<u128>,
-    packet: &'static [u8],
+    packet: &'a [u8],
 }
 
+#[cfg(not(runtime_input))]
 include!("native-fixture.rs");
+#[cfg(runtime_input)]
+mod runtime_input_v3;
 
 struct Receiver {
     last: Option<u128>,
@@ -154,8 +157,16 @@ impl Receiver {
 }
 
 fn main() {
-    let mut results = Vec::with_capacity(CASES.len());
-    for steps in CASES {
+    #[cfg(runtime_input)]
+    let raw = runtime_input_v3::read(std::io::stdin().lock()).expect("bounded audit input");
+    #[cfg(runtime_input)]
+    let parsed = runtime_input_v3::parse(&raw).expect("valid audit input");
+    #[cfg(runtime_input)]
+    let cases: Vec<&[Step<'_>]> = parsed.iter().map(Vec::as_slice).collect();
+    #[cfg(not(runtime_input))]
+    let cases = CASES;
+    let mut results = Vec::with_capacity(cases.len());
+    for steps in cases.iter() {
         let mut receiver = Receiver::new();
         let mut outputs = Vec::with_capacity(steps.len());
         for step in *steps {
