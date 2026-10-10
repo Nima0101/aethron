@@ -18,7 +18,7 @@ class FleetClaimTests(unittest.TestCase):
 
     def setUp(self):
         fixtures.FleetPlanTests.setUp(self)
-        samples = iter((1000, 1001, 1002))
+        samples = iter((1000, 1001, 1002, 1002))
         self.plan = fleet_plan.create_rollout_plan(
             self.bundle,
             self.public,
@@ -152,7 +152,7 @@ class FleetClaimTests(unittest.TestCase):
 
     def test_signed_provisioning_permission_allows_only_a_synthetic_reservation(self):
         self.resign_policy(allow_initial_provisioning=True)
-        samples = iter((1003, 1004, 1005))
+        samples = iter((1003, 1004, 1005, 1005))
         self.plan = fleet_plan.create_rollout_plan(
             self.bundle,
             self.public,

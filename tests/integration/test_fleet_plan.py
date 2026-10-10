@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import json
 import unittest
+from contextlib import contextmanager
 from unittest.mock import patch
 
 import test_fleet_policy as fixtures
@@ -44,7 +45,7 @@ class FleetPlanTests(unittest.TestCase):
 
         return fleet_plan
 
-    def create(self, times=(1000, 1001, 1002)):
+    def create(self, times=(1000, 1001, 1002, 1003)):
         samples = iter(times)
         return self.module().create_rollout_plan(
             self.bundle,
@@ -116,6 +117,93 @@ class FleetPlanTests(unittest.TestCase):
         self.reject((1998, 1999, 2000))
         self.assertFalse(self.journal.exists())
         self.assertEqual(self.store.read(), FleetFloors(3, 1999))
+
+    def test_expiry_after_journal_commit_preserves_both_stores(self):
+        self.reject((1997, 1998, 1999, 2000))
+        snapshot = self.module().RolloutJournal(self.journal).snapshot()
+        self.assertEqual((snapshot.revision, snapshot.last_time_s), (0, 1999))
+        self.assertEqual(snapshot.states, ("pending",) * 10)
+        self.assertEqual(self.store.read(), FleetFloors(3, 1998))
+
+    def test_final_clock_is_checked_after_journal_is_reopenable(self):
+        samples = iter((1000, 1001, 1002, 1999))
+        observed = []
+
+        def clock():
+            value = next(samples)
+            observed.append(self.journal.exists())
+            if value == 1999:
+                self.assertEqual(self.module().RolloutJournal(self.journal).snapshot().revision, 0)
+            return value
+
+        self.module().create_rollout_plan(
+            self.bundle,
+            self.public,
+            journal_path=self.journal,
+            floor_store=self.store,
+            clock=clock,
+        )
+        self.assertEqual(observed, [False, False, False, True])
+
+    def test_invalid_or_backward_final_time_preserves_created_journal(self):
+        for index, bad in enumerate((True, 1003.0, None, -1, 2**53, 1001)):
+            with self.subTest(time=bad):
+                self.journal = self.root / f"late-{index}.db"
+                self.reject((1001, 1001, 1002, bad))
+                self.assertEqual(self.module().RolloutJournal(self.journal).snapshot().revision, 0)
+                self.assertEqual(self.store.read(), FleetFloors(3, 1001))
+
+    def test_final_clock_failure_does_not_remove_committed_journal(self):
+        self.reject((1000, 1001, 1002))
+        self.assertEqual(self.module().RolloutJournal(self.journal).snapshot().revision, 0)
+
+    def test_source_size_changes_after_open_reject_before_durable_changes(self):
+        module = self.module()
+        original = module.regular_reader
+        artifact = self.bundle / "fleet-artifact.bin"
+        for changed in (b"", self.artifact + b"growth"):
+            with self.subTest(size=len(changed)):
+                artifact.write_bytes(self.artifact)
+
+                @contextmanager
+                def changing_reader(path, limit, *, replacement=changed):
+                    with original(path, limit) as opened:
+                        if path == artifact:
+                            artifact.write_bytes(replacement)
+                        yield opened
+
+                with patch.object(module, "regular_reader", changing_reader):
+                    self.reject()
+                self.assertFalse(self.journal.exists())
+                self.assertEqual(self.store.read(), FleetFloors(1, 900))
+
+    def test_snapshot_streaming_bounds_and_exact_copy_hash(self):
+        module = self.module()
+        original = module.regular_reader
+        artifact = self.bundle / "fleet-artifact.bin"
+        payload = b"x" * (3 * 65536 + 17)
+        artifact.write_bytes(payload)
+        snapshot = self.root / "snapshot"
+        snapshot.mkdir()
+        requests = []
+
+        @contextmanager
+        def observing_reader(path, limit):
+            with original(path, limit) as (stream, size):
+
+                class Observed:
+                    def read(self, count):
+                        if path == artifact:
+                            requests.append(count)
+                        return stream.read(count)
+
+                yield Observed(), size
+
+        with patch.object(module, "regular_reader", observing_reader):
+            pins = module._copy_snapshot(self.bundle, snapshot)
+        self.assertEqual(requests, [65536, 65536, 65536, 17, 1])
+        self.assertEqual((snapshot / artifact.name).read_bytes(), payload)
+        self.assertEqual(pins[artifact.name], hashlib.sha256(payload).hexdigest())
 
     def test_floor_commit_failure_cannot_publish_journal(self):
         with patch.object(self.store, "advance", side_effect=ValueError("injected")):

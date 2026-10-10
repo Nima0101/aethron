@@ -1,5 +1,10 @@
 # Authenticated rollout plan binding v1
 
+The [technology audit v2](fleet-plan-technology-audit-v2.md) supersedes the initial
+technology rationale and adds a trusted-time check after journal initialization.
+Late rejection preserves both committed stores; it never deletes the journal to
+make a retry succeed. The public API, signed format and size/time limits remain.
+
 ## Requirements and technology decision (2026-10-10)
 
 Bind signed policy fields and exact software artifact bytes to journal pins, with

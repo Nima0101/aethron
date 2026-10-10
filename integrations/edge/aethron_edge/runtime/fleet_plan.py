@@ -83,7 +83,7 @@ def create_rollout_plan(
         # private copy was evidence for pins, not a retained deployment payload.
         floor_store.advance(minimum_version=policy.bundle_version, minimum_time_s=verified_at)
         created_at = _time(clock(), verified_at, policy.expires_unix_s - 1)
-        return RolloutJournal.initialize(
+        journal = RolloutJournal.initialize(
             journal_path,
             policy_sha256=pins["fleet-policy.json"],
             artifact_sha256=pins["fleet-artifact.bin"],
@@ -94,6 +94,10 @@ def create_rollout_plan(
             expires_unix_s=policy.expires_unix_s,
             now_unix_s=created_at,
         )
+        # Journal creation may block past expiry. Preserve both durable stores
+        # on late rejection; the caller must reconcile the existing journal.
+        _time(clock(), created_at, policy.expires_unix_s - 1)
+        return journal
     except (OSError, ValueError, TypeError, RuntimeError, StopIteration):
         raise ValueError("invalid_fleet_plan") from None
 

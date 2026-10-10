@@ -1,0 +1,61 @@
+{
+  "audit_policy_version": 2,
+  "component": "authenticated bounded snapshot plan creation",
+  "subject_parent": "9d8dc10f0bbd9b6dbd8ca7e0bf2a620123af788c",
+  "decision": "KEEP bounded synchronous streaming and native hashing; add post-journal-commit trusted-time validation",
+  "required_language_migrations": [],
+  "source_sha256": {
+    "integrations/edge/aethron_edge/runtime/fleet_plan.py": "33078d619070e9407b39f150684ce536f9055b919a98f7fabb6d3ee4f2417911",
+    "tests/integration/test_fleet_plan.py": "adcbf642b830922fafcd043c573547c23e27be413f631532c1f4052552bd945b",
+    "tests/integration/test_fleet_claim.py": "23ed63edd72d105c32b65f09a1bd174206591f968d1541f080c82eeffeea098e"
+  },
+  "environment": {
+    "python": "3.13.5",
+    "os": "Linux"
+  },
+  "red": {
+    "plan_methods_run": 15,
+    "failures": 9,
+    "cases": [
+      "Final expiry ignored",
+      "Clock exhaustion ignored",
+      "Only three pre-journal time observations",
+      "Six malformed/backward final samples ignored"
+    ]
+  },
+  "green": {
+    "plan_claim_methods": 26,
+    "streaming_payload_bytes": 196625,
+    "artifact_read_requests": [
+      65536,
+      65536,
+      65536,
+      17,
+      1
+    ],
+    "copy_hash_and_bytes": "MATCH",
+    "source_mutation_after_open": [
+      "truncation rejected before floor/journal changes",
+      "growth rejected before floor/journal changes"
+    ],
+    "journal_exists_at_time_samples": [
+      false,
+      false,
+      false,
+      true
+    ],
+    "late_rejection": "Committed floors and pending journal retained",
+    "ruff_format_bandit": "PASS"
+  },
+  "retained_negative_evidence": [
+    "First affected-suite run had one claim fixture with only three clock samples; updated to four, leaving claim operation times unchanged.",
+    "Initial Ruff B023 mutation-fixture capture corrected without suppression."
+  ],
+  "reproduction": "PYTHONPATH=integrations/edge:build/fleet-linux-deps:tests/integration python3 -W error::ResourceWarning -m unittest test_fleet_plan test_fleet_claim -q",
+  "limits": [
+    "No atomic cross-file commit or immutable-source-directory claim.",
+    "Final sample checked but not persisted; return can be delayed afterward.",
+    "No candidate throughput benchmark, hardware or power-loss qualification.",
+    "No full matrix, full fuzz, local Docker/VM or clean clone."
+  ]
+}
