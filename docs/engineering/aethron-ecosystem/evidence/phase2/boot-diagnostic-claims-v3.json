@@ -1,0 +1,37 @@
+{
+  "review_order_version": 3,
+  "component": "C09_boot_sensor_diagnostic_claims",
+  "decision": "CLARIFY",
+  "full_component_review_complete": false,
+  "reviewed_head": "8e1228b0841ca3a97816f31deb048e1512620e83",
+  "runtime_changed": false,
+  "checks": {
+    "new_methods_before_documentation": 2,
+    "focused_methods_after": 7,
+    "errors": 0,
+    "skips": 0,
+    "runtime_ast_excluding_docstring": "UNCHANGED",
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS, zero findings",
+    "diff_check": "PASS"
+  },
+  "negative_evidence": [
+    "No RED code regression is claimed; new tests document existing behavior.",
+    "Recent activity remains true after fault/stall/invalid sample until its window expires.",
+    "Recovery and update flags survive activity expiry.",
+    "Historical missing-processing source-run assertion remains unexplained."
+  ],
+  "limitations": [
+    "No VM, boot, installed package, worker or device execution.",
+    "Trusted status and monotonic common-domain host clock assumed.",
+    "No continuous availability, current health or hardware qualification.",
+    "No production technology decision or complete V3 audit."
+  ],
+  "sha256": {
+    "packaging/appliance/image/sensor_probe.py": "2863bfd65a732f13a3cb7f088b824edbdc14ffa3ced5f477eb9d9761a23c5ead",
+    "tests/integration/test_boot_sensor_evidence.py": "e0c4a1fe0b29cbb17637ca4a2f007d2399b96ca5460c4747fe8c0fc135ff2c87",
+    "docs/engineering/aethron-ecosystem/SENSOR-APPLIANCE.md": "9e07fb94c53b5a536a1a8a4bc0a9bc2a4322a48c3fe5dfcaa18ed486c35d1d3e",
+    "docs/engineering/aethron-ecosystem/P21-BOOT-DIAGNOSTIC-CLAIMS-V3.md": "b978c93abcfa7b4ef805c1ded83042f2b7a831146daba0d2bc4e85aa1f0aa063"
+  }
+}
