@@ -1,0 +1,102 @@
+{
+  "baseline": "ac9fa6984d915f06b775d51b81c2f049ea01f360",
+  "component": "P3.3 wire/session byte admission",
+  "review_order_version": 3,
+  "audit_complete": false,
+  "decision": "KEEP TypeScript/native host primitives; add independently falsifiable session boundary evidence. No production defect demonstrated.",
+  "adr": "examples/clients/typescript/session-boundary-adr.json",
+  "source_sha256": {
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "7c706f9735a8cd9469b11590bcf6499d7465c62867409eab3bf107721948f08f",
+    "examples/clients/typescript/README.md": "ed83e98428b3fdaeefc031d2f94b45f2aea2f1414da630349500448ef84c1da3",
+    "examples/clients/typescript/session-boundary.test.mjs": "b6c87808e2ba55ddc1d865ee16690caa37db8c18259b7573425766825f55fb3c",
+    "examples/clients/typescript/audit-session-boundary.mjs": "897c9a0d4094598a9546eb78f958ab3f1069a53e2e7c60412a88831f0d121341",
+    "examples/clients/typescript/session-boundary-adr.json": "659fae94c966b0b87ea677aedd59899e75ce9c8b16826d45c58cf9835cf03bd6",
+    "examples/clients/typescript/session-boundary-adr.schema.json": "e481bf794c3cf6c298d5eb99b3e0bd885cc36e2536781c6a7a1fd6b57254a111",
+    "examples/clients/typescript/generation.test.mjs": "c4e5ca785bca8018bf66dcafc24054ba9479da42da4ee93e1142797181425c5a",
+    "examples/clients/typescript/package.json": "f617baf54f7f6cf1420e5aac0ac285289ae2e39b0825253cc44f89f340e73a98",
+    "examples/clients/typescript/package-lock.json": "e9851168f26e274480aa106a84f447bbd5429cf9c3e8462ec44c58c2158666c1",
+    "examples/clients/typescript/src/wire.ts": "47891df5be59e1df0537faae87020a98e31f52b5659e8d8ff481434a2faa6a26",
+    "examples/clients/typescript/src/session.ts": "17cabbb49e597f78aa0b41ddd00fad91391e5b108de14652f91129429da56155",
+    "examples/clients/typescript/src/client.ts": "2ad3ccf7651ae6dfb7da865b110b0161959878d56d5a64364066a4440ad79bc5",
+    "examples/clients/typescript/generate-contract.mjs": "b551440c98e5c0f12a2c776e2474f78558c2cfdb2489f59c314954c88c9679d2",
+    "examples/clients/typescript/generate-validators.mjs": "e989f6fb25921f3ce3be7a2a58a5e44b2377d16a5f1ea0a0871d7d04380b051a",
+    "examples/clients/typescript/build.mjs": "3fef76ca0da3993a7e9d79eedc0d52d8ab4c51a8c9bc773ee689fc48790867e2",
+    "examples/clients/typescript/transport.test.mjs": "9e3a1089d907904ac2af575e454a33924546fe87968d4de140f345cbc4b1cd15",
+    "examples/clients/typescript/numeric.test.mjs": "10a66171cc7ca49641e09b28b6ba52cc3ad42b05d3379c585928ac08df880895",
+    "examples/clients/typescript/session.test.mjs": "448c00e8e65b70e17ee6f14a02bbeb0436da8e3ec2c217b41f6a1de94d9d2776",
+    "examples/clients/typescript/wire.test.mjs": "001e55f149ea79574d474d945a35b9bad591f6c796d77da09bdfb96956390b67",
+    "contracts/openapi/aethron-edge-v1.json": "4d562382b803e59dac1ab24a7ead52cd2cdbbc9533aa6d9dc68fca9f6e9b0b83"
+  },
+  "log_directory": "build/p33-sdk-linux",
+  "report_sha256": {
+    "session-boundary-baseline.log": "1949faef7b3f071fe9fb7170e74e9a4a3cf70e8fc99fcabce46f9c5183ee27c4",
+    "session-boundary-mutations.log": "36c4a308a57e3fe1389b413050c5d984d0369cff471c64b85c3634402bb15f33",
+    "session-review-build.log": "81878ace1c27df5627af8b2af71b8ad4f9de0585c11ea6dddb4398605cfcffe4",
+    "session-review-build-retry.log": "81878ace1c27df5627af8b2af71b8ad4f9de0585c11ea6dddb4398605cfcffe4",
+    "session-review-build-diagnostic.log": "6d42f2f3f7b68f5cfc04619dad5798f3e592cbd84e906b44f1b6e1a0a54fa5fd",
+    "session-review-focused.log": "2517e01d30f0fd73f9ba5ce9bd3aeb48d4e017a93dad371c4cbdccddafc89c16",
+    "session-review-mutations.log": "c28bc6eb944cc2803e3b6223f135bfa008f1af3885de48049d7c3093148ad86a",
+    "session-review-types.log": "09bed08b0097b741cf6e066ffc9f4450002fd80dea7afd73cd195017c9513e43",
+    "session-review-package.log": "b12ab8b7f4c7dca4ccdc0ab8484c753e634b3365019704e2d99d5751afc2db8e",
+    "session-review-package-cache.log": "2c68b8ee197a9358c92e4303ed5126727cddaacaf93a2b2ad9b810c714b5814b",
+    "session-review-pr44.json": "aad7c800fd8cb73a2bc7c585990efedb7be15ac04b8c3408e85012813f094d6e"
+  },
+  "checks": {
+    "baseline_session_tests": 9,
+    "focused_tests": 126,
+    "package_tests": 3,
+    "failures": 0,
+    "skips": 0,
+    "types": "PASS",
+    "syntax_diff": "PASS",
+    "mutation_methods": 18,
+    "expected_mutation_failures": 6,
+    "mutants_rejected": 2,
+    "distribution_files_byte_identical": 10,
+    "previous_commit_source_hashes_verified": 22,
+    "previous_report_hashes_verified": 8
+  },
+  "build": {
+    "initial": "FAIL client_build_failed; stage cause not recorded",
+    "retry": "FAIL client_build_failed; unchanged limits; stage cause not recorded",
+    "diagnostic": "PASS same wrapper; unchanged 30000 ms stage timeout; tsc 23606.739974 ms",
+    "interpretation": "Host observation only; initial failure causes not established"
+  },
+  "packaging": {
+    "initial": "FAIL: default npm cache outside writable workspace; pack failed before consumer install",
+    "corrected": "PASS: explicit existing writable lane cache; archive-only offline install, public declarations, runtime consumer, uninstall and reinstall"
+  },
+  "security_review": [
+    "Fixed bounded buffer and fatal UTF-8 preserved; malformed-byte profile cannot become authorized through decoder replacement.",
+    "Mutation runner uses local copied compiled code and fixed process arguments with shell:false and a 10000 ms timeout. No network or source edits; temporary test files removed in finally.",
+    "Packed allowlist excludes new audit and ADR files; no credentials or prohibited data in fixtures."
+  ],
+  "publication": {
+    "pr": "https://github.com/Nima0101/aethron/pull/44",
+    "head": "ba2f8885b4bbb6844c6b462527b99066c70921b5",
+    "failures": [
+      {
+        "name": "vision",
+        "url": "https://github.com/Nima0101/aethron/actions/runs/38077908761/job/114288651179"
+      },
+      {
+        "name": "vision",
+        "url": "https://github.com/Nima0101/aethron/actions/runs/38077905433/job/114288641050"
+      }
+    ],
+    "queued": 10,
+    "polling": false,
+    "pushed_this_turn": false
+  },
+  "origin_main": {
+    "stored_head": "fce89d3904ddbfb004b55718fab955c91a9c49a0",
+    "fetch": "FAIL read-only FETCH_HEAD; no workaround"
+  },
+  "previous_evidence": "docs/engineering/aethron-ecosystem/evidence/phase3/p33-build-lifecycle-v1.json",
+  "next": "Session cancellation and observation lifecycle, then remaining P12 client/UI/help components",
+  "limits": [
+    "No whole-lane audit completion; no full repository matrix, fuzz, clean clone, browser, Windows or hardware qualification this turn.",
+    "SSE payload-only versus complete-event cap remains a rejected fixture and producer-owned contract handoff.",
+    "No signed release, MLS/CNSA qualification, hard-real-time, availability or tactical-deployment claim."
+  ]
+}

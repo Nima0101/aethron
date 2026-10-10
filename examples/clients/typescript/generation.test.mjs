@@ -158,3 +158,13 @@ test('build lifecycle decision is closed and component-scoped', async () => {
   assert.equal(validate({...decision, production_qualified: true}), false);
   assert.equal(validate({...decision, c4: {...decision.c4, certified: true}}), false);
 });
+
+test('session boundary decision rejects unsupported qualification fields', async () => {
+  const {Ajv2020} = await import('ajv/dist/2020.js');
+  const read = name => JSON.parse(readFileSync(new URL(name, import.meta.url)));
+  const validate = new Ajv2020({strict: true}).compile(read('./session-boundary-adr.schema.json'));
+  const decision = read('./session-boundary-adr.json');
+  assert.equal(validate(decision), true, JSON.stringify(validate.errors));
+  assert.equal(validate({...decision, production_qualified: true}), false);
+  assert.equal(validate({...decision, c4: {...decision.c4, certified: true}}), false);
+});

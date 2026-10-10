@@ -1564,3 +1564,44 @@ checks compare every emitted file with the current successful distribution.
 An initial npm exec invocation tried offline Node resolution before running tests;
 that negative tooling result is retained separately from the real regressions.
 Next earliest review: wire/session admission and observation lifecycle.
+
+
+## Fresh wire/session byte-admission review
+
+Baseline `ac9fa6984d915f06b775d51b81c2f049ea01f360`. Re-read the earliest
+contract generator, validator builder and build wrapper before reviewing wire
+and session admission. The preceding bridge commit matches all 22 recorded
+source hashes and eight retained report hashes. Native session accumulation and
+wire parsing preserve bounded bytes, duplicate-key rejection, strict UTF-8 and
+fixed errors. The producer JSON-only cap versus consumer complete-event cap
+remains a rejected interoperability fixture and producer handoff.
+
+No production admission defect was demonstrated. Added nine independent session
+regressions covering exact fragmented multibyte byte limits, malformed scalars
+whose replacement text would match the requested profile, valid Unicode without
+normalization, reader release and transport failure after an otherwise valid
+JSON prefix. All nine pass on the baseline. A reproducible copied-module mutation
+driver rejects nonfatal decoding (five expected failures) and a one-byte cap
+increase (one expected failure); it never changes production source or dist.
+
+[Closed component decision](../../../examples/clients/typescript/session-boundary-adr.json)
+compares TypeScript, plain ECMAScript, ReScript and Rust/WebAssembly using current
+primary sources, with four C4 views. KEEP TypeScript and native host byte/stream
+primitives: alternatives do not remove the host admission boundary, and no
+measured throughput or native-core requirement establishes a migration benefit.
+Static types do not enforce runtime security. No alternate-runtime benchmark,
+full memory bound, hard real-time or browser/device qualification is claimed.
+
+The initial package rebuild and one unchanged retry failed with
+`client_build_failed` before the focused suite. Their stage cause is absent from
+the logs; both failures are retained. A diagnostic invocation of the same wrapper
+passed all three stages with unchanged limits (compiler: about 23.6 seconds).
+The resulting ten distribution files match the preceding verified build bytes.
+All 126 focused tests and public type checks pass. The first packaging invocation
+used the read-only default npm cache and failed; the corrected invocation uses
+the existing writable lane cache. All three packaging checks then pass. See [byte-bound evidence](evidence/phase3/p33-session-boundary-v1.json)
+for the final checks and retry outcome. No threshold was changed. Fetching main
+was also refused by read-only Git metadata; the stored origin/main snapshot is
+not a freshly fetched head. Next earliest review is session cancellation and
+observation lifecycle, before remaining P12/UI/help work. No lane-completion
+marker is created.

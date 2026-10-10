@@ -312,3 +312,11 @@ only its own `validators.cjs` output on handled read/compile/write failure.
 failure with small local fixtures and verifies byte-identical recovery. It links
 the installed toolchain and does not install dependencies or clone the repository.
 See the [build lifecycle decision](build-lifecycle-adr.json).
+
+The [session boundary review](session-boundary-adr.json) keeps the current runtime
+admission after checking fragmented multibyte bodies, malformed UTF-8, exact byte
+limits, profile normalization differences and a read failure after valid JSON.
+`npm run audit:session` proves the regression corpus rejects copied modules with
+nonfatal decoding or an increased byte limit. It never edits source or `dist`.
+These checks establish local rejection behavior, not total transport-memory,
+deadline, platform or customer-release qualification.
