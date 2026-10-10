@@ -577,3 +577,43 @@ fix. The nested isolated fresh-process replay test also passed. No test was skip
 or weakened. The exact runner, source/wheel/log hashes and environment limitations
 are retained. This is bounded verification of the existing fix, not a new component,
 a production runtime decision, or full package/product qualification.
+
+## Retain completed managed measurements when a later attempt fails
+
+FIX the managed comparison receipt. Previously `runs` was attached to the final
+report only after all six child processes succeeded. A failure in a later child
+therefore discarded earlier validated timing/RSS metadata, including any slow
+observation. Raw stdout/stderr survived, but parent-measured durations were not
+recoverable from those logs. The report now owns the run list from initialization
+and each pair before either child starts. Only results that pass metadata and
+parity checks enter the pair. A partial pair is not a completed comparison:
+`state` remains `failed`, `failed_attempt` identifies the failing child and no
+overall `parity` success is emitted. Successful receipt fields remain unchanged.
+Historical receipts are not rewritten. This is retention on handled failure or
+normal Python unwinding, not crash-durable checkpointing or guaranteed recovery
+after process termination, disk failure or power loss.
+
+This is a correction in the parent that measures subprocess time, not a new
+decoder or a production-language KEEP decision. Native or managed child code
+cannot recover that parent's discarded measurement. The existing native harness
+already attaches partial pairs before execution; its production code is unchanged.
+The [source-bound result](../verification/robotics-partial-pair-review-v3.json)
+records five RED assertions for later timeout, nonzero exit, malformed JSON,
+invalid metadata and parity mismatch, followed by 27 passing focused harness
+methods. Controlled process responses test the real receipt, timing, JSON,
+metadata and parity paths; they do not qualify a compiler or SDK.
+
+A real Python/JavaScript run also compared all 16 cases and 48 transitions across
+three pairs. Observed whole-process times, in pair order, were Python
+1,394,487,052 / 507,605,052 / 479,552,938 ns and JavaScript
+693,002,043 / 116,501,463 / 115,798,864 ns. Reported peak RSS was 29,452 KiB
+for Python and 45,812 / 46,324 / 46,328 KiB for JavaScript. All values, including
+the slower first pair, are retained without an outlier exclusion. These are
+shared-host whole-process observations, not isolated cold-import timings or
+deadline guarantees. The pinned full Python dialect and the original two-layout
+JavaScript prototype perform different dependency/import work. The
+[official generator catalog](https://mavlink.io/en/#language-generator-list)
+and [Rust SDK](https://github.com/mavlink/rust-mavlink) were revisited; SDK support
+does not turn these original prototypes into SDK qualification. No numerical
+deployment memory/startup budget is established. The earliest passive component
+remains PENDING; signing/replay is the next later unreviewed component.

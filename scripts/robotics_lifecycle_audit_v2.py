@@ -212,7 +212,7 @@ def compare(cases):
 
 def run(out):
     out.mkdir(parents=True, exist_ok=False)
-    report = {"audit_policy_version": 3, "state": "failed", "decision": "PENDING"}
+    report = {"audit_policy_version": 3, "state": "failed", "decision": "PENDING", "runs": []}
     try:
         # Scoped repository sources, not an authenticated dependency attestation.
         report["source_sha256"] = {
@@ -226,9 +226,11 @@ def run(out):
         cases = corpus()
         expected = reference(cases)
         (out / "expected.json").write_text(json.dumps(expected) + "\n")
-        runs = []
         for repetition in range(3):
             pair = {}
+            # Keep completed measurements even if the other runtime or a later
+            # repetition fails. Only validated results enter this partial pair.
+            report["runs"].append(pair)
             for name, command in (
                 ("python", [sys.executable, str(Path(__file__)), "--reference"]),
                 ("javascript", ["node", str(DRIVER)]),
@@ -239,14 +241,12 @@ def run(out):
                 check_measurement(result)
                 check_parity(expected, result.pop("results"))
                 pair[name] = {**result, "whole_process_ns": elapsed}
-            runs.append(pair)
         report.pop("failed_attempt", None)
         report.update(
             state="compared",
             parity=True,
             cases=len(cases),
             steps=sum(len(c["steps"]) for c in cases),
-            runs=runs,
             driver_sha256=hashlib.sha256(DRIVER.read_bytes()).hexdigest(),
             harness_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
             fixture_sha256=hashlib.sha256(json.dumps(cases).encode()).hexdigest(),

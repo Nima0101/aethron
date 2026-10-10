@@ -92,6 +92,53 @@ class LifecycleAuditTests(unittest.TestCase):
             self.assertEqual(report["failed_attempt"], "python-0")
             self.assert_source_receipt(report)
 
+    def test_later_failure_preserves_validated_measurements_and_partial_pair(self):
+        valid = b'{"results": [], "peak_rss_kib": 42, "runtime": "fixture"}\n'
+        failures = (
+            subprocess.TimeoutExpired("fixture", 10, output=b"partial", stderr=b"timeout"),
+            subprocess.CompletedProcess(["fixture"], 7, b"failed", b"exit"),
+            subprocess.CompletedProcess(["fixture"], 0, b"not-json", b"json"),
+            subprocess.CompletedProcess(
+                ["fixture"],
+                0,
+                b'{"results": [], "peak_rss_kib": -1, "runtime": "fixture"}',
+                b"metadata",
+            ),
+            subprocess.CompletedProcess(
+                ["fixture"],
+                0,
+                b'{"results": [1], "peak_rss_kib": 42, "runtime": "fixture"}',
+                b"parity",
+            ),
+        )
+        for failure in failures:
+            with self.subTest(failure=repr(failure)), tempfile.TemporaryDirectory() as directory:
+                out = Path(directory) / "attempt"
+                responses = [subprocess.CompletedProcess(["fixture"], 0, valid, b"")] * 3
+                responses.append(failure)
+                with (
+                    patch.object(self.api, "corpus", return_value=[]),
+                    patch.object(self.api.subprocess, "run", side_effect=responses),
+                    patch.object(self.api.time, "monotonic_ns", side_effect=range(0, 80, 10)),
+                ):
+                    with self.assertRaises((subprocess.SubprocessError, ValueError)):
+                        self.api.run(out)
+                report = json.loads((out / "result.json").read_text())
+                measurement = {"peak_rss_kib": 42, "runtime": "fixture", "whole_process_ns": 10}
+                self.assertEqual(
+                    report.get("runs"),
+                    [
+                        {"python": measurement, "javascript": measurement},
+                        {"python": measurement},
+                    ],
+                )
+                self.assertEqual(report["state"], "failed")
+                self.assertEqual(report["decision"], "PENDING")
+                self.assertEqual(report["failed_attempt"], "javascript-1")
+                self.assertNotIn("parity", report)
+                self.assertEqual((out / "python-1-stdout.log").read_bytes(), valid)
+                self.assertEqual((out / "javascript-1-stderr.log").read_bytes(), failure.stderr)
+
     def test_run_retains_nonzero_exit_and_rejected_json_before_propagating(self):
         real_run = subprocess.run
         for code, output, error in (
