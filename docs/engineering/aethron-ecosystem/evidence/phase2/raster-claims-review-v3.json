@@ -1,0 +1,41 @@
+{
+  "review_order_version": 3,
+  "component": "C06_recorded_raster",
+  "decision": "CLARIFY",
+  "scope": "Sampling-mask and privacy/qualification claims only; no runtime or operational enhancement",
+  "full_component_review_complete": false,
+  "reviewed_head": "a2015058ea729d0210d6277225b64b123de694e0",
+  "production_behavior_changed": false,
+  "checks": {
+    "production_executable_ast_unchanged": true,
+    "focused_test_methods_passed": 3,
+    "new_test_methods": 1,
+    "new_test_encoding_cases": 2,
+    "new_test_passed_before_docstring_change": true,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS",
+    "diff_check": "PASS",
+    "hardware_checks": false,
+    "new_benchmarks": false
+  },
+  "focused_command": "PYTHONPATH=integrations/edge:tests/integration build/lane-b/linux-tools/bin/python -m unittest test_sensor_raster_rectification.RecordedRasterClaims test_sensor_raster_rectification.SensorRasterRectification.test_identity_preserves_zero_counts_and_ignores_padding test_sensor_raster_rectification.SensorMono16Rectification.test_radial_and_fisheye_keep_high_counts_and_invalid_zero_distinct",
+  "limitations": [
+    "Geometric sampling validity does not certify sensor quality, physical calibration or absence.",
+    "repr=False does not redact dataclass conversion or anonymize image content.",
+    "Output-pixel cap does not bound process memory or elapsed completion time.",
+    "Full V3 technology reassessment remains incomplete; no KEEP/MIGRATE decision in this limited pass."
+  ],
+  "negative_evidence": [
+    "Two tool-host handshake failures occurred before the policy read; the same read succeeded after a bounded retry.",
+    "Historical T10 latency and signed radar startup failures remain unresolved by these tests."
+  ],
+  "sha256": {
+    "integrations/edge/aethron_edge/sensors/raster_rectification.py": "451f59237826e3cc0572d97c6eb5986b4aadcdc9734d72ad70b830844c0ab0e6",
+    "tests/integration/test_sensor_raster_rectification.py": "9f190e47cd722d1958d8354be3fd246a2237fd899e6516b72eadb858052786cb",
+    "docs/engineering/aethron-ecosystem/P21-RASTER-CLAIMS-REVIEW-V3.md": "1badd0410e6a16eb0020bcc8ee1c7903840ce3698ac9c66f8c49f5ca8a71e877"
+  },
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/dataclasses.html#dataclasses.asdict"
+  ]
+}

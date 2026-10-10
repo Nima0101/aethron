@@ -2,6 +2,7 @@
 
 import importlib
 import unittest
+from dataclasses import asdict
 
 from aethron_edge.sensors.geometry import Pinhole
 from aethron_edge.sensors.packets import Raster, decode_image
@@ -29,6 +30,29 @@ def brown(source, output=None, coefficients=(0.0, 0.0, 0.0, 0.0, 0.0), radius=3.
     return LensCalibration(
         camera=source, output_camera=output or source, distortion=coefficients, valid_radius=radius
     )
+
+
+class RecordedRasterClaims(unittest.TestCase):
+    def test_mask_is_sampling_only_and_repr_is_not_redaction(self):
+        api = importlib.import_module("aethron_edge.sensors.raster_rectification")
+        for encoding, size in (("mono8", 1), ("mono16", 2)):
+            with self.subTest(encoding=encoding):
+                frame = raster(2, bytes(2 * size), step=2 * size, encoding=encoding)
+                result = getattr(api, f"rectify_{encoding}_recorded")(
+                    frame, brown(camera(2), radius=0.5)
+                )
+                # Identical stored zeros have distinct sampling status, not quality scores.
+                self.assertEqual(result.data, bytes(2 * size))
+                self.assertEqual(result.validity, b"\x01\x00")
+                self.assertEqual(result.sample(0, 0), 0)
+                self.assertIsNone(result.sample(1, 0))
+                self.assertFalse(result.live_evidence)
+                self.assertNotIn("data=", repr(result))
+                self.assertNotIn("validity=", repr(result))
+                # Generic dataclass conversion still exposes both full buffers.
+                serialized = asdict(result)
+                self.assertEqual(serialized["data"], result.data)
+                self.assertEqual(serialized["validity"], result.validity)
 
 
 class SensorRasterRectification(unittest.TestCase):

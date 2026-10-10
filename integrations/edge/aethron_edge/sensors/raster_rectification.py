@@ -12,6 +12,13 @@ MAX_OUTPUT_PIXELS = 640 * 512
 
 @dataclass(frozen=True)
 class _RectifiedCounts:
+    """Recorded counts with a geometric sampling mask, not a sensor-quality score.
+
+    Neither remapping nor repr suppression anonymizes image content. Generic
+    dataclass serialization includes both buffers; callers own disclosure policy.
+    Zero counts do not establish absence, temperature, or physical calibration.
+    """
+
     width: int
     height: int
     modality: str
