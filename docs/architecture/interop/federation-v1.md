@@ -3,13 +3,16 @@
 Federation narrows which authenticated software statements a local trust domain can
 accept. It never gives a self-declared capability execution or motion authority and
 never establishes evidence truth, accreditation or ownership of a real-world domain.
-Domains are local software-policy aliases, not persons, devices, URLs or network names.
+Domains are local software-policy aliases. Matching an alias does not authenticate a
+network endpoint or prove domain ownership. Restricted identifier syntax is not anonymity;
+producers must not encode personal identities in those aliases.
 
 ## Technology decision
 
 Requirements: offline immutable snapshots on Linux/macOS/Windows, at most 16 direct
 peers, exact byte pins, explicit issuer/capability scope, no transitive trust, current
-time and independently persisted revision floors. No network identity service, rule
+time and separate caller-supplied revision floors. Persistence of those floors is the
+caller's responsibility; this function cannot verify that they were persisted. No network identity service, rule
 extensions, dynamic hierarchy, scheduler or real-time control is required.
 
 Compare [Cedar](https://docs.cedarpolicy.com/overview/terminology.html) scoped policies
@@ -28,6 +31,8 @@ tables could meet the same contract, but no native deployment, throughput or mem
 requirement establishes a material migration benefit here. Existing component bounds
 and negative contract tests evidence the choice; no installation/familiarity preference
 or performance superiority is claimed. A rule-language requirement reopens selection.
+The [V3 review](../../engineering/reviews/p16-federation-v3.md) records the renewed
+comparison and the limits of the local evidence.
 
 ## Snapshot contract
 
@@ -42,6 +47,8 @@ Each row contains exactly `remote_domain`, `policy_sha256`, `issuers`, `capabili
 Remote domains are unique and differ from the local domain. The policy pin hashes exact
 passport trust-policy bytes. Issuers are 1–16 unique aliases. Capabilities are 1–3 unique
 members of the passport v1 vocabulary. Wildcards and delegation fields are rejected.
+Every row is shape-validated, including unselected rows; a malformed row rejects the
+whole snapshot. This does not verify signatures under each unselected peer policy.
 
 `verify_federated_bundle` requires caller-authenticated `expected_federation_sha256`,
 `local_domain`, `remote_domain`, `minimum_federation_revision`, and all public task-bundle
@@ -54,6 +61,12 @@ the library does not fetch snapshots or persist caller high-water marks.
 
 The result carries immutable digest/revision/expiry/evidence metadata only. Expiry is
 the minimum of federation, task, passport and policy expiry. All authority/qualification
-flags remain false. Failure clears metadata and does not echo inputs. Input evidence
+flags remain false. Each rejected result omits metadata and does not echo inputs; a
+rejection does not alter or revoke a result already held by a caller. Input evidence
 limits remain those of task-bundle v1; federation adds at most 64 KiB. No cached admission,
 remote transport, transitive chain or actuation is implemented.
+
+Time checks use the supplied `now_s`, not an internal clock or a completion-time sample.
+Saved results are snapshots and require freshness/trust revalidation at use. Repeated
+calls are not replay prevention. Byte/count bounds do not establish a process-memory,
+hard-real-time, MLS, CNSA or availability qualification.

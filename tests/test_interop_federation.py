@@ -5,6 +5,7 @@ import dataclasses
 import json
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import test_interop_bundles as fixtures
 import test_passports as passport_fixtures
@@ -96,6 +97,52 @@ class FederationTests(unittest.TestCase):
     def test_scope_cannot_expand(self):
         self.snapshot["peers"][0]["issuers"] = ["other-publisher"]
         self.assertEqual(self.check().reason, "peer_scope_mismatch")
+
+    def assert_no_metadata(self, result, reason):
+        self.assertEqual((result.status, result.reason), ("rejected", reason))
+        for name in (
+            "task_sha256",
+            "passport_sha256",
+            "federation_sha256",
+            "federation_revision",
+            "policy_revision",
+            "expires_at",
+        ):
+            self.assertIsNone(getattr(result, name))
+        self.assertEqual(result.evidence, ())
+        for name in ("execution_authority", "motion_authority", "evidence_verified"):
+            self.assertIs(dataclasses.asdict(result)[name], False)
+
+    def test_scope_failure_discards_authenticated_bundle_metadata(self):
+        accepted = self.check()
+        self.assertEqual(accepted.status, "bound")
+        self.assertTrue(accepted.evidence)
+        self.snapshot["peers"][0]["issuers"] = ["other-publisher"]
+        with patch.object(
+            interop_federation, "verify_task_bundle", wraps=interop_federation.verify_task_bundle
+        ) as verifier:
+            rejected = self.check()
+        verifier.assert_called_once()
+        self.assert_no_metadata(rejected, "peer_scope_mismatch")
+        # Stateless rejection does not revoke an object already held by a caller.
+        self.assertEqual(accepted.status, "bound")
+
+    def test_malformed_unselected_peer_rejects_before_bundle_verification(self):
+        second = copy.deepcopy(self.snapshot["peers"][0])
+        second["remote_domain"] = "unselected-peer"
+        self.snapshot["peers"].append(second)
+        self.assertEqual(self.check().status, "bound")
+        second["issuers"] = []
+        with patch.object(
+            interop_federation, "verify_task_bundle", side_effect=AssertionError("bundle reached")
+        ):
+            self.assert_no_metadata(self.check(), "invalid_federation")
+
+    def test_bundle_expiry_still_caps_longer_federation_snapshot(self):
+        self.snapshot["expires_at"] = 1900
+        accepted = self.check(now_s=1699)
+        self.assertEqual((accepted.status, accepted.expires_at), ("bound", 1700))
+        self.assert_no_metadata(self.check(now_s=1700), "bundle_rejected")
 
     def test_every_signed_capability_requires_direct_scope(self):
         signer = self.bundle.fixture.signer
