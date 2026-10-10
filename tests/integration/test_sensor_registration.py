@@ -58,6 +58,29 @@ class SensorRegistration(unittest.TestCase):
         args.update(changes)
         return binding.project(point, **args)
 
+    def test_active_calibration_cannot_be_replaced_without_rebinding(self):
+        binding = self.binding()
+        original = self.project(binding)
+        with self.assertRaises(AttributeError):
+            binding.calibration = self.artifact(translation_m=(0.0, 0.0, 0.0))
+        current = self.project(binding)
+        self.assertEqual(current.pixel, original.pixel)
+        self.assertEqual(current.calibration_digest, original.calibration_digest)
+        fresh = self.project(self.binding(translation_m=(0.0, 0.0, 0.0)))
+        self.assertNotEqual(fresh.calibration_digest, original.calibration_digest)
+        self.assertTrue(fresh.scene_break)
+
+    def test_bound_projection_reuses_validated_digest_without_json_serialization(self):
+        from unittest.mock import patch
+
+        binding = self.binding()
+        expected = binding.calibration.digest
+        with patch.object(self.api().json, "dumps", side_effect=AssertionError("per_point_json")):
+            for _ in range(4):
+                result = self.project(binding)
+                self.assertEqual(result.calibration_digest, expected)
+                self.assertFalse(result.live_evidence)
+
     def test_translated_projection_uses_camera_frame_and_preserves_uncertainty(self):
         binding = self.binding()
         result = self.project(binding)

@@ -1,0 +1,102 @@
+{
+  "audit_policy_version": 2,
+  "component": "C04_rig_registration",
+  "decision": "KEEP",
+  "implemented_change": "Read-only public calibration snapshot; compute validated v1 digest once per binding and reuse for each point.",
+  "constraints": {
+    "max_calibration_bytes": 16384,
+    "rotation_tolerance": 1e-06,
+    "software_range_m": 500,
+    "binding_lifetime_ns_max": 600000000000,
+    "age_ns_max": 100000000,
+    "time_uncertainty_ns_max": 50000000,
+    "evidence": "synthetic/recorded/external_unverified only; live_evidence always false",
+    "scope": "thread-confined scalar rigid registration, strict admission, no calibration fitting or device SDK"
+  },
+  "candidates": {
+    "python_snapshot": "Selected, implemented and tested.",
+    "numpy_transform": "Full-path prototype, including favorable prebuilt-array variant.",
+    "scipy_rotation": "Source-only; matrix correction is not strict reject-not-repair admission.",
+    "julia_intervalarithmetic": "Source-only credible non-incumbent validated numerics; no rigorous-enclosure implementation claimed.",
+    "boost_interval": "Source-only native candidate; target/compiler rounding requirements must be separately verified."
+  },
+  "experiments": {
+    "initial": {
+      "points": 64,
+      "samples": 15,
+      "includes_binding": true,
+      "parity": true,
+      "cpu_p50_ms": {
+        "scalar": 3.611667,
+        "numpy_transform": 5.358782
+      }
+    },
+    "before_prototypes": {
+      "points": 64,
+      "samples": 15,
+      "includes_binding": true,
+      "parity": true,
+      "cpu_p50_ms": {
+        "scalar": 3.770589,
+        "numpy_transform": 5.87934,
+        "cached_digest_prototype": 1.684653,
+        "cached_numpy_prototype": 2.710096
+      }
+    },
+    "after": {
+      "points": 64,
+      "samples": 15,
+      "includes_binding": true,
+      "parity": true,
+      "cpu_p50_ms": {
+        "scalar": 1.758096,
+        "numpy_transform": 3.145699,
+        "cached_digest_prototype": 1.680387,
+        "cached_numpy_prototype": 2.466147
+      }
+    },
+    "final_with_prepared_numpy": {
+      "points": 64,
+      "samples": 15,
+      "includes_binding": true,
+      "prepared_numpy_setup_excluded": true,
+      "parity": true,
+      "cpu_p50_ms": {
+        "scalar": 1.40887,
+        "numpy_transform": 2.845143,
+        "prepared_numpy_transform": 2.175473,
+        "cached_digest_prototype": 1.461954,
+        "cached_numpy_prototype": 2.362957
+      }
+    }
+  },
+  "checks": {
+    "red": "Two failures: calibration reassignment accepted; per-point JSON serialization observed.",
+    "focused": "46 registration/geometry/packet/provider tests PASS; includes 2000 existing bounded invalid-geometry cases.",
+    "installed_wheel": "15 registration tests PASS, isolated Python outside source imports.",
+    "lint": "Ruff lint/format PASS.",
+    "security": "Production registration.py Bandit: zero findings."
+  },
+  "limits": [
+    "One translated identity-rotation performance fixture; no hardware/accuracy/deadline qualification.",
+    "Prototype constant-digest override only valid for its one fixture; production computes actual snapshot digest.",
+    "Prepared NumPy setup excluded to favor challenger.",
+    "Separate shared-host run windows; no precise universal speedup inferred.",
+    "Public read-only property does not defend against hostile same-process private-state mutation.",
+    "No interval implementation or rigorous floating-point enclosure proof claimed.",
+    "Original JuliaMath interval documentation URL failed; JuliaIntervals official documentation succeeded.",
+    "Historic T10 latency and signed radar startup failures not cleared."
+  ],
+  "sha256": {
+    "integrations/edge/aethron_edge/sensors/registration.py": "6ec929ab4c081e10fbc258e59667aa8387603811d8f2fa4d285840fa9d60f22b",
+    "tests/integration/test_sensor_registration.py": "77698fde83d36d9f6c78e9a2d8a122ae6adc691ef592b3cc9338013d27f01e7c",
+    "scripts/probes/sensor_registration_audit/compare.py": "e2bd04e03e04ab67d1053f30005d13be2fe62f2cfb94f8dc4913632d9d713fce"
+  },
+  "primary_sources": [
+    "https://docs.pydantic.dev/latest/concepts/models/#faux-immutability",
+    "https://numpy.org/doc/stable/reference/generated/numpy.matmul.html",
+    "https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.from_matrix.html",
+    "https://juliaintervals.github.io/IntervalArithmetic.jl/stable/",
+    "https://www.boost.org/doc/libs/latest/libs/numeric/interval/doc/interval.htm"
+  ]
+}
