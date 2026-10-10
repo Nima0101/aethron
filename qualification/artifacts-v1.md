@@ -31,28 +31,29 @@ requires all declaration checks. `artifact_authenticity_verified` and
 report's historical `artifacts_verified` field remains false. No contents are
 interpreted as calibration or measurement truth. Subsequent consumers must use
 the same immutable bytes or reverify; no filesystem snapshot is claimed.
+Replacing a value in the caller's mapping after return does not update an old
+report. Its nested input digest commits the declaration, not a separately
+authenticated artifact collection or the evaluation instant. Retain the actual
+verified bytes and evaluation provenance; the aggregate report is not a reusable
+authorization token. Runtime/backend failures must not be treated as success.
 
 Supply only authorized, minimized evidence. This API is not a privacy/rights
 scanner, signed attestation verifier or live recording API. The input-manifest
 digest is linkable, not encryption or anonymization. Existing synthetic fixture
 hash placeholders intentionally cannot pass real byte-binding checks.
 
-## Requirements-driven technology decision — 2026-10-10
+## Technology review
 
 This component needs offline deterministic SHA-256, bounded work, exact byte
 semantics, portable tests and no sensor/OS SDK or real-time scheduling. Large
 capture/archive ingestion is a separate interface. The requirements permit a
 small in-memory API without filesystem path/symlink or blocking-device access.
 
-[Python hashlib](https://docs.python.org/3.13/library/hashlib.html) guarantees a
-SHA-256 constructor over bytes; [Go crypto/sha256](https://pkg.go.dev/crypto/sha256)
-provides a standard-library digest suitable for a standalone compiled reader;
-[RustCrypto sha2](https://docs.rs/sha2/latest/sha2/) provides a digest crate
-suitable for a future native ingestion adapter. Python's native digest primitive
-plus explicit type/size checks is selected for this bounded API: no additional
-dependency/build step is needed, and neither process isolation nor throughput
-beyond the small byte budget is required. Existing implementation language was
-not a selection requirement. No measured performance superiority is claimed.
+The [fresh component review](technology/review-v3.md#artifact-byte-binding-review)
+compares ownership, trust boundaries and native hash implementations across
+Python, Rust, Erlang/Elixir, C#, Node and Swift. It retains the current immutable
+byte boundary with explicit budgets; no measured performance superiority is
+claimed. Compilation or installation cost is not a reason to reject a candidate.
 
 Implementation plan: first run missing-feature tests using known SHA-256
 vectors and bounded malformed inputs; implement byte verification; then check

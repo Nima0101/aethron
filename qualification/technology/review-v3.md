@@ -8,7 +8,7 @@ inputs only. No audit-complete marker or physical qualification is asserted.
 | Historical component | Current review state |
 |---|---|
 | Rig, calibration, clock, environment declaration validator | KEEP implementation; FIX evidence coverage; CLARIFY claims |
-| Artifact byte binding | Pending fresh review |
+| Artifact byte binding | KEEP implementation; FIX evidence coverage; CLARIFY report lifetime |
 | P15 campaign coverage and procedures | Pending fresh review |
 | CLI/report delivery and verification tooling, including audit probes | Pending fresh review |
 
@@ -93,5 +93,64 @@ Those claims require separate contracts and evidence outside this component.
 Insufficient information for tactical deployment. Physical calibration,
 environmental performance and certification remain external and unverified.
 
-Next earliest unreviewed component: artifact byte binding. The entire lane review
-and forward software work remain incomplete.
+## Artifact byte binding review
+
+The declaration tests were rerun before advancing to this component. Current
+`artifacts.py`, its v1 contract and all eight original artifact tests were read
+again. The boundary admits only exact built-in dict/string/immutable-byte values,
+snapshots the mapping, checks fifteen entries, 1 MiB per value and 4 MiB aggregate,
+then uses native SHA-256. It reads no device, file or network. Callers must supply
+authorized bytes, must not mutate the mapping concurrently and own any storage
+allocated before admission. No thread-safety or memory-admission guarantee is
+claimed for caller allocation. There is no hard scheduling deadline.
+
+Fresh technology comparison:
+
+| Candidate | Fit for these constraints |
+|---|---|
+| Python immutable bytes/native hashlib | Exact immutable ownership and explicit pre-hash budgets avoid payload copies. The GIL may be released during hashing, so rejecting mutable values is significant. |
+| Rust owned immutable slices/native SHA-256 | Static ownership is a strong alternative for native consumers. Safe ownership does not authenticate the declared digest or establish what the payload means. |
+| Erlang/Elixir immutable binaries/native crypto | Immutable message data fits byte binding. Supervision and distribution provide no required capability to this synchronous offline operation. |
+| C# ReadOnlyMemory/native SHA-256 | Read-only access is useful but must be paired with control over backing storage; a view alone does not prove immutable ownership. |
+| Node Buffer/native crypto | Mutable views need an owned snapshot or enforced transfer. The earlier alias/copy experiment remains evidence of that distinction, not a whole-validator comparison. |
+| Swift Data/Swift Crypto | Value-oriented buffers and portable crypto are credible; a required Swift/native client could favor this boundary. No such deployment constraint has been established here. |
+
+Primary sources inspected again 2026-10-10:
+[Python hashlib and GIL behavior](https://docs.python.org/3.13/library/hashlib.html),
+[Erlang crypto](https://www.erlang.org/doc/apps/crypto/crypto.html#hash/2), and
+[ReadOnlyMemory](https://learn.microsoft.com/en-us/dotnet/api/system.readonlymemory-1?view=net-9.0).
+Rust, Node and Swift source links and bounded executable ownership/hash probes
+are retained in [the earlier comparison](retrospective-v2.md#artifact-byte-binding).
+Those historical timing arrays remain descriptive, not a ranking or current
+hardware qualification. No backend certification follows from a hash module name.
+
+**KEEP the current Python/native hash implementation; FIX test coverage and
+CLARIFY report lifetime.** Its immutable ownership and measured bounded tests meet
+the actual in-process contract without a second payload representation. Alternative
+ownership systems are viable, but no missing required property or material measured
+gain was demonstrated. The decision is about byte ownership and the trusted boundary,
+not familiarity, installed tooling, build steps or rewrite effort. Reopen for a
+native consumer ABI, authenticated ingestion contract or demonstrated resource need.
+
+Four new methods verify swapped payload/digest associations, simultaneous expired
+calibration plus missing/mismatched/extra bytes, replacement of a caller mapping
+after an earlier successful report, and all four distinct 1 MiB payloads at the
+aggregate ceiling plus a one-byte-over rejection. Hash success remains independent
+of authenticity and physical qualification. No production mismatch was demonstrated.
+
+`python3 -m qualification.technology.review_artifacts` requires the new baseline,
+then introduces three temporary negative controls: a constant digest, erased
+declaration negatives and a one-byte relaxation of the aggregate budget. Each must
+cause an assertion failure, with no execution errors, before the restored baseline
+is accepted. Source-bound results are in `artifact-review-v3.json`. These are
+bounded synthetic controls, not a concurrent-mutation, field or fuzz qualification.
+
+The contract now states that a prior report does not update when supplied bytes
+are replaced and cannot serve as an authorization token. P17/P18 consumers must
+reverify the same bytes and independently establish provenance, clock trust,
+rights and instrument authenticity. A matched digest grants no operational or
+motion authority. Native byte ingestion, transport and crypto certification are
+separate peer/external responsibilities, not claims supplied by this API.
+
+Next earliest unreviewed component: P15 campaign coverage and procedures. The
+entire lane review and forward software work remain incomplete.
