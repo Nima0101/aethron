@@ -20,6 +20,17 @@ SDK and panel, then exercise the presenter and a structural DOM implementation.
 The panel has no runtime library dependency. LinkeDOM is development-only; it does
 not verify browser layout, keyboard behavior or screen-reader output.
 
+`npm run build --prefix examples/operator` removes the previous `dist`, runs the
+TypeScript compiler with `noEmitOnError`, and removes output again if the compiler
+fails. The compiler has a requested 30-second subprocess timeout. Only this
+component's `dist` is owned by that command; previously built browser bundles have
+their separate build lifecycle. `npm run test:build --prefix examples/operator`
+checks real compiler failure/recovery and controlled partial-write cleanup.
+Use a single build per output directory and never serve it while building.
+Host crashes, forced wrapper termination, filesystem failure and concurrent writers
+are outside this cleanup guarantee; direct `tsc` invocation bypasses cleanup.
+The scoped technology comparison is in [the build ADR](build-adr.json).
+
 A host with an existing admitted SDK `observation` can mount the built module:
 
 ```js

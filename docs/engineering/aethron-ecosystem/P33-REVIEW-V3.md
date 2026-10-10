@@ -1724,3 +1724,61 @@ Verified bridge commit 1947a1d6 was fast-forward pushed to PR #44. One snapshot
 reported 37 queued, two running, one success and one skipped check; no waiting,
 polling or merge. Next earliest unreviewed component: P12 display presenter/panel,
 then lifecycle and help coverage. Full lane and P19 completion remain unclaimed.
+
+
+### P12 presenter, panel and direct build reassessment — 2026-10-10
+
+At `b356d7c6b53865235b95cfe08c3c420da85dfea3`, re-read the authoritative
+policy and V3 order, checked the early SDK evidence and verified all 13 previous
+source hashes, six report hashes and ten SDK outputs before editing. Re-read the
+P12 presenter/panel implementation, tests, schemas, decisions, documentation and
+compiler/browser build boundaries.
+
+KEEP TypeScript for the fixed aggregate presenter and native DOM panel. Fresh
+comparison against plain ECMAScript, Elm ports, ReScript JSON interop and Lit's
+reactive lifecycle still supports the existing scoped decisions in
+[the presenter ADR](../../../examples/operator/adr.json) and
+[the panel ADR](../../../examples/operator/panel-adr.json). Their decisive constraints
+are a synchronous three-state projection, browser/Node ESM, typed host contracts,
+fixed bilingual text and explicit host ownership. Runtime shape guards remain
+necessary for every candidate; none eliminates the host trust/freshness boundary.
+No numeric kernel, alternate-runtime speedup or new application framework is
+justified for these two components. This comparison is source-based, not a
+cross-language benchmark.
+
+Confirmed UNKNOWN current state, finite shape-only uncertainty validation,
+withdrawal on malformed projections, literal text rendering, stable native
+controls, latest-refresh precedence and disposal. Covariance shape admission is
+not physical accuracy validation. The early clone has no pre-clone memory bound.
+Native DOM/LinkeDOM tests do not establish assistive-technology or real-browser
+acceptance; previously failed browser probes remain negative evidence.
+
+FIX direct operator compilation: its npm build entry previously invoked tsc
+without noEmitOnError or cleanup. A real-compiler regression failed because the
+rejected build retained stale/partial dist files. The Node wrapper now clears its
+owned output before compilation and after child failure; the compiler suppresses
+emission on diagnostics. Separate arguments, the absolute running Node executable,
+no shell and a requested 30-second compiler timeout constrain this build boundary.
+Retain detailed spawn-error causes and nonzero exit/signal diagnostics. No host
+runtime behavior or immutable observation threshold changed.
+
+The new closed [build ADR](../../../examples/operator/build-adr.json) includes
+four C4 views and compares Node with POSIX shell, PowerShell 7 and Dart. KEEP the
+Node compiler host: the required process/filesystem controls need no additional
+interpreter, binary or deployment contract. This is a build-tool decision only.
+Cleanup does not cover forced wrapper termination, host crash, concurrent writers
+or filesystem failure; direct tsc and the separately owned browser bundle retain
+their documented distinct lifecycles.
+
+The first full compile failed with the initial generic diagnostic and correctly
+removed dist; its exact child cause was not retained. Preserve that result. One
+retry at the unchanged timeout passed, with all 14 generated files byte-identical
+to the pre-change output. Final focused test results and source/report hashes are
+in [the evidence](evidence/phase3/p12-display-build-review-v1.json). No full repository,
+clean-clone, actual-browser or customer-install qualification was run.
+
+Verified bridge commit b356d7c6 was fast-forward pushed to PR #44. Its one exact-head
+snapshot showed 40 queued and one skipped check; no polling or merge. Next earliest
+unreviewed component: P12 lifecycle scheduling and suspension, followed by the
+remaining connection/browser/help inventory. Full lane and P19 acceptance remain
+unfinished; no audit-complete marker is issued.
