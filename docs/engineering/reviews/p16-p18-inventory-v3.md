@@ -1,7 +1,7 @@
 # P16–P18 review inventory v3
 
-Snapshot: `828943affeeb6d5878dc9e07accf46571791604b`, plus the ROS status
-consumer conformance correction, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `7cb3c7e50142bab0206dcf30c5073b4da5d5611c`, plus the trust-floor
+lifecycle clarification, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -33,7 +33,7 @@ external gates. No whole-phase completion can be inferred from the rows above.
 
 | Scope | State at this snapshot |
 |---|---|
-| P16 transport, enrollment and persistent rollback floors | Not implemented by the owned modules. Caller-provided pins/floors are assumptions, not these services. |
+| P16 transport, enrollment and persistent rollback floors | Not implemented by the owned modules. Caller-provided pins/floors are assumptions, not these services. [Lifecycle traces](p16-trust-floor-v3.md) show why floors cannot be derived solely from successful passport results. |
 | P16 cross-phase conformance | [Edge UNKNOWN corpus](p16-edge-conformance-v3.md) checks one published API/fixture boundary; [P2 packet cases](p16-sensor-conformance-v3.md) exercise the published decoder and P16 binding independently; [encoding cases](p16-sensor-encoding-v3.md) add byte-order, padding and trailing-byte checks. [ROS diagnostic cases](p16-ros-status-v3.md) consume receipt/loss/fault status through real APIs. Integrated P2/P3/P14 runtime qualification is not established. |
 | P17 common picture and operator collaboration | No owned implementation or integrated client evidence identified. |
 | P17 role/authority, intent, coordination and cancellation | No owned command workflow implementation; P16 verification tasks do not implement it. |

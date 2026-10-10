@@ -234,6 +234,51 @@ class PassportVerificationTests(unittest.TestCase):
         self.assertIsNone(result.expires_at)
         return result
 
+    def test_revocation_rejection_does_not_persist_the_new_policy_floor(self):
+        original_policy = copy.deepcopy(self.policy)
+        envelope = self.envelope()
+        self.assertEqual(self.verify(envelope).status, "authenticated")
+        self.policy["revision"] = 4
+        self.policy["revoked_passports"] = [self.document["passport_id"]]
+        rejected = self.verify(envelope)
+        self.assertEqual((rejected.status, rejected.reason), ("rejected", "revoked"))
+        self.assertIsNone(rejected.policy_revision)
+        self.assertIsNone(rejected.payload_sha256)
+        self.assertIsNone(rejected.expires_at)
+        # Model a caller restoring its old snapshot/floor. No disk or restart is tested.
+        self.policy = original_policy
+        replayed = self.verify(envelope)
+        self.assertEqual((replayed.status, replayed.policy_revision), ("authenticated", 3))
+        # Independently retained configuration state prevents that rollback.
+        protected = self.verify(envelope, minimum_policy_revision=4)
+        self.assertEqual((protected.status, protected.reason), ("rejected", "policy_rollback"))
+        self.assertIsNone(protected.policy_revision)
+        self.assertIsNone(protected.payload_sha256)
+        self.assertIsNone(protected.expires_at)
+        for result in (rejected, replayed, protected):
+            self.assertIs(result.motion_authority, False)
+            self.assertIs(result.evidence_verified, False)
+
+    def test_expiry_rejection_does_not_persist_a_trusted_time_floor(self):
+        envelope = self.envelope()
+        self.assertEqual(self.verify(envelope, now_s=1500).status, "authenticated")
+        expired = self.verify(envelope, now_s=2000)
+        self.assertEqual((expired.status, expired.reason), ("rejected", "passport_not_current"))
+        self.assertIsNone(expired.policy_revision)
+        self.assertIsNone(expired.payload_sha256)
+        self.assertIsNone(expired.expires_at)
+        # Saving time only after successful authentication misses the trusted 2000 sample.
+        rewound = self.verify(envelope, now_s=1500, minimum_time_s=1500)
+        self.assertEqual(rewound.status, "authenticated")
+        protected = self.verify(envelope, now_s=1500, minimum_time_s=2000)
+        self.assertEqual((protected.status, protected.reason), ("rejected", "time_rollback"))
+        self.assertIsNone(protected.policy_revision)
+        self.assertIsNone(protected.payload_sha256)
+        self.assertIsNone(protected.expires_at)
+        for result in (expired, rewound, protected):
+            self.assertIs(result.motion_authority, False)
+            self.assertIs(result.evidence_verified, False)
+
     def test_unselected_key_metadata_is_not_ignored(self):
         other_public = Ed25519PrivateKey.from_private_bytes(b"\x01" * 32).public_key()
         other_bytes = other_public.public_bytes(Encoding.Raw, PublicFormat.Raw)

@@ -233,7 +233,11 @@ def verify(
 ) -> VerificationResult:
     """Authenticate using caller-provisioned policy/time/floors; perform no I/O.
 
-    The caller must preserve accepted time/revision high-water marks across restarts.
+    The caller must preserve trusted time/revision high-water marks across restarts.
+    Advance them from independently authenticated configuration and trusted clock
+    observations, not solely from successful passport results: a newer revocation
+    policy or later time can reject this passport and return no result metadata.
+    This function neither authenticates policy transport nor persists any floor.
     Expiry/revocation reflect only the provided snapshot, not global live status.
     """
     try:
