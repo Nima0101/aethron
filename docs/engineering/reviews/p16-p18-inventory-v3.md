@@ -1,6 +1,6 @@
 # P16–P18 review inventory v3
 
-Snapshot: `64ac47c6d0986af09238d61a8514085849f1a36a`, plus local optional-backend test corrections, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `5f733e4af8649d9ef61ae4a26edda320fa183006`, plus the consumer/lifecycle review record, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -14,8 +14,11 @@ components through evidence, tasks, bundles, federation and inbox. It adds full 
 reference coverage and corrects two public evidence records rejected by hosted checks.
 The [current schema/packaging review](p16-installed-floor-v3.md) confirms the six
 schemas and adds the omitted installed floor-store persistence scenario. Next in
-the current review cursor: peer-consumer boundaries, after the
-[probe dependency correction](p16-probe-optional-v3.md) and live comparison/mutation checks.
+the current review cursor: independent pinned federation-snapshot admission, after the
+[probe dependency correction](p16-probe-optional-v3.md), live comparison/mutation checks
+and [consumer/lifecycle and public-claim refresh](p16-consumer-refresh-v3.md).
+The latter found no new mismatch across four assurance components; 24 focused methods
+and nine controlled assertion failures support the current scoped KEEP decisions.
 The consumed JSON-bound helper belongs to the foundation lane.
 
 | Component | Current evidence and decision |
