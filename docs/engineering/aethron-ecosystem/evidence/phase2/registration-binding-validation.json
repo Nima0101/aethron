@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "scope": "P2.1 registration binding validation",
+  "base_commit": "0ce84bf52bb53385aafdd5615c87254790f9fba2",
+  "platform": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "python": "3.13.13"
+  },
+  "research": {
+    "source": "https://docs.pydantic.dev/latest/api/base_model/",
+    "constraint": "Frozen Python model objects can contain unchecked copied or constructed data; validate nested rig fields before binding without per-point overhead.",
+    "selection": "Reconstruct with the existing strict Pydantic schema; no new runtime dependencies."
+  },
+  "red": {
+    "tests": 2,
+    "failed_subtests": 18,
+    "reason": "Invalid calibration objects were accepted by the binding constructor."
+  },
+  "source": {
+    "tests": 60,
+    "passed": true,
+    "seconds": 4.33,
+    "modules": [
+      "test_sensor_registration",
+      "test_sensor_cloud_inspect",
+      "test_sensor_cloud_replay_v2",
+      "test_sensor_replay",
+      "test_sensor_packets",
+      "test_sensor_radar_appliance",
+      "test_sensor_provider"
+    ]
+  },
+  "installed_wheel": {
+    "tests": 13,
+    "passed": true,
+    "seconds": 0.189,
+    "isolated_python": true,
+    "wheels": {
+      "aethron-0.2.0-py3-none-any.whl": "66f99b43339746ac3b8f11871d908be0e433ecbf181d2f1e4c8c4b5518d68127",
+      "aethron_edge-0.1.0-py3-none-any.whl": "3d2f93aa5644130293462113d0c3e82a443dc41d8f71b9aa7fbfb24ef065e975"
+    }
+  },
+  "checks": {
+    "ruff": "passed",
+    "ruff_format": "passed after formatting correction",
+    "bandit_registration": "passed",
+    "pip_check": "passed",
+    "review": "Revalidation occurs before binding state is created; fixed rejection omits input; no capture/timebase/provider implementation changed."
+  },
+  "negative_evidence": [
+    {
+      "tests": 44,
+      "errors": 1,
+      "reason": "Initial host Python lacked fastapi; radar signed CLI test could not resolve service.app. Confirmed by direct import. Repeated with hash-pinned server dependencies in lane-local isolated environment: all 60 focused tests passed."
+    },
+    "Historical T10 latency failure and radar startup timeout remain in cloud-inspection/cloud-replay-v2 evidence; this correction does not qualify latency or hardware."
+  ],
+  "limits": [
+    "No broad fuzz, VM, Docker, full hosted-equivalent matrix or clean-clone run locally, per owner resource limit.",
+    "Existing 2000 invalid geometry and 2000 replay corruption cases are included in focused tests.",
+    "Hosted checks for this new head remain pending; no release or physical qualification claim."
+  ],
+  "artifacts": {
+    "red.log": "f8fab15f7ec22b8792031d46058e210c40e5073724f49c4b3b8e2478cd9d382c",
+    "targeted.log": "a8c33e55c8ca25d2ff86bdc8a3a9cff630a9a2a3babe299353adce3736adf71e",
+    "global-import.log": "1c1260dd3ff895bde3664e7619a36ec419adefbed2a1f5e6d1b00641944f7ebe",
+    "targeted-isolated.log": "3e64ba407c975e086633680632c3ea522124d35377d486e2d4296280274db623",
+    "installed-tests.log": "282f7a0ff75aa62325f7a7a37ec27bdae439d362fd22e3f7faaa87556df6cfe3"
+  }
+}

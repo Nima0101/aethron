@@ -98,6 +98,38 @@ class SensorBootEvidence(unittest.TestCase):
         self.assertTrue(self.probe.result(1000)["raw-depth"]["processing_at_end"])
         self.assertFalse(self.probe.result(3001)["raw-depth"]["processing_at_end"])
 
+    def test_recent_activity_is_not_latest_sample_health(self):
+        for state in ("fault", "stalled", "invalid"):
+            with self.subTest(state=state):
+                self.setUp()
+                self.probe.observe(self.sample(20), 1000)
+                later = self.sample(20, at=1100)
+                if state == "fault":
+                    later["sensors"]["raw-depth"].update(available=False, state="fault")
+                elif state == "invalid":
+                    later["qualified"] = True
+                self.probe.observe(later, 1100)
+                row = self.probe.result()["raw-depth"]
+                self.assertTrue(row["processing_at_end"])
+                self.assertEqual(row["batches_observed"], 20)
+                self.assertEqual(row["fault_samples"], int(state == "fault"))
+                self.assertEqual(row["invalid_samples"], int(state == "invalid"))
+                self.assertTrue(self.probe.result(3000)["raw-depth"]["processing_at_end"])
+                self.assertFalse(self.probe.result(3001)["raw-depth"]["processing_at_end"])
+
+    def test_recovery_and_update_are_historical_flags_after_activity_expires(self):
+        self.probe.observe(self.sample(20), 1000)
+        self.probe.mark_fault()
+        self.probe.observe(self.sample(31, at=1100), 1100)
+        self.probe.mark_update(1200)
+        self.probe.observe(self.sample(11, at=1300), 1300)
+        row = self.probe.result(3301)["raw-depth"]
+        self.assertFalse(row["processing_at_end"])
+        self.assertTrue(row["processing_resumed_after_fault"])
+        self.assertTrue(row["updated_runtime_processing"])
+        self.assertTrue(self.probe.recovered())
+        self.assertTrue(self.probe.updated())
+
     def test_guest_inputs_provision_actual_bound_raw_recording(self):
         import json
         import tempfile
