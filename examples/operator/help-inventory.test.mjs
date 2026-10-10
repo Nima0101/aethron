@@ -23,6 +23,13 @@ test('source and artifact bindings change with their actual bytes',()=>{
  const input=sources(),first=build(input);input.presenter+='\n// source change\n';const second=build(input);assert.notEqual(first.source_sha256.presenter,second.source_sha256.presenter);
  const third=module.createStateHelpInventory(input,new Uint8Array([4]),{head:'a'.repeat(40),modified:true});assert.notEqual(second.module_sha256,third.module_sha256);
 });
+test('distributed state and action inventories agree on remaining product coverage',()=>{
+ const state=build();
+ const action=module.createActionHelpInventory(readFileSync(new URL('./src/action-help.ts',import.meta.url),'utf8'),new Uint8Array([1,2,3]),{head:'a'.repeat(40),modified:true});
+ assert.equal(action.topics.length,4);assert.equal(state.product_help_complete,false);assert.equal(action.product_help_complete,false);
+ assert.deepEqual(state.remaining_coverage,action.remaining_coverage);
+ assert.deepEqual(state.remaining_coverage,['routes and role/permission inventory','search and onboarding','manuals and installed-product acceptance']);
+});
 test('only an exact clean source revision is eligible for a release SHA binding',()=>{
  assert.equal(build(sources(),{head:'b'.repeat(40),modified:false}).release_sha,'b'.repeat(40));
  for(const revision of [{head:'main',modified:false},{head:'a'.repeat(40),modified:'false'},{head:'a'.repeat(40),modified:false,qualified:true}])assert.throws(()=>build(sources(),revision),{message:'invalid_help_revision'});

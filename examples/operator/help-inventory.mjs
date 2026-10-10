@@ -81,7 +81,8 @@ export function createStateHelpInventory(sources,moduleBytes,revision) {
   return {format:'aethron-state-help-v1',ui_schema:'aethron-observation-component-v1',api_schema:'aethron-edge-v1',
     source_revision:revision.head,source_modified:revision.modified,release_sha:revision.modified?null:revision.head,
     product_help_complete:false,coverage_scope:'observation-and-connection-state-guidance',
-    remaining_coverage:['action-specific topics','routes and role/permission inventory','search and onboarding','manuals and installed-product acceptance'],
+    // Product gaps shared with the separately distributed ACTION-HELP inventory.
+    remaining_coverage:['routes and role/permission inventory','search and onboarding','manuals and installed-product acceptance'],
     locales,source_sha256:Object.fromEntries(Object.entries(sources).map(([name,text])=>[name,hash(text)])),
     module_sha256:hash(moduleBytes),topics:topics.sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0)};
 }

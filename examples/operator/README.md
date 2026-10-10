@@ -290,10 +290,11 @@ metadata: it records HEAD, observes dirty status before and after compilation,
 rejects a changed HEAD, and emits `release_sha: null` for dirty builds. A clean
 revision binding is unsigned component provenance, not product release approval.
 
-This file deliberately says `product_help_complete: false`. It covers state
-guidance, not all actions, routes, role permissions, manuals, search, onboarding or
-installed-product acceptance. Those are listed as remaining coverage and continue
-to block full P19.7 acceptance. It does not contain administrator procedures,
+This file deliberately says `product_help_complete: false`. It covers ten state
+topics; the companion `ACTION-HELP.json` covers the four shipped buttons.
+Both inventories list remaining product coverage: routes and role permissions,
+search and onboarding, manuals and installed-product acceptance. Those gaps
+continue to block full P19.7 acceptance. It does not contain administrator procedures,
 credentials or sensor values. [State-help decision](state-help-adr.json) records
 parser alternatives and the supported source grammar.
 

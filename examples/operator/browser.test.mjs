@@ -240,6 +240,7 @@ test('standalone containing client shares locale and withdraws a stopped observa
 
 test('distributed state help exactly covers rendered bilingual component states offline',async t=>{
  const inventory=JSON.parse(read('STATE-HELP.json'));assert.equal(inventory.module_sha256,hash(read('aethron-observation.mjs')));assert.equal(inventory.product_help_complete,false);
+ assert.deepEqual(inventory.remaining_coverage,JSON.parse(read('ACTION-HELP.json')).remaining_coverage);
  for(const [name,digest] of Object.entries(inventory.source_sha256))assert.equal(hash(readFileSync(new URL(`./src/${name}.ts`,import.meta.url))),digest);
  assert.match(inventory.source_revision,/^[0-9a-f]{40}$/);assert.equal(inventory.release_sha,inventory.source_modified?null:inventory.source_revision);
  t.mock.method(globalThis,'fetch',()=>{throw new Error('unexpected_network');});

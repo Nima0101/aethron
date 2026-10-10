@@ -2,10 +2,10 @@
   "id": "P12-STATE-HELP-001",
   "version": 1,
   "status": "accepted-component-only",
-  "decision": "SELECT build-time ECMAScript with the pinned TypeScript compiler AST for state-guidance extraction; retain existing browser rendering runtime.",
+  "decision": "KEEP build-time ECMAScript with the pinned TypeScript compiler AST for state/action-guidance extraction after the current source and coverage review; retain existing browser rendering runtime.",
   "constraints": [
     "Derive state and locale sets from actual TypeScript type unions and literal guidance dictionaries, without executing source or maintaining a second handwritten state list.",
-    "Build-time only, two small source files, exact bilingual key parity and literal title/body admission. Reject unsupported syntax and never import the compiler into the browser artifact.",
+    "Build-time only, three small source files shared by the state/action extractors, exact bilingual key parity and literal title/body admission. Reject unsupported initializer syntax and never import the compiler into the browser artifact.",
     "Bind distributed guidance to source hashes and actual module bytes. Dirty builds have null release_sha; a clean matching Git revision binds component provenance only, not product qualification."
   ],
   "alternatives": [
@@ -19,7 +19,7 @@
     },
     {
       "technology": "Rust with SWC parser / @swc/core bindings",
-      "assessment": "SWC exposes TypeScript parsing and native performance is credible for large input graphs. This bounded two-file extractor has no demonstrated parsing throughput bottleneck; compiler AST compatibility is decisive rather than an unmeasured speed ranking."
+      "assessment": "SWC exposes TypeScript parsing and native performance is credible for large input graphs. This bounded three-file extractor has no demonstrated parsing throughput bottleneck; compiler AST compatibility is decisive rather than an unmeasured speed ranking."
     },
     {
       "technology": "ReScript binding to the TypeScript compiler API",
@@ -28,16 +28,17 @@
   ],
   "sources": [
     "https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API",
-    "https://tree-sitter.github.io/tree-sitter/using-parsers/",
+    "https://tree-sitter.github.io/tree-sitter/using-parsers/1-getting-started.html",
     "https://swc.rs/docs/usage/core",
     "https://rescript-lang.org/docs/manual/bind-to-js-function/"
   ],
   "limits": [
     "Pinned TypeScript 5.9.3 API is an explicit build dependency. The official compiler API documentation warns of API changes in later major versions; upgrades require this extractor and mutation tests to pass.",
-    "This inventory covers ten rendered state topics only. It explicitly reports product_help_complete=false and remaining action-specific, route/role, search/onboarding/manual/customer acceptance coverage.",
+    "This state inventory covers ten rendered topics; ACTION-HELP.json separately covers the four shipped buttons. Both report product_help_complete=false and remaining route/role, search/onboarding/manual/customer acceptance coverage.",
     "Clean source revision and content hashes establish unsigned component provenance, not a signed release, authentication, human semantic review or P19 acceptance. The pure function trusts revision metadata; the builder obtains it from Git before and after compilation.",
     "Rendered bilingual titles/bodies and native details entry points are checked against the actual standalone module in structural DOM tests. Native browser keyboard/screen-reader and independent installed-product checks remain open.",
-    "No runtime network, credentials, source execution, telemetry, physical or security-certification claim."
+    "No runtime network, credentials, source execution, telemetry, physical or security-certification claim.",
+    "The AST extractor reads admitted initializers and unions, not arbitrary program semantics. It does not prove that later code cannot mutate or shadow declarations. Compilation, source review and separate bilingual bundled-DOM parity checks remain necessary; this is not an authorization or hostile-source sandbox."
   ],
   "c4": {
     "context": "flowchart LR\nMaintainer --> Build[Component build]\nBuild --> Inventory[Offline state help inventory]\nOperator --> UI[Existing bilingual UI]\nInventory --> Check[Artifact coverage check]\nUI --> Check",

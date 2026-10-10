@@ -1991,3 +1991,57 @@ Verified bridge commit 350e39bb was fast-forward pushed to PR #44. Its one exact
 snapshot reported forty queued and one skipped check; no polling or merge. Next
 earliest unreviewed component: state/action help inventory and coverage enforcement.
 Full lane/P12/P19 and independent installed-product acceptance remain incomplete.
+
+### P12 help-inventory and coverage reassessment — 2026-10-10
+
+At `6fcc6dcaf39b14298a59bd3cd4f8e64cf9fbe5ea`, re-read the authoritative
+policy, V3 order and full P19 specification. Verified the previous bridge commit,
+its fourteen source hashes, seven reports and twenty-one distribution hashes,
+then fast-forward pushed that commit to PR #44. One exact-head snapshot reported
+forty queued and one skipped check; no polling or merge.
+
+Reviewed the two help extractors, the three literal-guidance inputs, closed ADR
+schemas, generated inventories, source and packaged-DOM coverage tests, package
+entry point and hosted workflow invocation. KEEP the pinned TypeScript compiler
+AST with build-time ECMAScript. The constraints are three small compiler-owned
+TypeScript inputs, exact state/action/locale parity, no source evaluation and
+no compiler in the browser artifact. Fresh official sources in the
+[state-help ADR](../../../examples/operator/state-help-adr.json) support the
+comparison: the TypeScript API exposes literal/type nodes in the compilation
+syntax; Tree-sitter provides C and other language bindings with a separately
+versioned grammar; Rust/SWC supports TypeScript parsing; ReScript can bind to the
+same JavaScript API. The latter alternatives are credible outside the incumbent
+language. No incremental editor, cross-language parser requirement or measured
+throughput problem makes them materially better for this contract. No comparative
+performance result is claimed. Compiler API upgrades remain an explicit recheck.
+
+FIX a stale coverage claim: STATE-HELP still listed action topics as unfinished
+although ACTION-HELP already describes all four shipped buttons. A focused
+cross-inventory regression failed on that extra entry. The generator now reports
+the same remaining product gaps in both inventories. README and the closed ADR
+explain the separate ten-state and four-action coverage without claiming complete
+product help. The packaged state test also checks the pair's remaining-coverage
+agreement. No browser runtime, transport, permission, state or language text changed.
+
+The AST extraction is intentionally limited to admitted initializers and unions;
+it is not proof of arbitrary program semantics or an authorization sandbox.
+Later mutations and shadowing require compilation, code review and packaged-DOM
+parity checks. Existing artifact tests compare every exercised bilingual state
+and actual button, including label/body, contextual link and language; hosted CI
+invokes them through the component package test command. Full routes, permissions,
+search, onboarding, manuals and independent installed-product acceptance remain
+unfinished. Those limits are now explicit in the ADR.
+
+Verification: the intended regression recorded one failure before the correction;
+all 22 focused extraction/action/ADR checks now pass. The component browser build
+and both targeted standalone bilingual help tests pass, the latter with dynamic
+string code generation disabled and unexpected fetch rejected. Eighteen generated
+files remain byte-identical, including fourteen compiled operator files and the
+148568-byte browser module. Only coverage/revision inventory metadata and its
+manifest binding change. Syntax checks and diff whitespace checks pass. Retained
+reports and source/distribution hashes are in
+[the evidence](evidence/phase3/p12-help-inventory-review-v1.json).
+
+Next earliest unreviewed component: contextual action-help runtime binding and
+its accessibility/lifecycle boundaries. The full lane review and P19 acceptance
+remain incomplete; no audit-completion marker is created.
