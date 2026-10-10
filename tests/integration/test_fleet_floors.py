@@ -132,6 +132,39 @@ else:
         self.assertEqual((result.minimum_version, result.minimum_time_s), (5, 2000))
         self.assertEqual(self.path.stat().st_mode & 0o777, 0o600)
 
+    def test_process_exit_after_commit_before_return_keeps_committed_pair(self):
+        store = self.initialize()
+        returned = self.path.with_suffix(".returned")
+        program = """
+import os, sqlite3, sys
+from pathlib import Path
+from unittest.mock import patch
+from aethron_edge.runtime.fleet_floors import FleetFloorStore
+connect = sqlite3.connect
+class ExitAfterCommit(sqlite3.Connection):
+    def execute(self, sql, parameters=()):
+        result = super().execute(sql, parameters)
+        if sql == 'COMMIT':
+            os._exit(75)
+        return result
+with patch('aethron_edge.runtime.fleet_floors.sqlite3.connect',
+           side_effect=lambda *a, **kw: connect(*a, **kw, factory=ExitAfterCommit)):
+    FleetFloorStore(Path(sys.argv[1])).advance(minimum_version=5, minimum_time_s=2000)
+Path(sys.argv[2]).write_text('returned')
+"""
+        child = subprocess.run(
+            [sys.executable, "-c", program, str(self.path), str(returned)],
+            timeout=10,
+            check=False,
+            capture_output=True,
+        )
+        self.assertEqual(child.returncode, 75, child.stderr.decode())
+        self.assertFalse(returned.exists())
+        result = store.read()
+        self.assertEqual((result.minimum_version, result.minimum_time_s), (5, 2000))
+        with self.assertRaisesRegex(ValueError, "^invalid_fleet_floor$"):
+            store.advance(minimum_version=3, minimum_time_s=1000)
+
     def test_existing_file_cannot_be_reinitialized(self):
         store = self.initialize()
         store.advance(minimum_version=6, minimum_time_s=3000)

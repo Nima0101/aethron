@@ -1,0 +1,58 @@
+{
+  "audit_policy_version": 3,
+  "component": "P3.4 persistent version/time floors",
+  "reviewed_head": "18ed24b882025996c2ac035ed936b4c87121eb05",
+  "decision": "KEEP SQLite/Python; FIX documentation and add missing crash-boundary test",
+  "production_change": false,
+  "required_migrations": [],
+  "source_sha256": {
+    "integrations/edge/aethron_edge/runtime/fleet_floors.py": "6c0f374e3629d6c00e420e07869d85c14672965e8bc92dfbc6092f182058bf9a",
+    "tests/integration/test_fleet_floors.py": "0020cc574755e1709ff87fa3700eb2f298a4592e59c0d4e3a265df3e93c494f8"
+  },
+  "environment": {
+    "python": "3.13.5",
+    "sqlite": "3.46.1",
+    "os": "Linux"
+  },
+  "tests": {
+    "floor_tests": 18,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_seconds": 1.078
+  },
+  "new_case": {
+    "name": "test_process_exit_after_commit_before_return_keeps_committed_pair",
+    "injection": "Real SQLite COMMIT executes; connection subclass then calls os._exit(75) before returning to advance.",
+    "observed_exit_code": 75,
+    "after_call_marker_present": false,
+    "reopened_pair": [
+      5,
+      2000
+    ],
+    "regression_to_old_pair": [
+      3,
+      1000
+    ],
+    "regression_rejected": true,
+    "interpretation": "Missing success acknowledgment does not mean rollback. OS remains running; no simulated power-loss claim."
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_production": "PASS; no findings",
+    "diff_whitespace": "PASS"
+  },
+  "retained_negative_evidence": "docs/verification/fleet-floors-technology-audit-v2.json",
+  "corrections": [
+    "Replace stale FULL recommendation with implemented verified EXTRA synchronization",
+    "Distinguish aborted uncommitted transaction from missing success after commit",
+    "Document guarded provisional floors and no cross-database atomicity",
+    "Replace obsolete implementation plan with current focused results and limits"
+  ],
+  "limitations": [
+    "No production defect was found for the tested crash boundary; no artificial red-to-green implementation claim.",
+    "No alternative-language performance benchmark, physical power-loss test or storage-stack qualification.",
+    "Database-file admission cap is not a process-memory or temporary-file quota.",
+    "No encryption, cryptographic rollback anchor, replication, realtime or uptime guarantee."
+  ]
+}
