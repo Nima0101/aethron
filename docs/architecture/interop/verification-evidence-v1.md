@@ -1,7 +1,7 @@
 # P16 verification evidence boundary
 
 P16 implements local software-statement verification, bounded in-memory buffering and
-an explicit single-scope local policy-floor store.
+explicit local policy and federation floor stores.
 Passing an example, a unit test or a configured CI job does not establish an installed
 customer product. This page describes how to interpret the existing checks; it adds no
 release gate implementation, transport, persistence or qualification claim.
@@ -18,11 +18,12 @@ release gate implementation, transport, persistence or qualification claim.
 | `validate_pinned_federation` | Complete canonical table matches the external pin, local domain and supplied time/revision floors, including an empty deny-all table. | Pin/time authenticity, durable floors and fresh peer/bundle verification; referenced policies are not authenticated. |
 | `verify_federated_bundle` | The direct pinned federation table permits the statement under its selected peer row. | Provisioned domain aliases and pins; network identity, trust enrollment and floor persistence. |
 | `BoundedInbox` | Local quota/expiry accounting and opaque byte retention. | Authenticated peer aliases, trustworthy monotonic time and verification after dequeue. Closing does not revoke returned copies. |
+| `FederationFloorStore` | Committed federation revision/digest and trusted-time floors, including deny-all snapshots. | Clock/pin authenticity, protected local storage, whole-store rollback detection and fresh verification at use. |
 | `PolicyFloorStore` | Committed policy revision/digest and trusted-time floors on cooperating local storage. | Clock/pin authenticity, protected storage, independent detection of whole-store rollback, and fresh verification at use. |
 
 These are application values and checks, not unforgeable authorization tokens. The
-stateless verifiers do not persist floors; the separate [store](policy-floor-store-v1.md)
-requires explicit initialization and caller use. P16 does not fetch policy updates or provide durable synchronization,
+stateless verifiers do not persist floors; the separate [policy](policy-floor-store-v1.md) and [federation](federation-floor-store-v1.md) stores
+require explicit initialization and caller use. P16 does not fetch policy updates or provide durable synchronization,
 cancel work already taken by a consumer or sample a completion-time clock. Logical
 byte ceilings do not establish process-memory or worst-case execution-time bounds.
 
@@ -62,9 +63,9 @@ their own revisions and experiments; they do not automatically certify later HEA
 Source hashes establish listed-file byte identity only, not loaded-code identity,
 complete dependencies, signed release provenance or truth of the reported observations.
 
-Provisioning, federation-floor persistence, independent whole-store rollback detection,
+Provisioning, independent whole-store rollback detection,
 remote transport and integrated runtime conformance remain unfinished P16 software.
-The local policy-floor helper does not close those gaps. P17 command-platform, P18 physical/real-time and P19
+The local floor helpers do not close those gaps. P17 command-platform, P18 physical/real-time and P19
 installed-product/help acceptance are not established by these library checks. A
 similarly numbered phase-1 evidence file is not evidence for those later phase scopes.
 

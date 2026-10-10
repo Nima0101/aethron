@@ -46,6 +46,28 @@ class PolicyFloorStoreTests(unittest.TestCase):
     def reopen(self):
         return self.api.PolicyFloorStore(self.path, scope="local")
 
+    def test_original_v1_disk_format_remains_readable_and_writable(self):
+        # Literal original schema/markers: independent of the implementation constants.
+        with closing(sqlite3.connect(self.path)) as db, db:
+            db.execute(
+                "CREATE TABLE policy_floor (id INTEGER PRIMARY KEY CHECK(id=1), "
+                "scope TEXT NOT NULL, revision INTEGER NOT NULL, time_s INTEGER NOT NULL, "
+                "policy_sha256 TEXT NOT NULL)"
+            )
+            db.execute("PRAGMA application_id=1096042033")
+            db.execute("PRAGMA user_version=1")
+            db.execute("INSERT INTO policy_floor VALUES (1, 'local', 3, 1500, ?)", (self.pin,))
+        store = self.reopen()
+        self.assertEqual(store.read().policy_sha256, self.pin)
+        store.observe_time(now_s=1501)
+        with closing(sqlite3.connect(self.path)) as db:
+            self.assertEqual(
+                db.execute("SELECT * FROM policy_floor").fetchall(),
+                [(1, "local", 3, 1501, self.pin)],
+            )
+            self.assertEqual(db.execute("PRAGMA application_id").fetchone(), (1096042033,))
+            self.assertEqual(db.execute("PRAGMA user_version").fetchone(), (1,))
+
     def test_reopen_keeps_complete_metadata_without_authority(self):
         self.create()
         row = self.reopen().read()

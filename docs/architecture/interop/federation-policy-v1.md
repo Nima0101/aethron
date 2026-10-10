@@ -114,5 +114,5 @@ identify the scoped checks and local raw logs. Reproduce the API boundary with:
 PYTHONPATH=tests:. python -m unittest test_interop_federation_policy test_interop_federation test_interop_delivery -v
 ```
 
-Durable federation-floor persistence remains the next software task. Whole-store
+Durable federation-floor persistence now has a [separate local store](federation-floor-store-v1.md). Whole-store
 rollback protection requires an independently retained anchor and is not supplied here.

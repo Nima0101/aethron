@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "id": "p16-federation-floor-store-v1",
+  "component": "Single-domain local federation revision, digest and trusted-time persistence",
+  "decision": "KEEP",
+  "constraints": [
+    "Offline one-row metadata, protected local filesystem and cooperating processes. Explicit initialization, no implicit repair/reset, exact domain and snapshot pin; no identified target or hard-real-time SLA.",
+    "Persist valid deny-all independently of bundle success; atomic read-check-write, nondecreasing time/revision and same-revision digest consistency. Preserve existing policy v1 disk format and rejection behavior."
+  ],
+  "alternatives": [
+    "Native SQLite transactions through Python sqlite3, Rust rusqlite, or C#/F# Microsoft.Data.Sqlite.",
+    "Atomic JSON replacement with OS locking, file/directory synchronization and explicit recovery protocol.",
+    "Erlang/Elixir OTP Mnesia transactions and local disk tables.",
+    "LMDB native transaction API; documentation retrieval failed again during this review, so no unsupported negative capability claim is made."
+  ],
+  "rationale": [
+    "KEEP SQLite and the Python binding after reviewing the existing persistence component: SQLite provides atomic local updates and writer serialization without introducing a custom journal. BEGIN IMMEDIATE acquires the write transaction before reading floors; timeout zero rejects contention.",
+    "Python invokes the existing exact-byte validator in the same process. Rust and .NET can provide sound SQLite bindings but do not by themselves add stronger snapshot acceptance, rollback detection or cross-file atomicity. No measured target constraint demonstrates a material benefit from replacing this boundary.",
+    "Mnesia is a credible runtime outside the component language and supports transactions; its broader database/distribution model does not resolve the identified whole-store-restore limitation. Atomic replacement needs a separate concurrent read/check/write locking and crash protocol.",
+    "Share the reviewed transaction machinery using fixed subclass SQL profiles, preserving policy disk bytes. Add a separate federation application ID/schema and immutable metadata type rather than treating federation as a policy. Decisions are constraint-based, not based on installed tools, familiarity or rewrite cost."
+  ],
+  "limits": [
+    "No alternative executable prototype or benchmark was run; no latency, resource superiority or universally best technology claim. LMDB source retrieval failure limits the comparison.",
+    "Atomic-commit properties depend on SQLite VFS/filesystem/hardware assumptions. Commit-failure injection is not physical power-loss qualification. Native/real-time targets require independent selection and evidence.",
+    "Whole database restore can lower floors. No independent rollback anchor, authenticated storage, encryption, trust enrollment or coordinated policy/federation transaction. All authority/qualification flags remain false."
+  ],
+  "evidence": [
+    "https://www.sqlite.org/lang_transaction.html",
+    "https://www.sqlite.org/atomiccommit.html",
+    "https://docs.python.org/3/library/sqlite3.html",
+    "https://docs.rs/rusqlite/latest/rusqlite/struct.Transaction.html",
+    "https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/transactions",
+    "https://www.erlang.org/doc/apps/mnesia/mnesia_chap4.html"
+  ]
+}

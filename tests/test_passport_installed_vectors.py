@@ -21,6 +21,84 @@ HAS_CRYPTO = importlib.util.find_spec("cryptography") is not None
 
 
 class InstalledVectorTests(unittest.TestCase):
+    def test_federation_floor_scenario_uses_real_api(self):
+        from aethron.passport_floor_store import FederationFloorStore
+
+        with patch.object(
+            RUNNER, "FederationFloorStore", wraps=FederationFloorStore, create=True
+        ) as store:
+            RUNNER.check_federation_floor_persistence(ROOT)
+            self.assertEqual(store.create.call_count, 1)
+            self.assertGreaterEqual(store.call_count, 3)
+
+    def test_federation_floor_write_loss_prevents_success(self):
+        from aethron.passport_floor_store import FederationFloorStore
+
+        def lost_time(store, *, now_s):
+            return SimpleNamespace(**(asdict(store.read()) | {"minimum_time_s": now_s}))
+
+        def lost_revision(store, federation, *, expected_federation_sha256, now_s):
+            return SimpleNamespace(
+                **(
+                    asdict(store.read())
+                    | {
+                        "federation_revision": 6,
+                        "minimum_time_s": now_s,
+                        "federation_sha256": expected_federation_sha256,
+                    }
+                )
+            )
+
+        for method, replacement in (
+            ("observe_time", lost_time),
+            ("accept_federation", lost_revision),
+        ):
+            with (
+                self.subTest(method=method),
+                patch.object(FederationFloorStore, method, replacement),
+            ):
+                with self.assertRaises(AssertionError):
+                    RUNNER.check_federation_floor_persistence(ROOT)
+
+    def test_federation_floor_wrong_metadata_prevents_success(self):
+        from aethron.passport_floor_store import FederationFloorStore
+
+        read = FederationFloorStore.read
+        for field, value in (
+            ("local_domain", "other"),
+            ("federation_revision", 99),
+            ("minimum_time_s", 0),
+            ("federation_sha256", "0" * 64),
+            ("execution_authority", True),
+            ("motion_authority", True),
+            ("evidence_verified", True),
+        ):
+
+            def changed(store, field=field, value=value):
+                return SimpleNamespace(**(asdict(read(store)) | {field: value}))
+
+            with self.subTest(field=field), patch.object(FederationFloorStore, "read", changed):
+                with self.assertRaises(AssertionError):
+                    RUNNER.check_federation_floor_persistence(ROOT)
+
+    def test_federation_floor_accepted_rollback_prevents_success(self):
+        from aethron.passport_floor_store import FederationFloorStore, FloorStoreError
+
+        for method in ("observe_time", "accept_federation"):
+            original = getattr(FederationFloorStore, method)
+
+            def changed(store, *args, original=original, **kwargs):
+                try:
+                    return original(store, *args, **kwargs)
+                except FloorStoreError:
+                    return store.read()
+
+            with self.subTest(method=method), patch.object(FederationFloorStore, method, changed):
+                with self.assertRaisesRegex(
+                    AssertionError, "installed federation floor rollback accepted"
+                ):
+                    RUNNER.check_federation_floor_persistence(ROOT)
+
     def test_federation_admission_uses_real_api_without_crypto(self):
         from aethron.interop_federation import validate_pinned_federation
 
@@ -179,8 +257,15 @@ class InstalledVectorTests(unittest.TestCase):
         with patch.object(
             RUNNER, "check_federation_policy", wraps=RUNNER.check_federation_policy
         ) as admission:
-            self.assertEqual(RUNNER.run(ROOT), 61)
+            self.assertEqual(RUNNER.run(ROOT), 62)
             admission.assert_called_once_with(ROOT)
+        with patch.object(
+            RUNNER,
+            "check_federation_floor_persistence",
+            side_effect=AssertionError("missing federation persistence"),
+        ):
+            with self.assertRaisesRegex(AssertionError, "missing federation persistence"):
+                RUNNER.run(ROOT)
         from aethron.passport_floor_store import FloorStoreError
 
         # A failed floor scenario must prevent the complete runner reporting success.
@@ -199,7 +284,7 @@ class InstalledVectorTests(unittest.TestCase):
         with patch.object(
             RUNNER, "validate_pinned_policy", wraps=validate_pinned_policy, create=True
         ) as validator:
-            self.assertEqual(RUNNER.run(ROOT), 61)
+            self.assertEqual(RUNNER.run(ROOT), 62)
             self.assertEqual(validator.call_count, 10)
 
     @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")

@@ -11,7 +11,7 @@ from aethron.interop_federation import validate_pinned_federation, verify_federa
 from aethron.interop_inbox import BoundedInbox
 from aethron.interop_tasks import validate_task
 from aethron.passport_evidence import verify_evidence
-from aethron.passport_floor_store import FloorStoreError, PolicyFloorStore
+from aethron.passport_floor_store import FederationFloorStore, FloorStoreError, PolicyFloorStore
 from aethron.passports import validate_pinned_policy, verify
 
 # Reviewed fixture bytes; changes require deliberate coverage review.
@@ -143,6 +143,59 @@ def check_floor_persistence(root):
             check(PolicyFloorStore(path, scope="installed-check").read(), 4, 1502, updated_pin)
 
 
+def check_federation_floor_persistence(root):
+    """Persist deny-all and clock metadata independently of bundle success."""
+    case = load_vectors(root, "examples/interop/federation-policy-vectors-v1.json")["cases"][1]
+    raw = case["federation"].encode()
+    pin = sha256(raw).hexdigest()
+    domain = case["arguments"]["local_domain"]
+
+    def check(row, revision, time_s, digest):
+        assert (
+            row.local_domain,
+            row.federation_revision,
+            row.minimum_time_s,
+            row.federation_sha256,
+        ) == (domain, revision, time_s, digest)
+        assert row.execution_authority is False
+        assert row.motion_authority is False
+        assert row.evidence_verified is False
+
+    with tempfile.TemporaryDirectory(prefix="aethron-federation-floor-check-") as directory:
+        path = str(Path(directory).resolve() / "floor.sqlite")
+        FederationFloorStore.create(path, federation=raw, **case["arguments"])
+        store = FederationFloorStore(path, local_domain=domain)
+        check(store.read(), 5, 1500, pin)
+        check(store.observe_time(now_s=1501), 5, 1501, pin)
+        check(FederationFloorStore(path, local_domain=domain).read(), 5, 1501, pin)
+        changed = json.loads(raw)
+        changed.update(revision=6, peers=[])
+        deny_all = json.dumps(changed, sort_keys=True, separators=(",", ":")).encode("ascii")
+        deny_pin = sha256(deny_all).hexdigest()
+        check(
+            store.accept_federation(deny_all, expected_federation_sha256=deny_pin, now_s=1502),
+            6,
+            1502,
+            deny_pin,
+        )
+        check(FederationFloorStore(path, local_domain=domain).read(), 6, 1502, deny_pin)
+        for method, arguments, reason in (
+            (store.observe_time, {"now_s": 1501}, "time_rollback"),
+            (
+                store.accept_federation,
+                {"federation": raw, "expected_federation_sha256": pin, "now_s": 1503},
+                "federation_rejected",
+            ),
+        ):
+            try:
+                method(**arguments)
+            except FloorStoreError as error:
+                assert str(error) == reason
+            else:
+                raise AssertionError("installed federation floor rollback accepted")
+            check(FederationFloorStore(path, local_domain=domain).read(), 6, 1502, deny_pin)
+
+
 def run(root):
     if sys.flags.optimize:
         raise RuntimeError("optimized_execution_not_supported")
@@ -224,7 +277,8 @@ def run(root):
         assert result.evidence_verified is False
     check_federation_policy(root)
     check_floor_persistence(root)
-    return sum(count for _, count in CORPORA.values()) + 1
+    check_federation_floor_persistence(root)
+    return sum(count for _, count in CORPORA.values()) + 2
 
 
 if __name__ == "__main__":

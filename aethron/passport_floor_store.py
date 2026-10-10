@@ -1,4 +1,4 @@
-"""Local policy floors, under caller-controlled storage and trusted clock/pin inputs.
+"""Local policy and federation floors, under caller-controlled storage and trusted clock/pin inputs.
 
 Not filesystem rollback detection, enrollment, encryption or execution authority.
 """
@@ -10,6 +10,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from .interop_federation import validate_pinned_federation
 from .passports import _HEX, _integer, _token, validate_pinned_policy
 
 _APPLICATION_ID = 0x41544631
@@ -56,36 +57,28 @@ def _time(value):
         raise FloorStoreError("invalid_time") from None
 
 
-class PolicyFloorStore:
-    """One scope per protected local file; each operation opens its own transaction."""
+@dataclass(frozen=True)
+class FederationFloor:
+    local_domain: str
+    federation_revision: int
+    minimum_time_s: int
+    federation_sha256: str
+    execution_authority: bool = field(default=False, init=False)
+    motion_authority: bool = field(default=False, init=False)
+    evidence_verified: bool = field(default=False, init=False)
 
-    def __init__(self, path: str, *, scope: str):
+
+class _FloorStore:
+    """Shared local transactions; subclasses supply fixed SQL and row types."""
+
+    def _open(self, path, scope):
         self._path = _configuration(path, scope)
         self._scope = scope
         self.read()  # No implicit initialization, repair or recovery to default floors.
 
     @classmethod
-    def create(
-        cls,
-        path: str,
-        *,
-        scope: str,
-        policy: bytes,
-        expected_policy_sha256: str,
-        now_s: int,
-        minimum_time_s: int,
-        minimum_policy_revision: int,
-    ):
+    def _create(cls, path, scope, revision, now_s, digest):
         target = _configuration(path, scope)
-        admitted = validate_pinned_policy(
-            policy,
-            expected_policy_sha256=expected_policy_sha256,
-            now_s=now_s,
-            minimum_time_s=minimum_time_s,
-            minimum_policy_revision=minimum_policy_revision,
-        )
-        if admitted.status != "validated":
-            raise FloorStoreError("policy_rejected")
         # Leave any partial file after a failed initialization for explicit recovery.
         try:
             fd = os.open(target, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
@@ -95,12 +88,12 @@ class PolicyFloorStore:
         instance = cls.__new__(cls)
         instance._path, instance._scope = target, scope
         with instance._transaction(initializing=True) as db:
-            db.execute(_SCHEMA)
-            db.execute("PRAGMA application_id=1096042033")
+            db.execute(instance._schema)
+            db.execute(instance._application_pragma)
             db.execute("PRAGMA user_version=1")
             db.execute(
-                "INSERT INTO policy_floor VALUES (1, ?, ?, ?, ?)",
-                (scope, admitted.policy_revision, now_s, admitted.policy_sha256),
+                instance._insert,
+                (scope, revision, now_s, digest),
             )
         return instance
 
@@ -147,15 +140,13 @@ class PolicyFloorStore:
 
     def _row(self, db):
         if (
-            db.execute("PRAGMA application_id").fetchone() != (_APPLICATION_ID,)
+            db.execute("PRAGMA application_id").fetchone() != (self._application_id,)
             or db.execute("PRAGMA user_version").fetchone() != (1,)
             or db.execute("SELECT type, name, sql FROM sqlite_master").fetchmany(2)
-            != [("table", "policy_floor", _SCHEMA)]
+            != [("table", self._table, self._schema)]
         ):
             raise FloorStoreError("invalid_store")
-        rows = db.execute(
-            "SELECT id, scope, revision, time_s, policy_sha256 FROM policy_floor"
-        ).fetchmany(2)
+        rows = db.execute(self._select).fetchmany(2)
         try:
             if len(rows) != 1 or rows[0][0] != 1 or rows[0][1] != self._scope:
                 raise ValueError
@@ -166,21 +157,61 @@ class PolicyFloorStore:
             _token(digest, _HEX)
         except (ValueError, TypeError):
             raise FloorStoreError("invalid_store") from None
-        return PolicyFloor(scope, revision, time_s, digest)
+        return self._row_type(scope, revision, time_s, digest)
 
-    def read(self) -> PolicyFloor:
+    def read(self):
         with self._transaction() as db:
             return self._row(db)
 
-    def observe_time(self, *, now_s: int) -> PolicyFloor:
-        """Record an independently trusted clock observation, even after policy expiry."""
+    def observe_time(self, *, now_s: int):
+        """Record an independently trusted clock observation, even after snapshot expiry."""
         _time(now_s)
         with self._transaction() as db:
             previous = self._row(db)
             if now_s < previous.minimum_time_s:
                 raise FloorStoreError("time_rollback")
-            db.execute("UPDATE policy_floor SET time_s=? WHERE id=1", (now_s,))
+            db.execute(self._update_time, (now_s,))
             return self._row(db)
+
+
+class PolicyFloorStore(_FloorStore):
+    """One policy scope per file; the original v1 disk format is unchanged."""
+
+    _application_id = _APPLICATION_ID
+    _application_pragma = "PRAGMA application_id=1096042033"
+    _table = "policy_floor"
+    _schema = _SCHEMA
+    _row_type = PolicyFloor
+    _insert = "INSERT INTO policy_floor VALUES (1, ?, ?, ?, ?)"
+    _select = "SELECT id, scope, revision, time_s, policy_sha256 FROM policy_floor"
+    _update_time = "UPDATE policy_floor SET time_s=? WHERE id=1"
+
+    def __init__(self, path: str, *, scope: str):
+        self._open(path, scope)
+
+    @classmethod
+    def create(
+        cls,
+        path: str,
+        *,
+        scope: str,
+        policy: bytes,
+        expected_policy_sha256: str,
+        now_s: int,
+        minimum_time_s: int,
+        minimum_policy_revision: int,
+    ):
+        _configuration(path, scope)
+        admitted = validate_pinned_policy(
+            policy,
+            expected_policy_sha256=expected_policy_sha256,
+            now_s=now_s,
+            minimum_time_s=minimum_time_s,
+            minimum_policy_revision=minimum_policy_revision,
+        )
+        if admitted.status != "validated":
+            raise FloorStoreError("policy_rejected")
+        return cls._create(path, scope, admitted.policy_revision, now_s, admitted.policy_sha256)
 
     def accept_policy(
         self,
@@ -209,5 +240,83 @@ class PolicyFloorStore:
             db.execute(
                 "UPDATE policy_floor SET revision=?, time_s=?, policy_sha256=? WHERE id=1",
                 (admitted.policy_revision, now_s, admitted.policy_sha256),
+            )
+            return self._row(db)
+
+
+class FederationFloorStore(_FloorStore):
+    """One local domain per file; admits deny-all without successful bundles."""
+
+    _application_id = 0x41544632
+    _application_pragma = "PRAGMA application_id=1096042034"
+    _table = "federation_floor"
+    _schema = (
+        "CREATE TABLE federation_floor (id INTEGER PRIMARY KEY CHECK(id=1), "
+        "local_domain TEXT NOT NULL, revision INTEGER NOT NULL, time_s INTEGER NOT NULL, "
+        "federation_sha256 TEXT NOT NULL)"
+    )
+    _row_type = FederationFloor
+    _insert = "INSERT INTO federation_floor VALUES (1, ?, ?, ?, ?)"
+    _select = "SELECT id, local_domain, revision, time_s, federation_sha256 FROM federation_floor"
+    _update_time = "UPDATE federation_floor SET time_s=? WHERE id=1"
+
+    def __init__(self, path: str, *, local_domain: str):
+        self._open(path, local_domain)
+
+    @classmethod
+    def create(
+        cls,
+        path: str,
+        *,
+        local_domain: str,
+        federation: bytes,
+        expected_federation_sha256: str,
+        now_s: int,
+        minimum_time_s: int,
+        minimum_federation_revision: int,
+    ):
+        _configuration(path, local_domain)
+        admitted = validate_pinned_federation(
+            federation,
+            expected_federation_sha256=expected_federation_sha256,
+            local_domain=local_domain,
+            now_s=now_s,
+            minimum_time_s=minimum_time_s,
+            minimum_federation_revision=minimum_federation_revision,
+        )
+        if admitted.status != "validated":
+            raise FloorStoreError("federation_rejected")
+        return cls._create(
+            path, local_domain, admitted.federation_revision, now_s, admitted.federation_sha256
+        )
+
+    def accept_federation(
+        self,
+        federation: bytes,
+        *,
+        expected_federation_sha256: str,
+        now_s: int,
+    ) -> FederationFloor:
+        """Validate a pinned snapshot under persisted floors, then commit metadata."""
+        with self._transaction() as db:
+            previous = self._row(db)
+            admitted = validate_pinned_federation(
+                federation,
+                expected_federation_sha256=expected_federation_sha256,
+                local_domain=self._scope,
+                now_s=now_s,
+                minimum_time_s=previous.minimum_time_s,
+                minimum_federation_revision=previous.federation_revision,
+            )
+            if admitted.status != "validated":
+                raise FloorStoreError("federation_rejected")
+            if (
+                admitted.federation_revision == previous.federation_revision
+                and admitted.federation_sha256 != previous.federation_sha256
+            ):
+                raise FloorStoreError("federation_equivocation")
+            db.execute(
+                "UPDATE federation_floor SET revision=?, time_s=?, federation_sha256=? WHERE id=1",
+                (admitted.federation_revision, now_s, admitted.federation_sha256),
             )
             return self._row(db)

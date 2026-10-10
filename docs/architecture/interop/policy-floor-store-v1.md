@@ -80,7 +80,8 @@ No extension loading or SQL supplied by callers is provided.
 A returned snapshot can become stale immediately after commit. The store does not
 atomically authorize subsequent use or cancel work already running. Consumers still
 need fresh verifier calls with the returned floors and their current trusted inputs.
-Policy enrollment, trusted clocks, provisioning, federation revision floors, encryption,
+Federation revision floors have a [separate store](federation-floor-store-v1.md).
+Policy enrollment, trusted clocks, provisioning, encryption,
 distributed synchronization, backup recovery and whole-store anti-rollback detection
 are separate requirements. The store grants no execution authority.
 
