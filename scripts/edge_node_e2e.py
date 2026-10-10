@@ -11,6 +11,8 @@ sys.path.insert(0, str(ROOT / "tests/integration"))
 
 
 def run():
+    output = ROOT / "build/ecosystem-phase1/node-consumer.json"
+    output.unlink(missing_ok=True)
     from test_edge_http import HTTPService
 
     archive = ROOT / "build/ecosystem-phase1/ts-package/aethron-edge-client-example-0.1.0.tgz"
@@ -49,12 +51,18 @@ def run():
         HTTPService.setUpClass()
         try:
             code = """import {observe} from 'aethron-edge-client-example';
-const controller=new AbortController();let received=0;
+const controller=new AbortController();let displays=0;
 try { await observe(process.argv[1],process.argv[2],'bench',value=>{
- if(value.label==='delayed_observation' && ++received>=3) controller.abort();
-},controller.signal); } catch(error) {if(error.name!=='AbortError')throw error;}
-if(received<3)throw new Error('no observations');
-console.log(JSON.stringify({events:received,current_state:'UNKNOWN',installed_client:true}));
+ if(value.current_state!=='UNKNOWN')throw new Error('unexpected_current_state');
+ if(value.label==='delayed_observation' && ++displays>=3) controller.abort();
+},controller.signal); } catch(error) {
+ if(!controller.signal.aborted || !(error instanceof Error) ||
+    error.message!=='stream_unavailable')throw error;
+}
+if(displays<3)throw new Error('no observations');
+console.log(JSON.stringify({
+ display_callbacks:displays,current_state:'UNKNOWN',installed_client:true
+}));
 """
             result = subprocess.run(
                 ["node", "--input-type=module", "-e", code, HTTPService.url, HTTPService.token],
@@ -65,10 +73,8 @@ console.log(JSON.stringify({events:received,current_state:'UNKNOWN',installed_cl
                 timeout=20,
             )
             record = json.loads(result.stdout)
-            assert record["events"] >= 3
-            (ROOT / "build/ecosystem-phase1/node-consumer.json").write_text(
-                json.dumps(record, indent=2) + "\n"
-            )
+            assert record["display_callbacks"] >= 3
+            output.write_text(json.dumps(record, indent=2) + "\n")
             print(result.stdout.strip())
         finally:
             HTTPService.tearDownClass()

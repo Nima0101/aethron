@@ -491,3 +491,52 @@ measurements. A local contract drift check does not authenticate the producing
 OpenAPI export or establish reproducible release provenance. Those distribution
 boundaries and the remaining platform/P12 inventory still need fresh review;
 no lane completion marker is created.
+
+
+## Fourth component, installed-client smoke result validity
+
+Baseline `57d5dbe0848e9febad54025b75d813077890b275`. Fresh SDK admission,
+projection, clock and transport regression checks remain green. The producer's
+`test_openapi.py` already compares its live model export with the checked-in
+OpenAPI artifact; its dependencies are absent from this host's system Python, so
+this turn does not claim a new executed producer-export check. No producer files
+were changed. Review of the consumer smoke harness found a stale `AbortError`
+expectation after the client switched to fixed transport errors. It also reported
+display callbacks as wire events, wrote UNKNOWN without checking callback state,
+and could leave an old success report after a failed run.
+
+Constraints: execute the actual Node program, consume the producing lane's
+Python `HTTPService` lifecycle fixture without duplicating its configuration,
+install only the prepared archive offline, distinguish expected caller shutdown
+from all other errors, and prevent stale results from appearing current.
+
+| Candidate | Decisive property |
+| --- | --- |
+| Python orchestration plus Node consumer | [Python subprocess](https://docs.python.org/3/library/subprocess.html#subprocess.run) executes argument lists with failure propagation and a child timeout; direct access to the existing Python service fixture keeps one service-bootstrap definition. [Node package resolution](https://nodejs.org/api/packages.html#module-resolution-and-loading) exercises the package import in the external consumer directory. |
+| Node-only orchestration | Can host the client but still requires a Python fixture bridge or a second implementation of server setup/cleanup. It does not eliminate the Python server/test dependency at this integration boundary. This differs from the standalone generator, where migration removed that dependency. |
+| PowerShell process orchestration | [Start-Process](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-process?view=powershell-7.5) provides process launch, waiting and stream redirection. It still needs both Python and Node, and a bridge to the service fixture; no demonstrated correctness or deployment benefit justifies a third runtime here. No comparative performance claim is made. |
+
+**KEEP Python/Node integration boundary; FIX result validity.** The harness checks
+every displayed current state, accepts only its own cancellation paired with
+`stream_unavailable`, and reports `display_callbacks`. Watchdog renders can repeat
+an observation; this count is not distinct wire evidence. The previous report is
+removed before import/install/server prerequisites, and only successful execution
+writes a new report. Historical reports are retained unchanged.
+
+Eight regression methods failed against baseline, with no test execution errors.
+They now pass, covering expected cancellation, other errors before/after abort,
+legacy abort rejection, missing observations, false state, reporting semantics
+and stale result removal. A ninth control executes the built SDK with controlled
+fetch/clock responses and requires DELETE cleanup. Its initial JavaScript fixture
+escaping error is retained separately from baseline product failures. The final
+nine methods and 235 SDK controls pass. Tests exercise the actual child program;
+package installation and the Python service boundary are substituted in these
+harness controls. They do not qualify a fresh real-server installed run, Windows,
+macOS or a customer distribution. See the
+[source-bound evidence](evidence/phase3/p33-smoke-review-v3.json).
+
+The archive's fixed filename does not bind it to the current source revision.
+Archive/source binding and actual real-server execution remain the next distribution
+review items. P19 and its complete offline bilingual contextual Help Center
+requirements were read; no P12/P19 UI or acceptance claim is made before this
+lane's outstanding re-audit and applicable integration gates are complete.
