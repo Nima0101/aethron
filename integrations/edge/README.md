@@ -10,6 +10,12 @@ The `sensor-replay` profile now runs calibrated raw recordings in the independen
 
 Raw radar/LiDAR sample indices refer to original row-major packet positions, including invalid points across organized rows; row padding does not consume an index. Selecting an invalid point yields no geometry; it never selects the next valid point. `Cloud.points` retains the finite-points view, while `Cloud.sample_points` preserves packet slots with `None` for invalid samples. Recorded replay stays recorded and unqualified, including when its configuration and bytes are signed.
 
+The `doctor` and `replay` configuration file must be UTF-8 JSON, at most 65536
+bytes and eight nesting levels, with unique object keys and integer `version: 1`.
+Replay requires a nonempty UTF-8 path without NUL; paths resolve relative to the
+configuration. Invalid configuration emits only `invalid_request` and no report.
+These are local configuration admission bounds, not new sensor thresholds.
+
 The JSONL replay CLI consumes bounded lines instead of loading the entire recording.
 `aethron_edge.protocol.replay_stream(binary_stream)` returns a complete `ReplayReport`
 only after all input passes the existing 300-frame, 30-second and 65536-byte line bounds;
