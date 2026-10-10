@@ -19,9 +19,92 @@ from aethron_edge.sensors import replay
 
 ROOT = Path(__file__).resolve().parents[2]
 PROBE = ROOT / "scripts/probes/sensor_replay_audit/compare.py"
+TRACE_CASES = (
+    "test_existing_trace_session_rejects_before_fixture_creation",
+    "test_traced_candidate_failure_stops_owned_tracing_without_report",
+    "test_peak_read_failure_stops_owned_tracing_without_report",
+    "test_normal_mode_rejects_wrong_timed_and_traced_results_without_report",
+)
 
 
 class ReplayAuditModeTests(unittest.TestCase):
+    def test_trace_cases_preserve_runner_trace(self):
+        # The outer process owns its tracer; this test must not alter the suite runner's.
+        code = """
+import json, sys, tracemalloc, unittest
+from test_sensor_replay_audit_modes import ReplayAuditModeTests, TRACE_CASES
+tracemalloc.start(3)
+retained = bytearray(32)
+before = tracemalloc.get_object_traceback(retained)
+result = unittest.TextTestRunner().run(unittest.TestSuite(
+    ReplayAuditModeTests(name) for name in TRACE_CASES
+))
+print(json.dumps({
+    'success': result.wasSuccessful(), 'tests': result.testsRun, 'skips': len(result.skipped),
+    'tracing': tracemalloc.is_tracing(),
+    'limit': tracemalloc.get_traceback_limit(),
+    'trace_preserved': before is not None and tracemalloc.get_object_traceback(retained) == before,
+}))
+sys.exit(0 if result.wasSuccessful() else 1)
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            env=self.child_environment(),
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            json.loads(result.stdout),
+            {
+                "success": True,
+                "tests": 4,
+                "skips": 0,
+                "tracing": True,
+                "limit": 3,
+                "trace_preserved": True,
+            },
+        )
+
+    @staticmethod
+    def child_environment():
+        env = dict(
+            os.environ,
+            PYTHONPATH=os.pathsep.join(
+                (str(ROOT / "integrations/edge"), str(Path(__file__).parent))
+            ),
+            OPENBLAS_NUM_THREADS="1",
+            OMP_NUM_THREADS="1",
+        )
+        # Each child owns a fresh trace and must execute the harness assertions.
+        env.pop("PYTHONTRACEMALLOC", None)
+        env.pop("PYTHONOPTIMIZE", None)
+        return env
+
+    def run_isolated_trace_case(self):
+        self.assertIn(self._testMethodName, TRACE_CASES)
+        code = """
+import json, sys, unittest
+from test_sensor_replay_audit_modes import ReplayAuditModeTests
+result = unittest.TextTestRunner().run(unittest.TestSuite([
+    ReplayAuditModeTests(sys.argv[1])
+]))
+print(json.dumps({'tests': result.testsRun, 'skips': len(result.skipped)}))
+sys.exit(0 if result.wasSuccessful() else 1)
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", code, "_" + self._testMethodName],
+            env=self.child_environment(),
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout), {"tests": 1, "skips": 0})
+
     def setUp(self):
         self.shared_bindings = (
             replay.__file__,
@@ -142,6 +225,9 @@ class ReplayAuditModeTests(unittest.TestCase):
                 self.diagnostic_report(replay_path=Path(directory) / "missing.py")
 
     def test_existing_trace_session_rejects_before_fixture_creation(self):
+        self.run_isolated_trace_case()
+
+    def _test_existing_trace_session_rejects_before_fixture_creation(self):
         module = runpy.run_path(str(PROBE))
         output = io.StringIO()
         tracemalloc.start()
@@ -172,6 +258,9 @@ class ReplayAuditModeTests(unittest.TestCase):
             tracemalloc.stop()
 
     def test_traced_candidate_failure_stops_owned_tracing_without_report(self):
+        self.run_isolated_trace_case()
+
+    def _test_traced_candidate_failure_stops_owned_tracing_without_report(self):
         for failure_type in (RuntimeError, KeyboardInterrupt):
             with self.subTest(failure_type=failure_type):
                 module = runpy.run_path(str(PROBE))
@@ -201,6 +290,9 @@ class ReplayAuditModeTests(unittest.TestCase):
                     tracemalloc.stop()
 
     def test_peak_read_failure_stops_owned_tracing_without_report(self):
+        self.run_isolated_trace_case()
+
+    def _test_peak_read_failure_stops_owned_tracing_without_report(self):
         module = runpy.run_path(str(PROBE))
         output = io.StringIO()
         try:
@@ -260,6 +352,9 @@ class ReplayAuditModeTests(unittest.TestCase):
                 self.assertEqual(result.stderr.strip(), "replay_audit_requires_assertions")
 
     def test_normal_mode_rejects_wrong_timed_and_traced_results_without_report(self):
+        self.run_isolated_trace_case()
+
+    def _test_normal_mode_rejects_wrong_timed_and_traced_results_without_report(self):
         for fail_at in (1, 2):
             with self.subTest(fail_at=fail_at):
                 module = runpy.run_path(str(PROBE))

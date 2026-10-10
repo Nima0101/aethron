@@ -17,10 +17,28 @@ cleanup, payload binding, parity failures and optimized-import rejection.
 Ruff lint/format checks passed. Bandit retained the two existing LOW findings
 for the subprocess import and bounded interpreter invocation.
 
-The tests that verify real tracing ownership still start/stop the interpreter's
-real tracer. Narrowing function mocks does not isolate that process-global
-state. The next C02 test task is to verify isolation from an already-active
-runner tracer. No concurrent failure or hosted CI repair is claimed here.
+The initial mock-scope correction left real tracing tests in the runner's
+interpreter. A subsequent regression started a three-frame runner trace and
+retained an allocation before invoking all four tracing cases. The four cases
+reported success, but the regression failed: tracing was stopped, the allocation
+trace was erased, and the traceback limit had changed to one. Python documents
+that [`tracemalloc.stop()` clears recorded traces](https://docs.python.org/3.13/library/tracemalloc.html#tracemalloc.stop).
+
+FIX: run each of the four existing test bodies in a fresh interpreter. A child
+must report exactly one executed test, no skips and a successful exit. Preserve
+the original assertions and negative cases; AST comparison confirmed all four
+bodies are unchanged. Child environments remove inherited tracing/optimization
+settings without modifying the parent environment. Each case has a 15-second
+subprocess timeout; the runner-preservation regression has a 60-second timeout.
+These are test timeouts, not a hard real-time or process-tree deadline claim.
+
+The complete focused suite now passes all 11 methods. The new regression verifies
+all four public cases succeed while the runner's original allocation traceback,
+active tracing state and three-frame limit survive. Ruff passes. Bandit reports
+four LOW findings: the two earlier findings plus two subprocess calls added for
+isolation. Both new calls use the current interpreter, fixed test code, argument
+lists without a shell and explicit timeouts. No finding is suppressed and no
+hosted CI repair is claimed.
 
 This correction changes only tests. Replay implementation, comparison harness,
 contracts, historical measurements and frozen thresholds are unchanged. No
