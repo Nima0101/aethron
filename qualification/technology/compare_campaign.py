@@ -29,14 +29,26 @@ def main():
     with patch.object(campaign_sql, "evaluate_sql", wraps=campaign_sql.evaluate_sql) as calls:
         result = runner.run(suite())
         invocations = calls.call_count
-    if not result.wasSuccessful():
+    if (
+        not result.wasSuccessful()
+        or not result.testsRun
+        or result.skipped
+        or result.expectedFailures
+        or not invocations
+    ):
         raise RuntimeError("campaign_candidate_contract_failed")
     # A relational mutant that admits all duplicate rows must be detected.
     with patch.object(
         campaign_sql, "ELIGIBLE", campaign_sql.ELIGIBLE.replace("d.n = 1", "d.n >= 1")
     ):
         mutant = runner.run(suite())
-    if mutant.wasSuccessful() or mutant.errors:
+    if (
+        not mutant.failures
+        or mutant.errors
+        or mutant.skipped
+        or mutant.expectedFailures
+        or mutant.unexpectedSuccesses
+    ):
         raise RuntimeError("campaign_mutation_check_failed")
     plan = plan_fixture()
     plan["cases"] = [dict(plan["cases"][0], id=f"case{i}", minimum_captures=4) for i in range(16)]

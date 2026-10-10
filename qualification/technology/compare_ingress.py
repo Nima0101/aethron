@@ -41,7 +41,13 @@ def collect():
     result = unittest.TextTestRunner(stream=io.StringIO()).run(
         unittest.TestSuite(Capture(name) for name in names)
     )
-    if not result.wasSuccessful():
+    if (
+        not result.wasSuccessful()
+        or not result.testsRun
+        or result.skipped
+        or result.expectedFailures
+        or not requests
+    ):
         raise RuntimeError("semantic_oracle_tests_failed")
     return requests
 
