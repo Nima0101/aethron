@@ -103,6 +103,22 @@ def check_parity(expected, actual):
                 raise ValueError("candidate_parity_failed")
 
 
+def check_benchmark(expected, actual):
+    fields = {"samples", "accepted", "p50_ns", "p95_ns", "max_ns"}
+    if type(actual) is not dict or actual.keys() != fields:
+        raise ValueError("candidate_benchmark_failed")
+    if not all(type(value) is int and 0 <= value < 2**64 for value in actual.values()):
+        raise ValueError("candidate_benchmark_failed")
+    # Match the fixed round-robin probe schedule in reference.c, not its self-report.
+    accepted = sum(expected[i % len(expected)]["accepted"] for i in range(512))
+    if (
+        actual["samples"] != 512
+        or actual["accepted"] != accepted
+        or not actual["p50_ns"] <= actual["p95_ns"] <= actual["max_ns"]
+    ):
+        raise ValueError("candidate_benchmark_failed")
+
+
 def _execute(command, *, timeout, out, label):
     # All callers supply fixed local commands; no shell or remote installer.
     try:
@@ -218,6 +234,7 @@ def run(out):
         execute(command, "compiler", 30)
         candidate = decode_candidate(execute([str(executable)], "candidate", 5))
         check_parity(expected, candidate["results"])
+        check_benchmark(expected, candidate.get("benchmark"))
         sanitized = (out / "reference-sanitized").resolve()
         execute(
             command[:-2]
@@ -225,10 +242,9 @@ def run(out):
             "sanitized-compiler",
             30,
         )
-        check_parity(
-            expected,
-            decode_candidate(execute([str(sanitized)], "sanitized-candidate", 5))["results"],
-        )
+        sanitized_candidate = decode_candidate(execute([str(sanitized)], "sanitized-candidate", 5))
+        check_parity(expected, sanitized_candidate["results"])
+        check_benchmark(expected, sanitized_candidate.get("benchmark"))
         report["failed_stage"] = "baseline"
         for case, result in zip(cases, expected):
             if case["accepted"] != result["accepted"]:

@@ -153,6 +153,65 @@ class WireAuditTests(unittest.TestCase):
                 self.assertEqual((out / "candidate-stdout.log").read_bytes(), raw)
                 self.assertEqual((out / "candidate-stderr.log").read_bytes(), b"diagnostic\x00")
 
+    def test_run_rejects_inconsistent_benchmark_metadata_in_both_profiles(self):
+        results = [self.api.python_result(bytes.fromhex(c["hex"])) for c in self.api.corpus()]
+        accepted = sum(results[i % len(results)]["accepted"] for i in range(512))
+        valid = {"samples": 512, "accepted": accepted, "p50_ns": 1, "p95_ns": 2, "max_ns": 3}
+        negatives = [
+            None,
+            {},
+            dict(valid, extra=0),
+            dict(valid, samples=511),
+            dict(valid, accepted=accepted - 1),
+            dict(valid, p50_ns=False),
+            dict(valid, p95_ns=2.0),
+            dict(valid, max_ns=-1),
+            dict(valid, p50_ns=3),
+            dict(valid, max_ns=1),
+            dict(valid, max_ns=2**64),
+        ]
+        cases = [("candidate", value) for value in negatives]
+        cases.append(("sanitized-candidate", dict(valid, accepted=accepted - 1)))
+        for stage, invalid in cases:
+
+            def execute(command, *, label, stage=stage, invalid=invalid, **kwargs):
+                if command[0] == "cc":
+                    return "fixture compiler"
+                benchmark = invalid if label == stage else valid
+                return json.dumps({"results": results, "benchmark": benchmark})
+
+            with (
+                self.subTest(stage=stage, invalid=invalid),
+                tempfile.TemporaryDirectory() as directory,
+            ):
+                out = Path(directory) / "attempt"
+                with patch("pymavlink.generator.mavgen.mavgen", return_value=True):
+                    with patch.object(self.api, "_execute", side_effect=execute):
+                        with self.assertRaisesRegex(ValueError, "candidate_benchmark_failed"):
+                            self.api.run(out)
+                report = json.loads((out / "result.json").read_text())
+                self.assertEqual(report["state"], "failed")
+                self.assertEqual(report["failed_stage"], stage)
+
+    def test_run_preserves_valid_zero_resolution_timing_metadata(self):
+        results = [self.api.python_result(bytes.fromhex(c["hex"])) for c in self.api.corpus()]
+        accepted = sum(results[i % len(results)]["accepted"] for i in range(512))
+        benchmark = {"samples": 512, "accepted": accepted, "p50_ns": 0, "p95_ns": 0, "max_ns": 0}
+
+        def execute(command, **kwargs):
+            if command[0] == "cc":
+                return "fixture compiler"
+            return json.dumps({"results": results, "benchmark": benchmark})
+
+        with tempfile.TemporaryDirectory() as directory:
+            out = Path(directory) / "attempt"
+            with patch("pymavlink.generator.mavgen.mavgen", return_value=True):
+                with patch.object(self.api, "_execute", side_effect=execute):
+                    report = self.api.run(out)
+            self.assertEqual(report["state"], "compared")
+            self.assertEqual(report["c"], benchmark)
+            self.assertNotIn("failed_stage", report)
+
 
 if __name__ == "__main__":
     unittest.main()

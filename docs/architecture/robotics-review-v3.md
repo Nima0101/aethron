@@ -200,3 +200,29 @@ invalid UTF-8 retention. No production receiver, candidate decoder or frozen bou
 changed. The new receipt is separate from historical measurements; no performance
 ranking is inferred. This resolves these evidence defects, not the open technology
 decision, isolated-header-guard coverage or complete V3 review.
+
+## C benchmark summary consistency
+
+The C runner validated decoded packet results but copied benchmark metadata without
+checking it. Twelve negative fixtures returned successful comparison receipts for
+missing/extra fields, wrong probe or acceptance counts, boolean/float/negative or
+overflowing timing values, unordered percentiles, or an inconsistent sanitizer
+summary. FIX: both profiles now require the five declared integer fields, unsigned
+64-bit values matching the driver's representation, exactly 512 samples and the
+acceptance count independently computed from the fixed round-robin reference
+schedule. Timing summaries must satisfy `p50 <= p95 <= max`. Zero durations remain
+valid; clock resolution can make a measured interval zero. No new performance
+threshold or sample schedule is introduced.
+
+[Evidence](../verification/robotics-wire-metadata-review-v3.json) retains the
+twelve RED failures, 27 passing focused tests, a successful zero-duration control
+and normal/sanitized execution of the unchanged 17-case experiment. Both retained
+candidate logs also passed a separate parity/metadata recheck. Initial formatting
+findings were corrected and retained in the record. Production receiver and
+candidate implementations are unchanged.
+
+These checks establish internal summary consistency only. Ordered integer numbers
+do not prove that a candidate measured them honestly, authenticate the host clock,
+or recover individual timing samples. Historical reports are not retroactively
+qualified by this correction. Resource/latency comparisons still have different
+deployment envelopes; no runtime winner or complete first-component review follows.
