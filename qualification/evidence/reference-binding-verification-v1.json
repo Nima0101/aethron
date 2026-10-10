@@ -1,0 +1,33 @@
+{
+  "scope": "opaque campaign reference byte binding; no content approval",
+  "python": "3.13.5",
+  "before_head": "c541aa5564e6d5bd4bc16bfc35bd1aab6798ec39",
+  "observed_red": {
+    "test_methods": 6,
+    "assertion_failures": 17,
+    "errors": 0,
+    "reason": "module absent"
+  },
+  "green": {
+    "test_methods": 6,
+    "passed": true,
+    "errors": 0,
+    "skips": 0
+  },
+  "one_byte_budget_mutation": {
+    "assertion_failures": 2,
+    "errors": 0,
+    "restored_baseline_passed": true
+  },
+  "source_sha256": {
+    "qualification/campaign_references.py": "ffae611838d8627c036c68bd3e6988dab9656cbc6aee8f7032857a34199e6686",
+    "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "qualification/tests/test_campaign_references.py": "37ed0a291ecd08e28b66dabe3f0b4ab4ee37442d75ced6439391d937660e6698",
+    "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+    "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+    "qualification/campaign-references-v1.md": "ee8e18d683e8faa7c57eb95afc127784a73091e4275dda0529fbaf65cef9b710"
+  },
+  "physical_qualification_passed": false
+}

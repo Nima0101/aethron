@@ -1,0 +1,35 @@
+{
+  "review_order_version": 3,
+  "component": "declaration_validation",
+  "python": "3.13.5",
+  "baseline_tests": 4,
+  "baseline_passed": true,
+  "negative_finding_mutations": {
+    "capture_stale": {
+      "failures": 2,
+      "errors": 0
+    },
+    "record_stale": {
+      "failures": 1,
+      "errors": 0
+    },
+    "clock_pair_skew": {
+      "failures": 1,
+      "errors": 0
+    },
+    "clock_domain_mismatch": {
+      "failures": 1,
+      "errors": 0
+    }
+  },
+  "restored_baseline_passed": true,
+  "scope": "synthetic offline declarations; not live admission or authentication",
+  "physical_qualification_passed": false,
+  "source_sha256": {
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+    "qualification/tests/test_declaration_review.py": "f2b1798f19ee679868cf50e7f08e5c94bae5950a7bf6412e80611094e97a03c1",
+    "qualification/technology/review_declarations.py": "cce2daa5acf2c333fb96171f38fe51109fa4cd21fe598fce86f6747d61fb02bb"
+  }
+}

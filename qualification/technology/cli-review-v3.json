@@ -1,0 +1,39 @@
+{
+  "review_order_version": 3,
+  "component": "cli_report_delivery",
+  "python": "3.13.5",
+  "before_commit": "a69d174facce1b163136f0442b82d94d06879443",
+  "before_cli_sha256": "bdea12ec2faf3ea4bddf447aa836ce9d55d7625e58b910094f2bcf6d604608da",
+  "observed_red": {
+    "test_methods": 3,
+    "assertion_failures": 6,
+    "errors": 0,
+    "abbreviated_options_accepted": [
+      "--now",
+      "--now-m",
+      "--n"
+    ],
+    "repeated_time_exit_codes": [
+      0,
+      1,
+      0
+    ],
+    "expected_rejection_exit": 2
+  },
+  "after": {
+    "test_methods": 5,
+    "passed": true,
+    "errors": 0,
+    "skipped": 0,
+    "golden_reports_unchanged": true
+  },
+  "physical_qualification_passed": false,
+  "source_sha256": {
+    "qualification/__main__.py": "92864f32de4bbee186a1c6f8bf77596facc3e2e83d2c1de879a8869a9816ac60",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "qualification/tests/test_cli_review.py": "6e10783f1e9f53f6412479956beba3070f3949846677c9f570445ac60c5b644f",
+    "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+    "qualification/evidence/synthetic-report-v1.json": "4351cfca35268ef684f16c6cd98f8de3a41e5020fa10479c7b760fd46b4c1f35",
+    "qualification/evidence/expired-calibration-report-v1.json": "ebb63392fd6d48fdadd860091438f2181569fdcbf569130651b3e974b2981133"
+  }
+}

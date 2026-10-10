@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_head": "ad19b18cc7f79d3f94c9bc07af94abe06f3ad0fe",
+  "python": "3.13.5",
+  "baseline_methods": 82,
+  "red": {
+    "methods": 9,
+    "assertion_failures": 2992,
+    "errors": 0,
+    "cause": "Absent CLI module; each truncated-prefix subcase also failed the explicit entry-point existence assertion."
+  },
+  "golden_red": {
+    "methods": 1,
+    "assertion_failures": 1,
+    "errors": 0,
+    "cause": "Absent golden report fixture."
+  },
+  "mutations": [
+    {
+      "mutation": "length_guard",
+      "methods": 1,
+      "failures": 7,
+      "errors": 0,
+      "skips": 0
+    },
+    {
+      "mutation": "trailing_guard",
+      "methods": 1,
+      "failures": 2,
+      "errors": 0,
+      "skips": 0
+    },
+    {
+      "restored_methods": 11,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0
+    }
+  ],
+  "focused": {
+    "methods": 93,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "process_controls": [
+    {
+      "case": "positive",
+      "exit": 0,
+      "stdout_bytes": 1124,
+      "passed": true
+    },
+    {
+      "case": "negative",
+      "exit": 1,
+      "stdout_bytes": 1152,
+      "passed": true
+    },
+    {
+      "case": "malformed",
+      "exit": 2,
+      "stdout_bytes": 0,
+      "passed": true
+    }
+  ],
+  "static": {
+    "ruff_check": "PASS",
+    "ruff_format_check": "PASS",
+    "bandit_cli": "PASS",
+    "python_3_9_grammar": "PASS; no Python 3.9 interpreter execution claimed"
+  },
+  "commands": [
+    "python -m unittest qualification.tests.test_campaign_bundle_cli -q",
+    "python -m unittest discover -s qualification/tests -q",
+    "python -m qualification.campaign_bundle_cli < authorized-frame.bin"
+  ],
+  "source_sha256": {
+    "qualification/campaign_bundle_cli.py": "a19cf6ed0525afb75f551dbb94d41a5d1cfce4886895dfafcbd170e09186dbb4",
+    "qualification/campaign_bundle.py": "1584e531f994fde5c612dce52eafc993adfe51044d9338b5db27d97fe843e32e",
+    "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+    "qualification/campaign_references.py": "ffae611838d8627c036c68bd3e6988dab9656cbc6aee8f7032857a34199e6686",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "qualification/tests/test_campaign_bundle_cli.py": "f1faaf6f7c2e80978f89dd24ca0a7744ec82b58d2eacd8b96eabb9238b2a5cb4",
+    "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+    "qualification/tests/test_campaign_references.py": "37ed0a291ecd08e28b66dabe3f0b4ab4ee37442d75ced6439391d937660e6698",
+    "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+    "qualification/evidence/synthetic-campaign-bundle-v1.json": "6276c611412faed43956087ac372118f00d5f9a63baf6121deb3d6ef82838e58",
+    "qualification/campaign-bundle-stream-v1.md": "cd73d8d3bc115860a1db82cf807b9460988deed5f8f385444dceea4e949cde17"
+  },
+  "physical_qualification_passed": false,
+  "hosted_execution_verified": false,
+  "performance_qualification_passed": false
+}

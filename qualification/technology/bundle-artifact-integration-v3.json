@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "audit_policy_version": 3,
+  "baseline_commit": "bcb9b2fa455ef79c43a173ce93975fa792277711",
+  "source_state": "Baseline production files plus new working-copy integration test; hashes observed after test runs, not execution attestation.",
+  "python_version": "3.13.5",
+  "platform_class": "Linux development host; no target hardware evidence",
+  "reviewed": [
+    "P4 declarations and artifact binding",
+    "P15 campaign/reference/bundle composition and stream consumption"
+  ],
+  "decision": "KEEP Python direct integration tests; add missing composition coverage and consumer guidance",
+  "production_defect_demonstrated": false,
+  "production_files_changed": false,
+  "red_claimed": false,
+  "new_test_run": {
+    "methods": 4,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "elapsed_seconds": 0.26
+  },
+  "focused_test_run": {
+    "command": "python3 -m unittest qualification.tests.test_evidence qualification.tests.test_artifacts qualification.tests.test_campaign qualification.tests.test_campaign_references qualification.tests.test_campaign_bundle qualification.tests.test_campaign_bundle_cli qualification.tests.test_bundle_process qualification.tests.test_bundle_artifact_integration -q",
+    "methods": 63,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "elapsed_seconds": 6.227
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "diff": "PASS",
+    "bandit_production_paths_exit": 0,
+    "bandit_test_path_exit": 1,
+    "bandit_test_findings": [
+      "B404 low: subprocess import",
+      "B603 low: subprocess invocation"
+    ],
+    "bandit_review": "Fixed interpreter/module argv and checkout cwd; no shell; 10-second timeout; synthetic manifest only on stdin. Requires trusted interpreter/checkout. Findings retained without suppression."
+  },
+  "sources_sha256": {
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "qualification/artifacts.py": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+    "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+    "qualification/campaign_references.py": "ffae611838d8627c036c68bd3e6988dab9656cbc6aee8f7032857a34199e6686",
+    "qualification/campaign_bundle.py": "1584e531f994fde5c612dce52eafc993adfe51044d9338b5db27d97fe843e32e",
+    "qualification/campaign_bundle_cli.py": "a19cf6ed0525afb75f551dbb94d41a5d1cfce4886895dfafcbd170e09186dbb4",
+    "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+    "qualification/tests/test_artifacts.py": "b0e4a20dc2a92a0b0773b0d6749a15495e0e8361b89da3e46197f88267077563",
+    "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+    "qualification/tests/test_campaign_references.py": "37ed0a291ecd08e28b66dabe3f0b4ab4ee37442d75ced6439391d937660e6698",
+    "qualification/tests/test_campaign_bundle.py": "eec7d74e1bd8c5432366be08c61e4bb71ae47b85127342ae5849efc473429026",
+    "qualification/tests/test_campaign_bundle_cli.py": "f1faaf6f7c2e80978f89dd24ca0a7744ec82b58d2eacd8b96eabb9238b2a5cb4",
+    "qualification/tests/test_bundle_process.py": "20547364dc7e9d184be3b413293867e7366ae103d33c6a08c9428fbed94663c2",
+    "qualification/tests/test_bundle_artifact_integration.py": "bca180b04c29367afc80a055b06abcde0ac8f09ca7d9e4623568cd055668584b"
+  },
+  "integration_cases": [
+    "Four freshness/byte-match combinations retain separate results",
+    "Previously passing artifact report cannot bind a substituted manifest",
+    "Passing artifact checks cannot remove duplicate-capture rejection",
+    "Real stream process and artifact API retain simultaneous declaration/reference/byte failures"
+  ],
+  "claims_withheld": [
+    "artifact authenticity",
+    "trusted time",
+    "source authorization",
+    "physical qualification",
+    "installed distribution acceptance",
+    "P19 help coverage",
+    "hard real-time latency",
+    "uptime",
+    "certification"
+  ],
+  "hosted_run_observed": false,
+  "technology_audit_complete": false,
+  "lane_complete": false
+}

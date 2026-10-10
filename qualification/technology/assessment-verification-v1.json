@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "baseline_commit": "1c0c111b59300b6563d591c82624f24ac217a7a6",
+  "scope": "Raw-input qualification software assessment v1",
+  "source_sha256": {
+    "qualification/assessment.py": "8d2df16612ff788af4fe51ac73ca5a5953d2e9424dac6d1097c6b6e2b48c5956",
+    "qualification/tests/test_assessment.py": "56aaaa672dc6efcf7d9f8a7446b9426c275dca5b1bd46d773dca3082d2084ab7",
+    "qualification/assessment-v1.md": "a62bbae125bdd5cd2b1642c7246d5e5ea31bf6dc4f1dd504ddd87a37f7205caf",
+    "qualification/technology/assessment-decision-v1.json": "59c453921dd7760714b8cd230e71440b967fad6fb821df18e3b0ff8bdd6cdf6a",
+    "qualification/technology/assessment-decision-v1.schema.json": "f805f46dbdf480efc4faeb375ff6d3b75279c0de9733352ec122844f037c54df",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "qualification/artifacts.py": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+    "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+    "qualification/domains.py": "7ef976b0936b0b6c2db701767e4f31e84ec51193b81c4ec2fb2489c2aea3e2a0",
+    "qualification/procedures.py": "5c6bc37c7eb4a8a45ad9ba8f592838065ebea1a9b95090bf7f6f7a345fd6923a",
+    "qualification/methods.py": "ac80ba3089447ac3d23bb37b98555e0b9bdb6b42360bb59901f02e84baeec388",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e"
+  },
+  "source_observations_unchanged": true,
+  "red": {
+    "test": "test_all_software_gates_pass_without_qualification",
+    "expected_failures": 1,
+    "reason": "API module absent before implementation"
+  },
+  "development_findings": [
+    "Privacy test initially used a label also present in a fixed finding code; replaced with a distinct private sentinel.",
+    "Ruff rejected assigned lambda in independent commitment oracle; replaced with named function.",
+    "First in-memory mutation runner omitted module spec and failed in find_spec before testing the mutation; supplied the original import spec and reran."
+  ],
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "qualification.tests.test_assessment",
+        "qualification.tests.test_evidence",
+        "qualification.tests.test_artifacts",
+        "qualification.tests.test_campaign",
+        "qualification.tests.test_campaign_bundle",
+        "qualification.tests.test_domains",
+        "qualification.tests.test_procedures",
+        "qualification.tests.test_methods",
+        "-q"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 11.470931,
+      "stdout": "",
+      "stderr": "----------------------------------------------------------------------\nRan 91 tests in 11.014s\n\nOK\n"
+    },
+    {
+      "command": [
+        "ruff",
+        "check",
+        "qualification/assessment.py",
+        "qualification/tests/test_assessment.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.069524,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "ruff",
+        "format",
+        "--check",
+        "qualification/assessment.py",
+        "qualification/tests/test_assessment.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.011369,
+      "stdout": "2 files already formatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "bandit",
+        "qualification/assessment.py",
+        "-q"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.738839,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "negative_controls": [
+    {
+      "control": "dropped_campaign_gate",
+      "test": "test_duplicate_capture_failure_survives_individually_passing_artifacts",
+      "expected_assertion_failures": 1,
+      "unexpected_errors": 0
+    },
+    {
+      "control": "dropped_domain_gate",
+      "test": "test_every_independent_gate_is_required",
+      "expected_assertion_failures": 1,
+      "unexpected_errors": 0
+    },
+    {
+      "control": "dropped_method_gate",
+      "test": "test_every_independent_gate_is_required",
+      "expected_assertion_failures": 1,
+      "unexpected_errors": 0
+    },
+    {
+      "control": "dropped_capture_gate",
+      "test": "test_every_independent_gate_is_required",
+      "expected_assertion_failures": 1,
+      "unexpected_errors": 0
+    },
+    {
+      "control": "promoted_physical_claim",
+      "test": "test_all_software_gates_pass_without_qualification",
+      "expected_assertion_failures": 1,
+      "unexpected_errors": 0
+    },
+    {
+      "control": "unbounded_aggregate",
+      "test": "test_aggregate_artifact_limit_counts_reused_payloads",
+      "expected_assertion_failures": 1,
+      "unexpected_errors": 0
+    }
+  ],
+  "limits": [
+    "Synthetic software consistency only; no source authentication, hardware qualification or customer acceptance.",
+    "Payload upper bound is not a heap, latency, hard-real-time or uptime claim.",
+    "Caller must not mutate envelopes during initial snapshot; subsequent mutation is isolated.",
+    "ADR JSON Schema supplied; external schema-engine conformance not executed.",
+    "Local Python 3.13 only; no current Python 3.9 or hosted PASS claim.",
+    "Source observations are not execution attestation or complete dependency closure."
+  ],
+  "physical_qualification_passed": false,
+  "phase_complete": false
+}

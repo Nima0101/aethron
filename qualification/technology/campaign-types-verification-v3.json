@@ -1,0 +1,418 @@
+{
+  "version": 1,
+  "audit_policy_version": 3,
+  "baseline_commit": "a156b147cead165f136536e4de40505f501c781f",
+  "scope": "P4 evidence/artifact/campaign review; exact campaign candidate result types in ordinary contract cases",
+  "source_sha256_at_record_creation": {
+    "qualification/tests/test_campaign_audit.py": "14ffec4acb4b7e3a2ab273edc263bd540631db05b0c86f8102ae653c4cea457c",
+    "qualification/tests/test_campaign_measurement_results.py": "aa69c9a80cdacc6462daeab1c9c3deb67dddf5c8a61e772941fe1203ef0ca116",
+    "qualification/technology/campaign-types-decision-v3.json": "fb48ad2ade8adbd53049482c617874c783e9f57b28fb8ddb62b65ad15e36e11f",
+    "qualification/technology/campaign-types-decision-v3.schema.json": "c20a4b185bed1899de3cb8ad1dbdb71f39466a3271128e8a129bff04f4310ef1",
+    "qualification/technology/review-v3.md": "bb8d00461517081b6683e991490c098db2b47af72531cf60c9c2a34d6e9fff3d"
+  },
+  "red": {
+    "test": "test_contract_types_cannot_hide_behind_a_valid_maximum_workload",
+    "tests": 1,
+    "assertion_failures": 2,
+    "unexpected_errors": 0,
+    "mismatches": [
+      "Boolean version in ordinary contract cases",
+      "Floating rejected-count in ordinary contract cases"
+    ],
+    "maximum_workloads_unchanged": true
+  },
+  "initial_checks": {
+    "lint": "Five B023 closure-binding findings corrected using explicit default arguments",
+    "format": "One file required formatting; corrected",
+    "combined_tests": {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "qualification.tests.test_evidence",
+        "qualification.tests.test_artifacts",
+        "qualification.tests.test_binding_measurement_results",
+        "qualification.tests.test_campaign_audit",
+        "qualification.tests.test_campaign_measurement_results",
+        "qualification.tests.test_comparison_results",
+        "-q"
+      ],
+      "timeout_seconds": 60,
+      "result": "terminated_timeout",
+      "test_completion_verified": false
+    }
+  },
+  "focused_checks": [
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "qualification.tests.test_evidence",
+        "qualification.tests.test_artifacts",
+        "qualification.tests.test_campaign_audit",
+        "-q"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 5.095652,
+      "stdout": "",
+      "stderr": "----------------------------------------------------------------------\nRan 33 tests in 4.405s\n\nOK\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "qualification.tests.test_binding_measurement_results",
+        "qualification.tests.test_comparison_results",
+        "-q"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 13.602896,
+      "stdout": "",
+      "stderr": "----------------------------------------------------------------------\nRan 8 tests in 12.295s\n\nOK\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "qualification.tests.test_campaign_measurement_results",
+        "-q"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 41.253401,
+      "stdout": "",
+      "stderr": "----------------------------------------------------------------------\nRan 6 tests in 38.331s\n\nOK\n"
+    }
+  ],
+  "static_checks": [
+    {
+      "command": [
+        "ruff",
+        "check",
+        "qualification/tests/test_campaign_audit.py",
+        "qualification/tests/test_campaign_measurement_results.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "ruff",
+        "format",
+        "--check",
+        "qualification/tests/test_campaign_audit.py",
+        "qualification/tests/test_campaign_measurement_results.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "bandit",
+        "-q",
+        "qualification/tests/test_campaign_audit.py",
+        "qualification/tests/test_campaign_measurement_results.py"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "probe_execution": [
+    {
+      "name": "binding",
+      "command": [
+        "python3",
+        "-m",
+        "qualification.technology.measure_binding"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 1.997959,
+      "stderr": ""
+    },
+    {
+      "name": "campaign",
+      "command": [
+        "python3",
+        "-m",
+        "qualification.technology.compare_campaign"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 13.713382,
+      "stderr": ""
+    },
+    {
+      "name": "node",
+      "command": [
+        "node",
+        "--v8-pool-size=1",
+        "qualification/technology/hash-probe.mjs"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 2.106828,
+      "stderr": ""
+    }
+  ],
+  "reports": {
+    "binding": {
+      "scope": "four_mib_production_artifact_binding",
+      "audit_policy_version": 3,
+      "python": "3.13.5",
+      "hash_backend_module": "_hashlib",
+      "four_mib_digests": [
+        "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58",
+        "ee78cd29d3a534713b36e6ff6fa3668c8a8f851a542d5eb2401c25ca4e057d02",
+        "2fa4430272111c7854b204001461e16f2c73725b07dde2b6d1dc4f2aa8fe18da",
+        "9ed3b916b5b6b1dbe61b8844c8130657b9bc4f7ff80a07c7835989c911ad430a"
+      ],
+      "verify_elapsed_ns": [
+        3161336,
+        88982901,
+        3243820,
+        4815093,
+        92087066,
+        3222148,
+        2894154,
+        2708797,
+        2750331,
+        87351376
+      ],
+      "traced_peak_bytes_one_call": 10949,
+      "input_storage_excluded_from_tracing": true,
+      "result_validation_excluded_from_measurements": true,
+      "all_measured_results_checked": true,
+      "artifact_counts": {
+        "referenced": 4,
+        "supplied": 4,
+        "matched": 4,
+        "missing": 0,
+        "mismatched": 0,
+        "unreferenced": 0,
+        "supplied_bytes": 4194304
+      },
+      "manifest_sha256": "11e2cdcb0c5511aa2132f6136bf36033d6bae99f7935f33baa90eee722e55ef7",
+      "source_sha256": {
+        "qualification/artifacts.py": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+        "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+        "qualification/technology/measure_binding.py": "99bb5ccd4ed3a0116296c497185195be517affa3220e07e4df0981cb6233184e",
+        "qualification/technology/measurement.py": "4121cadfb220bef2835eefd9c3eca65501c1f535e05097711fd29c9713721bf3",
+        "qualification/technology/source_snapshot.py": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365"
+      },
+      "source_observation": "equal_before_and_after_workload",
+      "physical_qualification_passed": false
+    },
+    "campaign": {
+      "scope": "offline_campaign_aggregation_audit",
+      "audit_policy_version": 3,
+      "python": "3.13.5",
+      "sqlite": "3.46.1",
+      "test_methods": 11,
+      "candidate_calls": 48,
+      "all_contract_tests_passed": true,
+      "duplicate_mutant_failures": 3,
+      "duplicate_mutant_errors": 0,
+      "maximum_cases": 16,
+      "maximum_submissions": 64,
+      "maximum_workload_report": {
+        "version": 1,
+        "plan_sha256": "e5d41a943710f3e18d879037e231fc7da7e378c3bea5cf3faa6664042ec90b9b",
+        "captures_sha256": "9297849b54d145970ee979df3cb1b2aad5bd066352e8302d67c0d34a4c9f66e2",
+        "capture_counts": {
+          "submitted": 64,
+          "eligible": 64,
+          "rejected": 0
+        },
+        "cases": [
+          {
+            "case_index": 0,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 1,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 2,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 3,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 4,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 5,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 6,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 7,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 8,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 9,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 10,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 11,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 12,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 13,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 14,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 15,
+            "required": 4,
+            "eligible": 4
+          }
+        ],
+        "findings": [],
+        "declaration_coverage_complete": true,
+        "domain_verified": false,
+        "procedure_verified": false,
+        "artifact_authenticity_verified": false,
+        "physical_qualification_passed": false
+      },
+      "maximum_result_oracle": "fixed_synthetic_v1",
+      "all_measured_results_checked": true,
+      "elapsed_ns": {
+        "python": [
+          403274760,
+          195480867,
+          106401708,
+          184916048,
+          187877293,
+          104643096,
+          296107857,
+          209531808,
+          106606873,
+          185518782
+        ],
+        "sqlite": [
+          494002418,
+          396566842,
+          112737491,
+          201400328,
+          109876381,
+          110355588,
+          285845660,
+          196962444,
+          106298891,
+          103160692
+        ]
+      },
+      "python_traced_peak_bytes": {
+        "python": 39085,
+        "sqlite": 49780
+      },
+      "measurement_limits": [
+        "Shared host, ten alternating-order repetitions; descriptive only.",
+        "Both paths share admission and declaration semantics; SQL aggregation is independent.",
+        "Tracing excludes preconstructed inputs and native SQLite allocations.",
+        "Result validation is outside measurements; traced calls retain their returned reports.",
+        "Whitespace-distinct bytes test input capacity, not independent physical evidence."
+      ],
+      "source_sha256": {
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+        "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+        "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+        "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+        "qualification/tests/test_campaign_audit.py": "14ffec4acb4b7e3a2ab273edc263bd540631db05b0c86f8102ae653c4cea457c",
+        "qualification/technology/campaign_sql.py": "4deb710665852d208c1b8170a5963cc649a73e0536116d88926eff99074259c3",
+        "qualification/technology/compare_campaign.py": "226494d03bbe4d34f90aa311da9d3b425454151b8ba3968bf5b2f34e309c4609",
+        "qualification/technology/measurement.py": "4121cadfb220bef2835eefd9c3eca65501c1f535e05097711fd29c9713721bf3",
+        "qualification/technology/source_snapshot.py": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365"
+      },
+      "source_observation": "equal_before_and_after_workload",
+      "physical_qualification_passed": false
+    },
+    "node": {
+      "audit_policy_version": 3,
+      "scope": "native_sha256_and_ownership_probe_only",
+      "runtime": "v22.23.2",
+      "known_vectors": [
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      ],
+      "four_mib_digests": [
+        "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58",
+        "ee78cd29d3a534713b36e6ff6fa3668c8a8f851a542d5eb2401c25ca4e057d02",
+        "2fa4430272111c7854b204001461e16f2c73725b07dde2b6d1dc4f2aa8fe18da",
+        "9ed3b916b5b6b1dbe61b8844c8130657b9bc4f7ff80a07c7835989c911ad430a"
+      ],
+      "copy_and_hash_elapsed_ns": [
+        190298320,
+        15917231,
+        87557211,
+        92622514,
+        10533554,
+        90936742,
+        100160518,
+        15427104,
+        95004372,
+        6788559
+      ],
+      "all_measured_results_checked": true,
+      "result_validation_excluded_from_measurements": true,
+      "alias_changed": true,
+      "owned_preserved": true,
+      "physical_qualification_passed": false,
+      "source_observation": "equal_before_and_after_workload",
+      "source_sha256": {
+        "qualification/technology/hash-probe.mjs": "6dbf3a4f2f0eff0417f8d2f251bc74701bdfc076134006e17b206cfb341542e5"
+      }
+    }
+  },
+  "limits": [
+    "Candidate reports are compared against the Python reference; identical shared defects may still require independent contract expectations.",
+    "Fixed maximum-workload expectations remain independent of both evaluators.",
+    "SQL and Python share input admission and capture semantics; only aggregation is separately expressed.",
+    "Shared-host samples are descriptive and include runtime contention; no statistical runtime ranking or target deadline follows.",
+    "Python tracing excludes preconstructed inputs and native SQLite allocations; Node timing includes copies and hashes, not full artifact validation.",
+    "Initial combined test command was terminated at 60 seconds and is not counted as passing.",
+    "Report source observations were rechecked at record creation; file hashes are not execution attestation.",
+    "Strict ADR JSON Schema supplied; no external schema-engine conformance run.",
+    "CLI/reference/bundle and remaining acceptance re-review are not completed by this slice."
+  ],
+  "physical_qualification_passed": false,
+  "phase_complete": false
+}

@@ -1,0 +1,403 @@
+{
+  "version": 1,
+  "audit_policy_version": 3,
+  "baseline_commit": "20e19c0b6c8a0b7c5de7aa5365a87d9e913f2467",
+  "scope": "Independent token admission expectations in the diagnostic comparison; no production API change",
+  "source_sha256": {
+    "qualification/technology/compare_ingress.py": "598bcfbed884d303af4c1e719e27a5b35b392d7b99a7ba942a1f74e34e100073",
+    "qualification/tests/test_audit_reports.py": "149ffe14f92b88e6d3398c454d6c7fdcbdccddbc153a07b1dddd9dbe817e6bc6",
+    "qualification/technology/ingress-admission-decision-v3.json": "0f81dd18277a098a7ae60013bbc301307542e9f6092c0e61e55b5a6036936d0c",
+    "qualification/technology/ingress-admission-decision-v3.schema.json": "08ad2848ccee16fc6d5b982c2dc1f5475b7ca2dcbda405b3398264e79bd564fa",
+    "qualification/technology/review-v3.md": "fe72da1447ac96a76f5e60fafa03fce47b5b36c18e17125e8935835d14cadc83",
+    "qualification/tests/test_ingress_audit.py": "e614426850878706420ea248ec2d93f5a96f4957709d25bcf632ff4f49cdf0c4",
+    "qualification/tests/test_comparison_sources.py": "acaf3be25f6ae28c1388ed705e30e383fe83978e73e0856e67574de2a9ff3cf7",
+    "qualification/tests/test_comparison_results.py": "0ad67f360dbf848c39e09867b501aad38fabc04b61fcfd58af68cdb4de729b29",
+    "qualification/tests/test_ingress_measurement_results.py": "b2d1b0d90b88b10e28fdb840db4205e01e2827ce60f91b6c9b3912726ec131f0",
+    "qualification/tests/test_measurement_review.py": "c26ba9514d70195917a1f1db5c67724b47ed1d223eb44ba785133eafb5c45453",
+    "qualification/tests/java_transport.py": "b108f6b242733901296e0850680615f12e1c8ca04e299843eead609dfe451ffe"
+  },
+  "red": {
+    "test": "test_equal_schema_rejections_do_not_hide_forbidden_ingress_acceptance",
+    "tests": 1,
+    "assertion_failures": 3,
+    "errors": 0,
+    "observed": "Before correction, each forbidden float-token acceptance returned success despite the pinned rejection expectation."
+  },
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "qualification.tests.test_audit_reports",
+        "qualification.tests.test_ingress_audit",
+        "qualification.tests.test_comparison_sources",
+        "qualification.tests.test_comparison_results",
+        "-q"
+      ],
+      "tests": 22,
+      "exit_code": 0,
+      "elapsed_test_seconds": 51.465
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "qualification.tests.test_ingress_measurement_results",
+        "qualification.tests.test_measurement_review",
+        "-q"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 29.607289,
+      "stdout": "",
+      "stderr": "----------------------------------------------------------------------\nRan 7 tests in 24.695s\n\nOK\n"
+    },
+    {
+      "command": [
+        "ruff",
+        "check",
+        "qualification/technology/compare_ingress.py",
+        "qualification/tests/test_audit_reports.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "ruff",
+        "format",
+        "--check",
+        "qualification/technology/compare_ingress.py",
+        "qualification/tests/test_audit_reports.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "bandit",
+        "-q",
+        "qualification/technology/compare_ingress.py",
+        "qualification/tests/test_audit_reports.py"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "actual_probe_execution": [
+    {
+      "name": "java-version",
+      "command": [
+        "java",
+        "-Xint",
+        "-XX:ActiveProcessorCount=1",
+        "-XX:+UseSerialGC",
+        "-Xmx64m",
+        "-version"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.69746,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "69e4d820bbf12548b1aff85e7901c4a0c1d91062235f919476a893c02ed0816d"
+    },
+    {
+      "name": "node-version",
+      "command": [
+        "node",
+        "--v8-pool-size=1",
+        "--version"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.195972,
+      "stdout_sha256": "c42fcf0db5a550bda2f566fcdc21955df3e5a8ec3aeb90ac533f3776e7fce32a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "compile",
+      "command": [
+        "javac",
+        "-J-XX:ActiveProcessorCount=1",
+        "-J-XX:+UseSerialGC",
+        "-J-Xmx64m",
+        "-cp",
+        "<pinned-jackson-jar>",
+        "-d",
+        "<audit-dir>",
+        "qualification/technology/IngressProbe.java"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 19.307964,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "requests",
+      "command": [
+        "python3",
+        "-m",
+        "qualification.technology.compare_ingress",
+        "--export"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 1.598223,
+      "stdout_sha256": "7c1ddc2d27791242716bfa836e681f0b3b8fa92e05350806b4536350620255e0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "responses",
+      "command": [
+        "java",
+        "-Xint",
+        "-XX:ActiveProcessorCount=1",
+        "-XX:+UseSerialGC",
+        "-Xmx64m",
+        "-cp",
+        "<audit-dir>:<pinned-jackson-jar>",
+        "IngressProbe"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 4.48843,
+      "stdout_sha256": "5059be25311cb6c0e60f0c9e0636ccc3e62535d233661267ee152a5d5f55668f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "comparison",
+      "command": [
+        "python3",
+        "-m",
+        "qualification.technology.compare_ingress",
+        "--responses",
+        "<audit-dir>/responses.stdout"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 4.032358,
+      "stdout_sha256": "1a6be89f3c759c0c2a7b8c6c5ca2b12500840935b29b07ff6f67f0e8c86ca645",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "transport-tests",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "qualification.tests.java_transport",
+        "-q"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 9.975763,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "884eac13e0f5fc1e92b618c8e5c845d470b5e02f742c6ec7501909184366aa16"
+    },
+    {
+      "name": "node",
+      "command": [
+        "node",
+        "--v8-pool-size=1",
+        "qualification/technology/ingress-probe.mjs"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.122867,
+      "stdout_sha256": "a266ee904fb898b45178e6568907b177e65f870d75fae75463f5ca9170a96b3e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "java_version": "openjdk version \"21.0.11\" 2026-04-21\nOpenJDK Runtime Environment (build 21.0.11+10-1-deb13u2-Debian)\nOpenJDK 64-Bit Server VM (build 21.0.11+10-1-deb13u2-Debian, interpreted mode, sharing)",
+  "parser_sha256": "b64b5874162b503a0e58a8f7758266e8dd9f91bf49e3a59ae0b5f47589a231b7",
+  "compiled_class_sha256": "b8f73e8a0ca8c551166857f2e37f693e5616f56a69a84310fd3ee785ca708dfc",
+  "java_transport_tests": {
+    "tests": 8,
+    "exit_code": 0,
+    "stderr": "----------------------------------------------------------------------\nRan 8 tests in 8.621s\n\nOK\n"
+  },
+  "java_comparison": {
+    "audit_policy_version": 3,
+    "scope": "Java ingress with unchanged Python semantic oracle; not a Java validator",
+    "python": "3.13.5",
+    "ingress_cases": 18,
+    "semantic_requests": 63,
+    "mismatch_indices": [],
+    "ingress_mismatch_indices": [],
+    "report_mismatch_indices": [],
+    "document_mismatch_indices": [],
+    "all_reports_match": true,
+    "all_ingress_expectations_match": true,
+    "all_documents_match": true,
+    "request_transport_sha256": "7c1ddc2d27791242716bfa836e681f0b3b8fa92e05350806b4536350620255e0",
+    "response_transport_sha256": "5059be25311cb6c0e60f0c9e0636ccc3e62535d233661267ee152a5d5f55668f",
+    "python_65536_byte_measurement": {
+      "iterations": 20,
+      "elapsed_ns": [
+        6044727,
+        88395587,
+        6746111,
+        5856135,
+        91327075,
+        10648529,
+        89934836,
+        93008713,
+        5534383,
+        6920600,
+        5732647,
+        87319855,
+        5842488,
+        5424877,
+        87417608,
+        5763626,
+        5624635,
+        5553458,
+        83923601,
+        6000666
+      ],
+      "traced_peak_bytes_one_call": 73615,
+      "acceptance_threshold": null,
+      "all_measured_results_checked": true,
+      "result_validation_excluded_from_measurements": true,
+      "expected_input_sha256": "5ecd7409628816cfb0cdd497fa0ff1f85b0f3340fdf6ec4870c8021c04c53f66"
+    },
+    "source_sha256": {
+      "qualification/technology/IngressProbe.java": "f3e814c0039f3aaec9d50003a908eca18feedcb3edba58be8530f73b56f8ffee",
+      "qualification/technology/compare_ingress.py": "598bcfbed884d303af4c1e719e27a5b35b392d7b99a7ba942a1f74e34e100073",
+      "qualification/technology/measurement.py": "4121cadfb220bef2835eefd9c3eca65501c1f535e05097711fd29c9713721bf3",
+      "qualification/technology/ingress-vectors-v1.json": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff",
+      "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+      "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+      "qualification/rigs/synthetic-v1.json": "0b68e3a27477d5d53bc616afac23d82568ac357fdf95ce2520f114ac2efb25ea",
+      "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+      "qualification/technology/source_snapshot.py": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365"
+    },
+    "source_observation": "equal_before_and_after_workload",
+    "physical_qualification_passed": false
+  },
+  "node_probe": {
+    "audit_policy_version": 3,
+    "scope": "ingress_token_probe_only_no_schema_or_semantic_validation",
+    "runtime": "v22.23.2",
+    "source_aware_reviver": true,
+    "cases": [
+      {
+        "id": "valid-incomplete",
+        "accepted": true,
+        "expected_accepted": true,
+        "matches": true
+      },
+      {
+        "id": "integer-negative-zero",
+        "accepted": true,
+        "expected_accepted": true,
+        "matches": true
+      },
+      {
+        "id": "escaped-key-valid",
+        "accepted": true,
+        "expected_accepted": true,
+        "matches": true
+      },
+      {
+        "id": "float-integral",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "exponent-integral",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "float-underflow",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "nonfinite",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "infinite",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "oversized-number",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "duplicate-equal",
+        "accepted": true,
+        "expected_accepted": false,
+        "matches": false
+      },
+      {
+        "id": "duplicate-overwrite",
+        "accepted": true,
+        "expected_accepted": false,
+        "matches": false
+      },
+      {
+        "id": "duplicate-escaped",
+        "accepted": true,
+        "expected_accepted": false,
+        "matches": false
+      },
+      {
+        "id": "nested-duplicate",
+        "accepted": true,
+        "expected_accepted": false,
+        "matches": false
+      },
+      {
+        "id": "utf8-bom",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "invalid-utf8",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "utf16",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "trailing-document",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      },
+      {
+        "id": "malformed",
+        "accepted": false,
+        "expected_accepted": false,
+        "matches": true
+      }
+    ],
+    "parity": false,
+    "source_observation": "equal_before_and_after_workload",
+    "source_sha256": {
+      "qualification/technology/ingress-probe.mjs": "fec6a03be76426f189822036f4bbe9034b06c0e3737e67581a2a0ab8188bc92d",
+      "qualification/technology/ingress-vectors-v1.json": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff"
+    },
+    "physical_qualification_passed": false
+  },
+  "limits": [
+    "The 18 pinned corpus cases have independent token admission expectations; 63 collected semantic requests test Python reference preservation only.",
+    "Actual local Java 21.0.11 and Node 22.23.2 were exercised; configured hosted Java 17 was not exercised locally.",
+    "Node exits successfully to publish its negative diagnostic report; parity remains false on four duplicate-key cases.",
+    "Timing samples measure the Python reference on a shared host, not Java speed, target latency or a hard deadline.",
+    "Source hashes observe files before/after workloads and at record creation; they are not execution attestation.",
+    "Strict ADR schema supplied and JSON parsed; no external JSON Schema engine conformance run.",
+    "Remaining diagnostic re-review and P15/P19 software acceptance work are incomplete."
+  ],
+  "physical_qualification_passed": false,
+  "phase_complete": false
+}

@@ -1,0 +1,32 @@
+{
+  "scope": "native_sha256_and_ownership_probe_only",
+  "runtime": "v22.23.2",
+  "known_vectors": [
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+  ],
+  "four_mib_digests": [
+    "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58",
+    "ee78cd29d3a534713b36e6ff6fa3668c8a8f851a542d5eb2401c25ca4e057d02",
+    "2fa4430272111c7854b204001461e16f2c73725b07dde2b6d1dc4f2aa8fe18da",
+    "9ed3b916b5b6b1dbe61b8844c8130657b9bc4f7ff80a07c7835989c911ad430a"
+  ],
+  "copy_and_hash_elapsed_ns": [
+    85401881,
+    209206158,
+    8381410,
+    7371738,
+    84355563,
+    14213886,
+    180415939,
+    98910343,
+    13504340,
+    84863546
+  ],
+  "alias_changed": true,
+  "owned_preserved": true,
+  "physical_qualification_passed": false,
+  "source_sha256": {
+    "qualification/technology/hash-probe.mjs": "010f2925a1a8abae567a0030f89abb27ebf97ed429ad35e1697ecda278bb5c1e"
+  }
+}

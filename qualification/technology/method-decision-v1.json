@@ -1,0 +1,48 @@
+{
+  "$schema": "./method-decision-v1.schema.json",
+  "version": 1,
+  "id": "qualification-declaration-methods-v1",
+  "decision": "KEEP",
+  "technology": "Python immutable byte snapshot, native hashing and bounded JSON hooks",
+  "constraints": [
+    "Offline in-process source-checkout adapter",
+    "At most 48 exact-byte documents, each at most 65536 bytes and depth eight",
+    "Exact digest binding and closed rule declarations; no instructions or authority",
+    "Preserve checklist, byte and content failures independently",
+    "No target ABI, hard deadline or process-supervision requirement"
+  ],
+  "alternatives": [
+    {
+      "technology": "CUE",
+      "source": "https://cuelang.org/docs/concept/how-cue-enables-data-validation/",
+      "assessment": "Declarative constraints fit rule shape; byte-envelope snapshots, exact commitments and report composition still need a host boundary."
+    },
+    {
+      "technology": "Rego",
+      "source": "https://www.openpolicyagent.org/docs/policy-language",
+      "assessment": "Policy relations are credible for authored rules, but there is no independently distributed policy requirement and raw token admission remains separate."
+    },
+    {
+      "technology": "Erlang",
+      "source": "https://www.erlang.org/doc/system/expressions.html",
+      "assessment": "Immutable binaries and maps suit evidence snapshots. The current synchronous adapter does not need process supervision; report parity still needs explicit implementation."
+    },
+    {
+      "technology": "C# and Rust",
+      "source": "qualification/procedures-v1.md",
+      "assessment": "Native streaming or typed paths remain credible if a target ABI or measured resource requirement becomes decisive."
+    }
+  ],
+  "rationale": "Immutable byte values stabilize payloads while a shallow dictionary snapshot stabilizes the envelope. Pair and numeric-token hooks preserve strict admission. Direct composition preserves the existing checklist report and independent findings without a serialization bridge. Qualitative mechanism comparison, not a performance ranking.",
+  "source": "https://docs.python.org/3.13/library/json.html",
+  "reopen_when": [
+    "A target native ABI is required",
+    "Measured resource limits are unmet",
+    "Rules require independent policy distribution"
+  ],
+  "validation": [
+    "qualification.tests.test_methods",
+    "qualification/fixtures/methods-v1.json"
+  ],
+  "physical_qualification_passed": false
+}

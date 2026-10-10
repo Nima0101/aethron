@@ -1,0 +1,631 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_commit": "52cd6f093d7940194e9bdd4725fe6016bd153d68",
+  "scope": "All tracked implementation/experiment sources under qualification and the owned workflow at the baseline; not full phase delivery",
+  "implemented_component_review_caught_up": true,
+  "phase_complete": false,
+  "audit_completion_marker_written": false,
+  "source_inventory": [
+    {
+      "component": "declarations",
+      "decision": "KEEP Python bounded decoding/semantics",
+      "decision_documents": [
+        "qualification/schema-v1.md",
+        "qualification/technology/review-v3.md"
+      ],
+      "sources": [
+        {
+          "path": "qualification/evidence.py",
+          "sha256": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+          "matching_retained_records": [
+            "qualification/evidence/artifacts-verification-v1.json",
+            "qualification/evidence/campaign-bundle-cli-verification-v1.json",
+            "qualification/evidence/campaign-bundle-verification-v1.json",
+            "qualification/evidence/campaign-verification-v1.json",
+            "qualification/evidence/reference-binding-verification-v1.json",
+            "qualification/technology/artifact-review-v3.json",
+            "qualification/technology/audit-tool-review-v3.json",
+            "qualification/technology/binding-results-review-v3.json",
+            "qualification/technology/campaign-results-review-v3.json",
+            "qualification/technology/campaign-review-v3.json",
+            "qualification/technology/campaign-sql-result-v1.json",
+            "qualification/technology/cli-review-v3.json",
+            "qualification/technology/comparison-results-v3.json",
+            "qualification/technology/comparison-source-observation-v3.json",
+            "qualification/technology/declaration-review-v3.json",
+            "qualification/technology/delivery-review-v3.json",
+            "qualification/technology/document-fidelity-review-v3.json",
+            "qualification/technology/ingress-java-result-v1.json",
+            "qualification/technology/ingress-verification-v1.json",
+            "qualification/technology/java-output-review-v3.json",
+            "qualification/technology/java-transport-review-v3.json",
+            "qualification/technology/measurement-review-v3.json",
+            "qualification/technology/report-output-review-v3.json",
+            "qualification/technology/review-results-v3.json",
+            "qualification/technology/source-observation-v3.json",
+            "qualification/technology/workflow-retention-review-v3.json"
+          ]
+        }
+      ]
+    },
+    {
+      "component": "byte_binding",
+      "decision": "KEEP immutable bytes/native hashing",
+      "decision_documents": [
+        "qualification/artifacts-v1.md",
+        "qualification/campaign-references-v1.md"
+      ],
+      "sources": [
+        {
+          "path": "qualification/artifacts.py",
+          "sha256": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+          "matching_retained_records": [
+            "qualification/evidence/artifacts-verification-v1.json",
+            "qualification/technology/artifact-review-v3.json",
+            "qualification/technology/audit-tool-review-v3.json",
+            "qualification/technology/binding-python-result-v1.json",
+            "qualification/technology/binding-results-review-v3.json",
+            "qualification/technology/comparison-source-observation-v3.json",
+            "qualification/technology/measurement-review-v3.json",
+            "qualification/technology/review-results-v3.json",
+            "qualification/technology/source-observation-v3.json"
+          ]
+        },
+        {
+          "path": "qualification/campaign_references.py",
+          "sha256": "ffae611838d8627c036c68bd3e6988dab9656cbc6aee8f7032857a34199e6686",
+          "matching_retained_records": [
+            "qualification/evidence/campaign-bundle-cli-verification-v1.json",
+            "qualification/evidence/campaign-bundle-verification-v1.json",
+            "qualification/evidence/reference-binding-verification-v1.json",
+            "qualification/technology/cli-shutdown-review-v3.json",
+            "qualification/technology/delivery-review-v3.json",
+            "qualification/technology/document-fidelity-review-v3.json"
+          ]
+        }
+      ]
+    },
+    {
+      "component": "campaign",
+      "decision": "KEEP direct aggregation and independent SQL comparison",
+      "decision_documents": [
+        "qualification/campaign-v1.md",
+        "qualification/technology/campaign-results-review-v3.md"
+      ],
+      "sources": [
+        {
+          "path": "qualification/campaign.py",
+          "sha256": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+          "matching_retained_records": [
+            "qualification/evidence/campaign-bundle-cli-verification-v1.json",
+            "qualification/evidence/campaign-bundle-verification-v1.json",
+            "qualification/evidence/campaign-verification-v1.json",
+            "qualification/evidence/reference-binding-verification-v1.json",
+            "qualification/technology/audit-tool-review-v3.json",
+            "qualification/technology/campaign-results-review-v3.json",
+            "qualification/technology/campaign-review-v3.json",
+            "qualification/technology/campaign-sql-result-v1.json",
+            "qualification/technology/comparison-results-v3.json",
+            "qualification/technology/comparison-source-observation-v3.json",
+            "qualification/technology/delivery-review-v3.json",
+            "qualification/technology/java-transport-review-v3.json",
+            "qualification/technology/measurement-review-v3.json",
+            "qualification/technology/review-results-v3.json",
+            "qualification/technology/source-observation-v3.json"
+          ]
+        },
+        {
+          "path": "qualification/technology/campaign_sql.py",
+          "sha256": "4deb710665852d208c1b8170a5963cc649a73e0536116d88926eff99074259c3",
+          "matching_retained_records": [
+            "qualification/technology/audit-tool-review-v3.json",
+            "qualification/technology/campaign-results-review-v3.json",
+            "qualification/technology/campaign-review-v3.json",
+            "qualification/technology/campaign-sql-result-v1.json",
+            "qualification/technology/comparison-results-v3.json",
+            "qualification/technology/comparison-source-observation-v3.json",
+            "qualification/technology/java-transport-review-v3.json",
+            "qualification/technology/measurement-review-v3.json",
+            "qualification/technology/review-results-v3.json",
+            "qualification/technology/source-observation-v3.json"
+          ]
+        }
+      ]
+    },
+    {
+      "component": "bundle",
+      "decision": "KEEP direct composition",
+      "decision_documents": [
+        "qualification/campaign-bundle-v1.md"
+      ],
+      "sources": [
+        {
+          "path": "qualification/campaign_bundle.py",
+          "sha256": "1584e531f994fde5c612dce52eafc993adfe51044d9338b5db27d97fe843e32e",
+          "matching_retained_records": [
+            "qualification/evidence/campaign-bundle-cli-verification-v1.json",
+            "qualification/evidence/campaign-bundle-verification-v1.json",
+            "qualification/technology/cli-shutdown-review-v3.json",
+            "qualification/technology/delivery-review-v3.json"
+          ]
+        }
+      ]
+    },
+    {
+      "component": "process_transport",
+      "decision": "KEEP bounded Python framing and process-owned exit finalization",
+      "decision_documents": [
+        "qualification/campaign-bundle-stream-v1.md",
+        "qualification/technology/cli-shutdown-review-v3.md"
+      ],
+      "sources": [
+        {
+          "path": "qualification/__init__.py",
+          "sha256": "191f75496c5beb5702479e89569da21a1914e127e1fc8dd3fe90b76852b4b2f3",
+          "matching_retained_records": [
+            "qualification/technology/delivery-review-v3.json"
+          ]
+        },
+        {
+          "path": "qualification/__main__.py",
+          "sha256": "a5700fa70f5ec658a3da7c9dc092e8bca7f01a100ab39ba9c238fdc9ce88903d",
+          "matching_retained_records": [
+            "qualification/technology/cli-shutdown-review-v3.json"
+          ]
+        },
+        {
+          "path": "qualification/_process_exit.py",
+          "sha256": "52b1c86ea7ae795caafbfe9a5c6162b3ec01f42a1905504378c4b8115e6c52f9",
+          "matching_retained_records": [
+            "qualification/technology/cli-shutdown-review-v3.json"
+          ]
+        },
+        {
+          "path": "qualification/campaign_bundle_cli.py",
+          "sha256": "0131e719f6b24d386a8553b910b57c199138a99976144e44b080345b1622cd52",
+          "matching_retained_records": [
+            "qualification/technology/cli-shutdown-review-v3.json"
+          ]
+        }
+      ]
+    },
+    {
+      "component": "audit_orchestration",
+      "decision": "KEEP direct API/mutation access and explicit measurement scope",
+      "decision_documents": [
+        "qualification/technology/review-v3.md",
+        "qualification/technology/measurement-review-v3.json"
+      ],
+      "sources": [
+        {
+          "path": "qualification/technology/compare_campaign.py",
+          "sha256": "226494d03bbe4d34f90aa311da9d3b425454151b8ba3968bf5b2f34e309c4609",
+          "matching_retained_records": [
+            "qualification/technology/campaign-results-review-v3.json"
+          ]
+        },
+        {
+          "path": "qualification/technology/compare_ingress.py",
+          "sha256": "47b348960c32f4e72184f943013660d9694c8b0a6b3f787dc0f1e342d7fc3f95",
+          "matching_retained_records": [
+            "qualification/technology/ingress-measurement-results-v3.json"
+          ]
+        },
+        {
+          "path": "qualification/technology/measure_binding.py",
+          "sha256": "99bb5ccd4ed3a0116296c497185195be517affa3220e07e4df0981cb6233184e",
+          "matching_retained_records": [
+            "qualification/technology/campaign-results-review-v3.json"
+          ]
+        },
+        {
+          "path": "qualification/technology/measurement.py",
+          "sha256": "4121cadfb220bef2835eefd9c3eca65501c1f535e05097711fd29c9713721bf3",
+          "matching_retained_records": [
+            "qualification/technology/campaign-results-review-v3.json",
+            "qualification/technology/ingress-measurement-results-v3.json"
+          ]
+        },
+        {
+          "path": "qualification/technology/review_artifacts.py",
+          "sha256": "d3320120cd225363996fb081cc08f4a07f247f7c11d9a7f9cd683992dc6b0b0f",
+          "matching_retained_records": [
+            "qualification/technology/binding-results-review-v3.json",
+            "qualification/technology/source-observation-v3.json"
+          ]
+        },
+        {
+          "path": "qualification/technology/review_campaign.py",
+          "sha256": "35b7dc774472b7fa4ff46f006a9158f421826962df48904c912929e23ecb0961",
+          "matching_retained_records": [
+            "qualification/technology/campaign-results-review-v3.json",
+            "qualification/technology/source-observation-v3.json"
+          ]
+        },
+        {
+          "path": "qualification/technology/review_declarations.py",
+          "sha256": "5227b05825c0aa55e6c601a470bbd07122ec03dbccfae973347134f5ee97df03",
+          "matching_retained_records": [
+            "qualification/technology/binding-results-review-v3.json",
+            "qualification/technology/source-observation-v3.json"
+          ]
+        },
+        {
+          "path": "qualification/technology/source_snapshot.py",
+          "sha256": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365",
+          "matching_retained_records": [
+            "qualification/technology/binding-results-review-v3.json",
+            "qualification/technology/campaign-results-review-v3.json",
+            "qualification/technology/comparison-source-observation-v3.json",
+            "qualification/technology/java-output-review-v3.json",
+            "qualification/technology/source-observation-v3.json",
+            "qualification/technology/workflow-retention-review-v3.json"
+          ]
+        }
+      ]
+    },
+    {
+      "component": "experimental_subjects",
+      "decision": "KEEP experimental Java and Node subjects; not production substitutes",
+      "decision_documents": [
+        "qualification/technology/node-hash-results-v3.md",
+        "qualification/technology/java-transport-review-v3.md",
+        "qualification/technology/ingress-corpus-review-v3.md"
+      ],
+      "sources": [
+        {
+          "path": "qualification/technology/IngressProbe.java",
+          "sha256": "f3e814c0039f3aaec9d50003a908eca18feedcb3edba58be8530f73b56f8ffee",
+          "matching_retained_records": [
+            "qualification/technology/java-output-review-v3.json",
+            "qualification/technology/workflow-retention-review-v3.json"
+          ]
+        },
+        {
+          "path": "qualification/technology/hash-probe.mjs",
+          "sha256": "6dbf3a4f2f0eff0417f8d2f251bc74701bdfc076134006e17b206cfb341542e5",
+          "matching_retained_records": [
+            "qualification/technology/node-hash-results-v3.json"
+          ]
+        },
+        {
+          "path": "qualification/technology/ingress-probe.mjs",
+          "sha256": "fec6a03be76426f189822036f4bbe9034b06c0e3737e67581a2a0ab8188bc92d",
+          "matching_retained_records": []
+        }
+      ]
+    },
+    {
+      "component": "hosted_workflow",
+      "decision": "KEEP native Actions controls; last failure-retention correction verified in bridge commit",
+      "decision_documents": [
+        "qualification/technology/workflow-failure-review-v3.md"
+      ],
+      "sources": [
+        {
+          "path": ".github/workflows/aethron-qualification.yml",
+          "sha256": "9f91ebb3a968caa8cf747386375b40d7ca0d56d0216ecf9a1805a51ea3bab3d6",
+          "matching_retained_records": [
+            "qualification/technology/workflow-failure-review-v3.json"
+          ]
+        }
+      ]
+    }
+  ],
+  "test_and_fixture_observations": {
+    "qualification/fixtures/consumer-vectors-v1.json": "8c3f345a6e8e3b947ca94ca4b4e0817e2d3961ff43bade6cff2adc5f2b4daff9",
+    "qualification/plans/synthetic-campaign-v1.json": "0522b38fcc206d0ee4e55d27387efea9c81ff31de949e3674644e799d9c1373e",
+    "qualification/rigs/expired-calibration-v1.json": "4c7ca70d035358964252a5fa31002f9edd6f69a2bb1dc9f40fb60dc33e806eb7",
+    "qualification/rigs/synthetic-v1.json": "0b68e3a27477d5d53bc616afac23d82568ac357fdf95ce2520f114ac2efb25ea",
+    "qualification/tests/java_transport.py": "b108f6b242733901296e0850680615f12e1c8ca04e299843eead609dfe451ffe",
+    "qualification/tests/node_provenance.py": "eeea38447dfaf2338182ab2ce45cd1efc42eab737114b3e3872e6b33f3047eea",
+    "qualification/tests/test_artifact_review.py": "00c5afdbba6c71fe6f9ebe1ea9057ea3c7a80688ba04b0130f13a6608ae17d1b",
+    "qualification/tests/test_artifacts.py": "b0e4a20dc2a92a0b0773b0d6749a15495e0e8361b89da3e46197f88267077563",
+    "qualification/tests/test_audit_reports.py": "b83bef9357afc466b120812d9f85ef4d5554026e622e33c528fc7a0ac711b613",
+    "qualification/tests/test_binding_measurement_results.py": "650ed9350bff47563a5149c94810fecd6177b44b4399f8e6eec3c7dd71c9da6a",
+    "qualification/tests/test_bundle_artifact_integration.py": "bca180b04c29367afc80a055b06abcde0ac8f09ca7d9e4623568cd055668584b",
+    "qualification/tests/test_bundle_process.py": "20547364dc7e9d184be3b413293867e7366ae103d33c6a08c9428fbed94663c2",
+    "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+    "qualification/tests/test_campaign_audit.py": "65938f530a0025d2f060b1f450f15ce3150bd27dcf6cb8ab9598da9f7f3bf3e0",
+    "qualification/tests/test_campaign_bundle.py": "eec7d74e1bd8c5432366be08c61e4bb71ae47b85127342ae5849efc473429026",
+    "qualification/tests/test_campaign_bundle_cli.py": "f1faaf6f7c2e80978f89dd24ca0a7744ec82b58d2eacd8b96eabb9238b2a5cb4",
+    "qualification/tests/test_campaign_measurement_results.py": "0fdec40a041c1723c6e432a6e5813c73f007532bfb49c52cb317de803f879f82",
+    "qualification/tests/test_campaign_references.py": "37ed0a291ecd08e28b66dabe3f0b4ab4ee37442d75ced6439391d937660e6698",
+    "qualification/tests/test_campaign_review.py": "f3bc5240549e6cd79d1861e54ad3e3e41196da176aa98ea5fbb27958b55406ed",
+    "qualification/tests/test_cli_review.py": "6e10783f1e9f53f6412479956beba3070f3949846677c9f570445ac60c5b644f",
+    "qualification/tests/test_cli_shutdown.py": "817b5b42aaac0cd9d49b49dbba4e8ca0dad493fef111b8cdb0fe6e20d56964b1",
+    "qualification/tests/test_comparison_results.py": "0ad67f360dbf848c39e09867b501aad38fabc04b61fcfd58af68cdb4de729b29",
+    "qualification/tests/test_comparison_sources.py": "acaf3be25f6ae28c1388ed705e30e383fe83978e73e0856e67574de2a9ff3cf7",
+    "qualification/tests/test_consumer_corpus_binding.py": "d98eb7f6f5dcecea18a7049049b80bc91c73fd0ada7567da8f276c7e3a24b5ff",
+    "qualification/tests/test_consumer_vector_types.py": "d27efcae1c387fe4ccfe8f7a8e0bd7a5c0fd46bde968c86098c069a5907d9183",
+    "qualification/tests/test_consumer_vectors.py": "b952ea464d227469f58708104df33f76bfbace3787dca6b6ab9b8f01a2d43e74",
+    "qualification/tests/test_declaration_review.py": "f2b1798f19ee679868cf50e7f08e5c94bae5950a7bf6412e80611094e97a03c1",
+    "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+    "qualification/tests/test_ingress_audit.py": "e614426850878706420ea248ec2d93f5a96f4957709d25bcf632ff4f49cdf0c4",
+    "qualification/tests/test_ingress_measurement_results.py": "b2d1b0d90b88b10e28fdb840db4205e01e2827ce60f91b6c9b3912726ec131f0",
+    "qualification/tests/test_measurement_review.py": "c26ba9514d70195917a1f1db5c67724b47ed1d223eb44ba785133eafb5c45453",
+    "qualification/tests/test_report_output.py": "2f42746ada76ed5537db98e4eeea0a5e95080c59a8f6d19ecc4c3d7f6548b2ca",
+    "qualification/tests/test_review_results.py": "5cdf94d7e63f3bd43f2c2eba3a8fd52134b4c093e6e3dd915fc9e1b44f02f2ac",
+    "qualification/tests/test_review_sources.py": "2d11bbd6ea46b5ea1371c5235daeb5ae72487c6aca056c24e9c9a988499fbd29"
+  },
+  "fresh_checks": {
+    "production_and_consumers": {
+      "methods": 73,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "modules": [
+        "test_evidence",
+        "test_artifacts",
+        "test_campaign",
+        "test_campaign_references",
+        "test_campaign_bundle",
+        "test_campaign_bundle_cli",
+        "test_bundle_process",
+        "test_bundle_artifact_integration",
+        "test_consumer_vectors",
+        "test_consumer_vector_types",
+        "test_cli_review",
+        "test_cli_shutdown"
+      ]
+    },
+    "audit_tools": {
+      "methods": 37,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "modules": [
+        "test_review_results",
+        "test_review_sources",
+        "test_measurement_review",
+        "test_audit_reports",
+        "test_campaign_audit",
+        "test_ingress_audit",
+        "test_consumer_corpus_binding"
+      ]
+    },
+    "java_transport": {
+      "java_tests": "----------------------------------------------------------------------\nRan 8 tests in 5.486s\n\nOK\n",
+      "java_version": "openjdk version \"21.0.11\" 2026-04-21\nOpenJDK Runtime Environment (build 21.0.11+10-1-deb13u2-Debian)\nOpenJDK 64-Bit Server VM (build 21.0.11+10-1-deb13u2-Debian, mixed mode, sharing)\n",
+      "node_retained_mismatches": [
+        "duplicate-equal",
+        "duplicate-overwrite",
+        "duplicate-escaped",
+        "nested-duplicate"
+      ],
+      "java_source_sha256": "f3e814c0039f3aaec9d50003a908eca18feedcb3edba58be8530f73b56f8ffee",
+      "class_sha256": "b8f73e8a0ca8c551166857f2e37f693e5616f56a69a84310fd3ee785ca708dfc"
+    },
+    "java_comparison": {
+      "audit_policy_version": 3,
+      "scope": "Java ingress with unchanged Python semantic oracle; not a Java validator",
+      "python": "3.13.5",
+      "ingress_cases": 18,
+      "semantic_requests": 63,
+      "mismatch_indices": [],
+      "report_mismatch_indices": [],
+      "document_mismatch_indices": [],
+      "all_reports_match": true,
+      "all_documents_match": true,
+      "request_transport_sha256": "7c1ddc2d27791242716bfa836e681f0b3b8fa92e05350806b4536350620255e0",
+      "response_transport_sha256": "5059be25311cb6c0e60f0c9e0636ccc3e62535d233661267ee152a5d5f55668f",
+      "python_65536_byte_measurement": {
+        "iterations": 20,
+        "elapsed_ns": [
+          8319205,
+          8170311,
+          6048982,
+          71535138,
+          12053908,
+          9800696,
+          8177681,
+          71091200,
+          11735422,
+          5418447,
+          5354780,
+          5388401,
+          71098040,
+          8036747,
+          5696719,
+          5421329,
+          5500640,
+          5175437,
+          5074615,
+          69507735
+        ],
+        "traced_peak_bytes_one_call": 73620,
+        "acceptance_threshold": null,
+        "all_measured_results_checked": true,
+        "result_validation_excluded_from_measurements": true,
+        "expected_input_sha256": "5ecd7409628816cfb0cdd497fa0ff1f85b0f3340fdf6ec4870c8021c04c53f66"
+      },
+      "source_sha256": {
+        "qualification/technology/IngressProbe.java": "f3e814c0039f3aaec9d50003a908eca18feedcb3edba58be8530f73b56f8ffee",
+        "qualification/technology/compare_ingress.py": "47b348960c32f4e72184f943013660d9694c8b0a6b3f787dc0f1e342d7fc3f95",
+        "qualification/technology/measurement.py": "4121cadfb220bef2835eefd9c3eca65501c1f535e05097711fd29c9713721bf3",
+        "qualification/technology/ingress-vectors-v1.json": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff",
+        "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "qualification/rigs/synthetic-v1.json": "0b68e3a27477d5d53bc616afac23d82568ac357fdf95ce2520f114ac2efb25ea",
+        "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+        "qualification/technology/source_snapshot.py": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365"
+      },
+      "source_observation": "equal_before_and_after_workload",
+      "physical_qualification_passed": false
+    },
+    "node_ingress": {
+      "audit_policy_version": 3,
+      "scope": "ingress_token_probe_only_no_schema_or_semantic_validation",
+      "runtime": "v22.23.2",
+      "source_aware_reviver": true,
+      "cases": [
+        {
+          "id": "valid-incomplete",
+          "accepted": true,
+          "expected_accepted": true,
+          "matches": true
+        },
+        {
+          "id": "integer-negative-zero",
+          "accepted": true,
+          "expected_accepted": true,
+          "matches": true
+        },
+        {
+          "id": "escaped-key-valid",
+          "accepted": true,
+          "expected_accepted": true,
+          "matches": true
+        },
+        {
+          "id": "float-integral",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "exponent-integral",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "float-underflow",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "nonfinite",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "infinite",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "oversized-number",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "duplicate-equal",
+          "accepted": true,
+          "expected_accepted": false,
+          "matches": false
+        },
+        {
+          "id": "duplicate-overwrite",
+          "accepted": true,
+          "expected_accepted": false,
+          "matches": false
+        },
+        {
+          "id": "duplicate-escaped",
+          "accepted": true,
+          "expected_accepted": false,
+          "matches": false
+        },
+        {
+          "id": "nested-duplicate",
+          "accepted": true,
+          "expected_accepted": false,
+          "matches": false
+        },
+        {
+          "id": "utf8-bom",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "invalid-utf8",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "utf16",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "trailing-document",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "malformed",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        }
+      ],
+      "parity": false,
+      "source_observation": "equal_before_and_after_workload",
+      "source_sha256": {
+        "qualification/technology/ingress-probe.mjs": "fec6a03be76426f189822036f4bbe9034b06c0e3737e67581a2a0ab8188bc92d",
+        "qualification/technology/ingress-vectors-v1.json": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff"
+      },
+      "physical_qualification_passed": false
+    }
+  },
+  "raw_runtime_evidence": {
+    "requests.hex": {
+      "sha256": "7c1ddc2d27791242716bfa836e681f0b3b8fa92e05350806b4536350620255e0",
+      "bytes": 562077
+    },
+    "responses.jsonl": {
+      "sha256": "5059be25311cb6c0e60f0c9e0636ccc3e62535d233661267ee152a5d5f55668f",
+      "bytes": 127211
+    },
+    "comparison.json": {
+      "sha256": "b2bde2e373edbe5d89172b5855ee0a1a015a80c0fb02032b9cf9b1bbd8e2fad1",
+      "bytes": 2354
+    },
+    "node-ingress.json": {
+      "sha256": "a266ee904fb898b45178e6568907b177e65f870d75fae75463f5ca9170a96b3e",
+      "bytes": 2790
+    },
+    "java-tests.txt": {
+      "sha256": "dc00d2272d3fa165cd80e8799f580b50d7e69aeab87eb4e0a81d754fc2a4214e",
+      "bytes": 97
+    },
+    "execution.json": {
+      "sha256": "3c9d9f8ecb9e1bcbf7997e90f6840171662d99c56487131a8c58199f3658f6f0",
+      "bytes": 647
+    }
+  },
+  "runtime_evidence_location": "Lane runtime coverage-probe directory; not included as a public dataset or authenticated archive",
+  "correction": "README now separates missing environment software checks from external instrument/field/review evidence. Current Node ingress source observation added with its four negative cases.",
+  "remaining_software": [
+    "Non-executing procedure/domain content contracts and negative fixtures",
+    "Additional environment evidence schemas/checks",
+    "Published producer adapters and capture evidence integration",
+    "Installed distribution and consumer verification",
+    "Release-bound role/locale/help acceptance verification"
+  ],
+  "external_gates": [
+    "Authorized exact-device access and calibrated instruments",
+    "Representative field evidence and independent qualification review",
+    "Independent customer install-and-demo evidence on the exact release"
+  ],
+  "new_required_runtime_migrations": [],
+  "limits": [
+    "Finite synthetic controls, not exhaustive proof, real-time performance or scientific acquisition independence",
+    "Source fingerprints are observations, not execution or trust attestations",
+    "Local JDK21 does not establish configured hosted JDK17 success",
+    "Node ingress duplicate-key mismatches remain; no production migration to that probe",
+    "No fresh origin/main fetch: read-only FETCH_HEAD; cached main only"
+  ],
+  "physical_qualification_passed": false,
+  "product_acceptance_passed": false
+}

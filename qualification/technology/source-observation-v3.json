@@ -1,0 +1,165 @@
+{
+  "audit_policy_version": 3,
+  "baseline_commit": "36f9cdafcea71290a6e3c101f58a3be6faab486a",
+  "component": "P4/P15 review driver source observations",
+  "decision": "KEEP Python orchestration; FIX before/after source observation",
+  "python": "3.13.5",
+  "red": {
+    "methods": 4,
+    "assertion_failures": 12,
+    "execution_errors": 0,
+    "failure_boundary_cases": 9,
+    "metadata_controls": 3
+  },
+  "green": {
+    "related_methods": 21,
+    "skips": 0,
+    "final_elapsed_seconds": 1.931,
+    "fresh_processes": 3,
+    "fresh_source_observations": 23
+  },
+  "static": {
+    "initial_ruff_import_findings": 3,
+    "initial_format_mismatches": 1,
+    "final_ruff": "PASS",
+    "final_format": "PASS",
+    "targeted_bandit": "PASS",
+    "python39_syntax_files": 5,
+    "python39_execution": "not run locally"
+  },
+  "fresh_reports": {
+    "review_declarations": {
+      "review_order_version": 3,
+      "component": "declaration_validation",
+      "python": "3.13.5",
+      "baseline_tests": 4,
+      "baseline_passed": true,
+      "negative_finding_mutations": {
+        "capture_stale": {
+          "failures": 2,
+          "errors": 0
+        },
+        "record_stale": {
+          "failures": 1,
+          "errors": 0
+        },
+        "clock_pair_skew": {
+          "failures": 1,
+          "errors": 0
+        },
+        "clock_domain_mismatch": {
+          "failures": 1,
+          "errors": 0
+        }
+      },
+      "restored_baseline_passed": true,
+      "scope": "synthetic offline declarations; not live admission or authentication",
+      "physical_qualification_passed": false,
+      "source_sha256": {
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+        "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+        "qualification/tests/test_declaration_review.py": "f2b1798f19ee679868cf50e7f08e5c94bae5950a7bf6412e80611094e97a03c1",
+        "qualification/technology/review_declarations.py": "5227b05825c0aa55e6c601a470bbd07122ec03dbccfae973347134f5ee97df03",
+        "qualification/technology/source_snapshot.py": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365"
+      },
+      "source_observation": "equal_before_and_after_controls"
+    },
+    "review_artifacts": {
+      "review_order_version": 3,
+      "component": "artifact_byte_binding",
+      "python": "3.13.5",
+      "hash_backend_module": "_hashlib",
+      "baseline_tests": 4,
+      "baseline_passed": true,
+      "mutations": {
+        "constant_digest": {
+          "failures": 1,
+          "errors": 0
+        },
+        "erased_declaration_negatives": {
+          "failures": 1,
+          "errors": 0
+        },
+        "relaxed_total_budget": {
+          "failures": 1,
+          "errors": 0
+        }
+      },
+      "restored_baseline_passed": true,
+      "physical_qualification_passed": false,
+      "source_sha256": {
+        "qualification/artifacts.py": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+        "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+        "qualification/tests/test_artifacts.py": "b0e4a20dc2a92a0b0773b0d6749a15495e0e8361b89da3e46197f88267077563",
+        "qualification/tests/test_artifact_review.py": "00c5afdbba6c71fe6f9ebe1ea9057ea3c7a80688ba04b0130f13a6608ae17d1b",
+        "qualification/technology/review_artifacts.py": "d3320120cd225363996fb081cc08f4a07f247f7c11d9a7f9cd683992dc6b0b0f",
+        "qualification/technology/source_snapshot.py": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365"
+      },
+      "source_observation": "equal_before_and_after_controls"
+    },
+    "review_campaign": {
+      "review_order_version": 3,
+      "component": "campaign_coverage_and_procedures",
+      "python": "3.13.5",
+      "sqlite": "3.46.1",
+      "baseline_tests": 5,
+      "baseline_passed": true,
+      "mutations": {
+        "duplicate_counts_erased": {
+          "failures": 2,
+          "errors": 0
+        },
+        "commitment_multiplicity_erased": {
+          "failures": 1,
+          "errors": 0
+        },
+        "sql_duplicates_admitted": {
+          "failures": 1,
+          "errors": 0
+        }
+      },
+      "restored_baseline_passed": true,
+      "limits": [
+        "SQL aggregation is independent; admission and capture semantics are shared.",
+        "Finite synthetic controls do not demonstrate scientific sample independence.",
+        "No authenticated preregistration, clock, procedure or domain evidence."
+      ],
+      "physical_qualification_passed": false,
+      "source_sha256": {
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+        "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+        "qualification/technology/campaign_sql.py": "4deb710665852d208c1b8170a5963cc649a73e0536116d88926eff99074259c3",
+        "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+        "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+        "qualification/tests/test_campaign_review.py": "f3bc5240549e6cd79d1861e54ad3e3e41196da176aa98ea5fbb27958b55406ed",
+        "qualification/technology/review_campaign.py": "35b7dc774472b7fa4ff46f006a9158f421826962df48904c912929e23ecb0961",
+        "qualification/technology/source_snapshot.py": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365"
+      },
+      "source_observation": "equal_before_and_after_controls"
+    }
+  },
+  "source_sha256": {
+    "qualification/technology/review_declarations.py": "5227b05825c0aa55e6c601a470bbd07122ec03dbccfae973347134f5ee97df03",
+    "qualification/technology/review_artifacts.py": "d3320120cd225363996fb081cc08f4a07f247f7c11d9a7f9cd683992dc6b0b0f",
+    "qualification/technology/review_campaign.py": "35b7dc774472b7fa4ff46f006a9158f421826962df48904c912929e23ecb0961",
+    "qualification/technology/source_snapshot.py": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365",
+    "qualification/tests/test_review_sources.py": "2d11bbd6ea46b5ea1371c5235daeb5ae72487c6aca056c24e9c9a988499fbd29",
+    "qualification/tests/test_review_results.py": "5cdf94d7e63f3bd43f2c2eba3a8fd52134b4c093e6e3dd915fc9e1b44f02f2ac",
+    "qualification/technology/source-observation-v3.md": "2f5af9943357bc401518453a167a1bed26fbe3c5ed71a25d6bbd5ed0acb53166",
+    "qualification/technology/review-v3.md": "6525aea2b7d90b8c5ef926ce5adf457ff8576b758f1e0fe7b19a3a64e3109181"
+  },
+  "limits": [
+    "Before/after file observations are not proof of executed code or immutable execution.",
+    "No transient-edit detection, import attestation, complete dependency inventory or authenticity claim.",
+    "Historical reports remain unchanged; prior source matches alone do not prove execution.",
+    "Comparison and measurement driver source observations remain to be reviewed.",
+    "P19 integrated acceptance awaits published producer contracts and applicable prerequisite gates."
+  ],
+  "audit_complete": false,
+  "product_acceptance_passed": false,
+  "physical_qualification_passed": false
+}
