@@ -138,6 +138,14 @@ def admit_fleet_policy(
         # advance rereads both floors under its writer transaction. A competing
         # admission can invalidate this candidate after signature verification.
         floor_store.advance(minimum_version=policy.bundle_version, minimum_time_s=finished)
+        # Lock acquisition and durable commit can outlast the validity window.
+        # A late rejection must not undo the already committed rollback floors.
+        committed = clock()
+        if (
+            not _integer(committed, finished, 2**53 - 1)
+            or not policy.not_before_unix_s <= committed < policy.expires_unix_s
+        ):
+            raise ValueError()
         return policy
     except (OSError, ValueError, TypeError, RuntimeError, StopIteration):
         raise ValueError("invalid_fleet_admission") from None

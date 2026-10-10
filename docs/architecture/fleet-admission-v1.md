@@ -1,5 +1,11 @@
 # Fleet admission with committed floors v1
 
+The [technology audit v2](fleet-admission-technology-audit-v2.md) amends the
+return boundary: admission also checks trusted time **after** the floor commit.
+A rejection at that final check preserves committed floors. The original
+pre-commit-only behavior described below remains historical evidence, not the
+current return contract. The API and frozen numeric limits are unchanged.
+
 ## Requirements and technology decision (2026-10-10)
 
 The local fleet boundary must authenticate bounded policy bytes, reject version

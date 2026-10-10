@@ -20,7 +20,7 @@ class FleetAdmissionTests(unittest.TestCase):
         )
         self.sign()
 
-    def admit(self, times=(1000, 1001)):
+    def admit(self, times=(1000, 1001, 1002)):
         samples = iter(times)
         return fleet_policy.admit_fleet_policy(
             self.bundle, self.public, floor_store=self.store, clock=lambda: next(samples)
@@ -30,7 +30,7 @@ class FleetAdmissionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "^invalid_fleet_admission$"):
             self.admit(times)
 
-    def test_admission_commits_authenticated_version_and_latest_time_before_return(self):
+    def test_admission_commits_authenticated_version_and_verified_time_before_return(self):
         self.assertTrue(callable(getattr(fleet_policy, "admit_fleet_policy", None)))
         value = self.admit()
         self.assertEqual((value.bundle_version, value.batch_size), (3, 2))
@@ -57,6 +57,35 @@ class FleetAdmissionTests(unittest.TestCase):
     def test_expiry_during_verification_rejects_without_committing(self):
         self.rejected((1999, 2000))
         self.assertEqual(self.store.read(), FleetFloors(1, 900))
+
+    def test_expiry_during_commit_rejects_but_retains_committed_floors(self):
+        self.rejected((1998, 1999, 2000))
+        self.assertEqual(self.store.read(), FleetFloors(3, 1999))
+
+    def test_invalid_or_backward_post_commit_time_never_returns_configuration(self):
+        for bad in (True, 1002.0, None, -1, 2**53, 1000):
+            with self.subTest(time=bad):
+                self.rejected((1001, 1001, bad))
+                self.assertEqual(self.store.read(), FleetFloors(3, 1001))
+
+    def test_post_commit_clock_failure_retains_floors(self):
+        self.rejected((1000, 1001))
+        self.assertEqual(self.store.read(), FleetFloors(3, 1001))
+
+    def test_final_clock_observes_commit_before_return(self):
+        samples = iter((1000, 1001, 1999))
+        observed = []
+
+        def clock():
+            value = next(samples)
+            observed.append(FleetFloorStore(self.store.path).read())
+            return value
+
+        value = fleet_policy.admit_fleet_policy(
+            self.bundle, self.public, floor_store=self.store, clock=clock
+        )
+        self.assertEqual(value.bundle_version, 3)
+        self.assertEqual(observed, [FleetFloors(1, 900), FleetFloors(1, 900), FleetFloors(3, 1001)])
 
     def test_invalid_time_samples_never_advance_floors(self):
         for bad in (True, 1000.0, None, -1, 2**53):
@@ -112,7 +141,7 @@ class FleetAdmissionTests(unittest.TestCase):
 
     def test_idempotent_version_still_commits_newer_time(self):
         self.admit()
-        self.admit((1002, 1003))
+        self.admit((1002, 1003, 1004))
         self.assertEqual(self.store.read(), FleetFloors(3, 1003))
 
 
