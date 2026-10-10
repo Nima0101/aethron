@@ -9,6 +9,10 @@ import tracemalloc
 import numpy as np
 from aethron_edge.sensors.geometry import Pinhole, finite
 
+# Admission and warm-up parity assertions must run before reporting evidence.
+if not __debug__:
+    raise SystemExit("geometry_audit_requires_assertions")
+
 
 class NumpyPinhole(Pinhole):
     def project(self, xyz_m):

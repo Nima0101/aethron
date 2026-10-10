@@ -21,3 +21,19 @@ incorrect candidate. The production regression can additionally be mutation
 checked by replacing geometry.math.hypot with sqrt(sum(x*x)) during the test;
 the tiny-norm cases must fail. This is candidate RED evidence, not a claim that
 the existing production implementation failed.
+
+Assertions must be enabled. Optimized execution/import (`-O`, `-OO` or nonzero
+`PYTHONOPTIMIZE`) is rejected before exposing the comparison entry point. The
+`parity` field covers the admission vectors and premeasurement warm-up only;
+timed repetitions and traced outputs are not individually compared. A successful
+report therefore does not prove parity of every measured call. The report retains
+aggregate measurements, not the individual timing samples. Historical reports
+are not requalified by the new mode guard.
+
+Focused evidence-admission checks (no timing matrix):
+
+```sh
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
+  PYTHONPATH=integrations/edge:tests/integration \
+  python -m unittest test_sensor_geometry_audit_modes
+```
