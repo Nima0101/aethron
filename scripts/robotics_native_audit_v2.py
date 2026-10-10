@@ -47,7 +47,8 @@ def fixture_source(cases):
     """Emit only validated input constants, never candidate results or raw strings."""
     api = lifecycle_api()
     api.validate_cases(cases)
-    lines = ["const CASES: &[&[Step]] = &["]
+    senders = ", ".join(str(api.case_sender(case)) for case in cases)
+    lines = [f"const SENDERS: &[(u8, u8)] = &[{senders}];", "const CASES: &[&[Step]] = &["]
     operations = {"ingest": 0, "snapshot": 1, "close": 2}
     validate_operation = api.validate_operation
     for case in cases:
@@ -167,7 +168,7 @@ def run(out, *, compiler="rustc", runtime_input=False):
             shutil.copyfile(DRIVER.with_name("runtime_input_v3.rs"), out / "runtime_input_v3.rs")
             report.update(
                 report_schema_version=3,
-                input_format="aethron-audit-v3",
+                input_format="aethron-audit-v" + chr(input_bytes[7]),
                 input_sha256=hashlib.sha256(input_bytes).hexdigest(),
             )
             for path in (

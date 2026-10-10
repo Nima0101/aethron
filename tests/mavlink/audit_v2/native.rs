@@ -21,6 +21,8 @@ include!("native-fixture.rs");
 mod runtime_input_v3;
 
 struct Receiver {
+    system: u8,
+    component: u8,
     last: Option<u128>,
     sequence: Option<u8>,
     boot: [Option<u32>; 2],
@@ -30,9 +32,9 @@ struct Receiver {
 }
 
 impl Receiver {
-    fn new() -> Self {
+    fn new(system: u8, component: u8) -> Self {
         Self {
-            last: None, sequence: None, boot: [None; 2], samples: [None; 2],
+            system, component, last: None, sequence: None, boot: [None; 2], samples: [None; 2],
             reason: "no_observation", latched: false,
         }
     }
@@ -73,7 +75,7 @@ impl Receiver {
         if !(1..=28).contains(&p[1]) {
             self.withdraw("invalid_packet", false); return;
         }
-        if p[5] != 1 || p[6] != 1 {
+        if p[5] != self.system || p[6] != self.component {
             self.withdraw("sender_mismatch", false); return;
         }
         let mut crc = 65535u16;
@@ -143,12 +145,12 @@ impl Receiver {
             };
             // All strings are fixed literals; floats were checked finite above.
             samples.push(format!(concat!(
-                "{{\"system_id\":1,\"component_id\":1,\"message\":\"{}\",",
+                "{{\"system_id\":{},\"component_id\":{},\"message\":\"{}\",",
                 "\"frame\":\"{}\",\"fields\":{},\"units\":{},\"values\":{:?},",
                 "\"source_boot_ms\":{},\"receive_ns\":\"{}\",\"capture_ns\":null,",
                 "\"evidence\":\"external_unverified\",\"authenticated\":false,",
                 "\"link_id\":null,\"signature_timestamp\":null}}"
-            ), name, frame, fields, units, s.values, s.boot, s.receive));
+            ), self.system, self.component, name, frame, fields, units, s.values, s.boot, s.receive));
         }
         let state = if samples.is_empty() { "UNKNOWN" } else { "OBSERVED_UNVERIFIED" };
         format!("{{\"state\":\"{}\",\"reason\":\"{}\",\"samples\":[{}],\"perception_eligible\":false}}",
@@ -162,12 +164,16 @@ fn main() {
     #[cfg(runtime_input)]
     let parsed = runtime_input_v3::parse(&raw).expect("valid audit input");
     #[cfg(runtime_input)]
-    let cases: Vec<&[Step<'_>]> = parsed.iter().map(Vec::as_slice).collect();
+    let cases: Vec<&[Step<'_>]> = parsed.iter().map(|case| case.steps.as_slice()).collect();
     #[cfg(not(runtime_input))]
     let cases = CASES;
     let mut results = Vec::with_capacity(cases.len());
-    for steps in cases.iter() {
-        let mut receiver = Receiver::new();
+    for (index, steps) in cases.iter().enumerate() {
+        #[cfg(runtime_input)]
+        let (system, component) = (parsed[index].system, parsed[index].component);
+        #[cfg(not(runtime_input))]
+        let (system, component) = SENDERS[index];
+        let mut receiver = Receiver::new(system, component);
         let mut outputs = Vec::with_capacity(steps.len());
         for step in *steps {
             match step.op {

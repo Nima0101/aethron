@@ -4,6 +4,12 @@ use std::io::{self, Read};
 
 const LIMIT: usize = 65536;
 
+pub struct Case<'a> {
+    pub system: u8,
+    pub component: u8,
+    pub steps: Vec<Step<'a>>,
+}
+
 pub fn read<R: Read>(mut input: R) -> io::Result<Vec<u8>> {
     let mut raw = vec![0; LIMIT + 1];
     let mut used = 0;
@@ -36,12 +42,21 @@ fn count(raw: &mut &[u8]) -> Result<usize, &'static str> {
     Ok(value)
 }
 
-pub fn parse(mut raw: &[u8]) -> Result<Vec<Vec<Step<'_>>>, &'static str> {
+pub fn parse(mut raw: &[u8]) -> Result<Vec<Case<'_>>, &'static str> {
     if raw.len() > LIMIT { return Err("audit_input_too_large"); }
-    if take(&mut raw, 8)? != b"AETHAUD3" { return Err("audit_input_version"); }
+    let configured = match take(&mut raw, 8)? {
+        b"AETHAUD3" => false,
+        b"AETHAUD4" => true,
+        _ => return Err("audit_input_version"),
+    };
     let total = count(&mut raw)?;
     let mut cases = Vec::with_capacity(total);
     for _ in 0..total {
+        let (system, component) = if configured {
+            let sender = take(&mut raw, 2)?;
+            if sender[0] == 0 || sender[1] == 0 { return Err("audit_sender_domain"); }
+            (sender[0], sender[1])
+        } else { (1, 1) };
         let size = count(&mut raw)?;
         let mut steps = Vec::with_capacity(size);
         for _ in 0..size {
@@ -57,7 +72,7 @@ pub fn parse(mut raw: &[u8]) -> Result<Vec<Vec<Step<'_>>>, &'static str> {
                 packet: take(&mut raw, length)?,
             });
         }
-        cases.push(steps);
+        cases.push(Case { system, component, steps });
     }
     if !raw.is_empty() { return Err("audit_input_trailing"); }
     Ok(cases)
@@ -79,11 +94,31 @@ mod tests {
         let raw = golden();
         let cases = parse(&raw).unwrap();
         assert_eq!(cases.len(), 1);
-        assert_eq!(cases[0].len(), 1);
-        assert_eq!(cases[0][0].op, 0);
-        assert_eq!(cases[0][0].now, Some(257));
-        assert_eq!(cases[0][0].packet, &[253, 255]);
-        assert_eq!(cases[0][0].packet.as_ptr(), raw[32..].as_ptr());
+        assert_eq!(cases[0].steps.len(), 1);
+        assert_eq!(cases[0].steps[0].op, 0);
+        assert_eq!(cases[0].steps[0].now, Some(257));
+        assert_eq!(cases[0].steps[0].packet, &[253, 255]);
+        assert_eq!(cases[0].steps[0].packet.as_ptr(), raw[32..].as_ptr());
+    }
+
+    #[test]
+    fn configured_sender_versions_and_zero_rejection() {
+        let legacy = golden();
+        let parsed = parse(&legacy).unwrap();
+        assert_eq!((parsed[0].system, parsed[0].component), (1, 1));
+        for (system, component) in [(1, 255), (255, 1), (255, 255)] {
+            let mut raw = b"AETHAUD4\x01\x00".to_vec();
+            raw.extend([system, component]);
+            raw.extend(&legacy[10..]);
+            let parsed = parse(&raw).unwrap();
+            assert_eq!((parsed[0].system, parsed[0].component), (system, component));
+            assert_eq!(parsed[0].steps[0].packet.as_ptr(), raw[34..].as_ptr());
+            for end in 0..raw.len() { assert!(parse(&raw[..end]).is_err()); }
+            for offset in [10, 11] {
+                let mut bad = raw.clone(); bad[offset] = 0;
+                assert!(matches!(parse(&bad), Err("audit_sender_domain")));
+            }
+        }
     }
 
     #[test]
@@ -105,10 +140,10 @@ mod tests {
         for value in [0, u128::MAX] {
             let mut raw = golden();
             raw[14..30].copy_from_slice(&value.to_le_bytes());
-            assert_eq!(parse(&raw).unwrap()[0][0].now, Some(value));
+            assert_eq!(parse(&raw).unwrap()[0].steps[0].now, Some(value));
         }
         let mut raw = golden(); raw[13..30].fill(0);
-        assert_eq!(parse(&raw).unwrap()[0][0].now, None);
+        assert_eq!(parse(&raw).unwrap()[0].steps[0].now, None);
     }
 
     #[test]

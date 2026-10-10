@@ -45,6 +45,59 @@ class LifecycleAuditTests(unittest.TestCase):
         self.assertTrue(result["parity"])
         self.assertGreater(result["steps"], 30)
 
+    def test_configured_sender_corpus_and_literal_results(self):
+        cases = [c for c in self.api.corpus() if c.get("version") == 4]
+        self.assertEqual(len(cases), 3)
+        expected_senders = [(1, 255), (255, 1), (255, 255)]
+        self.assertEqual([tuple(c["sender"].values()) for c in cases], expected_senders)
+        for outputs, sender in zip(self.api.reference(cases), expected_senders):
+            self.assertEqual(
+                [o["reason"] for o in outputs],
+                ["unmapped_source_clock", "sender_mismatch", "unmapped_source_clock", "closed"],
+            )
+            for index in (0, 2):
+                sample = outputs[index]["samples"][0]
+                self.assertEqual((sample["system_id"], sample["component_id"]), sender)
+                self.assertFalse(sample["authenticated"])
+                self.assertFalse(outputs[index]["perception_eligible"])
+            for index in (1, 3):
+                self.assertEqual(outputs[index]["state"], "UNKNOWN")
+                self.assertEqual(outputs[index]["samples"], [])
+        self.assertTrue(self.api.compare(cases)["parity"])
+
+    def test_sender_version_and_types_reject_before_reference_construction(self):
+        good = {
+            "version": 4,
+            "name": "configured",
+            "sender": {"system": 255, "component": 1},
+            "steps": [{"op": "snapshot", "now": "0"}],
+        }
+        invalid = []
+        for field in ("system", "component"):
+            for value in (0, 256, -1, True, 1.0, "1", None):
+                invalid.append(dict(good, sender=dict(good["sender"], **{field: value})))
+        invalid += [dict(good, version=v) for v in (3, 5, True, 4.0, "4", None)]
+        invalid += [
+            dict(good, sender=v)
+            for v in ({}, [], None, {"system": 1}, {"system": 1, "component": 1, "extra": 1})
+        ]
+        invalid += [{k: v for k, v in good.items() if k != "version"}, dict(good, extra=1)]
+        for case in invalid:
+            with self.subTest(case=case):
+                with patch.object(self.api, "PassiveTelemetry") as receiver:
+                    with self.assertRaises(ValueError):
+                        self.api.reference([{"name": "legacy", "steps": good["steps"]}, case])
+                    receiver.assert_not_called()
+                completed = subprocess.run(
+                    [self.node, str(self.api.DRIVER)],
+                    input=json.dumps([case]).encode(),
+                    capture_output=True,
+                    timeout=10,
+                    check=False,
+                )  # nosec B603
+                self.assertNotEqual(completed.returncode, 0)
+                self.assertEqual(completed.stdout, b"")
+
     def test_close_expiry_and_clock_latches_have_independent_expectations(self):
         results = dict(
             zip((c["name"] for c in self.api.corpus()), self.api.reference(self.api.corpus()))

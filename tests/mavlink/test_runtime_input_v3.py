@@ -30,6 +30,32 @@ class RuntimeInputTests(unittest.TestCase):
         self.assertEqual(self.api.encode(cases), golden)
         self.assertEqual(self.api.decode(golden)[0]["steps"], cases[0]["steps"])
 
+    def test_v4_sender_golden_mixed_cases_and_invalid_bytes(self):
+        step = {"op": "ingest", "now": "257", "hex": "fdff"}
+        cases = [
+            {"version": 4, "name": "a", "sender": {"system": 255, "component": 1}, "steps": [step]}
+        ]
+        golden = (
+            b"AETHAUD4\x01\x00\xff\x01\x01\x00\x00\x01\x01\x01" + bytes(14) + b"\x02\x00\xfd\xff"
+        )
+        self.assertEqual(self.api.encode(cases), golden)
+        decoded = self.api.decode(golden)[0]
+        self.assertEqual(decoded["version"], 4)
+        self.assertEqual(decoded["sender"], cases[0]["sender"])
+        self.assertEqual(decoded["steps"], [step])
+        mixed = cases + [{"name": "legacy", "steps": [step]}]
+        decoded = self.api.decode(self.api.encode(mixed))
+        self.assertEqual(decoded[1]["sender"], {"system": 1, "component": 1})
+        self.assertIn("(255, 1)", self.native.fixture_source(cases))
+        for invalid in [golden[:i] for i in range(len(golden))] + [golden + b"x"]:
+            with self.assertRaises(ValueError):
+                self.api.decode(invalid)
+        for offset in (10, 11):
+            invalid = bytearray(golden)
+            invalid[offset] = 0
+            with self.assertRaisesRegex(ValueError, "sender"):
+                self.api.decode(bytes(invalid))
+
     def test_full_corpus_and_clock_boundaries_preserve_observations(self):
         cases = self.native.corpus() + [
             {
@@ -129,7 +155,7 @@ class RuntimeInputTests(unittest.TestCase):
             self.assertEqual(len(inputs), 8)
             self.assertTrue(all(value == self.api.encode(self.native.corpus()) for value in inputs))
             self.assertEqual((out / "runtime-input.bin").read_bytes(), inputs[0])
-            self.assertEqual(report["input_format"], "aethron-audit-v3")
+            self.assertEqual(report["input_format"], "aethron-audit-v4")
             self.assertIn("scripts/robotics_runtime_input_v3.py", report["source_sha256"])
             self.assertIn("tests/mavlink/audit_v2/runtime_input_v3.rs", report["source_sha256"])
             self.assertTrue(any("--test" in call.args[0] for call in calls.call_args_list))

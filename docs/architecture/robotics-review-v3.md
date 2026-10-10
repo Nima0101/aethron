@@ -1011,3 +1011,63 @@ remain tied to their older corpora and source revisions; no new performance
 ranking is inferred. Ruff, formatting and Bandit pass. Runtime selection remains
 PENDING at passive wire; versioned configurable-sender comparison is still an
 executable gap before the next later component, signing/replay.
+
+## Versioned configured-sender comparison
+
+Review baseline: `41c8ce1535eb517babb58f4e362a8d02a3c6e64c`. FIX the
+comparison envelope and independent candidates' fixed-sender assumption. Production
+telemetry remains unchanged. Legacy records still mean sender `(1,1)`; configured
+records have exactly `version: 4`, `name`, `sender`, and `steps`. `sender` has exactly
+`system` and `component`, each an integer from 1 through 255. Missing, unknown,
+boolean, floating, string, zero and overflowing configurations are rejected before
+reference receivers are constructed. JSON numeric tokens must use unsigned integer
+syntax; the managed reader checks original tokens and rejects `1.0`/exponent forms
+before execution, preserving distinctions lost by Number conversion. Existing duplicate-member and byte limits still apply.
+
+This is an experiment contract, not a new telemetry protocol. Deployment and runtime
+selection constraints remain those of the passive receiver checkpoint above. The
+[MAVLink routing](https://mavlink.io/en/guide/routing.html) and
+[serialization](https://mavlink.io/en/guide/serialization.html) sources were reread:
+header sender identifiers provide filtering, not cryptographic authentication.
+The format choice extends the earlier fixed-envelope/JSON/CBOR comparison: two
+explicit sender octets avoid adding another package or an implicit routing model.
+Python reference, managed Number and native u8 domains all represent the admitted
+values exactly. This does not grant Python, Rust, JavaScript or any other runtime
+a production KEEP decision; the broader candidate comparison remains open.
+
+For binary comparisons, `AETHAUD3` is unchanged. `AETHAUD4` adds `system:u8` and
+`component:u8` before each case's step count, both nonzero. All other v3 fields,
+65,536-byte aggregate limit, count bounds and rejection rules remain. Encoding any
+configured case selects v4 for the whole envelope and materializes `(1,1)` for
+legacy cases. Decoding v4 reconstructs explicit configured records for every case.
+Legacy-only input still generates byte-identical v3 data. Static Rust fixtures bind
+a validated sender tuple alongside each step slice; runtime Rust input borrows
+packet slices as before and now retains each case's admitted tuple.
+
+The C4 views of this correction remain confined to the comparison environment:
+
+- Context: synthetic local fixtures and reviewers; no vehicle or command interface.
+- Containers: Python reference, independent Node candidate, and hosted Rust candidate
+  consume admitted cases and return diagnostic JSON to the comparison harness.
+- Components: closed envelope admission, per-case receiver, state/provenance comparator,
+  and retained source/input/output receipts. Sender rejection withdraws samples.
+- Code: `case_sender` binds Python/fixture configuration; the managed `sender` function
+  and Rust `runtime_input_v3::parse` admit configuration before execution;
+  each receiver filters header bytes and emits its configured IDs.
+
+[Evidence](../verification/robotics-sender-config-v4.json) retains one expected RED
+failure and one unsupported-envelope error, followed by 73 passing focused methods.
+One method was rerun after removing an unused test loop variable. Three configured
+cases cover `(1,255)`, `(255,1)` and `(255,255)`, mismatch withdrawal, counter-preserving
+recovery and closure. Real Node/reference parity passes for 24 cases/78 steps;
+two deliberately hard-coded candidate mutations fail parity. The original 21
+records and 5,264-byte legacy combined input are unchanged. The combined v4 input
+has 48 cases/102 steps and 5,966 bytes; Python binary roundtrip parity passes.
+
+Five Rust parser tests are wired for hosted execution, including configured sender
+bounds and borrowed packet offsets. The local compiler attempt failed with
+`FileNotFoundError`, retained with `native_executed: false`; mocked harness tests
+are not native execution. No current-head Rust parity, new performance ranking,
+hardware timing or deployment qualification is claimed. The passive-wire decision
+remains PENDING; next review is its state-commit fault boundary, followed later by
+the still-unreviewed signing/replay component. No audit-complete marker is warranted.

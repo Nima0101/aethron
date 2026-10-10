@@ -10,7 +10,8 @@ const layouts = new Map([
 ]);
 
 class Receiver {
-  constructor() {
+  constructor(system, component) {
+    this.system = system; this.component = component;
     this.last = null; this.sequence = null; this.boot = new Map(); this.samples = new Map();
     this.reason = 'no_observation'; this.latched = false;
   }
@@ -36,7 +37,7 @@ class Receiver {
     const id = p.readUIntLE(7, 3), layout = layouts.get(id);
     if (!layout) { this.withdraw('unsupported_message'); return; }
     if (p[1] < 1 || p[1] > 28) { this.withdraw('invalid_packet'); return; }
-    if (p[5] !== 1 || p[6] !== 1) { this.withdraw('sender_mismatch'); return; }
+    if (p[5] !== this.system || p[6] !== this.component) { this.withdraw('sender_mismatch'); return; }
     let crc = 65535;
     for (const byte of [...p.subarray(1, -2), layout[4]]) {
       let tmp = byte ^ (crc & 255);
@@ -55,7 +56,7 @@ class Receiver {
       this.withdraw('source_clock_reset', true); return;
     }
     this.sequence = seq; this.boot.set(id, boot);
-    this.samples.set(id, {system_id: 1, component_id: 1, message: layout[0], frame: layout[1],
+    this.samples.set(id, {system_id: this.system, component_id: this.component, message: layout[0], frame: layout[1],
       fields: layout[2], values, units: layout[3], source_boot_ms: boot, receive_ns: now,
       capture_ns: null, evidence: 'external_unverified', authenticated: false,
       link_id: null, signature_timestamp: null});
@@ -91,6 +92,13 @@ while (true) {
 const decoder = new TextDecoder('utf-8', {fatal: true, ignoreBOM: true});
 const text = decoder.decode(raw.subarray(0, used));
 const cases = JSON.parse(text);
+// JSON numbers in this grammar are unsigned integer configuration only. Preserve
+// token distinctions (1.0 / 1e0 / -0) that JavaScript Number would otherwise erase.
+for (const [token] of text.matchAll(/"(?:[^"\\]|\\.)*"|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g)) {
+  if (!token.startsWith('"') && !/^(0|[1-9][0-9]*)$/.test(token)) {
+    throw new Error('audit_integer_token');
+  }
+}
 // JSON.parse establishes valid grammar but discards duplicate members. Scan
 // the original bounded text before using the result. Whole string tokens hide
 // their punctuation; each colon follows a key string in the validated grammar.
@@ -110,12 +118,30 @@ for (const [token] of text.matchAll(/"(?:[^"\\]|\\.)*"|[{}\[\]:]/g)) {
 if (!Array.isArray(cases) || cases.length < 1 || cases.length > 64) {
   throw new Error('audit_case_limit');
 }
-const names = new Set();
-for (const c of cases) {
-  if (c === null || typeof c !== 'object' || Array.isArray(c) ||
-      Object.keys(c).length !== 2 || !Object.hasOwn(c, 'name') || !Object.hasOwn(c, 'steps')) {
+function sender(c) {
+  if (c === null || typeof c !== 'object' || Array.isArray(c)) {
     throw new Error('audit_case_record');
   }
+  const fields = Object.hasOwn(c, 'version') ? ['version', 'name', 'sender', 'steps'] : ['name', 'steps'];
+  if (Object.keys(c).length !== fields.length || !fields.every(k => Object.hasOwn(c, k))) {
+    throw new Error('audit_case_record');
+  }
+  if (fields.length === 2) return [1, 1];
+  if (c.version !== 4) throw new Error('audit_case_version');
+  const s = c.sender;
+  if (s === null || typeof s !== 'object' || Array.isArray(s) || Object.keys(s).length !== 2 ||
+      !Object.hasOwn(s, 'system') || !Object.hasOwn(s, 'component')) {
+    throw new Error('audit_sender_record');
+  }
+  const ids = [s.system, s.component];
+  if (!ids.every(v => Number.isInteger(v) && v >= 1 && v <= 255)) {
+    throw new Error('audit_sender_domain');
+  }
+  return ids;
+}
+const names = new Set();
+for (const c of cases) {
+  sender(c);
   if (typeof c.name !== 'string' || c.name.length === 0 || names.has(c.name)) {
     throw new Error('audit_case_name');
   }
@@ -125,7 +151,7 @@ for (const c of cases) {
   }
 }
 const results = cases.map(c => {
-  const receiver = new Receiver();
+  const receiver = new Receiver(...sender(c));
   return c.steps.map(step => {
     if (step === null || typeof step !== 'object' || Array.isArray(step)) {
       throw new Error('audit_operation_record');

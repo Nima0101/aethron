@@ -108,7 +108,24 @@ def corpus():
         ingest(seq=0, boot=1),
     ]
     cases["sender_session_fresh"] = [snap(0), ingest(seq=0, boot=1)]
-    return [{"name": name, "steps": steps} for name, steps in cases.items()]
+    legacy = [{"name": name, "steps": steps} for name, steps in cases.items()]
+    configured = []
+    for system, component in ((1, 255), (255, 1), (255, 255)):
+        sender = {"system": system, "component": component}
+        configured.append(
+            {
+                "version": 4,
+                "name": f"configured-{system}-{component}",
+                "sender": sender,
+                "steps": [
+                    ingest(**sender),
+                    ingest(1, seq=1, boot=11, system=2, component=2),
+                    ingest(2, seq=1, boot=11, **sender),
+                    {"op": "close", "now": "1000000003"},
+                ],
+            }
+        )
+    return legacy + configured
 
 
 def validate_operation(step):
@@ -143,14 +160,32 @@ def validate_operation(step):
     return op
 
 
+def case_sender(case):
+    """Closed legacy/v4 envelope; return exact admitted sender octets."""
+    if type(case) is not dict:
+        raise ValueError("audit_case_record")
+    if case.keys() == {"name", "steps"}:
+        return (1, 1)
+    if case.keys() != {"version", "name", "sender", "steps"}:
+        raise ValueError("audit_case_record")
+    if type(case["version"]) is not int or case["version"] != 4:
+        raise ValueError("audit_case_version")
+    sender = case["sender"]
+    if type(sender) is not dict or sender.keys() != {"system", "component"}:
+        raise ValueError("audit_sender_record")
+    values = (sender["system"], sender["component"])
+    if any(type(value) is not int or not 1 <= value <= 255 for value in values):
+        raise ValueError("audit_sender_domain")
+    return values
+
+
 def validate_cases(cases):
     """Validate experiment envelopes before creating receivers or native input."""
     if type(cases) is not list or not 1 <= len(cases) <= 64:
         raise ValueError("audit_case_limit")
     names = set()
     for case in cases:
-        if type(case) is not dict or case.keys() != {"name", "steps"}:
-            raise ValueError("audit_case_record")
+        case_sender(case)
         name = case["name"]
         if type(name) is not str or not name or name in names:
             raise ValueError("audit_case_name")
@@ -165,7 +200,7 @@ def reference(cases):
     results = []
     for case in cases:
         current = [None]
-        source = PassiveTelemetry(1, 1, clock=lambda current=current: current[0])
+        source = PassiveTelemetry(*case_sender(case), clock=lambda current=current: current[0])
         steps = []
         try:
             for step in case["steps"]:
