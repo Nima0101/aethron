@@ -50,9 +50,9 @@ its versioned schema; this review does not rewrite that peer interface.
 | Package distribution and fixtures | Pending full review; focused installed-artifact checks are regression evidence only |
 | Android/JVM, desktop lifecycle, P12 operator application | No completed implementation identified in the previous inventory; fresh inventory and justified implementation decisions remain outstanding |
 
-No completion marker is created. Session-response limits, lexical integer-form
-admission and producer whole-event versus payload-size reconciliation remain
-known open issues. Cancellation no longer blocks DELETE, but a source may ignore
+No completion marker is created. The session-response admission slice below
+resolves the previously open response limit. Lexical integer-form admission and
+producer whole-event versus payload-size reconciliation remain open. Cancellation no longer blocks DELETE, but a source may ignore
 cancellation and a remote server may fail to delete its session. Full live-server,
 platform and deployment qualification are not established by synthetic tests.
 
@@ -149,3 +149,46 @@ across all response phases, lexical integer forms and the known producer raw-eve
 size mismatch. Neither this slice nor earlier tests establish deployment security,
 physical freshness or hard-real-time behavior. Review evidence is in
 [the session record](evidence/phase3/p33-session-review-v3.json).
+
+## Third component, authenticated HTTP redirect slice
+
+Baseline `ecd3991d2aef42c0f787378a06a66fc31ec1fa00`. Earlier generated admission
+was rerun (4 tests, including the independent safety negatives); observation,
+session and stream regression checks remain part of this slice's verification.
+Requirements are one caller-selected read-only service endpoint, no implicit
+forwarding of authenticated requests, preservation of session cleanup, Node ESM
+integration, and no browser or target-device qualification claim.
+
+The default fetch redirect policy followed responses for POST, GET and DELETE.
+Thirty real loopback HTTP controls reproduced follow-up requests at unintended
+destinations (five redirect statuses, three request phases, same/different origin).
+Same-origin destinations received the synthetic bearer token. Cross-origin native
+fetch stripped authorization in these tests, but still sent a request; that does
+not meet the explicit no-redirect policy. This finding is not a claim of token
+forwarding across origins.
+
+Current official-source comparison (2026-10-10):
+
+| Candidate | Decisive property |
+| --- | --- |
+| TypeScript with host fetch | [Fetch HTTP redirect handling](https://fetch.spec.whatwg.org/#http-fetch) supports redirect mode `error` before following. The Node interface exposes it directly for every existing request. |
+| Kotlin/Ktor | [Redirect controls](https://ktor.io/docs/client-redirect.html) allow disabling following. A JVM/client migration could enforce the same policy but provides no additional endpoint authorization property; Node module consumption would require a different distribution boundary. |
+| Dart HTTP | [HttpClientRequest redirect controls](https://api.dart.dev/dart-io/HttpClientRequest/followRedirects.html) can disable following, with documented method/header rules. A Dart implementation is credible for a Dart client, but redirect security here does not require a different runtime. |
+| Manual redirect validation | Explicit host redirect refusal avoids parsing and authorizing a second destination or replaying request bodies. No requirement permits endpoint migration, so a hand-built redirect resolver would add unnecessary authority decisions. |
+
+**KEEP TypeScript/host fetch; FIX all three requests to reject redirects.** No
+runtime ranking or foreign-runtime benchmark is claimed. Direct host policy is
+the decisive property, verified through actual native fetch and loopback sockets,
+not fetch mocks. Thirty retained baseline assertion failures become passing;
+one nonredirected positive control still creates, reads and deletes the session.
+Rejected GET redirects still clear the display and attempt DELETE at the original
+endpoint. DELETE redirect refusal remains best effort; it is not a deletion receipt.
+The README also corrects the unconditional claim that abort releases a handle.
+
+This does not validate the caller's initial base URL, attest TLS configuration,
+restrict DNS/proxies, normalize all native fetch exceptions, or bound all response
+cleanup phases. Those remain in the earliest open transport review, along with
+lexical integer forms and producer payload/wire-size reconciliation. No new
+command, hardware, identity or authority surface is introduced. The parent review
+and lane are incomplete. Evidence is recorded in
+[the redirect record](evidence/phase3/p33-redirect-review-v3.json).

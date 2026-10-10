@@ -31,7 +31,7 @@ await observe('http://127.0.0.1:8765', token, 'bench', state => {
 }, controller.signal);
 ```
 
-The named profile uses the `warn` contract in this example. Python's example accepts the other contract names explicitly; application SDKs should preserve the schema enum. `observe()` releases its viewer handle when aborted; the supervisor continues processing. An independent client timer requests an expiry check every 20ms; host scheduling delays can postpone that check. Without a measured transit bound, current state remains UNKNOWN and observations are labeled delayed.
+The named profile uses the `warn` contract in this example. Python's example accepts the other contract names explicitly; application SDKs should preserve the schema enum. `observe()` attempts to release its validated viewer handle when aborted; remote deletion is best effort and the supervisor continues processing. An independent client timer requests an expiry check every 20ms; host scheduling delays can postpone that check. Without a measured transit bound, current state remains UNKNOWN and observations are labeled delayed.
 
 `Observation.accept()` snapshots and validates its input. Mutating that input or a
 returned covariance array cannot change later observations. Explicit local clock
@@ -105,3 +105,12 @@ without echoing response details or using an unvalidated handle. This is a clien
 admission limit, not a server size guarantee or an upstream allocation bound.
 Caller cancellation is still required for a stalled response. An invalid/lost
 reply cannot establish remote viewer-handle cleanup.
+
+Authenticated session creation, event reception and deletion reject HTTP redirects,
+including redirects within the same origin. A redirect therefore cannot transfer
+these requests to a different path or origin. Set the intended endpoint directly;
+redirect-based routing is unsupported. A rejected creation/stream redirect rejects
+`observe()`; a rejected cleanup redirect leaves deletion unconfirmed and remains
+best effort. This uses the host fetch redirect policy, not a check after following
+the redirect. The caller still owns initial endpoint trust and transport security;
+this does not restrict arbitrary caller-supplied base URLs or certify TLS/MLS/CNSA.

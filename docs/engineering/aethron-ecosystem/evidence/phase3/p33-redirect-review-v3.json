@@ -1,0 +1,77 @@
+{
+  "audit_policy_version": 3,
+  "component": "P3.3 authenticated HTTP redirects",
+  "baseline": "ecd3991d2aef42c0f787378a06a66fc31ec1fa00",
+  "decision": "KEEP TypeScript/native fetch; FIX redirect refusal at POST/GET/DELETE",
+  "source_sha256": {
+    "examples/clients/typescript/src/client.ts": "c4a85daeda0c5dc514925f71deaa7725b25da89099b607a0070f07458bc7b877",
+    "examples/clients/typescript/redirect.test.mjs": "4f67dc638e1b56501913e7eb423d26d448b8ee8fecc16f2ae37e985ca6b58e41",
+    "examples/clients/typescript/package.json": "ffb645d0fc6d22ae9097eb862c3db1bb9125421a32bb7bf700d3026be40e92ce",
+    "examples/clients/typescript/README.md": "73f83bcdba7347178351ff8da0405dba95c308c96e8d59755a1f0e03c947b947",
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "d9381809dfa9e501c687821d43f05742801fe296dad9f3200ad48ba8bbfa5f03"
+  },
+  "reports": {
+    "redirect-red-v3.tap": {
+      "sha256": "f798c7a1f871dbc7fc9e5fa20a45ebfdfc7336dc022e5a5bc146cd7db870e407",
+      "pass": 1,
+      "fail": 30
+    },
+    "redirect-green-v3.tap": {
+      "sha256": "69839d768d8049863af8fccda84d438c1f838cd427e101dc81217b3fbe9297c7",
+      "pass": 31,
+      "fail": 0
+    },
+    "redirect-source-v3.tap": {
+      "sha256": "af55d7711758dd6075ca500425232028a26010babef9ed2cbaea8c865ad5a30c",
+      "pass": 81,
+      "fail": 0
+    },
+    "redirect-baseline-validation-v3.tap": {
+      "sha256": "5cd59b89be2409d1769e21f0fe5bb2faa94715269caa733cf344a739ebe31c6d",
+      "pass": 4,
+      "fail": 0
+    },
+    "redirect-installed-v3.tap": {
+      "sha256": "1afc0dacea79a42f4561a34f529c99538421aef9a8a0125c10688d5c003ce43a",
+      "pass": 108,
+      "fail": 0
+    }
+  },
+  "green": {
+    "focused_tests": 116,
+    "installed_tests": 108,
+    "strict_typescript_build_and_consumer": "PASS",
+    "installed_bytes": "All dist implementation/schema/declaration bytes equal tested build",
+    "observation_parity": {
+      "traces": 45,
+      "views": 162,
+      "report_sha256": "2d919583255a606a96f16537d14b6bd4c1ba8d01f6be3a02ee75f9776056afb3"
+    }
+  },
+  "package": {
+    "name": "aethron-edge-client-example@0.1.0",
+    "sha256": "17e5d6f0752c4ce552d482f7bbee46e3333962e99f975b4b876ab03cfc221dea",
+    "size": 20270,
+    "unpacked_size": 130156
+  },
+  "sources": [
+    "https://fetch.spec.whatwg.org/#http-fetch",
+    "https://ktor.io/docs/client-redirect.html",
+    "https://api.dart.dev/dart-io/HttpClientRequest/followRedirects.html"
+  ],
+  "environment": {
+    "node": "v22.23.2",
+    "platform": "linux",
+    "architecture": "x64",
+    "transport": "native fetch; synthetic loopback HTTP servers only"
+  },
+  "security_review": "All three authenticated fetch calls reject redirects before following; no Location parser, retry, additional authority or dependency. Tests observe destination requests rather than mock options. Same-origin token forwarding reproduced with synthetic credentials; cross-origin credentials were stripped by native fetch, but requests still followed on baseline. This is not a TLS or deployment security assessment.",
+  "negative_evidence": [
+    "30 baseline assertion failures; direct nonredirect control passed",
+    "Initial policy-read tool host SIGTRAP three times; unchanged read succeeded on retry",
+    "gh pr edit failed on deprecated projectCards GraphQL field; REST body update succeeded",
+    "Initial endpoint trust, raw native fetch exceptions and response disposal/cancellation remain unreviewed; no blanket transport completion",
+    "Remote deletion remains best effort; lexical integer and producer payload/wire cap mismatch remain open"
+  ],
+  "audit_complete": false
+}
