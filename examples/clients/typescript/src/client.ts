@@ -16,6 +16,19 @@ function discardResponse(response: Response): void {
   void response.body?.cancel().catch(() => {});
 }
 
+function endpointOrigin(base: string): string {
+  try {
+    // Match the host parser's canonical origin, with one optional trailing slash.
+    // This rejects userinfo, paths, queries, fragments and silently repaired input.
+    if (typeof base !== 'string') throw new Error();
+    const url = new URL(base);
+    if (base !== url.origin && base !== `${url.origin}/`) throw new Error();
+    if (url.protocol !== 'https:' && !(url.protocol === 'http:' &&
+        (url.hostname === '127.0.0.1' || url.hostname === '[::1]'))) throw new Error();
+    return url.origin;
+  } catch { throw new Error('invalid_endpoint'); }
+}
+
 export class Observation {
   // Retain only the displayed aggregate, never the transport handle or track IDs.
   #projection: {
@@ -68,8 +81,9 @@ export class Observation {
 /** Authenticated fetch streaming; credentials never enter URLs or persistent storage. */
 export async function observe(base: string, token: string, profile: string,
   display: (state: ReturnType<Observation['view']>) => void, signal: AbortSignal): Promise<void> {
+  const origin = endpointOrigin(base);
   const headers = {Authorization: `Bearer ${token}`, 'Content-Type': 'application/json'};
-  const request = await fetch(`${base}/api/v1/sessions`, {method: 'POST', headers, redirect: 'error',
+  const request = await fetch(`${origin}/api/v1/sessions`, {method: 'POST', headers, redirect: 'error',
     body: JSON.stringify({source_profile: profile, contract: 'warn'}), signal})
     .catch(() => { throw new Error('session_unavailable'); });
   if (!request.ok) {
@@ -92,7 +106,7 @@ export async function observe(base: string, token: string, profile: string,
     }
   }, 20);
   try {
-    const response = await fetch(`${base}/api/v1/sessions/${handle}/events`, {headers, signal: eventSignal, redirect: 'error'})
+    const response = await fetch(`${origin}/api/v1/sessions/${handle}/events`, {headers, signal: eventSignal, redirect: 'error'})
       .catch(() => { throw new Error('stream_unavailable'); });
     if (!response.ok || !response.body) {
       discardResponse(response);
@@ -137,7 +151,7 @@ export async function observe(base: string, token: string, profile: string,
     clearInterval(timer); stop.abort(); value.disconnect();
     try { if (!renderFailed) display(value.view()); }
     finally {
-      await fetch(`${base}/api/v1/sessions/${handle}`, {method: 'DELETE', headers, signal: AbortSignal.timeout(2000), redirect: 'error'})
+      await fetch(`${origin}/api/v1/sessions/${handle}`, {method: 'DELETE', headers, signal: AbortSignal.timeout(2000), redirect: 'error'})
         .then(discardResponse).catch(() => {});
     }
   }

@@ -112,8 +112,8 @@ these requests to a different path or origin. Set the intended endpoint directly
 redirect-based routing is unsupported. A rejected creation/stream redirect rejects
 `observe()`; a rejected cleanup redirect leaves deletion unconfirmed and remains
 best effort. This uses the host fetch redirect policy, not a check after following
-the redirect. The caller still owns initial endpoint trust and transport security;
-this does not restrict arbitrary caller-supplied base URLs or certify TLS/MLS/CNSA.
+the redirect. The caller still owns selection of a trusted admitted endpoint and transport
+security. Endpoint syntax admission below does not certify TLS/MLS/CNSA.
 
 Unused HTTP response bodies are explicitly cancelled: unsuccessful session creation,
 unsuccessful event responses, and all DELETE replies. The client neither reads
@@ -137,3 +137,21 @@ cancellation clears the observation and attempts DELETE with its independent
 timeout. Cancellation before session admission cannot confirm remote cleanup.
 The checks do not preempt synchronous callbacks/parsing or establish a real-time
 shutdown deadline; the host fetch implementation must honor its abort signal.
+
+Before constructing authenticated requests, `observe()` requires a canonical
+origin string: `https://example.test` or `https://example.test:8443`, with at most
+one trailing slash. Plaintext HTTP is admitted only for the literal hosts
+`127.0.0.1` and `[::1]`. Use lowercase/ASCII host serialization and omit a scheme's
+default port. Userinfo, path prefixes, queries, fragments, whitespace, repaired
+URL spellings and numeric loopback aliases are rejected with `invalid_endpoint`
+before fetch or display is called. `localhost` is not admitted over plaintext
+because this policy avoids name resolution for the HTTP exception. A trailing
+slash is accepted and removed before constructing the three fixed API routes.
+
+This deliberately tightens the example's former arbitrary-base behavior; proxy
+path prefixes and plaintext LAN endpoints are unsupported. A separately reviewed
+TLS deployment can use an HTTPS origin. The checks do not authorize that server,
+pin its certificate/address, enforce proxy configuration, prevent an application
+from supplying the wrong trusted origin, or replace host networking policy.
+IPv6/HTTPS URL admission is covered with controlled fetch; actual socket evidence
+here is IPv4 loopback HTTP, not remote TLS or IPv6 qualification.

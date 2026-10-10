@@ -290,3 +290,56 @@ lexical-number equivalence and producer payload/whole-event bounds remain in the
 open transport review. Distribution/tooling and remaining platform/P12 inventory
 have not completed V3 review. No completion marker is created. See the
 [source-bound record](evidence/phase3/p33-errors-review-v3.json).
+
+
+## Third component, endpoint origin admission slice
+
+Baseline `66ff8a2650f3499d2fdaf1a605556989ec8c5031`. The earliest generated
+admission and observation controls were rechecked with the full focused client
+regression run. Raw base concatenation admitted paths/query/fragment components
+and made a trailing slash produce a double-slash API route. It also allowed
+plaintext remote URLs despite the documented loopback/TLS deployment boundary
+in [edge usage](../../usage-edge.md). Caller-selected endpoint trust was documented,
+but the client did not enforce even that transport shape before attaching credentials.
+
+Constraints: accept one explicit server origin for a read-only Node client;
+preserve literal loopback development; require HTTPS for other hosts; reject
+userinfo and URL components that change API routing; normalize only the optional
+terminal slash; expose a fixed diagnostic before any fetch. This is endpoint
+admission, not server authorization, TLS qualification or an SSRF sandbox.
+
+Current primary-source comparison (2026-10-10):
+
+| Candidate | Decisive property |
+| --- | --- |
+| TypeScript + host WHATWG URL | [Node URL documentation](https://nodejs.org/api/url.html#the-whatwg-url-api) exposes origin and parsed scheme/host separately from credentials/path/query/fragment. Using the host parser and comparing input with its origin avoids a second parser disagreeing with the actual fetch runtime. Local Node 22 tests verify the chosen behavior; the current documentation is not a claim that Node 26 was tested. |
+| Rust `url` | [Url parsing and origin](https://docs.rs/url/latest/url/struct.Url.html) provide a credible native structured-URL interface. A Rust boundary still needs explicit scheme and origin policy. Moving this small guard across FFI/Wasm adds a second interpretation boundary without a demonstrated throughput or isolation need; a separately deployed native client is not evaluated by these Node tests. |
+| C#/.NET `Uri` | [IsLoopback](https://learn.microsoft.com/en-us/dotnet/api/system.uri.isloopback?view=net-9.0) is a semantic helper, not this policy: its documented accepted cases include names and local file URIs. Explicit protocol/authority restrictions remain necessary. A .NET implementation offers no demonstrated security advantage for the existing Node fetch boundary. |
+| Handwritten URL regex or raw string concatenation | A regex would need to reproduce host parsing and normalization; concatenation already fails the query/fragment/trailing-slash controls. Neither supplies the required structured interpretation unaided. |
+
+**KEEP TypeScript/host URL; FIX origin admission before credential construction.**
+Input must exactly equal the parser's origin, with one optional trailing slash.
+This deliberately rejects parser-repaired aliases, casing, default-port spellings,
+userinfo, path prefixes, query/fragment markers and non-string coercion. HTTPS is
+admitted; HTTP permits only `127.0.0.1` or `[::1]`. The returned origin constructs
+all three fixed paths. A caught parse failure is replaced by `invalid_endpoint`,
+without the rejected value/cause. No DNS request, new dependency or server policy
+implementation is added. This is a documented tightening of the client contract,
+not a frozen server schema or threshold change.
+
+Forty-eight controls cover 38 rejected inputs, seven admitted origins and three
+native IPv4 HTTP cases. Baseline retains 45 assertion failures and three passing
+controls; there are no test execution errors, skips or cancellations. Actual
+loopback requests independently expose query/fragment path corruption and the
+double-slash route. HTTPS and IPv6 cases check request construction through a
+controlled fetch only. Native five-second watchdogs bound regression hangs, not
+production latency. Caller-selected origins remain trusted configuration; host
+proxy behavior, TLS trust, DNS policy and local privileged networking remain
+outside this helper's guarantees.
+
+Endpoint shape is now reviewed; production TLS deployment remains an external
+integration gate with no qualification claimed. The next earliest transport
+questions are lexical numeric equivalence and the producer payload versus consumer
+whole-event limit. Distribution/tooling and the remaining platform/P12 inventory
+are still incomplete. No completion marker is created. See the
+[source-bound record](evidence/phase3/p33-endpoint-review-v3.json).
