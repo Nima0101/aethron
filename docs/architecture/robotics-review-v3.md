@@ -652,3 +652,23 @@ component, language selection or performance optimization. No source authorizati
 sensor-fusion suitability, hard-real-time behavior or weapon integration follows
 from passing these checks. The passive component's technology review remains
 PENDING; signing/replay remains the next later unreviewed component.
+
+## Consolidate the passive interface's assurance limits
+
+CLARIFY the public telemetry entry point after re-reading the passive source,
+its provenance/expiry/clock tests and the schema-2 receipt at `48de56c`.
+Existing detailed prose correctly separated authentication from measurement
+trust, but did not put the requested system-level assurance claims alongside
+the introductory diagnostic contract. The README now maps acceptance, observed
+status, receipt age and file hashes to their limited supported meanings. It
+explicitly leaves cryptographic compliance, MLS, complete Zero Trust deployment,
+availability and single-point-of-failure claims unqualified.
+
+The official MAVLink serialization and message-signing guides were revisited
+for the checksum/authentication distinction. No cryptographic implementation,
+transport, receiver or runtime choice changed. The
+[verification record](../verification/robotics-assurance-limits-v3.json) binds
+the documentation and the focused existing checks; there is no invented RED
+result or newly discovered production defect. This documentation review does
+not advance the earliest component's PENDING technology decision or re-review
+the later signing/replay, worker, ROS, vendor or simulated-interface components.

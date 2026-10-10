@@ -2,6 +2,35 @@
 
 The optional installed `aethron_edge.telemetry.mavlink` adapter decodes real MAVLink 2 common-dialect ATTITUDE (30) and LOCAL_POSITION_NED (32) packets using pymavlink 2.4.50. It is a diagnostic observation interface, not perception evidence or an autopilot controller. No command, heartbeat, ACK, rate request or TIMESYNC is transmitted. It neither enables telemetry streams nor changes flight-controller configuration.
 
+## Assurance limits at this interface
+
+Passing a diagnostic check establishes only the property it checks:
+
+| Observed result | Supported interpretation | Unsupported interpretation |
+| --- | --- | --- |
+| Sender tuple and CRC accepted | Packet passed this decoder's routing and corruption checks | Authenticated sender, authorized source or trustworthy physical measurement |
+| `OBSERVED_UNVERIFIED` | At least one retained diagnostic sample passed the local checks | Perception eligibility, calibrated geometry, clear space or permission to act |
+| Receipt age within 100ms | Age in the supplied local clock at the last explicit check | Sensor capture age, a scheduled watchdog or an end-to-end deadline |
+| Installed module hash matches the reviewed file | Those file bytes match the recorded digest | Signed execution attestation, uncompromised host or certified cryptographic implementation |
+
+The [MAVLink serialization guide](https://mavlink.io/en/guide/serialization.html)
+describes packet checksums; [message signing](https://mavlink.io/en/guide/message_signing.html)
+is a separate mechanism. This unsigned interface rejects signed packets and
+does not provide confidentiality. The optional signed interface below also
+retains unverified measurement status; its shared-key check is not physical
+sensor attestation. Neither interface's diagnostic tests establish CNSA/Suite B
+compliance, MLS isolation, a complete Zero Trust deployment, five-nines
+availability or absence of single points of failure. Those are unqualified
+system requirements, not properties conferred by MAVLink support.
+
+The [accepted-sample receipts](../../../../docs/verification/robotics-sdk-provenance-v3.json)
+bind the unsigned status claims to two fixed synthetic packets in both tested
+CRC backend modes. This evidence is intentionally narrow: no physical device,
+mission, weapon integration or tactical deployment is qualified. Insufficient
+information for tactical deployment.
+
+## Installation and basic use
+
 Install the separately built core and edge wheels first. For the locally tested CPython 3.13/macOS ARM64 SDK closure:
 
 ```sh
