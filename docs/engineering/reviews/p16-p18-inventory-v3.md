@@ -1,9 +1,16 @@
 # P16–P18 review inventory v3
 
-Snapshot: `cbb383b73c3dc505305b8c4716f7f407786cc16b`, plus local federation floors, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `b1301a1f57c16325ae893942e70afb51da047798`, plus canonical Base64 coverage, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
+
+The latest owner-ordered restart begins again at passport admission. The [current
+Base64 review](p16-base64-current-v3.md) rechecks the parser/envelope boundary and
+fixes a guard-sensitivity gap: 33 alias cases now detect removed canonical equality.
+Runtime is unchanged. Next earliest unreviewed component in this restart: independent
+pinned-policy validation, then persistence and evidence binding. Earlier rows below
+remain evidence inputs and do not satisfy the remaining restart by themselves.
 
 The history of the owned runtime files starts with passport admission, then evidence,
 tasks, bundles, federation and inbox. The entries below record prior review coverage;
@@ -176,4 +183,4 @@ and requires the four selected baseline methods to pass before crediting guard-r
 failures. The [mutation integrity review](p16-mutation-integrity-v3.md) records remaining
 loaded-code and isolation limits; the earlier post-execution-only behavior is historical.
 
-Next executable P16 task: compose the separate durable floors with current bundle verification, retaining rejection and freshness-at-use limits without granting execution authority.
+After the current restart catches up, the next forward P16 task remains composition of durable floors with bundle verification, preserving rejection and freshness-at-use limits without granting execution authority.

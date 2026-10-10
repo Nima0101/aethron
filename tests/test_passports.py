@@ -393,6 +393,55 @@ class PassportVerificationTests(unittest.TestCase):
             self.assert_rejected()
             self.policy[field] = []
 
+    def test_signature_nonzero_pad_bits_reject_identical_decoded_signature(self):
+        original = json.loads(self.envelope())
+        encoded = original["signatures"][0]["sig"]
+        self.assertTrue(encoded.endswith("=="))  # 64-byte Ed25519 signature.
+        self.assertEqual(self.verify().status, "authenticated")
+        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+        last = alphabet.index(encoded[-3])
+        self.assertEqual(last & 15, 0)
+        for low_bits in range(1, 16):
+            changed = copy.deepcopy(original)
+            alias = encoded[:-3] + alphabet[last | low_bits] + "=="
+            self.assertEqual(
+                base64.b64decode(alias, validate=True), base64.b64decode(encoded, validate=True)
+            )
+            changed["signatures"][0]["sig"] = alias
+            with self.subTest(low_bits=low_bits):
+                self.assertEqual(
+                    self.assert_rejected(envelope=wire(changed)).reason, "invalid_input"
+                )
+
+    def test_payload_nonzero_pad_bits_reject_identical_signed_bytes(self):
+        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+        seen_padding = set()
+        for length in range(1, 4):
+            self.document["passport_id"] = "a" * length
+            original = json.loads(self.envelope())
+            self.assertEqual(self.verify().status, "authenticated")
+            encoded = original["payload"]
+            padding = len(encoded) - len(encoded.rstrip("="))
+            if not padding:
+                continue
+            seen_padding.add(padding)
+            index = len(encoded) - padding - 1
+            mask = 15 if padding == 2 else 3
+            last = alphabet.index(encoded[index])
+            self.assertEqual(last & mask, 0)
+            for low_bits in range(1, mask + 1):
+                changed = copy.deepcopy(original)
+                alias = encoded[:index] + alphabet[last | low_bits] + encoded[index + 1 :]
+                self.assertEqual(
+                    base64.b64decode(alias, validate=True), base64.b64decode(encoded, validate=True)
+                )
+                changed["payload"] = alias
+                with self.subTest(padding=padding, low_bits=low_bits):
+                    self.assertEqual(
+                        self.assert_rejected(envelope=wire(changed)).reason, "invalid_input"
+                    )
+        self.assertEqual(seen_padding, {1, 2})
+
     def test_tampering_noncanonical_and_malformed_envelopes(self):
         original = json.loads(self.envelope())
         altered_payload = payload()

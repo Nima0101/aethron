@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "p16-base64-current-v3",
+  "component": "Earliest bounded passport admission and canonical envelope Base64",
+  "decision": "KEEP",
+  "constraints": [
+    "Immutable UTF-8 input bounded to 65536 bytes and depth eight; duplicate rejection, safe integer tokens, closed fields, canonical payload and standard padded Base64.",
+    "One 64-byte Ed25519 signature; caller-provisioned policy, trusted time/floors and artifact identity. No network, private-key processing or authority grant.",
+    "No identified target hardware, memory budget, throughput acceptance limit or hard deadline."
+  ],
+  "alternatives": [
+    "Python lexical JSON hooks, native-backed Base64 decode/re-encode equality and native signature verification.",
+    "Erlang/Elixir OTP JSON callbacks and Base64 binary APIs with an explicit canonical adapter.",
+    "Rust base64 engine with explicit padding/trailing-bit configuration and a bounded lexical adapter.",
+    "C#/F# .NET Convert codecs and token-oriented JSON with explicit strict-wire checks."
+  ],
+  "rationale": [
+    "KEEP the bounded runtime after fresh source review: immutable inputs, lexical hooks and a narrow decode/re-encode equality predicate express this profile without custom codec arithmetic. No candidate has demonstrated a material advantage under the identified constraints.",
+    "FIX assurance coverage: all 17 preexisting signature verification methods survived in-memory removal of canonical Base64 equality. Two new methods reject 33 aliases which decode to the original signed payload/signature bytes; removing the guard now causes 33 assertion failures.",
+    "OTP and .NET are credible alternatives outside the component language, but codec decoding alone is not this strict wire profile. Rust exposes relevant strictness controls; no claim is made that its complete adapter cannot improve measured native-target constraints.",
+    "Only the current runtime and controlled guard removal were executed. No speed ranking, installed-tool preference, familiarity or rewrite-cost argument is used."
+  ],
+  "limits": [
+    "Production runtime and wire contract unchanged. This is a test-coverage repair, not a demonstrated deployed exploit or complete cryptographic validation.",
+    "An initial excess-padding experiment was unsuitable because the local decoder already rejects it. Failure evidence is retained; pad-bit variants supply the successful guard-sensitivity test.",
+    "No physical, real-time, MLS/CNSA, availability, installed-product or whole-lane completion claim."
+  ],
+  "evidence": [
+    "https://www.rfc-editor.org/rfc/rfc4648.html#section-3.5",
+    "https://docs.python.org/3/library/base64.html",
+    "https://docs.python.org/3/library/json.html",
+    "https://www.erlang.org/doc/apps/stdlib/base64.html",
+    "https://www.erlang.org/doc/apps/stdlib/json.html",
+    "https://docs.rs/base64/latest/base64/engine/general_purpose/struct.GeneralPurposeConfig.html",
+    "https://learn.microsoft.com/en-us/dotnet/api/system.convert.frombase64string"
+  ]
+}

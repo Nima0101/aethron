@@ -1,0 +1,74 @@
+{
+  "baseline_commit": "b1301a1f57c16325ae893942e70afb51da047798",
+  "review_order_version": 3,
+  "date": "2026-10-10",
+  "scope": "Restart at earliest bounded parser and envelope/signature admission; remaining restart incomplete.",
+  "decision": "KEEP production runtime; FIX canonical Base64 guard coverage with two methods and 33 signed aliases.",
+  "checks": {
+    "original_verification_methods": 17,
+    "original_guard_removed_failures": 0,
+    "new_methods": 2,
+    "alias_cases": 33,
+    "new_baseline_failures": 0,
+    "new_guard_removed_assertion_failures": 33,
+    "new_guard_removed_errors": 0,
+    "new_guard_removed_skips": 0,
+    "focused_methods": 36,
+    "focused_skips": 0,
+    "additional_adr_recheck_methods": 4,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": {
+      "exit_code": 1,
+      "low": 2,
+      "medium": 0,
+      "high": 0,
+      "production_findings": 0,
+      "notes": "B311 in preexisting seeded mutation-test generators; no cryptographic randomness is derived from them. No blanket exclusion."
+    },
+    "discarded_test_design": "Excess padding was already rejected by native decoder; retained real error log and removed unsuitable guard-sensitivity test."
+  },
+  "source_sha256": {
+    "tests/test_passports.py": "43f48e5813bc28e88c30bbf6982a02b902cf165cbc48b03855c84538c3dee29b",
+    "docs/decisions/p16-base64-current-v3.json": "3c057c278bf887817aff0991712e064eb4818b2be43c63d341e44760d4ce071c",
+    "docs/engineering/reviews/p16-base64-current-v3.md": "7f0ed64f56a578f00ba09a48b54611cd3fdcf48ed3684d622998c933901ba3ed",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "4508a33fc4c622caafc75ce7e3f1744ee8cea7ba1b0277bd44d61ed149b831d0",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "tests/test_passport_lexical.py": "0272780452980ec03e9b180a84e35db7e2aefd04f7bc6cf0ac21cfd9288b1887",
+    "tests/test_passport_optional_backend.py": "40dea2bde03a7813dcc976920081593984212043a22da54ddc0c5a72348b35e5",
+    "tests/test_passport_schemas.py": "0c423ffb3e53e8edc3f7a9bad16b460c1ca92b76ebeeb05f32492cda0d8f40b2",
+    "scripts/passport_trust_review.py": "118ce6a5232af5099294658c03326b01bd32107b08f16cb69eb4c241253dd195",
+    "examples/passports/parser-vectors-v1.json": "1be832f5b9d0120c3dab3816f72c679081ffbdc5b81d38efdb3432fe23922ced",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    ".github/workflows/aethron-passports.yml": "f2e52752fcda9ff25b5792b2639d45704cb8568f8cdb8eee5fe0cb4cc2051e72"
+  },
+  "runtime_artifacts_sha256": {
+    "base64-review-adr.log": "2448b2f73d5d370bc15d5604a91df577bce9d846d41bec2f1081129fd8ee0e9a",
+    "base64-review-bandit.json": "b6166ae9070dea67d7da3c0c08a35e1f5c60fbc035e0a91da45b23702bc2e9bf",
+    "base64-review-before.log": "9338b4d6cdb117f50a3403cbb376ecda390e1f3d7dff966f79d11122678eed9e",
+    "base64-review-design-failure.log": "aa57c7bd2f85ad23dfae948d0ad855e18a942294c95e65eb7e0d7d1920b52c56",
+    "base64-review-focused.log": "36a8180c11e62a0cbfc4d7eed6b8097f7118603a8c0efd9e82bfdf4eb30efa69",
+    "base64-review-lint.log": "ce04ce92b16073000b77c97a42c00b98b96305692d9d5ed4dcfa5a9ca9ea62d6",
+    "base64-review-sensitivity.json": "db320110437129d28379f760131db9c577ae516829bb10ec74348e1afe2d6d20"
+  },
+  "reproduction": [
+    "PYTHONPATH=tests:. python -m unittest test_passports test_passport_lexical test_passport_optional_backend test_passport_schemas.ArchitectureDecisionConformance -v",
+    "Load scripts/passport_trust_review.py and use its _run with captured aethron/passports.py source and the two named methods below. Require baseline success without skips; then remove the unique round-trip equality line in memory and require 33 assertion failures, no errors/skips. Never modify production source."
+  ],
+  "mutation": {
+    "remove_exact_line": "    _require(base64.b64encode(raw).decode(\"ascii\") == value)\n",
+    "methods": [
+      "test_signature_nonzero_pad_bits_reject_identical_decoded_signature",
+      "test_payload_nonzero_pad_bits_reject_identical_signed_bytes"
+    ]
+  },
+  "limits": [
+    "Source tests only; no new installed-distribution or hosted acceptance result.",
+    "The runtime already rejects these aliases. Controlled guard removal demonstrates a prior test blind spot, not a production vulnerability.",
+    "Alternatives compared from official sources, not executed or benchmarked. No latency/runtime superiority claim.",
+    "Listed source hashes are disk-byte identities, not loaded-code attestation, atomic snapshots, dependency closure or signed provenance.",
+    "No P16-P19 completion, hardware, MLS/CNSA, availability or tactical qualification."
+  ],
+  "next": "Independent pinned-policy validation, then persistence and evidence binding in the fresh review cursor."
+}
