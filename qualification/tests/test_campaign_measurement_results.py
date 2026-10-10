@@ -11,6 +11,41 @@ from qualification.technology import campaign_sql, compare_campaign
 
 
 class CampaignMeasurementResultTests(unittest.TestCase):
+    def test_contract_types_cannot_hide_behind_a_valid_maximum_workload(self):
+        original = campaign_sql.evaluate_sql
+        for path, convert in (
+            (("version",), bool),
+            (("capture_counts", "rejected"), float),
+        ):
+            with self.subTest(path=path):
+                changed_calls = []
+
+                def changed(
+                    plan, captures, path=path, convert=convert, changed_calls=changed_calls
+                ):
+                    report = original(plan, captures)
+                    # Leave both maximum-case tests and measurements correct.
+                    # Only ordinary contract cases receive an equal wrong type.
+                    if len(captures) != 64:
+                        parent = report
+                        for key in path[:-1]:
+                            parent = parent[key]
+                        parent[path[-1]] = convert(parent[path[-1]])
+                        changed_calls.append(len(captures))
+                    return report
+
+                output = io.StringIO()
+                with (
+                    patch.object(campaign_sql, "evaluate_sql", changed),
+                    contextlib.redirect_stdout(output),
+                ):
+                    with self.assertRaisesRegex(
+                        RuntimeError, "^campaign_candidate_contract_failed$"
+                    ):
+                        compare_campaign.main()
+                self.assertTrue(changed_calls)
+                self.assertEqual(output.getvalue(), "")
+
     def reject_changed_result(self, engines, path, value, *, traced, at_call=None):
         original_python = compare_campaign.evaluate
         original_sql = campaign_sql.evaluate_sql

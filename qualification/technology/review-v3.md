@@ -584,3 +584,45 @@ outside this diagnostic's scope. It qualifies none of MLS, ZTA, Link 16, CNSA,
 DDS deadlines, availability or physical sensor performance. Next earliest pending
 review: artifact/campaign comparison and remaining measurement evidence tooling.
 No phase or technology-audit completion is asserted.
+
+## Campaign contract type comparison — 2026-10-10
+
+Baseline `a156b147cead165f136536e4de40505f501c781f`: restarted with
+bounded evidence admission, timing and artifact binding, then campaign multiplicity,
+commitments and comparison tools. The production limits and non-qualification
+flags remain unchanged. The artifact tool checks every timed and traced result;
+its Node alternative still tests only hashing and ownership.
+
+A new counterexample exposed a gap before the already-strict maximum-workload
+gate: `CampaignAuditTests.evaluate` used ordinary equality for candidate reports.
+A Boolean version or floating rejected-count value in ordinary contract cases
+could pass, even while every maximum workload was correctly typed. The driver
+then emitted normal comparison evidence. Both controls failed before correction.
+
+The executable contract wrapper now applies `measurement.require_result` to each
+successful candidate report. Any value, key, container or scalar-type mismatch
+becomes an assertion failure, allowing the existing driver to reject the baseline
+suite with `campaign_candidate_contract_failed` before emitting a report. Expected
+duplicate-mutation failures remain failures, not unexpected harness errors.
+This fixes diagnostic evidence admission; production APIs and SQL are unchanged.
+The reference oracle is still shared: this is not independent validation of all
+production semantics or protection against identical bugs in both evaluators.
+
+[Decision](campaign-types-decision-v3.json) compares the bounded direct APIs with
+SQLite, Erlang/OTP, Souffle, .NET hashing and the actual Node primitive experiment.
+KEEP the scoped technologies; FIX exact candidate-result comparison. Fresh SQL
+runs passed 11 contract methods with 48 calls and detected three duplicate-mutant
+failures, with zero mutant errors. Ten descriptive samples had a lower SQLite
+median, overlapping ranges and a larger SQLite maximum; this is retained, not
+rewritten as a Python speed win. It is insufficient for a general runtime ranking.
+[Verification](campaign-types-verification-v3.json) retains all timing samples,
+source observations, regression results and an incomplete combined test command
+that hit its 60-second cap. Focused batches replace that incomplete test result.
+
+C4 context and deployment remain the offline reviewer/source-checkout diagnostic
+boundary already described above. Within its comparison component, the code path
+is now `evaluate_sql -> require_result -> contract assertion -> runner gate ->
+report`; maximum-workload measurements remain separately checked. No C2, network,
+sensor ingestion, actuation or classified-data service is added or qualified.
+Next earliest pending review: CLI/report delivery and reference/bundle consumers,
+then the remaining P15/P19 acceptance inventory. The lane remains incomplete.

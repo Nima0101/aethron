@@ -2,6 +2,7 @@
 
 import itertools
 
+from qualification.technology.measurement import require_result
 from qualification.tests import test_campaign as contract
 from qualification.tests.test_evidence import encoded, fixture
 
@@ -19,7 +20,12 @@ class CampaignAuditTests(contract.CampaignTests):
                 evaluate_sql(raw, captures)
             raise
         actual = evaluate_sql(raw, captures)
-        self.assertEqual(actual, expected)
+        try:
+            require_result(actual, expected, "campaign_candidate_result_mismatch")
+        except RuntimeError as error:
+            # Type mismatches are contract failures, including in the negative
+            # mutation run; they must not be mistaken for harness exceptions.
+            self.fail(str(error))
         return actual
 
     def test_all_small_permutations_retain_failed_and_reused_attempts(self):

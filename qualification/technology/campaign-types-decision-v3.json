@@ -1,0 +1,53 @@
+{
+  "$schema": "./campaign-types-decision-v3.schema.json",
+  "version": 1,
+  "id": "qualification-campaign-types-v3",
+  "decision": "KEEP",
+  "technology": "Direct Python/native-hash artifact binding and Counter aggregation; SQLite audit candidate; exact in-process contract result comparison",
+  "constraints": [
+    "Offline synchronous byte APIs: at most 15 artifact entries and 4 MiB artifact bytes; campaign at most 16 cases and 64 submitted attempts",
+    "Retain every duplicate occurrence, all negative findings and byte commitments; do not infer authenticity from hashes",
+    "Compare original nested Python result types before serialization, with independent fixed maximum-workload expectations",
+    "No durable query service, target SDK/ABI, device scheduling deadline or physical performance claim"
+  ],
+  "alternatives": [
+    {
+      "technology": "SQLite relational aggregation",
+      "source": "https://www.sqlite.org/datatype3.html",
+      "assessment": "Native count/join logic is exercised as an independent aggregation candidate, sharing admission semantics. Its lower median in this ten-sample shared-host run is retained, along with overlapping ranges and a higher maximum. Python tracing excludes SQLite native memory. This evidence does not demonstrate a stable end-to-end resource advantage requiring migration, and the bounded one-shot report does not require a persistent relational representation."
+    },
+    {
+      "technology": "Erlang/OTP exact comparison and immutable terms",
+      "source": "https://www.erlang.org/doc/system/expressions.html",
+      "assessment": "Exact term comparison is a credible typed alternative for a BEAM service. Hosting these Python reference and sqlite3 result objects externally would require serialization and a separate Python instrumentation boundary; it cannot directly distinguish the original Python result types after transport."
+    },
+    {
+      "technology": "Souffle Datalog aggregation",
+      "source": "https://souffle-lang.github.io/aggregates",
+      "assessment": "Compiled relational counting is credible for large or recursive rule sets. Attempt ordinals must still preserve duplicate multiplicity. The current finite batch has no recursive analysis requirement; no executable target-resource advantage was established."
+    },
+    {
+      "technology": "C# SHA256 span hashing",
+      "source": "https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.sha256.hashdata?view=net-10.0",
+      "assessment": "Native byte/span hashing is appropriate for a .NET consumer. Hash throughput alone does not replace admission, immutable snapshot semantics or the full artifact report. No complete .NET validator was benchmarked here."
+    },
+    {
+      "technology": "Node crypto with owned Buffer copies",
+      "source": "qualification/technology/hash-probe.mjs",
+      "assessment": "Fresh execution preserves four pinned hashes and ownership controls. Its timed copy-plus-hash primitive is not the full Python artifact validation workload and supplies no cross-language performance ranking."
+    }
+  ],
+  "rationale": "Retain direct immutable-byte/count operations and direct reference instrumentation for the bounded APIs. Fix the campaign candidate contract wrapper to require exact recursive types, not ordinary numeric equality, on every successful candidate result. Keep explicit SQL experiments to retain alternative evidence. Python is selected for observable API/type semantics here, not installation, familiarity or rewrite cost; no alternative has demonstrated a material complete-component deployment advantage under the stated constraints.",
+  "source": "https://docs.python.org/3.13/library/unittest.html#unittest.TestCase.assertEqual",
+  "reopen_when": [
+    "A durable query or recursive policy requirement appears",
+    "Controlled target measurements establish a material full-component resource advantage",
+    "An independently implemented native consumer or new deployment ABI is required"
+  ],
+  "validation": [
+    "qualification.tests.test_campaign_audit",
+    "qualification.tests.test_campaign_measurement_results",
+    "qualification/technology/campaign-types-verification-v3.json"
+  ],
+  "physical_qualification_passed": false
+}
