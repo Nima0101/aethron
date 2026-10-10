@@ -111,7 +111,7 @@ test('manifest binds a closed runtime input set and distributed license bytes',a
   assert.ok(!Object.keys(manifest.inputs).some(name=>name.includes('linkedom')));
 });
 test('failed rebuild withdraws old output; recovery reproduces every artifact byte',async()=>{
-  await bundle();const names=['aethron-observation.mjs','LICENSE','AJV-LICENSE','ESBUILD-LICENSE','manifest.json'];
+  await bundle();const names=['aethron-observation.mjs','LICENSE','AJV-LICENSE','ESBUILD-LICENSE','STATE-HELP.json','manifest.json'];
   const before=names.map(name=>hash(read(name)));
   // Missing compiler command is a real child-process failure, not a mocked builder.
   try {
@@ -220,4 +220,36 @@ test('standalone containing client shares locale and withdraws a stopped observa
   click('button[lang="sv-SE"]');assert.deepEqual([...root.querySelectorAll('section')].map(n=>n.lang),['sv-SE','sv-SE']);assert.match(root.textContent,/Stoppa/);
   click('[data-feature="connection.stop"]');assert.equal(signal.aborted,true);assert.ok(!root.textContent.includes('lwir'));finish();await new Promise(resolve=>setImmediate(resolve));
  }finally{client.dispose();}
+});
+
+test('distributed state help exactly covers rendered bilingual component states offline',async t=>{
+ const inventory=JSON.parse(read('STATE-HELP.json'));assert.equal(inventory.module_sha256,hash(read('aethron-observation.mjs')));assert.equal(inventory.product_help_complete,false);
+ for(const [name,digest] of Object.entries(inventory.source_sha256))assert.equal(hash(readFileSync(new URL(`./src/${name}.ts`,import.meta.url))),digest);
+ assert.match(inventory.source_revision,/^[0-9a-f]{40}$/);assert.equal(inventory.release_sha,inventory.source_modified?null:inventory.source_revision);
+ t.mock.method(globalThis,'fetch',()=>{throw new Error('unexpected_network');});
+ const {mountObservationClient}=await bundle();
+ for(const locale of ['en','sv-SE']) {
+  const {document,Event:DOMEvent}=parseHTML('<main></main>');const window=new EventTarget(),timers=new Map();let nextTimer=0,resolve,reject;
+  let view={label:'delayed_observation',current_state:'UNKNOWN',observed_state:'PRESENT',sources:['lwir'],uncertainty:[[0.1,0.1]]};
+  Object.defineProperty(document,'defaultView',{value:window});Object.defineProperty(document,'visibilityState',{value:'visible'});
+  window.setInterval=fn=>{timers.set(++nextTimer,fn);return nextTimer;};window.clearInterval=id=>timers.delete(id);
+  const root=document.querySelector('main'),seen=new Set();
+  const client=mountObservationClient(root,{view:()=>view,disconnect(){},start(){return new Promise((yes,no)=>{resolve=yes;reject=no;});}},locale);
+  const click=id=>root.querySelector(`[data-feature="connection.${id}"]`).dispatchEvent(new DOMEvent('click'));
+  const check=()=>{
+   for(const section of root.querySelectorAll('section')) {
+    const details=section.querySelector('details'),id=details.getAttribute('data-help-topic');seen.add(id);
+    const topic=inventory.topics.find(topic=>topic.id===id);assert.ok(topic,`Undocumented ${id}`);const expected=topic.translations[locale];
+    const status=section.querySelector('[role=status]');assert.equal((status.querySelector('h2')??status).textContent,expected.title);
+    assert.equal(details.querySelector('p').textContent,expected.body);assert.equal(section.lang,locale);assert.ok(details.querySelector('summary').textContent);
+    details.setAttribute('open','');details.dispatchEvent(new DOMEvent('toggle'));assert.equal(details.getAttribute('data-help-topic'),id);
+   }
+  };
+  try{
+   check();client.setEnabled(true);check();window.dispatchEvent(new Event('pagehide'));check();window.dispatchEvent(new Event('pageshow'));
+   click('start');for(const fn of timers.values())fn();check();view=null;for(const fn of timers.values())fn();check();
+   click('stop');check();resolve();await new Promise(yes=>setImmediate(yes));check();click('start');reject(new Error('private_failure'));await new Promise(yes=>setImmediate(yes));check();
+   assert.deepEqual([...seen].sort(),inventory.topics.map(topic=>topic.id).sort());assert.ok(!root.textContent.includes('private_failure'));
+  }finally{client.dispose();}
+ }
 });

@@ -1,0 +1,48 @@
+{
+  "id": "P12-STATE-HELP-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "SELECT build-time ECMAScript with the pinned TypeScript compiler AST for state-guidance extraction; retain existing browser rendering runtime.",
+  "constraints": [
+    "Derive state and locale sets from actual TypeScript type unions and literal guidance dictionaries, without executing source or maintaining a second handwritten state list.",
+    "Build-time only, two small source files, exact bilingual key parity and literal title/body admission. Reject unsupported syntax and never import the compiler into the browser artifact.",
+    "Bind distributed guidance to source hashes and actual module bytes. Dirty builds have null release_sha; a clean matching Git revision binds component provenance only, not product qualification."
+  ],
+  "alternatives": [
+    {
+      "technology": "ECMAScript with TypeScript compiler API",
+      "assessment": "Selected: the parser consumes the same TypeScript syntax as the pinned product compiler and exposes literal/type nodes directly. Closed extraction fails on computed or unsupported forms. No additional grammar, native binary or runtime evaluator is required."
+    },
+    {
+      "technology": "Python or Go with Tree-sitter TypeScript grammar",
+      "assessment": "Credible maintained parser ecosystem with language bindings. It adds a separate grammar/version boundary for these compiler-owned declarations; no incremental editing or multi-language source requirement establishes a material win here."
+    },
+    {
+      "technology": "Rust with SWC parser / @swc/core bindings",
+      "assessment": "SWC exposes TypeScript parsing and native performance is credible for large input graphs. This bounded two-file extractor has no demonstrated parsing throughput bottleneck; compiler AST compatibility is decisive rather than an unmeasured speed ranking."
+    },
+    {
+      "technology": "ReScript binding to the TypeScript compiler API",
+      "assessment": "Can retain the same parser while adding typed bindings. The extraction boundary admits only a narrow literal grammar and tests negative syntax; no separate state domain or cross-target reuse requirement establishes an additional compiler advantage."
+    }
+  ],
+  "sources": [
+    "https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API",
+    "https://tree-sitter.github.io/tree-sitter/using-parsers/",
+    "https://swc.rs/docs/usage/core",
+    "https://rescript-lang.org/docs/manual/bind-to-js-function/"
+  ],
+  "limits": [
+    "Pinned TypeScript 5.9.3 API is an explicit build dependency. The official compiler API documentation warns of API changes in later major versions; upgrades require this extractor and mutation tests to pass.",
+    "This inventory covers ten rendered state topics only. It explicitly reports product_help_complete=false and remaining action-specific, route/role, search/onboarding/manual/customer acceptance coverage.",
+    "Clean source revision and content hashes establish unsigned component provenance, not a signed release, authentication, human semantic review or P19 acceptance. The pure function trusts revision metadata; the builder obtains it from Git before and after compilation.",
+    "Rendered bilingual titles/bodies and native details entry points are checked against the actual standalone module in structural DOM tests. Native browser keyboard/screen-reader and independent installed-product checks remain open.",
+    "No runtime network, credentials, source execution, telemetry, physical or security-certification claim."
+  ],
+  "c4": {
+    "context": "flowchart LR\nMaintainer --> Build[Component build]\nBuild --> Inventory[Offline state help inventory]\nOperator --> UI[Existing bilingual UI]\nInventory --> Check[Artifact coverage check]\nUI --> Check",
+    "containers": "flowchart LR\nNode[Build-time Node] --> Parser[Pinned TypeScript parser]\nParser --> Inventory[STATE-HELP.json]\nBundle[Browser ESM] --> Check[Offline structural DOM check]\nInventory --> Check",
+    "components": "flowchart LR\nTypes[Locale and state unions] --> Parity[Exact dictionary coverage]\nCopy[Literal localized guidance] --> Parity\nParity --> Topics[Ten state topics]\nRevision[Clean or dirty source revision] --> Binding[SHA and byte hashes]\nTopics --> Binding\nBinding --> Manifest[Artifact manifest]",
+    "code": "classDiagram\nclass StateHelpExtractor {\n parse(source) AST\n union(AST) strings\n literal(AST) data\n createStateHelpInventory(sources, bytes, revision) inventory\n}\nStateHelpExtractor --> TypeScriptParser\nStateHelpExtractor --> StateHelpInventory"
+  }
+}

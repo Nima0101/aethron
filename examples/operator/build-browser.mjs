@@ -6,11 +6,14 @@ import {execFileSync} from 'node:child_process';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const output=resolve(root,'examples/operator/browser-dist');
-const names=['manifest.json','aethron-observation.mjs','LICENSE','AJV-LICENSE','ESBUILD-LICENSE'];
+const names=['manifest.json','aethron-observation.mjs','LICENSE','AJV-LICENSE','ESBUILD-LICENSE','STATE-HELP.json'];
 mkdirSync(output,{recursive:true});
 // Invalidate the previous component before any compiler or dependency can fail.
 for(const name of names) rmSync(resolve(output,name),{force:true});
 try {
+  const revision=()=>({head:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),
+    modified:execFileSync('git',['status','--porcelain','--untracked-files=normal'],{cwd:root,encoding:'utf8'}).length!==0});
+  const beforeRevision=revision();
   for(const prefix of ['examples/clients/typescript','examples/operator']) {
     execFileSync('npm',['run','build','--prefix',prefix],{cwd:root,stdio:'inherit',timeout:60000});
   }
@@ -35,7 +38,14 @@ try {
      Object.values(result.metafile.outputs).some(item=>item.imports.length!==0)) {
     throw new Error('unsupported_browser_dependency_graph');
   }
+  const afterRevision=revision();
+  if(beforeRevision.head!==afterRevision.head) throw new Error('changed_build_revision');
+  const {createStateHelpInventory}=await import('./help-inventory.mjs');
+  const help=createStateHelpInventory(Object.fromEntries(['presenter','connection'].map(name=>
+    [name,readFileSync(new URL(`./src/${name}.ts`,import.meta.url),'utf8')])),result.outputFiles[0].contents,
+    {head:beforeRevision.head,modified:beforeRevision.modified||afterRevision.modified});
   const artifacts={
+    'STATE-HELP.json':Buffer.from(JSON.stringify(help,null,2)+'\n'),
     'aethron-observation.mjs':result.outputFiles[0].contents,
     LICENSE:readFileSync(resolve(root,'LICENSE')),
     'AJV-LICENSE':readFileSync(resolve(root,'examples/clients/typescript/node_modules/ajv/LICENSE')),

@@ -1336,3 +1336,57 @@ onboarding, accounts and independently installed product acceptance remain open;
 the next executable slice is the source-derived contextual help inventory. The
 producer whole-SSE-event boundary handoff and earlier negative evidence remain
 unchanged. No phase, lane, P19 or technology-audit completion marker is asserted.
+
+## P12 state-help extraction and artifact parity
+
+Baseline `321a11b9abc08b7bd9f4197e75c5b25ad5977ff4`. Verified the containing-client
+bridge result, fourteen paths, noreply identity, 93 source hashes and six report
+hashes before publishing the baseline to PR 44. Restarted review at generation
+and contract admission, checking current declaration generation, standalone
+validator metadata and their negative tests, then the unchanged bounded SDK
+source boundary and P12 presenter/connection state dictionaries, locale ownership,
+lifecycle, containing client and build graph. Existing state withdrawal and local
+locale behavior remain supported; no replacement runtime materially wins for
+these native host contracts on the available evidence.
+
+FIX the missing executable state-help inventory. The UI contained accurate local
+state guidance, but no distributed source-derived artifact linked its declared
+state sets, translations and actually rendered bundle. Eleven missing-tool tests
+preceded the new build-time extractor. It parses the two actual TypeScript source
+files, admits literal dictionaries only, and compares them bidirectionally with
+the declared state/locale unions. Missing translations, new undocumented states,
+extra unshipped topics, duplicate keys, empty text, executable expressions and
+malformed source are rejected. There is no evaluation of source expressions.
+
+SELECT ECMAScript with the pinned TypeScript compiler AST for this two-file build
+tool. Official compiler API, Tree-sitter and SWC documentation informed current
+comparisons with Python/Go grammar bindings, Rust/SWC and ReScript bindings. Exact
+compiler-language syntax compatibility and fail-closed literal extraction are
+the decisive requirements; no large-tree throughput or native runtime advantage
+is asserted. The compiler remains a development dependency outside the eleven
+browser runtime inputs. Its pinned API is reviewed again on upgrades. The closed
+[state-help ADR](../../../examples/operator/state-help-adr.json) has all four C4
+views and records these limits.
+
+The build distributes STATE-HELP.json and hashes it in the artifact manifest.
+It binds source bytes, module bytes and Git provenance; dirty builds have a null
+release SHA, and a changing HEAD fails the build. A clean revision is unsigned
+component provenance, never P19 acceptance. Failed builds remove the help artifact
+along with earlier bundle outputs; recovery reproduces all artifact bytes.
+
+Validation: 88 operator checks, including twelve extractor/ADR checks, and 18
+bundled checks pass with no skips. The actual standalone module runs all ten
+states in both locales without network and opens each native details entry point;
+its rendered title/body/topic set must exactly match the packaged inventory.
+This catches missing and unreachable extra state topics without a second manually
+maintained state list. The focused 44 SDK generation/admission/wire/session/source
+checks also pass. JavaScript syntax, manifest hashes and diff checks pass.
+
+This is intentionally the **state-guidance portion** of help coverage. The output
+sets product_help_complete=false and lists remaining action-specific topics,
+route/role coverage, search/onboarding/manuals and installed-product acceptance.
+No account/admin workflows are invented. Native browser and independent customer
+acceptance remain open, as does the producer SSE-size contract handoff. The
+[source-bound evidence](evidence/phase3/p12-state-help-v1.json) preserves initial
+negative results and earlier failures. Next: action-level contextual help and
+coverage in the containing client. No completion marker is created.

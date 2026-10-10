@@ -235,3 +235,27 @@ The component has no account UI, persistent state or complete release-bound help
 inventory. Full P19 search, onboarding, role coverage and independent installed
 browser/accessibility acceptance remain open. [Client decision](client-adr.json)
 and [scope](CLIENT-PLAN.md) describe this software boundary.
+
+### Packaged state-guidance inventory
+
+The browser build emits `browser-dist/STATE-HELP.json`, covered by the artifact
+manifest. It derives the current locale/state sets and literal title/body text
+from the actual presenter and connection source using the pinned TypeScript
+compiler AST. Missing/extra state translations, duplicate keys, malformed source
+or executable expressions fail the build. No source evaluation is used.
+
+The inventory binds ten state topics in English and Swedish to source hashes and
+the distributed module hash. The bundle tests execute every state, open its
+native contextual details entry, and compare rendered titles/bodies in both
+locales with the packaged inventory. This catches disconnected or stale help
+bindings as well as unexercised new state topics. The build requires local Git
+metadata: it records HEAD, observes dirty status before and after compilation,
+rejects a changed HEAD, and emits `release_sha: null` for dirty builds. A clean
+revision binding is unsigned component provenance, not product release approval.
+
+This file deliberately says `product_help_complete: false`. It covers state
+guidance, not all actions, routes, role permissions, manuals, search, onboarding or
+installed-product acceptance. Those are listed as remaining coverage and continue
+to block full P19.7 acceptance. It does not contain administrator procedures,
+credentials or sensor values. [State-help decision](state-help-adr.json) records
+parser alternatives and the supported source grammar.
