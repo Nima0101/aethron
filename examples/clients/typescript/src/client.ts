@@ -115,6 +115,7 @@ export async function observe(base: string, token: string, profile: string,
   const value = new Observation();
   let stop: AbortController | undefined;
   let timer: ReturnType<typeof setInterval> | undefined;
+  let rendering = true;
   let renderFailed = false;
   let renderError: unknown;
   try {
@@ -125,7 +126,10 @@ export async function observe(base: string, token: string, profile: string,
       // Setup is inside the admitted handle's cleanup scope as well as reception.
       // Independent render-time expiry, including a stalled response.
       timer = setInterval(() => {
-        if (renderFailed) return;
+        if (!rendering || renderFailed) return;
+        // Cancellation can precede the pending read's promise reaction.
+        // A timer must not republish that session's earlier observation.
+        if (eventSignal.aborted) value.disconnect();
         try { display(value.view()); }
         catch (error) {
           renderFailed = true; renderError = error;
@@ -175,6 +179,7 @@ export async function observe(base: string, token: string, profile: string,
     // Surface the renderer failure through the observer promise, not the timer.
     throw renderFailed ? renderError : error;
   } finally {
+    rendering = false;
     if (timer !== undefined) clearInterval(timer);
     stop?.abort(); value.disconnect();
     try { if (!renderFailed) display(value.view()); }

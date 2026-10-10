@@ -1064,3 +1064,63 @@ and package checks. Native browser lifecycle/keyboard acceptance, revocable
 transport-to-display integration, release-bound role-aware help and the existing
 producer-payload/whole-event discrepancy remain open. Next earliest unfinished
 component: a fresh revocable source integration for the browser lifecycle host.
+
+## P3.3 observer timer revocation correction
+
+Baseline `8ade520d4b357775950cc12dff0ba6fd3b875b35`. Restarted from the
+admission and observer source after reading the current policy and review order.
+Verified the preceding bridge commit against all eight changed paths, 76 source
+hashes, seven retained reports and the browser artifact's input/output hashes.
+Published that commit to PR #44. The single CI snapshot observed the preceding
+`605db933f2a6b9a0892e4d6fb1e0cd9f6d4b6830` head queued/behind; no polling or
+check bypass. Prior evidence remains tied to its historical source bytes.
+
+The timer-to-display boundary had a separate mismatch: stream reception checked
+cancellation, but the timer could publish an earlier observation after abort
+before the reader's promise reaction executed. It also had no terminal guard if
+a host retained and invoked its callback after cleanup. Four failing assertions
+cover cancellation during a pending read, reentrant cancellation in display, and
+retained callback invocation after EOF or invalid-event termination. The latter
+is application lifetime fault injection, not evidence that a native browser
+normally runs a cleared timer.
+
+KEEP TypeScript/native host APIs; FIX the timer's revocation gates. Each active
+timer invocation inspects the combined abort state and disconnects the observation
+before reading it if cancelled. The outer finally disables rendering before timer
+clear, final withdrawal and independent DELETE. A retained timer cannot invoke
+the display after that point, including while deletion is pending. Frozen lease,
+event size and timer request values, public API/types and callback error behavior
+are unchanged. A native Node HTTP case additionally aborts a real stalled Fetch
+response and invokes the timer before the read rejection resumes the observer.
+It confirms withdrawal through the native transport without claiming a timing
+bound or browser qualification.
+
+Fresh source research compared typed native host orchestration, checked plain
+ECMAScript, RxJS Subscription, Kotlin/JS and Rust/Wasm. This is a single-session
+callback lifetime, not a reactive ownership graph or a native compute kernel.
+The tagged RxJS implementation sets `closed` before finalizers, but that does not
+supply this application's signal-to-display check. Kotlin/JS sharing and Wasm
+host bindings offer no demonstrated improvement for this component's actual
+interoperability requirements. No cross-language speed ranking or installed-tool
+preference is claimed. The [closed revocation ADR](../../../examples/clients/typescript/observer-revocation-adr.json)
+records current primary sources, constraints, tradeoffs and four architecture
+views; its schema rejects extra claims.
+
+The [retained evidence](evidence/phase3/p33-observer-revocation-v1.json) records
+four initial failures, six new cancellation/lifetime cases, native loopback,
+bundled execution without string code generation, artifact reproduction and
+packed-consumer verification. Existing Chromium probe failures and producer JSON
+payload versus whole-event cap disagreement remain unresolved. This review and
+correction do not complete the full lane audit or P19. No completion marker is
+created. Next earliest unreviewed integration: exposing a fresh revocable SDK
+source to the P12 lifecycle host without treating callback snapshots as fresh
+observations; then complete the remaining component and product-help reviews.
+
+Verification outcome: 64 final transport/error/disposal checks (including two
+closed ADR checks), 49 operator checks and 13 bundled checks passed with no skips.
+The first package run passed archive/license checks but the external consumer
+TypeScript compiler hit its existing 30-second child timeout. The failure log is
+retained. An isolated retry with the same timeout passed all three package checks,
+including 11 installed runtime checks on each installation. Other lane activity
+was not controlled, so contention is not established as the cause. No timeout
+or frozen limit was increased.

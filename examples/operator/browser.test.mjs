@@ -124,3 +124,30 @@ test('failed rebuild withdraws old output; recovery reproduces every artifact by
   }
   assert.deepEqual(names.map(name=>hash(read(name))),before);
 });
+
+test('bundled observer withdraws on abort and retires its timer after cleanup',async t=>{
+  const {observe}=await bundle();const views=[],requests=[],caller=new AbortController();
+  let tick,controller,admitted;
+  const ready=new Promise(resolve=>{admitted=resolve;});
+  t.mock.method(performance,'now',()=>0);
+  t.mock.method(globalThis,'setInterval',callback=>{tick=callback;return 0;});
+  t.mock.method(globalThis,'clearInterval',()=>{});
+  t.mock.method(globalThis,'fetch',async(url,options)=>{
+    requests.push(options.method??'GET');
+    if(options.method==='POST')return Response.json({source_profile:'bench',session:envelope.session});
+    if(options.method==='DELETE')return new Response(null,{status:204});
+    return new Response(new ReadableStream({start(value){
+      controller=value;value.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(envelope)}\n\n`));
+    }}));
+  });
+  const observed=observe('http://127.0.0.1:8765','synthetic-token','bench',view=>{
+    views.push(view);if(view.label==='delayed_observation')admitted();
+  },caller.signal).then(()=>undefined,error=>error);
+  try {
+    await ready;caller.abort(new Error('private_abort_marker'));tick();
+    assert.equal(views.at(-1).label,'expired');assert.deepEqual(views.at(-1).sources,[]);
+    assert.equal(views.filter(view=>view.label==='delayed_observation').length,1);
+  } finally {controller.close();assert.equal((await observed)?.message,'stream_unavailable');}
+  assert.deepEqual(requests,['POST','GET','DELETE']);
+  const count=views.length;tick();assert.equal(views.length,count);
+});

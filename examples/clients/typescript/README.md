@@ -193,6 +193,15 @@ timeout. Cancellation before session admission cannot confirm remote cleanup.
 The checks do not preempt synchronous callbacks/parsing or establish a real-time
 shutdown deadline; the host fetch implementation must honor its abort signal.
 
+The expiry timer also checks the combined abort state before rendering, so it
+withdraws details even before a pending read's rejection is handled. Terminal
+cleanup disables timer rendering before clearing the timer and attempting remote
+deletion. A retained timer callback is then inert. These guards do not erase views
+already copied by a caller, synchronously redraw the UI at the instant of abort,
+or establish a cancellation deadline. The caller must still dispose its host UI.
+See the [revocation decision](observer-revocation-adr.json) and its
+[closed schema](observer-revocation-adr.schema.json).
+
 Before constructing authenticated requests, `observe()` requires a canonical
 origin string: `https://example.test` or `https://example.test:8443`, with at most
 one trailing slash. Plaintext HTTP is admitted only for the literal hosts

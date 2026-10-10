@@ -8,11 +8,11 @@ const session = {session: 'a'.repeat(32), source_profile: 'bench'};
 const reasons = [new Error('private_transport_marker', {cause: {token: 'private_cause_marker'}}),
   {address: 'private_endpoint_marker'}, 'private_string_marker'];
 
-test('observer setup decision uses a closed schema and four architecture views', async () => {
+for (const component of ['observer-setup', 'observer-revocation']) test(`${component} decision uses a closed schema and four architecture views`, async () => {
   const {Ajv2020} = await import('ajv/dist/2020.js');
   const read = name => JSON.parse(readFileSync(new URL(name, import.meta.url), 'utf8'));
-  const validate = new Ajv2020({strict:true}).compile(read('./observer-setup-adr.schema.json'));
-  const adr = read('./observer-setup-adr.json');
+  const validate = new Ajv2020({strict:true}).compile(read(`./${component}-adr.schema.json`));
+  const adr = read(`./${component}-adr.json`);
   assert.equal(validate(adr), true, JSON.stringify(validate.errors));
   assert.equal(validate({...adr, qualified:true}), false);
   assert.equal(validate({...adr, c4:{...adr.c4, unreviewed:'claim'}}), false);
@@ -159,3 +159,132 @@ for (const tail of ['scene', 'malformed']) {
     assert.deepEqual(requests, ['POST', 'GET', 'DELETE']);
   });
 }
+
+for (const point of ['pending-read', 'display-callback']) {
+  test(`timer withdraws a cancelled observation before ${point} unwinds`, async t => {
+    const caller = new AbortController(), views = [], requests = [];
+    let tick, controller, admitted;
+    const ready = new Promise(resolve => {admitted = resolve;});
+    const result = JSON.parse(readFileSync(new URL('../../../contracts/fixtures/v3/blackout-output.json', import.meta.url))).results[0];
+    const scene = {api_version:'1', kind:'scene', sequence:1, session:session.session,
+      clock:{domain:'edge_monotonic', emitted_ms:0, valid_for_ms:100}, result};
+    t.mock.method(performance, 'now', () => 0);
+    t.mock.method(globalThis, 'setInterval', callback => {tick = callback;return 0;});
+    t.mock.method(globalThis, 'clearInterval', () => {});
+    t.mock.method(globalThis, 'fetch', async (url, options) => {
+      requests.push(options.method ?? 'GET');
+      if (options.method === 'POST') return Response.json(session);
+      if (options.method === 'DELETE') return new Response(null, {status:204});
+      // Deliberately keep read pending until the test releases it. Withdrawal
+      // must follow the abort state, not await a transport promise reaction.
+      return new Response(new ReadableStream({start(value) {
+        controller = value;
+        value.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(scene)}\n\n`));
+      }}));
+    });
+    let nested = false;
+    const observed = observe('http://127.0.0.1:8765', 'synthetic-token', 'bench', view => {
+      views.push(view);
+      if (view.label === 'delayed_observation' && !nested) {
+        nested = true;
+        if (point === 'display-callback') {
+          caller.abort(new Error('private_abort_marker'));tick();
+        }
+        admitted();
+      }
+    }, caller.signal).then(() => undefined, error => error);
+    try {
+      await ready;
+      if (point === 'pending-read') {caller.abort(new Error('private_abort_marker'));tick();}
+      assert.equal(views.at(-1).label, 'expired');
+      assert.deepEqual(views.at(-1).sources, []);
+      assert.equal(views.filter(view => view.label === 'delayed_observation').length, 1);
+    } finally {
+      if (point === 'pending-read') controller.close();
+      assert.equal((await observed)?.message, 'stream_unavailable');
+      assert.equal(requests.at(-1), 'DELETE');
+    }
+  });
+}
+
+for (const ending of ['EOF', 'invalid-event']) {
+  test(`retained timer callback is inert after ${ending} termination`, async t => {
+    let tick;
+    const views = [];
+    t.mock.method(globalThis, 'setInterval', callback => {tick = callback;return 0;});
+    t.mock.method(globalThis, 'clearInterval', () => {});
+    t.mock.method(globalThis, 'fetch', async (url, options) => {
+      if (options.method === 'POST') return Response.json(session);
+      if (options.method === 'DELETE') return new Response(null, {status:204});
+      return new Response(ending === 'EOF' ? '' : 'data: {bad}\n\n');
+    });
+    const error = await observe('http://127.0.0.1:8765', 'synthetic-token', 'bench', view => views.push(view),
+      new AbortController().signal).then(() => undefined, error => error);
+    assert.equal(error?.message, ending === 'EOF' ? undefined : 'invalid_event');
+    assert.equal(views.at(-1).label, 'expired');
+    const count = views.length;
+    tick();tick();
+    assert.equal(views.length, count, 'a retired observer must not invoke its display again');
+  });
+}
+
+test('native fetch cancellation withdraws before its read rejection is handled', async t => {
+  const caller = new AbortController(), views = [], requests = [];
+  let tick, admitted, watchdog;
+  const ready = new Promise(resolve => {admitted = resolve;});
+  const result = JSON.parse(readFileSync(new URL('../../../contracts/fixtures/v3/blackout-output.json', import.meta.url))).results[0];
+  const scene = {api_version:'1', kind:'scene', sequence:1, session:session.session,
+    clock:{domain:'edge_monotonic', emitted_ms:0, valid_for_ms:100}, result};
+  t.mock.method(performance, 'now', () => 0);
+  t.mock.method(globalThis, 'setInterval', callback => {tick = callback;return 0;});
+  t.mock.method(globalThis, 'clearInterval', () => {});
+  const server = createServer((request, response) => {
+    requests.push(request.method);request.resume();
+    if (request.method === 'POST') response.end(JSON.stringify(session));
+    else if (request.method === 'DELETE') {response.writeHead(204);response.end();}
+    else {response.writeHead(200);response.write(`data: ${JSON.stringify(scene)}\n\n`);}
+  });
+  let observed;
+  try {
+    await new Promise((resolve, reject) => {server.once('error', reject);server.listen(0, '127.0.0.1', resolve);});
+    watchdog = setTimeout(() => {admitted();caller.abort();server.closeAllConnections();}, 5000);
+    observed = observe(`http://127.0.0.1:${server.address().port}`, 'synthetic-token', 'bench', view => {
+      views.push(view);if (view.label === 'delayed_observation') admitted();
+    }, caller.signal).then(() => undefined, error => error);
+    await ready;
+    assert.equal(views.at(-1)?.label, 'delayed_observation');
+    caller.abort(new Error('private_abort_marker'));
+    // No await: native fetch rejection has not resumed the observer yet.
+    tick();
+    assert.equal(views.at(-1).label, 'expired');
+    assert.deepEqual(views.at(-1).sources, []);
+    assert.equal((await observed)?.message, 'stream_unavailable');
+    assert.deepEqual(requests, ['POST', 'GET', 'DELETE']);
+    const count = views.length;tick();assert.equal(views.length, count);
+  } finally {
+    clearTimeout(watchdog);caller.abort();server.closeAllConnections();
+    await observed;
+    if (server.listening) await new Promise(resolve => server.close(resolve));
+  }
+});
+
+test('timer is retired before independent remote deletion settles', async t => {
+  let tick, deleting, release;
+  const ready = new Promise(resolve => {deleting = resolve;});
+  const deletion = new Promise(resolve => {release = resolve;});
+  const views = [];
+  t.mock.method(globalThis, 'setInterval', callback => {tick = callback;return 0;});
+  t.mock.method(globalThis, 'clearInterval', () => {});
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    if (options.method === 'POST') return Response.json(session);
+    if (options.method === 'DELETE') {deleting();return deletion;}
+    return new Response('');
+  });
+  const observed = observe('http://127.0.0.1:8765', 'synthetic-token', 'bench', view => views.push(view),
+    new AbortController().signal);
+  try {
+    await ready;
+    assert.equal(views.at(-1).label, 'expired');
+    const count = views.length;tick();assert.equal(views.length, count);
+  } finally {release(new Response(null, {status:204}));await observed;}
+});
