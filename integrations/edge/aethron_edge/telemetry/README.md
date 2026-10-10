@@ -17,7 +17,7 @@ from aethron_edge.telemetry.mavlink import PassiveTelemetry, UdpTelemetry
 
 source = PassiveTelemetry(system=1, component=1)
 with UdpTelemetry(source, port=14560) as receiver:
-    status = receiver.poll()  # one datagram, <=20ms socket wait; no transmission
+    status = receiver.poll()  # one datagram; configured 20ms socket timeout; no transmission
     print(status.state, status.reason)
 ```
 
@@ -82,7 +82,18 @@ scheduling and stdout backpressure can delay process exit. See the
 - ATTITUDE carries body Euler angles in radians and angular rates in rad/s. LOCAL_POSITION_NED carries an unregistered local NED position/velocity in m and m/s. The six `fields`, `values` and `units` entries correspond by index. No coordinates are converted to camera displacement, world coordinates or inferred object tracks.
 - Two immutable latest-sample slots, no trajectory/history. A local monotonic receipt older than 100ms expires on `snapshot()`/`poll()`, including no-traffic timeouts. This is a receipt TTL, **not** source measurement freshness: remote boot timestamps remain unmapped and router/socket buffering is unqualified. Never substitute it for frozen v3 exposure-age/calibration rules.
 - Input <=280 bytes, exactly one packet, pinned payload layout/CRC, finite values, sequence progression modulo256 (delta1..127), strictly advancing boot time per message type. Malformed, foreign-sender, unsupported or reordered input clears observations. A boot reset/wrap/duplicate acquisition timestamp or local-clock rollback latches UNKNOWN until a fresh instance. Signed/extension flags are refused. CRC-bypass SDK configuration and SDK version mismatch prevent construction.
-- `close()` erases state and latches closed. Use a single owner/thread; callers retain responsibility for overall polling/resource limits. Unsigned traffic remains spoofable/replayable and must not grant capability authority even when these checks pass.
+- `close()` clears the decoder's retained state and latches closed. Previously returned immutable observations remain in caller-owned references; closure or expiry cannot erase those copies. A saved status describes an earlier check, not current receipt validity or permission to act. Use a single owner/thread; callers retain responsibility for overall polling/resource limits. Unsigned traffic remains spoofable/replayable and must not grant capability authority even when these checks pass.
+
+The base `PassiveTelemetry`/`UdpTelemetry` interface has no background watchdog.
+Expiry is evaluated during `snapshot()` (also called by `poll()`); stopping calls
+does not schedule a later withdrawal or revise an already returned status.
+The configured socket timeout is not an end-to-end `poll()` deadline: decoding,
+clock reads and OS scheduling also affect return time. Python's
+[socket timeout interface](https://docs.python.org/3/library/socket.html#socket.socket.settimeout)
+specifies blocking-operation behavior, not a hard-real-time service guarantee.
+The receipt TTL neither measures source capture age nor bounds transport latency.
+See the [partial V3 review](../../../../docs/architecture/robotics-review-v3.md)
+for evidence limits; its first-component technology decision remains open.
 
 ## Provenance and license boundary
 

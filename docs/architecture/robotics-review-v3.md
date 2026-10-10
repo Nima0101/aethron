@@ -77,3 +77,24 @@ review does not turn the comparison into a production speedup, hard-real-time
 claim or unconditional language ranking. No production adapter was changed.
 The first-component technology decision and later-component V3 reviews remain
 open; no completion marker is justified.
+
+## Passive API claim clarification
+
+At `61cb81f`, the README example described a socket wait as `<=20ms` and stated
+that `close()` erases state without identifying the owner of that state.
+CLARIFY: the implementation configures a 20ms socket timeout; this is not a
+measured upper bound on scheduling or complete `poll()` execution. Expiry runs
+on `snapshot()`/`poll()` calls. The base adapter has no background watchdog.
+A returned frozen `TelemetryStatus` holds immutable `Observation` objects, so
+caller-owned references remain unchanged after later expiry or closure. Only
+the decoder's own sample slots are cleared. The README now states these limits.
+
+The evidence is `mavlink.py`'s `settimeout`, `poll`, `snapshot`, frozen dataclasses
+and `close`, plus the existing provenance, independent-slot expiry and local
+clock/closure tests. A bounded in-process check retained an old status through
+expiry and closure and confirmed a new snapshot was UNKNOWN while the old
+reference still held its original sample. This is evidence about API semantics,
+not permission to retain a surveillance history or treat a saved status as live.
+No production code, frozen threshold or transport behavior changes. This closes
+the documentation mismatch only; the technology decision and review cursor remain
+open. Existing timing failures and all hardware/deployment limitations remain.
