@@ -2,7 +2,7 @@
   "id": "P12-003",
   "version": 1,
   "status": "accepted-component-only",
-  "decision": "Use TypeScript/native page lifecycle events for a read-only observation display host; clear the source on mount, suspension, reactivation and disposal, and request one 20 ms refresh interval only while visible.",
+  "decision": "KEEP TypeScript/native page lifecycle events for a read-only observation display host after the current source and failure-path reassessment; clear the source on mount, suspension, reactivation and disposal, and request one 20 ms refresh interval only while visible.",
   "constraints": [
     "Offline browser DOM with a caller-owned admitted source and authorization; no new transport or credentials.",
     "No queued views or personal identifiers; UNKNOWN remains current state; en and sv-SE panel guidance survives lifecycle changes.",
@@ -28,20 +28,28 @@
     {
       "technology": "ReScript JavaScript bindings",
       "assessment": "Typed foreign-function bindings can express event and timer APIs. They do not provide missing browser scheduling guarantees or source authorization, and no measured benefit justifies migration of this boundary."
+    },
+    {
+      "technology": "Dedicated Web Worker with message passing",
+      "assessment": "A worker can move computation off the UI event loop, but cannot own this DOM panel directly. This adapter has no numerical workload; worker-to-window messages would still depend on window scheduling and explicit page revocation. No deadline guarantee or capability improvement justifies that asynchronous boundary."
     }
   ],
   "sources": [
     "https://developer.chrome.com/docs/web-platform/page-lifecycle-api",
     "https://lit.dev/docs/composition/controllers/",
     "https://guide.elm-lang.org/interop/ports.html",
-    "https://rescript-lang.org/docs/manual/bind-to-js-function/"
+    "https://rescript-lang.org/docs/manual/latest/bind-to-js-function",
+    "https://html.spec.whatwg.org/multipage/timers-and-user-prompts.html#timers",
+    "https://guide.elm-lang.org/effects/time",
+    "https://html.spec.whatwg.org/multipage/workers.html#workers-and-the-workerglobalscope-interface"
   ],
   "limits": [
     "Synthetic event/clock tests in a structural DOM do not qualify browser navigation, back-forward cache, accessibility, OS suspend or installed product behavior.",
-    "The source must be exclusively owned by this host. The adapter does not stop ingress, abort sessions, revoke external copies, validate permission or reset producer state.",
+    "The source must be exclusively owned by this host. The adapter delegates revocation to source.disconnect; an SDK createObservationSource aborts its owned session there, whereas a plain Observation clears only its local state. The host does not independently authenticate, revoke external copies or reset producer state.",
     "Source clearer or scheduler failure latches invalid guidance until remount. Reader failures withdraw displayed details and may recover on a later independent read.",
     "No hard-real-time, hardware, weapon integration, MLS/CNSA, DDS/Link16, five-nines or tactical deployment claim.",
-    "No full application, searchable role-aware release-bound Help Center or P19 acceptance."
+    "No full application, searchable role-aware release-bound Help Center or P19 acceptance.",
+    "If a visibility notification is missed, a later refresh observes hidden state and suspends. Merely reporting visible afterward does not reactivate the source: an explicit lifecycle activation must clear it first. No cleanup or deadline is guaranteed while the browser event loop is stalled or the process is terminated."
   ],
   "c4": {
     "context": "flowchart LR\nOperator --> Host[Read-only observation display host]\nAuthorizedSource[Caller-owned authorized source] --> Host\nBrowser[Page lifecycle] --> Host",

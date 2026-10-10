@@ -1,0 +1,110 @@
+{
+  "baseline": "546293e157d98fad61dbfd7c715dd7704d50c6da",
+  "component": "P12 lifecycle host timer, suspension and source revocation",
+  "review_order_version": 3,
+  "audit_complete": false,
+  "decision": "KEEP TypeScript/native DOM lifecycle; add three executable boundary checks and clarify delegated source revocation. No production runtime defect found.",
+  "adr": "examples/operator/lifecycle-adr.json",
+  "source_sha256": {
+    "examples/operator/src/lifecycle.ts": "1da3e5a95b92d2db6cd372faf482173f3a0e6947da2760e4cfc96d7c5206ae7d",
+    "examples/operator/src/panel.ts": "bb7ff47719a81fff9643fd6d62be217b2c2319ec73d699ee0b7af8eebdec086f",
+    "examples/operator/src/presenter.ts": "ca6048627c403caf55038d46118b4246e656fd95900a1af509593c4fd53be286",
+    "examples/operator/lifecycle.test.mjs": "4aff63b5c4faf205fddc287996da02faf97923db586422fa89cdc95b8bc90b7a",
+    "examples/operator/lifecycle-adr.json": "389e04ac0013f991f3d3ac7a983fa4610305c0ff2e985a1f8025568dab19ea4c",
+    "examples/operator/lifecycle-adr.schema.json": "7d57aa6bb5419e199e28140927f5a3cdcd875490f0175614b66cfea3d0b970a9",
+    "examples/operator/README.md": "799a9fe1f766ea5369af805b9b1596579072a27924cdd5ad9b80df5e9580c4e3",
+    "examples/operator/package.json": "2f948de72a201880f4c291161e98fb3730100e111433250a1d9a0c22bf89478d",
+    "examples/operator/package-lock.json": "f1d6402b9aaeb16efd25bcf4cef728abcc76077d633f0c2e30447134d25464da",
+    "examples/clients/typescript/src/client.ts": "2ad3ccf7651ae6dfb7da865b110b0161959878d56d5a64364066a4440ad79bc5",
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "8207c7228cf7ec28cc13f812d3e6fee3c6c8fdf40fd927f5af54d2912cba57d0"
+  },
+  "log_directory": "build/p33-sdk-linux",
+  "report_sha256": {
+    "lifecycle-review-green.log": "9159e7197d261a1907737332e4f02f6a305305ee601d19306edb4a7cc57275c2",
+    "lifecycle-review-final.log": "9b1bda63842ca6144d9537c3b1f12106f7ec587eeb4622b0f02e1caa628a8fab",
+    "lifecycle-negative-controls.mjs": "2f8a56595e20c28d1c91399e65886c248f6b6bcc28de46336eb26484554872c3",
+    "lifecycle-negative-summary.log": "b07c02229d88a965f09f8d3884e75b7d882e1efd6f18937ad5bde584a5c34002",
+    "lifecycle-negative-timer-cancellation.log": "d55a427402d32840220f33fe07e7ffbd01adab6597af8c270a25566137223fe8",
+    "lifecycle-negative-failure-latch.log": "b046f83c449a4bc05bafc8e4284f5e03322daf66f722d3ba858a1d11c4e22690",
+    "lifecycle-review-pr44.json": "de1db4008e5dc2845e62647c1107377289d4b4c1927e0f28d8d91a4be3a4343a"
+  },
+  "distribution_sha256": {
+    "examples/operator/dist/action-help.d.ts": "ac620671b9053ee53d3e5b2d1a5602987f9c059f95136a4de53b12b10fd00780",
+    "examples/operator/dist/action-help.js": "ace36b50ae250363215d9fdbf3c343b3d1763a62ada5037dddf90ac0d21e0c61",
+    "examples/operator/dist/browser.d.ts": "f2f37b0d20f20828032de474a92586b4595a4e1b4695f328d75d576eea89c4b7",
+    "examples/operator/dist/browser.js": "f2f37b0d20f20828032de474a92586b4595a4e1b4695f328d75d576eea89c4b7",
+    "examples/operator/dist/client.d.ts": "100d5412387f0a62e7226382459776ca206f4ca005c68d66ce32293fcbb63266",
+    "examples/operator/dist/client.js": "d664a760a610ae61e44cc78ad4fa0c5567d1baa695e6395463e53825db2041e4",
+    "examples/operator/dist/connection.d.ts": "3795a0fefa3a29663b5ac4fe419e26348da23be00619b6a1714152de4cbd2878",
+    "examples/operator/dist/connection.js": "4a07537c4f2984a515530760ccfb45e11eeeb9faa42a60c214ae7b299d591dc7",
+    "examples/operator/dist/lifecycle.d.ts": "5d82f6ed79dff918f3456c565e2381c534a6491c05761d202e91ea7009bb2013",
+    "examples/operator/dist/lifecycle.js": "21acce417c6eca107c2a17a71c62089ae41e91d23dcf335ce66d69548e21bbc6",
+    "examples/operator/dist/panel.d.ts": "48473f57f5d1607c7887cd5eea5e555d512b82dc3577eb35d2ba31bac94e18fe",
+    "examples/operator/dist/panel.js": "c6a1b7d8cec3386c842a7d7919b43fde8817cd73a52550e5752167111a8191d4",
+    "examples/operator/dist/presenter.d.ts": "8282396e83b722d3684e3b5bb623be356536d2676a519634b3e6b46425b7f92d",
+    "examples/operator/dist/presenter.js": "3d84b3f1d06229e56bff834057a440b071c2a5b306deb769d67588fb62f2a51f"
+  },
+  "checks": {
+    "lifecycle_methods": 21,
+    "new_methods": 3,
+    "failures": 0,
+    "skips": 0,
+    "cancelled": 0,
+    "closed_adr": "PASS included in lifecycle suite",
+    "syntax_diff": "PASS",
+    "negative_control_methods": 2,
+    "expected_negative_assertion_failures": 2,
+    "unchanged_operator_outputs": 14,
+    "previous_source_hashes_verified": 18,
+    "previous_report_hashes_verified": 10
+  },
+  "negative_controls": {
+    "command": "node build/p33-sdk-linux/lifecycle-negative-controls.mjs",
+    "execution": "Copied compiled lifecycle module, data URL imports and temporary test file; 15000 ms child bound and 1 MiB captured-output cap. Files removed in finally. Runtime unchanged.",
+    "timer-cancellation": "Removing clearInterval fails the missed-hidden-notification assertion that no timer remains.",
+    "failure-latch": "Resetting failed on activation fails the requirement that repaired revocation remains unavailable until remount.",
+    "production_defect": false
+  },
+  "research": {
+    "checked_on": "2026-10-10",
+    "candidates": [
+      "TypeScript/native DOM",
+      "ECMAScript/native DOM",
+      "Lit reactive controller",
+      "Elm subscriptions/ports",
+      "ReScript bindings",
+      "Dedicated Web Worker/message passing"
+    ],
+    "basis": "Official browser/runtime/framework sources and executable lifetime/resource checks; no alternate-language benchmark or browser deadline qualification.",
+    "sources": [
+      "https://developer.chrome.com/docs/web-platform/page-lifecycle-api",
+      "https://lit.dev/docs/composition/controllers/",
+      "https://guide.elm-lang.org/interop/ports.html",
+      "https://rescript-lang.org/docs/manual/latest/bind-to-js-function",
+      "https://html.spec.whatwg.org/multipage/timers-and-user-prompts.html#timers",
+      "https://guide.elm-lang.org/effects/time",
+      "https://html.spec.whatwg.org/multipage/workers.html#workers-and-the-workerglobalscope-interface"
+    ]
+  },
+  "security_review": [
+    "Current display remains UNKNOWN; suspension prevents source reads and active-source revocation errors latch unavailable without exposing exception content.",
+    "Late callbacks during suspension do not reactivate or create timers. Reactivation clears observations admitted in background.",
+    "Caller supplies trusted DOM/source integration; source.disconnect delegates cancellation and does not grant authorization or remote actuation. No private configuration or peer worktree touched."
+  ],
+  "publication": {
+    "pr": "https://github.com/Nima0101/aethron/pull/44",
+    "published_head": "546293e157d98fad61dbfd7c715dd7704d50c6da",
+    "observed_ci": {
+      "QUEUED": 40,
+      "SKIPPED": 1
+    },
+    "merge": "Not attempted; pending checks not polled. Current five-path test/doc correction requires bridge commit."
+  },
+  "previous_evidence": "docs/engineering/aethron-ecosystem/evidence/phase3/p12-display-build-review-v1.json",
+  "next_earliest_unreviewed": "P12 connection controller/browser build, then remaining help inventory",
+  "limits": [
+    "Structural DOM and controlled event/clock/transport checks; no real browser navigation, OS suspend or installed-customer acceptance.",
+    "Requested 20 ms timer unchanged; no deadline, hard-real-time, availability or cryptographic certification claim.",
+    "Full lane/P19 incomplete. Insufficient information for tactical deployment."
+  ]
+}

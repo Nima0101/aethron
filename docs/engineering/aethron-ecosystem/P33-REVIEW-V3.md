@@ -1782,3 +1782,55 @@ snapshot showed 40 queued and one skipped check; no polling or merge. Next earli
 unreviewed component: P12 lifecycle scheduling and suspension, followed by the
 remaining connection/browser/help inventory. Full lane and P19 acceptance remain
 unfinished; no audit-complete marker is issued.
+
+
+### P12 lifecycle host reassessment — 2026-10-10
+
+At `546293e157d98fad61dbfd7c715dd7704d50c6da`, re-read the full authoritative
+policy and V3 order, the early declaration generator and current coordination
+snapshot, then inspected the lifecycle implementation, test harness, ADR and
+host/source documentation. Verified 18 source hashes, ten retained reports and
+14 operator output hashes from the previous review before changing documentation.
+The stored protected-main ref does not yet contain this lane's lifecycle module;
+no peer contract or worktree was modified.
+
+KEEP TypeScript/native DOM events under the updated closed
+[lifecycle ADR](../../../examples/operator/lifecycle-adr.json), including its four
+C4 views. Constraints remain browser ESM, synchronous source revocation, one
+visible-page timer, five event listeners, no queued observations and no added
+transport/authentication. Fresh official-source comparison covers plain ECMAScript,
+Lit reactive controllers, Elm subscriptions/ports, ReScript bindings and a
+worker/message design. Lit connection callbacks do not substitute for page
+suspension; a worker cannot own the panel DOM and does not eliminate window
+scheduling. No candidate supplies a browser deadline or demonstrated material
+advantage for this small source/display boundary. No migration or cross-language
+performance claim is justified.
+
+No new runtime defect was found. Three executable cases now cover missed hidden
+notifications and explicit reactivation, a late timer callback during suspension,
+and failed revocation after the host was already active. The last case remains
+unavailable even after the clearer is repaired, until disposal/remount. All 21
+lifecycle methods pass, with no skips or cancellations. Tests use a structural
+DOM, synthetic events/clocks and a mocked transport around the actual SDK source;
+they do not qualify real browser navigation, OS suspension or service operation.
+
+Two isolated negative controls remove timer cancellation and clear the failure
+latch respectively. Each fails its selected new test at the intended assertion;
+module/syntax errors are rejected as evidence. Controls use copied compiled code
+in data URLs, bounded child runs and temporary test files removed in finally;
+production source and dist remain unchanged. These are injected failures, not
+production defects. Raw scripts/results and source hashes are bound in
+[the evidence](evidence/phase3/p12-lifecycle-review-v1.json).
+
+CLARIFY revocation responsibility in the ADR/README: the lifecycle host delegates
+to source.disconnect(). A plain Observation clears its local state, while the SDK
+createObservationSource also aborts its owned ingress. Neither gives this display
+adapter independent authorization or producer-control authority. A requested
+20 ms interval remains a scheduling request; stalled/terminated browser execution
+cannot guarantee cleanup. This preserves the API, resource bound and negative
+browser evidence.
+
+Verified bridge commit 546293e1 was fast-forward pushed to PR #44. Its single
+exact-head snapshot showed 40 queued and one skipped check; no polling or merge.
+Next earliest unreviewed component: P12 connection controller and browser build,
+then the remaining help inventory. Full lane/P19 acceptance remains incomplete.

@@ -72,11 +72,19 @@ admitted in the background and waits for a subsequent admission. Unsupported
 visibility states remain inactive. Disposal removes the timer and five lifecycle
 listeners as well as the panel. Late timer callbacks are inert.
 
+If a visibility notification is missed, a later refresh still suspends when the
+document reports hidden. A later visible state alone does not reactivate the
+host; an activation event must first clear background observations. A late timer
+callback while suspended cannot read the source or restart the timer. These are
+event/clock checks, not a guarantee that a blocked browser will run cleanup.
+
 Source-clearing or timer-creation failure latches unavailable guidance; after
 repairing the host, dispose and remount it. Reader exceptions withdraw details
 without copying their text and can recover on a later independent read. The
-adapter performs no transport, authorization, ingress cancellation or remote
-cleanup. The caller must stop its own session on logout. It does not erase copies
+adapter delegates revocation to `source.disconnect()`: a plain SDK `Observation`
+clears local state, while `createObservationSource` also aborts its owned ingress.
+The adapter does not independently authorize or implement remote cleanup. The
+caller must stop any separately owned session on logout. It does not erase copies
 held elsewhere. Timer scheduling and page lifecycle delivery are browser/OS
 assumptions, not measured deadlines or a reliable suspend detector.
 

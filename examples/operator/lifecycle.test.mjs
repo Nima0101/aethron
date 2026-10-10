@@ -37,7 +37,7 @@ function setup(initialVisibility='visible') {
   const root=document.querySelector('main');
   return {root,document,window,DOMEvent,timers,listeners,observation,source,
     mount:locale=>module.mountObservationHost(root,source,locale),
-    visibility(value){visibility=value;document.dispatchEvent(new DOMEvent('visibilitychange'));},
+    visibility(value,notify=true){visibility=value;if(notify)document.dispatchEvent(new DOMEvent('visibilitychange'));},
     emit(name){(name==='freeze'||name==='resume'?document:window).dispatchEvent(name==='freeze'||name==='resume'?new DOMEvent(name):new Event(name));},
     admit(){observation.accept(envelope,now);},
     tick(value){now=value;for(const callback of [...timers.values()])callback();},
@@ -124,6 +124,33 @@ test('repeated activation replaces the single timer and clears old observations'
   const s=setup();const host=s.mount();
   for(let i=0;i<3;i++){s.admit();host.refresh();s.emit('pageshow');assert.equal(s.state(),'expired');assert.equal(s.timers.size,1);}
   host.dispose();assert.equal(s.timers.size,0);
+});
+test('refresh detects missed hidden notification and waits for explicit reactivation',()=>{
+  const s=setup();const host=s.mount();const read=s.source.view;let reads=0;
+  s.source.view=()=>{reads++;return read();};s.admit();host.refresh();
+  assert.equal(s.state(),'delayed');
+  s.visibility('hidden',false);s.tick(1);
+  assert.equal(s.state(),'expired');assert.equal(s.timers.size,0);assert.equal(reads,1);
+  s.admit();s.visibility('visible',false);host.refresh();
+  assert.equal(s.state(),'expired');assert.equal(s.timers.size,0);assert.equal(reads,1);
+  s.emit('pageshow');assert.equal(s.state(),'expired');assert.equal(s.timers.size,1);
+  s.admit();host.refresh();assert.equal(s.state(),'delayed');host.dispose();
+});
+test('late timer callback while suspended neither reads nor reactivates the source',()=>{
+  const s=setup();const host=s.mount();const late=[...s.timers.values()][0];
+  s.admit();host.refresh();s.emit('freeze');const clears=s.clears();
+  s.source.view=()=>assert.fail('suspended callbacks must not read the source');s.admit();
+  late();host.refresh();host.setLocale('sv-SE');
+  assert.equal(s.state(),'expired');assert.equal(s.clears(),clears);assert.equal(s.timers.size,0);
+  host.dispose();assert.equal(s.listeners.size,0);
+});
+test('failure while clearing an active source stays unavailable through reactivation',()=>{
+  const s=setup();const host=s.mount();s.admit();host.refresh();assert.equal(s.state(),'delayed');
+  s.source.disconnect=()=>{throw new Error('private revocation failure');};s.emit('pagehide');
+  assert.equal(s.state(),'invalid');assert.equal(s.timers.size,0);
+  s.source.disconnect=()=>s.observation.disconnect();s.emit('pageshow');s.admit();host.refresh();
+  assert.equal(s.state(),'invalid');assert.equal(s.timers.size,0);assert.ok(!s.root.textContent.includes('private'));
+  host.dispose();assert.equal(s.root.textContent,'');assert.equal(s.listeners.size,0);
 });
 test('lifecycle ADR uses a closed schema and cannot acquire unsupported qualification claims',()=>{
   const read=name=>JSON.parse(readFileSync(new URL(name,import.meta.url),'utf8'));
