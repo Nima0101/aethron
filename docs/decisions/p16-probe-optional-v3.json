@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "id": "p16-probe-optional-v3",
+  "component": "Comparison and mutation probes; optional-backend test boundaries",
+  "decision": "KEEP",
+  "constraints": [
+    "Bounded developer/CI diagnostics for trusted local source and fixed synthetic fixtures. No service deadline, embedded target or throughput SLA.",
+    "Dependency-free core jobs must retain independent checks and report unavailable crypto coverage explicitly. Dedicated passport jobs install and import the required backend before testing."
+  ],
+  "alternatives": [
+    "Python asyncio capture and unittest fixtures invoking native-backed Python crypto and the exact runtime API.",
+    "Node.js/TypeScript child-process orchestration and native crypto comparison.",
+    "C#/F# System.Diagnostics.Process for external probe supervision.",
+    "Rust native process orchestration with independently defined Python report contracts."
+  ],
+  "rationale": [
+    "KEEP comparison observer in Python and Node primitive comparator: direct runtime observations and explicit lexical differences matter; neither primitive speed nor one desktop batch establishes a replacement verifier.",
+    "KEEP mutation runner in Python: it compiles isolated copies of the actual Python verifier and executes existing real admission tests. A translated verifier or external orchestrator would not supply equivalent guard-sensitivity evidence by itself.",
+    "FIX test dependency declarations: only tests requiring positive crypto admission may skip in a missing-backend job. Floor persistence checks invoke their backend-independent scenario directly; core process controls and pinned-policy checks remain active.",
+    "Fresh no-site execution reproduced the CI failures, then passed 23 checks with 20 explicit dependency skips. With crypto installed, all 48 affected methods pass without skips. No alternative establishes a material advantage or winning migration under these constraints."
+  ],
+  "limits": [
+    "Only Python and the Node primitive comparator were executed. C#/F# and Rust are architecture candidates, not measured performance results.",
+    "No-site skips are unavailable coverage, never crypto PASS. Probe executables still reject missing backend without success output.",
+    "Temporary module restoration and listed-source comparisons are not sandbox isolation or loaded-code attestation. Timers are local elapsed-time samples, not target qualification.",
+    "No hosted PASS is claimed for this correction. Three existing low-severity subprocess warnings in probe tests remain retained."
+  ],
+  "evidence": [
+    "https://docs.python.org/3/library/unittest.html",
+    "https://docs.python.org/3/library/asyncio-subprocess.html",
+    "https://nodejs.org/api/child_process.html",
+    "https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process"
+  ]
+}

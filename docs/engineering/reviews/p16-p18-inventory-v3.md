@@ -1,6 +1,6 @@
 # P16–P18 review inventory v3
 
-Snapshot: `42259ba689e205a8c44375f19d2b4b5affe36c6e`, plus local installed-floor coverage corrections, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `64ac47c6d0986af09238d61a8514085849f1a36a`, plus local optional-backend test corrections, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -14,7 +14,8 @@ components through evidence, tasks, bundles, federation and inbox. It adds full 
 reference coverage and corrects two public evidence records rejected by hosted checks.
 The [current schema/packaging review](p16-installed-floor-v3.md) confirms the six
 schemas and adds the omitted installed floor-store persistence scenario. Next in
-the current review cursor: comparison/mutation probes, then peer-consumer boundaries.
+the current review cursor: peer-consumer boundaries, after the
+[probe dependency correction](p16-probe-optional-v3.md) and live comparison/mutation checks.
 The consumed JSON-bound helper belongs to the foundation lane.
 
 | Component | Current evidence and decision |

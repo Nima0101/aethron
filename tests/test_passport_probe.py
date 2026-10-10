@@ -3,6 +3,7 @@
 import asyncio
 import contextlib
 import hashlib
+import importlib.util
 import io
 import json
 import runpy
@@ -12,6 +13,8 @@ import tracemalloc
 import unittest
 from pathlib import Path
 from unittest.mock import patch
+
+HAS_CRYPTO = importlib.util.find_spec("cryptography") is not None
 
 
 class ProbeExecutionTests(unittest.TestCase):
@@ -71,6 +74,7 @@ class MutationSourceTests(unittest.TestCase):
         self.assertIs(fixtures.passports, original)
         self.assertEqual(output.getvalue(), "")
 
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
     def test_changed_mutation_source_emits_no_evidence(self):
         read = Path.read_bytes
         run = unittest.TextTestRunner.run
@@ -152,6 +156,7 @@ class ProbeResponseTests(unittest.TestCase):
         ):
             self.main()
 
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
     def test_valid_comparison_is_retained(self):
         for elapsed in (0, 1.25):
             with self.subTest(elapsed=elapsed):
@@ -166,6 +171,7 @@ class ProbeResponseTests(unittest.TestCase):
                 self.assertEqual(result["audit_policy_version"], 3)
                 self.assertEqual(result["python_lexical_rejections"], 5)
 
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
     def test_timing_retains_integer_intervals_and_batch_scope(self):
         output = io.StringIO()
         verifier = unittest.mock.Mock(wraps=self.main.__globals__["verify"])
@@ -216,6 +222,7 @@ class ProbeResponseTests(unittest.TestCase):
         finally:
             tracemalloc.stop()
 
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
     def test_measurement_failure_stops_owned_tracing_without_evidence(self):
         original = self.main.__globals__["verify"]
         for exception in (RuntimeError("measurement failed"), KeyboardInterrupt()):
@@ -238,6 +245,7 @@ class ProbeResponseTests(unittest.TestCase):
                 finally:
                     tracemalloc.stop()
 
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
     def test_peak_read_failure_stops_owned_tracing_without_evidence(self):
         output = io.StringIO()
         try:
@@ -249,6 +257,7 @@ class ProbeResponseTests(unittest.TestCase):
         finally:
             tracemalloc.stop()
 
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
     def test_comparison_records_project_source_digests(self):
         output = io.StringIO()
         self.invoke(json.dumps(self.response).encode(), output)
@@ -269,6 +278,7 @@ class ProbeResponseTests(unittest.TestCase):
                 hashlib.sha256((root / name).read_bytes()).hexdigest(),
             )
 
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
     def test_changed_project_source_emits_no_evidence(self):
         root = Path(__file__).resolve().parents[1]
         read = Path.read_bytes
@@ -303,6 +313,7 @@ class ProbeResponseTests(unittest.TestCase):
                 self.assertEqual(output.getvalue(), "")
                 self.assertFalse(tracemalloc.is_tracing())
 
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
     def test_mutation_records_direct_helper_and_fixture_digests(self):
         root = Path(__file__).resolve().parents[1]
         main = runpy.run_path(str(root / "scripts/passport_trust_review.py"))["main"]
@@ -337,6 +348,7 @@ class ProbeResponseTests(unittest.TestCase):
                 hashlib.sha256((root / name).read_bytes()).hexdigest(),
             )
 
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
     def test_malformed_comparison_emits_no_evidence(self):
         changes = [
             ("crypto_accepts", [1, 1, 1, 1, 0, 1]),

@@ -1,5 +1,6 @@
 """Compose the real inbox and federation boundaries with synthetic offline artifacts."""
 
+import importlib.util
 import json
 import unittest
 from pathlib import Path
@@ -10,6 +11,10 @@ from aethron.interop_inbox import BoundedInbox
 VECTORS = Path(__file__).resolve().parents[1] / "examples/interop/federation-vectors-v1.json"
 
 
+HAS_CRYPTO = importlib.util.find_spec("cryptography") is not None
+
+
+@unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
 class DeliveryConformanceTests(unittest.TestCase):
     def setUp(self):
         self.cases = {case["name"]: case for case in json.loads(VECTORS.read_bytes())["cases"]}

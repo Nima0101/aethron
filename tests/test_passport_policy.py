@@ -2,12 +2,15 @@
 
 import copy
 import hashlib
+import importlib.util
 import json
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 from aethron import passports
+
+HAS_CRYPTO = importlib.util.find_spec("cryptography") is not None
 
 
 class PinnedPolicyTests(unittest.TestCase):
@@ -46,6 +49,7 @@ class PinnedPolicyTests(unittest.TestCase):
         self.assertFalse(result.execution_authority)
         self.assertFalse(result.evidence_verified)
 
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
     def test_policy_can_revoke_every_available_signer(self):
         control = passports.verify(
             self.case["envelope"].encode(), self.raw, **self.case["arguments"]

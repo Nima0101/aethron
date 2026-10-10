@@ -17,12 +17,15 @@ RUNNER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(RUNNER)
 
 
+HAS_CRYPTO = importlib.util.find_spec("cryptography") is not None
+
+
 class InstalledVectorTests(unittest.TestCase):
     def test_floor_persistence_is_executed_with_real_api(self):
         from aethron.passport_floor_store import PolicyFloorStore
 
         with patch.object(RUNNER, "PolicyFloorStore", wraps=PolicyFloorStore, create=True) as store:
-            RUNNER.run(ROOT)
+            RUNNER.check_floor_persistence(ROOT)
             self.assertEqual(store.create.call_count, 1)
             self.assertGreaterEqual(store.call_count, 3)
 
@@ -34,7 +37,7 @@ class InstalledVectorTests(unittest.TestCase):
 
         with patch.object(PolicyFloorStore, "observe_time", lost_write):
             with self.assertRaises(AssertionError):
-                RUNNER.run(ROOT)
+                RUNNER.check_floor_persistence(ROOT)
 
     def test_floor_policy_write_loss_prevents_success(self):
         from hashlib import sha256
@@ -55,7 +58,7 @@ class InstalledVectorTests(unittest.TestCase):
 
         with patch.object(PolicyFloorStore, "accept_policy", lost_write):
             with self.assertRaises(AssertionError):
-                RUNNER.run(ROOT)
+                RUNNER.check_floor_persistence(ROOT)
 
     def test_floor_rollback_acceptance_prevents_success(self):
         from aethron.passport_floor_store import FloorStoreError, PolicyFloorStore
@@ -74,7 +77,7 @@ class InstalledVectorTests(unittest.TestCase):
                     with self.assertRaisesRegex(
                         AssertionError, "installed floor rollback accepted"
                     ):
-                        RUNNER.run(ROOT)
+                        RUNNER.check_floor_persistence(ROOT)
 
     def test_wrong_floor_metadata_prevents_success(self):
         from aethron.passport_floor_store import PolicyFloorStore
@@ -97,8 +100,9 @@ class InstalledVectorTests(unittest.TestCase):
             with self.subTest(field=field):
                 with patch.object(PolicyFloorStore, "read", changed):
                     with self.assertRaises(AssertionError):
-                        RUNNER.run(ROOT)
+                        RUNNER.check_floor_persistence(ROOT)
 
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
     def test_wrong_inbox_result_flags_prevent_success(self):
         for operation in ("put", "take"):
             original = getattr(RUNNER.BoundedInbox, operation)
@@ -114,6 +118,7 @@ class InstalledVectorTests(unittest.TestCase):
                         with self.assertRaises(AssertionError):
                             RUNNER.run(ROOT)
 
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
     def test_wrong_bundle_evidence_flag_prevents_success(self):
         original = RUNNER.verify_task_bundle
 
@@ -135,9 +140,19 @@ class InstalledVectorTests(unittest.TestCase):
                     with self.assertRaisesRegex(RuntimeError, "optimized_execution_not_supported"):
                         RUNNER.run(Path("missing-fixture-root"))
 
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
     def test_current_corpora_execute_all_checks(self):
         self.assertEqual(RUNNER.run(ROOT), 51)
+        from aethron.passport_floor_store import FloorStoreError
 
+        # A failed floor scenario must prevent the complete runner reporting success.
+        with patch.object(
+            RUNNER.PolicyFloorStore, "create", side_effect=FloorStoreError("store_unavailable")
+        ):
+            with self.assertRaisesRegex(FloorStoreError, "^store_unavailable$"):
+                RUNNER.run(ROOT)
+
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
     def test_policy_corpus_is_executed_with_real_api(self):
         from aethron.passports import validate_pinned_policy
 
@@ -149,6 +164,7 @@ class InstalledVectorTests(unittest.TestCase):
             self.assertEqual(RUNNER.run(ROOT), 51)
             self.assertEqual(validator.call_count, 10)
 
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
     def test_wrong_policy_result_fields_prevent_success(self):
         from aethron.passports import validate_pinned_policy
 
@@ -200,6 +216,7 @@ class InstalledVectorTests(unittest.TestCase):
             with self.assertRaises(FileNotFoundError):
                 RUNNER.load_vectors(Path(directory), next(iter(RUNNER.CORPORA)))
 
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
     def test_behavior_mismatch_still_fails_with_intact_corpora(self):
         from aethron.passports import VerificationResult
 
