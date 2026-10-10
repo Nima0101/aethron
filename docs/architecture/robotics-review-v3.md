@@ -631,3 +631,24 @@ and actually imported modules are distinguished; no cold-machine, WCET, producti
 language winner or completed review is inferred. The safe-embedded addendum was
 read at this checkpoint. Its non-actuating evidence requirements reinforce these
 qualification limits and do not transfer P18/P19 ownership to this lane.
+
+## Bind diagnostic provenance claims to accepted observations
+
+The earliest passive-component evidence review found that the SDK startup
+probe checked message names after acceptance, then checked perception eligibility
+only after corrupt input emptied the status. Its unverified-observation claim
+was not directly covered by that receipt. Schema 2 now exports the actual
+accepted status and each sample's evidence/authentication/capture/signing metadata.
+Both fixed unsigned fixture messages remain external-unverified, unauthenticated,
+without capture or signing metadata, and perception-ineligible in both backend
+modes. Tests assert false/null identities so numeric zero cannot substitute for
+the boolean or null contract. No production adapter is changed.
+
+The [source-bound results](../verification/robotics-sdk-provenance-v3.json)
+retain two RED assertions, 14 passing focused tests, and both isolated receipts.
+Historical schema-1 results remain unchanged and are identified by their commit.
+This is an evidence correction using the existing interpreter probe, not a new
+component, language selection or performance optimization. No source authorization,
+sensor-fusion suitability, hard-real-time behavior or weapon integration follows
+from passing these checks. The passive component's technology review remains
+PENDING; signing/replay remains the next later unreviewed component.

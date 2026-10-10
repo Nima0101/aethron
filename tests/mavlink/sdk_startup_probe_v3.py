@@ -56,7 +56,23 @@ def probe(mode):
         )
         first.ingest(attitude)
         first.ingest(position)
-        messages = [sample.message for sample in first.snapshot().samples]
+        accepted = first.snapshot()
+        messages = [sample.message for sample in accepted.samples]
+        accepted_status = {
+            "state": accepted.state,
+            "perception_eligible": accepted.perception_eligible,
+            "samples": [
+                {
+                    "message": sample.message,
+                    "evidence": sample.evidence,
+                    "authenticated": sample.authenticated,
+                    "capture_ns": sample.capture_ns,
+                    "link_id": sample.link_id,
+                    "signature_timestamp": sample.signature_timestamp,
+                }
+                for sample in accepted.samples
+            ],
+        }
         first.ingest(position[:-1] + bytes([position[-1] ^ 1]))
         corrupt = first.snapshot()
         first.close()
@@ -80,7 +96,7 @@ def probe(mode):
                     module_sha256[name] = hashlib.sha256(path.read_bytes()).hexdigest()
         common = sys.modules["pymavlink.dialects.v20.common"]
         return {
-            "schema_version": 1,
+            "schema_version": 2,
             "mode": mode,
             "isolated": bool(sys.flags.isolated),
             "python": sys.version.split()[0],
@@ -93,6 +109,7 @@ def probe(mode):
             "module_sha256": module_sha256,
             "initial_state": initial_state,
             "messages": messages,
+            "accepted_status": accepted_status,
             "corrupt_state": corrupt.state,
             "corrupt_reason": corrupt.reason,
             "corrupt_samples": len(corrupt.samples),

@@ -39,21 +39,37 @@ supports integer elapsed observations, not scheduler or startup guarantees.
 
 Both modes accept the same two fixed synthetic packets, report unverified
 observations, reject a CRC-corrupt packet with empty UNKNOWN/`invalid_packet`,
-remain perception-ineligible and support explicit close. The normal installed
+remain perception-ineligible and support explicit close. Receipt schema 2 adds
+`accepted_status`, captured before corruption: both samples explicitly retain
+`external_unverified`, `authenticated=false`, and null capture time, link ID and
+signature timestamp. The status has `perception_eligible=false`. These fields
+are read from the receiver's returned objects, rather than inferred from message
+names or from the later empty UNKNOWN status. The top-level `perception_eligible`
+field continues to describe only the corrupt-packet status. The normal installed
 mode selects `_x25crc_fast`; simulated import failure selects `_x25crc_slow`.
 `lxml` is installed as a package dependency but is not loaded by either probe
 path. This distinguishes installation dependencies from observed runtime imports;
 it does not establish that lxml can be removed from the package closure. There
 are no socket operations, live sources, keys, persistence or actuation.
 
-The [results](robotics-sdk-startup-v3.json) retain three process pairs from the
-final probe and an earlier six-process run before the explicit Linux guard was
+The [historical schema-1 results](robotics-sdk-startup-v3.json), committed at
+`fbd4d706ab6190d3634cdc9cf6b8576e15c080fe`, retain three process pairs from that
+probe and an earlier six-process run before the explicit Linux guard was
 added. The earlier run overlapped focused tests; its 84,424,117 ns second-constructor
 observation is retained. The final pairs ran after those tests, but the host
 remained shared and filesystem caches uncontrolled. No readings are discarded
 and no timing threshold or runtime ranking is inferred. The initial run is
 historical evidence, not execution of the final probe bytes. The final probe
-bytes were captured before the six runs and checked unchanged afterward.
+bytes were captured before the six runs and checked unchanged afterward. Those
+source hashes identify the historical commit, not today's schema-2 probe.
+
+The [schema-2 provenance results](robotics-sdk-provenance-v3.json) retain a fresh
+process in each mode, two RED assertions for the missing accepted-status field,
+and 14 passing focused tests with zero skips. This closes an evidence gap:
+the original probe asserted message names and checked eligibility only after
+corruption. It did not directly test the accepted observations' provenance.
+No production defect or production-code change is claimed. The new raw receipts
+retain incidental timings without a comparison or performance conclusion.
 
 The missing probe produced two RED test assertions. The completed probe and
 passive receiver tests pass with no Linux skips. The installed-source comparison
@@ -66,8 +82,9 @@ An external C/Rust/JavaScript launcher could time a whole process but would not
 separate these internal stages without the same interpreter instrumentation.
 This rationale does not award Python a production KEEP decision. The full
 Python dialect still differs from the original native/managed two-layout
-prototypes. Next compare a generated two-message dialect under the same SDK
-and lifecycle contract before attributing dependency costs to language alone.
+prototypes. Consequently these observations do not settle the runtime decision;
+that review remains open. This probe is restricted to non-actuating synthetic
+diagnostics and provides no evidence for weapon integration.
 
 The safe-embedded addendum's modular interfaces, source validation and honest
 timing evidence apply here. These fixtures establish only the behaviors above.

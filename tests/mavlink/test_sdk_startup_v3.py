@@ -31,6 +31,21 @@ class SdkStartupTests(unittest.TestCase):
                 self.assertTrue(report["isolated"])
                 self.assertEqual(report["initial_state"], "UNKNOWN")
                 self.assertEqual(report["messages"], ["ATTITUDE", "LOCAL_POSITION_NED"])
+                self.assertIn("accepted_status", report)
+                accepted = report["accepted_status"]
+                self.assertEqual(report["schema_version"], 2)
+                self.assertEqual(accepted["state"], "OBSERVED_UNVERIFIED")
+                self.assertIs(accepted["perception_eligible"], False)
+                self.assertEqual(
+                    [sample["message"] for sample in accepted["samples"]],
+                    ["ATTITUDE", "LOCAL_POSITION_NED"],
+                )
+                for sample in accepted["samples"]:
+                    self.assertEqual(sample["evidence"], "external_unverified")
+                    self.assertIs(sample["authenticated"], False)
+                    self.assertIsNone(sample["capture_ns"])
+                    self.assertIsNone(sample["link_id"])
+                    self.assertIsNone(sample["signature_timestamp"])
                 self.assertEqual(report["corrupt_state"], "UNKNOWN")
                 self.assertEqual(report["corrupt_reason"], "invalid_packet")
                 self.assertEqual(report["corrupt_samples"], 0)

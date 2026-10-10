@@ -1,0 +1,170 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "fbd4d706ab6190d3634cdc9cf6b8576e15c080fe",
+  "component": "P3.1 passive diagnostic evidence: accepted unsigned sample provenance",
+  "decision": "VERIFY evidence coverage; production runtime decision PENDING",
+  "production_changed": false,
+  "platform": "Linux-6.6.143-09589-gf9e106250941-x86_64-with-glibc2.41",
+  "source_sha256": {
+    "tests/mavlink/sdk_startup_probe_v3.py": "188f64e1fa74a0c231d8622aca8c2e9f95d2376ffaddc7a149b9028df76b431c",
+    "tests/mavlink/test_sdk_startup_v3.py": "dba37336e03ba1c6c7c64be39cf4a11810b59fdc7c94228f2a39a6461e2ecd3f",
+    "tests/mavlink/test_telemetry.py": "00624096f3655bb2586932f1159ba84fe5ea03c54f521aee1ffa2087c4e09740",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "integrations/edge/requirements-mavlink-linux-x86_64-py313.lock": "fee2eb4848268d8b1feeab220cebb3a297a67daad997aac3ee752def22d86d3b",
+    "docs/verification/robotics-sdk-startup-v3.md": "58badbeecc8de0d0440adcffac630b4031cc40178407f971261dcece11479899",
+    "docs/architecture/robotics-review-v3.md": "fe257b6288908872cc82b82f0b388846bf4b2f1bb79650ad3e59cbfa530e295e"
+  },
+  "records": [
+    {
+      "accepted_status": {
+        "perception_eligible": false,
+        "samples": [
+          {
+            "authenticated": false,
+            "capture_ns": null,
+            "evidence": "external_unverified",
+            "link_id": null,
+            "message": "ATTITUDE",
+            "signature_timestamp": null
+          },
+          {
+            "authenticated": false,
+            "capture_ns": null,
+            "evidence": "external_unverified",
+            "link_id": null,
+            "message": "LOCAL_POSITION_NED",
+            "signature_timestamp": null
+          }
+        ],
+        "state": "OBSERVED_UNVERIFIED"
+      },
+      "closed_reason": "closed",
+      "corrupt_reason": "invalid_packet",
+      "corrupt_samples": 0,
+      "corrupt_state": "UNKNOWN",
+      "crc_backend": "_x25crc_fast",
+      "fastcrc_loaded": true,
+      "initial_state": "UNKNOWN",
+      "isolated": true,
+      "lxml_loaded": false,
+      "messages": [
+        "ATTITUDE",
+        "LOCAL_POSITION_NED"
+      ],
+      "mode": "installed",
+      "module_sha256": {
+        "aethron_edge.telemetry.mavlink": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+        "fastcrc": "1d8336381f2c50570a7797d5af8e586b8f6814583eb120dc044e6cb4ab83a675",
+        "fastcrc.__info__": "18b1fab5f53c79c282ce2d6c7ec804c0fa4863ec65d983bc762ad5d1b25d27c1",
+        "fastcrc.crc16": "94f8acd3900533f7b0f9916a1cfef52dfe44ccfdaf78c795731e6a68276fde9f",
+        "fastcrc.crc32": "ff6837156182105966b10f2879ff42ca583bfcba4d281a57cfd5f3ffe6f3b37f",
+        "fastcrc.crc64": "86b02fd0a0826909758483d21e71da234dddefc9e70a67522564eec8b2497a1c",
+        "fastcrc.crc8": "a5a90b256eb0e09ec5902facd4f22755370accffc52f63e6e4014ca88caa3c02",
+        "fastcrc.fastcrc": "7a0e2b3d13c3cf21e211db63c91b5f2da4fc596e22e6b5987a4bc25059543c54",
+        "pymavlink": "8e990fcf3dabda06fcaa8c6abb0cb12c3f7683d78eccc8f2f52bd4cebce0ef23",
+        "pymavlink.dialects": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pymavlink.dialects.v20": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pymavlink.dialects.v20.common": "6c4dab96ad0faa3f3bb2796b3d62854eb02eb8e537315b82af773e9855d173a1"
+      },
+      "peak_rss_kib": 27420,
+      "perception_eligible": false,
+      "phase_ns": {
+        "adapter_import": 117647035,
+        "first_constructor": 176725578,
+        "second_constructor": 629546
+      },
+      "pymavlink_version": "2.4.50",
+      "python": "3.13.5",
+      "schema_version": 2
+    },
+    {
+      "accepted_status": {
+        "perception_eligible": false,
+        "samples": [
+          {
+            "authenticated": false,
+            "capture_ns": null,
+            "evidence": "external_unverified",
+            "link_id": null,
+            "message": "ATTITUDE",
+            "signature_timestamp": null
+          },
+          {
+            "authenticated": false,
+            "capture_ns": null,
+            "evidence": "external_unverified",
+            "link_id": null,
+            "message": "LOCAL_POSITION_NED",
+            "signature_timestamp": null
+          }
+        ],
+        "state": "OBSERVED_UNVERIFIED"
+      },
+      "closed_reason": "closed",
+      "corrupt_reason": "invalid_packet",
+      "corrupt_samples": 0,
+      "corrupt_state": "UNKNOWN",
+      "crc_backend": "_x25crc_slow",
+      "fastcrc_loaded": false,
+      "initial_state": "UNKNOWN",
+      "isolated": true,
+      "lxml_loaded": false,
+      "messages": [
+        "ATTITUDE",
+        "LOCAL_POSITION_NED"
+      ],
+      "mode": "blocked",
+      "module_sha256": {
+        "aethron_edge.telemetry.mavlink": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+        "pymavlink": "8e990fcf3dabda06fcaa8c6abb0cb12c3f7683d78eccc8f2f52bd4cebce0ef23",
+        "pymavlink.dialects": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pymavlink.dialects.v20": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pymavlink.dialects.v20.common": "6c4dab96ad0faa3f3bb2796b3d62854eb02eb8e537315b82af773e9855d173a1"
+      },
+      "peak_rss_kib": 26524,
+      "perception_eligible": false,
+      "phase_ns": {
+        "adapter_import": 199421443,
+        "first_constructor": 175949336,
+        "second_constructor": 527891
+      },
+      "pymavlink_version": "2.4.50",
+      "python": "3.13.5",
+      "schema_version": 2
+    }
+  ],
+  "checks": {
+    "red": {
+      "methods": 2,
+      "assertion_failures": 2,
+      "errors": 0,
+      "reason": "accepted_status missing from schema-1 receipt; no production defect claimed"
+    },
+    "green": {
+      "methods": 14,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "seconds": 3.712
+    },
+    "ruff": "PASS",
+    "ruff_format": "PASS",
+    "bandit": "PASS"
+  },
+  "retained_file_sha256": {
+    "sdk-provenance-red.log": "05af7f01599c75708fb84bbcdee7fdd6130cb23b628a54805381d878bc4d6119",
+    "sdk-provenance-green.log": "8820b64c6517af6581380b4a9a9f3bbf7ec1588582adbcacc8328046f8425404",
+    "sdk-provenance-installed.stdout": "cf2c5c200949874264c9d5af098ef9d814a22b7bf95932a9dd853d3e0170a5e0",
+    "sdk-provenance-installed.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-provenance-blocked.stdout": "0fe1c4d723be14360f95702416f9be3dd938039a279fc861d1f2d7a69cd5a249",
+    "sdk-provenance-blocked.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-provenance-probe.sha256": "d1c4c07feeab96d7b7fbffaa432e965eb48db844f520e2d0bfb9df16f9125f8e"
+  },
+  "limitations": [
+    "Two fixed unsigned synthetic messages only; no live or transport test",
+    "Installed adapter file identity checked; no signed execution attestation",
+    "Recorded timings are incidental; no ranking, optimization or target timing qualification",
+    "No new language decision, cryptographic compliance or weapon integration",
+    "Historical schema-1 evidence remains bound to fbd4d706ab6190d3634cdc9cf6b8576e15c080fe"
+  ]
+}
