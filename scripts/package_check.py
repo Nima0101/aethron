@@ -61,6 +61,20 @@ def run():
             check=True,
             stdout=subprocess.DEVNULL,
         )
+        console = python.with_name("aethron.exe" if os.name == "nt" else "aethron")
+        console_env = dict(os.environ, PYTHONNOUSERSITE="1")
+        for variable in ("PYTHONPATH", "PYTHONHOME"):
+            console_env.pop(variable, None)
+        help_result = subprocess.run(
+            [str(console), "--help"],
+            cwd=temp,
+            env=console_env,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        assert help_result.stdout.strip(), "console help is empty"
         result = subprocess.run(
             [str(python), "-I", "-m", "aethron", "demo"],
             cwd=temp,
@@ -100,6 +114,7 @@ def run():
                     "sha256": wheel_sha256,
                     "byte_identical": True,
                     "isolated_install": True,
+                    "console_wrapper": True,
                     "dependency_installation": False,
                 }
             )
