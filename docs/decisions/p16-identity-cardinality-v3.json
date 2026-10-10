@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "p16-identity-cardinality-v3",
+  "component": "Installed distribution identity header cardinality",
+  "decision": "KEEP",
+  "constraints": [
+    "Offline developer check of the currently tested Python installation against two static pyproject identity strings; Python 3.9/3.13 CI profile, Linux/macOS/Windows, no real-time or throughput requirement.",
+    "Reject duplicate identity headers without implementing an email parser or changing passport runtime, package metadata, wire contracts, normalization semantics or output shape."
+  ],
+  "alternatives": [
+    "Python importlib.metadata with standard get_all header enumeration and existing TOML parser.",
+    "Python packaging.metadata parse_email/from_email for broader core-metadata validation.",
+    "Rust uv package/environment inspection with an interpreter probe for imported-module identity.",
+    "Java TomlJ plus Python metadata/import inspection for the actual installation under test."
+  ],
+  "rationale": [
+    "KEEP direct interpreter inspection. The required observable is all identity headers in the selected distribution, not a package-list summary. The standard metadata object preserves duplicates and offers case-insensitive get_all; comparing its full list with one expected value supplies cardinality and equality together.",
+    "packaging.metadata is credible for complete metadata validation but would add a separate raw-metadata parsing/validation policy beyond this exact two-field check. Broader package metadata compliance should use an explicit separate requirement.",
+    "uv documents environment and package inspection; TomlJ provides Java TOML parsing. Neither cited interface establishes this same-interpreter imported-module and duplicate-header check. They remain credible for other packaging boundaries but provide no evidenced correctness or deployment advantage for this correction.",
+    "Two new real-file test methods cover single mixed-case headers and six duplicate combinations across Name/Version. Before correction, four duplicate cases were silently accepted; after correction, all six reject. Existing missing and mismatched field checks remain passing.",
+    "Selection is based on the observable and deployment boundaries, not installed tooling, rewrite cost or language familiarity. No alternate-runtime benchmark or universal performance ranking was performed."
+  ],
+  "limits": [
+    "Trusted local metadata; not publisher authentication, a whole-metadata validator, loaded-bytecode attestation or atomic source/installation snapshot.",
+    "Exact project-profile strings remain required. Does not implement general equivalent-name/version normalization.",
+    "Local execution uses Linux Python 3.13 only. The Python 3.9 API documentation supports the chosen primitive but is not executed 3.9/Tomli or hosted matrix evidence.",
+    "No new build or install, physical qualification, MLS/CNSA, availability or complete-phase claim."
+  ],
+  "evidence": [
+    "https://packaging.python.org/en/latest/specifications/core-metadata/",
+    "https://docs.python.org/3.13/library/importlib.metadata.html",
+    "https://docs.python.org/3.13/library/email.message.html",
+    "https://docs.python.org/3.9/library/email.message.html",
+    "https://packaging.pypa.io/en/stable/metadata.html",
+    "https://docs.astral.sh/uv/pip/inspection/",
+    "https://github.com/tomlj/tomlj"
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "review_order_version": 3,
+  "baseline_commit": "383a4c536ce8f12799f6f1790f5e89e25c071005",
+  "component": "P16 installed distribution identity cardinality",
+  "decision": "KEEP direct Python inspection; FIX duplicate identity header acceptance",
+  "environment": {
+    "python": "3.13.5 (main, Jun 25 2025, 18:55:22) [GCC 14.2.0]",
+    "platform": "Linux-6.6.143-09589-gf9e106250941-x86_64-with-glibc2.41"
+  },
+  "baseline_source_sha256": {
+    "scripts/passport_install_check.py": "83e38c1e33df2dd7f9178ae2a60a90d5f08ec362e3f9613ba0743f0756ca60d9",
+    "tests/test_passport_install_check.py": "c1cda03dab42b3ff48afb537d363154cfc219f6f1948ab329b23c972f8f0e520"
+  },
+  "source_sha256": {
+    "scripts/passport_install_check.py": "e1dc753fdd276635756c072fd70ec316d136165909c07ee874f9bc7a6b1f16ee",
+    "tests/test_passport_install_check.py": "1914ba8d17fc7b6b416e3b85416313b13f55e90b9c0fe7a8ac5240f2b0ffa1be",
+    "scripts/passport_sdist_check.py": "6550689de5eafb0ca35d4dc6399f16c73f9746e470d0844048c6773abeae8f3e",
+    "scripts/passport_installed_vectors.py": "4712d6acce39300be12e47f35cd79ac7a7583bbbf7dd2c5d4a6c2cbaa49533e3",
+    "tests/test_passport_installed_vectors.py": "a5894d1b18f9d5f055d37705f78f662687d3bfdd4b47d6b4fce1de8aa60ac3ad",
+    "tests/packaging/test_passport_sdist.py": "5a41f7517791c9e6691a0a99004c2258b5b40901d51ff1cd7e82d04e5ee89819",
+    "tests/packaging/test_passport_manifest.py": "30d35a49196113c09cb1745a26a9201cc18e6270e6f7653c2c340029977f69cf",
+    ".github/workflows/aethron-passports.yml": "f2e52752fcda9ff25b5792b2639d45704cb8568f8cdb8eee5fe0cb4cc2051e72",
+    "pyproject.toml": "c5e3d4d7dd65acd3d3c04baf7f53b49b5ef99db6231fa610f1e144f17eec4b0e",
+    "docs/decisions/p16-identity-cardinality-v3.json": "a39b279e47ce95ca000d2a5cd3cae19c6d2dd0a7c054819fe70db7e4c20c37e9",
+    "docs/engineering/reviews/p16-installed-identity-v3.md": "1be02123760c9ff106173cb1a2f5d68f3923d71cf49ec4e39ebccca8d4dfe6f6",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "a8becdb215926098546c89f94d902fbafce3ccc8b5b57fa13ef22006c9acb9e8"
+  },
+  "checks": {
+    "red_methods": 6,
+    "red_assertion_failures": 4,
+    "red_errors": 0,
+    "red_skips": 0,
+    "green_focused_methods": 34,
+    "green_skips": 0,
+    "adr_methods": 4,
+    "installed_source_files": 7,
+    "installed_corpus_cases": 50,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS, changed checker, no exclusions",
+    "diff_check": "PASS"
+  },
+  "regression_cases": {
+    "duplicate_combinations": 6,
+    "positive_mixed_case_single_headers": 1,
+    "mechanism": "Real temporary METADATA parsed through Distribution.at; no mock metadata. Before correction, four matching-first duplicates were silently accepted."
+  },
+  "logs_sha256": {
+    "identity-cardinality-adr.log": "8635492f9d49fc049ce7254022ae56bcd3ec1dfdbc51704f3ca18810c0f06a5a",
+    "identity-cardinality-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "identity-cardinality-focused.log": "0d110bb405e9108fba1997eea9cfea15f92f01c34a723bcdbd3b9bd43abd3f9f",
+    "identity-cardinality-format.log": "3bc53bf3e981a98a34a852e175bf9b77af841edea74fca595d9aedcbaf9a4938",
+    "identity-cardinality-installed.log": "a5845b7f0947629a60415442c5b40644a94df0fafceaee76b2e105c888d3bddb",
+    "identity-cardinality-red.log": "12845d5ce4760265c9f538ee20c71195ef5f9de3b366158eec1f33f815a921b5",
+    "identity-cardinality-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "identity-cardinality-vectors.log": "e503b80eaf33004a70cdaa3ea788cffb330f6781c1bc9304af21bbe884c19857"
+  },
+  "reproduction": [
+    "PYTHONPATH=tests:tests/packaging python -m unittest test_passport_lexical test_passport_install_check test_passport_installed_vectors test_passport_manifest test_passport_sdist -v",
+    "PYTHONPATH=tests python -m unittest test_passport_schemas.ArchitectureDecisionConformance -v",
+    "python -I scripts/passport_install_check.py",
+    "python -I scripts/passport_installed_vectors.py"
+  ],
+  "limits": [
+    "Logs are retained in lane runtime; hashes bind those files, not execution truth or publisher identity. Listed sources are not full dependency closure.",
+    "Sparse manifest test emits missing-file warnings; retained red log also contains old metadata lookup deprecation warning.",
+    "No new archive build/install, hosted result, Python 3.9 execution, alternate-runtime benchmark, physical or whole-lane qualification.",
+    "No passport runtime, protocol, shared packaging metadata or peer-owned source changes."
+  ]
+}

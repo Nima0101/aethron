@@ -84,3 +84,70 @@ authority, live communications, intelligence, surveillance or reconnaissance ser
 is introduced. No MLS/CNSA, availability, hard-real-time or physical qualification.
 Insufficient information for tactical deployment. Full phase review and delivery
 remain unfinished.
+
+
+## Fresh cardinality review at 383a4c5
+
+Baseline `383a4c536ce8f12799f6f1790f5e89e25c071005`, reviewed 2026-10-10.
+Following the policy and earliest parser reread, the installed checker, RECORD tests,
+selected-archive checker and hosted packaging configuration were inspected again.
+The static identity check had a concrete ambiguity: `metadata[field]` could return
+the expected value while a second identity header contained the same or a different
+value. The old statement that identity matches source did not cover this case.
+
+[Python documents](https://docs.python.org/3.13/library/email.message.html) that
+single-header lookup does not specify which duplicate is returned. The correction
+reads the metadata object once and requires `get_all(field, []) == [expected]` for
+each identity field. Missing, duplicated or conflicting fields fail with the existing
+`installed_identity_mismatch` error. A single case-insensitively named header remains
+valid. This does not validate every core metadata field or make reads atomic.
+
+The [current strict ADR](../../decisions/p16-identity-cardinality-v3.json) compares
+standard Python inspection, PyPA packaging metadata validation, Rust uv inspection
+and Java TomlJ with interpreter inspection. KEEP direct inspection because it exposes
+the actual selected distribution and every header without another environment-selection
+boundary. The broader packaging validator is useful for complete metadata validation;
+that is outside this two-field comparison. No measured alternate-language speed or
+resource advantage is asserted, and no runtime language migration is justified here.
+
+Two new methods use real temporary METADATA files and `Distribution.at`. The duplicate
+method checks both identity fields with equal duplicates and conflicting values in both
+orders; the second method checks valid single headers with mixed-case spelling. Before
+the fix, four subcases failed with `ValueError not raised`, zero errors. All six duplicate
+subcases now reject. The original missing-field lookup also emitted a deprecation warning;
+using `get_all` with an explicit default removes that lookup from this code path.
+
+Thirty-four focused methods pass with no skips, covering lexical, installed-source,
+RECORD, identity, installed corpus, manifest selection and synthetic archive checks.
+The deliberately sparse manifest fixture emits missing-file warnings; these are retained
+in the log, not a clean build claim. The existing isolated installation outside the
+checkout passes all seven source-file comparisons and fifty behavioral cases. Ruff,
+format and unfiltered Bandit on the changed checker pass. The result record contains
+source and log hashes: [current results](p16-identity-cardinality-v3-results.json).
+No fresh wheel/sdist build, reinstallation, hosted matrix or Python 3.9 execution occurred.
+
+The context and container C4 views above remain applicable. Updated component boundary:
+
+```mermaid
+flowchart LR
+  Static[Static source identity] --> Equality[Exactly one matching header value]
+  Metadata[Selected distribution metadata] --> AllHeaders[Case-insensitive get_all]
+  AllHeaders --> Equality
+  Equality --> Files[Existing source and RECORD checks]
+```
+
+Updated code view:
+
+```mermaid
+flowchart LR
+  check_identity --> Snapshot[Read metadata object once]
+  Snapshot --> Fields[Name and Version]
+  Fields --> get_all
+  get_all --> Singleton[Compare full list with expected singleton]
+  Singleton --> RejectOrContinue[Reject mismatch or continue]
+```
+
+These are developer-assurance views. No operational command, communications or ISR
+functionality is introduced. Insufficient information for tactical deployment.
+The next earliest remaining review component is comparison/mutation assurance tooling;
+the lane audit and P17–P19 software remain incomplete.

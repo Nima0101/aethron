@@ -28,11 +28,13 @@ def check_identity(installed_distribution, project_path):
 
     with project_path.open("rb") as stream:
         project = tomllib.load(stream).get("project", {})
+    metadata = installed_distribution.metadata
     for field in ("name", "version"):
         value = project.get(field)
         if type(value) is not str or not value or field in project.get("dynamic", []):
             raise ValueError("invalid_source_identity")
-        if installed_distribution.metadata[field.title()] != value:
+        # A single header lookup can hide duplicates, including conflicting values.
+        if metadata.get_all(field.title(), []) != [value]:
             raise ValueError("installed_identity_mismatch")
 
 

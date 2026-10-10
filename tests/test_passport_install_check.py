@@ -128,6 +128,25 @@ class InstalledIdentityTests(unittest.TestCase):
     def test_matching_static_identity_is_accepted(self):
         self.check_identity()
 
+    def test_single_identity_headers_are_case_insensitive(self):
+        self.metadata.write_text("Metadata-Version: 2.4\nNAME: aethron\nvErSiOn: 0.2.0\n")
+        self.check_identity()
+
+    def test_duplicate_installed_identity_is_rejected(self):
+        for field, expected, other, remaining in (
+            ("Name", "aethron", "other", "Version: 0.2.0\n"),
+            ("Version", "0.2.0", "0.1.0", "Name: aethron\n"),
+        ):
+            for first, second in ((expected, expected), (expected, other), (other, expected)):
+                with self.subTest(field=field, first=first, second=second):
+                    self.metadata.write_text(
+                        "Metadata-Version: 2.4\n"
+                        + remaining
+                        + f"{field}: {first}\n{field.lower()}: {second}\n"
+                    )
+                    with self.assertRaisesRegex(ValueError, "installed_identity_mismatch"):
+                        self.check_identity()
+
     def test_wrong_or_missing_installed_identity_is_rejected(self):
         for fields in (
             "Name: other\nVersion: 0.2.0\n",
