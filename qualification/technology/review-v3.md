@@ -327,3 +327,65 @@ existing pinned parser and primitive comparisons. Workflow configuration and loc
 actionlint success do not establish hosted execution success. The current review
 is caught up through these built components; physical/legal review, authenticated
 evidence and further qualification software remain separate work.
+
+## Follow-up: parser document fidelity — 2026-10-10
+
+The fresh walk reread declaration validation, artifact binding, campaign coverage,
+CLI delivery, comparison tooling and campaign reference binding through `5f0f3a7`.
+All 71 existing focused methods passed. The earlier component constraints and KEEP
+choices still apply: exact immutable byte ownership, bounded offline inputs, fixed
+negative findings and no device, network, native ABI or hard-deadline requirement.
+The reference checker retains its separately documented immutable/native-hash
+choice and false qualification flags. This review found an executable mismatch
+in the comparison tooling, so forward campaign composition remains the next task.
+
+Summary-report parity did not demonstrate document preservation. The comparator
+replaced the candidate's input hash with the original hash before comparing
+summaries. Changed capture instants and clock-domain strings could disappear from
+the summary. Two different invalid documents could also produce the same fixed
+schema error. Earlier 81-request results establish only their recorded outcome
+parity; they do not establish the additional document-fidelity property below.
+Those historical reports are retained unchanged.
+
+The audit transport needs to compare decoded JSON values, ignore object key order
+and insignificant spelling, distinguish integer/float/Boolean representations,
+and reject ambiguous original JSON. It has no signing or cross-runtime canonical
+byte requirement. Current domain-relevant options were reassessed:
+
+| Option | Decisive property |
+|---|---|
+| Python sorted JSON encoding after strict decoding | Preserves integer/float/Boolean distinctions of the configured Python oracle, normalizes object order, and avoids an additional runtime conversion. `allow_nan=False` rejects nonfinite decoded values. |
+| Recursive exact-type comparison | Viable and avoids temporary serialization, but needs explicit scalar, object, sequence and finite-number rules. No measured allocation constraint requires that additional comparison implementation here. |
+| Node strict deep equality | Distinguishes Boolean from number, but JSON parsing maps integer and floating spellings to the same Number type. A token-preserving adapter would still be needed for this oracle. |
+| C# System.Text.Json DeepEquals/token reader | A credible independent typed JSON ecosystem. Deep equality alone is not evidence of this profile's integer-token, duplicate and encoding rules; a configured token reader and adapter require parity evidence. |
+| RFC 8785 canonical JSON | Intended for invariant cryptographic serialization. Its numeric normalization is not the integer-versus-float distinction required here. This audit does not need a signing format. |
+
+Sources inspected: [Python JSON hooks and serialization](https://docs.python.org/3.13/library/json.html),
+[Node strict assertions](https://nodejs.org/api/assert.html),
+[System.Text.Json deep equality](https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsonelement.deepequals?view=net-9.0),
+and [RFC 8785](https://www.rfc-editor.org/rfc/rfc8785).
+The suitability conclusions are this review's analysis. **KEEP Python orchestration;
+FIX document preservation checks.** Installed tools, familiarity and rewrite cost
+are not selection criteria. Reopen for a measured allocation constraint or a
+standalone comparison service with a different token contract.
+
+Every accepted candidate response now gets a separate comparison to its original
+bounded UTF-8 input with duplicate-key rejection and bounded integer conversion.
+Sorted encoding compares decoded values before lossy report projection. Integer
+`-0` and `0`, escaped names and reordered object keys remain equivalent. Floating
+spellings are compared as Python decoded values, not arbitrary-precision lexical
+numbers; valid qualification manifests contain no floats. This is not canonical
+signing, response authentication or proof of parser behavior outside the corpus.
+Rejected candidate rows are covered by outcome comparison, not by a claim that
+there was a returned document. `all_documents_match` is vacuous if none is accepted;
+`all_reports_match` and the process exit must also be checked.
+
+Reports retain `mismatch_indices` as the union of failures and add
+`report_mismatch_indices`, `document_mismatch_indices` and `all_documents_match`.
+`all_reports_match` continues to describe summary equality alone. Exit zero requires
+both kinds of equality. The transport's existing 8 MiB bound remains unchanged;
+comparison may allocate temporary encoded strings within that finite workload and
+has no wall-clock guarantee. Four new test methods retain eight negative assertions
+and a key-order/negative-zero positive control. See `document-fidelity-review-v3.json`
+for RED/GREEN, bypass-mutation and fresh Java composition evidence. No physical or
+production qualification follows.

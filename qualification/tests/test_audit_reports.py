@@ -117,6 +117,59 @@ class AuditReportTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "^audit_row_count$"):
                 self.compare(invalid)
 
+    def test_candidate_cannot_change_values_hidden_by_summary(self):
+        for field, replacement in (("start_ms", 999), ("clock_domain", "other")):
+            with self.subTest(field=field):
+                rows = self.responses()
+                rows[0]["document"]["capture"][field] = replacement
+                status, report = self.compare(self.lines(rows))
+                self.assertEqual(status, 1)
+                self.assertEqual(report["document_mismatch_indices"], [0])
+                self.assertTrue(report["all_reports_match"])
+                self.assertFalse(report["all_documents_match"])
+
+    def test_equal_rejection_outcomes_do_not_prove_document_fidelity(self):
+        # Vector 3 has version 1.0. These replacements also fail the schema,
+        # but none is the document the parser was asked to preserve.
+        for replacement in (True, "1", None):
+            with self.subTest(replacement=replacement):
+                rows = self.responses()
+                original = json.loads(
+                    bytes.fromhex(
+                        json.loads(
+                            (
+                                Path(compare_ingress.__file__).parent / "ingress-vectors-v1.json"
+                            ).read_text()
+                        )[3]["hex"]
+                    )
+                )
+                original["version"] = replacement
+                rows[3] = {"accepted": True, "document": original}
+                status, report = self.compare(self.lines(rows))
+                self.assertEqual(status, 1)
+                self.assertEqual(report["document_mismatch_indices"], [3])
+
+    def test_accepting_malformed_source_cannot_hide_behind_schema_rejection(self):
+        rows = self.responses()
+        # Duplicate equal keys, invalid UTF-8, and malformed JSON respectively.
+        for index in (9, 14, 17):
+            with self.subTest(index=index):
+                changed = list(rows)
+                changed[index] = {"accepted": True, "document": None}
+                status, report = self.compare(self.lines(changed))
+                self.assertEqual(status, 1)
+                self.assertEqual(report["document_mismatch_indices"], [index])
+
+    def test_object_order_and_integer_negative_zero_preserve_documents(self):
+        rows = self.responses()
+        for row in rows:
+            if row["accepted"]:
+                row["document"] = dict(reversed(list(row["document"].items())))
+        status, report = self.compare(self.lines(rows))
+        self.assertEqual(status, 0)
+        self.assertEqual(report["mismatch_indices"], [])
+        self.assertTrue(report["all_documents_match"])
+
 
 if __name__ == "__main__":
     unittest.main()

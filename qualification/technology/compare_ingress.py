@@ -14,6 +14,7 @@ import tracemalloc
 import unittest
 from pathlib import Path
 
+from aethron._json_bounds import check
 from qualification.evidence import _pairs, _parse_integer, validate
 from qualification.tests.test_evidence import EvidenceTests, encoded
 
@@ -68,6 +69,23 @@ def _response(raw):
         raise ValueError("invalid_audit_response") from None
 
 
+def _document_matches(raw, document):
+    """Compare decoded values, not lossy summaries or original JSON spelling."""
+    try:
+        if not check(raw):
+            return False
+        original = json.loads(
+            raw.decode("utf-8"), object_pairs_hook=_pairs, parse_int=_parse_integer
+        )
+        # Sorting ignores object order; encoding distinguishes 1, 1.0 and true.
+        # Finite floats retain Python's decoded value, not their source spelling.
+        return json.dumps(original, sort_keys=True, allow_nan=False) == json.dumps(
+            document, sort_keys=True, allow_nan=False
+        )
+    except (ValueError, UnicodeError, RecursionError):
+        return False
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -91,16 +109,19 @@ def main():
     if len(lines) != len(requests):
         raise RuntimeError("audit_row_count")
     rows = [_response(row) for row in lines]
-    mismatches = []
+    report_mismatches, document_mismatches = [], []
     for index, ((raw, now_ms), row) in enumerate(zip(requests, rows)):
         expected = outcome(raw, now_ms)
         actual = {"error": "invalid_qualification_manifest"}
         if row["accepted"]:
+            if not _document_matches(raw, row["document"]):
+                document_mismatches.append(index)
             actual = outcome(encoded(row["document"]), now_ms)
             if "input_sha256" in actual:
                 actual["input_sha256"] = hashlib.sha256(raw).hexdigest()
         if actual != expected:
-            mismatches.append(index)
+            report_mismatches.append(index)
+    mismatches = sorted(set(report_mismatches) | set(document_mismatches))
 
     # Local upper-byte-bound measurement, not an acceptance threshold or a
     # cross-language timing comparison. No compilation or unbounded soak.
@@ -122,7 +143,10 @@ def main():
         "ingress_cases": len(vectors),
         "semantic_requests": len(requests) - len(vectors),
         "mismatch_indices": mismatches,
-        "all_reports_match": not mismatches,
+        "report_mismatch_indices": report_mismatches,
+        "document_mismatch_indices": document_mismatches,
+        "all_reports_match": not report_mismatches,
+        "all_documents_match": not document_mismatches,
         "request_transport_sha256": hashlib.sha256(transport.encode("ascii")).hexdigest(),
         "response_transport_sha256": hashlib.sha256(response_bytes).hexdigest(),
         "python_65536_byte_measurement": {
