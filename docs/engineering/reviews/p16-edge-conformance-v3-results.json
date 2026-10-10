@@ -1,0 +1,45 @@
+{
+  "audit_policy_version": 3,
+  "baseline_head": "93b916427dfd8ae8e7301d0a37bd2dabed0b9eda",
+  "producer_main": "a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46",
+  "decision": "KEEP bounded byte binding; FIX published edge fixture conformance gap",
+  "checks": {
+    "red_assertion_failures": 3,
+    "red_errors": 0,
+    "conformance_methods": 15,
+    "passport_family_methods": 64,
+    "portable_edge_cases": 6,
+    "skips": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "actionlint": "PASS",
+    "bandit_evidence_bundle": "PASS",
+    "diff": "PASS"
+  },
+  "source_scope": "Listed local project files; not loaded-code attestation or dependency closure.",
+  "source_sha256": {
+    "tests/test_passport_schemas.py": "037b5263fa3dcaeffe034a24d85c21cd6ff893f3dfd90f175f6148d68da0216f",
+    "examples/interop/edge-unknown-vectors-v1.json": "ee56de5eaa3b597aace551fc93f8faf6e1f3b9d72ceca9872ee6b0d2886144d7",
+    "contracts/openapi/aethron-edge-v1.json": "4d562382b803e59dac1ab24a7ead52cd2cdbbc9533aa6d9dc68fca9f6e9b0b83",
+    "contracts/fixtures/v3/unknown-output.json": "2b91d797820cce663134417d5b52b016aebcaca02c7a710bc16984487b35a754",
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    ".github/workflows/aethron-passports.yml": "70a59a71edee6be0ca8ece6edf75831e17ed00d72ec6551a7dd9c56850b2114a",
+    "docs/architecture/interop/schema-conformance-v1.md": "1c0686f1df390d5def75c305d096840628802e818c1fdaa68095906d623feb88",
+    "docs/engineering/reviews/p16-edge-conformance-v3.md": "34da1b994333bbb50dfb10e87b10f326669563990be905a51917e1e9041550e2"
+  },
+  "log_sha256": {
+    "edge-conformance-red.log": "832846f268081ad9a671768612054f08046bf05904bb3e303e1e58b5c9a0a29c",
+    "edge-conformance-green.log": "1f60b8e5d8ea90b4f9c76eb13a7a006082ae6683584e41c7a4e2e794eb314621",
+    "edge-conformance-family.log": "33aa95b43fd6a771ae750e98e162786f6163c180c9215037f24c2914c2b0bd1e"
+  },
+  "limits": [
+    "Synthetic UNKNOWN fixture; public test key only.",
+    "No new runtime, live edge service, cross-clock mapping or hardware qualification.",
+    "No full P2/P3/P14 runtime integration or hosted run is asserted."
+  ],
+  "audit_complete": false
+}

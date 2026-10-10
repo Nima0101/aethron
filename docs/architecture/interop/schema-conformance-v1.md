@@ -66,3 +66,20 @@ in JSON Schema does not enforce uniqueness by remote-domain name or prevent a pe
 from using the local-domain alias. Retained tests demonstrate these structural-success,
 runtime-rejection cases and require genuine positive runtime results as controls.
 See the [technology and coverage review](../../engineering/reviews/p16-interop-schemas-v3.md).
+
+## Published edge UNKNOWN evidence
+
+The [portable edge corpus](../../../examples/interop/edge-unknown-vectors-v1.json)
+consumes the existing API v1 `V3Snapshot` schema and fixed v3 UNKNOWN output from
+protected main `a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46`. Exact source hashes pin the
+reviewed contract and fixture; producer changes require deliberate compatibility review.
+No peer implementation or schema is copied or changed. The conformance job validates
+the source structure with local references, then checks P16 byte binding and negatives.
+
+The fixture has no tracks and no observation evidence. Its independently controlled
+recommendation remains data; the test never invokes a controller. Signed `unknown`
+outcomes remain unknown. P16 UTC expiry concerns the verification descriptions, while
+scene monotonic milliseconds remain uninterpreted evidence bytes. A bound result does
+not translate clocks, establish live freshness or qualify sensor observations.
+This is one offline producer-contract/consumer check, not P2/P3/P14 runtime integration.
+See [review and technology decision](../../engineering/reviews/p16-edge-conformance-v3.md).

@@ -1,7 +1,7 @@
 # P16–P18 review inventory v3
 
-Snapshot: `8edce6f5e6cd877b2c836da14a1947f7f06a984f`, plus the task/federation
-structural-schema correction, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `93b916427dfd8ae8e7301d0a37bd2dabed0b9eda`, plus the edge UNKNOWN
+conformance correction, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -33,7 +33,7 @@ external gates. No whole-phase completion can be inferred from the rows above.
 | Scope | State at this snapshot |
 |---|---|
 | P16 transport, enrollment and persistent rollback floors | Not implemented by the owned modules. Caller-provided pins/floors are assumptions, not these services. |
-| P16 cross-phase conformance | Local passport/task/bundle/federation/inbox vectors exist; integrated P2/P3/P14 consumer qualification is not established. |
+| P16 cross-phase conformance | [Edge UNKNOWN corpus](p16-edge-conformance-v3.md) checks one published API/fixture boundary; integrated P2/P3/P14 runtime consumer qualification is not established. |
 | P17 common picture and operator collaboration | No owned implementation or integrated client evidence identified. |
 | P17 role/authority, intent, coordination and cancellation | No owned command workflow implementation; P16 verification tasks do not implement it. |
 | P17 offline synchronization and conflict handling | Local inbox and direct federation checks do not provide durable synchronization or conflict resolution. |

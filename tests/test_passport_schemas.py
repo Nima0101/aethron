@@ -1,12 +1,13 @@
 """Independent structural checks; schema validity never authenticates a passport."""
 
 import copy
+import hashlib
 import json
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from aethron import interop_federation, interop_tasks, passports
+from aethron import interop_bundles, interop_federation, interop_tasks, passports
 
 try:
     from jsonschema import Draft202012Validator, ValidationError
@@ -383,6 +384,103 @@ class InteropSchemaConformance(unittest.TestCase):
             self.schema("federation").validate(doc)
             with self.assertRaises(ValueError):
                 interop_federation._snapshot(doc)
+
+
+@unittest.skipIf(Draft202012Validator is None, "install optional passport conformance requirements")
+class EdgeEvidenceConformance(unittest.TestCase):
+    def vectors(self):
+        path = ROOT / "examples/interop/edge-unknown-vectors-v1.json"
+        self.assertTrue(path.is_file(), "published edge UNKNOWN binding vectors required")
+        return json.loads(path.read_bytes())
+
+    def test_published_sources_and_independent_edge_structure(self):
+        vectors = self.vectors()
+        expected = {
+            "contracts/openapi/aethron-edge-v1.json": "4d562382b803e59dac1ab24a7ead52cd2cdbbc9533aa6d9dc68fca9f6e9b0b83",
+            "contracts/fixtures/v3/unknown-output.json": "2b91d797820cce663134417d5b52b016aebcaca02c7a710bc16984487b35a754",
+        }
+        self.assertEqual(vectors["source_sha256"], expected)
+        self.assertEqual(vectors["source_commit"], "a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46")
+        for path, digest in expected.items():
+            self.assertEqual(hashlib.sha256((ROOT / path).read_bytes()).hexdigest(), digest)
+        api = json.loads((ROOT / "contracts/openapi/aethron-edge-v1.json").read_bytes())
+        self.assertEqual(api["openapi"], "3.1.1")
+        check = Draft202012Validator(
+            {"$ref": "#/components/schemas/V3Snapshot", "components": api["components"]},
+            registry=Registry(retrieve=deny_retrieval),
+        )
+        doc = json.loads((ROOT / "contracts/fixtures/v3/unknown-output.json").read_bytes())
+        check.validate(doc)
+        self.assertEqual(doc["state"], "UNKNOWN")
+        self.assertEqual(doc["tracks"], [])
+        self.assertIsNone(doc["evidence"])
+        self.assertIs(doc["recommendation"]["requires_independent_controller"], True)
+        for field, value in (("state", "SAFE"), ("motion_authority", True)):
+            with self.assertRaises(ValidationError):
+                check.validate(dict(doc, **{field: value}))
+        changed = copy.deepcopy(doc)
+        changed["recommendation"]["requires_independent_controller"] = False
+        with self.assertRaises(ValidationError):
+            check.validate(changed)
+
+    def test_exact_binding_and_negative_portable_cases(self):
+        cases = self.vectors()["cases"]
+        self.assertEqual(
+            [case["name"] for case in cases],
+            [
+                "unknown-bytes-bind",
+                "reserialized-bytes",
+                "changed-state",
+                "missing-evidence",
+                "expired-task",
+                "revoked-evidence",
+            ],
+        )
+        source = (ROOT / "contracts/fixtures/v3/unknown-output.json").read_bytes()
+        for case in cases:
+            with self.subTest(case=case["name"]):
+                evidence = tuple(bytes.fromhex(blob) for blob in case["evidence_hex"])
+                result = interop_bundles.verify_task_bundle(
+                    *(case[key].encode() for key in ("task", "envelope", "policy")),
+                    evidence,
+                    **case["arguments"],
+                )
+                self.assertEqual((result.status, result.reason), (case["status"], case["reason"]))
+                self.assertEqual([item.outcome for item in result.evidence], case["outcomes"])
+                self.assertIs(result.execution_authority, False)
+                self.assertIs(result.motion_authority, False)
+                self.assertIs(result.evidence_verified, False)
+                if case["name"] == "unknown-bytes-bind":
+                    self.assertEqual(evidence, (source,))
+                    self.assertEqual(result.evidence[0].kind, "synthetic")
+                    self.assertEqual(result.evidence[0].sha256, hashlib.sha256(source).hexdigest())
+                    self.assertEqual(result.expires_at, 1700)
+                else:
+                    self.assertIsNone(result.task_sha256)
+                    self.assertIsNone(result.passport_sha256)
+                    self.assertIsNone(result.expires_at)
+                    self.assertEqual(result.evidence, ())
+                if case["name"] == "reserialized-bytes":
+                    self.assertNotEqual(evidence[0], source)
+                    self.assertEqual(json.loads(evidence[0]), json.loads(source))
+                if case["name"] == "changed-state":
+                    self.assertEqual(json.loads(evidence[0])["state"], "PRESENT")
+
+    def test_binding_does_not_translate_scene_clocks_or_make_observations_current(self):
+        case = self.vectors()["cases"][0]
+        source = bytes.fromhex(case["evidence_hex"][0])
+        doc = json.loads(source)
+        result = interop_bundles.verify_task_bundle(
+            *(case[key].encode() for key in ("task", "envelope", "policy")),
+            (source,),
+            **case["arguments"],
+        )
+        self.assertEqual(result.status, "bound")
+        self.assertEqual((doc["at_ms"], doc["expires_at_ms"]), (600, 800))
+        self.assertEqual(result.expires_at, 1700)  # UTC seconds, not scene monotonic ms.
+        self.assertEqual(result.evidence[0].outcome, "unknown")
+        self.assertIs(result.evidence_verified, False)
+        self.assertEqual(json.loads(source), doc)
 
 
 if __name__ == "__main__":
