@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "p16-policy-reassessment-v3",
+  "component": "P16 independent externally pinned policy validation",
+  "constraints": [
+    "Immutable UTF-8 JSON at most 65536 bytes and depth eight; closed metadata, bounded keys/revocations and exact-byte SHA-256.",
+    "Caller supplies authenticated pin, trusted time and revision/time floors. No enrollment, disk, network, implicit clock or persistent state.",
+    "No specified hardware, embedded OS, throughput, hard deadline or process-memory budget."
+  ],
+  "alternatives": [
+    "CPython lexical hooks plus native hashlib SHA-256.",
+    "CUE declarative constraints with an exact-byte/context wrapper.",
+    "Java/Kotlin Jackson token streaming and provider SHA-256.",
+    "Rust Serde custom lexical admission and sha2.",
+    "Erlang/Elixir binary data, JSON callbacks and crypto hashing."
+  ],
+  "rationale": [
+    "KEEP the explicit lexical hooks and native hash boundary: the same validated bytes are hashed, all key metadata is checked, and invalid scalar/lexical inputs retain closed rejection behavior.",
+    "Value/schema validation alone does not replace exact raw-byte pins or authenticate the pin provider. CUE is credible for configuration tooling but would still need those boundaries. Native/managed token parsers remain credible alternatives.",
+    "Eight focused policy methods pass; disabling the raw-byte pin comparison causes an expected assertion failure. This supplies contract and negative-control evidence, not full alternative implementation parity.",
+    "No requirement or measurement establishes a material alternative advantage. Existing language, installed tools, familiarity and rewrite cost are not retention criteria."
+  ],
+  "limits": [
+    "Caller-supplied pins and floors can be rolled back; this API has no persistence or same-revision equivocation detection.",
+    "A valid policy may revoke every signer. Successful policy validation is not a successful passport or evidence qualification.",
+    "Candidate comparison is source-based; no CUE/JVM/Rust/BEAM implementation was benchmarked.",
+    "No comparative performance ranking, whole-lane completion, MLS/CNSA qualification, availability or physical timing claim.",
+    "No migration winner is established under the specified bounded offline constraints; no winning migration is deferred.",
+    "Insufficient information for tactical deployment."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/json.html",
+    "https://docs.python.org/3.13/library/hashlib.html",
+    "https://cuelang.org/docs/concept/how-cue-enables-data-validation/",
+    "https://github.com/FasterXML/jackson-core",
+    "https://serde.rs/attributes.html",
+    "https://www.erlang.org/doc/apps/stdlib/json.html"
+  ],
+  "decision": "KEEP"
+}

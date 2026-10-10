@@ -1,6 +1,6 @@
 # P16–P18 review inventory v3
 
-Snapshot: `bc196647ed8a5c7a0d1a970c2800eec53f5d0bd7`, plus fresh trust technology
+Snapshot: `d6edbc52de8781d41d5dcf8fa5e9f4bf3ff80474`, plus fresh policy/evidence technology
 reassessment, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
@@ -14,8 +14,8 @@ remain historical inputs. The consumed JSON-bound helper belongs to the foundati
 |---|---|
 | Parser and canonicalization | [Original V3 review](p16-parser-v3.md): FIX pre-conversion integer bound. [Fresh reassessment](p16-parser-reassessment-v3.md): KEEP lexical hooks; fourteen portable cases and bounded syntax comparison, no performance ranking. |
 | Signature, trust, expiry and revocation | [Original review](p16-trust-v3.md). [Fresh reassessment](p16-trust-reassessment-v3.md): KEEP bounded native crypto boundary; add real missing-package process checks, preserve provisioning limits and source-bound primitive evidence. |
-| Independent pinned-policy validation | [Review](p16-policy-admission-v3.md): ADD complete policy validation against an external exact-byte pin, independent of passport success; no persistence or enrollment. |
-| Evidence bytes | [Review](p16-evidence-v3.md): KEEP immutable byte binding; clarify digest/privacy and qualification limits. |
+| Independent pinned-policy validation | [Original review](p16-policy-admission-v3.md). [Fresh reassessment](p16-policy-evidence-reassessment-v3.md): KEEP exact-byte external pin and complete metadata validation; existing tests detect removed pin comparison. No persistence or enrollment. |
+| Evidence bytes | [Original review](p16-evidence-v3.md). [Fresh reassessment](p16-policy-evidence-reassessment-v3.md): KEEP immutable per-blob binding; existing tests detect weakened set comparison. No content qualification. |
 | Three passport schemas and conformance | [Review](p16-conformance-v3.md): KEEP structural schema tooling; FIX positive authentication control and dependency closure. |
 | Task/federation structural schemas | [Review](p16-interop-schemas-v3.md): FIX missing portable structural contracts; preserve runtime admission. |
 | Task descriptions | [Review](p16-task-v3.md): KEEP bounded descriptions; no task execution or replay store. |
