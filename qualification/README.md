@@ -100,6 +100,11 @@ report = evaluate(
 The separate [campaign reference byte checker](campaign-references-v1.md) matches
 supplied domain/procedure bytes to the plan's hashes. It does not authenticate
 those references, approve their contents or change campaign qualification flags.
+The separate [procedure checklist API](procedures-v1.md) checks strict, bounded
+case/check declarations against the same plan and preserves missing, unknown and
+unverified states. It runs no procedure and does not validate referenced method
+contents or human approval. [Synthetic vectors](fixtures/procedures-v1.json)
+include complete-but-unverified, unknown, missing and conflicting declarations.
 The [campaign bundle report](campaign-bundle-v1.md) computes both coverage and
 reference matching from raw inputs against one plan. Its software result requires
 both checks; capture artifact verification and physical qualification remain false.
