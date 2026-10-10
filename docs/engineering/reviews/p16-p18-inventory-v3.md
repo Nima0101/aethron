@@ -1,6 +1,6 @@
 # P16–P18 review inventory v3
 
-Snapshot: `ba0dbbc6af2cf7e87df0da0a8ace7fe1b4fa8e06`, plus fresh task/bundle technology
+Snapshot: `8cc440edeab8f217851781a513075632ffb2217e`, plus fresh federation/inbox technology
 reassessment, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
@@ -20,9 +20,9 @@ remain historical inputs. The consumed JSON-bound helper belongs to the foundati
 | Task/federation structural schemas | [Review](p16-interop-schemas-v3.md): FIX missing portable structural contracts; preserve runtime admission. |
 | Task descriptions | [Review](p16-task-v3.md): KEEP bounded descriptions; no task execution or replay store. [Fresh reassessment](p16-task-bundle-reassessment-v3.md): KEEP lexical/canonical description validation; existing test detects removed canonical equality. |
 | Bundle verification | [Review](p16-bundle-v3.md): KEEP snapshot composition; all revocation lists rechecked. [Fresh reassessment](p16-task-bundle-reassessment-v3.md): KEEP immutable snapshots; existing test detects removed envelope pin. |
-| Direct federation | [Review](p16-federation-v3.md): KEEP closed pinned table; no enrollment or distributed consensus. |
-| Inbox resource accounting | [Review](p16-inbox-v3.md): KEEP local bounded queue; no transport or hard real-time guarantee. |
-| Inbox/federation composition | [Review](p16-delivery-boundary-v3.md): KEEP primitives; ADD real-API expiry, revocation, revision-floor and close traces. Caller refresh and in-flight cancellation are not implemented. |
+| Direct federation | [Review](p16-federation-v3.md): KEEP closed pinned table; no enrollment or distributed consensus. [Fresh reassessment](p16-federation-inbox-reassessment-v3.md): KEEP closed-table validation; no production mismatch demonstrated. |
+| Inbox resource accounting | [Review](p16-inbox-v3.md): KEEP local bounded queue; no transport or hard real-time guarantee. [Fresh reassessment](p16-federation-inbox-reassessment-v3.md): KEEP accounting; FIX test-runner hang on injected worker deadlock through child-process supervision. |
+| Inbox/federation composition | [Review](p16-delivery-boundary-v3.md): KEEP primitives; ADD real-API expiry, revocation, revision-floor and close traces. Caller refresh and in-flight cancellation are not implemented. Four composition methods freshly rechecked in the [federation/inbox reassessment](p16-federation-inbox-reassessment-v3.md). |
 | Packaging evidence | [Review](p16-packaging-v3.md): FIX installed/source identity comparison, [package input coverage](p16-packaging-inputs-v3.md) and [installed fixture coverage](p16-installed-corpus-v3.md) and [installed policy API cases](p16-installed-policy-v3.md); no full-distribution attestation. |
 | ADR publication tooling | [Review](p16-adr-publication-v3.md): FIX schema/record test discovery and ADR-only workflow triggers; structure is not evidence truth. [Fresh reassessment](p16-schema-reassessment-v3.md): FIX reference character profile; raw controls and malformed percent escapes rejected without optional format validation. |
 | Comparison and mutation probes | FIX optimized-mode evidence loss; [response types](p16-probe-response-v3.md); [capture bounds](p16-probe-capture-v3.md); [tracing lifecycle](p16-probe-tracing-v3.md); [source consistency](p16-probe-snapshot-v3.md); [timing accounting](p16-probe-timing-v3.md); [mutation integrity](p16-mutation-integrity-v3.md); historical source-manifest correction below. |

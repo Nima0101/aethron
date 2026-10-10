@@ -1,13 +1,51 @@
 """Resource limits, loss handling and lifetime tests for opaque offline inboxes."""
 
 import json
+import subprocess  # nosec B404
+import sys
 import unittest
-from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
 from pathlib import Path
-from threading import Barrier
 
 from aethron.interop_inbox import BoundedInbox
+
+CONCURRENT_PROBE = """
+import json
+import sys
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
+
+sys.path.insert(0, sys.argv[1])
+from aethron.interop_inbox import BoundedInbox
+
+q = BoundedInbox(max_items=8, max_bytes=8, max_per_peer=8)
+barrier = Barrier(2)
+
+def producer():
+    barrier.wait(timeout=5)
+    return [q.put("peer", b"x", now_ms=0, expires_at_ms=20) for _ in range(8)]
+
+with ThreadPoolExecutor(max_workers=2) as pool:
+    futures = [pool.submit(producer) for _ in range(2)]
+    results = [result for future in futures for result in future.result(timeout=10)]
+print(json.dumps({
+    "results": [[r.status, r.items, r.payload_bytes] for r in results],
+    "payloads": [q.take(now_ms=1).payload.hex() for _ in range(8)],
+    "tail_status": q.take(now_ms=1).status,
+}))
+"""
+
+
+def _run_concurrency_probe(*, script=CONCURRENT_PROBE, timeout=10):
+    # Trusted test code only, fixed small output, no shell or descendant processes.
+    # run() kills/reaps this child on timeout; executor shutdown stays in the child.
+    return subprocess.run(  # nosec B603
+        [sys.executable, "-I", "-c", script, str(Path(__file__).resolve().parents[1])],
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=timeout,
+    )
 
 
 class InboxTests(unittest.TestCase):
@@ -52,20 +90,24 @@ class InboxTests(unittest.TestCase):
         self.assertEqual(q.take(now_ms=11).reason, "closed")
 
     def test_concurrent_admission_cannot_overbook(self):
-        q = BoundedInbox(max_items=8, max_bytes=8, max_per_peer=8)
-        barrier = Barrier(2)
+        try:
+            report = json.loads(_run_concurrency_probe().stdout)
+        except subprocess.TimeoutExpired:
+            self.fail("inbox concurrency probe exceeded process timeout")
+        results = report["results"]
+        self.assertEqual(len(results), 16)
+        self.assertEqual(sum(status == "queued" for status, _, _ in results), 8)
+        self.assertTrue(all(items <= 8 and size <= 8 for _, items, size in results))
+        self.assertEqual(report["payloads"], [b"x".hex()] * 8)
+        self.assertEqual(report["tail_status"], "empty")
 
-        def producer():
-            barrier.wait(timeout=5)
-            return [q.put("peer", b"x", now_ms=0, expires_at_ms=20) for _ in range(8)]
-
-        with ThreadPoolExecutor(max_workers=2) as pool:
-            futures = [pool.submit(producer) for _ in range(2)]
-            results = [result for future in futures for result in future.result(timeout=10)]
-        self.assertEqual(sum(r.status == "queued" for r in results), 8)
-        self.assertTrue(all(r.items <= 8 and r.payload_bytes <= 8 for r in results))
-        self.assertEqual([q.take(now_ms=1).payload for _ in range(8)], [b"x"] * 8)
-        self.assertEqual(q.take(now_ms=1).status, "empty")
+    def test_deadlocked_concurrency_probe_is_terminated(self):
+        # Force workers to block on the real lock without changing production code.
+        needle = "barrier = Barrier(2)"
+        self.assertEqual(CONCURRENT_PROBE.count(needle), 1)
+        blocked = CONCURRENT_PROBE.replace(needle, "q._lock.acquire(); " + needle)
+        with self.assertRaises(subprocess.TimeoutExpired):
+            _run_concurrency_probe(script=blocked, timeout=1)
 
     def test_portable_traces(self):
         path = Path(__file__).resolve().parents[1] / "examples/interop/inbox-vectors-v1.json"
