@@ -12,6 +12,12 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def require_evidence(condition):
+    """Keep fixture evidence gates active with optimized Python too."""
+    if not condition:
+        raise ValueError("invalid_loopback_evidence")
+
+
 def run():
     report = ROOT / "build/p33-sdk-linux/archive-loopback-v3.json"
     report.parent.mkdir(parents=True, exist_ok=True)
@@ -46,18 +52,18 @@ def run():
             self.wfile.write(body)
 
         def do_POST(self):
-            assert self.path == "/api/v1/sessions"
-            assert self.headers["Authorization"] == "Bearer " + Service.token
+            require_evidence(self.path == "/api/v1/sessions")
+            require_evidence(self.headers.get("Authorization") == "Bearer " + Service.token)
             body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
-            assert body == {"source_profile": "bench", "contract": "warn"}
+            require_evidence(body == {"source_profile": "bench", "contract": "warn"})
             requests.append("POST")
             self.answer(
                 201, json.dumps({"session": scene["session"], "source_profile": "bench"}).encode()
             )
 
         def do_GET(self):
-            assert self.headers["Authorization"] == "Bearer " + Service.token
-            assert self.path == "/api/v1/sessions/" + scene["session"] + "/events"
+            require_evidence(self.headers.get("Authorization") == "Bearer " + Service.token)
+            require_evidence(self.path == "/api/v1/sessions/" + scene["session"] + "/events")
             requests.append("GET")
             body = "".join(
                 "data: " + json.dumps({**scene, "sequence": n}) + "\n\n" for n in range(3)
@@ -65,8 +71,8 @@ def run():
             self.answer(200, body.encode(), "text/event-stream")
 
         def do_DELETE(self):
-            assert self.headers["Authorization"] == "Bearer " + Service.token
-            assert self.path == "/api/v1/sessions/" + scene["session"]
+            require_evidence(self.headers.get("Authorization") == "Bearer " + Service.token)
+            require_evidence(self.path == "/api/v1/sessions/" + scene["session"])
             requests.append("DELETE")
             self.answer(204, b"")
 
@@ -89,7 +95,7 @@ def run():
             cls.server.shutdown()
             cls.server.server_close()
             cls.thread.join(timeout=2)
-            assert not cls.thread.is_alive()
+            require_evidence(not cls.thread.is_alive())
 
     module = types.ModuleType("test_edge_http")
     module.HTTPService = Service
@@ -98,8 +104,14 @@ def run():
         with patch.dict(sys.modules, {"test_edge_http": module}):
             smoke.run()
         record = json.loads(output.read_text())
-        assert requests == ["POST", "GET", "DELETE"], requests
-        assert record["display_callbacks"] >= 3 and record["current_state"] == "UNKNOWN"
+        require_evidence(requests == ["POST", "GET", "DELETE"])
+        require_evidence(
+            isinstance(record, dict)
+            and type(record.get("display_callbacks")) is int
+            and record["display_callbacks"] >= 3
+            and record.get("current_state") == "UNKNOWN"
+            and record.get("installed_client") is True
+        )
         record["producer_fixture"] = (
             "Controlled stdlib loopback HTTP; not production aethron_edge service"
         )

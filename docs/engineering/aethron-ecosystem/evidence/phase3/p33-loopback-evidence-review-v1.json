@@ -1,0 +1,65 @@
+{
+  "baseline": "442678030af32adbb4ba23dd6bae2216c1f5002c",
+  "component": "P3.3 controlled loopback fixture evidence gates",
+  "review_order_version": 3,
+  "audit_complete": false,
+  "decision": "KEEP Python stdlib controlled HTTP fixture; FIX optimization-sensitive evidence gates.",
+  "adr": "examples/clients/typescript/loopback-evidence-adr.json",
+  "source_sha256": {
+    ".github/workflows/aethron-typescript-client.yml": "00795b8a7dbf97a72a1c530a4ccd8ef6db463915b3f304c5bf1dc4bbc2dd05ab",
+    "tests/integration/node_consumer_loopback.py": "bcdaff35a201dd2e0517f4c568a4a1317293575b70aa4185fef3e700b186c76d",
+    "tests/integration/test_node_loopback_evidence.py": "2e308106152b60c438d0c6313ec8994e498d643a8afb05c1be2f8cafefc7e87e",
+    "examples/clients/typescript/loopback-evidence-adr.json": "ae1ffbc5bbdfe0fa3d6cefc89b3ede49d9cb8c6694ee66ba7fb2461b1dc61ec0",
+    "examples/clients/typescript/loopback-evidence-adr.schema.json": "7946321b2cc9039aecabc3fe24d6717cf9c11b5570b95c4df4b737e2c5e6ee18",
+    "examples/clients/typescript/offline-consumer.test.mjs": "e744af27479ed2bc90692b9b9a806e6117c1f1383b951705db50f4f5de82e6df",
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "24234ced90730b68f6519f3ad2cd68e0e5fa750e0677e4a1a9f5ad52a7e69a5e"
+  },
+  "log_directory": "build/p33-sdk-linux",
+  "report_sha256": {
+    "inventory-loopback-red.log": "e2a8895c3b2e9ca1d185a655a75ec2bcd8b49e7ed26d6d80ea1564f4b8d38c73",
+    "inventory-loopback-final.log": "49c233402dfa51c55de9359990427b03d650076448e9ad3e66ebf9ccd8f8d449",
+    "inventory-loopback-final-optimized.log": "136591a749f1501777bd01c5231c0e16613fa1236a6b4d24fa4b7038a16278f0",
+    "inventory-loopback-schema-final.log": "a87baec1bcd7a6e69ee83f419668bd3c38ab82e3fb1c27e1d686f272e5293de0",
+    "inventory-workflow-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "inventory-review-pr44.json": "0fdbb25a0fabf9374a8c28e8a89377a0648de041391b74931b8db84abfaa1b7f"
+  },
+  "red": {
+    "failures": 12,
+    "optimized_bypass_failures": 11,
+    "normal_fractional_count_failure": 1
+  },
+  "checks": {
+    "normal_parent_methods": 2,
+    "optimized_parent_methods": 2,
+    "negative_subcases_per_run": 28,
+    "positive_subcases_per_run": 2,
+    "closed_adr_methods": 1,
+    "failures": 0,
+    "skips": 0,
+    "python_compile": "PASS",
+    "actionlint": "PASS",
+    "diff_check": "PASS"
+  },
+  "technology_sources_reviewed": [
+    "https://docs.python.org/3/using/cmdline.html#cmdoption-O",
+    "https://docs.python.org/3/library/http.server.html",
+    "https://nodejs.org/api/http.html",
+    "https://api.dart.dev/dart-io/HttpServer-class.html",
+    "https://pkg.go.dev/net/http#Server"
+  ],
+  "comparative_benchmark": null,
+  "pr": 44,
+  "published_head": "442678030af32adbb4ba23dd6bae2216c1f5002c",
+  "ci": {
+    "QUEUED": 40,
+    "SKIPPED": 1
+  },
+  "next": "Finish complete P3.3/P12 source-to-review inventory and remaining delivery/integration gates.",
+  "limits": [
+    "Evidence gates are not production authentication or hostile-server hardening. The synthetic bearer value is public test data; the fixture is local and source controlled.",
+    "Controlled tests substitute the packed consumer and invoke actual fixture handlers without sockets or npm. Positive controls verify labeling and cleanup, not a fresh production-service or installed customer run.",
+    "Explicit thread-exit checks reject a reported live thread; they do not guarantee thread termination or process isolation.",
+    "No comparative performance benchmark, hard real-time, MLS/CNSA, physical, uptime or customer acceptance claim.",
+    "Full phase audit and product help/customer acceptance remain incomplete. Insufficient information for tactical deployment."
+  ]
+}

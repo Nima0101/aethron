@@ -48,7 +48,8 @@ its versioned schema; this review does not rewrite that peer interface.
 | Observation projection and local clocks | Reviewed below; host-clock exception correction and claim clarification |
 | HTTP/session/stream/renderer lifecycle | Reviewed in the third-component slices below; bounded admission, cancellation, redirect, error and numeric corrections retained; producer SSE-size reconciliation remains open |
 | Package distribution and fixtures | Manifest, generator, installed declarations and service smoke reviewed below; offline removal/reinstall coverage added; cross-version upgrade remains unverified |
-| Android/JVM, desktop lifecycle, P12 operator application | Fresh file inventory found no owned implementation; platform selection and implementation remain executable work |
+| P12 reusable operator client | Presenter, panel, lifecycle, connection, browser distribution and bilingual state/action help implemented and reviewed in later slices below; complete scene/map/mission/replay application and product acceptance remain open |
+| Android/JVM and desktop product lifecycle | No owned native implementation identified; requirements-driven platform selection and remaining software work are not complete; P11 system install/provision remains peer-owned |
 
 No completion marker is created. The session-response admission slice below
 resolves the previously open response limit. Integer wire forms are corrected in
@@ -2100,3 +2101,51 @@ Next task: reconcile the full P3.3/P12 component inventory and remaining deliver
 and integration gates against the corrected HEAD before forward expansion. This
 slice closes the contextual action-help runtime review; it does not declare the
 full phase review, product Help Center or independent installed acceptance complete.
+
+
+### P3.3 controlled loopback evidence reassessment — 2026-10-10
+
+At `442678030af32adbb4ba23dd6bae2216c1f5002c`, re-read the authoritative
+policy and V3 order, verified the preceding bridge commit and retained hashes,
+and pushed that commit to PR #44. The one exact-head snapshot showed forty queued
+and one skipped check. No polling or merge. The inventory reconciliation found
+an unaudited verification weakness in the standalone controlled loopback fixture;
+that correction takes precedence over forward expansion. The introductory cursor
+also incorrectly said that no P12 operator implementation existed. It now separates
+the implemented reusable client from unfinished product and native client work.
+
+KEEP the standard-library Python HTTP fixture; FIX its evidence gates. The closed
+[ADR](../../../examples/clients/typescript/loopback-evidence-adr.json) compares
+Python, Node native HTTP, Dart HttpServer and Go net/http against the existing
+packed-consumer fixture lifecycle, small synthetic workload and report semantics.
+The official Python command-line documentation confirms that optimization removes
+assert statements. Each alternative can serve loopback HTTP, but none removes the
+need for explicit report admission; separate executable servers add a lifecycle
+protocol without a demonstrated concurrency or target-runtime requirement. No
+comparative timing result, familiarity preference or production HTTP claim is used.
+
+The focused regression recorded twelve failures: eleven contradictory scenarios
+were accepted with the fixture compiled at optimization level two, and a fractional
+callback count was accepted without optimization. Explicit condition checks now
+reject wrong paths, bearer markers, body, request order, report values and a live
+thread after teardown. Callback counts must be actual integers, excluding booleans.
+The old controlled report is withdrawn before execution; the temporary service-style
+report is removed on exit. Valid output remains explicitly labeled as a controlled
+fixture, not the production service. SDK and production server behavior are unchanged.
+
+Verification uses actual handler and report-gate code with a substituted driver,
+no sockets or npm. Two unittest methods exercise twenty-eight negative subcases
+and two positive controls across optimization levels zero and two. Both normal and
+`python -O` parent invocations pass. CI now includes both runs and triggers when
+these fixture files change. The ADR is part of the existing strict schema tests,
+including root and nested qualification-extension rejection. Workflow actionlint,
+Python compilation and diff checks pass. Raw negative evidence is retained in
+[the source-bound result](evidence/phase3/p33-loopback-evidence-review-v1.json).
+These checks do not establish a fresh packed install, production service run,
+thread termination guarantee or independently installed customer acceptance.
+
+Next earliest unreviewed work: finish the complete P3.3/P12 source-to-review inventory
+and remaining delivery/integration gates. Exact source matches to older evidence
+are useful reconciliation inputs, not fresh decisions by themselves. Native client
+selection, producer SSE boundary reconciliation, full operator workflows and product
+help/acceptance remain open. No technology-audit completion marker is created.

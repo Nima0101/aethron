@@ -11,6 +11,8 @@ on:
       - 'examples/temporal-blackout.jsonl'
       - 'tests/integration/test_edge_http.py'
       - 'tests/integration/test_node_consumer_smoke.py'
+      - 'tests/integration/node_consumer_loopback.py'
+      - 'tests/integration/test_node_loopback_evidence.py'
       - 'scripts/edge_node_e2e.py'
       - '.github/workflows/aethron-typescript-client.yml'
   push:
@@ -24,6 +26,8 @@ on:
       - 'examples/temporal-blackout.jsonl'
       - 'tests/integration/test_edge_http.py'
       - 'tests/integration/test_node_consumer_smoke.py'
+      - 'tests/integration/node_consumer_loopback.py'
+      - 'tests/integration/test_node_loopback_evidence.py'
       - 'scripts/edge_node_e2e.py'
       - '.github/workflows/aethron-typescript-client.yml'
   workflow_dispatch:
@@ -68,6 +72,8 @@ jobs:
           npm test --prefix examples/clients/typescript 2>&1 | tee build/ecosystem-phase1/client-ci/client-tests.log
           npm test --prefix examples/operator 2>&1 | tee build/ecosystem-phase1/client-ci/operator-tests.log
           python -m unittest discover -s tests/integration -p test_node_consumer_smoke.py -v 2>&1 | tee build/ecosystem-phase1/client-ci/smoke-controls.log
+          python -m unittest discover -s tests/integration -p test_node_loopback_evidence.py -v 2>&1 | tee build/ecosystem-phase1/client-ci/loopback-controls.log
+          python -O -m unittest discover -s tests/integration -p test_node_loopback_evidence.py -v 2>&1 | tee build/ecosystem-phase1/client-ci/loopback-optimized.log
       - name: Fresh packed client against the production service
         run: python scripts/edge_node_e2e.py 2>&1 | tee build/ecosystem-phase1/client-ci/packed-client.log
       - name: Retain success and failure evidence
