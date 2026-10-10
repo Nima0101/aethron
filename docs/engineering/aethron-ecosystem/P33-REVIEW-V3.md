@@ -441,3 +441,53 @@ qualification or public SDK release. Full source/build provenance and generated
 declaration/schema parity remain the next distribution review items; the overall
 P3.3/P12 audit remains incomplete. See the
 [source-bound record](evidence/phase3/p33-package-review-v3.json).
+
+
+## Fourth component, declaration/schema generation and drift admission
+
+Baseline `08dae57139be0d84d3320d327205923f2927151c`. Rechecked earlier
+admission, projection, clock, session and transport controls before continuing
+through distribution. The Python generator flattened every array into a variable
+length TypeScript array, including four contract fields with equal minimum and
+maximum widths. The standalone package build also lacked a contract drift gate.
+
+Constraints: generate declarations plus the exact API-v1 runtime schema from the
+checked-in OpenAPI document; run source-package build/checks on Node without a
+second interpreter; preserve the reviewed runtime transport; reject unsupported
+schema evolution; require explicit regeneration instead of repairing drift during
+a check. The input is a trusted repository build artifact, not a network document.
+
+| Candidate | Decisive evidence |
+| --- | --- |
+| Python standard-library generator | Can produce both outputs, but the standalone Node source build would require a second interpreter for drift checking. No Python-specific dependency or semantic requirement exists in this transformation. The historical implementation also replaced reference-like annotation text globally. |
+| Node ESM with native JSON and filesystem | [Node filesystem APIs](https://nodejs.org/api/fs.html#fsreadfilesyncpath-options) support deterministic local build inputs. A single Node build tool can check both generated files without another runtime or dependency. Exact baseline parity and focused rejection tests support this bounded choice. |
+| TypeScript openapi-typescript | [Official advanced documentation](https://openapi-ts.dev/advanced) covers richer schema typing, including fixed tuples. It is a credible candidate if the vocabulary expands. It supplies declarations rather than this package's runtime schema bundling/check contract, which would still need an adapter. No startup or speed advantage is asserted for the custom tool. |
+| Java OpenAPI Generator, TypeScript fetch target | [Official generator documentation](https://openapi-generator.tech/docs/generators/typescript-fetch/) provides a broader client-generation ecosystem. This slice requires models and a runtime schema, while retaining the reviewed transport. Its Java build dependency and broader templates offer no demonstrated advantage for the present closed contract; no parity or performance claim is made for this candidate. |
+
+**MIGRATE generation from Python to Node ESM; FIX tuple widths and build drift
+admission.** The old Python command is a compatibility forwarder to the sole Node
+implementation. `--check` is read-only; `--write` is explicit. Schema references
+are rewritten only in schema locations, preserving annotation text. Unsupported
+keywords, unknown primitive types, external/dangling references and open objects
+are rejected. Fixed tuple expansion is limited to 32 entries as a build-tool
+constraint, not a change to frozen runtime limits. This is a deliberately narrow
+API-v1 generator, not a complete OpenAPI implementation.
+
+[TypeScript tuple semantics](https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types)
+match the fixed centre, box, covariance and velocity widths. Positive and negative
+compilation fixtures check all four. The corrected baseline fixture fails with
+four unused expected-error directives; the migrated declarations pass. An initial
+positive covariance fixture incorrectly used four entries instead of the published
+two and was corrected before the final baseline run. The first generator test
+also caught inherited object-property lookup for an unknown primitive; a Map now
+performs that lookup. Both negative reports are retained.
+
+The runtime schema remains byte-identical to baseline. Declaration parity differs
+only in the four widths and generator attribution. Source, installed artifact,
+strict type and compatibility checks are recorded in the
+[source-bound evidence](evidence/phase3/p33-generation-review-v3.json). These are
+Linux/Node software checks, not browser/native qualification or hard real-time
+measurements. A local contract drift check does not authenticate the producing
+OpenAPI export or establish reproducible release provenance. Those distribution
+boundaries and the remaining platform/P12 inventory still need fresh review;
+no lane completion marker is created.

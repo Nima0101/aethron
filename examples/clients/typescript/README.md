@@ -10,6 +10,16 @@ npm test
 npm pack
 ```
 
+The build first checks that committed declarations and the runtime schema match
+`contracts/openapi/aethron-edge-v1.json`; drift fails without rewriting either
+file. After a reviewed contract update, run `npm run generate` and inspect the
+result before rebuilding. The Node generator supports the current closed API-v1
+schema vocabulary, rejects unsupported constructs, and preserves fixed-width
+arrays as TypeScript tuples. These declarations do not replace runtime validation.
+The former `python3 scripts/edge_generate_types.py` command forwards to the same
+Node generator for compatibility; Python is not needed for this package's build.
+`npm run test:types` checks valid and invalid tuple assignments.
+
 The build generates `dist/validators.cjs` from the unchanged versioned schema.
 Runtime imports do not compile schemas or use string code generation. AJV remains
 a pinned runtime dependency for its generated Unicode-length helper. The test
