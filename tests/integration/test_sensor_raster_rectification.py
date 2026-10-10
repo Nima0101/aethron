@@ -2,7 +2,7 @@
 
 import importlib
 import unittest
-from dataclasses import asdict
+from dataclasses import FrozenInstanceError, asdict
 
 from aethron_edge.sensors.geometry import Pinhole
 from aethron_edge.sensors.packets import Raster, decode_image
@@ -33,6 +33,32 @@ def brown(source, output=None, coefficients=(0.0, 0.0, 0.0, 0.0, 0.0), radius=3.
 
 
 class RecordedRasterClaims(unittest.TestCase):
+    def test_direct_records_do_not_validate_or_freeze_caller_buffers(self):
+        api = importlib.import_module("aethron_edge.sensors.raster_rectification")
+        for record_type in (api.RectifiedMono8, api.RectifiedMono16):
+            with self.subTest(record=record_type.__name__):
+                data, validity = bytearray(b"a"), bytearray(b"b")
+                record = record_type(-1, 0, "unvalidated", data, validity)
+                # Direct construction is storage, not the remapping admission path.
+                self.assertEqual((record.width, record.height), (-1, 0))
+                with self.assertRaises(FrozenInstanceError):
+                    record.width = 1
+                data[0], validity[0] = 99, 100
+                self.assertEqual(bytes(record.data), b"c")
+                self.assertEqual(bytes(record.validity), b"d")
+                self.assertFalse(record.live_evidence)
+
+    def test_dataclass_conversion_omits_nonlive_and_version_properties(self):
+        api = importlib.import_module("aethron_edge.sensors.raster_rectification")
+        for record_type in (api.RectifiedMono8, api.RectifiedMono16):
+            with self.subTest(record=record_type.__name__):
+                record = record_type(1, 1, "lwir", b"\x00\x00", b"\x01")
+                self.assertFalse(record.live_evidence)
+                self.assertEqual(record.version, 1)
+                self.assertEqual(
+                    set(asdict(record)), {"width", "height", "modality", "data", "validity"}
+                )
+
     def test_mask_is_sampling_only_and_repr_is_not_redaction(self):
         api = importlib.import_module("aethron_edge.sensors.raster_rectification")
         for encoding, size in (("mono8", 1), ("mono16", 2)):

@@ -17,6 +17,10 @@ class _RectifiedCounts:
     Neither remapping nor repr suppression anonymizes image content. Generic
     dataclass serialization includes both buffers; callers own disclosure policy.
     Zero counts do not establish absence, temperature, or physical calibration.
+    Direct construction does not validate dimensions, modality or buffer types;
+    frozen fields do not freeze caller-supplied mutable buffers. The remapping
+    functions produce immutable bytes. Dataclass conversion omits the version
+    and live_evidence properties and is not a versioned evidence envelope.
     """
 
     width: int
