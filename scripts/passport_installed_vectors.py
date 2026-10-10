@@ -3,6 +3,7 @@
 import json
 import sys
 import tempfile
+from base64 import b64decode
 from hashlib import sha256
 from pathlib import Path
 
@@ -60,6 +61,53 @@ def load_vectors(root, relative):
     if type(data["cases"]) is not list or len(data["cases"]) != expected_count:
         raise ValueError("invalid_vector_coverage")
     return data
+
+
+def check_verification_metadata(result, case, *, binding=False):
+    """Compare public metadata to the pinned fixture, never to a second verifier.
+
+    Only call after load_vectors has matched the fixed reviewed corpus bytes.
+    This is a test oracle for those fixtures, not an input validation API.
+    """
+    accepted = case["status"] != "rejected"
+    expected = {}
+    expiries = []
+    references = []
+    if "envelope" in case:
+        payload = b64decode(json.loads(case["envelope"])["payload"], validate=True)
+        statement = json.loads(payload)
+        policy = json.loads(case["policy"])
+        key = "passport_sha256" if binding else "payload_sha256"
+        expected[key] = sha256(payload).hexdigest() if accepted else None
+        expected["policy_revision"] = policy["revision"] if accepted else None
+        expiries.extend((statement["expires_at"], policy["expires_at"]))
+        references = statement["evidence"]
+    if "task" in case:
+        task = json.loads(case["task"])
+        expected["task_sha256"] = sha256(case["task"].encode()).hexdigest() if accepted else None
+        expiries.append(task["expires_at"])
+        if task["kind"] == "passport.verify.v1":
+            references = []
+    if "federation" in case:
+        federation = json.loads(case["federation"])
+        expected["federation_sha256"] = (
+            sha256(case["federation"].encode()).hexdigest() if accepted else None
+        )
+        expected["federation_revision"] = federation["revision"] if accepted else None
+        expiries.append(federation["expires_at"])
+    expected["expires_at"] = min(expiries) if accepted else None
+    for field, value in expected.items():
+        actual = getattr(result, field)
+        assert type(actual) is type(value) and actual == value, (case["name"], field)
+    if binding:
+        expected_references = (
+            [(item["sha256"], item["kind"], item["outcome"]) for item in references]
+            if accepted
+            else []
+        )
+        assert [
+            (item.sha256, item.kind, item.outcome) for item in result.evidence
+        ] == expected_references, case["name"]
 
 
 def check_federation_policy(root):
@@ -216,6 +264,16 @@ def run(root):
             assert result.motion_authority is False
             assert result.execution_authority is False
             assert result.evidence_verified is False
+            # The pinned corpus has exactly these two successful dequeue records.
+            expected_identity = (
+                {
+                    "count-backpressure-fifo": ("peer", 10),
+                    "expiry-behind-head": ("a", 20),
+                }[case["name"]]
+                if operation["expected"][0] == "dequeued"
+                else (None, None)
+            )
+            assert (result.peer, result.expires_at_ms) == expected_identity, case["name"]
     vectors = load_vectors(root, "examples/interop/federation-vectors-v1.json")
     for case in vectors["cases"]:
         result = verify_federated_bundle(
@@ -230,6 +288,7 @@ def run(root):
         assert [item.outcome for item in result.evidence] == case["outcomes"]
         assert result.execution_authority is False and result.motion_authority is False
         assert result.evidence_verified is False
+        check_verification_metadata(result, case, binding=True)
     vectors = load_vectors(root, "examples/interop/bundle-vectors-v1.json")
     for case in vectors["cases"]:
         result = verify_task_bundle(
@@ -243,16 +302,20 @@ def run(root):
         assert [item.outcome for item in result.evidence] == case["outcomes"]
         assert result.execution_authority is False and result.motion_authority is False
         assert result.evidence_verified is False
+        check_verification_metadata(result, case, binding=True)
     vectors = load_vectors(root, "examples/interop/task-vectors-v1.json")
     for case in vectors["cases"]:
         result = validate_task(case["task"].encode(), **case["arguments"])
         assert (result.status, result.reason) == (case["status"], case["reason"]), case["name"]
         assert result.execution_authority is False and result.motion_authority is False
+        assert result.evidence_verified is False
+        check_verification_metadata(result, case)
     vectors = load_vectors(root, "examples/passports/vectors.json")
     for case in vectors["cases"]:
         result = verify(case["envelope"].encode(), case["policy"].encode(), **case["arguments"])
         assert (result.status, result.reason) == (case["status"], case["reason"]), case["name"]
         assert result.motion_authority is False and result.evidence_verified is False
+        check_verification_metadata(result, case)
     vectors = load_vectors(root, "examples/passports/evidence-vectors.json")
     for case in vectors["cases"]:
         blobs = tuple(bytes.fromhex(blob) for blob in case["evidence_hex"])
@@ -262,6 +325,7 @@ def run(root):
         assert (result.status, result.reason) == (case["status"], case["reason"]), case["name"]
         assert [item.outcome for item in result.evidence] == case["outcomes"]
         assert result.motion_authority is False and result.evidence_verified is False
+        check_verification_metadata(result, case, binding=True)
     vectors = load_vectors(root, "examples/passports/policy-vectors-v1.json")
     for case in vectors["cases"]:
         result = validate_pinned_policy(bytes.fromhex(case["policy_hex"]), **case["arguments"])

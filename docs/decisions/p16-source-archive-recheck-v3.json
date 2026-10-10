@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "id": "p16-source-archive-recheck-v3",
+  "component": "Selected source-archive and manifest evidence",
+  "decision": "KEEP",
+  "constraints": [
+    "Read selected regular members of a locally built gzip tar archive without extraction; reject duplicate/missing/type/size/content mismatches against trusted checkout inputs.",
+    "Finite consumer inventory and static package prefix; this is not hostile-archive handling, dependency closure or a release signature validator."
+  ],
+  "alternatives": [
+    "Python tarfile plus the current setuptools file-selection engine gives direct entry inspection and a check of actual manifest selection semantics.",
+    "Java/Kotlin Apache Commons Compress and C#/F# System.Formats.Tar provide credible independent archive readers; Hatch file selection is an alternative packaging design."
+  ],
+  "rationale": [
+    "KEEP Python inspection and existing manifest selection: six synthetic archive methods and one finite manifest method pass; no archive extraction or local distribution build performed.",
+    "Other readers do not eliminate the need to inspect actual build selection. No throughput requirement, demonstrated resource failure or measured alternative advantage justifies a migration in this trusted developer-tool boundary."
+  ],
+  "limits": [
+    "Official-source candidate comparison only; no alternative executable or speed benchmark.",
+    "Local focused source tests only; no new installed distribution, hosted matrix, P19 customer acceptance, physical, hard-real-time, MLS/CNSA or availability claim."
+  ],
+  "evidence": [
+    "https://docs.python.org/3/library/tarfile.html",
+    "https://setuptools.pypa.io/en/latest/userguide/miscellaneous.html",
+    "https://commons.apache.org/proper/commons-compress/",
+    "https://learn.microsoft.com/en-us/dotnet/api/system.formats.tar.tarreader?view=net-10.0",
+    "https://hatch.pypa.io/latest/config/build/"
+  ]
+}

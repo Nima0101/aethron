@@ -1,6 +1,6 @@
 # P16–P18 review inventory v3
 
-Snapshot: `7cc10877e431448d535dc45f62228c0245bda05e`, plus schema claim review, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `ea75e19c4e16486b7a91e83ca8db44de0eb9d6e2`, plus installed-result review, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -16,7 +16,8 @@ confirms runtime behavior and adds standalone evidence metadata checks. The
 federation, independent snapshot admission, inbox accounting and four delivery traces.
 The [current schema review](p16-schema-claims-current-v3.md) confirms six structural
 contracts and fixes payload claim-vocabulary test sensitivity. Next earliest unreviewed
-group in this restart: installed/package assurance tooling, followed by probes and
+group was installed/package assurance tooling. The [installed-result review](p16-installed-result-current-v3.md)
+now checks that group and fixes incomplete metadata comparisons. Next: probes and
 remaining cross-phase consumer/lifecycle review. Earlier rows below
 remain evidence inputs and do not satisfy the remaining restart by themselves.
 

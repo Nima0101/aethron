@@ -21,6 +21,82 @@ HAS_CRYPTO = importlib.util.find_spec("cryptography") is not None
 
 
 class InstalledVectorTests(unittest.TestCase):
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
+    def test_wrong_inbox_identity_prevents_success(self):
+        for operation in ("put", "take"):
+            original = getattr(RUNNER.BoundedInbox, operation)
+            for field in ("peer", "expires_at_ms"):
+
+                def changed(*args, original=original, field=field, **kwargs):
+                    result = original(*args, **kwargs)
+                    return SimpleNamespace(**(asdict(result) | {field: "wrong"}))
+
+                with self.subTest(operation=operation, field=field):
+                    with patch.object(RUNNER.BoundedInbox, operation, changed):
+                        with self.assertRaises(AssertionError):
+                            RUNNER.run(ROOT)
+
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
+    def test_wrong_verification_metadata_prevents_success(self):
+        for name, success, metadata in (
+            ("verify", "authenticated", ("payload_sha256", "policy_revision", "expires_at")),
+            ("verify_evidence", "bound", ("passport_sha256", "policy_revision", "expires_at")),
+            ("validate_task", "validated", ("task_sha256", "expires_at", "evidence_verified")),
+            (
+                "verify_task_bundle",
+                "bound",
+                ("task_sha256", "passport_sha256", "policy_revision", "expires_at"),
+            ),
+            (
+                "verify_federated_bundle",
+                "bound",
+                (
+                    "task_sha256",
+                    "passport_sha256",
+                    "policy_revision",
+                    "expires_at",
+                    "federation_sha256",
+                    "federation_revision",
+                ),
+            ),
+        ):
+            original = getattr(RUNNER, name)
+            for status in (success, "rejected"):
+                for field in metadata:
+
+                    def changed(*args, original=original, status=status, field=field, **kwargs):
+                        result = original(*args, **kwargs)
+                        values = {item.name: getattr(result, item.name) for item in fields(result)}
+                        for flag in ("motion_authority", "evidence_verified"):
+                            values[flag] = getattr(result, flag)
+                        if result.status == status:
+                            values[field] = True if field == "evidence_verified" else "wrong"
+                        return SimpleNamespace(**values)
+
+                    with self.subTest(api=name, status=status, field=field):
+                        with patch.object(RUNNER, name, changed):
+                            with self.assertRaises(AssertionError):
+                                RUNNER.run(ROOT)
+
+    @unittest.skipUnless(HAS_CRYPTO, "requires optional passport crypto backend")
+    def test_wrong_signed_reference_prevents_success(self):
+        for name in ("verify_evidence", "verify_task_bundle", "verify_federated_bundle"):
+            original = getattr(RUNNER, name)
+            for field in ("sha256", "kind"):
+
+                def changed(*args, original=original, field=field, **kwargs):
+                    result = original(*args, **kwargs)
+                    if not result.evidence:
+                        return result
+                    references = list(result.evidence)
+                    references[0] = SimpleNamespace(**(asdict(references[0]) | {field: "wrong"}))
+                    values = {item.name: getattr(result, item.name) for item in fields(result)}
+                    return SimpleNamespace(**(values | {"evidence": tuple(references)}))
+
+                with self.subTest(api=name, field=field), patch.object(RUNNER, name, changed):
+                    with self.assertRaises(AssertionError):
+                        RUNNER.run(ROOT)
+
     def test_federation_floor_scenario_uses_real_api(self):
         from aethron.passport_floor_store import FederationFloorStore
 

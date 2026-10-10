@@ -55,6 +55,13 @@ keys and artificial times. Running their two Python snippets from a checkout val
 those snippets against that source environment. It does not repeat the documented
 installation command, test a clean customer installation or establish hosted execution.
 
+The [current installed-result review](../../engineering/reviews/p16-installed-result-current-v3.md)
+corrects gaps in the fixed installed-vector runner: it now compares result identities,
+revision and expiry metadata, complete signed references and inbox peer/expiry values.
+Expected values come from the pinned synthetic corpus, not a second verifier call.
+The local regression tests execute source imports; configured `python -I` installed
+jobs still require observed exact-revision hosted evidence before any installation claim.
+
 ## Current scope and unresolved work
 
 The [current inventory](../../engineering/reviews/p16-p18-inventory-v3.md) records
