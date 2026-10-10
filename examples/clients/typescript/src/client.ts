@@ -100,7 +100,13 @@ export async function observe(base: string, token: string, profile: string,
           display(value.view());
         }
       }
-    } finally { value.disconnect(); decoder.clear(); await reader.cancel(); }
+    } finally {
+      value.disconnect(); decoder.clear(); stop.abort();
+      // Source cleanup can remain pending after the stream closes. Do not let
+      // it hold session deletion or replace the primary admission/render error.
+      void reader.cancel().catch(() => {});
+      reader.releaseLock();
+    }
     if (renderFailed) throw renderError;
   } catch (error) {
     // Surface the renderer failure through the observer promise, not the timer.

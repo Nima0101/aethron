@@ -225,3 +225,42 @@ compliance, live-server qualification or completed client security review.
 Source-bound regression and package results are retained in the
 [ingress evidence](evidence/phase3/p33-stream-ingress-audit-v2.json). Earlier negative
 evidence remains unchanged. There is still no audit-complete marker.
+
+## Third component, teardown slice: source cancellation ownership
+
+Baseline `0310a092bf45334f1b94ae2855ef032d3705073c`. Cleanup must clear
+observations, stop event reception, attempt authenticated DELETE with its own
+existing timeout, and preserve the admission/renderer error. An underlying source
+must not hold those steps by returning a pending cancellation promise. This is an
+ordering requirement, not a new real-time or network-completion guarantee.
+
+The [Streams source contract](https://streams.spec.whatwg.org/#underlying-source-api)
+allows asynchronous cancellation cleanup; its promise can reject or stay pending
+after the stream closes. [Node AbortController](https://nodejs.org/api/globals.html#class-abortcontroller)
+provides the existing request cancellation boundary. Comparing strategies:
+awaiting source cancellation fails the ordering requirement; racing a new timeout
+would delay deletion without guaranteeing source termination; observing the
+cancellation promise while immediately releasing the reader lock lets independent
+session cleanup proceed. The [Dart Future timeout contract](https://api.dart.dev/dart-async/Future/timeout.html)
+also permits the source future to finish after timeout: changing runtimes does not
+itself establish termination. Kotlin/Ktor's coroutine SSE scope remains credible
+for a JVM client, but does not remove the need to define transport cleanup and
+error ownership, and is not a direct Node package implementation. These are
+interface/semantic comparisons; no foreign-runtime speed result is asserted.
+
+Decision: **KEEP TypeScript/host fetch; MIGRATE teardown from awaited source
+cancellation to abort, observed best-effort cancellation, and reader release.**
+No timer, frozen observation bound, dependency or transport authority is added.
+The cancellation rejection handler retains neither the view nor bearer token.
+Four deterministic public-API regressions failed before the correction: pending
+or rejecting cancellation after parser or renderer failure. All four now pass,
+including deletion before the pending source resolves, lock release, private
+request abort, caller-signal independence and original-error preservation.
+
+A source that ignores abort/cancel may still retain its own resources. DELETE is
+best effort and still depends on fetch honoring its two-second abort signal;
+this slice does not claim remote deletion acknowledgement, arbitrary callback
+preemption or complete observer lifecycle qualification. Session response bounds,
+lexical integer forms, producer cap reconciliation, distribution/tooling and the
+shared producer audit remain open. Previous ingress evidence is unchanged; the
+[cancellation record](evidence/phase3/p33-cancellation-audit-v2.json) binds this slice.

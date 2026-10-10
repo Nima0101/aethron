@@ -115,3 +115,58 @@ test('ingress failure clears state before pending reader cancellation',async t=>
     assert.equal(views.at(-1).label,'expired');
   } finally {release();assert.equal((await observed)?.message,'invalid_event');}
 });
+
+for (const failureKind of ['parser', 'renderer']) {
+  for (const cancellation of ['pending', 'rejecting']) {
+    test(`${failureKind} failure survives ${cancellation} cancellation and attempts deletion`, async t => {
+      let release, started, streamSignal, stream, settled = false;
+      const cancelling = new Promise(resolve => { started = resolve; });
+      const cleanup = new Promise(resolve => { release = resolve; });
+      const requests = [], views = [];
+      const rendererFailure = new Error('synthetic_renderer_failure');
+      const caller = new AbortController();
+      t.mock.method(performance, 'now', () => 0);
+      t.mock.method(globalThis, 'setInterval', () => 0);
+      t.mock.method(globalThis, 'clearInterval', () => {});
+      t.mock.method(globalThis, 'fetch', async (url, options) => {
+        requests.push({url, options});
+        if (options.method === 'POST') return Response.json({session: scene.session});
+        if (options.method === 'DELETE') return new Response(null, {status: 204});
+        streamSignal = options.signal;
+        stream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(encode(wire(scene) + (failureKind === 'parser' ? 'data: {broken}\n\n' : '')));
+          },
+          cancel() {
+            started();
+            return cancellation === 'pending' ? cleanup : Promise.reject(new Error('private_cancel_marker'));
+          },
+        });
+        return new Response(stream);
+      });
+      const observed = observe('http://127.0.0.1:8765', 'synthetic-token', 'bench', view => {
+        views.push(view);
+        if (failureKind === 'renderer' && view.label === 'delayed_observation') throw rendererFailure;
+      }, caller.signal).then(() => null, error => error).then(error => { settled = true; return error; });
+      try {
+        await cancelling;
+        // One event-loop turn drains promise reactions without a timing threshold.
+        await new Promise(resolve => setImmediate(resolve));
+        assert.equal(requests.at(-1).options.method, 'DELETE');
+        assert.equal(requests.at(-1).options.headers.Authorization, 'Bearer synthetic-token');
+        assert.equal(requests.at(-1).options.signal.aborted, false);
+        assert.equal(streamSignal.aborted, true);
+        assert.equal(caller.signal.aborted, false);
+        assert.equal(stream.locked, false);
+        assert.equal(views.at(-1).label, 'expired');
+        assert.equal(settled, true, 'underlying cancellation must not hold observer completion');
+        const error = await observed;
+        if (failureKind === 'parser') assert.equal(error?.message, 'invalid_event');
+        else assert.equal(error, rendererFailure);
+      } finally {
+        release();
+        await observed;
+      }
+    });
+  }
+}

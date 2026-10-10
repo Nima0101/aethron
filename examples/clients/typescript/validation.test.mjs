@@ -76,3 +76,30 @@ test('built client loads without runtime string compilation', () => {
   // Do not echo compiler output: it may contain schema or input contents.
   assert.equal(child.status, 0, 'client must load with string compilation disabled');
 });
+
+test('independent safety cases reject authority, identity and nonfinite inputs', t => {
+  const mutations = [
+    value => { value.api_version = '2'; },
+    value => { value.sequence = Number.MAX_SAFE_INTEGER + 1; },
+    value => { value.sequence = true; },
+    value => { value.clock.valid_for_ms = 101; },
+    value => { value.clock.valid_for_ms = '100'; },
+    value => { value.result.recommendation.requires_independent_controller = false; },
+    value => { value.result.recommendation.action = 'ENGAGE'; },
+    value => { value.result.tracks[0].person_identity = 'synthetic-forbidden'; },
+    value => { value.result.tracks[0].appearance_embedding = [0]; },
+    value => { value.result.tracks[0].prediction = {centre: [0.5, 0.5], horizon_ms: 200, evidence: true}; },
+    value => { value.result.tracks[0].covariance = [Infinity, 0]; },
+    value => { value.result.tracks[0].covariance = [NaN, 0]; },
+    value => { value.result.tracks = Array.from({length: 33}, () => structuredClone(value.result.tracks[0])); },
+  ];
+  for (const mutate of mutations) {
+    const value = structuredClone(scene);
+    mutate(value);
+    const before = structuredClone(value);
+    assert.equal(generated.validateScene(value), false);
+    assert.deepEqual(value, before);
+  }
+  assert.equal(generated.validateHealth({...health, scene_state: 'PRESENT'}), false);
+  t.diagnostic(`${mutations.length + 1} independent negative safety cases; no baseline validator oracle`);
+});

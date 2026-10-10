@@ -52,7 +52,11 @@ comparison; `npm test` includes its deterministic timing trace checks.
 
 Teardown attempts authenticated session deletion even if the final display
 callback throws or aborts the caller's signal. Deletion uses its own two-second
-timeout and remains best effort when the server cannot be reached.
+timeout and remains best effort when the server cannot be reached. Teardown
+clears observations, aborts the event request, requests reader cancellation and
+releases its lock without waiting for source cleanup. A pending or rejected source
+cancellation cannot hold DELETE or replace the original ingress/render error.
+This does not guarantee resource termination for a source that ignores cancellation.
 
 The display callback is synchronous. If it throws from the watchdog timer,
 `observe()` clears its observation, aborts the event request, and rejects with
