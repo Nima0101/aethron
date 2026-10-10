@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
-import {mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
+import {copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {test} from 'node:test';
@@ -39,4 +40,30 @@ test('package contains the unchanged repository license text', () => {
   try { license = readFileSync(path); } catch { /* Assertion reports absent package input. */ }
   assert.ok(license, 'package LICENSE must exist');
   assert.deepEqual(license, readFileSync(new URL('../../../LICENSE', import.meta.url)));
+});
+
+test('installed public declarations preserve UNKNOWN and discriminate expiry', () => {
+  const npm = process.env.npm_execpath;
+  assert.ok(npm, 'Run through npm run test:package');
+  const work = mkdtempSync(join(tmpdir(), 'aethron-client-types-'));
+  const options = {encoding: 'utf8', timeout: 30000, maxBuffer: 1024 * 1024};
+  try {
+    const packed = JSON.parse(execFileSync(process.execPath, [npm, 'pack', '--json',
+      '--ignore-scripts', '--offline', '--pack-destination', work], {...options, cwd: root}));
+    assert.equal(packed.length, 1);
+    writeFileSync(join(work, 'package.json'), JSON.stringify({private: true, type: 'module'}));
+    execFileSync(process.execPath, [npm, 'install', '--offline', '--ignore-scripts',
+      '--no-audit', '--no-fund', join(work, packed[0].filename)], {...options, cwd: work});
+    copyFileSync(new URL('./public-types.test.ts', import.meta.url), join(work, 'consumer.ts'));
+    // The fixture imports only the package entry point from outside this checkout.
+    try {
+      execFileSync(process.execPath, [join(root, 'node_modules/typescript/bin/tsc'),
+        '--strict', '--noEmit', '--target', 'es2022', '--module', 'nodenext',
+        '--moduleResolution', 'nodenext', 'consumer.ts'], {...options, cwd: work});
+    } catch (error) {
+      assert.fail(error.stdout || error.message);
+    }
+  } finally {
+    rmSync(work, {recursive: true, force: true});
+  }
 });

@@ -20,6 +20,16 @@ The former `python3 scripts/edge_generate_types.py` command forwards to the same
 Node generator for compatibility; Python is not needed for this package's build.
 `npm run test:types` checks valid and invalid tuple assignments.
 
+`Observation.view()` and the `observe()` display callback expose the exported
+`ObservationView` union. Its `current_state` is always the literal `UNKNOWN`;
+checking `label === 'expired'` narrows the observed state to `UNKNOWN` and the
+source/covariance arrays to empty tuples. The delayed branch retains the observed
+state and sensor source types from API-v1. These are compile-time descriptions
+of the returned view, not runtime authorization or transport freshness checks.
+`npm run test:package` also packs and installs the archive offline in an external
+temporary project, then compiles a consumer of its public declarations. Prepare
+the locked dependency cache first; the consumer fixture is never executed.
+
 The build generates `dist/validators.cjs` from the unchanged versioned schema.
 Runtime imports do not compile schemas or use string code generation. AJV remains
 a pinned runtime dependency for its generated Unicode-length helper. The test

@@ -645,3 +645,46 @@ Remaining: hosted execution of the new workflow, broader distribution/platform
 review, producer/consumer SSE-size reconciliation and the unimplemented P12
 operator client. P19/UI/help, device qualification, signed customer distribution
 and lane completion remain unclaimed.
+
+## Fourth component, installed public observation declarations
+
+Baseline `e7404949e324950834157d892b4cabdbeb44c1ab`. Restarted review of
+admission, projection, transport and distribution found that inferred declaration
+output widened the guaranteed `current_state: 'UNKNOWN'` and both display labels
+to `string`. An external consumer could not narrow expired versus delayed views.
+The new test packs the actual archive, installs it offline outside the checkout
+and compiles only against its public package entry point. Before correction it
+failed with seven TS2322 assignment diagnostics; package resolution succeeded.
+
+Constraints: preserve the existing JavaScript host APIs and runtime behavior,
+provide accurate TypeScript declarations to npm consumers, preserve the API-v1
+observed-state/source vocabulary, and avoid a new runtime dependency. **KEEP
+TypeScript; FIX the exported view boundary with an explicit discriminated union.**
+The [TypeScript narrowing rules](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions)
+support branch-specific fields through literal labels; the
+[declaration-file model](https://www.typescriptlang.org/docs/handbook/declaration-files/introduction.html)
+lets consumers check this without executing the fixture. Kotlin/JS is a credible
+alternative with [JavaScript and TypeScript exports](https://kotlinlang.org/docs/js-to-kotlin-interop.html),
+but would still require an explicit export boundary and host interop for this
+fetch/stream client. ReScript/genType, Dart/JS and Rust/Wasm were considered in the
+broader SDK reassessment; this declaration-only defect establishes no new native
+compute or shared JVM requirement that materially favors those alternatives.
+No cross-language performance win is asserted. A handwritten declaration would
+duplicate the implementation signature; `as const` would introduce readonly
+array semantics beyond this correction. The explicit return annotation checks
+both implementation branches and generates the public union from the same source.
+
+The built `client.js` SHA-256 is identical before and after the correction.
+The 235 focused runtime controls pass with string code generation disabled,
+as do the three package tests and existing tuple assignment compilation. The
+first post-fix package run timed out in the compiler while other checks were
+running; the failure is retained. An isolated retry passed with the same 30-second
+child timeout. No frozen bound was relaxed. Type declarations are not runtime
+validation, authorization or an immutability guarantee; callers still receive
+mutable copies. See the [source-bound results](evidence/phase3/p33-public-types-review-v3.json).
+
+The inventory still lacks Android/JVM modules, desktop launch/install lifecycle
+and the P12 operator application. The existing camera demonstration is not P12
+completion. Review and implementation of those owned boundaries, the producer
+SSE-size mismatch and the P19 UI/help contribution remain outstanding. This slice
+does not issue an audit completion marker or customer/physical qualification.

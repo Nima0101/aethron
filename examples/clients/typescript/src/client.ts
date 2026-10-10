@@ -5,6 +5,20 @@ import type {HealthEvent, SceneEnvelope} from './types.js';
 
 const {validateScene: validate, validateHealth} = validators;
 
+export type ObservationView = {
+  label: 'expired';
+  current_state: 'UNKNOWN';
+  observed_state: 'UNKNOWN';
+  sources: [];
+  uncertainty: [];
+} | {
+  label: 'delayed_observation';
+  current_state: 'UNKNOWN';
+  observed_state: SceneEnvelope['result']['state'];
+  sources: SceneEnvelope['result']['tracks'][number]['sources'];
+  uncertainty: number[][];
+};
+
 function localNow(): number {
   // A host clock failure must reach the same clearing path as an invalid sample.
   try { return performance.now(); }
@@ -65,7 +79,7 @@ export class Observation {
 
   disconnect(): void { this.#projection = null; this.#received = 0; this.#lastViewed = 0; }
 
-  view(now = localNow()) {
+  view(now = localNow()): ObservationView {
     if (!this.#projection || !Number.isFinite(now) || now < 0 || now < this.#lastViewed ||
         now - this.#received > this.#projection.validForMs) {
       this.disconnect();
