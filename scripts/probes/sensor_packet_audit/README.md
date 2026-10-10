@@ -27,3 +27,15 @@ The retained original scalar decoder is the baseline. `production` invokes the
 real installed/source decoder; `compiled_struct` is an independent prototype of
 the selected mechanism. The comparison only informs this existing object ABI;
 array-native downstream processing needs its own audit.
+
+Evidence admission requires assertions enabled. `-O`, `-OO` and nonzero
+`PYTHONOPTIMIZE` are rejected at module load, including helper imports: Python
+optimization removes parity assertions and the handshake/warm-up calls inside
+them. This guard does not establish the validity of historical timing reports or
+complete the current component technology reassessment. Focused checks:
+
+```sh
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
+  PYTHONPATH=integrations/edge:tests/integration \
+  python -m unittest test_sensor_packet_audit_modes
+```

@@ -15,6 +15,11 @@ from pathlib import Path
 import numpy as np
 from aethron_edge.sensors.packets import Cloud, CloudLayout, Point, decode_cloud
 
+# Assertions also consume the worker handshake and execute warm-up candidates.
+# Reject optimized imports as well as CLI execution before exposing these helpers.
+if not __debug__:
+    raise SystemExit("packet_audit_requires_assertions")
+
 
 def validated(layout, data):
     spec = CloudLayout.model_validate(layout)
