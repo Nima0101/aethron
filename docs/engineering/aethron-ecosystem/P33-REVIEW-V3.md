@@ -343,3 +343,57 @@ questions are lexical numeric equivalence and the producer payload versus consum
 whole-event limit. Distribution/tooling and the remaining platform/P12 inventory
 are still incomplete. No completion marker is created. See the
 [source-bound record](evidence/phase3/p33-endpoint-review-v3.json).
+
+
+## Third component, integer token admission slice
+
+Baseline `39956fd924fcdf1c2d65b16a5b998003892cfcba`. The earliest generated
+admission, observation projection and clock controls were rerun before advancing
+this transport correction. Native JSON parsing rounds numbers before AJV sees
+them: fractional source values can become apparently valid integers. Decimal and
+exponent forms also differ from the producer's strict integer model. JSON Schema
+itself [treats 1 and 1.0 as the same integer](https://json-schema.org/understanding-json-schema/reference/numeric);
+this is an explicit client wire restriction, not an AJV defect or schema rewrite.
+
+Constraints: retain the closed versioned API, 64 KiB whole-event and depth bounds,
+safe integer counts/timestamps, fractional geometry, escaped property decoding,
+fixed diagnostics and Node package deployment. No native binary installation or
+hardware timing guarantee is needed. The producer's `Closed` strict configuration
+and `StrictInt` constant guards are read-only contract inputs, not modified here.
+
+Current primary-source comparison (2026-10-10):
+
+| Candidate | Decisive property |
+| --- | --- |
+| TypeScript with native source-aware JSON reviver | [TC39 source access](https://github.com/tc39/proposal-json-parse-with-source) exposes original primitive tokens after native parsing. The executed Node 22.23.2 controls recover the distinction without a second JSON grammar or runtime boundary. |
+| Go `encoding/json` | [UseNumber and Number](https://pkg.go.dev/encoding/json) retain a numeric literal for explicit conversion. This is a credible native client option, but replacing the Node parser with a process/Wasm boundary offers no demonstrated isolation or resource benefit for bounded records; explicit schema and integer policies would still be needed. |
+| Rust `serde_json::Number` | [Integer classification](https://docs.rs/serde_json/latest/serde_json/struct.Number.html#method.is_i64) distinguishes integer representation from decimal forms. A native client can use this directly. An FFI/Wasm replacement for this Node-only parser still needs host transport integration and safe-range policy; no measured requirement favors that migration. |
+| Extending the handwritten preflight into a number parser | Would duplicate escape, key and token handling already supplied by the host. The existing preflight remains limited to duplicate keys/depth; source-aware native parsing provides the missing token evidence. |
+
+**KEEP TypeScript/native JSON; FIX integer token admission.** Generate immutable
+integer-property metadata alongside validators from the closed API bundle. At
+parse time require integer spelling and a safe integer value for these fields;
+missing source capability rejects the event. The current schema has no integer
+array items or names reused for floating-point fields. Its ten integer names are
+also pinned independently in tests; future schema changes require review of that
+assumption. Full schema validation still follows. The narrower wire profile does
+not claim arbitrary decimal precision for geometry; direct `Observation.accept()`
+input has already lost numeric spelling.
+
+Thirty-six new controls cover nine integer paths, three disallowed spellings,
+health/gap sequence fields, escaped keys, missing runtime support and five positive
+cases. The corrected pre-implementation RED run has 28 assertion failures and
+eight passes; three genuinely fractional zero values already failed admission.
+The initial run also exposed a malformed positive reason-text fixture, which was
+corrected before production edits; both reports are retained. Independent generated
+metadata admission failed once before implementation. After correction, 226 source
+controls and five validator controls pass; installed-package results are recorded
+in the evidence artifact. This is bounded behavioral evidence, not a cross-runtime
+performance benchmark or full producer/client qualification.
+
+The producer currently caps JSON payload bytes while the consumer caps the whole
+SSE event. The existing maximum-payload negative control remains rejected; no
+frozen bound is relaxed. Reconciliation remains an open producing-lane contract
+question. Distribution/tooling and the remaining platform/P12 inventory have not
+completed this review. No completion marker is created. See the
+[source-bound record](evidence/phase3/p33-numeric-review-v3.json).

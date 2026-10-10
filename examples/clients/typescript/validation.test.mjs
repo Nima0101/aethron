@@ -6,6 +6,8 @@ import {Ajv2020} from 'ajv/dist/2020.js';
 import standalone from 'ajv/dist/standalone/index.js';
 import generated from './dist/validators.cjs';
 
+const expectedIntegerFields = ['at_ms', 'emitted_ms', 'expires_at_ms', 'frame_count',
+  'freshness_ms', 'horizon_ms', 'protocol', 'sequence', 'valid_for_ms', 'version'];
 const schema = JSON.parse(readFileSync(new URL('./src/scene.schema.json', import.meta.url), 'utf8'));
 const compiler = new Ajv2020({strict: true});
 const original = [compiler.compile(schema), compiler.compile({...schema, $ref: '#/$defs/HealthEvent'})];
@@ -65,7 +67,8 @@ test('built validators exactly match the bundled versioned schema', () => {
   ajv.addSchema({...schema, $ref: '#/$defs/HealthEvent'}, 'health');
   ajv.addSchema({...schema, $ref: '#/$defs/SessionHandle'}, 'session');
   assert.equal(readFileSync(new URL('./dist/validators.cjs', import.meta.url), 'utf8'),
-    standalone(ajv, {validateScene: 'scene', validateHealth: 'health', validateSession: 'session'}));
+    standalone(ajv, {validateScene: 'scene', validateHealth: 'health', validateSession: 'session'}) +
+    `\nexports.integerFields = Object.freeze(${JSON.stringify(expectedIntegerFields)});\n`);
 });
 
 test('built client loads without runtime string compilation', () => {
@@ -103,4 +106,9 @@ test('independent safety cases reject authority, identity and nonfinite inputs',
   }
   assert.equal(generated.validateHealth({...health, scene_state: 'PRESENT'}), false);
   t.diagnostic(`${mutations.length + 1} independent negative safety cases; no baseline validator oracle`);
+});
+
+test('integer wire metadata includes every current strict integer field', () => {
+  assert.deepEqual(generated.integerFields, expectedIntegerFields);
+  assert.equal(Object.isFrozen(generated.integerFields), true);
 });

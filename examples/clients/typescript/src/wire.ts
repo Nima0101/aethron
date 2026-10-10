@@ -1,3 +1,7 @@
+import validators from './validators.cjs';
+
+// Generated from the closed API bundle; missing build metadata must fail loading.
+const integerFields = new Set([...validators.integerFields]);
 const LIMIT = 65536;
 
 /** Preflight duplicate decoded keys and depth before native JSON parsing.
@@ -31,7 +35,14 @@ export function strictObject(text: string): unknown {
         if (scope?.object) scope.key = true;
       }
     }
-    const result: unknown = JSON.parse(text);
+    const result: unknown = JSON.parse(text, (key: string, value: unknown, context?: {source?: string}) => {
+      // Native parsing has already rounded numbers; inspect the original token.
+      // JSON Schema alone cannot distinguish an integer token from 1.0 or 1e0.
+      if (typeof value === 'number' && integerFields.has(key) &&
+          (!context?.source || !/^-?(0|[1-9][0-9]*)$/.test(context.source) ||
+           !Number.isSafeInteger(value))) throw new Error();
+      return value;
+    });
     if (!result || typeof result !== 'object' || Array.isArray(result)) throw new Error();
     return result;
   } catch { throw new Error('invalid_event'); }

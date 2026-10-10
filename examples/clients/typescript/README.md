@@ -155,3 +155,12 @@ pin its certificate/address, enforce proxy configuration, prevent an application
 from supplying the wrong trusted origin, or replace host networking policy.
 IPv6/HTTPS URL admission is covered with controlled fetch; actual socket evidence
 here is IPv4 loopback HTTP, not remote TLS or IPv6 qualification.
+
+Wire integer fields require integer JSON tokens within JavaScript's safe integer
+range. Decimal and exponent spellings such as `1.0` and `1e0`, including fractions
+that round to integers, are rejected before schema admission. This client wire
+profile is stricter than JSON Schema's mathematical integer definition and follows
+the producer's strict integer model. Decimal geometry remains supported. The
+parser requires the source-aware `JSON.parse` reviver executed here on Node
+22.23.2; missing token-source support fails closed. `Observation.accept()` receives
+already parsed values and cannot recover their original numeric spelling.
