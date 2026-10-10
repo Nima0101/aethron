@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "base_commit": "2d29c3b852936fac9cddf66a55040d1b9a816179",
+  "source_binding": "sha256 of candidate files; no committed-candidate claim",
+  "files": {
+    "integrations/edge/aethron_edge/runtime/fleet_health.py": "75e284acbea0193f7499ff4c20d5def7cc0195875855f7e1e13a4c61b609c15d",
+    "tests/integration/test_fleet_health.py": "b08c25e9da82cb799111d72df7fee11e0fdc733d13483c055fa3651bc6afc632",
+    "docs/architecture/fleet-health-v1.md": "95a44ec08938e39bdbc21c06155119a0d9f39f920deb6786b7f83e029abc43c9",
+    "integrations/edge/README.md": "02efa09f042b9a9aba9afbe8346384fc35821154c3791d789f32fa4d0c4dbb0f",
+    ".github/workflows/aethron-edge-contracts.yml": "842693c1e8cd1c5305977773fc91095c4c25e7cdbcc14bfacdce45ec3fc2a2c1"
+  },
+  "verification": {
+    "runtime": "CPython 3.13.15, source imports, local macOS",
+    "command": "PYTHONPATH=integrations/edge:build/fleet-deps python3.13 -m unittest discover -s tests/integration -p test_fleet_health.py -v",
+    "tests_passed": 15,
+    "tests_failed": 0,
+    "deterministic_hostile_byte_cases": 257,
+    "ruff_version": "0.16.10",
+    "ruff_check": "PASS",
+    "ruff_format_check": "PASS",
+    "bandit_version": "1.9.4",
+    "bandit_runtime_module": "PASS, no findings",
+    "workflow_yaml_parse": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "retained_negative_evidence": [
+    "Initial focused run failed with ModuleNotFoundError before the fleet_health interface existed.",
+    "First format check failed on test layout; formatted before final checks."
+  ],
+  "not_run": [
+    "Full repository verify/matrix and temporal evaluation",
+    "Full fuzz, local packaging, clean-clone and artifact reproduction",
+    "Hosted installed-wheel CI",
+    "Any hardware or cross-host collection"
+  ],
+  "scope": "Aggregate local software health only. Fixed UNKNOWN scene state and qualified=false. Signed fleet configuration, provisioning and update orchestration remain outstanding.",
+  "linux_verification": {
+    "base_commit": "0ce84bf52bb53385aafdd5615c87254790f9fba2",
+    "runtime": "CPython 3.13.5, source imports, Linux x86_64",
+    "command": "PYTHONPATH=integrations/edge:build/fleet-linux-deps python3 -m unittest discover -s tests/integration -p test_fleet_health.py -v",
+    "tests_passed": 15,
+    "tests_failed": 0,
+    "elapsed_seconds": 0.555,
+    "elapsed_time_is_not_a_benchmark": true,
+    "deterministic_hostile_byte_cases": 257,
+    "ruff_version": "0.16.10",
+    "ruff_check": "PASS",
+    "ruff_format_check": "PASS",
+    "bandit_version": "1.9.4",
+    "bandit_runtime_module": "PASS, no findings",
+    "workflow_yaml_parse": "PASS",
+    "preserved_candidate_file_hashes": "PASS",
+    "candidate_private_path_and_key_scan": "PASS",
+    "git_diff_check": "PASS",
+    "hosted_ci": "not run for this candidate"
+  }
+}

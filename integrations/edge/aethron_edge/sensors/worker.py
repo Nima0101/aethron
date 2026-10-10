@@ -9,6 +9,14 @@ from .provisioning import load_manifest, recording_frames, verified_recording
 
 
 def replay_worker(profile, send, stop):
+    """Publish recorded diagnostics only; availability is not live scene evidence.
+
+    Cancellation is cooperative; blocking file I/O or a send callback has no
+    deadline here. Supervisor termination is separate. A failing fault-message
+    sink can propagate private exception text and the original error context.
+    Interrupts can escape without a final fault. Only the diagnostic message is
+    sanitized; callers must not expose propagated exceptions as public output.
+    """
     batches = 0
     provider = None
     logical = consumed_at = 0
@@ -82,7 +90,7 @@ def replay_worker(profile, send, stop):
             if stop.wait(0.05):
                 return
     except Exception:
-        # No source paths, raw payload, calibration or exception details leave worker.
+        # Fixed message fields omit input details; callback exceptions may propagate.
         publish("fault")
     finally:
         if provider is not None:

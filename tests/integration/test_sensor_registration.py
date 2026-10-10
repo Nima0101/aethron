@@ -95,6 +95,39 @@ class SensorRegistration(unittest.TestCase):
             with self.subTest(changes=changes), self.assertRaises(ValueError):
                 self.artifact(**changes)
 
+    def test_binding_revalidates_copied_and_constructed_rig_calibration(self):
+        api = self.api()
+        artifact = self.artifact()
+        for changes in [
+            {"translation_error_m": -0.02},
+            {"rotation_error_rad": -0.001},
+            {"reprojection_error_px": -0.25},
+            {"rotation": (-1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)},
+            {"translation_m": (501.0, 0.0, 0.0)},
+            {"evidence": "live"},
+            {"source_frame": "private-sentinel/../frame"},
+        ]:
+            for calibration in (
+                artifact.model_copy(update=changes),
+                api.RigCalibration.model_construct(**(artifact.model_dump() | changes)),
+            ):
+                with self.subTest(changes=changes):
+                    with self.assertRaisesRegex(ValueError, "^invalid_calibration$"):
+                        api.Registration(calibration, now_ns=0, valid_for_ns=1, clock_id="boot_a")
+
+    def test_binding_revalidates_nested_camera_and_rejects_incomplete_models(self):
+        api = self.api()
+        artifact = self.artifact()
+        invalid = [api.RigCalibration.model_construct()]
+        for changes in ({"fx": -400.0}, {"width": 0}, {"cx": float("nan")}):
+            invalid.append(
+                artifact.model_copy(update={"camera": artifact.camera.model_copy(update=changes)})
+            )
+        for calibration in invalid:
+            with self.subTest(calibration=calibration):
+                with self.assertRaisesRegex(ValueError, "^invalid_calibration$"):
+                    api.Registration(calibration, now_ns=0, valid_for_ns=1, clock_id="boot_a")
+
     def test_stale_future_wrong_mount_frame_clock_and_expired_binding_withdraw(self):
         for changes in [
             {"capture_ns": 900_000_000},
