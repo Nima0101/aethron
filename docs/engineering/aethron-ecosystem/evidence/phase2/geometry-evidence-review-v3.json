@@ -1,0 +1,33 @@
+{
+  "review_order_version": 3,
+  "component": "C03_comparison_evidence_integrity",
+  "decision": "FIX_CLARIFY",
+  "full_component_review_complete": false,
+  "reviewed_head": "56194a4a33ca9f49cb1cb1558bdf13df8f629dec",
+  "runtime_sensor_processing_changed": false,
+  "checks": {
+    "red_assertion_failures": 4,
+    "red_execution_errors": 0,
+    "green_methods": 3,
+    "optimized_subcases": 4,
+    "normal_mismatch_cases": 2,
+    "previous_comparison_ast_unchanged": true,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "two existing LOW B101 findings; zero added",
+    "new_benchmarks": false,
+    "hardware_checks": false
+  },
+  "limitations": [
+    "No complete timing matrix executed.",
+    "Measured/traced outputs are not individually compared.",
+    "No new runtime KEEP/MIGRATE decision.",
+    "Historical source hashes and reports are not requalified."
+  ],
+  "sha256": {
+    "docs/engineering/aethron-ecosystem/P21-GEOMETRY-EVIDENCE-REVIEW-V3.md": "1641defe5ccc0ed1869339c4a6353288c39bc7b0473047e876bf404117fd01d3",
+    "scripts/probes/sensor_geometry_audit/compare.py": "7574db8dfa5bcdb8b2c413e7224bd9229d3a76ea24a38e3bc28e4d2b0fda502a",
+    "scripts/probes/sensor_geometry_audit/README.md": "a88b7e7d56c58b49ee3e3ced38a5fb91ac6e0a5e02ade05bc12e47b5f3e98933",
+    "tests/integration/test_sensor_geometry_audit_modes.py": "33d69f40f032a582d4bef418d7cde98045bbde3f76487f7c6bc77c473c24f1d2"
+  }
+}
