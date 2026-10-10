@@ -14,6 +14,7 @@ readme = "README.md"
 
 [project.optional-dependencies]
 vision = ["numpy==2.3.5", "opencv-python-headless==4.13.0.92"]
+passports = ["cryptography==50.0.2"]
 
 [project.scripts]
 aethron = "aethron.__main__:main"
