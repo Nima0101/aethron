@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from aethron import passports
+from aethron import interop_federation, interop_tasks, passports
 
 try:
     from jsonschema import Draft202012Validator, ValidationError
@@ -63,7 +63,10 @@ class PassportSchemaConformance(unittest.TestCase):
             "passport-v1.schema.json",
             "passport-envelope-v1.schema.json",
             "passport-policy-v1.schema.json",
+            "task-v1.schema.json",
+            "federation-v1.schema.json",
         ):
+            self.assertTrue((ROOT / "contracts/interop" / name).is_file(), name)
             schema = validator(name).schema
 
             def inspect(value):
@@ -202,6 +205,184 @@ class PassportSchemaConformance(unittest.TestCase):
         validator("passport-v1.schema.json").validate(doc)
         with self.assertRaises(ValueError):
             passports.canonicalize(json.dumps(doc).encode())
+
+
+@unittest.skipIf(Draft202012Validator is None, "install optional passport conformance requirements")
+class InteropSchemaConformance(unittest.TestCase):
+    def schema(self, kind):
+        name = kind + "-v1.schema.json"
+        self.assertTrue((ROOT / "contracts/interop" / name).is_file(), name)
+        return validator(name)
+
+    def cases(self, kind):
+        return json.loads((ROOT / "examples/interop" / (kind + "-vectors-v1.json")).read_bytes())[
+            "cases"
+        ]
+
+    def document(self, kind):
+        return json.loads(self.cases(kind)[0][kind])
+
+    def reject(self, kind, doc):
+        with self.assertRaises(ValidationError):
+            self.schema(kind).validate(doc)
+        with self.assertRaises(ValueError):
+            if kind == "task":
+                interop_tasks.canonicalize_task(json.dumps(doc).encode())
+            else:
+                interop_federation._snapshot(doc)
+
+    def test_portable_shapes_do_not_replace_authenticated_runtime(self):
+        for kind in ("task", "federation"):
+            check = self.schema(kind)
+            for case in self.cases(kind):
+                doc = json.loads(case[kind])
+                if case["reason"] == "invalid_input":
+                    with self.assertRaises(ValidationError):
+                        check.validate(doc)
+                else:
+                    check.validate(doc)
+                if kind == "task":
+                    result = interop_tasks.validate_task(case["task"].encode(), **case["arguments"])
+                else:
+                    result = interop_federation.verify_federated_bundle(
+                        *(
+                            case[key].encode()
+                            for key in ("federation", "task", "envelope", "policy")
+                        ),
+                        tuple(bytes.fromhex(value) for value in case["evidence_hex"]),
+                        **case["arguments"],
+                    )
+                self.assertEqual((result.status, result.reason), (case["status"], case["reason"]))
+                self.assertIs(result.execution_authority, False)
+                self.assertIs(result.motion_authority, False)
+                self.assertIs(result.evidence_verified, False)
+
+    def test_closed_objects_and_safe_scalar_bounds(self):
+        for kind in ("task", "federation"):
+            self.schema(kind)
+            original = self.document(kind)
+            for field in original:
+                changed = copy.deepcopy(original)
+                del changed[field]
+                with self.subTest(kind=kind, missing=field):
+                    self.reject(kind, changed)
+            for field, value in (
+                ("extra", False),
+                ("version", True),
+                ("version", 2),
+                ("issued_at", False),
+                ("issued_at", -1),
+                ("expires_at", 2**53),
+            ):
+                with self.subTest(kind=kind, field=field, value=value):
+                    self.reject(kind, dict(original, **{field: value}))
+            field = "task_id" if kind == "task" else "local_domain"
+            for value in ("", "a" * 65, "x\n", "x\r", "x\u2028", "x\u2029", "é"):
+                self.reject(kind, dict(original, **{field: value}))
+        peer = self.document("federation")["peers"][0]
+        for field in (*peer, "extra"):
+            doc = self.document("federation")
+            if field == "extra":
+                doc["peers"][0][field] = False
+            else:
+                del doc["peers"][0][field]
+            self.reject("federation", doc)
+
+    def test_task_kind_evidence_and_budget_constraints(self):
+        check = self.schema("task")
+        original = self.document("task")
+        for field in ("subject_sha256", "passport_sha256", "policy_sha256"):
+            for value in ("A" * 64, "a" * 63, "a" * 64 + "\n", False):
+                self.reject("task", dict(original, **{field: value}))
+        for field, value in (
+            ("kind", "shell.exec"),
+            ("motion_authority", True),
+            ("motion_authority", 0),
+            ("evidence_sha256", []),
+            ("evidence_sha256", ["d" * 64] * 2),
+            ("evidence_sha256", [format(i, "064x") for i in range(17)]),
+            ("max_evidence_bytes", 0),
+            ("max_evidence_bytes", True),
+            ("max_evidence_bytes", 1048577),
+        ):
+            self.reject("task", dict(original, **{field: value}))
+        for count, budget in ((1, 1), (16, 1048576)):
+            doc = dict(
+                original,
+                evidence_sha256=[format(i, "064x") for i in range(count)],
+                max_evidence_bytes=budget,
+            )
+            check.validate(doc)
+            interop_tasks.canonicalize_task(json.dumps(doc).encode())
+        doc = dict(original, kind="passport.verify.v1", evidence_sha256=[], max_evidence_bytes=0)
+        check.validate(doc)
+        interop_tasks.canonicalize_task(json.dumps(doc).encode())
+        for field, value in (("evidence_sha256", ["d" * 64]), ("max_evidence_bytes", 1)):
+            self.reject("task", dict(doc, **{field: value}))
+
+    def test_federation_collection_bounds_and_scopes(self):
+        check = self.schema("federation")
+        original = self.document("federation")
+        for count in (0, 16):
+            doc = copy.deepcopy(original)
+            doc["peers"] = [
+                dict(original["peers"][0], remote_domain=f"peer-{i}") for i in range(count)
+            ]
+            check.validate(doc)
+            interop_federation._snapshot(doc)
+        for field, value in (
+            ("revision", 0),
+            ("revision", True),
+            ("revision", 2**53),
+            ("peers", original["peers"] * 2),
+            ("peers", [dict(original["peers"][0], remote_domain=f"peer-{i}") for i in range(17)]),
+        ):
+            self.reject("federation", dict(original, **{field: value}))
+        for field, value in (
+            ("issuers", []),
+            ("issuers", ["a"] * 2),
+            ("issuers", [f"issuer-{i}" for i in range(17)]),
+            ("capabilities", []),
+            ("capabilities", ["shell.exec"]),
+            ("capabilities", ["evidence.offline.v1"] * 2),
+            ("remote_domain", "peer\n"),
+            ("policy_sha256", "A" * 64),
+        ):
+            doc = copy.deepcopy(original)
+            doc["peers"][0][field] = value
+            self.reject("federation", doc)
+        doc = copy.deepcopy(original)
+        doc["peers"][0].update(
+            issuers=[f"issuer-{i}" for i in range(16)],
+            capabilities=["perception.direct.v3", "presence.coarse.v2", "evidence.offline.v1"],
+        )
+        check.validate(doc)
+        interop_federation._snapshot(doc)
+
+    def test_structural_success_still_requires_semantic_and_lexical_checks(self):
+        for kind, lifetime in (("task", 300), ("federation", 3600)):
+            check = self.schema(kind)
+            for start, end in ((1000, 1000), (1000, 1000 + lifetime + 1)):
+                doc = dict(self.document(kind), issued_at=start, expires_at=end)
+                check.validate(doc)
+                with self.assertRaises(ValueError):
+                    if kind == "task":
+                        interop_tasks.canonicalize_task(json.dumps(doc).encode())
+                    else:
+                        interop_federation._snapshot(doc)
+            doc = dict(self.document(kind), version=1.0)
+            check.validate(doc)
+            with self.assertRaises(ValueError):
+                passports._parse(json.dumps(doc).encode())
+        for duplicate_domain in (False, True):
+            doc = self.document("federation")
+            if duplicate_domain:
+                doc["peers"].append(dict(doc["peers"][0], issuers=["different-issuer"]))
+            else:
+                doc["peers"][0]["remote_domain"] = doc["local_domain"]
+            self.schema("federation").validate(doc)
+            with self.assertRaises(ValueError):
+                interop_federation._snapshot(doc)
 
 
 if __name__ == "__main__":

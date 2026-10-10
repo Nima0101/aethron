@@ -1,7 +1,7 @@
 # P16–P18 review inventory v3
 
-Snapshot: `0a1a0ee64463bc168221fd082519e9cb14f1b357`, plus the source-manifest
-correction described below, reviewed 2026-10-10. This is an evidence inventory, not an architecture
+Snapshot: `8edce6f5e6cd877b2c836da14a1947f7f06a984f`, plus the task/federation
+structural-schema correction, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
 ## Implemented components
@@ -16,6 +16,7 @@ remain historical inputs. The consumed JSON-bound helper belongs to the foundati
 | Signature, trust, expiry and revocation | [Review](p16-trust-v3.md): KEEP native crypto boundary; strengthen rejection tests and clarify provisioning limits. |
 | Evidence bytes | [Review](p16-evidence-v3.md): KEEP immutable byte binding; clarify digest/privacy and qualification limits. |
 | Three passport schemas and conformance | [Review](p16-conformance-v3.md): KEEP structural schema tooling; FIX positive authentication control and dependency closure. |
+| Task/federation structural schemas | [Review](p16-interop-schemas-v3.md): FIX missing portable structural contracts; preserve runtime admission. |
 | Task descriptions | [Review](p16-task-v3.md): KEEP bounded descriptions; no task execution or replay store. |
 | Bundle verification | [Review](p16-bundle-v3.md): KEEP snapshot composition; all revocation lists rechecked. |
 | Direct federation | [Review](p16-federation-v3.md): KEEP closed pinned table; no enrollment or distributed consensus. |
@@ -31,7 +32,6 @@ external gates. No whole-phase completion can be inferred from the rows above.
 
 | Scope | State at this snapshot |
 |---|---|
-| P16 task/federation structural schemas | Passport schemas exist; task and federation schema publication remains absent. |
 | P16 transport, enrollment and persistent rollback floors | Not implemented by the owned modules. Caller-provided pins/floors are assumptions, not these services. |
 | P16 cross-phase conformance | Local passport/task/bundle/federation/inbox vectors exist; integrated P2/P3/P14 consumer qualification is not established. |
 | P17 common picture and operator collaboration | No owned implementation or integrated client evidence identified. |
@@ -139,7 +139,9 @@ versions. Together with the two manifest failures, all four new assertions now p
 Current outcomes and the historical source-match inventory are retained in the
 [source reconciliation record](p16-probe-provenance-v3-results.json).
 
-The current code correction concerns assurance tools only. The missing-software rows
-above remain accurate; no audit or phase completion marker is issued. Next verify the
-source-manifest bridge and reconcile the remaining review boundary before publishing
-P16 task/federation structural conformance work.
+That source-manifest correction concerned assurance tools only. Its bridge commit
+`8edce6f5e6cd877b2c836da14a1947f7f06a984f` has now been verified against its parent,
+five recorded file hashes and noreply identity. No audit or phase completion marker is issued.
+
+The task/federation structural publication gap identified above in earlier snapshots is
+now corrected locally. This does not establish integrated cross-phase consumer conformance.

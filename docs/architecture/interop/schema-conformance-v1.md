@@ -1,6 +1,7 @@
 # Passport schema conformance v1
 
-The payload, signature envelope and externally provisioned trust policy need portable
+The payload, signature envelope, externally provisioned trust policy, offline task
+description and direct federation snapshot need portable
 structural schemas for publishers and SDK consumers. These are tooling contracts, not
 an alternate verifier. Frozen safety rules and passport v1 timing/resource bounds remain
 unchanged. No schema success can grant authority, authenticate a statement or qualify data.
@@ -49,3 +50,19 @@ to run these comparisons; it includes the pinned passport crypto closure. The ho
 job explicitly imports both schema and crypto backends before running. The runtime
 comparison must authenticate a known-good fixture and reject negative fixtures for
 their expected reasons; an unavailable or always-rejecting backend cannot pass it.
+
+## Task and federation coverage
+
+The [task schema](../../../contracts/interop/task-v1.schema.json) enforces the two
+verification-only kinds and their distinct evidence-list and byte-budget constraints.
+The [federation schema](../../../contracts/interop/federation-v1.schema.json) enforces
+closed rows, scalar ranges, issuer/capability lists and the 16-peer limit. Both schemas
+are self-contained and use the same safe-integer and absolute-end identifier profile.
+
+The normative [task](task-v1.md) and [federation](federation-v1.md) runtime contracts
+still enforce lexical/byte/depth limits, canonical identity, interval relationships,
+pins, freshness, revision floors and authenticated bundle scope. Full-row uniqueness
+in JSON Schema does not enforce uniqueness by remote-domain name or prevent a peer
+from using the local-domain alias. Retained tests demonstrate these structural-success,
+runtime-rejection cases and require genuine positive runtime results as controls.
+See the [technology and coverage review](../../engineering/reviews/p16-interop-schemas-v3.md).
