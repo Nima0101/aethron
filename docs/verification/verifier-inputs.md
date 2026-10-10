@@ -1,0 +1,56 @@
+# Verifier input boundaries
+
+The developer verifier requires Python 3.9+ and the verification-only parser in
+`requirements-links.lock`. The core runtime package does not gain this dependency.
+For offline installation, prepare a wheelhouse with `python -m pip download
+--only-binary=:all: --require-hashes -r requirements-links.lock -d link-wheels`
+on a connected machine, then install with `python -m pip install --no-index
+--find-links link-wheels --require-hashes -r requirements-links.lock` offline.
+Use the same interpreter for installation and verification. Missing parser imports
+fail with this installation instruction; no automatic download or regex fallback.
+
+Both checkers parse CommonMark inline/reference links and images, excluding code,
+raw HTML attributes, remote schemes/authorities and fragment-only destinations.
+Entities and percent escapes are decoded once. Queries/fragments are not paths.
+A link check neither fetches its destination nor approves its content or rights.
+Excess parser nesting fails explicitly instead of silently omitting links.
+See [parser decision](../decisions/0024-markdown-parser-resources.json).
+
+The public-tree checker resolves the requested immutable tree without replacement
+objects or lazy fetching. It rejects repository-selecting environment overrides,
+missing objects, invalid UTF-8 and symlink Markdown. It admits 10,000 entries,
+1,000 Markdown paths, 1 MiB per document, 16 MiB total document bytes and 10,000
+local destinations. Missing-report source/target fields admit 1 MiB of summed
+UTF-8 bytes, excluding JSON overhead. Invalid/incomplete scans exit2 with
+`invalid_public_tree` and no partial report. Complete reports retain exit0/1.
+
+The worktree verifier rejects optimized Python execution, mismatched repository
+roots, selected Git environment overrides, escaping paths and symlink/reparse
+entries. Its existing discovery rules exclude generated directories only when
+untracked and require coverage of selected tracked text. Filesystem errors fail
+the scan. These checks assume a stable trusted checkout, not a hostile concurrent
+filesystem. Freeze manifests remain trusted declarations, not signed provenance.
+
+The worktree public-content Markdown scan has separate limits: 1,000 documents,
+1 MiB each, 16 MiB total and 10,000 local destinations. Empty/untracked selected
+documents and repeated destinations count. Oversized files are rejected before
+opening when stat establishes their size. Otherwise a bounded binary read permits
+one extra byte to detect excess before decoding/parsing. Excess raises
+`worktree_markdown_limit`; later product checks and the final PASS are not reached.
+See [admission decision](../decisions/0025-worktree-markdown-admission.json).
+
+Git capture uses a 30-second per-command wait budget and 16 MiB stdout cap, discards
+stderr and never accepts partial output after failure. It kills/reaps its direct
+child; spawning/reaping are not hard-bounded and descendants retaining pipes can
+outlive cleanup. No generic process-tree containment is claimed.
+
+These are admission limits, not total RSS, CPU, filesystem or whole-verifier
+bounds. Decoded text/parser allocations are additional. Earlier freeze/source
+reads, other content reads, traversal and product child processes remain outside
+the Markdown budgets. The source syntax rules do not prove runtime security or
+termination. The final PASS names completed checks, not production qualification.
+
+The dedicated Markdown workflow exercises Linux/macOS/Windows and Python3.9/3.13.
+Workflow existence is not hosted evidence. ADR source revisions identify local
+pre-change baselines; source hashes bind the described files. Historical local
+results do not qualify a different delivery head or platform.
