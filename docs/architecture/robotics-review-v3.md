@@ -811,3 +811,13 @@ became green; 59 focused audit methods pass, with four input methods rerun after
 test-launcher cleanup. [Evidence](../verification/robotics-managed-input-v3.json)
 records the checks and source hashes. This corrects experiment admission;
 production telemetry and its pending technology decision are unchanged.
+
+## Reject duplicate members in managed experiment input
+
+The [managed JSON review](../verification/robotics-comparator-coverage-v3.md#managed-json-member-uniqueness)
+found that standard JSON parsing discarded earlier repeated members before schema
+admission. The bounded original text is now checked for duplicate decoded keys
+in each object before any receiver executes. Ten RED assertions became green;
+61 focused audit methods pass. [Evidence](../verification/robotics-managed-duplicates-v3.json)
+binds the correction to source and logs. Production telemetry is unchanged;
+this closes a specific comparison-input gap, not the pending runtime decision.

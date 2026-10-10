@@ -89,7 +89,24 @@ while (true) {
 }
 // Preserve a BOM for JSON rejection, and never substitute malformed UTF-8.
 const decoder = new TextDecoder('utf-8', {fatal: true, ignoreBOM: true});
-const cases = JSON.parse(decoder.decode(raw.subarray(0, used)));
+const text = decoder.decode(raw.subarray(0, used));
+const cases = JSON.parse(text);
+// JSON.parse establishes valid grammar but discards duplicate members. Scan
+// the original bounded text before using the result. Whole string tokens hide
+// their punctuation; each colon follows a key string in the validated grammar.
+const scopes = [];
+let stringToken;
+for (const [token] of text.matchAll(/"(?:[^"\\]|\\.)*"|[{}\[\]:]/g)) {
+  if (token === '{') scopes.push(new Set());
+  else if (token === '[') scopes.push(null);
+  else if (token === '}' || token === ']') scopes.pop();
+  else if (token === ':') {
+    const key = JSON.parse(stringToken);
+    const members = scopes.at(-1);
+    if (members.has(key)) throw new Error('audit_duplicate_member');
+    members.add(key);
+  } else stringToken = token;
+}
 if (!Array.isArray(cases) || cases.length < 1 || cases.length > 64) {
   throw new Error('audit_case_limit');
 }

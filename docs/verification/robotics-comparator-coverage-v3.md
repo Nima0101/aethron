@@ -382,3 +382,45 @@ bounded, but this is not a whole-process memory limit or independent stdin
 deadline: the invoking audit runner retains its subprocess timeout. JavaScript
 JSON duplicate-member rejection remains unresolved. There is no new Rust run,
 hardware latency result, production qualification or completed lane reassessment.
+
+## Managed JSON member uniqueness
+
+Reviewed baseline: `367db5022e08d0858474ddcd68670441a8769bb0`.
+The managed driver parsed input with standard `JSON.parse`, which overwrites
+earlier repeated members. That allowed a repeated operation or clock field to
+change meaning before the experiment's strict field checks. The Python CLI's
+object-pair hook already rejects this input; the managed CLI did not.
+
+The [ECMAScript JSON specification](https://tc39.es/ecma262/multipage/structured-data.html#sec-json.parse)
+defines overwrite behavior. [RFC 8259 sections 4 and 8.3](https://www.rfc-editor.org/rfc/rfc8259)
+explain duplicate-member interoperability and comparing decoded member names.
+Schema validation or a reviver over the resulting object cannot restore the
+lost member occurrences. A full replacement parser or external parser dependency
+would add grammar responsibility to this small comparison driver. Instead, the
+standard parser establishes valid JSON syntax, then an iterative token scan of
+the original bounded text checks member uniqueness before using the parsed value.
+This repair is scoped to experiment admission, not production language selection.
+
+Whole JSON string tokens are consumed together, so their braces, colons and
+escaped quotes do not affect structure. A stack holds a Set for each object and
+an array marker for each array. In already-valid JSON, every colon follows a
+member-name string; decoding that token with JSON.parse makes escaped and literal
+spellings comparable. Sets avoid treating inherited property names as special.
+The scan uses no recursion and does not collect the full token stream. Its input
+remains limited to 65536 bytes by the prior byte-admission correction. This is not
+a whole-process memory or execution deadline guarantee.
+
+The [receipt](robotics-managed-duplicates-v3.json) retains ten expected RED
+assertions across repeated name, steps, op, clock and hex members, escaped-key
+aliases, a nested duplicate and special property names. Seven cases previously
+succeeded; three were rejected later for schema errors instead of recognizing
+duplicate input. All ten now fail with the fixed duplicate-member category and
+no stdout. Positive controls preserve escaped unique keys, JSON-looking string
+contents, both Unicode encodings, property order and separate object scopes.
+The existing corpus and maximum-size/short-read input checks remain green.
+
+61 focused audit methods, Ruff, formatting, Bandit and Node syntax pass. No
+production adapter, native candidate execution or benchmark ranking changes are
+claimed. Earlier timing records remain tied to their recorded source revisions.
+The first-component production technology decision remains PENDING, with signing
+and replay the next later unreviewed component.

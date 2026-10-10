@@ -254,6 +254,60 @@ process.stderr.write(JSON.stringify({read_calls: calls}));
         self.assertGreater(json.loads(result.stderr)["read_calls"], len(payload) // 17)
         self.api.check_parity(self.api.reference(cases), json.loads(result.stdout)["results"])
 
+    def test_managed_json_rejects_duplicate_members_before_schema_admission(self):
+        steps = b'[{"op":"snapshot","now":"0"}]'
+        payloads = [
+            b'[{"name":"first","name":"last","steps":' + steps + b"}]",
+            b'[{"name":"case","steps":[],"steps":' + steps + b"}]",
+            rb'[{"name":"first","na\u006de":"last","steps":' + steps + b"}]",
+        ]
+        records = [
+            b'{"op":"close","op":"snapshot","now":"0"}',
+            b'{"op":"snapshot","now":"1","now":"0"}',
+            rb'{"op":"close","\u006fp":"snapshot","now":"0"}',
+            b'{"op":"ingest","now":"0","hex":"aa","hex":""}',
+            b'{"op":"snapshot","now":"0","extra":{"x":1,"x":2}}',
+            b'{"op":"snapshot","now":"0","__proto__":0,"__proto__":1}',
+            b'{"op":"snapshot","now":"0","constructor":0,"constructor":1}',
+        ]
+        payloads += [b'[{"name":"case","steps":[' + record + b"]}]" for record in records]
+        for payload in payloads:
+            with self.subTest(payload=payload):
+                result = subprocess.run(  # nosec B603
+                    [self.node, str(self.api.DRIVER)],
+                    input=payload,
+                    capture_output=True,
+                    timeout=10,
+                    check=False,
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(result.stdout, b"")
+                self.assertIn(b"audit_duplicate_member", result.stderr)
+
+    def test_managed_json_preserves_string_contents_and_separate_object_scopes(self):
+        cases = [
+            {
+                "name": 'quoted "name": \\ backslash {}[]: and mätning',
+                "steps": [{"now": "0", "op": "snapshot"}, {"op": "close", "now": "1"}],
+            },
+            {"steps": [{"op": "snapshot", "now": "0"}], "name": "next"},
+        ]
+        for ensure_ascii in (True, False):
+            payload = json.dumps(cases, ensure_ascii=ensure_ascii).encode("utf-8")
+            # Valid escaped member spelling must be decoded for identity, not forbidden.
+            payload = payload.replace(b'"op":', rb'"\u006fp":')
+            with self.subTest(ensure_ascii=ensure_ascii):
+                result = subprocess.run(  # nosec B603
+                    [self.node, str(self.api.DRIVER)],
+                    input=payload,
+                    capture_output=True,
+                    timeout=10,
+                    check=True,
+                )
+                self.api.check_parity(
+                    self.api.reference(cases), json.loads(result.stdout)["results"]
+                )
+
     def reference_cli(self, payload):
         return subprocess.run(  # nosec B603
             [sys.executable, str(Path(self.api.__file__)), "--reference"],
