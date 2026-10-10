@@ -1,0 +1,42 @@
+{
+  "review_order_version": 3,
+  "component": "C09_offline_appliance",
+  "decision": "CLARIFY",
+  "scope": "Recorded diagnostic authority, disclosure and qualification limits only",
+  "full_component_review_complete": false,
+  "reviewed_head": "de2bc759f68b53ec45ec3d7afc764c03afdc1717",
+  "production_behavior_changed": false,
+  "checks": {
+    "production_executable_ast_unchanged": true,
+    "focused_test_methods_passed": 2,
+    "new_test_methods": 2,
+    "new_tests_passed_before_docstring_change": true,
+    "earlier_component_source_bindings_rechecked": 37,
+    "ruff": "PASS",
+    "format": "PASS after formatting new tests",
+    "bandit": "PASS",
+    "hardware_checks": false,
+    "new_benchmarks": false
+  },
+  "focused_command": "PYTHONPATH=integrations/edge:tests/integration build/lane-b/linux-tools/bin/python -m unittest test_sensor_worker_claims",
+  "limitations": [
+    "Mocked fault tests do not qualify supervisor termination, scheduling or installed service availability.",
+    "Final diagnostic delivery is not guaranteed when its sink fails.",
+    "One descriptor is not an immutable content snapshot.",
+    "Provider processing duration excludes validation, pacing and downstream delivery.",
+    "Full V3 technology reassessment remains incomplete; no runtime KEEP/MIGRATE decision."
+  ],
+  "negative_evidence": [
+    "Historical appliance startup, EOF, RGB and optional rectification timing failures remain in sensor-appliance.json.",
+    "Earlier T10 latency and signed radar startup failures remain unresolved."
+  ],
+  "source_binding_note": "provisioning.py is the existing dirty lane version, read-only for this pass; its hash identifies working bytes rather than content changed by this patch.",
+  "sha256": {
+    "integrations/edge/aethron_edge/sensors/worker.py": "74bbb4481ab1489ec917ce3f42d0e19be407b412781198717bfd71626577a9ef",
+    "integrations/edge/aethron_edge/sensors/provisioning.py": "655ef8f8798e373dac9ba46bf7048ff0160320fb312bffb8f2e88920f62c2905",
+    "tests/integration/test_sensor_worker_claims.py": "403bbecab36bbddf93e6e36053321bf9c5d01085f8a455fb3c22a3ceacf31c52",
+    "docs/engineering/aethron-ecosystem/SENSOR-APPLIANCE.md": "5a017363ad87a2d71baa3697a081097c054aa7b7a0b96d77bef06b32e2ae789b",
+    "docs/engineering/aethron-ecosystem/P21-APPLIANCE-CLAIMS-REVIEW-V3.md": "cca04869ca095711b070ed60396eb63f314934efa886ea9755408a48cd4773f3",
+    "docs/engineering/aethron-ecosystem/evidence/phase2/sensor-appliance.json": "4313d7465d59fc22ab49d7130bf5ae1180bd1a1bb89ce37c0c893829c1b04741"
+  }
+}

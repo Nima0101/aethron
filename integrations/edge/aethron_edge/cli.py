@@ -10,6 +10,41 @@ from . import __version__
 from ._startup_trace import mark
 
 
+def _replay_config(path: Path, *, require_replay: bool):
+    """Admit the offline CLI configuration before opening a recording."""
+    from aethron._json_bounds import check
+
+    with path.open("rb") as stream:
+        data = stream.read(65537)
+    if not check(data):
+        raise ValueError("invalid_request")
+
+    def unique(items):
+        result = {}
+        for key, value in items:
+            if key in result:
+                raise ValueError("invalid_request")
+            result[key] = value
+        return result
+
+    def invalid(value):
+        raise ValueError("invalid_request")
+
+    config = json.loads(data.decode("utf-8"), object_pairs_hook=unique, parse_constant=invalid)
+    if (
+        not isinstance(config, dict)
+        or type(config.get("version")) is not int
+        or config["version"] != 1
+    ):
+        raise ValueError("invalid_request")
+    if require_replay:
+        replay = config.get("replay")
+        if not isinstance(replay, str) or not replay or "\x00" in replay:
+            raise ValueError("invalid_request")
+        replay.encode("utf-8", errors="strict")
+    return config
+
+
 def main():
     mark("cli_ready")
     parser = argparse.ArgumentParser(prog="aethron-edge")
@@ -129,9 +164,7 @@ def main():
             parser.exit(2, "startup_failed\n")
         return
     try:
-        config = json.loads(args.config.read_text())
-        if config.get("version") != 1:
-            raise ValueError("invalid_request")
+        config = _replay_config(args.config, require_replay=args.command == "replay")
         if args.command == "doctor":
             result = {
                 "edge_version": __version__,

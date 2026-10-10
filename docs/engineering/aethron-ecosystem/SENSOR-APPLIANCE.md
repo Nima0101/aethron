@@ -4,8 +4,9 @@ The `sensor-replay` driver connects the [calibrated provider](SENSOR-PROVIDER.md
 to the existing appliance worker, one-slot mailbox, watchdog, restart budget,
 local status and authenticated HTTP/SSE service. It processes without viewers,
 WAN, online licensing or a development terminal. This is recorded software
-integration; physical sources and ROS installation clock authority remain next
-work. Raw geometry does not create semantic detections or current live support.
+integration; physical-source qualification remains external. ROS clock authority
+is maintained separately by the robotics lane. Raw geometry does not create
+semantic detections or current live support.
 
 ## Provisioning contract
 
@@ -53,7 +54,9 @@ recording; `verify_configuration` rejects any input outside or missing from its
 signed file inventory. Runtime/model rights and immutable administrator-owned
 bundle storage remain installation requirements. Signature verification occurs
 at startup; an administrator able to rewrite trusted runtime files is outside
-the unprivileged remote-client boundary. The worker additionally checks the
+the unprivileged remote-client boundary. Using one descriptor does not snapshot
+file contents against in-place writes; immutable trusted storage is required
+through validation and playback. The worker additionally checks the
 provisioned recording digest every cycle. Keep logs, status, credentials and
 private signing keys outside the signed bundle. No private signing key ships
 with the application.
@@ -81,8 +84,11 @@ and at most 64 projected samples. Parser/copy and next-record handoff buffers
 add bounded overhead; 8 MiB is a payload limit, not a measured process RSS cap. Entire input validation precedes processing;
 it checks every record through provider admission on the same descriptor used
 for playback. Long recorded gaps use cancellable ≤100 ms waits/heartbeats.
-The supervisor can terminate a blocked or corrupt worker without blocking its
-watchdog. No hard-real-time or physical power/memory guarantee follows.
+The supervisor owns termination of blocked or corrupt workers. The worker
+itself checks cancellation cooperatively; hashing, validation, file I/O and the
+diagnostic send callback have no local deadline. A wait interval is not a bound
+on shutdown latency. If the diagnostic sink fails, final fault delivery is not
+guaranteed. No hard-real-time or physical power/memory guarantee follows.
 
 Recorded acquisition plus declared uncertainty defines the logical replay
 clock. Host elapsed processing time consumes that sample's freshness budget.
@@ -110,6 +116,18 @@ does not change processing. The initial SSE gap remains part of the API contract
 
 ## Evidence and remaining execution
 
+The guest sensor probe observes declared batch counters. Its legacy
+`processing_at_end` field means a valid processing sample advanced the counter
+within the preceding 2000 ms, including the endpoint. A subsequent fault,
+unchanged counter or invalid sample does not clear that window. Fault and invalid
+sample counts remain separate diagnostics. Recovery and update flags latch
+historical observations; they can remain true after recent activity expires.
+These fields establish neither uninterrupted service nor latest-sample health.
+The observer assumes trusted status mappings and a monotonic integer clock in
+the same domain as the emission times. It does not authenticate those inputs or
+validate the host clock. Four profiles bound retained rows; counters still grow
+with run duration. No availability percentage follows from these diagnostics.
+
 Tests exercise strict provisioning, signed inventory coverage, real spawned
 supervision with zero viewers, source removal, worker crash/recovery, expiry,
 EOF, corrupt/oversized recordings, long-gap heartbeats, and a real signed CLI
@@ -119,8 +137,9 @@ negative aircraft/latency evidence remains applicable within its recorded scope.
 
 This increment does not claim that the new driver has completed a VM boot soak.
 The earlier Phase 1 VM boot/one-hour soak used its own synthetic semantic source.
-Next: provision ROS/DDS in the supervisor with explicit per-boot clock authority,
-then run the combined candidate through Linux autostart/offline/reboot/soak,
-and connect separately evaluated nonvisible models. Models, licensed real sensor
+ROS/DDS integration and per-boot authority belong to the separate robotics lane;
+this recorded-source evidence does not qualify those interfaces. Combined Linux
+autostart/offline/reboot/soak and separately evaluated nonvisible models require
+their own current evidence. Models, licensed real sensor
 recordings, calibration/clock hardware tuples, physical power/thermal behavior,
 field safety, certification and publication gates remain pending. See [NEXT](NEXT.md).
