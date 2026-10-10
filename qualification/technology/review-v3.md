@@ -47,6 +47,8 @@ The [Node hash result correction](node-hash-results-v3.md) checks every measured
 digest, known vector and ownership result before publishing the primitive report.
 The [hosted failure retention correction](workflow-failure-review-v3.md) allows
 independent checks after failures while requiring preparation and respecting cancellation.
+The [implemented-source coverage checkpoint](coverage-review-v3.md) inventories
+the reviewed baseline and keeps unfinished P15/P19 software gates explicit.
 
 The [measurement lifecycle correction](#follow-up-measurement-lifecycle--2026-10-10)
 qualifies the older allocation results and corrects all three measurement drivers.

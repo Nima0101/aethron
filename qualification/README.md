@@ -43,9 +43,12 @@ are declarations, never proof that the referenced bytes exist or are authentic.
 
 The versioned contract is [schema-v1.md](schema-v1.md). The included rig is
 entirely synthetic; its repeated-digit hashes are placeholders, not hardware
-evidence. Environment validation currently covers lighting declarations only;
-power, weather, temperature, vibration, EMC, field accuracy and independent
-privacy/safety/certification review remain external pending work.
+evidence. Environment validation currently covers lighting declarations only.
+Software schemas and evidence checks for power, weather, temperature, vibration
+and EMC are not implemented here; they remain software work. Actual instrument
+measurements, representative field accuracy and independent privacy, safety and
+certification review remain external gates. Missing software is not an external
+qualification gate; see the [readiness inventory](p15-readiness-v1.md).
 
 `rigs/expired-calibration-v1.json` retains the negative case where calibration
 expires one millisecond before capture end. Its CLI exit must be 1, with
@@ -113,6 +116,9 @@ constraints, technology alternatives, executable evidence and limitations. The
 earlier [policy-2 experiments](technology/retrospective-v2.md) remain evidence,
 not completion of the current review. A language is not excluded because it
 requires compilation. No generic JSON Schema conformance is claimed.
+The [source coverage checkpoint](technology/coverage-review-v3.md) maps the
+implemented components to decisions and current source observations. It does
+not mark P4/P15 or customer acceptance complete.
 
 Declaration success is not live sensor admission. Record age is assessed at
 capture end, and capture age at the supplied evaluation instant; those separate
