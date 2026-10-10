@@ -8,26 +8,13 @@ from pathlib import Path
 
 from qualification.artifacts import verify
 from qualification.technology import source_snapshot
-from qualification.technology.measurement import peak_bytes, require_untraced
+from qualification.technology.measurement import peak_bytes, require_result, require_untraced
 from qualification.tests.test_evidence import encoded, fixture
 
 
 def _require_report(actual, expected):
     """Check this fixed synthetic result, including scalar and container types."""
-    if type(actual) is not type(expected):
-        raise RuntimeError("binding_measurement_failed")
-    if type(expected) is dict:
-        if actual.keys() != expected.keys():
-            raise RuntimeError("binding_measurement_failed")
-        for key, value in expected.items():
-            _require_report(actual[key], value)
-    elif type(expected) is list:
-        if len(actual) != len(expected):
-            raise RuntimeError("binding_measurement_failed")
-        for value, wanted in zip(actual, expected):
-            _require_report(value, wanted)
-    elif actual != expected:
-        raise RuntimeError("binding_measurement_failed")
+    require_result(actual, expected, "binding_measurement_failed")
 
 
 def main():

@@ -1,6 +1,24 @@
-"""Own one synchronous Python-allocation trace; not a process memory ceiling."""
+"""Check synthetic results and own tracing; not a process memory ceiling."""
 
 import tracemalloc
+
+
+def require_result(actual, expected, error):
+    """Require a fixed synthetic result with exact container and scalar types."""
+    if type(actual) is not type(expected):
+        raise RuntimeError(error)
+    if type(expected) is dict:
+        if actual.keys() != expected.keys():
+            raise RuntimeError(error)
+        for key, value in expected.items():
+            require_result(actual[key], value, error)
+    elif type(expected) is list:
+        if len(actual) != len(expected):
+            raise RuntimeError(error)
+        for value, wanted in zip(actual, expected):
+            require_result(value, wanted, error)
+    elif actual != expected:
+        raise RuntimeError(error)
 
 
 def require_untraced():

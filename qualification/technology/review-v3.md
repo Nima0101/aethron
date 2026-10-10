@@ -31,6 +31,9 @@ produce misleading parity evidence.
 The [artifact measurement result correction](binding-results-review-v3.md) requires
 the complete expected report from every timed and allocation-traced call before
 publishing measurements, including exact count types and non-qualification flags.
+The [campaign comparison result correction](campaign-results-review-v3.md) uses an
+independent maximum-workload oracle and applies the same exact result checking to
+both candidates' timed and allocation-traced calls.
 
 The [measurement lifecycle correction](#follow-up-measurement-lifecycle--2026-10-10)
 qualifies the older allocation results and corrects all three measurement drivers.
