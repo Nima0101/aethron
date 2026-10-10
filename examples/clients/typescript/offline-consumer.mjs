@@ -14,7 +14,11 @@ export function renderOfflineConsumer(manifest,lock,filename,archive) {
      !record(lock.packages[''])||!/^[-a-z0-9]+$/.test(manifest.name??'')||
      typeof manifest.version!=='string'||lock.packages[''].name!==manifest.name||lock.packages[''].version!==manifest.version||
      canonical(manifest.dependencies)!==canonical(lock.packages[''].dependencies)||manifest.optionalDependencies||manifest.peerDependencies)invalid();
-  const runtime=Object.fromEntries(Object.entries(lock.packages).filter(([key,value])=>key&&value.dev!==true).map(([key,value])=>{
+  // Validate before reading classification metadata, including excluded dev entries.
+  const runtime=Object.fromEntries(Object.entries(lock.packages).filter(([key,value])=>{
+    if(!record(value)||(Object.hasOwn(value,'dev')&&typeof value.dev!=='boolean'))invalid();
+    return key&&value.dev!==true;
+  }).map(([key,value])=>{
     if(!/^node_modules\/(?:@[-a-z0-9]+\/)?[-a-z0-9]+$/.test(key)||!record(value)||value.link||value.optional||value.peer||
        typeof value.version!=='string'||typeof value.resolved!=='string'||!value.resolved.startsWith('https://registry.npmjs.org/')||
        typeof value.integrity!=='string'||!/^sha512-[A-Za-z0-9+/]{86}==$/.test(value.integrity))invalid();

@@ -28,8 +28,39 @@ test('archive paths cannot escape the external fixture directory',()=>{
  for(const name of ['../client.tgz','C:client.tgz','/tmp/client.tgz','a\\b.tgz'])assert.throws(()=>helper.renderOfflineConsumer(read('./package.json'),read('./package-lock.json'),name,new Uint8Array([1])),{message:'invalid_consumer_archive'});
 });
 
+for (const [label, entry] of [['null', null], ['array', []], ['string', 'private-marker'],
+  ['number', 1], ['boolean', true]]) {
+ test(`non-record ${label} lock entry fails with the fixed error`,()=>{
+  const lock=read('./package-lock.json');lock.packages['node_modules/ajv']=entry;
+  assert.throws(()=>build(undefined,lock),{name:'Error',message:'invalid_consumer_lock'});
+ });
+}
+for (const dev of [null, 'true', 'false', 0, 1, [], {}]) {
+ test(`non-boolean dev marker ${JSON.stringify(dev)} cannot classify a package`,()=>{
+  const lock=read('./package-lock.json');lock.packages['node_modules/ajv'].dev=dev;
+  assert.throws(()=>build(undefined,lock),{name:'Error',message:'invalid_consumer_lock'});
+ });
+}
+test('explicit false dev marker retains the runtime package without modifying input',()=>{
+ const manifest=read('./package.json'),lock=read('./package-lock.json');
+ lock.packages['node_modules/ajv'].dev=false;
+ const before=structuredClone(lock),value=build(manifest,lock);
+ assert.deepEqual(value.lock.packages['node_modules/ajv'],before.packages['node_modules/ajv']);
+ value.lock.packages['node_modules/ajv'].version='mutated';
+ assert.deepEqual(lock,before);
+});
+
 test('offline consumer decision is closed and does not permit qualification extensions',async()=>{
  const {Ajv2020}=await import('ajv/dist/2020.js');const validate=new Ajv2020({strict:true}).compile(read('./offline-consumer-adr.schema.json'));
  const value=read('./offline-consumer-adr.json');assert.equal(validate(value),true,JSON.stringify(validate.errors));
  assert.equal(validate({...value,production_qualified:true}),false);assert.equal(validate({...value,c4:{...value.c4,certified:true}}),false);
 });
+
+ test('transport and install review uses a closed schema',async()=>{
+  const {Ajv2020}=await import('ajv/dist/2020.js');
+  const validate=new Ajv2020({strict:true}).compile(read('./transport-install-adr.schema.json'));
+  const value=read('./transport-install-adr.json');
+  assert.equal(validate(value),true,JSON.stringify(validate.errors));
+  assert.equal(validate({...value,production_qualified:true}),false);
+  assert.equal(validate({...value,c4:{...value.c4,certified:true}}),false);
+ });

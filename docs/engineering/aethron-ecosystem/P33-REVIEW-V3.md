@@ -1637,3 +1637,47 @@ evidence are in [the review record](evidence/phase3/p33-cancellation-oracle-v1.j
 Next earliest component: endpoint/redirect admission and package/service consumer
 lifecycle, followed by remaining P12 display/help review. The SSE event-size
 producer handoff, browser/device qualification and P19 gaps remain open.
+
+
+### Endpoint/redirect and offline lock review — 2026-10-10
+
+Re-read the earliest generator, build, wire/session and observation sources at
+`7368b197466796688fc9b8c43a56095ff8fd5b89`; prior source, report and distribution
+hashes were verified. This continuation reviewed canonical endpoint admission,
+all three authenticated redirect policies, and the shared offline lock adapter.
+
+KEEP native URL/Fetch and the Node lock adapter under the
+[transport/install decision](../../../examples/clients/typescript/transport-install-adr.json)
+and its closed schema. The decision compares typed JavaScript alternatives and
+Dart/Python build adapters against actual host and offline consumer constraints.
+No foreign-language benchmark or target-device qualification is claimed.
+
+FIX: the lock adapter classified entries before validating their shape. A null
+record produced an uncontrolled TypeError, and seven non-boolean dev markers were
+accepted. Thirteen added input/ownership regression methods reproduced eight
+failures before correction. Validate records and optional boolean dev markers
+before filtering; preserve the valid locked graph and archive integrity binding.
+
+Endpoint/redirect production code needed no correction. Added bounded copied-module
+controls independently change POST, GET and DELETE to follow redirects. Each must
+fail precisely its ten loopback redirect cases at the destination-I/O assertion;
+its other twenty cases and the direct request control must still pass. The audit
+runs through npm test, never modifies production/dist, and rejects child timeout,
+syntax/import errors, skipped tests and unrelated failures.
+
+The focused Node suite passed 98 methods with no skips; the controlled Python
+service-harness suite passed 16 methods. These harness tests use substituted
+package/server boundaries and do not establish a new real-service qualification.
+The first package check passed two methods but timed out at external consumer
+TypeScript compilation under the unchanged 30-second subprocess bound; preserve
+that failure separately. One unchanged-bound rerun passed all three package methods,
+including external type/runtime use and offline uninstall/reinstall. Exact results
+and source/log hashes are in
+[evidence](evidence/phase3/p33-transport-install-review-v1.json).
+
+Bridge commit `7368b197` was verified and fast-forward pushed to PR #44. Its one
+CI snapshot had 35 queued, four running, one success and one skipped check; no CI
+polling or merge. This correction still requires its own local bridge commit.
+Next: finish service-harness technology reassessment, then resume the remaining
+P12 display/help review. The full lane audit, producer/consumer SSE byte-boundary
+handoff and P19 installed-product/help gates remain unfinished.

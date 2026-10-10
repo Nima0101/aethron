@@ -327,3 +327,16 @@ The tests fail if their five-second cleanup watchdog fires; forced socket cleanu
 cannot stand in for a functioning cancellation path. The watchdog is a test
 escape hatch, not a production latency guarantee. See the
 [cancellation test decision](cancellation-oracle-adr.json).
+
+The offline consumer adapter validates each lock entry as an object and accepts
+only absent or boolean `dev` markers before classifying packages. Malformed
+metadata fails with `invalid_consumer_lock`; npm still validates dependency
+satisfaction during installation. The adapter is limited to the committed flat
+lock-v3 graph, not arbitrary npm lockfiles.
+
+`npm run audit:redirect` changes one request policy at a time in copied client
+modules. All ten redirect cases for that phase must fail because a destination
+received a request; other phases and the direct request control still pass.
+Production source and build outputs remain unchanged by this audit. See the
+[transport/install review](transport-install-adr.json) and its
+[closed schema](transport-install-adr.schema.json).

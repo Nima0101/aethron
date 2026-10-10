@@ -1,0 +1,57 @@
+{
+  "id": "P33-TRANSPORT-INSTALL-REVIEW-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "KEEP TypeScript/native URL and Fetch for endpoint/redirect admission and ECMAScript/Node for offline npm lock projection; FIX record and dev-marker admission before package classification.",
+  "constraints": [
+    "Node SDK for a single read-only API-v1 viewer. Require canonical origins, plaintext literal loopback only, and reject redirects independently for POST, GET and best-effort DELETE before destination I/O.",
+    "Build-only offline adapter shared by Node package verification and the Python service harness. Preserve archive SHA-512 binding, pinned flat npm lock-v3 runtime graph and npm ci --offline --ignore-scripts. No registry fallback.",
+    "Validate JSON-shaped package records before reading classification metadata. dev may be absent or boolean; true excludes a development-only record, false retains a runtime record. Never coerce a malformed marker.",
+    "Focused Linux Node 22 execution, no new runtime dependencies or native binary deployment. No hard deadline or browser/mobile qualification inferred from tests."
+  ],
+  "alternatives": [
+    {
+      "technology": "TypeScript SDK with native URL/Fetch; ECMAScript Node lock adapter",
+      "assessment": "KEEP. The URL parser supplies canonical serialization and Fetch enforces redirect error at the transport boundary. Thirty loopback redirect cases pass; three independent follow-policy mutations each produce ten destination-I/O failures. The adapter runs in the same required Node/npm consumer process and uses standard crypto; targeted record guards correct the reproduced invalid-input defect. The current valid lock projection and installed consumer behavior are retained."
+    },
+    {
+      "technology": "Plain ECMAScript SDK or TypeScript lock adapter",
+      "assessment": "Both use identical host URL/Fetch/JSON semantics. SDK declarations remain useful for callers; removing them offers no evidenced admission benefit. Compiling the tiny build-only lock adapter adds a generated prerequisite to its package/bootstrap consumers without replacing the necessary runtime JSON checks. Keep explicit runtime guards and executable fixture tests."
+    },
+    {
+      "technology": "Kotlin/JS or ReScript SDK",
+      "assessment": "Credible typed JavaScript alternatives with JavaScript interoperation/promise support. They still need the same host transport semantics, untrusted-input validation and cancellation tests. No shared Kotlin model or required ReScript consumer boundary exists here; no measured runtime or contract advantage warrants migration."
+    },
+    {
+      "technology": "Dart native CLI for offline lock projection",
+      "assessment": "Dart supports compiled self-contained executables and is a credible cross-platform build-tool candidate beyond incumbent languages. It would require per-target executable delivery while npm/Node remain mandatory for the resulting SDK consumer. No demonstrated isolation or performance need outweighs an in-process adapter for this small committed graph; no Dart performance claim is made."
+    },
+    {
+      "technology": "Python stdlib JSON/hashlib adapter",
+      "assessment": "Fits the Python service harness but would impose another interpreter on standalone Node package consumers or duplicate the projection. Keep Python service orchestration calling the shared Node adapter. This is an interoperability/deployment constraint, not preference for an installed language."
+    }
+  ],
+  "sources": [
+    "https://url.spec.whatwg.org/",
+    "https://fetch.spec.whatwg.org/#http-redirect-fetch",
+    "https://docs.npmjs.com/cli/v11/configuring-npm/package-lock-json/",
+    "https://docs.npmjs.com/cli/v11/commands/npm-ci/",
+    "https://nodejs.org/api/crypto.html",
+    "https://dart.dev/tools/dart-compile",
+    "https://kotlinlang.org/docs/js-overview.html",
+    "https://rescript-lang.org/docs/manual/promise/",
+    "https://docs.python.org/3/library/json.html"
+  ],
+  "limits": [
+    "The record failure is a build-adapter validation defect, not a demonstrated network or runtime SDK vulnerability. Input remains a locally committed manifest/lock plus supplied archive; this adapter is not a general untrusted npm graph validator or dependency resolver.",
+    "No arbitrary callable/getter/proxy object sandbox; callers provide JSON-shaped metadata. npm remains responsible for graph satisfaction and archive verification. Runtime graph layouts outside the documented flat subset remain unsupported.",
+    "HTTP socket evidence is IPv4 loopback with synthetic credentials. HTTPS/IPv6 are parser/mock admission cases only. Canonical origin admission does not authorize a server, pin DNS/certificates or establish MLS/CNSA/uptime guarantees.",
+    "Host URL/Fetch semantics and foreign language capabilities are source-based comparisons, not cross-language benchmarks. No full repository qualification, exact installed customer distribution acceptance or completed P12/P19 help audit."
+  ],
+  "c4": {
+    "context": "flowchart LR\nCaller[Authorized read-only client host] --> SDK[API-v1 SDK]\nSDK --> Service[Selected service origin]\nMaintainer --> Consumer[Offline package consumer]",
+    "containers": "flowchart LR\nSDK[TypeScript module] --> Host[Native URL and Fetch]\nNode[Node lock adapter] --> Npm[npm ci offline]\nPython[Service test harness] --> Node\nArchive[Local package archive] --> Node",
+    "components": "flowchart LR\nBase[Endpoint string] --> Canonical[Canonical origin gate]\nCanonical --> Redirect[Reject redirects for each request]\nRecords[Lock entries] --> Shape[Record and boolean marker gate]\nShape --> Runtime[Runtime graph projection]\nArchive[Archive bytes] --> Hash[SHA-512]\nHash --> Fixture[Consumer fixture]\nRuntime --> Fixture",
+    "code": "classDiagram\nclass EndpointAdmission {\n endpointOrigin(base) origin\n}\nclass OfflineConsumer {\n renderOfflineConsumer(manifest, lock, filename, archive) fixture\n}\nclass RedirectAudit {\n mutateOneRequestPolicy() module\n requireTenDestinationFailures() void\n}\nRedirectAudit --> EndpointAdmission"
+  }
+}
