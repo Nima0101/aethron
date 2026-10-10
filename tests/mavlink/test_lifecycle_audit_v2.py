@@ -1,5 +1,6 @@
 """Executable managed-runtime parity experiment, with synthetic wire only."""
 
+import asyncio
 import hashlib
 import importlib.util
 import json
@@ -49,6 +50,32 @@ class LifecycleAuditTests(unittest.TestCase):
         self.assertEqual(results["rollback"][-1]["reason"], "local_clock_invalid")
         self.assertEqual(results["boot_reset"][-1]["reason"], "source_clock_reset")
         self.assertEqual(results["closed"][-1]["reason"], "closed")
+
+    def test_run_records_cancellation_without_swallowing_it(self):
+        for error_type in (KeyboardInterrupt, SystemExit, asyncio.CancelledError):
+            with (
+                self.subTest(error=error_type.__name__),
+                tempfile.TemporaryDirectory() as directory,
+            ):
+                out = Path(directory) / "attempt"
+                failure = error_type("synthetic-private-diagnostic")
+                with (
+                    patch.object(self.api, "corpus", return_value=[]),
+                    patch.object(self.api, "_child", side_effect=failure) as child,
+                    self.assertRaises(error_type) as caught,
+                ):
+                    self.api.run(out)
+                self.assertIs(caught.exception, failure)
+                child.assert_called_once()
+                report = json.loads((out / "result.json").read_text())
+                self.assertEqual(report.get("failure_type"), error_type.__name__)
+                self.assertEqual(report["state"], "failed")
+                self.assertEqual(report["decision"], "PENDING")
+                self.assertEqual(report["failed_attempt"], "python-0")
+                self.assertEqual(report["runs"], [{}])
+                self.assertNotIn("parity", report)
+                self.assertNotIn("synthetic-private-diagnostic", (out / "result.json").read_text())
+                self.assert_source_receipt(report)
 
     def test_child_rejects_ambiguous_or_nonfinite_json_before_parity(self):
         for payload in (

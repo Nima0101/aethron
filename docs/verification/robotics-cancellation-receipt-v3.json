@@ -1,0 +1,75 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "1d77b03c0d33b1de60a9103646ca93b999a263d0",
+  "component": "passive lifecycle audit exception receipts",
+  "decision": "FIX audit reporting; production technology PENDING",
+  "production_adapter_changed": false,
+  "candidate_drivers_changed": false,
+  "source_sha256": {
+    "scripts/robotics_lifecycle_audit_v2.py": "99067988f04759867253631f1b7b18da08455a4ec5b9aed2565d8cf7222cea8d",
+    "scripts/robotics_native_audit_v2.py": "8fb649ded2b7c63fd2051fb429420e27bc2e8980f2686ff07cef1943bdc33f89",
+    "tests/mavlink/test_lifecycle_audit_v2.py": "1e63d37c2b13de8cc4c2cab6c066dbc6bc4ce9f917dcf8b066e711cc3fcaa562",
+    "tests/mavlink/test_native_audit_v2.py": "9b3add6656c251620f413547145f233d0c7d2ef103b58c5dfc406aba9353193c",
+    "tests/mavlink/test_telemetry.py": "316ba583ce5c61dc1e6783d31690cdbc29630a9193b04f95abe8ad66082df477",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "tests/mavlink/audit_v2/managed.mjs": "b7c89cdf7ada50ed38ce9563adf699d8c5d41bb95f6327fabe416ba3f42ed0cd",
+    "tests/mavlink/audit_v2/native.rs": "a694176e7110765d8c19242953fd8d9fb9a41140e5c071cb9cbd5037be96ab88",
+    "docs/architecture/robotics-review-v3.md": "40e6da8713065b3751ac56f8fa34eb822c2ffc74ea1dd02b1d268761e643eea4",
+    "docs/verification/robotics-comparator-coverage-v3.md": "1faa6ddbba30cf04115529cdc5510b98dbe8b48c6ea89e357d69402862e6e5b7"
+  },
+  "checks": {
+    "red": {
+      "methods": 2,
+      "failures": 6,
+      "errors": 0,
+      "reason": "missing failure_type for three BaseException classes in each runner"
+    },
+    "final_green": {
+      "methods": 30,
+      "skips": 0,
+      "seconds": 5.709,
+      "modules": [
+        "tests.mavlink.test_lifecycle_audit_v2",
+        "tests.mavlink.test_native_audit_v2"
+      ],
+      "additional_method": "tests.mavlink.test_telemetry.TelemetryTests.test_raised_clock_fault_withdraws_and_latches_before_propagating"
+    },
+    "validation": {
+      "initial_format_check": "FAIL: two test files required multiline with formatting",
+      "files": [
+        "tests/mavlink/test_lifecycle_audit_v2.py",
+        "tests/mavlink/test_native_audit_v2.py"
+      ],
+      "correction": "Applied Ruff format; final five-file format/check and Bandit PASS",
+      "initial_focused": "29 PASS, 6.613s",
+      "final_focused": "30 PASS, 5.709s",
+      "receiver_control": "Added CancelledError to two-operation, five-exception direct clock test; production unchanged"
+    },
+    "candidate_execution": "Managed comparison method executes Node on unchanged 16-case/48-step corpus; native processes mocked in runner tests, no new native compilation"
+  },
+  "retained_file_sha256": {
+    "cancellation-receipt-v3-final-green.log": "dea653e0b2899c7f1b872bc56bdfdfea902884a5d841e4be9588df7ec1a714a2",
+    "cancellation-receipt-v3-green.log": "24cacfa55fb5dc510216afbb39d22ad98a791fad232520a350d414a943d84f11",
+    "cancellation-receipt-v3-red.log": "5e5b2f8abff7f5ee086f5d68296033a40fe8e1b81bffd07cd2f54271264bc530",
+    "cancellation-receipt-v3-validation.json": "e0f0a86e9d763118753b1882730d113129919b43f193ee9800087b1ae22f2a18"
+  },
+  "sources": [
+    {
+      "url": "https://docs.python.org/3/library/asyncio-exceptions.html#asyncio.CancelledError",
+      "accessed": "2026-10-10",
+      "claim": "Cancellation inherits BaseException and normally must be re-raised."
+    },
+    {
+      "url": "https://docs.python.org/3/library/exceptions.html",
+      "accessed": "2026-10-10",
+      "claim": "SystemExit and KeyboardInterrupt are outside Exception."
+    }
+  ],
+  "limits": [
+    "Injected exception-object tests, not OS signal or process-kill qualification",
+    "Receipt write remains best-effort under storage/process failure",
+    "Value-based candidate clocks still do not prove callback-exception parity",
+    "No native compilation or new performance experiment",
+    "No production language winner, tactical, hardware, MLS/CNSA, uptime or complete audit claim"
+  ]
+}

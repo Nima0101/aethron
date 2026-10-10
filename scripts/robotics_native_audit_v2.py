@@ -232,7 +232,9 @@ def run(out, *, compiler="rustc"):
             ],
         )
         return report
-    except Exception as error:
+    except BaseException as error:
+        # Record interruption/cancellation without suppressing it or continuing
+        # another profile. The existing finally block retains the failed receipt.
         report["failure_type"] = type(error).__name__
         raise
     finally:

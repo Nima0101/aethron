@@ -259,7 +259,9 @@ def run(out):
             ],
         )
         return report
-    except Exception as exc:
+    except BaseException as exc:
+        # Retain the failure category for interruption/cancellation too, then
+        # propagate the original object; never turn cancellation into a result.
         report["failure_type"] = type(exc).__name__
         raise
     finally:

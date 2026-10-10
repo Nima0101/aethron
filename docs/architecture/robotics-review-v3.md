@@ -742,3 +742,16 @@ from a populated receiver; the C comparison remains fresh-packet-only. All prior
 four RED assertions, 43 passing methods and 24-case normal/sanitized C parity.
 Native fixtures are generated only. This is a coverage correction, not a
 production KEEP/MIGRATE decision or a review of signing/replay integration.
+
+## Preserve audit cancellation categories
+
+The [clock/cancellation review](../verification/robotics-comparator-coverage-v3.md#clock-exceptions-and-audit-cancellation-receipts)
+confirms that supplied clock values in the comparison corpus do not prove raised
+clock-callback behavior across languages. It also fixes a concrete evidence gap:
+managed/native audit runners now record interruption and cancellation categories
+before re-raising the same exception. Six RED assertions demonstrated omitted
+categories; 30 focused methods pass after correction. Direct Python receiver
+checks now include asyncio cancellation; production adapter and candidate drivers
+are unchanged. [Evidence](../verification/robotics-cancellation-receipt-v3.json)
+retains failure and validation records. The production technology reassessment
+and subsequent components remain incomplete.

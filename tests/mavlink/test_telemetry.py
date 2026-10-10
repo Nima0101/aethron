@@ -1,5 +1,6 @@
 """Optional SDK lane: synthetic real wire packets, no hardware qualification."""
 
+import asyncio
 import math
 import random
 import socket
@@ -122,7 +123,13 @@ class TelemetryTests(unittest.TestCase):
 
     def test_raised_clock_fault_withdraws_and_latches_before_propagating(self):
         for operation in ("snapshot", "ingest"):
-            for error_type in (RuntimeError, OSError, KeyboardInterrupt, SystemExit):
+            for error_type in (
+                RuntimeError,
+                OSError,
+                KeyboardInterrupt,
+                SystemExit,
+                asyncio.CancelledError,
+            ):
                 with self.subTest(operation=operation, error_type=error_type.__name__):
                     clock = Mock(return_value=self.now)
                     source = PassiveTelemetry(1, 1, clock=clock)

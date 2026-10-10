@@ -1,5 +1,6 @@
 """Native experiment ingress and negative evidence tests; no compiler download."""
 
+import asyncio
 import hashlib
 import importlib.util
 import json
@@ -103,6 +104,31 @@ class NativeAuditTests(unittest.TestCase):
             self.assertEqual(report["state"], "failed")
             self.assertEqual(report["failure_type"], "CalledProcessError")
             self.assertFalse(report["native_executed"])
+
+    def test_run_records_cancellation_without_swallowing_it(self):
+        for error_type in (KeyboardInterrupt, SystemExit, asyncio.CancelledError):
+            with (
+                self.subTest(error=error_type.__name__),
+                tempfile.TemporaryDirectory() as directory,
+            ):
+                out = Path(directory) / "attempt"
+                failure = error_type("synthetic-private-diagnostic")
+                with (
+                    patch.object(self.api, "retained_process", side_effect=failure) as process,
+                    self.assertRaises(error_type) as caught,
+                ):
+                    self.api.run(out)
+                self.assertIs(caught.exception, failure)
+                process.assert_called_once()
+                report = json.loads((out / "result.json").read_text())
+                self.assertEqual(report.get("failure_type"), error_type.__name__)
+                self.assertEqual(report["state"], "failed")
+                self.assertEqual(report["decision"], "PENDING")
+                self.assertIs(report["native_executed"], False)
+                self.assertEqual(report["native_attempts"], 0)
+                self.assertNotIn("parity", report)
+                self.assertNotIn("synthetic-private-diagnostic", (out / "result.json").read_text())
+                self.assert_source_receipt(report)
 
     def test_candidate_json_cannot_hide_duplicate_members_or_nonfinite_numbers(self):
         for label, payload, reason in (

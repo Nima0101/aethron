@@ -131,3 +131,48 @@ boundary. Using a C, Rust or Kotlin wrapper would still require those same calls
 to establish this evidence. This scoped tooling choice does not settle the
 production technology decision, which remains PENDING. No forward feature
 expansion or full-lane audit completion follows from the corrected finite corpus.
+
+## Clock exceptions and audit cancellation receipts
+
+Reviewed baseline: `1d77b03c0d33b1de60a9103646ca93b999a263d0`.
+The lifecycle fixture format supplies a `now` value for each operation. It does
+not invoke a failing clock callback in the JavaScript or Rust candidates. Invalid
+clock values and rollback cases therefore cannot establish exception propagation,
+cancellation or physical operator-stop behavior across those runtimes. No fixture
+or driver changes in this correction extend that claim.
+
+A separate executable reporting mismatch was found: both lifecycle audit runners
+caught `Exception`, while the existing `finally` wrote a failed receipt after a
+`KeyboardInterrupt`, `SystemExit` or `asyncio.CancelledError` without recording its
+failure category. They now catch `BaseException` only to set `failure_type`, then
+re-raise the original object immediately. No message, traceback or exception
+arguments are added to the receipt. The existing final write remains best-effort
+Python cleanup, not evidence of durability under process kill or storage failure.
+
+Python documents the [cancellation hierarchy and need to re-raise](https://docs.python.org/3/library/asyncio-exceptions.html#asyncio.CancelledError)
+and the [system-exiting exception hierarchy](https://docs.python.org/3/library/exceptions.html).
+This correction stays in the Python orchestrators because it records Python
+control flow around their existing compiler/process boundaries. A wrapper in C,
+Kotlin, JavaScript or Rust would observe process exit status rather than preserve
+the same in-process exception object. This is a scoped tooling decision, not a
+production receiver KEEP/MIGRATE result.
+
+Two regression methods cover three exception classes in each runner. Injection
+occurs at the managed runner's first child attempt and the native runner's compiler
+probe boundary. They verify identity-preserving propagation, one attempt only,
+failed/PENDING state, no parity claim, source bindings and omission of exception
+arguments. Native execution remains false at this pre-compilation boundary. These
+are injected exceptions, not OS signal-delivery or child-process shutdown tests.
+
+The existing direct receiver clock-fault method now also tests `CancelledError`
+for both ingest and snapshot, alongside its four prior exception classes. It
+populates both slots, verifies immediate withdrawal before propagation, and proves
+a recovered callback cannot revive the latched receiver. Production receiver code
+is unchanged. This direct Python evidence remains separate from candidate parity.
+
+The [source-bound receipt](robotics-cancellation-receipt-v3.json) records six RED
+assertions, a final 30-method PASS with no skips, and lint/format/security checks.
+An initial formatting failure is retained in the validation record. The real
+managed parity method still runs the unchanged 16-case/48-step corpus; no native
+compilation, full-suite, performance or deployment qualification is claimed.
+The earliest runtime choice remains PENDING and signing/replay remains unreviewed.
