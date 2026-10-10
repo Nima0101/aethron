@@ -472,3 +472,46 @@ fixture argv and mocked results, and the native test import now carries the same
 narrow rationale used by the other harness tests. No production adapter or
 candidate code changed. The production clock-exception gap and earliest-component
 review remain open; no qualification or completion claim follows.
+
+
+## Native execution receipt uncertainty
+
+FIX a negative-evidence ambiguity in the offline native harness. Previously,
+`native_executed: false` remained after a candidate invocation failed during
+output decoding, timeout handling, exit checking or finishing-clock handling.
+Those failures do not establish that the candidate never ran. Report schema 2
+adds `report_schema_version: 2` and `native_attempts` and gives `native_executed`
+three explicit values:
+
+- `false`: the native child wrapper has never been invoked in this run;
+- `null`: at least one invocation was attempted, but none returned through the
+  wrapper's exit, timing and JSON checks;
+- `true`: at least one invocation returned through those checks. This does not
+  establish measurement metadata validity, parity, or success of later attempts.
+
+`native_attempts` counts calls to the native child wrapper, including failures
+before process creation. It does not count confirmed process launches. A later
+failure preserves earlier confirmation. Consumers must check the schema version
+and distinguish `null` from `false`; Boolean coercion loses this distinction.
+Unversioned historical receipts retain their original bytes and interpretation.
+The existing `state`, `failure_type` and parity checks remain authoritative for
+comparison success. An unknown execution value cannot yield a successful run.
+
+The parent owns subprocess execution, timing and decoding. This bounded metadata
+correction belongs in that parent; moving it to C, Rust, JavaScript or a schema
+validator cannot observe parent-side failures reliably. It does not select a
+production runtime or introduce a new component. Python's documented
+[subprocess results and exceptions](https://docs.python.org/3/library/subprocess.html#subprocess.run)
+separate completion, exit status and timeout; none alone establishes valid JSON.
+The report deliberately retains uncertainty where the wrapper has not returned.
+
+[Source-bound verification](../verification/robotics-native-execution-review-v3.json)
+records eight RED assertions, then 26 passing focused methods. A fixed Python
+stand-in executes through the actual child/JSON path and preserves malformed
+stdout in a failed receipt with unknown execution. Compiler behavior is mocked
+for this fixture: it is not Rust qualification. The actual local native audit
+still stops at missing `rustc`, with zero native attempts and execution false.
+An initial test import error from omitted `PYTHONPATH` and two corrected lint
+findings are retained in the review record. Production and candidate sources are
+unchanged. The production clock-exception gap, earliest-component technology
+choice, subsequent components and overall lane completion remain open.

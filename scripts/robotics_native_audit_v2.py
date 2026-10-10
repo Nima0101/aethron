@@ -138,9 +138,11 @@ def run(out, *, compiler="rustc"):
     out.mkdir(parents=True, exist_ok=False)
     report = {
         "audit_policy_version": 3,
+        "report_schema_version": 2,
         "state": "failed",
         "decision": "PENDING",
         "native_executed": False,
+        "native_attempts": 0,
         "platform": platform.platform(),
         "driver_sha256": hashlib.sha256(DRIVER.read_bytes()).hexdigest(),
         "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
@@ -205,6 +207,12 @@ def run(out, *, compiler="rustc"):
                     ),
                     ("rust", [str(binary)]),
                 ):
+                    if name == "rust":
+                        report["native_attempts"] += 1
+                        # A failed wrapper may already have run the candidate. Unknown
+                        # is not evidence of non-execution; preserve earlier confirmation.
+                        if report["native_executed"] is False:
+                            report["native_executed"] = None
                     result, elapsed = child(command, cases, out, f"{profile}-{repeat}-{name}")
                     if name == "rust":
                         report["native_executed"] = True

@@ -185,6 +185,91 @@ class NativeAuditTests(unittest.TestCase):
                     self.assertEqual(report["state"], "failed")
                     self.assertEqual(report["failure_type"], "ValueError")
 
+    def test_failed_native_attempt_is_unknown_without_confirmed_execution(self):
+        cases = [{"name": "empty", "steps": [{"op": "snapshot", "now": "0"}]}]
+        expected = self.api.lifecycle_api().reference(cases)
+
+        def process(command, out, label, **kwargs):
+            if label.endswith("-compiler"):
+                Path(command[-1]).write_bytes(b"fixture only; never executed")
+            return subprocess.CompletedProcess(command, 0, b"fixture compiler", b""), 1
+
+        for target, failure, attempts, executed in (
+            ("checked-0-python", RuntimeError("reference_failure"), 0, False),
+            ("checked-0-rust", ValueError("malformed_output"), 1, None),
+            ("checked-0-rust", subprocess.CalledProcessError(3, ["fixture"]), 1, None),
+            ("checked-0-rust", subprocess.TimeoutExpired(["fixture"], 10), 1, None),
+            ("checked-0-rust", RuntimeError("clock_failure"), 1, None),
+            ("checked-0-rust", FileNotFoundError("candidate_missing"), 1, None),
+            ("optimized-0-rust", ValueError("malformed_output"), 2, True),
+            (None, None, 4, True),
+        ):
+
+            def child(command, cases, out, label, target=target, failure=failure):
+                if label == target:
+                    raise failure
+                result = {"results": expected, "peak_rss_kib": 0}
+                if label.endswith("-python"):
+                    result["runtime"] = "fixture-version"
+                return result, 1
+
+            with self.subTest(target=target, failure=failure):
+                with tempfile.TemporaryDirectory() as directory:
+                    out = Path(directory) / "attempt"
+                    # Receipt transitions only; no actual compiler or candidate execution.
+                    with (
+                        patch.object(self.api, "corpus", return_value=cases),
+                        patch.object(self.api, "retained_process", side_effect=process),
+                        patch.object(self.api, "child", side_effect=child),
+                    ):
+                        if failure is None:
+                            self.api.run(out)
+                        else:
+                            with self.assertRaises(type(failure)):
+                                self.api.run(out)
+                    report = json.loads((out / "result.json").read_text())
+                    self.assertIs(report["native_executed"], executed)
+                    self.assertEqual(report.get("native_attempts"), attempts)
+                    self.assertEqual(report.get("report_schema_version"), 2)
+                    self.assertEqual(report["state"], "failed" if failure else "compared")
+                    if failure:
+                        self.assertEqual(report["failure_type"], type(failure).__name__)
+
+    def test_malformed_fixture_process_retains_unknown_execution_receipt(self):
+        cases = [{"name": "empty", "steps": [{"op": "snapshot", "now": "0"}]}]
+        retained = self.api.retained_process
+
+        def process(command, out, label, **kwargs):
+            if label == "compiler-version":
+                return subprocess.CompletedProcess(command, 0, b"fixture compiler", b""), 1
+            if label.endswith("-compiler"):
+                binary = Path(command[-1])
+                binary.write_text(f"#!{sys.executable}\nprint('malformed fixture output')\n")
+                binary.chmod(0o700)
+                return subprocess.CompletedProcess(command, 0, b"", b""), 1
+            return retained(command, out, label, **kwargs)
+
+        with tempfile.TemporaryDirectory() as directory:
+            out = Path(directory) / "attempt"
+            # Execute a fixed Python stand-in through the actual child/JSON path.
+            # The compiler is simulated; this is not a Rust execution test.
+            with (
+                patch.object(self.api, "corpus", return_value=cases),
+                patch.object(self.api, "retained_process", side_effect=process),
+            ):
+                with self.assertRaises(json.JSONDecodeError):
+                    self.api.run(out)
+            report = json.loads((out / "result.json").read_text())
+            self.assertIsNone(report["native_executed"])
+            self.assertEqual(report["native_attempts"], 1)
+            self.assertEqual(report["report_schema_version"], 2)
+            self.assertEqual(report["state"], "failed")
+            self.assertEqual(report["failure_type"], "JSONDecodeError")
+            self.assertEqual(
+                (out / "checked-0-rust-stdout.log").read_bytes(), b"malformed fixture output\n"
+            )
+            self.assertEqual((out / "checked-0-rust-stderr.log").read_bytes(), b"")
+
     def test_missing_compiler_is_failure_with_retained_receipt(self):
         with tempfile.TemporaryDirectory() as directory:
             out = Path(directory) / "attempt"
