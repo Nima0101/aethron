@@ -1,7 +1,8 @@
 # P1.1 synthetic build-backend comparison
 
-The package backend decision remains **OPEN**. This experiment compares packaging
-contracts; it does not qualify either product package or select a winner.
+The scoped backend decision is **KEEP Setuptools**, recorded in
+[ADR0030](../decisions/0030-package-backend-review.json). These experiments compare
+packaging contracts; they do not qualify either product package.
 The root and edge packages both have optional native Cython build modes in their
 `setup.py` files. Any proposed replacement must preserve those modes, the supported
 Python/platform matrix, offline installation, resource inclusion and entry points.
@@ -48,12 +49,38 @@ missing/extra/changed resources, unrelated metadata directories, changed metadat
 licence/entry-point errors and rejection under optimized Python. These failures
 were probe defects, not evidence that a candidate backend failed the contract.
 
-Next compare optional native-extension builds and source distributions using
-small synthetic inputs. [Setuptools supports native extensions](https://setuptools.pypa.io/en/latest/userguide/ext_modules.html);
+The native comparison also rebuilds portable and Cython-compiled wheels from
+small synthetic source archives. [Setuptools supports native extensions](https://setuptools.pypa.io/en/latest/userguide/ext_modules.html);
 [uv_build currently supports pure Python](https://docs.astral.sh/uv/concepts/build-backend/).
 [Hatch build configuration](https://hatch.pypa.io/latest/config/build/) and
 [Flit project configuration](https://flit.pypa.io/en/stable/pyproject_toml.html)
 define the other tested packaging boundaries. Native-oriented alternatives remain
 eligible, including [meson-python](https://mesonbuild.com/meson-python/) and
 [scikit-build-core](https://scikit-build-core.readthedocs.io/en/latest/).
-No KEEP/MIGRATE decision or P1 completion follows from the pure-Python fixture.
+The pure-Python fixture alone cannot justify the decision; the native experiment
+and current build requirements support the limited KEEP. P1 is not complete.
+
+Run the additional native experiment with GCC/Clang, Python development headers,
+Git and CMake >=3.20 available:
+
+```sh
+python -m pip install --only-binary=:all: --require-hashes --no-deps \
+  --target build/native-backend-tools -r requirements-native-backend-probe-linux.lock
+python -m unittest tests.test_native_backend_probe -v
+python scripts/native_backend_probe.py --tools build/native-backend-tools \
+  --out build/native-backend-proof
+```
+
+Setuptools, Meson and scikit-build-core each passed portable and compiled cases
+on the Linux host. Portable builds receive invalid CC/CXX paths; compiled imports
+must resolve to an extension and preserve positive and negative `2**100` values.
+Source archives must exclude the unrelated fixture file and preserve the inputs.
+Initial scikit-build-core defaults tagged the portable wheel as platform-specific;
+explicit `wheel.cmake=false` corrected the fixture. Multiple source roots and a
+portable wheel with a native ABI tag are rejected by additional negative controls.
+
+The native lock pins Python-distributed tools for CPython3.13/Linux x86_64. The
+host compiler, Python headers, Git and CMake remain prerequisites, with versions
+recorded in CI artifacts. This is not a hermetic toolchain or proof of native
+byte reproducibility. `results.json` can be partial on failure; require exit zero
+and all six expected cases. No product module is imported or executed.
