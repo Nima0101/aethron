@@ -1,8 +1,10 @@
 """Recorded mono8 remapping: independent rays, invalid masks and strict bounds."""
 
 import importlib
+import traceback
 import unittest
 from dataclasses import FrozenInstanceError, asdict
+from unittest.mock import patch
 
 from aethron_edge.sensors.geometry import Pinhole
 from aethron_edge.sensors.packets import Raster, decode_image
@@ -33,6 +35,38 @@ def brown(source, output=None, coefficients=(0.0, 0.0, 0.0, 0.0, 0.0), radius=3.
 
 
 class RecordedRasterClaims(unittest.TestCase):
+    def test_fixed_error_suppresses_display_but_retains_exception_context(self):
+        api = importlib.import_module("aethron_edge.sensors.raster_rectification")
+        frame, lens = raster(1, b"\x00"), brown(camera(1))
+        sentinel = "private-calibration-detail"
+        for rectify in (api.rectify_mono8_recorded, api.rectify_mono16_recorded):
+            for error_type in (ValueError, TypeError, AttributeError, OverflowError):
+                with self.subTest(entry=rectify.__name__, error=error_type.__name__):
+                    original = error_type(sentinel)
+                    with patch.object(LensCalibration, "model_validate", side_effect=original):
+                        with self.assertRaises(ValueError) as raised:
+                            rectify(frame, lens)
+                    error = raised.exception
+                    self.assertEqual(str(error), "invalid_raster_rectification")
+                    self.assertNotIn(sentinel, repr(error))
+                    self.assertTrue(error.__suppress_context__)
+                    self.assertIsNone(error.__cause__)
+                    self.assertIs(error.__context__, original)
+                    self.assertIn(sentinel, str(error.__context__))
+                    self.assertNotIn(sentinel, "".join(traceback.format_exception(error)))
+
+    def test_unhandled_runtime_and_control_exceptions_propagate(self):
+        api = importlib.import_module("aethron_edge.sensors.raster_rectification")
+        frame, lens = raster(1, b"\x00"), brown(camera(1))
+        for rectify in (api.rectify_mono8_recorded, api.rectify_mono16_recorded):
+            for error_type in (RuntimeError, MemoryError, KeyboardInterrupt, SystemExit):
+                with self.subTest(entry=rectify.__name__, error=error_type.__name__):
+                    original = error_type("injected-fault")
+                    with patch.object(LensCalibration, "model_validate", side_effect=original):
+                        with self.assertRaises(error_type) as raised:
+                            rectify(frame, lens)
+                    self.assertIs(raised.exception, original)
+
     def test_direct_records_do_not_validate_or_freeze_caller_buffers(self):
         api = importlib.import_module("aethron_edge.sensors.raster_rectification")
         for record_type in (api.RectifiedMono8, api.RectifiedMono16):

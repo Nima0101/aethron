@@ -1,4 +1,10 @@
-"""Recorded intensity count remapping v1; no live admission or calibration claim."""
+"""Recorded intensity count remapping v1; no live admission or calibration claim.
+
+Handled validation failures expose a fixed message with suppressed context display,
+not erased exception context or traceback state. Do not serialize exception objects
+or traceback locals as privacy-safe diagnostics. Unexpected runtime failures and
+process-control exceptions propagate; the fixed message does not cover all faults.
+"""
 
 import math
 from dataclasses import dataclass, field
