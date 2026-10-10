@@ -79,6 +79,11 @@ def _read(stream: BinaryIO, size: int, allow_eof=False):
             if allow_eof and not buffer:
                 return None
             raise ValueError("truncated_record")
+        # A complete immutable read already owns the required bytes. Avoid two
+        # payload-sized copies; fragmented/custom byte subclasses retain the
+        # checked accumulation path and always return an exact bytes object.
+        if not buffer and type(block) is bytes and len(block) == size:
+            return block
         buffer.extend(block)
     return bytes(buffer)
 
