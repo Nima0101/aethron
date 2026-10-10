@@ -20,6 +20,9 @@ The [hosted retention correction](workflow-retention-review-v3.md) retains raw
 transport and tool/build observations without claiming execution attestation.
 The [bundle/artifact integration review](bundle-artifact-integration-v3.md)
 checks independent failure retention and report association across the real APIs.
+The [portable consumer corpus](../consumer-vectors-v1.md) makes six of those
+outcomes reusable; the [readiness inventory](../p15-readiness-v1.md) explicitly
+retains unfinished procedure, producer-consumer and installed-product software gates.
 
 The [measurement lifecycle correction](#follow-up-measurement-lifecycle--2026-10-10)
 qualifies the older allocation results and corrects all three measurement drivers.

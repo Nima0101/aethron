@@ -98,6 +98,9 @@ reference matching from raw inputs against one plan. Its software result require
 both checks; capture artifact verification and physical qualification remain false.
 The [stdin bundle command](campaign-bundle-stream-v1.md) accepts one bounded binary
 frame, preserves original evidence bytes, and emits the same report with exit 0/1/2.
+The [portable synthetic vectors](consumer-vectors-v1.md) reproduce six consumer
+outcomes without Python fixture builders. The [P4/P15 readiness inventory](p15-readiness-v1.md)
+separates implemented checks, unfinished software and external qualification gates.
 
 ## Technology decision and execution plan
 

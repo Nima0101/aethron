@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_commit": "488d9deb4dc30193152447efa74272d0436fe047",
+  "source_state": "Uncommitted tracked-format corpus/runner addition over baseline. Hashes are post-run file observations, not an execution attestation.",
+  "python": "3.13.5",
+  "decision": "JSON vectors with exact UTF-8 strings/hex payloads; direct Python API runner",
+  "production_files_changed": false,
+  "red": {
+    "reason": "Portable corpus missing",
+    "methods": 3,
+    "assertion_failures": 3,
+    "errors": 0
+  },
+  "final_runner": {
+    "methods": 3,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "cases": 6,
+    "bundle_evaluations": 6,
+    "artifact_evaluations": 7
+  },
+  "related_run": {
+    "command": "python3 -m unittest qualification.tests.test_consumer_vectors qualification.tests.test_bundle_artifact_integration qualification.tests.test_campaign_bundle qualification.tests.test_campaign_bundle_cli qualification.tests.test_campaign_references qualification.tests.test_campaign qualification.tests.test_artifacts qualification.tests.test_evidence -q",
+    "methods": 62,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "timing": "Before final extra fixture-key assertions; the three affected runner methods then passed again."
+  },
+  "temporary_corpus_controls": {
+    "empty": {
+      "methods": 3,
+      "failures": 3,
+      "errors": 0,
+      "skips": 0
+    },
+    "missing": {
+      "methods": 3,
+      "failures": 3,
+      "errors": 0,
+      "skips": 0
+    },
+    "duplicate": {
+      "methods": 3,
+      "failures": 3,
+      "errors": 0,
+      "skips": 0
+    },
+    "erased_stale_finding": {
+      "methods": 3,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0
+    },
+    "altered_bytes_reported_passed": {
+      "methods": 3,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0
+    }
+  },
+  "control_method": "Copy tracked JSON into a TemporaryDirectory; patch only runner CORPUS path; execute its real three tests; restore path and remove temporary files. No production function patched.",
+  "sources_sha256": {
+    "qualification/fixtures/consumer-vectors-v1.json": "8c3f345a6e8e3b947ca94ca4b4e0817e2d3961ff43bade6cff2adc5f2b4daff9",
+    "qualification/tests/test_consumer_vectors.py": "4d1c729e11d84534b65828fd15d9e1649ff0b493eda6fb0d99922c5e3abfb9d4",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "qualification/artifacts.py": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+    "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+    "qualification/campaign_references.py": "ffae611838d8627c036c68bd3e6988dab9656cbc6aee8f7032857a34199e6686",
+    "qualification/campaign_bundle.py": "1584e531f994fde5c612dce52eafc993adfe51044d9338b5db27d97fe843e32e",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e"
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_new_runner": "PASS",
+    "diff": "PASS"
+  },
+  "limitations": [
+    "Curated partial output projections, not comprehensive schema conformance.",
+    "Reference Python execution only; no independent native consumer verified.",
+    "Repository fixture loader, not hostile-upload admission.",
+    "Synthetic declarations and opaque bytes, not actual sensor/procedure evidence.",
+    "No installed product, release/help coverage, target latency or physical qualification."
+  ],
+  "physical_qualification_passed": false,
+  "lane_complete": false
+}
