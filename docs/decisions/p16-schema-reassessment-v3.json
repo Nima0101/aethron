@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "p16-schema-reassessment-v3",
+  "component": "P16 six structural schemas and offline conformance tooling",
+  "decision": "KEEP",
+  "constraints": [
+    "Publish closed versioned JSON contracts consumable outside one language; schemas are trusted repository inputs, not arbitrary uploaded programs.",
+    "Check finite local fixtures with external reference retrieval denied and no coercion; structure must not substitute for byte validation, authentication or time policy.",
+    "No deployment target, throughput SLA or hard deadline is specified for this developer/CI tooling."
+  ],
+  "alternatives": [
+    "JSON Schema 2020-12 with Python jsonschema and an explicitly non-retrieving Registry.",
+    "JavaScript/TypeScript Ajv compiled JSON Schema with coercion disabled and trusted schemas.",
+    "Rust jsonschema with explicit retrieval and regex configuration.",
+    "CUE closed definitions and constraint unification, with JSON Schema import/export interoperability reviewed separately."
+  ],
+  "rationale": [
+    "KEEP JSON Schema as the published contract: it preserves a standard, independently consumable structural boundary rather than making one language model the exchange format.",
+    "KEEP the offline Python checker for direct comparison with the real Python APIs and explicit reference rejection. Ajv and Rust are credible alternate engines; no specified workload or measured advantage establishes a migration winner.",
+    "CUE offers a constraint-oriented model but replacing the published standard requires demonstrated semantic equivalence for the existing contracts. Installation, familiarity and rewrite cost are not selection criteria.",
+    "Correct the ADR reference pattern now: whitespace exclusion admitted raw controls, non-URI punctuation and malformed percent escapes. An explicit ASCII character profile and percent triplets fixes the demonstrated defect without relying on optional format checks.",
+    "Nineteen focused schema methods pass, including 22 portable reference cases. Node ECMAScript patterns in normal and Unicode modes agree on all 22 cases; this is pattern evidence, not complete validator parity."
+  ],
+  "limits": [
+    "The ADR profile restricts characters; it is not a complete URI, DNS, source-credibility or dereference validator. Encoded controls remain URI data; no decoding or network request occurs.",
+    "Integral floats can satisfy JSON Schema; duplicate JSON keys, byte bounds, signatures, intervals, key bindings and cross-field uniqueness still require runtime checks.",
+    "Python regex semantics are not universally ECMAScript-equivalent. The Node probe covers only this fixed pattern and finite corpus.",
+    "No full Ajv, Rust or CUE implementation was executed or benchmarked. No migration winner is deferred.",
+    "This review does not complete the lane, attest a distribution or establish MLS/CNSA, availability or physical timing. Insufficient information for tactical deployment."
+  ],
+  "evidence": [
+    "https://python-jsonschema.readthedocs.io/en/stable/referencing/",
+    "https://ajv.js.org/security.html",
+    "https://ajv.js.org/options.html",
+    "https://docs.rs/jsonschema/latest/jsonschema/",
+    "https://cuelang.org/docs/concept/how-cue-enables-data-validation/",
+    "https://json-schema.org/understanding-json-schema/reference/regular_expressions",
+    "https://www.rfc-editor.org/rfc/rfc3986.html"
+  ]
+}

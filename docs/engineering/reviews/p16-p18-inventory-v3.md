@@ -1,6 +1,6 @@
 # P16–P18 review inventory v3
 
-Snapshot: `d6edbc52de8781d41d5dcf8fa5e9f4bf3ff80474`, plus fresh policy/evidence technology
+Snapshot: `8df5c4826f943802437df95d91efc8d924608655`, plus fresh structural-schema technology
 reassessment, reviewed 2026-10-10. This is an evidence inventory, not an architecture
 approval, qualification statement or lane-completion marker.
 
@@ -16,7 +16,7 @@ remain historical inputs. The consumed JSON-bound helper belongs to the foundati
 | Signature, trust, expiry and revocation | [Original review](p16-trust-v3.md). [Fresh reassessment](p16-trust-reassessment-v3.md): KEEP bounded native crypto boundary; add real missing-package process checks, preserve provisioning limits and source-bound primitive evidence. |
 | Independent pinned-policy validation | [Original review](p16-policy-admission-v3.md). [Fresh reassessment](p16-policy-evidence-reassessment-v3.md): KEEP exact-byte external pin and complete metadata validation; existing tests detect removed pin comparison. No persistence or enrollment. |
 | Evidence bytes | [Original review](p16-evidence-v3.md). [Fresh reassessment](p16-policy-evidence-reassessment-v3.md): KEEP immutable per-blob binding; existing tests detect weakened set comparison. No content qualification. |
-| Three passport schemas and conformance | [Review](p16-conformance-v3.md): KEEP structural schema tooling; FIX positive authentication control and dependency closure. |
+| Three passport schemas and conformance | [Review](p16-conformance-v3.md): KEEP structural schema tooling; FIX positive authentication control and dependency closure. [Fresh reassessment](p16-schema-reassessment-v3.md): KEEP standard contracts and offline checker; preserve lexical/authentication gaps. |
 | Task/federation structural schemas | [Review](p16-interop-schemas-v3.md): FIX missing portable structural contracts; preserve runtime admission. |
 | Task descriptions | [Review](p16-task-v3.md): KEEP bounded descriptions; no task execution or replay store. |
 | Bundle verification | [Review](p16-bundle-v3.md): KEEP snapshot composition; all revocation lists rechecked. |
@@ -24,7 +24,7 @@ remain historical inputs. The consumed JSON-bound helper belongs to the foundati
 | Inbox resource accounting | [Review](p16-inbox-v3.md): KEEP local bounded queue; no transport or hard real-time guarantee. |
 | Inbox/federation composition | [Review](p16-delivery-boundary-v3.md): KEEP primitives; ADD real-API expiry, revocation, revision-floor and close traces. Caller refresh and in-flight cancellation are not implemented. |
 | Packaging evidence | [Review](p16-packaging-v3.md): FIX installed/source identity comparison, [package input coverage](p16-packaging-inputs-v3.md) and [installed fixture coverage](p16-installed-corpus-v3.md) and [installed policy API cases](p16-installed-policy-v3.md); no full-distribution attestation. |
-| ADR publication tooling | [Review](p16-adr-publication-v3.md): FIX schema/record test discovery and ADR-only workflow triggers; structure is not evidence truth. |
+| ADR publication tooling | [Review](p16-adr-publication-v3.md): FIX schema/record test discovery and ADR-only workflow triggers; structure is not evidence truth. [Fresh reassessment](p16-schema-reassessment-v3.md): FIX reference character profile; raw controls and malformed percent escapes rejected without optional format validation. |
 | Comparison and mutation probes | FIX optimized-mode evidence loss; [response types](p16-probe-response-v3.md); [capture bounds](p16-probe-capture-v3.md); [tracing lifecycle](p16-probe-tracing-v3.md); [source consistency](p16-probe-snapshot-v3.md); [timing accounting](p16-probe-timing-v3.md); [mutation integrity](p16-mutation-integrity-v3.md); historical source-manifest correction below. |
 
 ## Missing implementation and unsupported claims

@@ -525,6 +525,20 @@ class ArchitectureDecisionConformance(unittest.TestCase):
                 with self.assertRaises(ValidationError):
                     check.validate(doc)
 
+    def test_reference_character_profile_without_format_checker(self):
+        check = validator("architecture-decision-v1.schema.json")
+        self.assertIsNone(check.format_checker)
+        corpus = json.loads((ROOT / "examples/interop/adr-reference-vectors-v1.json").read_bytes())
+        cases = corpus["cases"]
+        self.assertEqual(len(cases), 22)
+        self.assertEqual(len({case["name"] for case in cases}), len(cases))
+        self.assertEqual(sum(case["valid"] for case in cases), 6)
+        for case in cases:
+            doc = self.document()
+            doc["evidence"] = [case["reference"]]
+            with self.subTest(case=case["name"]):
+                self.assertIs(check.is_valid(doc), case["valid"])
+
     def test_references_reject_without_optional_format_checker(self):
         check = validator("architecture-decision-v1.schema.json")
         self.assertIsNone(check.format_checker)
