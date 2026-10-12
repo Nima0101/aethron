@@ -184,6 +184,11 @@ class DeclarationConsumerTests(unittest.TestCase):
 
 
 class DeclarationCollectionBoundaryTests(unittest.TestCase):
+    generate = staticmethod(consumer.declaration_collection_boundaries)
+    check = staticmethod(consumer.check_declaration_collection_boundaries)
+    diagnostic = "declaration_collection_"
+    count = 7
+
     def setUp(self):
         self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
         original = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
@@ -258,12 +263,12 @@ class DeclarationCollectionBoundaryTests(unittest.TestCase):
 
     def test_independent_documents_reports_and_isolated_binary_calls(self):
         original = copy.deepcopy(self.case)
-        self.assertEqual(consumer.declaration_collection_boundaries(self.case), self.cases)
+        self.assertEqual(self.generate(self.case), self.cases)
         with patch.object(
             consumer.subprocess, "run", side_effect=[self.result(r) for _, r in self.cases.values()]
         ) as run:
-            self.assertEqual(consumer.check_declaration_collection_boundaries(self.case), 7)
-        self.assertEqual(run.call_count, 7)
+            self.assertEqual(self.check(self.case), self.count)
+        self.assertEqual(run.call_count, self.count)
         for call, (raw, _) in zip(run.call_args_list, self.cases.values()):
             self.assertLessEqual(len(raw), 65536)
             self.assertEqual(
@@ -312,9 +317,9 @@ class DeclarationCollectionBoundaryTests(unittest.TestCase):
                         ):
                             with self.assertRaisesRegex(
                                 AssertionError,
-                                "^declaration_collection_" + mode + "_mismatch:" + name + "$",
+                                "^" + self.diagnostic + mode + "_mismatch:" + name + "$",
                             ):
-                                consumer.check_declaration_collection_boundaries(self.case)
+                                self.check(self.case)
 
     def test_every_boundary_checks_exit_status_stdout_and_stderr(self):
         good = [self.result(report) for _, report in self.cases.values()]
@@ -332,9 +337,45 @@ class DeclarationCollectionBoundaryTests(unittest.TestCase):
                     setattr(results[index], key, value)
                     with patch.object(consumer.subprocess, "run", side_effect=results):
                         with self.assertRaisesRegex(
-                            AssertionError, "^declaration_collection_process_mismatch:" + name + "$"
+                            AssertionError, "^" + self.diagnostic + "process_mismatch:" + name + "$"
                         ):
-                            consumer.check_declaration_collection_boundaries(self.case)
+                            self.check(self.case)
+
+
+class DeclarationClockBoundaryTests(DeclarationCollectionBoundaryTests):
+    generate = staticmethod(consumer.declaration_clock_boundaries)
+    check = staticmethod(consumer.check_declaration_clock_boundaries)
+    diagnostic = "declaration_clock_"
+    count = 12
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        original = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        self.cases = {}
+        # Literal boundary expectations are independent of the installed generator.
+        for name, left, right, findings in (
+            ("reference_positive_50", (49, 1), (49, 1), []),
+            ("reference_positive_51", (50, 1), (50, 1), ["clock_reference_skew"]),
+            ("reference_negative_50", (-49, 1), (-49, 1), []),
+            ("reference_negative_51", (-50, 1), (-50, 1), ["clock_reference_skew"]),
+            ("pair_offset_forward_50", (-24, 1), (24, 1), []),
+            ("pair_offset_forward_51", (-24, 1), (24, 2), ["clock_pair_skew"]),
+            ("pair_offset_reverse_50", (24, 1), (-24, 1), []),
+            ("pair_offset_reverse_51", (24, 2), (-24, 1), ["clock_pair_skew"]),
+            ("pair_uncertainty_forward_50", (0, 20), (0, 30), []),
+            ("pair_uncertainty_forward_51", (0, 20), (0, 31), ["clock_pair_skew"]),
+            ("pair_uncertainty_reverse_50", (0, 30), (0, 20), []),
+            ("pair_uncertainty_reverse_51", (0, 31), (0, 20), ["clock_pair_skew"]),
+        ):
+            doc = copy.deepcopy(original)
+            for index, (offset, uncertainty) in ((1, left), (4, right)):
+                self.assertEqual(doc["records"][index]["kind"], "clock")
+                doc["records"][index]["data"] = {
+                    "at_ms": 1050,
+                    "offset_ms": offset,
+                    "uncertainty_ms": uncertainty,
+                }
+            self.save(name, doc, 2, 6, findings)
 
 
 class DeclarationArgumentConsumerTests(unittest.TestCase):

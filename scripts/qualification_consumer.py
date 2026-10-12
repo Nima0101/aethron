@@ -472,6 +472,74 @@ def check_declaration_collection_boundaries(case):
     return len(cases)
 
 
+def declaration_clock_boundaries(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    template = case["expected_report"]["captures"][0]["report"]["declaration"]
+    cases = {}
+
+    def save(name, clocks, findings):
+        changed = copy.deepcopy(doc)
+        records = [row for row in changed["records"] if row["kind"] == "clock"]
+        for row, (offset, uncertainty) in zip(records, clocks):
+            row["data"].update(offset_ms=offset, uncertainty_ms=uncertainty)
+        raw = canonical(changed).encode("ascii")
+        expected = copy.deepcopy(template)
+        expected.update(
+            input_sha256=hashlib.sha256(raw).hexdigest(),
+            declaration_checks_passed=not findings,
+            findings=findings,
+        )
+        cases[name] = raw, expected
+
+    for sign, label in ((1, "positive"), (-1, "negative")):
+        for excess in (0, 1):
+            # Equal offsets isolate reference skew: pairwise skew stays at 2 ms.
+            clock = (sign * (49 + excess), 1)
+            save(
+                "reference_" + label + "_" + str(50 + excess),
+                (clock, clock),
+                ["clock_reference_skew"] if excess else [],
+            )
+    for family in ("offset", "uncertainty"):
+        for reverse in (False, True):
+            for excess in (0, 1):
+                # Each reference bound remains valid while the pair is 50/51 ms.
+                clocks = (
+                    ((-24, 1), (24, 1 + excess))
+                    if family == "offset"
+                    else ((0, 20), (0, 30 + excess))
+                )
+                save(
+                    "pair_" + family + ("_reverse_" if reverse else "_forward_") + str(50 + excess),
+                    clocks[::-1] if reverse else clocks,
+                    ["clock_pair_skew"] if excess else [],
+                )
+    return cases
+
+
+def check_declaration_clock_boundaries(case):
+    cases = declaration_clock_boundaries(case)
+    instant = case["captures"][0]["now_ms"]
+    for name, (raw, expected_report) in cases.items():
+        if canonical(validate(raw, now_ms=instant)) != canonical(expected_report):
+            raise AssertionError("declaration_clock_report_mismatch:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        expected = (
+            0 if expected_report["declaration_checks_passed"] else 1,
+            (canonical(expected_report) + os.linesep).encode("ascii"),
+            b"",
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_clock_process_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -1325,6 +1393,7 @@ def main():
     declaration_argument_cases = check_declaration_arguments(complete)
     declaration_boundary_cases = check_declaration_input_boundary(complete)
     declaration_collection_cases = check_declaration_collection_boundaries(complete)
+    declaration_clock_cases = check_declaration_clock_boundaries(complete)
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -1377,6 +1446,7 @@ def main():
                 "declaration_invalid_argument_cases": declaration_argument_cases,
                 "declaration_exact_limit_cases": declaration_boundary_cases,
                 "declaration_collection_boundary_cases": declaration_collection_cases,
+                "declaration_clock_boundary_cases": declaration_clock_cases,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,

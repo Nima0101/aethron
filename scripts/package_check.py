@@ -102,6 +102,7 @@ def run():
             "declaration_invalid_argument_cases": 29,
             "declaration_exact_limit_cases": 1,
             "declaration_collection_boundary_cases": 7,
+            "declaration_clock_boundary_cases": 12,
             "declaration_malformed_inputs": 293,
             "declaration_closed_pipe_cases": 6,
             "bundle_vectors": 6,
