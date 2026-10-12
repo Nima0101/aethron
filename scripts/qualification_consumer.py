@@ -386,6 +386,92 @@ def declaration_collection_inputs(raw):
     return cases
 
 
+def declaration_collection_boundaries(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    template = case["expected_report"]["captures"][0]["report"]["declaration"]
+    cases = {}
+
+    def save(name, changed, sensors, records, findings):
+        raw = canonical(changed).encode("ascii")
+        expected = copy.deepcopy(template)
+        expected.update(
+            input_sha256=hashlib.sha256(raw).hexdigest(),
+            sensor_count=sensors,
+            record_count=records,
+            evidence_counts={"synthetic": records, "recorded": 0, "external_unverified": 0},
+            declaration_checks_passed=not findings,
+            findings=findings,
+        )
+        cases[name] = raw, expected
+
+    for count in (1, 5):
+        changed = copy.deepcopy(doc)
+        if count == 1:
+            changed["rig"]["sensors"] = changed["rig"]["sensors"][:1]
+            changed["records"] = [
+                row
+                for row in changed["records"]
+                if row["sensor_id"] == doc["rig"]["sensors"][0]["id"]
+            ]
+        else:
+            for kind in ("rgb", "radar", "nir"):
+                changed["rig"]["sensors"].append(dict(doc["rig"]["sensors"][0], id=kind, kind=kind))
+                changed["records"].extend(
+                    dict(copy.deepcopy(row), sensor_id=kind)
+                    for row in doc["records"]
+                    if row["sensor_id"] == doc["rig"]["sensors"][0]["id"]
+                )
+        digest = hashlib.sha256(canonical(changed["rig"]).encode("ascii")).hexdigest()
+        for row in changed["records"]:
+            row["rig_sha256"] = digest
+        save(str(count) + "_sensors_complete", changed, count, count * 3, [])
+        changed["records"] = []
+        save(
+            str(count) + "_sensors_empty",
+            changed,
+            count,
+            0,
+            ["missing_calibration", "missing_clock", "missing_environment"],
+        )
+
+    for name in ("equal_capture", "equal_calibration", "equal_both"):
+        changed = copy.deepcopy(doc)
+        if name != "equal_calibration":
+            changed["capture"]["start_ms"] = changed["capture"]["end_ms"]
+        if name != "equal_capture":
+            for row in changed["records"]:
+                if row["kind"] == "calibration":
+                    row["data"] = {"valid_from_ms": 1050, "valid_until_ms": 1050}
+        # Equality is structurally valid. A zero-length calibration cannot
+        # cover the original nonzero capture, so retain that semantic finding.
+        findings = ["calibration_interval"] if name == "equal_calibration" else []
+        save(name, changed, 2, 6, findings)
+    return cases
+
+
+def check_declaration_collection_boundaries(case):
+    cases = declaration_collection_boundaries(case)
+    instant = case["captures"][0]["now_ms"]
+    for name, (raw, expected_report) in cases.items():
+        if canonical(validate(raw, now_ms=instant)) != canonical(expected_report):
+            raise AssertionError("declaration_collection_report_mismatch:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        expected = (
+            0 if expected_report["declaration_checks_passed"] else 1,
+            (canonical(expected_report) + os.linesep).encode("ascii"),
+            b"",
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_collection_process_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -1238,6 +1324,7 @@ def main():
     complete = next(case for case in cases if case["id"] == "complete")
     declaration_argument_cases = check_declaration_arguments(complete)
     declaration_boundary_cases = check_declaration_input_boundary(complete)
+    declaration_collection_cases = check_declaration_collection_boundaries(complete)
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -1289,6 +1376,7 @@ def main():
                 "declaration_cases": declaration_cases,
                 "declaration_invalid_argument_cases": declaration_argument_cases,
                 "declaration_exact_limit_cases": declaration_boundary_cases,
+                "declaration_collection_boundary_cases": declaration_collection_cases,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,

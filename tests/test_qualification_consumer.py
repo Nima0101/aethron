@@ -183,6 +183,160 @@ class DeclarationConsumerTests(unittest.TestCase):
                                 consumer.check_declaration(case)
 
 
+class DeclarationCollectionBoundaryTests(unittest.TestCase):
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        original = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        self.cases = {}
+        # Construct independent documents and literal semantic expectations;
+        # neither the installed generator nor validator supplies this oracle.
+        for count in (1, 5):
+            for empty in (False, True):
+                doc = copy.deepcopy(original)
+                sensors = doc["rig"]["sensors"][:1] if count == 1 else doc["rig"]["sensors"]
+                if count == 5:
+                    for kind in ("rgb", "radar", "nir"):
+                        sensor = copy.deepcopy(sensors[0])
+                        sensor.update(id=kind, kind=kind)
+                        sensors.append(sensor)
+                doc["rig"]["sensors"] = sensors
+                digest = hashlib.sha256(self.encode(doc["rig"])).hexdigest()
+                doc["records"] = []
+                if not empty:
+                    for sensor in sensors:
+                        templates = [
+                            row for row in original["records"] if row["sensor_id"] == sensor["id"]
+                        ] or original["records"][:3]
+                        for template in templates:
+                            record = copy.deepcopy(template)
+                            record.update(sensor_id=sensor["id"], rig_sha256=digest)
+                            doc["records"].append(record)
+                findings = (
+                    ["missing_calibration", "missing_clock", "missing_environment"] if empty else []
+                )
+                name = str(count) + "_sensors_" + ("empty" if empty else "complete")
+                self.save(name, doc, count, 0 if empty else count * 3, findings)
+        for name, capture, calibration, findings in (
+            ("equal_capture", True, False, []),
+            ("equal_calibration", False, True, ["calibration_interval"]),
+            ("equal_both", True, True, []),
+        ):
+            doc = copy.deepcopy(original)
+            if capture:
+                doc["capture"]["start_ms"] = 1050
+            if calibration:
+                for record in doc["records"]:
+                    if record["kind"] == "calibration":
+                        record["data"].update(valid_from_ms=1050, valid_until_ms=1050)
+            self.save(name, doc, 2, 6, findings)
+
+    def encode(self, value):
+        return json.dumps(value, sort_keys=True, separators=(",", ":")).encode("ascii")
+
+    def save(self, name, doc, sensors, records, findings):
+        raw = self.encode(doc)
+        report = {
+            "version": 1,
+            "input_sha256": hashlib.sha256(raw).hexdigest(),
+            "declaration_checks_passed": not findings,
+            "sensor_count": sensors,
+            "record_count": records,
+            "evidence_counts": {"synthetic": records, "recorded": 0, "external_unverified": 0},
+            "findings": findings,
+            "artifacts_verified": False,
+            "physical_qualification_passed": False,
+            "physical_status": "blocked_external_evidence_and_review",
+        }
+        self.cases[name] = raw, report
+
+    def result(self, report):
+        return SimpleNamespace(
+            returncode=0 if report["declaration_checks_passed"] else 1,
+            stdout=self.encode(report) + os.linesep.encode("ascii"),
+            stderr=b"",
+        )
+
+    def test_independent_documents_reports_and_isolated_binary_calls(self):
+        original = copy.deepcopy(self.case)
+        self.assertEqual(consumer.declaration_collection_boundaries(self.case), self.cases)
+        with patch.object(
+            consumer.subprocess, "run", side_effect=[self.result(r) for _, r in self.cases.values()]
+        ) as run:
+            self.assertEqual(consumer.check_declaration_collection_boundaries(self.case), 7)
+        self.assertEqual(run.call_count, 7)
+        for call, (raw, _) in zip(run.call_args_list, self.cases.values()):
+            self.assertLessEqual(len(raw), 65536)
+            self.assertEqual(
+                call.args[0],
+                [consumer.sys.executable, "-I", "-m", "qualification", "--now-ms", "1050"],
+            )
+            self.assertEqual(
+                call.kwargs,
+                {"input": raw, "capture_output": True, "check": False, "timeout": 10},
+            )
+        self.assertEqual(self.case, original)
+
+    def test_every_boundary_rejects_corrupted_library_and_process_reports(self):
+        reports = [report for _, report in self.cases.values()]
+        for index, (name, (_, report)) in enumerate(self.cases.items()):
+            for key, value in (
+                ("version", True),
+                ("input_sha256", "0" * 64),
+                ("sensor_count", float(report["sensor_count"])),
+                ("record_count", float(report["record_count"])),
+                ("declaration_checks_passed", int(report["declaration_checks_passed"])),
+                ("findings", [] if report["findings"] else ["capture_stale"]),
+                ("artifacts_verified", True),
+                ("artifacts_verified", 0),
+                ("physical_qualification_passed", True),
+                ("physical_qualification_passed", 0),
+                ("physical_status", "qualified"),
+                *(
+                    ("evidence_counts", dict(report["evidence_counts"], **{kind: float(count)}))
+                    for kind, count in report["evidence_counts"].items()
+                ),
+            ):
+                changed = copy.deepcopy(report)
+                changed[key] = value
+                for mode in ("report", "process"):
+                    with self.subTest(case=name, field=key, mode=mode):
+                        library = copy.deepcopy(reports)
+                        results = [self.result(item) for item in reports]
+                        if mode == "report":
+                            library[index] = changed
+                        else:
+                            results[index].stdout = self.encode(changed) + os.linesep.encode()
+                        with (
+                            patch.object(consumer, "validate", side_effect=library),
+                            patch.object(consumer.subprocess, "run", side_effect=results),
+                        ):
+                            with self.assertRaisesRegex(
+                                AssertionError,
+                                "^declaration_collection_" + mode + "_mismatch:" + name + "$",
+                            ):
+                                consumer.check_declaration_collection_boundaries(self.case)
+
+    def test_every_boundary_checks_exit_status_stdout_and_stderr(self):
+        good = [self.result(report) for _, report in self.cases.values()]
+        for index, name in enumerate(self.cases):
+            for key, value in (
+                ("returncode", 1 - good[index].returncode),
+                ("returncode", 2),
+                ("stdout", b""),
+                ("stdout", good[index].stdout.rstrip(b"\r\n")),
+                ("stdout", good[index].stdout + b"PRIVATE"),
+                ("stderr", b"PRIVATE"),
+            ):
+                with self.subTest(case=name, field=key):
+                    results = copy.deepcopy(good)
+                    setattr(results[index], key, value)
+                    with patch.object(consumer.subprocess, "run", side_effect=results):
+                        with self.assertRaisesRegex(
+                            AssertionError, "^declaration_collection_process_mismatch:" + name + "$"
+                        ):
+                            consumer.check_declaration_collection_boundaries(self.case)
+
+
 class DeclarationArgumentConsumerTests(unittest.TestCase):
     def setUp(self):
         self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
