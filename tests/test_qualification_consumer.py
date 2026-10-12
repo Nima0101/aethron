@@ -477,6 +477,122 @@ class DeclarationEscapedKeyControlTests(DeclarationCollectionBoundaryTests):
             self.assertEqual(self.check(case), 16)
 
 
+class DeclarationEscapedValueControlTests(DeclarationCollectionBoundaryTests):
+    generate = staticmethod(consumer.declaration_escaped_value_controls)
+    check = staticmethod(consumer.check_declaration_escaped_value_controls)
+    diagnostic = "declaration_escaped_value_"
+    count = 16
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        doc = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        groups = {
+            "rig_id": [(doc["rig"], "id")],
+            "rig_hashes": [(doc["rig"], "configuration_sha256")]
+            + [
+                (sensor, key)
+                for sensor in doc["rig"]["sensors"]
+                for key in ("device_sha256", "mount_sha256")
+            ],
+        }
+        for i, sensor in enumerate(doc["rig"]["sensors"]):
+            groups["sensor_" + str(i)] = [(sensor, "id")] + [
+                (row, "sensor_id") for row in doc["records"] if row["sensor_id"] == sensor["id"]
+            ]
+        groups["capture_clock"] = [(doc["capture"], "clock_domain")]
+        groups["record_clocks"] = [(row, "clock_domain") for row in doc["records"]]
+        groups["rig_commitments"] = [(row, "rig_sha256") for row in doc["records"]]
+        groups["combined"] = [member for members in groups.values() for member in members]
+        self.cases = {}
+        for name, members in groups.items():
+            for form in ("partial", "full"):
+                replacements = {}
+                originals = []
+                for index, (obj, key) in enumerate(members):
+                    value = obj[key]
+                    escaped = [b"\\u00" + bytes([c]).hex().encode() for c in value.encode("ascii")]
+                    token = (
+                        b'"'
+                        + (
+                            escaped[0] + value[1:].encode()
+                            if form == "partial"
+                            else b"".join(escaped)
+                        )
+                        + b'"'
+                    )
+                    marker = "ESCAPED_VALUE_" + str(index)
+                    originals.append((obj, key, value))
+                    obj[key] = marker
+                    replacements[self.encode(marker)] = token
+                # Placeholders let the standard JSON encoder preserve every
+                # unrelated member; no path walker or production oracle is used.
+                raw = self.encode(doc)
+                for marker, token in replacements.items():
+                    raw = raw.replace(marker, token)
+                for obj, key, value in originals:
+                    obj[key] = value
+                report = {
+                    "version": 1,
+                    "input_sha256": hashlib.sha256(raw).hexdigest(),
+                    "declaration_checks_passed": True,
+                    "sensor_count": 2,
+                    "record_count": 6,
+                    "evidence_counts": {"synthetic": 6, "recorded": 0, "external_unverified": 0},
+                    "findings": [],
+                    "artifacts_verified": False,
+                    "physical_qualification_passed": False,
+                    "physical_status": "blocked_external_evidence_and_review",
+                }
+                self.cases[name + "_" + form] = raw, report
+
+    def test_escapes_preserve_decoded_references_and_canonical_rig_bindings(self):
+        original = bytes.fromhex(self.case["captures"][0]["manifest_hex"])
+        doc = json.loads(original)
+        rig_digest = hashlib.sha256(self.encode(doc["rig"])).hexdigest()
+        commitments = set()
+        for name, (raw, report) in self.cases.items():
+            with self.subTest(case=name):
+                decoded = json.loads(raw)
+                self.assertEqual(decoded, doc)
+                self.assertEqual({r["rig_sha256"] for r in decoded["records"]}, {rig_digest})
+                self.assertIn(b"\\u00", raw)
+                self.assertNotEqual(report["input_sha256"], hashlib.sha256(original).hexdigest())
+                self.assertNotEqual(
+                    report["input_sha256"], hashlib.sha256(self.encode(doc)).hexdigest()
+                )
+                commitments.add(report["input_sha256"])
+                self.assertEqual(
+                    self.encode(consumer.validate(raw, now_ms=1050)), self.encode(report)
+                )
+        self.assertEqual(len(commitments), self.count)
+
+    def test_escapes_cannot_clear_stale_or_wrong_rig_findings(self):
+        for case_id in ("complete", "stale"):
+            case = next(c for c in consumer.corpus(CORPUS) if c["id"] == case_id)
+            changed = copy.deepcopy(case)
+            doc = json.loads(bytes.fromhex(changed["captures"][0]["manifest_hex"]))
+            doc["records"][0]["rig_sha256"] = "0" * 64
+            changed["captures"][0]["manifest_hex"] = self.encode(doc).hex()
+            report = changed["expected_report"]["captures"][0]["report"]["declaration"]
+            report["declaration_checks_passed"] = False
+            report["findings"] = sorted([*report["findings"], "rig_binding_mismatch"])
+            for source in (case, changed):
+                cases = self.generate(source)
+                instant = source["captures"][0]["now_ms"]
+                for name, (raw, expected) in cases.items():
+                    with self.subTest(case=case_id, encoding=name, findings=expected["findings"]):
+                        self.assertEqual(
+                            self.encode(consumer.validate(raw, now_ms=instant)),
+                            self.encode(expected),
+                        )
+                with patch.object(
+                    consumer.subprocess,
+                    "run",
+                    side_effect=[self.result(r) for _, r in cases.values()],
+                ):
+                    self.assertEqual(self.check(source), self.count)
+
+
 class DeclarationEscapedKeyDuplicateTests(unittest.TestCase):
     assert_process_call = DeclarationCollectionBoundaryTests.assert_process_call
 

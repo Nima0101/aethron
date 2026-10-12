@@ -1452,6 +1452,86 @@ def check_declaration_escaped_key_duplicates(case):
     return len(cases)
 
 
+def declaration_escaped_value_controls(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    groups = {
+        "rig_id": {("rig", "id")},
+        "rig_hashes": {("rig", "configuration_sha256")},
+        "sensor_0": set(),
+        "sensor_1": set(),
+        "capture_clock": {("capture", "clock_domain")},
+        "record_clocks": set(),
+        "rig_commitments": set(),
+    }
+    for i, sensor in enumerate(doc["rig"]["sensors"]):
+        groups["sensor_" + str(i)].add(("rig", "sensors", i, "id"))
+        for key in ("device_sha256", "mount_sha256"):
+            groups["rig_hashes"].add(("rig", "sensors", i, key))
+        for j, record in enumerate(doc["records"]):
+            if record["sensor_id"] == sensor["id"]:
+                groups["sensor_" + str(i)].add(("records", j, "sensor_id"))
+    for j in range(len(doc["records"])):
+        groups["record_clocks"].add(("records", j, "clock_domain"))
+        groups["rig_commitments"].add(("records", j, "rig_sha256"))
+    groups["combined"] = set().union(*groups.values())
+    cases = {}
+    for name, paths in groups.items():
+        for form in ("partial", "full"):
+
+            def encode(value, path=(), paths=paths, form=form):
+                if path in paths:
+                    prefix = value[:1] if form == "partial" else value
+                    return (
+                        '"'
+                        + "".join("\\u%04x" % ord(c) for c in prefix)
+                        + value[len(prefix) :]
+                        + '"'
+                    )
+                if isinstance(value, dict):
+                    return (
+                        "{"
+                        + ",".join(
+                            canonical(key) + ":" + encode(value[key], (*path, key))
+                            for key in sorted(value)
+                        )
+                        + "}"
+                    )
+                if isinstance(value, list):
+                    return (
+                        "[" + ",".join(encode(row, (*path, i)) for i, row in enumerate(value)) + "]"
+                    )
+                return canonical(value)
+
+            raw = encode(doc).encode("ascii")
+            report = copy.deepcopy(case["expected_report"]["captures"][0]["report"]["declaration"])
+            report["input_sha256"] = hashlib.sha256(raw).hexdigest()
+            cases[name + "_" + form] = raw, report
+    return cases
+
+
+def check_declaration_escaped_value_controls(case):
+    cases = declaration_escaped_value_controls(case)
+    instant = case["captures"][0]["now_ms"]
+    for name, (raw, report) in cases.items():
+        if canonical(validate(raw, now_ms=instant)) != canonical(report):
+            raise AssertionError("declaration_escaped_value_report_mismatch:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        expected = (
+            0 if report["declaration_checks_passed"] else 1,
+            (canonical(report) + os.linesep).encode("ascii"),
+            b"",
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_escaped_value_process_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -2320,6 +2400,7 @@ def main():
     declaration_combined_failure_count = check_declaration_combined_failures(complete)
     declaration_escaped_controls = check_declaration_escaped_key_controls(complete)
     declaration_escaped_duplicates = check_declaration_escaped_key_duplicates(complete)
+    declaration_escaped_values = check_declaration_escaped_value_controls(complete)
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -2386,6 +2467,7 @@ def main():
                 "declaration_combined_failure_cases": declaration_combined_failure_count,
                 "declaration_escaped_key_controls": declaration_escaped_controls,
                 "declaration_escaped_key_duplicates": declaration_escaped_duplicates,
+                "declaration_escaped_value_controls": declaration_escaped_values,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,

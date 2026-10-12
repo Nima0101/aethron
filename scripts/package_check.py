@@ -116,6 +116,7 @@ def run():
             "declaration_combined_failure_cases": 72,
             "declaration_escaped_key_controls": 16,
             "declaration_escaped_key_duplicates": 24,
+            "declaration_escaped_value_controls": 16,
             "declaration_malformed_inputs": 389,
             "declaration_closed_pipe_cases": 6,
             "bundle_vectors": 6,
