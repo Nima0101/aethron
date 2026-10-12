@@ -874,6 +874,232 @@ class DeclarationUnicodeValueTests(unittest.TestCase):
                     self.assert_process_call(run, raw)
 
 
+def utf8_value_documents(case):
+    """Independent placeholder encoding and code-point-based invalid byte table."""
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    paths = {
+        "rig_id": ("rig", "id"),
+        "rig_configuration": ("rig", "configuration_sha256"),
+        "sensor_id": ("rig", "sensors", 0, "id"),
+        "sensor_device": ("rig", "sensors", 0, "device_sha256"),
+        "sensor_mount": ("rig", "sensors", 0, "mount_sha256"),
+        "capture_clock": ("capture", "clock_domain"),
+        "record_sensor": ("records", 0, "sensor_id"),
+        "record_clock": ("records", 0, "clock_domain"),
+        "record_artifact": ("records", 0, "artifact_sha256"),
+        "record_rig": ("records", 0, "rig_sha256"),
+    }
+    values = {
+        "overlong_2": bytes([0xC0 | (ord("a") >> 6), 0x80 | (ord("a") & 0x3F)]),
+        "overlong_3": bytes([0xE0, 0x80 | (ord("a") >> 6), 0x80 | (ord("a") & 0x3F)]),
+        "overlong_4": bytes([0xF0, 0x80, 0x80 | (ord("a") >> 6), 0x80 | (ord("a") & 0x3F)]),
+        **{
+            name: chr(point).encode("utf-8", errors="surrogatepass")
+            for name, point in (
+                ("high_min", 0xD800),
+                ("high_max", 0xDBFF),
+                ("low_min", 0xDC00),
+                ("low_max", 0xDFFF),
+            )
+        },
+        "continuation_min": bytes([128]),
+        "continuation_max": bytes([191]),
+        "truncated_2": chr(0x80).encode("utf-8")[:1],
+        **{"truncated_3_" + str(n): chr(0x1000).encode("utf-8")[:n] for n in (1, 2)},
+        **{"truncated_4_" + str(n): chr(0x40000).encode("utf-8")[:n] for n in (1, 2, 3)},
+        "out_of_range": bytes([244, 144, 128, 128]),
+        "invalid_lead": bytes([255]),
+        "invalid_continuation": bytes([225, ord("a"), 128]),
+    }
+    controls, cases, details = {}, {}, {}
+    for name, path in paths.items():
+        changed = copy.deepcopy(doc)
+        obj = changed
+        for part in path[:-1]:
+            obj = obj[part]
+        original = obj[path[-1]]
+        obj[path[-1]] = "UTF8_VALUE_PLACEHOLDER"
+        marker = b'"UTF8_VALUE_PLACEHOLDER"'
+        template = json.dumps(changed, sort_keys=True, separators=(",", ":")).encode("ascii")
+        assert template.count(marker) == 1
+        prefix = b'"' + original[:-1].encode("ascii")
+        repair = b"\\u00" + original[-1:].encode("ascii").hex().encode("ascii")
+        repaired = template.replace(marker, prefix + repair + b'"')
+        controls[name] = (
+            repaired,
+            {
+                "version": 1,
+                "input_sha256": hashlib.sha256(repaired).hexdigest(),
+                "declaration_checks_passed": True,
+                "sensor_count": 2,
+                "record_count": 6,
+                "evidence_counts": {"synthetic": 6, "recorded": 0, "external_unverified": 0},
+                "findings": [],
+                "artifacts_verified": False,
+                "physical_qualification_passed": False,
+                "physical_status": "blocked_external_evidence_and_review",
+            },
+        )
+        for form, suffix in values.items():
+            key = name + "_" + form
+            raw = template.replace(marker, prefix + suffix + b'"')
+            cases[key] = raw
+            details[key] = name, suffix, repair, path, original
+    return controls, cases, details
+
+
+class DeclarationUTF8ValueControlTests(DeclarationCollectionBoundaryTests):
+    generate = staticmethod(consumer.declaration_utf8_value_controls)
+    check = staticmethod(consumer.check_declaration_utf8_value_controls)
+    diagnostic = "declaration_utf8_"
+    count = 10
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        self.cases, _, _ = utf8_value_documents(self.case)
+
+    def test_repairs_preserve_semantics_and_stale_findings(self):
+        doc = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        self.assertEqual(len({raw for raw, _ in self.cases.values()}), 10)
+        for raw, report in self.cases.values():
+            self.assertEqual(json.loads(raw), doc)
+            self.assertNotEqual(
+                report["input_sha256"], hashlib.sha256(self.encode(doc)).hexdigest()
+            )
+        stale = next(case for case in consumer.corpus(CORPUS) if case["id"] == "stale")
+        for raw, report in self.generate(stale).values():
+            self.assertEqual(report["findings"], ["capture_stale"])
+            self.assertFalse(report["declaration_checks_passed"])
+            self.assertEqual(self.encode(consumer.validate(raw, now_ms=1151)), self.encode(report))
+
+
+class DeclarationUTF8ValueTests(unittest.TestCase):
+    assert_process_call = DeclarationCollectionBoundaryTests.assert_process_call
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        self.controls, self.cases, self.details = utf8_value_documents(self.case)
+        self.good = SimpleNamespace(
+            returncode=2,
+            stdout=b"",
+            stderr=("invalid_qualification_manifest" + os.linesep).encode("ascii"),
+        )
+
+    def test_independent_documents_and_full_binary_traversal(self):
+        original = copy.deepcopy(self.case)
+        self.assertEqual(consumer.declaration_utf8_value_inputs(self.case), self.cases)
+        self.assertEqual(len(self.cases), 180)
+        self.assertEqual(len(set(self.cases.values())), 180)
+        with patch.object(consumer.subprocess, "run", return_value=self.good) as run:
+            self.assertEqual(consumer.check_declaration_utf8_value_inputs(self.case), 180)
+        self.assertEqual(run.call_count, 180)
+        for call, raw in zip(run.call_args_list, self.cases.values()):
+            self.assertLessEqual(len(raw), 65536)
+            self.assertEqual(
+                call.args[0],
+                [consumer.sys.executable, "-I", "-m", "qualification", "--now-ms", "1050"],
+            )
+            self.assertEqual(
+                call.kwargs, {"input": raw, "capture_output": True, "check": False, "timeout": 10}
+            )
+        self.assertEqual(self.case, original)
+
+    def test_invalid_encoding_and_single_value_repairs(self):
+        doc = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        for name, raw in self.cases.items():
+            field, suffix, repair, path, original = self.details[name]
+            with self.subTest(case=name):
+                with self.assertRaises(UnicodeDecodeError):
+                    raw.decode("utf-8")
+                if suffix.startswith(b"\xed"):
+                    # json.loads(bytes) permits encoded surrogates; the
+                    # validator must retain its explicit strict UTF-8 decode.
+                    decoded = json.loads(raw)
+                    obj = decoded
+                    for part in path[:-1]:
+                        obj = obj[part]
+                    self.assertEqual(
+                        obj[path[-1]], original[:-1] + suffix.decode("utf-8", "surrogatepass")
+                    )
+                    obj[path[-1]] = original
+                    self.assertEqual(decoded, doc)
+                else:
+                    with self.assertRaises(UnicodeDecodeError):
+                        json.loads(raw)
+                with self.assertRaisesRegex(ValueError, "^invalid_qualification_manifest$"):
+                    consumer.validate(raw, now_ms=1050)
+                # Invalid bytes are confined to the final character of one
+                # value; restoring it yields the exact independent control.
+                self.assertEqual(raw.count(suffix), 1)
+                repaired = raw.replace(suffix, repair, 1)
+                expected_raw, report = self.controls[field]
+                self.assertEqual(repaired, expected_raw)
+                self.assertEqual(json.loads(repaired), doc)
+                self.assertEqual(
+                    consumer.canonical(consumer.validate(repaired, now_ms=1050)),
+                    consumer.canonical(report),
+                )
+                # Even a permissive replacement decoder cannot hide another
+                # malformed member in the surrounding JSON document.
+                lossy = json.loads(raw.decode("utf-8", errors="replace"))
+                obj = lossy
+                for part in path[:-1]:
+                    obj = obj[part]
+                self.assertIn("\ufffd", obj[path[-1]])
+                obj[path[-1]] = original
+                self.assertEqual(lossy, doc)
+
+    def test_every_value_requires_fixed_library_rejection(self):
+        for name, raw in self.cases.items():
+            for error in (None, ValueError("PRIVATE")):
+                with self.subTest(case=name, error=error):
+                    with (
+                        patch.object(
+                            consumer, "declaration_utf8_value_inputs", return_value={name: raw}
+                        ),
+                        patch.object(
+                            consumer, "validate", side_effect=error, return_value={}
+                        ) as validate,
+                        patch.object(consumer.subprocess, "run") as run,
+                    ):
+                        suffix = "missing" if error is None else "mismatch"
+                        with self.assertRaisesRegex(
+                            AssertionError,
+                            "^declaration_utf8_error_" + suffix + ":" + name + "$",
+                        ):
+                            consumer.check_declaration_utf8_value_inputs(self.case)
+                    validate.assert_called_once_with(raw, now_ms=1050)
+                    run.assert_not_called()
+
+    def test_every_value_requires_fixed_process_rejection(self):
+        for name, raw in self.cases.items():
+            for field, value in (
+                ("returncode", 0),
+                ("returncode", 1),
+                ("stdout", raw),
+                ("stdout", b"{}"),
+                ("stderr", b""),
+                ("stderr", self.good.stderr + b"PRIVATE"),
+                ("stderr", b"Traceback"),
+            ):
+                with self.subTest(case=name, field=field):
+                    result = copy.copy(self.good)
+                    setattr(result, field, value)
+                    with (
+                        patch.object(
+                            consumer, "declaration_utf8_value_inputs", return_value={name: raw}
+                        ),
+                        patch.object(consumer, "validate", wraps=consumer.validate) as validate,
+                        patch.object(consumer.subprocess, "run", return_value=result) as run,
+                    ):
+                        with self.assertRaisesRegex(
+                            AssertionError, "^declaration_utf8_rejection_mismatch:" + name + "$"
+                        ):
+                            consumer.check_declaration_utf8_value_inputs(self.case)
+                    validate.assert_called_once_with(raw, now_ms=1050)
+                    self.assert_process_call(run, raw)
+
+
 class DeclarationTokenBoundaryTests(DeclarationCollectionBoundaryTests):
     generate = staticmethod(consumer.declaration_token_boundaries)
     check = staticmethod(consumer.check_declaration_token_boundaries)

@@ -1599,6 +1599,118 @@ def check_declaration_unicode_value_inputs(case):
     return len(cases)
 
 
+def _declaration_utf8_value_cases(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    encoded = canonical(doc).encode("ascii")
+    fields = [
+        ("rig_id", doc["rig"], "id"),
+        ("rig_configuration", doc["rig"], "configuration_sha256"),
+        ("sensor_id", doc["rig"]["sensors"][0], "id"),
+        ("sensor_device", doc["rig"]["sensors"][0], "device_sha256"),
+        ("sensor_mount", doc["rig"]["sensors"][0], "mount_sha256"),
+        ("capture_clock", doc["capture"], "clock_domain"),
+        ("record_sensor", doc["records"][0], "sensor_id"),
+        ("record_clock", doc["records"][0], "clock_domain"),
+        ("record_artifact", doc["records"][0], "artifact_sha256"),
+        ("record_rig", doc["records"][0], "rig_sha256"),
+    ]
+    invalid = {
+        "overlong_2": b"\xc1\xa1",
+        "overlong_3": b"\xe0\x81\xa1",
+        "overlong_4": b"\xf0\x80\x81\xa1",
+        "high_min": b"\xed\xa0\x80",
+        "high_max": b"\xed\xaf\xbf",
+        "low_min": b"\xed\xb0\x80",
+        "low_max": b"\xed\xbf\xbf",
+        "continuation_min": b"\x80",
+        "continuation_max": b"\xbf",
+        "truncated_2": b"\xc2",
+        "truncated_3_1": b"\xe1",
+        "truncated_3_2": b"\xe1\x80",
+        "truncated_4_1": b"\xf1",
+        "truncated_4_2": b"\xf1\x80",
+        "truncated_4_3": b"\xf1\x80\x80",
+        "out_of_range": b"\xf4\x90\x80\x80",
+        "invalid_lead": b"\xff",
+        "invalid_continuation": b"\xe1a\x80",
+    }
+    controls, cases = {}, {}
+    for name, obj, key in fields:
+        original = canonical(obj).encode("ascii")
+        member = canonical(key).encode("ascii") + b":"
+        value = canonical(obj[key]).encode("ascii")
+        # All malformed bytes stay inside one string and end at its closing
+        # quote. A single escaped ASCII character repairs that exact value.
+        repair = ("\\u%04x" % ord(obj[key][-1])).encode("ascii")
+        for form, suffix in [("repair", repair), *invalid.items()]:
+            changed = original.replace(member + value, member + value[:-2] + suffix + b'"', 1)
+            raw = encoded.replace(original, changed, 1)
+            if form == "repair":
+                report = copy.deepcopy(
+                    case["expected_report"]["captures"][0]["report"]["declaration"]
+                )
+                report["input_sha256"] = hashlib.sha256(raw).hexdigest()
+                controls[name] = raw, report
+            else:
+                cases[name + "_" + form] = raw
+    return controls, cases
+
+
+def declaration_utf8_value_controls(case):
+    return _declaration_utf8_value_cases(case)[0]
+
+
+def declaration_utf8_value_inputs(case):
+    return _declaration_utf8_value_cases(case)[1]
+
+
+def check_declaration_utf8_value_controls(case):
+    cases = declaration_utf8_value_controls(case)
+    instant = case["captures"][0]["now_ms"]
+    for name, (raw, report) in cases.items():
+        if canonical(validate(raw, now_ms=instant)) != canonical(report):
+            raise AssertionError("declaration_utf8_report_mismatch:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        expected = (
+            0 if report["declaration_checks_passed"] else 1,
+            (canonical(report) + os.linesep).encode("ascii"),
+            b"",
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_utf8_process_mismatch:" + name)
+    return len(cases)
+
+
+def check_declaration_utf8_value_inputs(case):
+    cases = declaration_utf8_value_inputs(case)
+    instant = case["captures"][0]["now_ms"]
+    expected = (2, b"", ("invalid_qualification_manifest" + os.linesep).encode("ascii"))
+    for name, raw in cases.items():
+        try:
+            validate(raw, now_ms=instant)
+        except ValueError as exc:
+            if str(exc) != "invalid_qualification_manifest":
+                raise AssertionError("declaration_utf8_error_mismatch:" + name) from exc
+        else:
+            raise AssertionError("declaration_utf8_error_missing:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_utf8_rejection_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -2469,6 +2581,8 @@ def main():
     declaration_escaped_duplicates = check_declaration_escaped_key_duplicates(complete)
     declaration_escaped_values = check_declaration_escaped_value_controls(complete)
     declaration_unicode = check_declaration_unicode_value_inputs(complete)
+    declaration_utf8_controls = check_declaration_utf8_value_controls(complete)
+    declaration_utf8_inputs = check_declaration_utf8_value_inputs(complete)
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -2537,6 +2651,8 @@ def main():
                 "declaration_escaped_key_duplicates": declaration_escaped_duplicates,
                 "declaration_escaped_value_controls": declaration_escaped_values,
                 "declaration_unicode_value_inputs": declaration_unicode,
+                "declaration_utf8_value_controls": declaration_utf8_controls,
+                "declaration_utf8_value_inputs": declaration_utf8_inputs,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,
