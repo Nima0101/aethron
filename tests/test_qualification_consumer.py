@@ -4,6 +4,7 @@ import copy
 import errno
 import hashlib
 import io
+import json
 import os
 import struct
 import tempfile
@@ -358,7 +359,7 @@ class DeclarationInputConsumerTests(unittest.TestCase):
 
         cases = consumer.declaration_malformed_inputs(self.raw)
         self.assertEqual(
-            cases,
+            {key: cases[key] for key in list(cases)[:5]},
             {
                 "one_byte_over": self.padded + b" ",
                 "trailing_non_whitespace": self.raw + b"PRIVATE",
@@ -389,8 +390,8 @@ class DeclarationInputConsumerTests(unittest.TestCase):
 
     def test_every_invalid_input_reaches_isolated_binary_cli(self):
         with patch.object(consumer.subprocess, "run", return_value=self.rejected) as run:
-            self.assertEqual(consumer.check_declaration_malformed_inputs(self.case), 5)
-        self.assertEqual(run.call_count, 5)
+            self.assertEqual(consumer.check_declaration_malformed_inputs(self.case), 21)
+        self.assertEqual(run.call_count, 21)
         for call, raw in zip(
             run.call_args_list, consumer.declaration_malformed_inputs(self.raw).values()
         ):
@@ -401,6 +402,76 @@ class DeclarationInputConsumerTests(unittest.TestCase):
             self.assertEqual(
                 call.kwargs, {"input": raw, "capture_output": True, "check": False, "timeout": 10}
             )
+
+    def test_field_cases_change_only_one_member_and_repair_to_valid_manifest(self):
+        original = json.loads(self.raw)
+        paths = {
+            "root": ((), "version"),
+            "rig": (("rig",), "id"),
+            "sensor": (("rig", "sensors", 0), "id"),
+            "capture": (("capture",), "clock_domain"),
+            "record": (("records", 0), "sensor_id"),
+        }
+        for kind, key in (
+            ("calibration", "valid_from_ms"),
+            ("clock", "at_ms"),
+            ("environment", "lighting"),
+        ):
+            index = next(i for i, row in enumerate(original["records"]) if row["kind"] == kind)
+            paths["data_" + kind] = (("records", index, "data"), key)
+        cases = consumer.declaration_malformed_inputs(self.raw)
+        self.assertEqual(
+            set(cases)
+            - {
+                "one_byte_over",
+                "trailing_non_whitespace",
+                "concatenated_json",
+                "truncated_json",
+                "invalid_utf8",
+            },
+            {name + "_" + defect for name in paths for defect in ("duplicate", "unknown")},
+        )
+        repaired = consumer.canonical(original).encode("ascii")
+        expected = copy.deepcopy(
+            self.case["expected_report"]["captures"][0]["report"]["declaration"]
+        )
+        expected["input_sha256"] = hashlib.sha256(repaired).hexdigest()
+        for name, (path, key) in paths.items():
+            target = original
+            for component in path:
+                target = target[component]
+            for defect in ("duplicate", "unknown"):
+                with self.subTest(level=name, defect=defect):
+                    duplicates = []
+
+                    def pairs_hook(pairs, duplicates=duplicates):
+                        obj = {}
+                        for field, value in pairs:
+                            if field in obj:
+                                duplicates.append((field, obj[field], value, dict(pairs)))
+                            obj[field] = value
+                        return obj
+
+                    raw = cases[name + "_" + defect]
+                    self.assertLessEqual(len(raw), 65536)
+                    decoded = json.loads(raw, object_pairs_hook=pairs_hook)
+                    if defect == "duplicate":
+                        self.assertEqual(duplicates, [(key, target[key], target[key], target)])
+                    else:
+                        self.assertEqual(duplicates, [])
+                        changed = decoded
+                        for component in path:
+                            changed = changed[component]
+                        self.assertEqual(changed.pop("person_identity"), "PRIVATE_MARKER")
+                    self.assertEqual(decoded, original)
+                    with self.assertRaisesRegex(ValueError, "^invalid_qualification_manifest$"):
+                        consumer.validate(raw, now_ms=1050)
+                    fixed = consumer.canonical(decoded).encode("ascii")
+                    self.assertEqual(fixed, repaired)
+                    self.assertEqual(
+                        consumer.canonical(consumer.validate(fixed, now_ms=1050)),
+                        consumer.canonical(expected),
+                    )
 
     def test_each_invalid_input_checks_status_empty_stdout_and_fixed_diagnostic(self):
         for index, name in enumerate(consumer.declaration_malformed_inputs(self.raw)):

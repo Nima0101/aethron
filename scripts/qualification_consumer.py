@@ -188,13 +188,41 @@ def check_declaration_arguments(case):
 
 
 def declaration_malformed_inputs(raw):
-    return {
+    cases = {
         "one_byte_over": raw.ljust(65537, b" "),
         "trailing_non_whitespace": raw + b"PRIVATE",
         "concatenated_json": raw + raw,
         "truncated_json": raw.rstrip()[:-1],
         "invalid_utf8": b"\xff" + raw,
     }
+    doc = json.loads(raw)
+    encoded = canonical(doc).encode("ascii")
+    objects = [
+        ("root", doc, "version"),
+        ("rig", doc["rig"], "id"),
+        ("sensor", doc["rig"]["sensors"][0], "id"),
+        ("capture", doc["capture"], "clock_domain"),
+        ("record", doc["records"][0], "sensor_id"),
+    ]
+    for kind, key in (
+        ("calibration", "valid_from_ms"),
+        ("clock", "at_ms"),
+        ("environment", "lighting"),
+    ):
+        record = next(record for record in doc["records"] if record["kind"] == kind)
+        objects.append(("data_" + kind, record["data"], key))
+    for name, obj, key in objects:
+        original = canonical(obj).encode("ascii")
+        # Insert an identical existing member: last-key-wins parsing would
+        # accept this otherwise valid manifest and conceal the duplicate.
+        duplicate = canonical({key: obj[key]}).encode("ascii")[1:-1]
+        for defect, member in (
+            ("duplicate", duplicate),
+            ("unknown", b'"person_identity":"PRIVATE_MARKER"'),
+        ):
+            changed = b"{" + member + b"," + original[1:]
+            cases[name + "_" + defect] = encoded.replace(original, changed, 1)
+    return cases
 
 
 def check_declaration_input_boundary(case):
