@@ -1874,6 +1874,69 @@ def check_declaration_invalid_separators(case):
     return len(cases)
 
 
+def declaration_invalid_punctuation(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    raw = canonical(doc).encode("ascii")
+    containers = [
+        ("root", doc),
+        ("rig", doc["rig"]),
+        ("sensor", doc["rig"]["sensors"][0]),
+        ("capture", doc["capture"]),
+        ("record", doc["records"][0]),
+        *(
+            ("data_" + kind, next(row["data"] for row in doc["records"] if row["kind"] == kind))
+            for kind in ("calibration", "clock", "environment")
+        ),
+        ("sensors", doc["rig"]["sensors"]),
+        ("records", doc["records"]),
+    ]
+    cases = {}
+    for name, value in containers:
+        encoded = canonical(value).encode("ascii")
+        if isinstance(value, dict):
+            key = sorted(value)[0]
+            colon = 1 + len(canonical(key).encode("ascii"))
+            comma = colon + 1 + len(canonical(value[key]).encode("ascii"))
+            positions = (("colon", colon), ("comma", comma))
+        else:
+            comma = 1 + len(canonical(value[0]).encode("ascii"))
+            positions = (("comma", comma),)
+        for kind, index in positions:
+            token = b":" if kind == "colon" else b","
+            if encoded[index : index + 1] != token:
+                raise AssertionError("declaration_punctuation_fixture_mismatch:" + name)
+            for mutation, replacement in (("missing", b""), ("doubled", token * 2)):
+                changed = encoded[:index] + replacement + encoded[index + 1 :]
+                cases[name + "_" + kind + "_" + mutation] = raw.replace(encoded, changed, 1)
+        changed = encoded[:-1] + b"," + encoded[-1:]
+        cases[name + "_trailing_comma"] = raw.replace(encoded, changed, 1)
+    return cases
+
+
+def check_declaration_invalid_punctuation(case):
+    cases = declaration_invalid_punctuation(case)
+    instant = case["captures"][0]["now_ms"]
+    expected = (2, b"", ("invalid_qualification_manifest" + os.linesep).encode("ascii"))
+    for name, raw in cases.items():
+        try:
+            validate(raw, now_ms=instant)
+        except ValueError as exc:
+            if str(exc) != "invalid_qualification_manifest":
+                raise AssertionError("declaration_punctuation_error_mismatch:" + name) from exc
+        else:
+            raise AssertionError("declaration_punctuation_error_missing:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_punctuation_rejection_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -2758,6 +2821,7 @@ def main():
         if case["id"] in ("complete", "stale")
     )
     declaration_separator_count = check_declaration_invalid_separators(complete)
+    declaration_punctuation_count = check_declaration_invalid_punctuation(complete)
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -2832,6 +2896,7 @@ def main():
                 "declaration_alternate_encodings": declaration_alternate_encoding_count,
                 "declaration_whitespace_controls": declaration_whitespace_count,
                 "declaration_invalid_separators": declaration_separator_count,
+                "declaration_invalid_punctuation": declaration_punctuation_count,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,

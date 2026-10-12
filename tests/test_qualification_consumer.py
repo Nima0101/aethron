@@ -1447,6 +1447,173 @@ class DeclarationInvalidSeparatorTests(unittest.TestCase):
                     self.assert_process_call(run, raw)
 
 
+class DeclarationInvalidPunctuationTests(unittest.TestCase):
+    assert_process_call = DeclarationCollectionBoundaryTests.assert_process_call
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        self.doc = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        output = bytearray()
+        marks = {}
+
+        def emit(value, path=()):
+            if not isinstance(value, (dict, list)):
+                output.extend(json.dumps(value).encode("ascii"))
+                return
+            marks[path] = {"colon": [], "comma": []}
+            mapping = isinstance(value, dict)
+            output.extend(b"{" if mapping else b"[")
+            entries = sorted(value.items()) if mapping else list(enumerate(value))
+            for index, (key, item) in enumerate(entries):
+                if index:
+                    marks[path]["comma"].append(len(output))
+                    output.extend(b",")
+                if mapping:
+                    output.extend(json.dumps(key).encode("ascii"))
+                    marks[path]["colon"].append(len(output))
+                    output.extend(b":")
+                emit(item, path + (key,))
+            marks[path]["close"] = len(output)
+            output.extend(b"}" if mapping else b"]")
+
+        emit(self.doc)
+        self.raw = bytes(output)
+        paths = {
+            "root": (),
+            "rig": ("rig",),
+            "sensor": ("rig", "sensors", 0),
+            "capture": ("capture",),
+            "record": ("records", 0),
+        }
+        for kind in ("calibration", "clock", "environment"):
+            index = next(i for i, row in enumerate(self.doc["records"]) if row["kind"] == kind)
+            paths["data_" + kind] = ("records", index, "data")
+        paths.update(sensors=("rig", "sensors"), records=("records",))
+        self.cases, self.repairs = {}, {}
+        for name, path in paths.items():
+            for kind in ("colon", "comma"):
+                if not marks[path][kind]:
+                    continue
+                index = marks[path][kind][0]
+                token = self.raw[index : index + 1]
+                key = name + "_" + kind + "_missing"
+                self.cases[key] = self.raw[:index] + self.raw[index + 1 :]
+                self.repairs[key] = (index, True, token)
+                key = name + "_" + kind + "_doubled"
+                self.cases[key] = self.raw[:index] + token + self.raw[index:]
+                self.repairs[key] = (index, False, token)
+            key = name + "_trailing_comma"
+            index = marks[path]["close"]
+            self.cases[key] = self.raw[:index] + b"," + self.raw[index:]
+            self.repairs[key] = (index, False, b",")
+        self.good = SimpleNamespace(
+            returncode=2,
+            stdout=b"",
+            stderr=("invalid_qualification_manifest" + os.linesep).encode("ascii"),
+        )
+
+    def test_independent_punctuation_and_full_binary_traversal(self):
+        original = copy.deepcopy(self.case)
+        self.assertEqual(consumer.declaration_invalid_punctuation(self.case), self.cases)
+        self.assertEqual(len(set(self.cases.values())), 46)
+        with patch.object(consumer.subprocess, "run", return_value=self.good) as run:
+            self.assertEqual(consumer.check_declaration_invalid_punctuation(self.case), 46)
+        self.assertEqual(run.call_count, 46)
+        for call, raw in zip(run.call_args_list, self.cases.values()):
+            self.assertLessEqual(len(raw), 65536)
+            self.assertEqual(
+                call.args[0],
+                [consumer.sys.executable, "-I", "-m", "qualification", "--now-ms", "1050"],
+            )
+            self.assertEqual(
+                call.kwargs, {"input": raw, "capture_output": True, "check": False, "timeout": 10}
+            )
+        self.assertEqual(self.case, original)
+
+    def test_single_token_repairs_reach_passing_and_stale_reports(self):
+        for case in consumer.corpus(CORPUS):
+            if case["id"] not in ("complete", "stale"):
+                continue
+            self.assertEqual(consumer.declaration_invalid_punctuation(case), self.cases)
+            expected_raw, report = consumer.declaration_encoding_controls(case)["utf8"]
+            instant = case["captures"][0]["now_ms"]
+            for name, raw in self.cases.items():
+                with self.subTest(case=case["id"], punctuation=name):
+                    with self.assertRaises(json.JSONDecodeError):
+                        json.loads(raw.decode("utf-8"))
+                    with self.assertRaisesRegex(ValueError, "^invalid_qualification_manifest$"):
+                        consumer.validate(raw, now_ms=instant)
+                    index, insert, token = self.repairs[name]
+                    repaired = (
+                        raw[:index] + token + raw[index:]
+                        if insert
+                        else raw[:index] + raw[index + 1 :]
+                    )
+                    self.assertEqual(repaired, self.raw)
+                    self.assertEqual(repaired, expected_raw)
+                    self.assertEqual(json.loads(repaired), self.doc)
+                    self.assertEqual(
+                        consumer.canonical(consumer.validate(repaired, now_ms=instant)),
+                        consumer.canonical(report),
+                    )
+                    self.assertEqual(
+                        report["findings"], [] if case["id"] == "complete" else ["capture_stale"]
+                    )
+                    self.assertIs(report["physical_qualification_passed"], False)
+                    self.assertIs(report["artifacts_verified"], False)
+
+    def test_every_punctuation_requires_fixed_library_rejection(self):
+        for name, raw in self.cases.items():
+            for error in (None, ValueError("PRIVATE")):
+                with self.subTest(case=name, error=error):
+                    with (
+                        patch.object(
+                            consumer, "declaration_invalid_punctuation", return_value={name: raw}
+                        ),
+                        patch.object(
+                            consumer, "validate", side_effect=error, return_value={}
+                        ) as validate,
+                        patch.object(consumer.subprocess, "run") as run,
+                    ):
+                        suffix = "missing" if error is None else "mismatch"
+                        with self.assertRaisesRegex(
+                            AssertionError,
+                            "^declaration_punctuation_error_" + suffix + ":" + name + "$",
+                        ):
+                            consumer.check_declaration_invalid_punctuation(self.case)
+                    validate.assert_called_once_with(raw, now_ms=1050)
+                    run.assert_not_called()
+
+    def test_every_punctuation_requires_fixed_process_rejection(self):
+        for name, raw in self.cases.items():
+            for field, value in (
+                ("returncode", 0),
+                ("returncode", 1),
+                ("stdout", raw),
+                ("stdout", b"{}"),
+                ("stderr", b""),
+                ("stderr", self.good.stderr + b"PRIVATE"),
+                ("stderr", b"Traceback"),
+            ):
+                with self.subTest(case=name, field=field):
+                    result = copy.copy(self.good)
+                    setattr(result, field, value)
+                    with (
+                        patch.object(
+                            consumer, "declaration_invalid_punctuation", return_value={name: raw}
+                        ),
+                        patch.object(consumer, "validate", wraps=consumer.validate) as validate,
+                        patch.object(consumer.subprocess, "run", return_value=result) as run,
+                    ):
+                        with self.assertRaisesRegex(
+                            AssertionError,
+                            "^declaration_punctuation_rejection_mismatch:" + name + "$",
+                        ):
+                            consumer.check_declaration_invalid_punctuation(self.case)
+                    validate.assert_called_once_with(raw, now_ms=1050)
+                    self.assert_process_call(run, raw)
+
+
 class DeclarationTokenBoundaryTests(DeclarationCollectionBoundaryTests):
     generate = staticmethod(consumer.declaration_token_boundaries)
     check = staticmethod(consumer.check_declaration_token_boundaries)
