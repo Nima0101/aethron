@@ -157,5 +157,81 @@ class BundleConsumerTests(unittest.TestCase):
                         consumer.check_bundle_case(self.data, case)
 
 
+class MalformedConsumerTests(unittest.TestCase):
+    def cases(self):
+        assessment = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        data = consumer.bundle_corpus(BUNDLE_CORPUS)
+        bundle = next(case for case in data["cases"] if case["id"] == "complete")
+        return (
+            (
+                "qualification.assessment_cli",
+                consumer.assessment_malformed_frames(consumer.arguments(assessment)),
+                "invalid_qualification_assessment",
+                17,
+            ),
+            (
+                "qualification.campaign_bundle_cli",
+                consumer.bundle_malformed_frames(consumer.bundle_arguments(data, bundle)),
+                "invalid_campaign_bundle",
+                13,
+            ),
+        )
+
+    def test_all_frames_fail_before_source_evaluation(self):
+        from qualification import assessment_cli, campaign_bundle_cli
+
+        for (module, cases, _diagnostic, count), command in zip(
+            self.cases(), (assessment_cli, campaign_bundle_cli)
+        ):
+            self.assertEqual(len(cases), count)
+            self.assertEqual(len(set(cases.values())), count)
+            with patch.object(command, "evaluate") as evaluate:
+                for name, raw in cases.items():
+                    with self.subTest(module=module, case=name):
+                        with self.assertRaises(ValueError):
+                            command._report(io.BytesIO(raw))
+                evaluate.assert_not_called()
+
+    def test_wrong_status_output_or_diagnostic_fails_at_any_case(self):
+        for module, cases, diagnostic, _count in self.cases():
+            fixed = (diagnostic + os.linesep).encode("ascii")
+            good = SimpleNamespace(returncode=2, stdout=b"", stderr=fixed)
+            for index, name in enumerate(cases):
+                for status, stdout, stderr in (
+                    (0, b"", fixed),
+                    (1, b"", fixed),
+                    (2, b"{}", fixed),
+                    (2, b"", b""),
+                    (2, b"", fixed + b"PRIVATE"),
+                    (2, b"", b"different_error" + os.linesep.encode("ascii")),
+                ):
+                    with self.subTest(module=module, case=name, status=status, stderr=stderr):
+                        bad = SimpleNamespace(returncode=status, stdout=stdout, stderr=stderr)
+                        with patch.object(
+                            consumer.subprocess, "run", side_effect=[good] * index + [bad]
+                        ):
+                            with self.assertRaises(AssertionError) as error:
+                                consumer.check_malformed_frames(module, cases, diagnostic)
+                        self.assertEqual(
+                            str(error.exception),
+                            "malformed_process_mismatch:" + module + ":" + name,
+                        )
+
+    def test_every_case_uses_isolated_binary_process_with_timeout(self):
+        for module, cases, diagnostic, count in self.cases():
+            result = SimpleNamespace(
+                returncode=2, stdout=b"", stderr=(diagnostic + os.linesep).encode("ascii")
+            )
+            with patch.object(consumer.subprocess, "run", return_value=result) as run:
+                self.assertEqual(consumer.check_malformed_frames(module, cases, diagnostic), count)
+            self.assertEqual(run.call_count, count)
+            for call, raw in zip(run.call_args_list, cases.values()):
+                self.assertEqual(call.args[0], [consumer.sys.executable, "-I", "-m", module])
+                self.assertEqual(
+                    call.kwargs,
+                    {"input": raw, "capture_output": True, "check": False, "timeout": 10},
+                )
+
+
 if __name__ == "__main__":
     unittest.main()

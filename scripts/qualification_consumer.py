@@ -240,6 +240,80 @@ def check_bundle_case(data, case):
         raise AssertionError("bundle_process_mismatch")
 
 
+def malformed_frames(raw, magic, oversized):
+    # Representative truncations cover magic, a partial length and the final
+    # payload. Source tests exhaust every byte offset and pre-read bound.
+    cases = {
+        "empty": b"",
+        "truncated_magic": magic[:-1],
+        "truncated_length": raw[: len(magic) + 3],
+        "truncated_payload": raw[:-1],
+        "trailing_bytes": raw + b"\r\n\x1a\x00\xffPRIVATE",
+        "second_frame": raw + raw,
+    }
+    cases.update(("oversized_" + name, header) for name, header in oversized.items())
+    return cases
+
+
+def assessment_malformed_frames(args):
+    plan, rows, domain, procedure, methods = args
+    magic = b"AETHRON-QUALIFICATION-ASSESSMENT-V1\n"
+    docs = magic + _blob(plan) + _blob(domain) + _blob(procedure)
+    mapped = docs + _byte_map(methods)
+    row = rows[0]
+    capture = mapped + struct.pack(">I", 1) + _blob(row["case_id"].encode("ascii"))
+    instant = _blob(json.dumps(row["now_ms"]).encode("ascii"))
+    manifest = capture + instant + _blob(row["manifest"])
+    # Frozen v1 bounds, independently pinned rather than imported from the CLI.
+    oversized = {
+        "plan": magic + struct.pack(">I", 65537),
+        "domain": magic + _blob(plan) + struct.pack(">I", 65537),
+        "procedure": magic + _blob(plan) + _blob(domain) + struct.pack(">I", 65537),
+        "method_count": docs + struct.pack(">I", 49),
+        "method": docs + struct.pack(">I", 1) + b"a" * 64 + struct.pack(">I", 65537),
+        "capture_count": mapped + struct.pack(">I", 65),
+        "case_id": mapped + struct.pack(">II", 1, 65),
+        "instant": capture + struct.pack(">I", 18),
+        "manifest": capture + instant + struct.pack(">I", 65537),
+        "artifact_count": manifest + struct.pack(">I", 16),
+        "artifact": manifest + struct.pack(">I", 1) + b"a" * 64 + struct.pack(">I", 1048577),
+    }
+    return malformed_frames(frame(args), magic, oversized)
+
+
+def bundle_malformed_frames(args):
+    plan, rows, domain, procedure = args
+    magic = b"AETHRON-QUALIFICATION-BUNDLE-V1\n"
+    docs = magic + _blob(plan) + _blob(domain) + _blob(procedure)
+    row = rows[0]
+    capture = docs + struct.pack(">I", 1) + _blob(row["case_id"].encode("ascii"))
+    oversized = {
+        "plan": magic + struct.pack(">I", 65537),
+        "domain": magic + _blob(plan) + struct.pack(">I", 1048577),
+        "procedure": magic + _blob(plan) + _blob(domain) + struct.pack(">I", 1048577),
+        "capture_count": docs + struct.pack(">I", 65),
+        "case_id": docs + struct.pack(">II", 1, 65),
+        "manifest": capture + struct.pack(">QI", row["now_ms"], 65537),
+        "uint32": magic + b"\xff" * 4,
+    }
+    return malformed_frames(bundle_frame(args), magic, oversized)
+
+
+def check_malformed_frames(module, cases, diagnostic):
+    expected = (2, b"", (diagnostic + os.linesep).encode("ascii"))
+    for name, raw in cases.items():
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", module],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("malformed_process_mismatch:" + module + ":" + name)
+    return len(cases)
+
+
 def main():
     if not sys.flags.isolated or sys.prefix == sys.base_prefix:
         raise RuntimeError("isolated_consumer_venv_required")
@@ -247,17 +321,32 @@ def main():
         # Do not resolve sys.executable: POSIX venvs can symlink the base binary.
         if Path(sys.prefix).resolve() not in Path(module.__file__).resolve().parents:
             raise RuntimeError("installed_module_required")
-    for case in corpus(Path(sys.argv[1])):
+    cases = corpus(Path(sys.argv[1]))
+    for case in cases:
         check_case(case)
     data = bundle_corpus(Path(sys.argv[2]))
     for case in data["cases"]:
         check_bundle_case(data, case)
+    complete = next(case for case in cases if case["id"] == "complete")
+    assessment_malformed = check_malformed_frames(
+        "qualification.assessment_cli",
+        assessment_malformed_frames(arguments(complete)),
+        "invalid_qualification_assessment",
+    )
+    complete_bundle = next(case for case in data["cases"] if case["id"] == "complete")
+    bundle_malformed = check_malformed_frames(
+        "qualification.campaign_bundle_cli",
+        bundle_malformed_frames(bundle_arguments(data, complete_bundle)),
+        "invalid_campaign_bundle",
+    )
     print(
         json.dumps(
             {
                 "assessment_vectors": 10,
                 "bundle_vectors": 6,
                 "artifact_vectors": 7,
+                "assessment_malformed_frames": assessment_malformed,
+                "bundle_malformed_frames": bundle_malformed,
                 "isolated_install": True,
             },
             sort_keys=True,
