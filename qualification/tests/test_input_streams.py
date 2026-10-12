@@ -1,6 +1,7 @@
 """Qualification commands must consume bounded binary input or fail closed."""
 
 import io
+import os
 import subprocess
 import sys
 import unittest
@@ -61,7 +62,8 @@ class InputStreamTests(unittest.TestCase):
                     check=False,
                 )
                 self.assertEqual(
-                    (result.returncode, result.stdout, result.stderr), (2, b"", diagnostic.encode())
+                    (result.returncode, result.stdout, result.stderr),
+                    (2, b"", (diagnostic[:-1] + os.linesep).encode("ascii")),
                 )
 
     def test_declaration_short_reads_preserve_golden_report(self):

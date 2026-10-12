@@ -20,6 +20,8 @@ from qualification.tests.test_report_output import Output
 ROOT = Path(__file__).resolve().parents[2]
 MAGIC = b"AETHRON-QUALIFICATION-ASSESSMENT-V1\n"
 DIAGNOSTIC = "invalid_qualification_assessment\n"
+# Process text streams use native newlines; the binary frame always uses LF.
+PROCESS_DIAGNOSTIC = ("invalid_qualification_assessment" + os.linesep).encode("ascii")
 
 
 def uint(value):
@@ -85,7 +87,7 @@ class AssessmentCliTests(unittest.TestCase):
                 if case["expected_error"]:
                     self.assertEqual(
                         (result.returncode, result.stdout, result.stderr),
-                        (2, b"", DIAGNOSTIC.encode()),
+                        (2, b"", PROCESS_DIAGNOSTIC),
                     )
                 else:
                     self.assertEqual(result.returncode, 0 if case["id"] == "complete" else 1)
@@ -97,9 +99,31 @@ class AssessmentCliTests(unittest.TestCase):
                             json.dumps(
                                 case["expected_report"], sort_keys=True, separators=(",", ":")
                             )
-                            + "\n"
+                            + os.linesep
                         ).encode(),
                     )
+
+    def test_binary_process_input_preserves_opaque_artifact_bytes(self):
+        args = copy.deepcopy(self.args)
+        # Text-mode stdin on Windows would translate CRLF and stop at Ctrl-Z.
+        artifacts = args[1][0]["artifacts"]
+        self.assertTrue(artifacts)
+        for digest in artifacts:
+            artifacts[digest] += b"\r\n\x1a\x00\xffPRIVATE"
+        expected = self.command.evaluate(*args)
+        self.assertFalse(expected["artifact_bytes_verified"])
+        self.assertFalse(expected["software_checks_passed"])
+        result = subprocess.run(
+            [sys.executable, "-E", "-m", "qualification.assessment_cli"],
+            input=frame(args),
+            capture_output=True,
+            cwd=ROOT,
+            timeout=10,
+            check=False,
+        )
+        self.assertEqual((result.returncode, result.stderr), (1, b""))
+        self.vectors.exact(json.loads(result.stdout), expected)
+        self.assertNotIn(b"PRIVATE", result.stdout)
 
     def test_short_reads_preserve_exact_report(self):
         raw = frame(self.args)
@@ -263,7 +287,7 @@ class AssessmentCliTests(unittest.TestCase):
                     )
                 self.assertEqual(result.returncode, 2)
                 if not close_errors:
-                    self.assertEqual(result.stderr, DIAGNOSTIC.encode())
+                    self.assertEqual(result.stderr, PROCESS_DIAGNOSTIC)
 
     def test_instants_are_not_coerced_and_names_are_validated(self):
         for value in (True, False, 1050.0, "1050", None, [], {}, -1, 2**53, float("inf")):

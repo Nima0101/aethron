@@ -37,21 +37,22 @@ class CliShutdownTests(unittest.TestCase):
                         (ROOT / "qualification/rigs" / rig).read_bytes(),
                         ["--now-ms", "1050"],
                     ),
-                    (2, b"invalid_qualification_manifest\n"),
+                    (2, ("invalid_qualification_manifest" + os.linesep).encode("ascii")),
                 )
         for raw in (frame(), frame(rows=[])):
             with self.subTest(module="qualification.campaign_bundle_cli", bytes=len(raw)):
                 self.assertEqual(
                     self.closed_pipe("qualification.campaign_bundle_cli", raw),
-                    (2, b"invalid_campaign_bundle\n"),
+                    (2, ("invalid_campaign_bundle" + os.linesep).encode("ascii")),
                 )
 
     def test_input_failure_remains_fixed_when_stdout_is_also_closed(self):
         for module, args, diagnostic in (
-            ("qualification", ["--now-ms", "1050"], b"invalid_qualification_manifest\n"),
-            ("qualification.campaign_bundle_cli", [], b"invalid_campaign_bundle\n"),
+            ("qualification", ["--now-ms", "1050"], "invalid_qualification_manifest"),
+            ("qualification.campaign_bundle_cli", [], "invalid_campaign_bundle"),
         ):
             with self.subTest(module=module):
                 self.assertEqual(
-                    self.closed_pipe(module, b"PRIVATE malformed", args), (2, diagnostic)
+                    self.closed_pipe(module, b"PRIVATE malformed", args),
+                    (2, (diagnostic + os.linesep).encode("ascii")),
                 )
