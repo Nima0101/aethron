@@ -368,6 +368,237 @@ class DeclarationCollectionBoundaryTests(unittest.TestCase):
                     self.assert_process_call(run, raw)
 
 
+def escaped_key_documents(case):
+    """Independent path-based encoder; preserve all untouched object members."""
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    paths = {
+        "root": ((), "version"),
+        "rig": (("rig",), "id"),
+        "sensor": (("rig", "sensors", 0), "id"),
+        "capture": (("capture",), "clock_domain"),
+        "record": (("records", 0), "sensor_id"),
+    }
+    for kind, key in (
+        ("calibration", "valid_from_ms"),
+        ("clock", "at_ms"),
+        ("environment", "lighting"),
+    ):
+        index = next(i for i, row in enumerate(doc["records"]) if row["kind"] == kind)
+        paths["data_" + kind] = (("records", index, "data"), key)
+    controls, duplicates = {}, {}
+    for name, (target_path, target_key) in paths.items():
+        literal = json.dumps(target_key)
+        # Encode from ASCII bytes independently of the consumer's ord-based code.
+        escapes = ["\\u00" + bytes([byte]).hex() for byte in target_key.encode("ascii")]
+        partial = '"' + escapes[0] + target_key[1:] + '"'
+        full = '"' + "".join(escapes) + '"'
+
+        def encode(value, path, token, extra, target_path=target_path, target_key=target_key):
+            if isinstance(value, dict):
+                members = []
+                if path == target_path and extra is not None:
+                    members.append(extra + ":" + json.dumps(value[target_key]))
+                for key in sorted(value):
+                    member_key = (
+                        token if path == target_path and key == target_key else json.dumps(key)
+                    )
+                    members.append(
+                        member_key + ":" + encode(value[key], (*path, key), token, extra)
+                    )
+                return "{" + ",".join(members) + "}"
+            if isinstance(value, list):
+                return (
+                    "["
+                    + ",".join(encode(row, (*path, i), token, extra) for i, row in enumerate(value))
+                    + "]"
+                )
+            return json.dumps(value)
+
+        for form, token, extra in (
+            ("partial", partial, None),
+            ("full", full, None),
+            ("literal_partial", partial, literal),
+            ("partial_literal", literal, partial),
+            ("partial_full", full, partial),
+        ):
+            raw = encode(doc, (), token, extra).encode("ascii")
+            if extra is None:
+                report = {
+                    "version": 1,
+                    "input_sha256": hashlib.sha256(raw).hexdigest(),
+                    "declaration_checks_passed": True,
+                    "sensor_count": 2,
+                    "record_count": 6,
+                    "evidence_counts": {"synthetic": 6, "recorded": 0, "external_unverified": 0},
+                    "findings": [],
+                    "artifacts_verified": False,
+                    "physical_qualification_passed": False,
+                    "physical_status": "blocked_external_evidence_and_review",
+                }
+                controls[name + "_" + form] = raw, report
+            else:
+                duplicates[name + "_" + form] = raw, target_path, target_key
+    return controls, duplicates
+
+
+class DeclarationEscapedKeyControlTests(DeclarationCollectionBoundaryTests):
+    generate = staticmethod(consumer.declaration_escaped_key_controls)
+    check = staticmethod(consumer.check_declaration_escaped_key_controls)
+    diagnostic = "declaration_escaped_key_"
+    count = 16
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        self.cases, _ = escaped_key_documents(self.case)
+
+    def test_encodings_preserve_semantics_but_commit_exact_bytes(self):
+        raw = bytes.fromhex(self.case["captures"][0]["manifest_hex"])
+        canonical_digest = hashlib.sha256(self.encode(json.loads(raw))).hexdigest()
+        for name, (encoded, report) in self.cases.items():
+            with self.subTest(case=name):
+                self.assertEqual(json.loads(encoded), json.loads(raw))
+                self.assertNotEqual(report["input_sha256"], hashlib.sha256(raw).hexdigest())
+                self.assertNotEqual(report["input_sha256"], canonical_digest)
+                self.assertIn(b"\\u00", encoded)
+                self.assertEqual(
+                    self.encode(consumer.validate(encoded, now_ms=1050)), self.encode(report)
+                )
+
+    def test_valid_escapes_cannot_clear_existing_stale_findings(self):
+        case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "stale")
+        cases = self.generate(case)
+        for raw, report in cases.values():
+            self.assertEqual(report["findings"], ["capture_stale"])
+            self.assertFalse(report["declaration_checks_passed"])
+            self.assertEqual(self.encode(consumer.validate(raw, now_ms=1151)), self.encode(report))
+        with patch.object(
+            consumer.subprocess, "run", side_effect=[self.result(r) for _, r in cases.values()]
+        ):
+            self.assertEqual(self.check(case), 16)
+
+
+class DeclarationEscapedKeyDuplicateTests(unittest.TestCase):
+    assert_process_call = DeclarationCollectionBoundaryTests.assert_process_call
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        self.controls, self.details = escaped_key_documents(self.case)
+        self.cases = {name: raw for name, (raw, _, _) in self.details.items()}
+        self.good = SimpleNamespace(
+            returncode=2,
+            stdout=b"",
+            stderr=("invalid_qualification_manifest" + os.linesep).encode("ascii"),
+        )
+
+    def test_independent_documents_decode_one_duplicate_at_the_intended_path(self):
+        original = copy.deepcopy(self.case)
+        self.assertEqual(consumer.declaration_escaped_key_duplicates(self.case), self.cases)
+        for name, (raw, path, key) in self.details.items():
+            with self.subTest(case=name):
+                found = []
+
+                def pairs_hook(pairs, found=found):
+                    result = {}
+                    for field, value in pairs:
+                        if field in result:
+                            found.append((field, result[field], value, dict(pairs)))
+                        result[field] = value
+                    return result
+
+                doc = json.loads(raw, object_pairs_hook=pairs_hook)
+                target = doc
+                for part in path:
+                    target = target[part]
+                self.assertEqual(found, [(key, target[key], target[key], target)])
+                self.assertEqual(
+                    doc, json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+                )
+                self.assertLessEqual(len(raw), 65536)
+                with self.assertRaisesRegex(ValueError, "^invalid_qualification_manifest$"):
+                    consumer.validate(raw, now_ms=1050)
+                # Removing the prepended duplicate leaves a valid singly encoded key.
+                level, form = name.rsplit("_", 2)[0], name.rsplit("_", 2)[1:]
+                token = json.dumps(key).encode("ascii")
+                partial = b'"\\u00' + bytes([ord(key[0])]).hex().encode() + key[1:].encode() + b'"'
+                first = token if form[0] == "literal" else partial
+                member = first + b":" + json.dumps(target[key]).encode() + b","
+                self.assertIn(member, raw)
+                repaired = raw.replace(member, b"", 1)
+                if form[1] == "literal":
+                    self.assertEqual(
+                        repaired,
+                        json.dumps(doc, sort_keys=True, separators=(",", ":")).encode("ascii"),
+                    )
+                    self.assertTrue(
+                        consumer.validate(repaired, now_ms=1050)["declaration_checks_passed"]
+                    )
+                else:
+                    self.assertEqual(repaired, self.controls[level + "_" + form[1]][0])
+        with patch.object(consumer.subprocess, "run", return_value=self.good) as run:
+            self.assertEqual(consumer.check_declaration_escaped_key_duplicates(self.case), 24)
+        self.assertEqual(run.call_count, 24)
+        for call, raw in zip(run.call_args_list, self.cases.values()):
+            self.assertEqual(
+                call.args[0],
+                [consumer.sys.executable, "-I", "-m", "qualification", "--now-ms", "1050"],
+            )
+            self.assertEqual(
+                call.kwargs, {"input": raw, "capture_output": True, "check": False, "timeout": 10}
+            )
+        self.assertEqual(self.case, original)
+
+    def test_every_duplicate_requires_fixed_library_rejection(self):
+        for name, raw in self.cases.items():
+            for error in (None, ValueError("PRIVATE")):
+                with self.subTest(case=name, error=error):
+                    with (
+                        patch.object(
+                            consumer, "declaration_escaped_key_duplicates", return_value={name: raw}
+                        ),
+                        patch.object(
+                            consumer, "validate", side_effect=error, return_value={}
+                        ) as validate,
+                        patch.object(consumer.subprocess, "run") as run,
+                    ):
+                        suffix = "missing" if error is None else "mismatch"
+                        with self.assertRaisesRegex(
+                            AssertionError,
+                            "^declaration_escaped_key_error_" + suffix + ":" + name + "$",
+                        ):
+                            consumer.check_declaration_escaped_key_duplicates(self.case)
+                    validate.assert_called_once_with(raw, now_ms=1050)
+                    run.assert_not_called()
+
+    def test_every_duplicate_requires_fixed_process_rejection(self):
+        for name, raw in self.cases.items():
+            for field, value in (
+                ("returncode", 0),
+                ("returncode", 1),
+                ("stdout", raw),
+                ("stdout", b"{}"),
+                ("stderr", b""),
+                ("stderr", self.good.stderr + b"PRIVATE"),
+                ("stderr", b"Traceback"),
+            ):
+                with self.subTest(case=name, field=field):
+                    result = copy.copy(self.good)
+                    setattr(result, field, value)
+                    with (
+                        patch.object(
+                            consumer, "declaration_escaped_key_duplicates", return_value={name: raw}
+                        ),
+                        patch.object(consumer, "validate", wraps=consumer.validate) as validate,
+                        patch.object(consumer.subprocess, "run", return_value=result) as run,
+                    ):
+                        with self.assertRaisesRegex(
+                            AssertionError,
+                            "^declaration_escaped_duplicate_process_mismatch:" + name + "$",
+                        ):
+                            consumer.check_declaration_escaped_key_duplicates(self.case)
+                    validate.assert_called_once_with(raw, now_ms=1050)
+                    self.assert_process_call(run, raw)
+
+
 class DeclarationTokenBoundaryTests(DeclarationCollectionBoundaryTests):
     generate = staticmethod(consumer.declaration_token_boundaries)
     check = staticmethod(consumer.check_declaration_token_boundaries)

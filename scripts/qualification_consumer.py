@@ -1354,6 +1354,104 @@ def check_declaration_wrong_case_references(case):
     return len(cases)
 
 
+def _declaration_escaped_key_inputs(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    encoded = canonical(doc).encode("ascii")
+    objects = [
+        ("root", doc, "version"),
+        ("rig", doc["rig"], "id"),
+        ("sensor", doc["rig"]["sensors"][0], "id"),
+        ("capture", doc["capture"], "clock_domain"),
+        ("record", doc["records"][0], "sensor_id"),
+    ]
+    for kind, key in (
+        ("calibration", "valid_from_ms"),
+        ("clock", "at_ms"),
+        ("environment", "lighting"),
+    ):
+        record = next(row for row in doc["records"] if row["kind"] == kind)
+        objects.append(("data_" + kind, record["data"], key))
+    controls, duplicates = {}, {}
+    for name, obj, key in objects:
+        original = canonical(obj).encode("ascii")
+        literal = canonical(key).encode("ascii")
+        partial = ('"\\u%04x' % ord(key[0]) + key[1:] + '"').encode("ascii")
+        full = ('"' + "".join("\\u%04x" % ord(char) for char in key) + '"').encode("ascii")
+        value = canonical(obj[key]).encode("ascii")
+        for form, token in (("partial", partial), ("full", full)):
+            changed = original.replace(literal + b":", token + b":", 1)
+            raw = encoded.replace(original, changed, 1)
+            report = copy.deepcopy(case["expected_report"]["captures"][0]["report"]["declaration"])
+            report["input_sha256"] = hashlib.sha256(raw).hexdigest()
+            controls[name + "_" + form] = raw, report
+        # Equal values ensure both first-key-wins and last-key-wins parsers
+        # would accept the document if decoded-name duplicates were missed.
+        for form, first, second in (
+            ("literal_partial", literal, partial),
+            ("partial_literal", partial, literal),
+            ("partial_full", partial, full),
+        ):
+            changed = original.replace(literal + b":", second + b":", 1)
+            changed = b"{" + first + b":" + value + b"," + changed[1:]
+            duplicates[name + "_" + form] = encoded.replace(original, changed, 1)
+    return controls, duplicates
+
+
+def declaration_escaped_key_controls(case):
+    return _declaration_escaped_key_inputs(case)[0]
+
+
+def declaration_escaped_key_duplicates(case):
+    return _declaration_escaped_key_inputs(case)[1]
+
+
+def check_declaration_escaped_key_controls(case):
+    cases = declaration_escaped_key_controls(case)
+    instant = case["captures"][0]["now_ms"]
+    for name, (raw, report) in cases.items():
+        if canonical(validate(raw, now_ms=instant)) != canonical(report):
+            raise AssertionError("declaration_escaped_key_report_mismatch:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        expected = (
+            0 if report["declaration_checks_passed"] else 1,
+            (canonical(report) + os.linesep).encode("ascii"),
+            b"",
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_escaped_key_process_mismatch:" + name)
+    return len(cases)
+
+
+def check_declaration_escaped_key_duplicates(case):
+    cases = declaration_escaped_key_duplicates(case)
+    instant = case["captures"][0]["now_ms"]
+    expected = (2, b"", ("invalid_qualification_manifest" + os.linesep).encode("ascii"))
+    for name, raw in cases.items():
+        try:
+            validate(raw, now_ms=instant)
+        except ValueError as exc:
+            if str(exc) != "invalid_qualification_manifest":
+                raise AssertionError("declaration_escaped_key_error_mismatch:" + name) from exc
+        else:
+            raise AssertionError("declaration_escaped_key_error_missing:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_escaped_duplicate_process_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -2220,6 +2318,8 @@ def main():
     declaration_wrong_case_count = check_declaration_wrong_case_references(complete)
     declaration_partial_record_count = check_declaration_partial_records(complete)
     declaration_combined_failure_count = check_declaration_combined_failures(complete)
+    declaration_escaped_controls = check_declaration_escaped_key_controls(complete)
+    declaration_escaped_duplicates = check_declaration_escaped_key_duplicates(complete)
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -2284,6 +2384,8 @@ def main():
                 "declaration_wrong_case_references": declaration_wrong_case_count,
                 "declaration_partial_record_cases": declaration_partial_record_count,
                 "declaration_combined_failure_cases": declaration_combined_failure_count,
+                "declaration_escaped_key_controls": declaration_escaped_controls,
+                "declaration_escaped_key_duplicates": declaration_escaped_duplicates,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,
