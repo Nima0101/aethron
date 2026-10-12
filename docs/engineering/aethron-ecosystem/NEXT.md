@@ -10,3 +10,15 @@ The [latest owner directive](LATEST-OWNER-AUTONOMY.md) supersedes the earlier Ph
 [Sensor contracts](P2-SENSOR-ADAPTERS.md), [machine status](PHASES.json), [execution ledger](EXECUTION.md) and [backlog](IMPLEMENTATION-BACKLOG.md) identify completed and pending work. Missing physical hardware does not block software adapters or replay/SITL. Current work is not globally qualified or publicly delivered.
 
 Release checks: [current clean reproduction](evidence/phase2/provider-clean.json) binds source `58addca`. Core/source/ZIP and installed edge checks passed; native synthetic p95 is 13.633ms. Prior [Mac latency failures](evidence/phase2/performance.json), aircraft misses/false positives, startup intermittency and semaphore warning remain retained. [Publication preflight](evidence/phase2/publication-preflight.json) includes the repaired Windows/Python 3.9 ZIP lookup and candidate SBOM inventory. Fresh browser execution is blocked by macOS Mach-port permission; native Windows and candidate hosted CI remain pending. Complete legitimate S01–S15/browser gates before public push, then required hosted checks/review before merge or deployment. Continue provisioned provider worker/supervisor wiring while those platform gates are open. No new owner START is required.
+
+- [x] 2026-10-12: clean reproduction retains compared hashes and revalidates both artifact inventories after each isolated ZIP consumer; changed, extra or missing second-build artifacts block success.
+- [x] Targeted check: six second-build regression cases failed before correction; all eight reproduction-report tests passed after it, including real synthetic ZIP consumers. Python stdlib SHA-256/inventory checks retain the existing cross-platform artifact contract.
+- [x] 2026-10-12: parent candidate Linux vision packaging passed with pinned wheels; committed-source reproduction still blocked by the no-new-repository restriction.
+- [x] Recovery spawn failures now latch a fault, retire the unstarted process and clear recovering state; Python multiprocessing retained for its existing process lifecycle contract.
+- [x] Targeted check: two failures reproduced before correction; four lifecycle checks passed after it (1.680s). Ruff passed; Bandit reported no medium/high findings.
+- [ ] BLOCKED: shutdown/replacement-start race repeatedly attempted without code progress; do not retry in this session.
+- [ ] Blocker: committed-source reproduction, native/platform/release qualification and PR #49 integration/checks remain open; no merge or release claim.
+
+- [x] Release archives/manifests now use immutable Git blobs from the provenance revision; checkout changes cannot enter the payload, and links/submodules are rejected. Python stdlib + Git batch reader retains cross-platform packaging without a new runtime.
+- [x] Targeted check: source-binding regression reproduced; five tests passed, including real Git object reading. Ruff and Bandit medium/high checks passed.
+- [ ] Next: reject stale unrelated files in the release output directory before checksum generation.

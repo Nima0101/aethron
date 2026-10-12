@@ -1,0 +1,35 @@
+{
+  "id": "0032-core-package-console-check",
+  "review_order_version": 3,
+  "component": "P1.1 installed console launcher verification; not product CLI implementation",
+  "source_revision": "1894da9fe7e7a3d593162f9808d86318e32e06d0",
+  "source_sha256": "23fbb480769d4ae9b9c54f5c83d4b3fc88d7e7ef471bfbed488f462f5aef2c4f",
+  "decision": "KEEP",
+  "constraints": [
+    "Offline wheel consumer on supported desktop Python/OS matrix; invoke the installer-generated command outside checkout, propagate failure, exclude Python import-path overrides, emit evidence only after consumers pass. No hard-real-time requirement."
+  ],
+  "comparison": [
+    "Python subprocess provides argument-vector invocation, explicit environment/cwd, captured output, timeout and exception propagation directly in the wheel/venv/pip observer. CTest add_test provides exit-status testing and working-directory selection through a CMake test description. PowerShell Start-Process offers working directory, environment and process handling through a separate shell runtime. Both are credible external-command runners; neither validates a Python console entry point merely by invoking the module."
+  ],
+  "rationale": [
+    "KEEP Python for this narrow verification boundary: its native process API composes directly with the existing in-memory artifact digest, pip admission and JSON report. CTest or PowerShell would still require this Python packaging boundary and an additional transport for the report/failure state. No performance ranking or general language preference is inferred."
+  ],
+  "evidence": [
+    "Before correction, six regression subcases failed: launcher omission, missing/failed/timed-out launcher, empty help, and absent seventh-child failure propagation. The checker now invokes the absolute installed console path with --help, removes PYTHONPATH/PYTHONHOME, sets PYTHONNOUSERSITE=1, requires exit zero/nonempty stdout and applies a 30-second subprocess timeout.",
+    "Twelve focused package methods passed on Linux/CPython3.13.13. Two cases used real venv/pip installs of a tiny synthetic wheel: its launcher ran despite a conflicting PYTHONPATH package; deleting the installed launcher prevented the success report. Product demo/replay subprocesses remained mocked. Existing hosted core jobs already execute scripts/package_check.py."
+  ],
+  "limits": [
+    "source_sha256 binds the pre-correction observer at source_revision. The report console_wrapper=true means a successful nonempty help smoke check, not argument-by-argument CLI qualification, source-tree binding, publisher authentication or installed-file tamper resistance.",
+    "The subprocess timeout is not an aggregate CPU/memory bound. Cross-platform hosted results remain pending; no product runtime, hardware, complete P1.1 or P1.2-P1.7 qualification is established. The genuine pip runs emitted local cache-permission warnings; installations and tests still exited successfully."
+  ],
+  "revisit": [
+    "Continue P1.1 source-tree-to-wheel binding and inspect remaining observer claims; revisit the runner if packaging gains a non-Python artifact graph or measured concurrency/resource constraint."
+  ],
+  "references": [
+    "https://packaging.python.org/en/latest/specifications/entry-points/",
+    "https://docs.python.org/3.13/library/subprocess.html",
+    "https://docs.python.org/3.13/using/cmdline.html",
+    "https://cmake.org/cmake/help/latest/command/add_test.html",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-process?view=powershell-7.5"
+  ]
+}
