@@ -1710,7 +1710,8 @@ class AggregateArtifactConsumerTests(unittest.TestCase):
             )
 
     def test_counts_negative_evidence_and_false_claims_are_checked_for_each_capture(self):
-        for index, (name, original) in enumerate(self.reports.items()):
+        for name, original in self.reports.items():
+            args = self.boundaries[name]
             mutations = []
             for i in range(len(original["captures"])):
                 prefix = ("captures", i, "report")
@@ -1736,22 +1737,26 @@ class AggregateArtifactConsumerTests(unittest.TestCase):
                     for key in path[:-1]:
                         target = target[key]
                     target[path[-1]] = value
-                    preceding = list(self.reports.values())[:index]
                     with (
-                        patch.object(consumer, "evaluate", side_effect=[*preceding, report]),
                         patch.object(
-                            consumer.subprocess,
-                            "run",
-                            side_effect=[self.result(r) for r in preceding],
+                            consumer, "aggregate_artifact_arguments", return_value={name: args}
                         ),
+                        patch.object(consumer, "evaluate", return_value=report) as evaluate,
+                        patch.object(consumer.subprocess, "run") as run,
                     ):
                         with self.assertRaisesRegex(
                             AssertionError, "^aggregate_assessment_" + error + ":" + name + "$"
                         ):
                             consumer.check_aggregate_artifacts(self.case)
+                    evaluate.assert_called_once_with(*args)
+                    run.assert_not_called()
 
     def test_process_cannot_reject_exact_limit_hide_findings_or_change_status(self):
-        for index, (name, report) in enumerate(self.reports.items()):
+        from qualification.tests.test_assessment_cli import frame
+
+        for name, report in self.reports.items():
+            args = self.boundaries[name]
+            raw = frame(args)
             good = self.result(report)
             for status, stdout, stderr in (
                 (0, good.stdout, b""),
@@ -1761,13 +1766,26 @@ class AggregateArtifactConsumerTests(unittest.TestCase):
                 (1, good.stdout, b"PRIVATE"),
             ):
                 with self.subTest(case=name, status=status, stderr=stderr):
-                    preceding = [self.result(r) for r in list(self.reports.values())[:index]]
                     bad = SimpleNamespace(returncode=status, stdout=stdout, stderr=stderr)
-                    with patch.object(consumer.subprocess, "run", side_effect=[*preceding, bad]):
+                    with (
+                        patch.object(
+                            consumer, "aggregate_artifact_arguments", return_value={name: args}
+                        ),
+                        patch.object(consumer, "evaluate", wraps=consumer.evaluate) as evaluate,
+                        patch.object(consumer.subprocess, "run", return_value=bad) as run,
+                    ):
                         with self.assertRaisesRegex(
                             AssertionError, "^aggregate_assessment_process_mismatch:" + name + "$"
                         ):
                             consumer.check_aggregate_artifacts(self.case)
+                    evaluate.assert_called_once_with(*args)
+                    run.assert_called_once_with(
+                        [consumer.sys.executable, "-I", "-m", "qualification.assessment_cli"],
+                        input=raw,
+                        capture_output=True,
+                        check=False,
+                        timeout=10,
+                    )
 
 
 class BundleConsumerTests(unittest.TestCase):
