@@ -87,6 +87,7 @@ def run():
                 "-I",
                 str(ROOT / "scripts/qualification_consumer.py"),
                 str(ROOT / "qualification/fixtures/assessment-vectors-v1.json"),
+                str(ROOT / "qualification/fixtures/consumer-vectors-v1.json"),
             ],
             cwd=temp,
             check=True,
@@ -95,7 +96,12 @@ def run():
             timeout=120,
         )
         qualification_result = json.loads(qualification.stdout)
-        assert qualification_result == {"assessment_vectors": 10, "isolated_install": True}
+        assert qualification_result == {
+            "assessment_vectors": 10,
+            "bundle_vectors": 6,
+            "artifact_vectors": 7,
+            "isolated_install": True,
+        }
         print(
             json.dumps(
                 {

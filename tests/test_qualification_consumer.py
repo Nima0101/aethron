@@ -1,6 +1,8 @@
 """Negative controls for the installed qualification acceptance checker."""
 
 import copy
+import io
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -10,6 +12,7 @@ from unittest.mock import patch
 from scripts import qualification_consumer as consumer
 
 CORPUS = Path(__file__).resolve().parents[1] / "qualification/fixtures/assessment-vectors-v1.json"
+BUNDLE_CORPUS = CORPUS.with_name("consumer-vectors-v1.json")
 
 
 class QualificationConsumerTests(unittest.TestCase):
@@ -54,6 +57,104 @@ class QualificationConsumerTests(unittest.TestCase):
                 with patch.object(consumer.subprocess, "run", return_value=result):
                     with self.assertRaisesRegex(AssertionError, "^assessment_process_mismatch$"):
                         consumer.check_case(self.cases["stale"])
+
+
+class BundleConsumerTests(unittest.TestCase):
+    def setUp(self):
+        self.data = consumer.bundle_corpus(BUNDLE_CORPUS)
+        self.cases = {case["id"]: case for case in self.data["cases"]}
+
+    def test_replaced_or_oversized_corpus_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "corpus.json"
+            for raw in (BUNDLE_CORPUS.read_bytes() + b" ", b"{}", b" " * 32769):
+                path.write_bytes(raw)
+                with self.assertRaisesRegex(ValueError, "^bundle_corpus_mismatch$"):
+                    consumer.bundle_corpus(path)
+
+    def test_all_vectors_preserve_frame_bytes_and_process_contract(self):
+        from qualification.campaign_bundle_cli import _report
+        from qualification.tests.test_campaign_bundle_cli import frame
+
+        for case in self.data["cases"]:
+            with self.subTest(case=case["id"]):
+                args = consumer.bundle_arguments(self.data, case)
+                raw = consumer.bundle_frame(args)
+                self.assertEqual(raw, frame(*args))
+                self.assertEqual(_report(io.BytesIO(raw)), consumer.evaluate_bundle(*args))
+                output = (consumer.canonical(_report(io.BytesIO(raw))) + os.linesep).encode()
+                status = 0 if case["expected"]["bundle"]["software_checks_passed"] else 1
+                result = SimpleNamespace(returncode=status, stdout=output, stderr=b"")
+                with patch.object(consumer.subprocess, "run", return_value=result) as run:
+                    consumer.check_bundle_case(self.data, case)
+                self.assertEqual(run.call_args.kwargs["input"], raw)
+                self.assertEqual(
+                    run.call_args.args[0],
+                    [consumer.sys.executable, "-I", "-m", "qualification.campaign_bundle_cli"],
+                )
+
+    def test_numeric_substitutions_and_qualification_claims_are_rejected(self):
+        case = self.cases["complete"]
+        original = consumer.evaluate_bundle(*consumer.bundle_arguments(self.data, case))
+        mutations = [
+            (("software_checks_passed",), 1, "bundle_report_mismatch"),
+            (("coverage", "capture_counts", "submitted"), True, "bundle_report_mismatch"),
+            (("coverage", "capture_counts", "eligible"), 1.0, "bundle_report_mismatch"),
+            (("plan_sha256",), "0" * 64, "bundle_plan_mismatch"),
+        ]
+        for key in (
+            "artifact_bytes_verified",
+            "artifact_authenticity_verified",
+            "domain_verified",
+            "procedure_verified",
+            "physical_qualification_passed",
+        ):
+            for value in (True, 0):
+                mutations.append(((key,), value, "bundle_qualification_claim"))
+        for nested in ("coverage", "references"):
+            mutations.append(
+                ((nested, "physical_qualification_passed"), True, "bundle_qualification_claim")
+            )
+        for path, value, error in mutations:
+            with self.subTest(path=path, value=value):
+                report = copy.deepcopy(original)
+                target = report
+                for key in path[:-1]:
+                    target = target[key]
+                target[path[-1]] = value
+                with patch.object(consumer, "evaluate_bundle", return_value=report):
+                    with self.assertRaisesRegex(AssertionError, "^" + error + "$"):
+                        consumer.check_bundle_case(self.data, case)
+
+    def test_artifact_failures_cannot_be_hidden_by_passing_bundle(self):
+        case = self.cases["altered_artifact"]
+        original = consumer.verify
+
+        def changed(*args, **kwargs):
+            report = original(*args, **kwargs)
+            report["artifact_findings"] = []
+            report["software_checks_passed"] = True
+            report["artifact_bytes_verified"] = True
+            return report
+
+        with patch.object(consumer, "verify", side_effect=changed):
+            with self.assertRaisesRegex(AssertionError, "^bundle_artifact_mismatch$"):
+                consumer.check_bundle_case(self.data, case)
+
+    def test_process_status_output_and_diagnostics_are_all_checked(self):
+        case = self.cases["stale"]
+        report = consumer.evaluate_bundle(*consumer.bundle_arguments(self.data, case))
+        output = (consumer.canonical(report) + os.linesep).encode()
+        for status, stdout, stderr in (
+            (0, output, b""),
+            (1, output + b"unexpected", b""),
+            (1, output, b"unexpected"),
+        ):
+            with self.subTest(status=status, stderr=stderr):
+                result = SimpleNamespace(returncode=status, stdout=stdout, stderr=stderr)
+                with patch.object(consumer.subprocess, "run", return_value=result):
+                    with self.assertRaisesRegex(AssertionError, "^bundle_process_mismatch$"):
+                        consumer.check_bundle_case(self.data, case)
 
 
 if __name__ == "__main__":
