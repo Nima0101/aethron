@@ -261,6 +261,77 @@ def declaration_structure_inputs(raw):
     return cases
 
 
+def declaration_value_inputs(raw):
+    doc = json.loads(raw)
+    environment = next(i for i, row in enumerate(doc["records"]) if row["kind"] == "environment")
+    groups = {
+        "version": {"root": ("version",)},
+        "enum": {
+            "sensor_kind": ("rig", "sensors", 0, "kind"),
+            "record_kind": ("records", 0, "kind"),
+            "evidence": ("records", 0, "evidence"),
+            "lighting": ("records", environment, "data", "lighting"),
+        },
+        "token": {
+            "rig_id": ("rig", "id"),
+            "sensor_id": ("rig", "sensors", 0, "id"),
+            "capture_clock": ("capture", "clock_domain"),
+            "record_sensor": ("records", 0, "sensor_id"),
+            "record_clock": ("records", 0, "clock_domain"),
+        },
+        "digest": {
+            "configuration": ("rig", "configuration_sha256"),
+            "device": ("rig", "sensors", 0, "device_sha256"),
+            "mount": ("rig", "sensors", 0, "mount_sha256"),
+            "artifact": ("records", 0, "artifact_sha256"),
+            "rig_binding": ("records", 0, "rig_sha256"),
+        },
+    }
+    cases = {}
+    for group, paths in groups.items():
+        for name, path in paths.items():
+            original = doc
+            for key in path:
+                original = original[key]
+            values = {"null": None, "boolean": True, "number": 1, "array": [], "object": {}}
+            if group == "version":
+                values.update(number=0, future=2, fraction=1.0, string="1")
+            else:
+                values["empty"] = ""
+                if group == "enum":
+                    values.update(
+                        unknown="PRIVATE", uppercase=original.upper(), space=original + " "
+                    )
+                elif group == "token":
+                    values.update(
+                        overlong="a" * 65,
+                        space="a b",
+                        path="a/b",
+                        non_ascii="caf\u00e9",
+                        nul="a\x00b",
+                        newline="a\nb",
+                    )
+                else:
+                    values.update(
+                        short="a" * 63,
+                        long="a" * 65,
+                        uppercase="A" * 64,
+                        non_hex="g" * 64,
+                        non_ascii="\u00e9" * 64,
+                        space="a" * 63 + " ",
+                    )
+            for defect, value in values.items():
+                changed = copy.deepcopy(doc)
+                parent = changed
+                for key in path[:-1]:
+                    parent = parent[key]
+                parent[path[-1]] = value
+                cases["value_" + group + "_" + name + "_" + defect] = canonical(changed).encode(
+                    "ascii"
+                )
+    return cases
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -298,6 +369,7 @@ def declaration_malformed_inputs(raw):
             cases[name + "_" + defect] = encoded.replace(original, changed, 1)
     cases.update(declaration_numeric_inputs(raw))
     cases.update(declaration_structure_inputs(raw))
+    cases.update(declaration_value_inputs(raw))
     return cases
 
 

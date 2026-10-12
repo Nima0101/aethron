@@ -390,8 +390,8 @@ class DeclarationInputConsumerTests(unittest.TestCase):
 
     def test_every_invalid_input_reaches_isolated_binary_cli(self):
         with patch.object(consumer.subprocess, "run", return_value=self.rejected) as run:
-            self.assertEqual(consumer.check_declaration_malformed_inputs(self.case), 116)
-        self.assertEqual(run.call_count, 116)
+            self.assertEqual(consumer.check_declaration_malformed_inputs(self.case), 280)
+        self.assertEqual(run.call_count, 280)
         for call, raw in zip(
             run.call_args_list, consumer.declaration_malformed_inputs(self.raw).values()
         ):
@@ -421,7 +421,7 @@ class DeclarationInputConsumerTests(unittest.TestCase):
             paths["data_" + kind] = (("records", index, "data"), key)
         cases = consumer.declaration_malformed_inputs(self.raw)
         self.assertEqual(
-            {name for name in cases if not name.startswith(("numeric_", "structure_"))}
+            {name for name in cases if not name.startswith(("numeric_", "structure_", "value_"))}
             - {
                 "one_byte_over",
                 "trailing_non_whitespace",
@@ -607,6 +607,70 @@ class DeclarationInputConsumerTests(unittest.TestCase):
                     consumer.canonical(consumer.validate(fixed, now_ms=1050)),
                     consumer.canonical(expected),
                 )
+
+    def test_value_cases_change_one_field_and_repair_to_pinned_report(self):
+        original = json.loads(self.raw)
+        environment = next(
+            i for i, row in enumerate(original["records"]) if row["kind"] == "environment"
+        )
+        fields = {
+            "version_root": ("version",),
+            "enum_sensor_kind": ("rig", "sensors", 0, "kind"),
+            "enum_record_kind": ("records", 0, "kind"),
+            "enum_evidence": ("records", 0, "evidence"),
+            "enum_lighting": ("records", environment, "data", "lighting"),
+            "token_rig_id": ("rig", "id"),
+            "token_sensor_id": ("rig", "sensors", 0, "id"),
+            "token_capture_clock": ("capture", "clock_domain"),
+            "token_record_sensor": ("records", 0, "sensor_id"),
+            "token_record_clock": ("records", 0, "clock_domain"),
+            "digest_configuration": ("rig", "configuration_sha256"),
+            "digest_device": ("rig", "sensors", 0, "device_sha256"),
+            "digest_mount": ("rig", "sensors", 0, "mount_sha256"),
+            "digest_artifact": ("records", 0, "artifact_sha256"),
+            "digest_rig_binding": ("records", 0, "rig_sha256"),
+        }
+        cases = consumer.declaration_value_inputs(self.raw)
+        self.assertEqual(len(cases), 164)
+        seen = set()
+        for field, path in fields.items():
+            saved = original
+            for key in path:
+                saved = saved[key]
+            defects = {
+                "version": "null boolean number array object future fraction string",
+                "enum": "null boolean number array object empty unknown uppercase space",
+                "token": "null boolean number array object empty overlong space path non_ascii nul newline",
+                "digest": "null boolean number array object empty short long uppercase non_hex non_ascii space",
+            }[field.split("_", 1)[0]].split()
+            for defect in defects:
+                name = "value_" + field + "_" + defect
+                seen.add(name)
+                with self.subTest(case=name):
+                    raw = cases[name]
+                    self.assertLessEqual(len(raw), 65536)
+                    decoded = json.loads(raw)
+                    target = decoded
+                    for key in path[:-1]:
+                        target = target[key]
+                    self.assertNotEqual(
+                        consumer.canonical(target[path[-1]]), consumer.canonical(saved)
+                    )
+                    with self.assertRaisesRegex(ValueError, "^invalid_qualification_manifest$"):
+                        consumer.validate(raw, now_ms=1050)
+                    target[path[-1]] = saved
+                    self.assertEqual(decoded, original)
+                    fixed = json.dumps(decoded, sort_keys=True, separators=(",", ":")).encode()
+                    self.assertEqual(fixed, self.raw.rstrip())
+                    expected = copy.deepcopy(
+                        self.case["expected_report"]["captures"][0]["report"]["declaration"]
+                    )
+                    expected["input_sha256"] = hashlib.sha256(fixed).hexdigest()
+                    self.assertEqual(
+                        consumer.canonical(consumer.validate(fixed, now_ms=1050)),
+                        consumer.canonical(expected),
+                    )
+        self.assertEqual(set(cases), seen)
 
     def test_each_invalid_input_checks_status_empty_stdout_and_fixed_diagnostic(self):
         for index, name in enumerate(consumer.declaration_malformed_inputs(self.raw)):
