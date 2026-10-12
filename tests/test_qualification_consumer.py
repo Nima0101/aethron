@@ -1239,6 +1239,214 @@ class DeclarationAlternateEncodingTests(unittest.TestCase):
                     self.assert_process_call(run, raw)
 
 
+def whitespace_tokens(value):
+    """Independent recursive serialization, without the consumer's regex lexer."""
+    if isinstance(value, dict):
+        yield b"{"
+        for index, key in enumerate(sorted(value)):
+            if index:
+                yield b","
+            yield json.dumps(key).encode("ascii")
+            yield b":"
+            yield from whitespace_tokens(value[key])
+        yield b"}"
+    elif isinstance(value, list):
+        yield b"["
+        for index, item in enumerate(value):
+            if index:
+                yield b","
+            yield from whitespace_tokens(item)
+        yield b"]"
+    else:
+        yield json.dumps(value).encode("ascii")
+
+
+class DeclarationWhitespaceControlTests(DeclarationCollectionBoundaryTests):
+    generate = staticmethod(consumer.declaration_whitespace_controls)
+    check = staticmethod(consumer.check_declaration_whitespace_controls)
+    diagnostic = "declaration_whitespace_"
+    count = 21
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        self.doc = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        tokens = list(whitespace_tokens(self.doc))
+        raw = b"".join(tokens)
+        self.cases = {}
+        for name, codes in (
+            ("space", [32]),
+            ("tab", [9]),
+            ("lf", [10]),
+            ("crlf", [13, 10]),
+            ("mixed", [32, 9, 10, 13, 10]),
+        ):
+            separator = bytes(codes)
+            for position in ("leading", "trailing", "between", "all"):
+                value = separator.join(tokens) if position in ("between", "all") else raw
+                if position in ("leading", "all"):
+                    value = separator + value
+                if position in ("trailing", "all"):
+                    value += separator
+                self.save(name + "_" + position, self.doc, 2, 6, [])
+                _, report = self.cases[name + "_" + position]
+                report["input_sha256"] = hashlib.sha256(value).hexdigest()
+                self.cases[name + "_" + position] = value, report
+        index = raw.index(b":") + 1
+        self.save("space_after_colon", self.doc, 2, 6, [])
+        _, report = self.cases["space_after_colon"]
+        value = raw[:index] + bytes([32]) + raw[index:]
+        report["input_sha256"] = hashlib.sha256(value).hexdigest()
+        self.cases["space_after_colon"] = value, report
+
+    def test_whitespace_preserves_values_and_commits_each_byte_layout(self):
+        self.assertEqual(len({raw for raw, _ in self.cases.values()}), self.count)
+        for name, (raw, expected) in self.cases.items():
+            with self.subTest(case=name):
+                self.assertEqual(json.loads(raw), self.doc)
+                self.assertEqual(
+                    consumer.canonical(consumer.validate(raw, now_ms=1050)),
+                    consumer.canonical(expected),
+                )
+                self.assertEqual(hashlib.sha256(raw).hexdigest(), expected["input_sha256"])
+
+    def test_all_stale_layouts_preserve_findings_and_binary_exit_status(self):
+        stale = next(case for case in consumer.corpus(CORPUS) if case["id"] == "stale")
+        expected = {
+            name: (raw, dict(report, findings=["capture_stale"], declaration_checks_passed=False))
+            for name, (raw, report) in self.cases.items()
+        }
+        self.assertEqual(self.generate(stale), expected)
+        with patch.object(
+            consumer.subprocess, "run", side_effect=[self.result(r) for _, r in expected.values()]
+        ) as run:
+            self.assertEqual(self.check(stale), self.count)
+        self.assertEqual(run.call_count, self.count)
+        for call, (raw, _) in zip(run.call_args_list, expected.values()):
+            self.assertEqual(
+                call.args[0],
+                [consumer.sys.executable, "-I", "-m", "qualification", "--now-ms", "1151"],
+            )
+            self.assertEqual(
+                call.kwargs, {"input": raw, "capture_output": True, "check": False, "timeout": 10}
+            )
+
+
+class DeclarationInvalidSeparatorTests(unittest.TestCase):
+    assert_process_call = DeclarationCollectionBoundaryTests.assert_process_call
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        doc = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        self.raw = b"".join(whitespace_tokens(doc))
+        self.cases = {}
+        self.repairs = {}
+        for name, separator in (("vt", chr(11)), ("ff", chr(12)), ("nbsp", chr(160))):
+            for position, index in (
+                ("leading", 0),
+                ("trailing", len(self.raw)),
+                ("after_colon", self.raw.index(b":") + 1),
+            ):
+                key = name + "_" + position
+                self.cases[key] = self.raw[:index] + separator.encode("utf-8") + self.raw[index:]
+                self.repairs[key] = (index, len(separator.encode("utf-8")), "space_" + position)
+        self.good = SimpleNamespace(
+            returncode=2,
+            stdout=b"",
+            stderr=("invalid_qualification_manifest" + os.linesep).encode("ascii"),
+        )
+
+    def test_independent_separators_and_full_binary_traversal(self):
+        original = copy.deepcopy(self.case)
+        self.assertEqual(consumer.declaration_invalid_separators(self.case), self.cases)
+        self.assertEqual(len(set(self.cases.values())), 9)
+        with patch.object(consumer.subprocess, "run", return_value=self.good) as run:
+            self.assertEqual(consumer.check_declaration_invalid_separators(self.case), 9)
+        self.assertEqual(run.call_count, 9)
+        for call, raw in zip(run.call_args_list, self.cases.values()):
+            self.assertLessEqual(len(raw), 65536)
+            self.assertEqual(
+                call.args[0],
+                [consumer.sys.executable, "-I", "-m", "qualification", "--now-ms", "1050"],
+            )
+            self.assertEqual(
+                call.kwargs, {"input": raw, "capture_output": True, "check": False, "timeout": 10}
+            )
+        self.assertEqual(self.case, original)
+
+    def test_only_one_separator_needs_repair_for_passing_and_stale_reports(self):
+        for case in consumer.corpus(CORPUS):
+            if case["id"] not in ("complete", "stale"):
+                continue
+            controls = consumer.declaration_whitespace_controls(case)
+            for name, raw in self.cases.items():
+                with self.subTest(case=case["id"], separator=name):
+                    # Every document is valid UTF-8 but invalid JSON syntax.
+                    with self.assertRaises(json.JSONDecodeError):
+                        json.loads(raw.decode("utf-8"))
+                    index, length, control = self.repairs[name]
+                    repaired = raw[:index] + b" " + raw[index + length :]
+                    expected_raw, report = controls[control]
+                    self.assertEqual(repaired, expected_raw)
+                    instant = case["captures"][0]["now_ms"]
+                    with self.assertRaisesRegex(ValueError, "^invalid_qualification_manifest$"):
+                        consumer.validate(raw, now_ms=instant)
+                    self.assertEqual(
+                        consumer.canonical(consumer.validate(repaired, now_ms=instant)),
+                        consumer.canonical(report),
+                    )
+
+    def test_every_separator_requires_fixed_library_rejection(self):
+        for name, raw in self.cases.items():
+            for error in (None, ValueError("PRIVATE")):
+                with self.subTest(case=name, error=error):
+                    with (
+                        patch.object(
+                            consumer, "declaration_invalid_separators", return_value={name: raw}
+                        ),
+                        patch.object(
+                            consumer, "validate", side_effect=error, return_value={}
+                        ) as validate,
+                        patch.object(consumer.subprocess, "run") as run,
+                    ):
+                        suffix = "missing" if error is None else "mismatch"
+                        with self.assertRaisesRegex(
+                            AssertionError,
+                            "^declaration_whitespace_error_" + suffix + ":" + name + "$",
+                        ):
+                            consumer.check_declaration_invalid_separators(self.case)
+                    validate.assert_called_once_with(raw, now_ms=1050)
+                    run.assert_not_called()
+
+    def test_every_separator_requires_fixed_process_rejection(self):
+        for name, raw in self.cases.items():
+            for field, value in (
+                ("returncode", 0),
+                ("returncode", 1),
+                ("stdout", raw),
+                ("stdout", b"{}"),
+                ("stderr", b""),
+                ("stderr", self.good.stderr + b"PRIVATE"),
+                ("stderr", b"Traceback"),
+            ):
+                with self.subTest(case=name, field=field):
+                    result = copy.copy(self.good)
+                    setattr(result, field, value)
+                    with (
+                        patch.object(
+                            consumer, "declaration_invalid_separators", return_value={name: raw}
+                        ),
+                        patch.object(consumer, "validate", wraps=consumer.validate) as validate,
+                        patch.object(consumer.subprocess, "run", return_value=result) as run,
+                    ):
+                        with self.assertRaisesRegex(
+                            AssertionError,
+                            "^declaration_whitespace_rejection_mismatch:" + name + "$",
+                        ):
+                            consumer.check_declaration_invalid_separators(self.case)
+                    validate.assert_called_once_with(raw, now_ms=1050)
+                    self.assert_process_call(run, raw)
+
+
 class DeclarationTokenBoundaryTests(DeclarationCollectionBoundaryTests):
     generate = staticmethod(consumer.declaration_token_boundaries)
     check = staticmethod(consumer.check_declaration_token_boundaries)

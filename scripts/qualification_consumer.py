@@ -10,6 +10,7 @@ import hashlib
 import itertools
 import json
 import os
+import re
 import struct
 import subprocess
 import sys
@@ -1783,6 +1784,96 @@ def check_declaration_alternate_encodings(case):
     return len(cases)
 
 
+def declaration_whitespace_controls(case):
+    raw = canonical(json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))).encode("ascii")
+    tokens = re.findall(
+        rb'"(?:\\.|[^"\\])*"|[{}\[\],:]|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|true|false|null',
+        raw,
+    )
+    if b"".join(tokens) != raw:
+        raise AssertionError("declaration_whitespace_token_mismatch")
+    cases = {}
+    for name, separator in (
+        ("space", b" "),
+        ("tab", b"\t"),
+        ("lf", b"\n"),
+        ("crlf", b"\r\n"),
+        ("mixed", b" \t\n\r\n"),
+    ):
+        between = separator.join(tokens)
+        for position, value in (
+            ("leading", separator + raw),
+            ("trailing", raw + separator),
+            ("between", between),
+            ("all", separator + between + separator),
+        ):
+            cases[name + "_" + position] = value
+    # Each invalid separator below has a repair changing exactly one separator.
+    cases["space_after_colon"] = raw.replace(b":", b": ", 1)
+    expected = case["expected_report"]["captures"][0]["report"]["declaration"]
+    return {
+        name: (value, dict(copy.deepcopy(expected), input_sha256=hashlib.sha256(value).hexdigest()))
+        for name, value in cases.items()
+    }
+
+
+def declaration_invalid_separators(case):
+    raw = canonical(json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))).encode("ascii")
+    cases = {}
+    for name, separator in (("vt", b"\x0b"), ("ff", b"\x0c"), ("nbsp", b"\xc2\xa0")):
+        cases[name + "_leading"] = separator + raw
+        cases[name + "_trailing"] = raw + separator
+        cases[name + "_after_colon"] = raw.replace(b":", b":" + separator, 1)
+    return cases
+
+
+def check_declaration_whitespace_controls(case):
+    cases = declaration_whitespace_controls(case)
+    instant = case["captures"][0]["now_ms"]
+    for name, (raw, report) in cases.items():
+        if canonical(validate(raw, now_ms=instant)) != canonical(report):
+            raise AssertionError("declaration_whitespace_report_mismatch:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        expected = (
+            0 if report["declaration_checks_passed"] else 1,
+            (canonical(report) + os.linesep).encode("ascii"),
+            b"",
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_whitespace_process_mismatch:" + name)
+    return len(cases)
+
+
+def check_declaration_invalid_separators(case):
+    cases = declaration_invalid_separators(case)
+    instant = case["captures"][0]["now_ms"]
+    expected = (2, b"", ("invalid_qualification_manifest" + os.linesep).encode("ascii"))
+    for name, raw in cases.items():
+        try:
+            validate(raw, now_ms=instant)
+        except ValueError as exc:
+            if str(exc) != "invalid_qualification_manifest":
+                raise AssertionError("declaration_whitespace_error_mismatch:" + name) from exc
+        else:
+            raise AssertionError("declaration_whitespace_error_missing:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_whitespace_rejection_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -2661,6 +2752,12 @@ def main():
         if case["id"] in ("complete", "stale")
     )
     declaration_alternate_encoding_count = check_declaration_alternate_encodings(complete)
+    declaration_whitespace_count = sum(
+        check_declaration_whitespace_controls(case)
+        for case in cases
+        if case["id"] in ("complete", "stale")
+    )
+    declaration_separator_count = check_declaration_invalid_separators(complete)
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -2733,6 +2830,8 @@ def main():
                 "declaration_utf8_value_inputs": declaration_utf8_inputs,
                 "declaration_encoding_controls": declaration_encoding_controls_count,
                 "declaration_alternate_encodings": declaration_alternate_encoding_count,
+                "declaration_whitespace_controls": declaration_whitespace_count,
+                "declaration_invalid_separators": declaration_separator_count,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,

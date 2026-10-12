@@ -122,6 +122,8 @@ def run():
             "declaration_utf8_value_inputs": 180,
             "declaration_encoding_controls": 2,
             "declaration_alternate_encodings": 9,
+            "declaration_whitespace_controls": 42,
+            "declaration_invalid_separators": 9,
             "declaration_malformed_inputs": 389,
             "declaration_closed_pipe_cases": 6,
             "bundle_vectors": 6,
