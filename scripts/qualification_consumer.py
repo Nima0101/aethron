@@ -240,6 +240,122 @@ def check_aggregate_artifacts(case):
     return 2
 
 
+def exact_limit_arguments(args):
+    # Independent frozen wire limits; invalid opaque content is admitted as
+    # negative evidence, never mistaken for an invalid envelope.
+    plan, rows, domain, procedure, _ = copy.deepcopy(args)
+    methods = {f"{i:064x}": b"\xff" * 65536 for i in range(48)}
+    row = rows[0]
+    row["case_id"] = "a" * 64
+    row["manifest"] = row["manifest"].ljust(65536, b" ")
+    row["artifacts"] = {f"{i:064x}": b"\xff" * 1048576 for i in range(4)}
+    row["artifacts"].update((f"{i:064x}", b"") for i in range(4, 15))
+    rows = [row, *(dict(row, artifacts={}) for _ in range(63))]
+    return (
+        plan.ljust(65536, b" "),
+        rows,
+        domain.ljust(65536, b" "),
+        procedure.ljust(65536, b" "),
+        methods,
+    )
+
+
+def check_exact_limits(case):
+    args = exact_limit_arguments(arguments(case))
+    report = evaluate(*args)
+    projection = {
+        "capture_counts": report["coverage"]["capture_counts"],
+        "coverage_findings": report["coverage"]["findings"],
+        "domain_findings": report["domain"]["findings"],
+        "procedure_findings": report["methods"]["procedure"]["findings"],
+        "method_counts": report["methods"]["method_counts"],
+        "method_findings": report["methods"]["method_findings"],
+        "captures": [
+            {
+                "index": row["capture_index"],
+                "findings": row["findings"],
+                "counts": row["report"]["artifact_counts"],
+                "artifact_findings": row["report"]["artifact_findings"],
+                "manifest_sha256": row["report"]["declaration"]["input_sha256"],
+            }
+            for row in report["captures"]
+        ],
+    }
+    expected = {
+        "capture_counts": {"submitted": 64, "eligible": 0, "rejected": 64},
+        "coverage_findings": ["capture_coverage_missing", "capture_reused", "capture_unplanned"],
+        "domain_findings": ["domain_digest_mismatch"],
+        "procedure_findings": ["procedure_digest_mismatch"],
+        "method_counts": {"referenced": 3, "supplied": 48, "supplied_bytes": 3145728},
+        "method_findings": [
+            "method_digest_mismatch",
+            "method_invalid",
+            "method_missing",
+            "method_unreferenced",
+        ],
+        "captures": [
+            {
+                "index": i,
+                "findings": [],
+                "counts": {
+                    "referenced": 1,
+                    "supplied": 15 if i == 0 else 0,
+                    "matched": 0,
+                    "missing": 1,
+                    "mismatched": 0,
+                    "unreferenced": 15 if i == 0 else 0,
+                    "supplied_bytes": 4194304 if i == 0 else 0,
+                },
+                "artifact_findings": (
+                    ["artifact_missing", "artifact_unreferenced"]
+                    if i == 0
+                    else ["artifact_missing"]
+                ),
+                "manifest_sha256": hashlib.sha256(args[1][i]["manifest"]).hexdigest(),
+            }
+            for i in range(64)
+        ],
+    }
+    if canonical(projection) != canonical(expected):
+        raise AssertionError("exact_limit_assessment_report_mismatch")
+    # Check each layer's negative/authority flags, including numeric impostors.
+    template = case["expected_report"]
+    artifact_template = template["captures"][0]["report"]
+    for nested, baseline in (
+        (report, template),
+        (report["coverage"], template["coverage"]),
+        (report["domain"], template["domain"]),
+        (report["methods"], template["methods"]),
+        (report["methods"]["procedure"], template["methods"]["procedure"]),
+        *((row["report"], artifact_template) for row in report["captures"]),
+        *(
+            (row["report"]["declaration"], artifact_template["declaration"])
+            for row in report["captures"]
+        ),
+    ):
+        for key in baseline:
+            if key.endswith("_verified") or key in (
+                "software_checks_passed",
+                "physical_qualification_passed",
+                "declaration_coverage_complete",
+                "domain_declaration_checks_passed",
+                "procedure_declaration_checks_passed",
+            ):
+                if nested.get(key) is not False:
+                    raise AssertionError("exact_limit_assessment_claim")
+    result = subprocess.run(
+        [sys.executable, "-I", "-m", "qualification.assessment_cli"],
+        input=frame(args),
+        capture_output=True,
+        check=False,
+        timeout=10,
+    )
+    expected_process = (1, (canonical(report) + os.linesep).encode("ascii"), b"")
+    if (result.returncode, result.stdout, result.stderr) != expected_process:
+        raise AssertionError("exact_limit_assessment_process_mismatch")
+    return 1
+
+
 def bundle_corpus(path):
     with path.open("rb") as stream:
         raw = stream.read(32769)
@@ -484,6 +600,7 @@ def main():
     complete = next(case for case in cases if case["id"] == "complete")
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
+    exact_limit_cases = check_exact_limits(complete)
     assessment_malformed = check_malformed_frames(
         "qualification.assessment_cli",
         assessment_malformed_frames(arguments(complete)),
@@ -503,6 +620,7 @@ def main():
                 "artifact_vectors": 7,
                 "assessment_opaque_artifact_cases": 1,
                 "assessment_aggregate_artifact_cases": aggregate_artifact_cases,
+                "assessment_exact_limit_cases": exact_limit_cases,
                 "assessment_malformed_frames": assessment_malformed,
                 "bundle_malformed_frames": bundle_malformed,
                 "isolated_install": True,

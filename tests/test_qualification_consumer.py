@@ -138,6 +138,134 @@ class OpaqueArtifactConsumerTests(unittest.TestCase):
                         consumer.check_opaque_artifacts(self.case)
 
 
+class ExactLimitConsumerTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        cls.args = consumer.exact_limit_arguments(consumer.arguments(cls.case))
+        cls.report = consumer.evaluate(*cls.args)
+        cls.output = (consumer.canonical(cls.report) + os.linesep).encode("ascii")
+
+    def test_frozen_limits_match_source_frame_and_isolated_process(self):
+        from qualification import assessment_cli
+        from qualification.tests.test_assessment_cli import frame
+
+        plan, rows, domain, procedure, methods = self.args
+        self.assertEqual([len(raw) for raw in (plan, domain, procedure)], [65536] * 3)
+        self.assertEqual(len(methods), 48)
+        self.assertTrue(all(raw == b"\xff" * 65536 for raw in methods.values()))
+        self.assertEqual(len(rows), 64)
+        for row in rows:
+            self.assertEqual(row["case_id"], "a" * 64)
+            self.assertEqual(len(row["manifest"]), 65536)
+        self.assertEqual(len(rows[0]["artifacts"]), 15)
+        self.assertEqual(
+            [len(raw) for raw in rows[0]["artifacts"].values()], [1048576] * 4 + [0] * 11
+        )
+        self.assertTrue(all(row["artifacts"] == {} for row in rows[1:]))
+        raw = frame(self.args)
+        self.assertEqual(consumer.frame(self.args), raw)
+        self.assertEqual(assessment_cli._report(io.BytesIO(raw)), self.report)
+        original = copy.deepcopy(self.case)
+        good = SimpleNamespace(returncode=1, stdout=self.output, stderr=b"")
+        with patch.object(consumer.subprocess, "run", return_value=good) as run:
+            self.assertEqual(consumer.check_exact_limits(self.case), 1)
+        self.assertEqual(self.case, original)
+        self.assertEqual(
+            run.call_args.args[0],
+            [consumer.sys.executable, "-I", "-m", "qualification.assessment_cli"],
+        )
+        self.assertEqual(
+            run.call_args.kwargs,
+            {"input": raw, "capture_output": True, "check": False, "timeout": 10},
+        )
+
+    def test_counts_and_negative_findings_cannot_disappear(self):
+        mutations = [
+            (("coverage", "findings"), []),
+            (("domain", "findings"), []),
+            (("methods", "procedure", "findings"), []),
+            (("methods", "method_findings"), []),
+            (("captures",), self.report["captures"][:-1]),
+        ]
+        for prefix in (("coverage", "capture_counts"), ("methods", "method_counts")):
+            target = self.report[prefix[0]][prefix[1]]
+            mutations.extend(((*prefix, key), True) for key in target)
+        for index in range(64):
+            prefix = ("captures", index)
+            mutations.extend(
+                [
+                    ((*prefix, "capture_index"), -1),
+                    ((*prefix, "findings"), ["capture_invalid"]),
+                    ((*prefix, "report", "artifact_findings"), []),
+                    ((*prefix, "report", "artifact_counts", "supplied_bytes"), True),
+                    ((*prefix, "report", "declaration", "input_sha256"), "0" * 64),
+                ]
+            )
+        for path, value in mutations:
+            with self.subTest(path=path):
+                report = copy.deepcopy(self.report)
+                target = report
+                for key in path[:-1]:
+                    target = target[key]
+                target[path[-1]] = value
+                with patch.object(consumer, "evaluate", return_value=report):
+                    with self.assertRaisesRegex(
+                        AssertionError, "^exact_limit_assessment_report_mismatch$"
+                    ):
+                        consumer.check_exact_limits(self.case)
+
+    def test_each_report_layer_preserves_false_claims(self):
+        for path in (
+            (),
+            ("coverage",),
+            ("domain",),
+            ("methods",),
+            ("methods", "procedure"),
+            ("captures", 0, "report"),
+            ("captures", 63, "report"),
+            ("captures", 0, "report", "declaration"),
+            ("captures", 63, "report", "declaration"),
+        ):
+            original = self.report
+            for key in path:
+                original = original[key]
+            for flag, current in original.items():
+                if current is not False:
+                    continue
+                for value in (True, 0, None):
+                    with self.subTest(path=path, flag=flag, value=value):
+                        report = copy.deepcopy(self.report)
+                        target = report
+                        for key in path:
+                            target = target[key]
+                        if value is None:
+                            del target[flag]
+                        else:
+                            target[flag] = value
+                        with patch.object(consumer, "evaluate", return_value=report):
+                            with self.assertRaisesRegex(
+                                AssertionError, "^exact_limit_assessment_claim$"
+                            ):
+                                consumer.check_exact_limits(self.case)
+
+    def test_process_cannot_reject_exact_limit_or_hide_negative_result(self):
+        for status, stdout, stderr in (
+            (0, self.output, b""),
+            (2, b"", b"invalid_qualification_assessment" + os.linesep.encode("ascii")),
+            (1, b"{}" + os.linesep.encode("ascii"), b""),
+            (1, self.output + b"PRIVATE", b""),
+            (1, self.output, b"PRIVATE"),
+        ):
+            with self.subTest(status=status, stderr=stderr):
+                result = SimpleNamespace(returncode=status, stdout=stdout, stderr=stderr)
+                with patch.object(consumer.subprocess, "run", return_value=result):
+                    with self.assertRaisesRegex(
+                        AssertionError, "^exact_limit_assessment_process_mismatch$"
+                    ):
+                        consumer.check_exact_limits(self.case)
+
+
 class AggregateArtifactConsumerTests(unittest.TestCase):
     def setUp(self):
         self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
