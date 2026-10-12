@@ -390,8 +390,8 @@ class DeclarationInputConsumerTests(unittest.TestCase):
 
     def test_every_invalid_input_reaches_isolated_binary_cli(self):
         with patch.object(consumer.subprocess, "run", return_value=self.rejected) as run:
-            self.assertEqual(consumer.check_declaration_malformed_inputs(self.case), 38)
-        self.assertEqual(run.call_count, 38)
+            self.assertEqual(consumer.check_declaration_malformed_inputs(self.case), 116)
+        self.assertEqual(run.call_count, 116)
         for call, raw in zip(
             run.call_args_list, consumer.declaration_malformed_inputs(self.raw).values()
         ):
@@ -421,7 +421,7 @@ class DeclarationInputConsumerTests(unittest.TestCase):
             paths["data_" + kind] = (("records", index, "data"), key)
         cases = consumer.declaration_malformed_inputs(self.raw)
         self.assertEqual(
-            {name for name in cases if not name.startswith("numeric_")}
+            {name for name in cases if not name.startswith(("numeric_", "structure_"))}
             - {
                 "one_byte_over",
                 "trailing_non_whitespace",
@@ -524,6 +524,84 @@ class DeclarationInputConsumerTests(unittest.TestCase):
                 expected = copy.deepcopy(
                     self.case["expected_report"]["captures"][0]["report"]["declaration"]
                 )
+                expected["input_sha256"] = hashlib.sha256(fixed).hexdigest()
+                self.assertEqual(
+                    consumer.canonical(consumer.validate(fixed, now_ms=1050)),
+                    consumer.canonical(expected),
+                )
+
+    def test_structure_cases_remove_required_members_or_replace_one_container(self):
+        original = json.loads(self.raw)
+        # Explicit schema fields keep coverage independent of the case generator
+        # and catch accidentally selecting the wrong record's data object.
+        objects = {
+            "root": ((), "version rig capture records"),
+            "rig": (("rig",), "id configuration_sha256 sensors"),
+            "sensor": (("rig", "sensors", 0), "id kind device_sha256 mount_sha256"),
+            "capture": (("capture",), "clock_domain start_ms end_ms"),
+            "record": (
+                ("records", 0),
+                "sensor_id kind evidence artifact_sha256 rig_sha256 clock_domain data",
+            ),
+        }
+        for kind, fields in (
+            ("calibration", "valid_from_ms valid_until_ms"),
+            ("clock", "at_ms offset_ms uncertainty_ms"),
+            ("environment", "at_ms lighting"),
+        ):
+            index = next(i for i, row in enumerate(original["records"]) if row["kind"] == kind)
+            objects["data_" + kind] = (("records", index, "data"), fields)
+        mutations = {}
+        for name, (path, fields) in objects.items():
+            for key in fields.split():
+                mutations["structure_" + name + "_missing_" + key] = (path, key, None)
+            mutations["structure_" + name + "_array"] = (path, None, [])
+        containers = {name: path for name, (path, _) in objects.items()}
+        for name, path in (("sensors", ("rig", "sensors")), ("records", ("records",))):
+            containers[name] = path
+            mutations["structure_" + name + "_object"] = (path, None, {})
+        for name, path in containers.items():
+            for defect, value in (
+                ("null", None),
+                ("string", "PRIVATE"),
+                ("boolean", True),
+                ("number", 1),
+            ):
+                mutations["structure_" + name + "_" + defect] = (path, None, value)
+        cases = consumer.declaration_structure_inputs(self.raw)
+        self.assertEqual(set(cases), set(mutations))
+        self.assertEqual(len(cases), 78)
+        expected = copy.deepcopy(
+            self.case["expected_report"]["captures"][0]["report"]["declaration"]
+        )
+        for name, (path, missing, value) in mutations.items():
+            with self.subTest(case=name):
+                decoded = json.loads(cases[name])
+                target, saved = decoded, original
+                for component in path:
+                    saved = saved[component]
+                    if missing is not None:
+                        target = target[component]
+                if missing is not None:
+                    self.assertNotIn(missing, target)
+                    self.assertEqual(set(target), set(saved) - {missing})
+                    target[missing] = saved[missing]
+                elif path:
+                    for component in path[:-1]:
+                        target = target[component]
+                    self.assertEqual(
+                        consumer.canonical(target[path[-1]]), consumer.canonical(value)
+                    )
+                    target[path[-1]] = saved
+                else:
+                    self.assertEqual(consumer.canonical(decoded), consumer.canonical(value))
+                    decoded = saved
+                self.assertEqual(decoded, original)
+                self.assertLessEqual(len(cases[name]), 65536)
+                with self.assertRaisesRegex(ValueError, "^invalid_qualification_manifest$"):
+                    consumer.validate(cases[name], now_ms=1050)
+                fixed = json.dumps(decoded, sort_keys=True, separators=(",", ":")).encode()
+                self.assertEqual(fixed, self.raw.rstrip())
                 expected["input_sha256"] = hashlib.sha256(fixed).hexdigest()
                 self.assertEqual(
                     consumer.canonical(consumer.validate(fixed, now_ms=1050)),

@@ -220,6 +220,47 @@ def declaration_numeric_inputs(raw):
     return cases
 
 
+def declaration_structure_inputs(raw):
+    doc = json.loads(raw)
+    paths = {
+        "root": (),
+        "rig": ("rig",),
+        "sensors": ("rig", "sensors"),
+        "sensor": ("rig", "sensors", 0),
+        "capture": ("capture",),
+        "records": ("records",),
+        "record": ("records", 0),
+    }
+    for kind in ("calibration", "clock", "environment"):
+        index = next(i for i, record in enumerate(doc["records"]) if record["kind"] == kind)
+        paths["data_" + kind] = ("records", index, "data")
+    cases = {}
+    for name, path in paths.items():
+        target = doc
+        for key in path:
+            target = target[key]
+        replacements = {"null": None, "string": "PRIVATE", "boolean": True, "number": 1}
+        if type(target) is dict:
+            replacements["array"] = []
+            for key in target:
+                changed = dict(target)
+                del changed[key]
+                replacements["missing_" + key] = changed
+        else:
+            replacements["object"] = {}
+        for defect, replacement in replacements.items():
+            # A wrapper permits replacing the root through the same path logic
+            # as nested objects, without mutating the pinned source manifest.
+            wrapper = {"root": copy.deepcopy(doc)}
+            parent = wrapper
+            full_path = ("root", *path)
+            for key in full_path[:-1]:
+                parent = parent[key]
+            parent[full_path[-1]] = replacement
+            cases["structure_" + name + "_" + defect] = canonical(wrapper["root"]).encode("ascii")
+    return cases
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -256,6 +297,7 @@ def declaration_malformed_inputs(raw):
             changed = b"{" + member + b"," + original[1:]
             cases[name + "_" + defect] = encoded.replace(original, changed, 1)
     cases.update(declaration_numeric_inputs(raw))
+    cases.update(declaration_structure_inputs(raw))
     return cases
 
 
