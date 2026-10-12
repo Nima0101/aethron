@@ -2282,8 +2282,10 @@ class ClosedPipeConsumerTests(unittest.TestCase):
     def test_every_pipe_case_checks_status_and_observable_diagnostic(self):
         for module, cases, _independent, diagnostic, arguments in self.cases():
             fixed = (diagnostic + os.linesep).encode("ascii")
-            preceding = []
-            for name in cases:
+            for name, raw in cases.items():
+                args = [] if arguments is None else arguments[name]
+                selected_arguments = None if arguments is None else {name: args}
+                command = [consumer.sys.executable, "-I", "-m", module.__name__, *args]
                 for close_errors in (False, True):
                     errors = None if close_errors else fixed
                     bad_results = [(status, None, errors) for status in (0, 1, 120, -13)]
@@ -2296,12 +2298,22 @@ class ClosedPipeConsumerTests(unittest.TestCase):
                     for status, stdout, stderr in bad_results:
                         with self.subTest(module=module.__name__, case=name, closed=close_errors):
                             bad = SimpleNamespace(returncode=status, stdout=stdout, stderr=stderr)
+                            # Full traversal is checked above. Only the same input's
+                            # stdout-only success must precede a both-pipes failure.
+                            results = [bad]
+                            if close_errors:
+                                results.insert(
+                                    0, SimpleNamespace(returncode=2, stdout=None, stderr=fixed)
+                                )
                             with patch.object(
-                                consumer.subprocess, "run", side_effect=[*preceding, bad]
-                            ):
+                                consumer.subprocess, "run", side_effect=results
+                            ) as run:
                                 with self.assertRaises(AssertionError) as error:
                                     consumer.check_closed_pipes(
-                                        module.__name__, cases, diagnostic, case_arguments=arguments
+                                        module.__name__,
+                                        {name: raw},
+                                        diagnostic,
+                                        case_arguments=selected_arguments,
                                     )
                             mode = "both" if close_errors else "stdout"
                             self.assertEqual(
@@ -2313,7 +2325,29 @@ class ClosedPipeConsumerTests(unittest.TestCase):
                                 + ":"
                                 + mode,
                             )
-                    preceding.append(SimpleNamespace(returncode=2, stdout=None, stderr=errors))
+                            self.assertEqual(run.call_count, 2 if close_errors else 1)
+                            for index, call in enumerate(run.call_args_list):
+                                output = call.kwargs["stdout"]
+                                error_stream = call.kwargs["stderr"]
+                                self.assertEqual(call.args, (command,))
+                                self.assertEqual(
+                                    call.kwargs,
+                                    {
+                                        "input": raw,
+                                        "stdout": output,
+                                        "stderr": error_stream,
+                                        "check": False,
+                                        "timeout": 10,
+                                    },
+                                )
+                                self.assertEqual(output.mode, "wb")
+                                self.assertTrue(output.closed)
+                                if index == 0:
+                                    self.assertEqual(error_stream, consumer.subprocess.PIPE)
+                                else:
+                                    self.assertIsNot(error_stream, output)
+                                    self.assertEqual(error_stream.mode, "wb")
+                                    self.assertTrue(error_stream.closed)
 
     def test_subprocess_failure_closes_descriptors_and_cannot_report_success(self):
         for fail_at in (0, 1):
