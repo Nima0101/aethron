@@ -246,7 +246,7 @@ class MalformedConsumerTests(unittest.TestCase):
                 "qualification.assessment_cli",
                 consumer.assessment_malformed_frames(consumer.arguments(assessment)),
                 "invalid_qualification_assessment",
-                33,
+                47,
             ),
             (
                 "qualification.campaign_bundle_cli",
@@ -293,6 +293,70 @@ class MalformedConsumerTests(unittest.TestCase):
                 with patch.object(assessment_cli, "evaluate", return_value=sentinel) as evaluate:
                     self.assertIs(assessment_cli._report(io.BytesIO(repaired)), sentinel)
                     evaluate.assert_called_once()
+
+    def test_invalid_scalars_have_complete_frames_and_single_field_repairs(self):
+        from qualification import assessment_cli
+        from qualification.tests.test_assessment_cli import frame
+
+        case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        original = consumer.arguments(case)
+        _module, cases, _diagnostic, _count = self.cases()[0]
+        values = {
+            "now_ms": {
+                "true": True,
+                "false": False,
+                "float": 1050.0,
+                "string": "1050",
+                "null": None,
+                "array": [],
+                "object": {},
+                "negative": -1,
+                "above_maximum": 2**53 - 999,
+                "overflow": 2**53,
+                "infinity": float("inf"),
+            },
+            "case_id": {"empty": "", "space": "PRIVATE name", "path": "a/b"},
+        }
+        names = set()
+        for field, invalid in values.items():
+            for label, value in invalid.items():
+                name = ("instant" if field == "now_ms" else field) + "_" + label + "_frame"
+                names.add(name)
+                with self.subTest(case=name):
+                    args = copy.deepcopy(original)
+                    args[1][0][field] = value
+                    # Independent source-test encoder proves that all later
+                    # fields are present and only the selected scalar changed.
+                    self.assertEqual(cases[name], frame(args))
+                    with patch.object(assessment_cli, "evaluate") as evaluate:
+                        with self.assertRaises(ValueError):
+                            assessment_cli._report(io.BytesIO(cases[name]))
+                        evaluate.assert_not_called()
+                    args[1][0][field] = original[1][0][field]
+                    sentinel = object()
+                    with patch.object(
+                        assessment_cli, "evaluate", return_value=sentinel
+                    ) as evaluate:
+                        self.assertIs(assessment_cli._report(io.BytesIO(frame(args))), sentinel)
+                        evaluate.assert_called_once_with(*original)
+        self.assertEqual(
+            names,
+            {name for name in cases if name.startswith(("instant_", "case_id_"))},
+        )
+
+    def test_valid_scalar_boundaries_reach_evaluation_without_coercion(self):
+        from qualification import assessment_cli
+
+        case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        for instant in (0, 2**53 - 1000):
+            for name in ("a", "Az09_-" + "a" * 58):
+                with self.subTest(instant=instant, name=name):
+                    args = consumer.arguments(case)
+                    args[1][0].update(now_ms=instant, case_id=name)
+                    with patch.object(assessment_cli, "evaluate") as evaluate:
+                        assessment_cli._report(io.BytesIO(consumer.frame(args)))
+                        evaluate.assert_called_once_with(*args)
+                        self.assertIs(type(evaluate.call_args.args[1][0]["now_ms"]), int)
 
     def test_wrong_status_output_or_diagnostic_fails_at_any_case(self):
         for module, cases, diagnostic, _count in self.cases():

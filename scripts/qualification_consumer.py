@@ -331,6 +331,33 @@ def assessment_malformed_frames(args):
         header = prefix + struct.pack(">I", 2) + b"a" * 64 + _blob(b"abc") + b"a" * 64
         cases[kind + "_duplicate_key_header"] = header
         cases[kind + "_duplicate_key_frame"] = header + _blob(b"PRIVATE") + suffix
+    # Complete envelopes isolate scalar validation from truncation/length
+    # rejection. Pin the wire tokens so bool/float/string coercion cannot pass.
+    for name, token in (
+        ("true", b"true"),
+        ("false", b"false"),
+        ("float", b"1050.0"),
+        ("string", b'"1050"'),
+        ("null", b"null"),
+        ("array", b"[]"),
+        ("object", b"{}"),
+        ("negative", b"-1"),
+        ("above_maximum", b"9007199254739993"),
+        ("overflow", b"9007199254740992"),
+        ("infinity", b"Infinity"),
+    ):
+        cases["instant_" + name + "_frame"] = (
+            capture + _blob(token) + _blob(row["manifest"]) + _byte_map(row["artifacts"])
+        )
+    for name, token in (("empty", b""), ("space", b"PRIVATE name"), ("path", b"a/b")):
+        cases["case_id_" + name + "_frame"] = (
+            mapped
+            + struct.pack(">I", 1)
+            + _blob(token)
+            + instant
+            + _blob(row["manifest"])
+            + _byte_map(row["artifacts"])
+        )
     return cases
 
 
