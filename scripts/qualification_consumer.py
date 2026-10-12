@@ -699,6 +699,74 @@ def check_declaration_domain_boundaries(case):
     return len(cases)
 
 
+def declaration_provenance_cases(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    template = case["expected_report"]["captures"][0]["report"]["declaration"]
+    cases = {}
+    profiles = {
+        "synthetic": ("synthetic",) * 6,
+        "recorded": ("recorded",) * 6,
+        "external_unverified": ("external_unverified",) * 6,
+        "mixed": ("synthetic", "recorded", "recorded") + ("external_unverified",) * 3,
+    }
+    for profile, evidence in profiles.items():
+        for invalid in (False, True):
+            changed = copy.deepcopy(doc)
+            for row, label in zip(changed["records"], evidence):
+                row["evidence"] = label
+            # Provenance labels must not suppress semantic failures or confer
+            # artifact authenticity, even when every record claims recording.
+            findings = []
+            if invalid:
+                changed["records"][0]["data"]["valid_until_ms"] = 1049
+                changed["records"][0]["rig_sha256"] = "0" * 64
+                findings = ["calibration_interval", "rig_binding_mismatch"]
+            records = changed["records"]
+            for order, ordered in (
+                ("forward", records),
+                ("reverse", records[::-1]),
+                ("interleaved", records[::2] + records[1::2]),
+            ):
+                changed["records"] = ordered
+                raw = canonical(changed).encode("ascii")
+                expected = copy.deepcopy(template)
+                expected.update(
+                    input_sha256=hashlib.sha256(raw).hexdigest(),
+                    evidence_counts={
+                        label: evidence.count(label)
+                        for label in ("synthetic", "recorded", "external_unverified")
+                    },
+                    declaration_checks_passed=not findings,
+                    findings=findings,
+                )
+                name = profile + ("_invalid_" if invalid else "_valid_") + order
+                cases[name] = raw, expected
+    return cases
+
+
+def check_declaration_provenance(case):
+    cases = declaration_provenance_cases(case)
+    instant = case["captures"][0]["now_ms"]
+    for name, (raw, expected_report) in cases.items():
+        if canonical(validate(raw, now_ms=instant)) != canonical(expected_report):
+            raise AssertionError("declaration_provenance_report_mismatch:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        expected = (
+            0 if expected_report["declaration_checks_passed"] else 1,
+            (canonical(expected_report) + os.linesep).encode("ascii"),
+            b"",
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_provenance_process_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -1555,6 +1623,7 @@ def main():
     declaration_clock_cases = check_declaration_clock_boundaries(complete)
     declaration_freshness_cases = check_declaration_freshness_boundaries(complete)
     declaration_domain_cases = check_declaration_domain_boundaries(complete)
+    declaration_provenance = check_declaration_provenance(complete)
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -1610,6 +1679,7 @@ def main():
                 "declaration_clock_boundary_cases": declaration_clock_cases,
                 "declaration_freshness_boundary_cases": declaration_freshness_cases,
                 "declaration_domain_boundary_cases": declaration_domain_cases,
+                "declaration_provenance_cases": declaration_provenance,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,

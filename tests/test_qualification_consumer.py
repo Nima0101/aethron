@@ -297,8 +297,9 @@ class DeclarationCollectionBoundaryTests(unittest.TestCase):
                 ("physical_qualification_passed", 0),
                 ("physical_status", "qualified"),
                 *(
-                    ("evidence_counts", dict(report["evidence_counts"], **{kind: float(count)}))
+                    ("evidence_counts", dict(report["evidence_counts"], **{kind: incorrect}))
                     for kind, count in report["evidence_counts"].items()
+                    for incorrect in (float(count), count + 1)
                 ),
             ):
                 changed = copy.deepcopy(report)
@@ -475,6 +476,72 @@ class DeclarationDomainBoundaryTests(DeclarationCollectionBoundaryTests):
                     if mode == "foreign_unbound":
                         record["rig_sha256"] = "0" * 64
                     self.save(sensor_id + "_" + kind + "_" + mode, doc, 2, 6, findings)
+
+
+class DeclarationProvenanceTests(DeclarationCollectionBoundaryTests):
+    generate = staticmethod(consumer.declaration_provenance_cases)
+    check = staticmethod(consumer.check_declaration_provenance)
+    diagnostic = "declaration_provenance_"
+    count = 24
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        original = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        self.cases = {}
+        # Literal counts and record positions independently pin provenance
+        # accounting, including unequal mixed counts and negative findings.
+        for profile, labels, counts in (
+            ("synthetic", ["synthetic"] * 6, (6, 0, 0)),
+            ("recorded", ["recorded"] * 6, (0, 6, 0)),
+            ("external_unverified", ["external_unverified"] * 6, (0, 0, 6)),
+            (
+                "mixed",
+                [
+                    "synthetic",
+                    "recorded",
+                    "recorded",
+                    "external_unverified",
+                    "external_unverified",
+                    "external_unverified",
+                ],
+                (1, 2, 3),
+            ),
+        ):
+            for state, findings in (
+                ("valid", []),
+                ("invalid", ["calibration_interval", "rig_binding_mismatch"]),
+            ):
+                for order, indices in (
+                    ("forward", (0, 1, 2, 3, 4, 5)),
+                    ("reverse", (5, 4, 3, 2, 1, 0)),
+                    ("interleaved", (0, 2, 4, 1, 3, 5)),
+                ):
+                    doc = copy.deepcopy(original)
+                    for index in range(6):
+                        doc["records"][index]["evidence"] = labels[index]
+                    if state == "invalid":
+                        self.assertEqual(doc["records"][0]["kind"], "calibration")
+                        doc["records"][0]["data"]["valid_until_ms"] = 1049
+                        doc["records"][0]["rig_sha256"] = "0" * 64
+                    doc["records"] = [doc["records"][i] for i in indices]
+                    name = profile + "_" + state + "_" + order
+                    self.save(name, doc, 2, 6, findings)
+                    self.cases[name][1]["evidence_counts"] = dict(
+                        zip(("synthetic", "recorded", "external_unverified"), counts)
+                    )
+
+    def test_record_order_changes_only_the_byte_commitment(self):
+        for profile in ("synthetic", "recorded", "external_unverified", "mixed"):
+            for state in ("valid", "invalid"):
+                reports, commitments = [], set()
+                for order in ("forward", "reverse", "interleaved"):
+                    raw, _ = self.cases[profile + "_" + state + "_" + order]
+                    report = consumer.validate(raw, now_ms=1050)
+                    commitments.add(report.pop("input_sha256"))
+                    reports.append(report)
+                self.assertEqual(len(commitments), 3)
+                self.assertEqual(reports[0], reports[1])
+                self.assertEqual(reports[0], reports[2])
 
 
 class DeclarationArgumentConsumerTests(unittest.TestCase):
