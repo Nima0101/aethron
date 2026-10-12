@@ -125,6 +125,8 @@ def run():
             "declaration_whitespace_controls": 42,
             "declaration_invalid_separators": 9,
             "declaration_invalid_punctuation": 46,
+            "declaration_number_inputs": 80,
+            "declaration_integer_controls": 12,
             "declaration_malformed_inputs": 389,
             "declaration_closed_pipe_cases": 6,
             "bundle_vectors": 6,

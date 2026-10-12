@@ -1937,6 +1937,117 @@ def check_declaration_invalid_punctuation(case):
     return len(cases)
 
 
+def declaration_number_inputs(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    fields = [("version", ("version",))]
+    fields.extend(("capture_" + key, ("capture", key)) for key in ("start_ms", "end_ms"))
+    fields.extend(
+        (f"clock_{index}_offset", ("records", index, "data", "offset_ms"))
+        for index, row in enumerate(doc["records"])
+        if row["kind"] == "clock"
+    )
+    cases = {}
+    for name, path in fields:
+        changed = copy.deepcopy(doc)
+        parent = changed
+        for key in path[:-1]:
+            parent = parent[key]
+        integer = str(parent[path[-1]]).encode("ascii")
+        parent[path[-1]] = "NUMBER_TOKEN"
+        template = canonical(changed).encode("ascii")
+        for defect, token in (
+            ("leading_zero", b"01"),
+            ("negative_leading_zero", b"-01"),
+            ("plus", b"+1"),
+            ("bare_minus", b"-"),
+            ("doubled_minus", b"--1"),
+            ("leading_point", b".1"),
+            ("fraction", b"1."),
+            ("negative_fraction", b"-1."),
+            ("exponent", b"1e"),
+            ("upper_exponent", b"1E"),
+            ("positive_exponent", b"1e+"),
+            ("negative_exponent", b"1E-"),
+        ):
+            cases[name + "_syntax_" + defect] = template.replace(b'"NUMBER_TOKEN"', token, 1)
+        # Equal numeric values remain floats under JSON parsing. Integer fields
+        # must reject them even though the JSON syntax is valid.
+        for label, suffix in (
+            ("fraction", b".0"),
+            ("exponent", b"e0"),
+            ("positive_exponent", b"E+0"),
+            ("negative_exponent", b"e-0"),
+        ):
+            cases[name + "_schema_" + label] = template.replace(
+                b'"NUMBER_TOKEN"', integer + suffix, 1
+            )
+    return cases
+
+
+def check_declaration_number_inputs(case):
+    cases = declaration_number_inputs(case)
+    instant = case["captures"][0]["now_ms"]
+    expected = (2, b"", ("invalid_qualification_manifest" + os.linesep).encode("ascii"))
+    for name, raw in cases.items():
+        try:
+            validate(raw, now_ms=instant)
+        except ValueError as exc:
+            if str(exc) != "invalid_qualification_manifest":
+                raise AssertionError("declaration_number_error_mismatch:" + name) from exc
+        else:
+            raise AssertionError("declaration_number_error_missing:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_number_rejection_mismatch:" + name)
+    return len(cases)
+
+
+def declaration_integer_controls(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    report = case["expected_report"]["captures"][0]["report"]["declaration"]
+    cases = {}
+    for index, row in enumerate(doc["records"]):
+        if row["kind"] != "clock":
+            continue
+        for token in (b"-0", b"-1", b"1"):
+            changed = copy.deepcopy(doc)
+            changed["records"][index]["data"]["offset_ms"] = "NUMBER_TOKEN"
+            raw = canonical(changed).encode("ascii").replace(b'"NUMBER_TOKEN"', token, 1)
+            expected = copy.deepcopy(report)
+            expected["input_sha256"] = hashlib.sha256(raw).hexdigest()
+            cases[f"clock_{index}_offset_" + token.decode("ascii")] = raw, expected
+    return cases
+
+
+def check_declaration_integer_controls(case):
+    cases = declaration_integer_controls(case)
+    instant = case["captures"][0]["now_ms"]
+    for name, (raw, report) in cases.items():
+        if canonical(validate(raw, now_ms=instant)) != canonical(report):
+            raise AssertionError("declaration_integer_report_mismatch:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        expected = (
+            0 if report["declaration_checks_passed"] else 1,
+            (canonical(report) + os.linesep).encode("ascii"),
+            b"",
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_integer_process_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -2822,6 +2933,12 @@ def main():
     )
     declaration_separator_count = check_declaration_invalid_separators(complete)
     declaration_punctuation_count = check_declaration_invalid_punctuation(complete)
+    declaration_number_count = check_declaration_number_inputs(complete)
+    declaration_integer_count = sum(
+        check_declaration_integer_controls(case)
+        for case in cases
+        if case["id"] in ("complete", "stale")
+    )
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -2897,6 +3014,8 @@ def main():
                 "declaration_whitespace_controls": declaration_whitespace_count,
                 "declaration_invalid_separators": declaration_separator_count,
                 "declaration_invalid_punctuation": declaration_punctuation_count,
+                "declaration_number_inputs": declaration_number_count,
+                "declaration_integer_controls": declaration_integer_count,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,

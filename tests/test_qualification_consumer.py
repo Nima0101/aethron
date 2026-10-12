@@ -1614,6 +1614,245 @@ class DeclarationInvalidPunctuationTests(unittest.TestCase):
                     self.assert_process_call(run, raw)
 
 
+def number_document(doc, path, token):
+    """Serialize recursively with one raw scalar, independent of marker replacement."""
+
+    def emit(value, location=()):
+        if location == path:
+            return token
+        if isinstance(value, dict):
+            return (
+                b"{"
+                + b",".join(
+                    json.dumps(key).encode("ascii") + b":" + emit(value[key], location + (key,))
+                    for key in sorted(value)
+                )
+                + b"}"
+            )
+        if isinstance(value, list):
+            return (
+                b"["
+                + b",".join(emit(item, location + (index,)) for index, item in enumerate(value))
+                + b"]"
+            )
+        return json.dumps(value).encode("ascii")
+
+    return emit(doc)
+
+
+class DeclarationNumberInputTests(unittest.TestCase):
+    assert_process_call = DeclarationCollectionBoundaryTests.assert_process_call
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        self.doc = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        self.cases, self.repairs = {}, {}
+        fields = {
+            "version": ("version",),
+            "capture_start_ms": ("capture", "start_ms"),
+            "capture_end_ms": ("capture", "end_ms"),
+            "clock_1_offset": ("records", 1, "data", "offset_ms"),
+            "clock_4_offset": ("records", 4, "data", "offset_ms"),
+        }
+        syntax = dict(
+            zip(
+                (
+                    "leading_zero",
+                    "negative_leading_zero",
+                    "plus",
+                    "bare_minus",
+                    "doubled_minus",
+                    "leading_point",
+                    "fraction",
+                    "negative_fraction",
+                    "exponent",
+                    "upper_exponent",
+                    "positive_exponent",
+                    "negative_exponent",
+                ),
+                ("01", "-01", "+1", "-", "--1", ".1", "1.", "-1.", "1e", "1E", "1e+", "1E-"),
+            )
+        )
+        for field, path in fields.items():
+            value = self.doc
+            for key in path:
+                value = value[key]
+            for category, tokens in (
+                ("syntax", syntax),
+                (
+                    "schema",
+                    {
+                        "fraction": f"{value}.0",
+                        "exponent": f"{value}e0",
+                        "positive_exponent": f"{value}E+0",
+                        "negative_exponent": f"{value}e-0",
+                    },
+                ),
+            ):
+                for label, token in tokens.items():
+                    name = field + "_" + category + "_" + label
+                    raw = number_document(self.doc, path, token.encode("ascii"))
+                    prefix, suffix = number_document(self.doc, path, b"REPAIR").split(b"REPAIR")
+                    self.cases[name] = raw
+                    self.repairs[name] = path, value, len(prefix), len(token), prefix, suffix
+        self.good = SimpleNamespace(
+            returncode=2,
+            stdout=b"",
+            stderr=("invalid_qualification_manifest" + os.linesep).encode("ascii"),
+        )
+
+    def test_independent_numbers_and_full_binary_traversal(self):
+        original = copy.deepcopy(self.case)
+        self.assertEqual(consumer.declaration_number_inputs(self.case), self.cases)
+        self.assertEqual(len(set(self.cases.values())), 80)
+        with patch.object(consumer.subprocess, "run", return_value=self.good) as run:
+            self.assertEqual(consumer.check_declaration_number_inputs(self.case), 80)
+        self.assertEqual(run.call_count, 80)
+        for call, raw in zip(run.call_args_list, self.cases.values()):
+            self.assertLessEqual(len(raw), 65536)
+            self.assertEqual(
+                call.args[0],
+                [consumer.sys.executable, "-I", "-m", "qualification", "--now-ms", "1050"],
+            )
+            self.assertEqual(
+                call.kwargs, {"input": raw, "capture_output": True, "check": False, "timeout": 10}
+            )
+        self.assertEqual(self.case, original)
+
+    def test_syntax_schema_and_single_value_repairs(self):
+        for case in consumer.corpus(CORPUS):
+            if case["id"] not in ("complete", "stale"):
+                continue
+            self.assertEqual(consumer.declaration_number_inputs(case), self.cases)
+            expected_raw, report = consumer.declaration_encoding_controls(case)["utf8"]
+            instant = case["captures"][0]["now_ms"]
+            for name, raw in self.cases.items():
+                with self.subTest(case=case["id"], number=name):
+                    path, value, start, length, prefix, suffix = self.repairs[name]
+                    if "_syntax_" in name:
+                        with self.assertRaises(json.JSONDecodeError):
+                            json.loads(raw)
+                    else:
+                        decoded = json.loads(raw)
+                        parent = decoded
+                        for key in path[:-1]:
+                            parent = parent[key]
+                        self.assertIs(type(parent[path[-1]]), float)
+                        self.assertEqual(parent[path[-1]], value)
+                        parent[path[-1]] = value
+                        self.assertEqual(decoded, self.doc)
+                    with self.assertRaisesRegex(ValueError, "^invalid_qualification_manifest$"):
+                        consumer.validate(raw, now_ms=instant)
+                    self.assertEqual(raw[:start], prefix)
+                    self.assertEqual(raw[start + length :], suffix)
+                    repaired = raw[:start] + str(value).encode("ascii") + raw[start + length :]
+                    self.assertEqual(repaired, expected_raw)
+                    self.assertEqual(
+                        consumer.canonical(consumer.validate(repaired, now_ms=instant)),
+                        consumer.canonical(report),
+                    )
+                    self.assertEqual(
+                        report["findings"], [] if case["id"] == "complete" else ["capture_stale"]
+                    )
+                    self.assertIs(report["physical_qualification_passed"], False)
+                    self.assertIs(report["artifacts_verified"], False)
+
+    def test_every_number_requires_fixed_library_rejection(self):
+        for name, raw in self.cases.items():
+            for error in (None, ValueError("PRIVATE")):
+                with self.subTest(case=name, error=error):
+                    with (
+                        patch.object(
+                            consumer, "declaration_number_inputs", return_value={name: raw}
+                        ),
+                        patch.object(
+                            consumer, "validate", side_effect=error, return_value={}
+                        ) as validate,
+                        patch.object(consumer.subprocess, "run") as run,
+                    ):
+                        suffix = "missing" if error is None else "mismatch"
+                        with self.assertRaisesRegex(
+                            AssertionError,
+                            "^declaration_number_error_" + suffix + ":" + name + "$",
+                        ):
+                            consumer.check_declaration_number_inputs(self.case)
+                    validate.assert_called_once_with(raw, now_ms=1050)
+                    run.assert_not_called()
+
+    def test_every_number_requires_fixed_process_rejection(self):
+        for name, raw in self.cases.items():
+            for field, value in (
+                ("returncode", 0),
+                ("returncode", 1),
+                ("stdout", raw),
+                ("stdout", b"{}"),
+                ("stderr", b""),
+                ("stderr", self.good.stderr + b"PRIVATE"),
+                ("stderr", b"Traceback"),
+            ):
+                with self.subTest(case=name, field=field):
+                    result = copy.copy(self.good)
+                    setattr(result, field, value)
+                    with (
+                        patch.object(
+                            consumer, "declaration_number_inputs", return_value={name: raw}
+                        ),
+                        patch.object(consumer, "validate", wraps=consumer.validate) as validate,
+                        patch.object(consumer.subprocess, "run", return_value=result) as run,
+                    ):
+                        with self.assertRaisesRegex(
+                            AssertionError,
+                            "^declaration_number_rejection_mismatch:" + name + "$",
+                        ):
+                            consumer.check_declaration_number_inputs(self.case)
+                    validate.assert_called_once_with(raw, now_ms=1050)
+                    self.assert_process_call(run, raw)
+
+
+class DeclarationIntegerControlTests(DeclarationCollectionBoundaryTests):
+    generate = staticmethod(consumer.declaration_integer_controls)
+    check = staticmethod(consumer.check_declaration_integer_controls)
+    diagnostic = "declaration_integer_"
+    count = 6
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        doc = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        self.cases = {}
+        for index in (1, 4):
+            for token in (b"-0", b"-1", b"1"):
+                name = f"clock_{index}_offset_" + token.decode("ascii")
+                changed = copy.deepcopy(doc)
+                changed["records"][index]["data"]["offset_ms"] = int(token)
+                self.save(name, changed, 2, 6, [])
+                raw = number_document(doc, ("records", index, "data", "offset_ms"), token)
+                report = self.cases[name][1]
+                report["input_sha256"] = hashlib.sha256(raw).hexdigest()
+                self.cases[name] = raw, report
+                self.assertIs(type(json.loads(raw)["records"][index]["data"]["offset_ms"]), int)
+
+    def test_signed_integers_retain_stale_findings_and_exact_bytes(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "stale")
+        for _raw, report in self.cases.values():
+            report.update(findings=["capture_stale"], declaration_checks_passed=False)
+        self.assertEqual(self.generate(self.case), self.cases)
+        with patch.object(
+            consumer.subprocess, "run", side_effect=[self.result(r) for _, r in self.cases.values()]
+        ) as run:
+            self.assertEqual(self.check(self.case), 6)
+        self.assertEqual(run.call_count, 6)
+        for call, (raw, report) in zip(run.call_args_list, self.cases.values()):
+            self.assertEqual(
+                call.args[0],
+                [consumer.sys.executable, "-I", "-m", "qualification", "--now-ms", "1151"],
+            )
+            self.assertEqual(
+                call.kwargs, {"input": raw, "capture_output": True, "check": False, "timeout": 10}
+            )
+            self.assertIs(report["physical_qualification_passed"], False)
+            self.assertIs(report["artifacts_verified"], False)
+
+
 class DeclarationTokenBoundaryTests(DeclarationCollectionBoundaryTests):
     generate = staticmethod(consumer.declaration_token_boundaries)
     check = staticmethod(consumer.check_declaration_token_boundaries)
