@@ -973,6 +973,73 @@ def check_declaration_rig_bindings(case):
     return len(cases)
 
 
+def declaration_token_boundaries(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    template = case["expected_report"]["captures"][0]["report"]["declaration"]
+    tokens = {
+        f"{name}_{length}": char * length
+        for length in (1, 64)
+        for name, char in (
+            ("lower", "a"),
+            ("upper", "Z"),
+            ("digit", "7"),
+            ("underscore", "_"),
+            ("hyphen", "-"),
+        )
+    }
+    tokens["mixed_64"] = "aZ7_-" * 12 + "aZ7_"
+    cases = {}
+    for field in ("rig", "sensor_0", "sensor_1", "domain"):
+        for name, token in tokens.items():
+            changed = copy.deepcopy(doc)
+            if field == "rig":
+                changed["rig"]["id"] = token
+            elif field == "domain":
+                changed["capture"]["clock_domain"] = token
+                for row in changed["records"]:
+                    row["clock_domain"] = token
+            else:
+                sensor = changed["rig"]["sensors"][int(field[-1])]
+                previous = sensor["id"]
+                sensor["id"] = token
+                for row in changed["records"]:
+                    if row["sensor_id"] == previous:
+                        row["sensor_id"] = token
+            # Bind every record to the resulting rig, keeping token admission
+            # independent of missing references or mismatched commitments.
+            digest = hashlib.sha256(canonical(changed["rig"]).encode("ascii")).hexdigest()
+            for row in changed["records"]:
+                row["rig_sha256"] = digest
+            raw = canonical(changed).encode("ascii")
+            expected = copy.deepcopy(template)
+            expected["input_sha256"] = hashlib.sha256(raw).hexdigest()
+            cases[field + "_" + name] = raw, expected
+    return cases
+
+
+def check_declaration_token_boundaries(case):
+    cases = declaration_token_boundaries(case)
+    instant = case["captures"][0]["now_ms"]
+    for name, (raw, expected_report) in cases.items():
+        if canonical(validate(raw, now_ms=instant)) != canonical(expected_report):
+            raise AssertionError("declaration_token_report_mismatch:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        expected = (
+            0,
+            (canonical(expected_report) + os.linesep).encode("ascii"),
+            b"",
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_token_process_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -1833,6 +1900,7 @@ def main():
     declaration_provenance = check_declaration_provenance(complete)
     declaration_rig_bindings = check_declaration_rig_bindings(complete)
     declaration_numeric_cases = check_declaration_numeric_boundaries(complete)
+    declaration_token_cases = check_declaration_token_boundaries(complete)
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -1891,6 +1959,7 @@ def main():
                 "declaration_provenance_cases": declaration_provenance,
                 "declaration_rig_binding_cases": declaration_rig_bindings,
                 "declaration_numeric_boundary_cases": declaration_numeric_cases,
+                "declaration_token_boundary_cases": declaration_token_cases,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,

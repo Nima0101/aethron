@@ -368,6 +368,70 @@ class DeclarationCollectionBoundaryTests(unittest.TestCase):
                     self.assert_process_call(run, raw)
 
 
+class DeclarationTokenBoundaryTests(DeclarationCollectionBoundaryTests):
+    generate = staticmethod(consumer.declaration_token_boundaries)
+    check = staticmethod(consumer.check_declaration_token_boundaries)
+    diagnostic = "declaration_token_"
+    count = 44
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        original = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        self.cases = {}
+        # Independent token table and documents; reports use literal counts and
+        # false authority flags from save(), never the validator's output.
+        tokens = [
+            ("lower_1", "a"),
+            ("upper_1", "Z"),
+            ("digit_1", "7"),
+            ("underscore_1", "_"),
+            ("hyphen_1", "-"),
+            ("lower_64", "a" * 64),
+            ("upper_64", "Z" * 64),
+            ("digit_64", "7" * 64),
+            ("underscore_64", "_" * 64),
+            ("hyphen_64", "-" * 64),
+            ("mixed_64", ("aZ7_-" * 13)[:64]),
+        ]
+        for field in ("rig", "sensor_0", "sensor_1", "domain"):
+            for name, token in tokens:
+                doc = copy.deepcopy(original)
+                if field == "rig":
+                    doc["rig"]["id"] = token
+                elif field == "domain":
+                    doc["capture"]["clock_domain"] = token
+                    for record in doc["records"]:
+                        record["clock_domain"] = token
+                else:
+                    index = 0 if field == "sensor_0" else 1
+                    doc["rig"]["sensors"][index]["id"] = token
+                    for record in doc["records"][index * 3 : index * 3 + 3]:
+                        self.assertEqual(
+                            record["sensor_id"], original["rig"]["sensors"][index]["id"]
+                        )
+                        record["sensor_id"] = token
+                digest = hashlib.sha256(self.encode(doc["rig"])).hexdigest()
+                for record in doc["records"]:
+                    record["rig_sha256"] = digest
+                self.save(field + "_" + name, doc, 2, 6, [])
+
+    def test_token_admission_preserves_existing_calibration_failures(self):
+        for name, (raw, expected) in self.cases.items():
+            with self.subTest(case=name):
+                doc = json.loads(raw)
+                doc["records"][0]["data"]["valid_until_ms"] = 1049
+                changed = self.encode(doc)
+                report = copy.deepcopy(expected)
+                report.update(
+                    input_sha256=hashlib.sha256(changed).hexdigest(),
+                    declaration_checks_passed=False,
+                    findings=["calibration_interval"],
+                )
+                self.assertEqual(
+                    self.encode(consumer.validate(changed, now_ms=1050)), self.encode(report)
+                )
+
+
 class DeclarationClockBoundaryTests(DeclarationCollectionBoundaryTests):
     generate = staticmethod(consumer.declaration_clock_boundaries)
     check = staticmethod(consumer.check_declaration_clock_boundaries)
