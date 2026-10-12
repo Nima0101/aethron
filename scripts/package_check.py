@@ -107,6 +107,8 @@ def run():
             "bundle_scalar_boundary_cases": 2,
             "assessment_malformed_frames": 58,
             "bundle_malformed_frames": 25,
+            "assessment_unexpected_argument_cases": 8,
+            "bundle_unexpected_argument_cases": 8,
             "isolated_install": True,
         }
         print(

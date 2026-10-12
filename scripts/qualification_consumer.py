@@ -771,6 +771,37 @@ def check_malformed_frames(module, cases, diagnostic):
     return len(cases)
 
 
+def unexpected_arguments():
+    return {
+        "long_option": ["--PRIVATE"],
+        "long_help": ["--help"],
+        "short_help": ["-h"],
+        "positional": ["PRIVATE"],
+        "empty": [""],
+        "separator": ["--"],
+        "option_value": ["--input", "PRIVATE path with spaces"],
+        "after_separator": ["--", "PRIVATE"],
+    }
+
+
+def check_unexpected_arguments(module, raw, diagnostic):
+    # The complete frame already passes without arguments in the vector checks.
+    # Rejection must therefore be attributable to argv, not malformed stdin.
+    cases = unexpected_arguments()
+    expected = (2, b"", (diagnostic + os.linesep).encode("ascii"))
+    for name, args in cases.items():
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", module, *args],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("argument_process_mismatch:" + module + ":" + name)
+    return len(cases)
+
+
 def main():
     if not sys.flags.isolated or sys.prefix == sys.base_prefix:
         raise RuntimeError("isolated_consumer_venv_required")
@@ -801,6 +832,16 @@ def main():
         bundle_malformed_frames(bundle_arguments(data, complete_bundle)),
         "invalid_campaign_bundle",
     )
+    assessment_arguments = check_unexpected_arguments(
+        "qualification.assessment_cli",
+        frame(arguments(complete)),
+        "invalid_qualification_assessment",
+    )
+    bundle_arguments_checked = check_unexpected_arguments(
+        "qualification.campaign_bundle_cli",
+        bundle_frame(bundle_arguments(data, complete_bundle)),
+        "invalid_campaign_bundle",
+    )
     print(
         json.dumps(
             {
@@ -814,6 +855,8 @@ def main():
                 "bundle_scalar_boundary_cases": bundle_scalar_boundary_cases,
                 "assessment_malformed_frames": assessment_malformed,
                 "bundle_malformed_frames": bundle_malformed,
+                "assessment_unexpected_argument_cases": assessment_arguments,
+                "bundle_unexpected_argument_cases": bundle_arguments_checked,
                 "isolated_install": True,
             },
             sort_keys=True,

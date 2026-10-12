@@ -680,6 +680,96 @@ class BundleScalarConsumerTests(unittest.TestCase):
                             consumer.check_bundle_scalar_boundaries(self.data, self.case)
 
 
+class UnexpectedArgumentConsumerTests(unittest.TestCase):
+    def cases(self):
+        from qualification import assessment_cli, campaign_bundle_cli
+        from qualification.tests.test_assessment_cli import frame
+        from qualification.tests.test_campaign_bundle_cli import frame as bundle_frame
+
+        complete = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        data = consumer.bundle_corpus(BUNDLE_CORPUS)
+        bundle = next(case for case in data["cases"] if case["id"] == "complete")
+        bundle_args = consumer.bundle_arguments(data, bundle)
+        return (
+            (
+                assessment_cli,
+                frame(consumer.arguments(complete)),
+                complete["expected_report"],
+                "invalid_qualification_assessment",
+            ),
+            (
+                campaign_bundle_cli,
+                bundle_frame(*bundle_args),
+                consumer.evaluate_bundle(*bundle_args),
+                "invalid_campaign_bundle",
+            ),
+        )
+
+    def test_complete_inputs_and_exact_isolated_argument_vectors(self):
+        expected_args = [
+            ["--PRIVATE"],
+            ["--help"],
+            ["-h"],
+            ["PRIVATE"],
+            [""],
+            ["--"],
+            ["--input", "PRIVATE path with spaces"],
+            ["--", "PRIVATE"],
+        ]
+        self.assertEqual(list(consumer.unexpected_arguments().values()), expected_args)
+        for module, raw, report, diagnostic in self.cases():
+            # Independently encoded complete inputs really reach successful evaluation.
+            self.assertEqual(
+                consumer.canonical(module._report(io.BytesIO(raw))), consumer.canonical(report)
+            )
+            self.assertIs(report["software_checks_passed"], True)
+            result = SimpleNamespace(
+                returncode=2, stdout=b"", stderr=(diagnostic + os.linesep).encode("ascii")
+            )
+            with patch.object(consumer.subprocess, "run", return_value=result) as run:
+                self.assertEqual(
+                    consumer.check_unexpected_arguments(module.__name__, raw, diagnostic), 8
+                )
+            self.assertEqual(run.call_count, 8)
+            for call, args in zip(run.call_args_list, expected_args):
+                self.assertEqual(
+                    call.args[0], [consumer.sys.executable, "-I", "-m", module.__name__, *args]
+                )
+                self.assertEqual(
+                    call.kwargs,
+                    {"input": raw, "capture_output": True, "check": False, "timeout": 10},
+                )
+
+    def test_each_argument_case_checks_status_stdout_and_fixed_diagnostic(self):
+        for module, raw, _report, diagnostic in self.cases():
+            fixed = (diagnostic + os.linesep).encode("ascii")
+            good = SimpleNamespace(returncode=2, stdout=b"", stderr=fixed)
+            for index, name in enumerate(consumer.unexpected_arguments()):
+                for status, stdout, stderr in (
+                    (0, b"", fixed),
+                    (1, b"", fixed),
+                    (2, raw, fixed),
+                    (2, b"PRIVATE", fixed),
+                    (2, b"", b""),
+                    (2, b"", fixed + b"PRIVATE"),
+                    (2, b"", raw),
+                    (2, b"", b"usage: --help"),
+                ):
+                    with self.subTest(module=module.__name__, case=name, status=status):
+                        bad = SimpleNamespace(returncode=status, stdout=stdout, stderr=stderr)
+                        with patch.object(
+                            consumer.subprocess, "run", side_effect=[good] * index + [bad]
+                        ):
+                            with self.assertRaises(AssertionError) as error:
+                                consumer.check_unexpected_arguments(
+                                    module.__name__, raw, diagnostic
+                                )
+                        self.assertEqual(
+                            str(error.exception),
+                            "argument_process_mismatch:" + module.__name__ + ":" + name,
+                        )
+
+
 class MalformedConsumerTests(unittest.TestCase):
     def cases(self):
         assessment = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
