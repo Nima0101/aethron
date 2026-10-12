@@ -390,8 +390,8 @@ class DeclarationInputConsumerTests(unittest.TestCase):
 
     def test_every_invalid_input_reaches_isolated_binary_cli(self):
         with patch.object(consumer.subprocess, "run", return_value=self.rejected) as run:
-            self.assertEqual(consumer.check_declaration_malformed_inputs(self.case), 21)
-        self.assertEqual(run.call_count, 21)
+            self.assertEqual(consumer.check_declaration_malformed_inputs(self.case), 38)
+        self.assertEqual(run.call_count, 38)
         for call, raw in zip(
             run.call_args_list, consumer.declaration_malformed_inputs(self.raw).values()
         ):
@@ -421,7 +421,7 @@ class DeclarationInputConsumerTests(unittest.TestCase):
             paths["data_" + kind] = (("records", index, "data"), key)
         cases = consumer.declaration_malformed_inputs(self.raw)
         self.assertEqual(
-            set(cases)
+            {name for name in cases if not name.startswith("numeric_")}
             - {
                 "one_byte_over",
                 "trailing_non_whitespace",
@@ -472,6 +472,63 @@ class DeclarationInputConsumerTests(unittest.TestCase):
                         consumer.canonical(consumer.validate(fixed, now_ms=1050)),
                         consumer.canonical(expected),
                     )
+
+    def test_numeric_cases_change_one_scalar_and_repair_to_pinned_report(self):
+        original = json.loads(self.raw)
+        clock_index = next(i for i, row in enumerate(original["records"]) if row["kind"] == "clock")
+        mutations = {}
+        for key, instant in (("start_ms", 1000), ("end_ms", 1050)):
+            for name, token in (
+                ("boolean", b"true"),
+                ("fraction", str(instant + 0.5).encode()),
+                ("string", ('"' + str(instant) + '"').encode()),
+                ("null", b"null"),
+                ("negative", b"-1"),
+                ("over_maximum", str(2**53 - 999).encode()),
+            ):
+                mutations["numeric_capture_" + key + "_" + name] = (("capture",), key, token)
+        for name, token in (
+            ("nan", b"NaN"),
+            ("infinity", b"Infinity"),
+            ("overflow", b"1e999"),
+            ("boolean", b"true"),
+            ("fraction", b"1.0"),
+        ):
+            mutations["numeric_clock_uncertainty_" + name] = (
+                ("records", clock_index, "data"),
+                "uncertainty_ms",
+                token,
+            )
+        cases = consumer.declaration_numeric_inputs(self.raw)
+        self.assertEqual(set(cases), set(mutations))
+        self.assertEqual(len(cases), 17)
+        for name, (path, key, token) in mutations.items():
+            with self.subTest(case=name):
+                doc = copy.deepcopy(original)
+                target = doc
+                for component in path:
+                    target = target[component]
+                saved = target[key]
+                target[key] = "NUMERIC_PLACEHOLDER"
+                template = json.dumps(doc, sort_keys=True, separators=(",", ":")).encode()
+                expected_raw = template.replace(b'"NUMERIC_PLACEHOLDER"', token, 1)
+                self.assertEqual(cases[name], expected_raw)
+                self.assertLessEqual(len(expected_raw), 65536)
+                with self.assertRaisesRegex(ValueError, "^invalid_qualification_manifest$"):
+                    consumer.validate(cases[name], now_ms=1050)
+                # Restoring just this scalar must recover the complete pinned
+                # declaration; rejection cannot come from unrelated corruption.
+                target[key] = saved
+                fixed = json.dumps(doc, sort_keys=True, separators=(",", ":")).encode()
+                self.assertEqual(fixed, self.raw.rstrip())
+                expected = copy.deepcopy(
+                    self.case["expected_report"]["captures"][0]["report"]["declaration"]
+                )
+                expected["input_sha256"] = hashlib.sha256(fixed).hexdigest()
+                self.assertEqual(
+                    consumer.canonical(consumer.validate(fixed, now_ms=1050)),
+                    consumer.canonical(expected),
+                )
 
     def test_each_invalid_input_checks_status_empty_stdout_and_fixed_diagnostic(self):
         for index, name in enumerate(consumer.declaration_malformed_inputs(self.raw)):

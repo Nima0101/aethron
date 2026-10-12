@@ -187,6 +187,39 @@ def check_declaration_arguments(case):
     return len(cases)
 
 
+def declaration_numeric_inputs(raw):
+    doc = json.loads(raw)
+    encoded = canonical(doc).encode("ascii")
+    cases = {}
+    for key in ("start_ms", "end_ms"):
+        for name, value in (
+            ("boolean", True),
+            ("fraction", doc["capture"][key] + 0.5),
+            ("string", str(doc["capture"][key])),
+            ("null", None),
+            ("negative", -1),
+            ("over_maximum", 9007199254739993),
+        ):
+            changed = copy.deepcopy(doc)
+            changed["capture"][key] = value
+            cases["numeric_capture_" + key + "_" + name] = canonical(changed).encode("ascii")
+    clock = next(record["data"] for record in doc["records"] if record["kind"] == "clock")
+    original = canonical(clock).encode("ascii")
+    member = canonical({"uncertainty_ms": clock["uncertainty_ms"]}).encode("ascii")[1:-1]
+    # Insert literal JSON tokens so overflow/nonfinite values are exercised
+    # without a host serializer normalizing them or altering another record.
+    for name, token in (
+        ("nan", b"NaN"),
+        ("infinity", b"Infinity"),
+        ("overflow", b"1e999"),
+        ("boolean", b"true"),
+        ("fraction", b"1.0"),
+    ):
+        changed = original.replace(member, b'"uncertainty_ms":' + token, 1)
+        cases["numeric_clock_uncertainty_" + name] = encoded.replace(original, changed, 1)
+    return cases
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -222,6 +255,7 @@ def declaration_malformed_inputs(raw):
         ):
             changed = b"{" + member + b"," + original[1:]
             cases[name + "_" + defect] = encoded.replace(original, changed, 1)
+    cases.update(declaration_numeric_inputs(raw))
     return cases
 
 
