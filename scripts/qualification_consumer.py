@@ -187,6 +187,54 @@ def check_declaration_arguments(case):
     return len(cases)
 
 
+def declaration_malformed_inputs(raw):
+    return {
+        "one_byte_over": raw.ljust(65537, b" "),
+        "trailing_non_whitespace": raw + b"PRIVATE",
+        "concatenated_json": raw + raw,
+        "truncated_json": raw.rstrip()[:-1],
+        "invalid_utf8": b"\xff" + raw,
+    }
+
+
+def check_declaration_input_boundary(case):
+    row = case["captures"][0]
+    raw = bytes.fromhex(row["manifest_hex"]).ljust(65536, b" ")
+    expected_report = copy.deepcopy(case["expected_report"]["captures"][0]["report"]["declaration"])
+    # Whitespace changes the byte commitment, but no typed semantic finding.
+    expected_report["input_sha256"] = hashlib.sha256(raw).hexdigest()
+    if canonical(validate(raw, now_ms=row["now_ms"])) != canonical(expected_report):
+        raise AssertionError("declaration_boundary_report_mismatch")
+    result = subprocess.run(
+        [sys.executable, "-I", "-m", "qualification", "--now-ms", str(row["now_ms"])],
+        input=raw,
+        capture_output=True,
+        check=False,
+        timeout=10,
+    )
+    expected = (0, (canonical(expected_report) + os.linesep).encode("ascii"), b"")
+    if (result.returncode, result.stdout, result.stderr) != expected:
+        raise AssertionError("declaration_boundary_process_mismatch")
+    return 1
+
+
+def check_declaration_malformed_inputs(case):
+    row = case["captures"][0]
+    cases = declaration_malformed_inputs(bytes.fromhex(row["manifest_hex"]))
+    expected = (2, b"", ("invalid_qualification_manifest" + os.linesep).encode("ascii"))
+    for name, raw in cases.items():
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(row["now_ms"])],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_input_process_mismatch:" + name)
+    return len(cases)
+
+
 def check_case(case):
     args = arguments(case)
     error = case["expected_error"]
@@ -945,6 +993,8 @@ def main():
         check_bundle_case(data, case)
     complete = next(case for case in cases if case["id"] == "complete")
     declaration_argument_cases = check_declaration_arguments(complete)
+    declaration_boundary_cases = check_declaration_input_boundary(complete)
+    declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
     exact_limit_cases = check_exact_limits(complete)
@@ -987,6 +1037,8 @@ def main():
                 "assessment_vectors": 10,
                 "declaration_cases": declaration_cases,
                 "declaration_invalid_argument_cases": declaration_argument_cases,
+                "declaration_exact_limit_cases": declaration_boundary_cases,
+                "declaration_malformed_inputs": declaration_malformed,
                 "bundle_vectors": 6,
                 "artifact_vectors": 7,
                 "assessment_opaque_artifact_cases": 1,

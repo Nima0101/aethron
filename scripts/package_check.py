@@ -100,6 +100,8 @@ def run():
             "assessment_vectors": 10,
             "declaration_cases": 4,
             "declaration_invalid_argument_cases": 29,
+            "declaration_exact_limit_cases": 1,
+            "declaration_malformed_inputs": 5,
             "bundle_vectors": 6,
             "artifact_vectors": 7,
             "assessment_opaque_artifact_cases": 1,

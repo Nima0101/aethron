@@ -1,6 +1,8 @@
 """Negative controls for the installed qualification acceptance checker."""
 
 import copy
+import errno
+import hashlib
 import io
 import os
 import struct
@@ -274,6 +276,152 @@ class DeclarationArgumentConsumerTests(unittest.TestCase):
                             consumer.check_declaration_arguments(self.case)
                     self.assertEqual(
                         str(error.exception), "declaration_argument_process_mismatch:" + name
+                    )
+
+
+class DeclarationInputConsumerTests(unittest.TestCase):
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        self.raw = bytes.fromhex(self.case["captures"][0]["manifest_hex"])
+        self.padded = self.raw + b" " * (65536 - len(self.raw))
+        self.report = copy.deepcopy(
+            self.case["expected_report"]["captures"][0]["report"]["declaration"]
+        )
+        self.report["input_sha256"] = hashlib.sha256(self.padded).hexdigest()
+        self.good = SimpleNamespace(
+            returncode=0,
+            stdout=(consumer.canonical(self.report) + os.linesep).encode("ascii"),
+            stderr=b"",
+        )
+        self.fixed = ("invalid_qualification_manifest" + os.linesep).encode("ascii")
+        self.rejected = SimpleNamespace(returncode=2, stdout=b"", stderr=self.fixed)
+
+    def test_exact_boundary_keeps_pinned_report_and_binary_process_contract(self):
+        original = copy.deepcopy(self.case)
+        with (
+            patch.object(consumer, "validate", wraps=consumer.validate) as validate,
+            patch.object(consumer.subprocess, "run", return_value=self.good) as run,
+        ):
+            self.assertEqual(consumer.check_declaration_input_boundary(self.case), 1)
+        validate.assert_called_once_with(self.padded, now_ms=1050)
+        run.assert_called_once_with(
+            [consumer.sys.executable, "-I", "-m", "qualification", "--now-ms", "1050"],
+            input=self.padded,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        self.assertNotEqual(self.report["input_sha256"], hashlib.sha256(self.raw).hexdigest())
+        self.assertEqual(self.case, original)
+
+    def test_exact_boundary_cannot_lose_digest_types_or_negative_claims(self):
+        for key, value in (
+            ("input_sha256", hashlib.sha256(self.raw).hexdigest()),
+            ("record_count", float(self.report["record_count"])),
+            ("declaration_checks_passed", 1),
+            ("findings", ["capture_stale"]),
+            ("artifacts_verified", True),
+            ("physical_qualification_passed", True),
+        ):
+            changed = copy.deepcopy(self.report)
+            changed[key] = value
+            with self.subTest(field=key):
+                with patch.object(consumer, "validate", return_value=changed):
+                    with self.assertRaisesRegex(
+                        AssertionError, "^declaration_boundary_report_mismatch$"
+                    ):
+                        consumer.check_declaration_input_boundary(self.case)
+                bad = copy.copy(self.good)
+                bad.stdout = (consumer.canonical(changed) + os.linesep).encode("ascii")
+                with patch.object(consumer.subprocess, "run", return_value=bad):
+                    with self.assertRaisesRegex(
+                        AssertionError, "^declaration_boundary_process_mismatch$"
+                    ):
+                        consumer.check_declaration_input_boundary(self.case)
+        for key, value in (
+            ("returncode", 1),
+            ("returncode", 2),
+            ("stdout", b""),
+            ("stderr", b"PRIVATE"),
+        ):
+            bad = copy.copy(self.good)
+            setattr(bad, key, value)
+            with patch.object(consumer.subprocess, "run", return_value=bad):
+                with self.assertRaisesRegex(
+                    AssertionError, "^declaration_boundary_process_mismatch$"
+                ):
+                    consumer.check_declaration_input_boundary(self.case)
+
+    def test_source_short_reads_accept_boundary_and_reject_each_invalid_input(self):
+        from qualification import __main__ as cli
+        from qualification.tests.test_campaign_bundle_cli import ShortReads
+
+        cases = consumer.declaration_malformed_inputs(self.raw)
+        self.assertEqual(
+            cases,
+            {
+                "one_byte_over": self.padded + b" ",
+                "trailing_non_whitespace": self.raw + b"PRIVATE",
+                "concatenated_json": self.raw * 2,
+                "truncated_json": self.raw.rstrip()[:-1],
+                "invalid_utf8": b"\xff" + self.raw,
+            },
+        )
+        for name, raw in {"exact_limit": self.padded, **cases}.items():
+            with self.subTest(case=name):
+                source = ShortReads(raw)
+                stdout, stderr = io.StringIO(), io.StringIO()
+                with (
+                    patch.object(cli.sys, "argv", ["qualification", "--now-ms", "1050"]),
+                    patch.object(cli.sys, "stdin", SimpleNamespace(buffer=source)),
+                    patch.object(cli.sys, "stdout", stdout),
+                    patch.object(cli.sys, "stderr", stderr),
+                ):
+                    status = cli.main()
+                expected = (
+                    (0, consumer.canonical(self.report) + "\n", "")
+                    if name == "exact_limit"
+                    else (2, "", "invalid_qualification_manifest\n")
+                )
+                self.assertEqual((status, stdout.getvalue(), stderr.getvalue()), expected)
+                self.assertEqual(source.tell(), len(raw))
+                self.assertFalse(source.closed)
+
+    def test_every_invalid_input_reaches_isolated_binary_cli(self):
+        with patch.object(consumer.subprocess, "run", return_value=self.rejected) as run:
+            self.assertEqual(consumer.check_declaration_malformed_inputs(self.case), 5)
+        self.assertEqual(run.call_count, 5)
+        for call, raw in zip(
+            run.call_args_list, consumer.declaration_malformed_inputs(self.raw).values()
+        ):
+            self.assertEqual(
+                call.args[0],
+                [consumer.sys.executable, "-I", "-m", "qualification", "--now-ms", "1050"],
+            )
+            self.assertEqual(
+                call.kwargs, {"input": raw, "capture_output": True, "check": False, "timeout": 10}
+            )
+
+    def test_each_invalid_input_checks_status_empty_stdout_and_fixed_diagnostic(self):
+        for index, name in enumerate(consumer.declaration_malformed_inputs(self.raw)):
+            for status, stdout, stderr in (
+                (0, b"", self.fixed),
+                (1, b"", self.fixed),
+                (2, self.raw, self.fixed),
+                (2, b"PRIVATE", self.fixed),
+                (2, b"", b""),
+                (2, b"", self.fixed + b"PRIVATE"),
+                (2, b"", b"Traceback"),
+            ):
+                with self.subTest(case=name, status=status, stdout=stdout, stderr=stderr):
+                    bad = SimpleNamespace(returncode=status, stdout=stdout, stderr=stderr)
+                    with patch.object(
+                        consumer.subprocess, "run", side_effect=[self.rejected] * index + [bad]
+                    ):
+                        with self.assertRaises(AssertionError) as error:
+                            consumer.check_declaration_malformed_inputs(self.case)
+                    self.assertEqual(
+                        str(error.exception), "declaration_input_process_mismatch:" + name
                     )
 
 
@@ -1056,8 +1204,13 @@ class ClosedPipeConsumerTests(unittest.TestCase):
                     self.assertEqual(stderr, consumer.subprocess.PIPE)
                 for stream in opened:
                     self.assertEqual(stream.mode, "wb")
-                    with self.assertRaises(BrokenPipeError):
+                    with self.assertRaises(OSError) as error:
                         os.write(stream.fileno(), b"probe")
+                    # The Windows CRT reports EINVAL for this reader-free pipe;
+                    # POSIX reports EPIPE. Do not accept unrelated I/O failures.
+                    self.assertEqual(
+                        error.exception.errno, errno.EINVAL if os.name == "nt" else errno.EPIPE
+                    )
                 streams.append(opened)
                 return SimpleNamespace(
                     returncode=2,
