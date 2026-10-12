@@ -770,6 +770,144 @@ class UnexpectedArgumentConsumerTests(unittest.TestCase):
                         )
 
 
+class ClosedPipeConsumerTests(unittest.TestCase):
+    def cases(self):
+        from qualification import assessment_cli, campaign_bundle_cli
+        from qualification.tests.test_assessment_cli import frame
+        from qualification.tests.test_campaign_bundle_cli import frame as bundle_frame
+
+        assessments = consumer.corpus(CORPUS)
+        data = consumer.bundle_corpus(BUNDLE_CORPUS)
+        return (
+            (
+                assessment_cli,
+                consumer.closed_pipe_frames(
+                    assessments, lambda case: consumer.frame(consumer.arguments(case))
+                ),
+                consumer.closed_pipe_frames(
+                    assessments, lambda case: frame(consumer.arguments(case))
+                ),
+                "invalid_qualification_assessment",
+            ),
+            (
+                campaign_bundle_cli,
+                consumer.closed_pipe_frames(
+                    data["cases"],
+                    lambda case: consumer.bundle_frame(consumer.bundle_arguments(data, case)),
+                ),
+                consumer.closed_pipe_frames(
+                    data["cases"], lambda case: bundle_frame(*consumer.bundle_arguments(data, case))
+                ),
+                "invalid_campaign_bundle",
+            ),
+        )
+
+    def test_inputs_reach_distinct_outcomes_and_pipes_have_no_readers(self):
+        for module, cases, independent, diagnostic in self.cases():
+            self.assertEqual(cases, independent)
+            self.assertEqual(list(cases), ["complete", "stale", "malformed"])
+            for name, expected in (("complete", True), ("stale", False)):
+                report = module._report(io.BytesIO(cases[name]))
+                self.assertIs(report["software_checks_passed"], expected)
+            with self.assertRaises(ValueError):
+                module._report(io.BytesIO(cases["malformed"]))
+
+            streams = []
+
+            def run(
+                command,
+                *,
+                input,
+                stdout,
+                stderr,
+                check,
+                timeout,
+                streams=streams,
+                module=module,
+                cases=cases,
+                diagnostic=diagnostic,
+            ):
+                index = len(streams)
+                self.assertEqual(command, [consumer.sys.executable, "-I", "-m", module.__name__])
+                self.assertEqual(input, list(cases.values())[index // 2])
+                self.assertIs(check, False)
+                self.assertEqual(timeout, 10)
+                opened = [stdout]
+                if index % 2:
+                    opened.append(stderr)
+                else:
+                    self.assertEqual(stderr, consumer.subprocess.PIPE)
+                for stream in opened:
+                    self.assertEqual(stream.mode, "wb")
+                    with self.assertRaises(BrokenPipeError):
+                        os.write(stream.fileno(), b"probe")
+                streams.append(opened)
+                return SimpleNamespace(
+                    returncode=2,
+                    stdout=None,
+                    stderr=None if index % 2 else (diagnostic + os.linesep).encode("ascii"),
+                )
+
+            with patch.object(consumer.subprocess, "run", side_effect=run):
+                self.assertEqual(consumer.check_closed_pipes(module.__name__, cases, diagnostic), 6)
+            self.assertEqual(len(streams), 6)
+            self.assertTrue(all(stream.closed for opened in streams for stream in opened))
+
+    def test_every_pipe_case_checks_status_and_observable_diagnostic(self):
+        for module, cases, _independent, diagnostic in self.cases():
+            fixed = (diagnostic + os.linesep).encode("ascii")
+            preceding = []
+            for name in cases:
+                for close_errors in (False, True):
+                    errors = None if close_errors else fixed
+                    bad_results = [(status, None, errors) for status in (0, 1, 120, -13)]
+                    bad_results += [(2, b"PRIVATE", errors)]
+                    bad_results += [
+                        (2, None, bad) for bad in (b"", fixed + b"PRIVATE", b"Traceback")
+                    ]
+                    if not close_errors:
+                        bad_results.append((2, None, None))
+                    for status, stdout, stderr in bad_results:
+                        with self.subTest(module=module.__name__, case=name, closed=close_errors):
+                            bad = SimpleNamespace(returncode=status, stdout=stdout, stderr=stderr)
+                            with patch.object(
+                                consumer.subprocess, "run", side_effect=[*preceding, bad]
+                            ):
+                                with self.assertRaises(AssertionError) as error:
+                                    consumer.check_closed_pipes(module.__name__, cases, diagnostic)
+                            mode = "both" if close_errors else "stdout"
+                            self.assertEqual(
+                                str(error.exception),
+                                "closed_pipe_process_mismatch:"
+                                + module.__name__
+                                + ":"
+                                + name
+                                + ":"
+                                + mode,
+                            )
+                    preceding.append(SimpleNamespace(returncode=2, stdout=None, stderr=errors))
+
+    def test_subprocess_failure_closes_descriptors_and_cannot_report_success(self):
+        for fail_at in (0, 1):
+            streams = []
+
+            def run(*args, streams=streams, fail_at=fail_at, **kwargs):
+                streams.append(kwargs["stdout"])
+                if kwargs["stderr"] != consumer.subprocess.PIPE:
+                    streams.append(kwargs["stderr"])
+                if len(streams) > fail_at:
+                    raise consumer.subprocess.TimeoutExpired(args[0], kwargs["timeout"])
+                return SimpleNamespace(
+                    returncode=2, stdout=None, stderr=b"fixed" + os.linesep.encode()
+                )
+
+            with patch.object(consumer.subprocess, "run", side_effect=run):
+                with self.assertRaises(consumer.subprocess.TimeoutExpired):
+                    consumer.check_closed_pipes("test.module", {"complete": b"data"}, "fixed")
+            self.assertEqual(len(streams), 1 if fail_at == 0 else 3)
+            self.assertTrue(all(stream.closed for stream in streams))
+
+
 class MalformedConsumerTests(unittest.TestCase):
     def cases(self):
         assessment = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")

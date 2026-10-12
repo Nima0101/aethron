@@ -109,6 +109,8 @@ def run():
             "bundle_malformed_frames": 25,
             "assessment_unexpected_argument_cases": 8,
             "bundle_unexpected_argument_cases": 8,
+            "assessment_closed_pipe_cases": 6,
+            "bundle_closed_pipe_cases": 6,
             "isolated_install": True,
         }
         print(

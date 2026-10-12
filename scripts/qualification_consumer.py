@@ -4,6 +4,7 @@ Run with the consumer venv's Python -I, outside the checkout, and pass the corpu
 paths. The corpora supply bytes and expected results, never executable helpers.
 """
 
+import contextlib
 import copy
 import hashlib
 import json
@@ -802,6 +803,47 @@ def check_unexpected_arguments(module, raw, diagnostic):
     return len(cases)
 
 
+def closed_pipe_frames(cases, encode):
+    selected = {
+        name: encode(next(case for case in cases if case["id"] == name))
+        for name in ("complete", "stale")
+    }
+    return dict(selected, malformed=b"PRIVATE malformed")
+
+
+def check_closed_pipes(module, cases, diagnostic):
+    checked = 0
+    for name, raw in cases.items():
+        for close_errors in (False, True):
+            with contextlib.ExitStack() as stack:
+                read_fd, write_fd = os.pipe()
+                os.close(read_fd)
+                # Remove readers before spawning: a deterministic broken pipe,
+                # including on Windows, without sleeps or shell pipelines.
+                output = stack.enter_context(os.fdopen(write_fd, "wb"))
+                errors = subprocess.PIPE
+                if close_errors:
+                    read_fd, write_fd = os.pipe()
+                    os.close(read_fd)
+                    errors = stack.enter_context(os.fdopen(write_fd, "wb"))
+                result = subprocess.run(
+                    [sys.executable, "-I", "-m", module],
+                    input=raw,
+                    stdout=output,
+                    stderr=errors,
+                    check=False,
+                    timeout=10,
+                )
+            expected_errors = None if close_errors else (diagnostic + os.linesep).encode("ascii")
+            if (result.returncode, result.stdout, result.stderr) != (2, None, expected_errors):
+                mode = "both" if close_errors else "stdout"
+                raise AssertionError(
+                    "closed_pipe_process_mismatch:" + module + ":" + name + ":" + mode
+                )
+            checked += 1
+    return checked
+
+
 def main():
     if not sys.flags.isolated or sys.prefix == sys.base_prefix:
         raise RuntimeError("isolated_consumer_venv_required")
@@ -842,6 +884,16 @@ def main():
         bundle_frame(bundle_arguments(data, complete_bundle)),
         "invalid_campaign_bundle",
     )
+    assessment_closed_pipes = check_closed_pipes(
+        "qualification.assessment_cli",
+        closed_pipe_frames(cases, lambda case: frame(arguments(case))),
+        "invalid_qualification_assessment",
+    )
+    bundle_closed_pipes = check_closed_pipes(
+        "qualification.campaign_bundle_cli",
+        closed_pipe_frames(data["cases"], lambda case: bundle_frame(bundle_arguments(data, case))),
+        "invalid_campaign_bundle",
+    )
     print(
         json.dumps(
             {
@@ -857,6 +909,8 @@ def main():
                 "bundle_malformed_frames": bundle_malformed,
                 "assessment_unexpected_argument_cases": assessment_arguments,
                 "bundle_unexpected_argument_cases": bundle_arguments_checked,
+                "assessment_closed_pipe_cases": assessment_closed_pipes,
+                "bundle_closed_pipe_cases": bundle_closed_pipes,
                 "isolated_install": True,
             },
             sort_keys=True,
