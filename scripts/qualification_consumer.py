@@ -169,6 +169,77 @@ def check_opaque_artifacts(case):
         raise AssertionError("opaque_assessment_process_mismatch")
 
 
+def aggregate_artifact_arguments(args):
+    # Pin the frozen 4 MiB aggregate independently of the runtime constants.
+    # Repeated keys/payloads in different captures still consume the allowance.
+    cases = {}
+    for name, groups in (
+        ("single_capture", (4,)),
+        ("across_captures", (1, 1, 1, 1)),
+    ):
+        plan, rows, domain, procedure, methods = copy.deepcopy(args)
+        template = rows[0]
+        rows = [
+            dict(template, artifacts={f"{i:064x}": b"x" * 1048576 for i in range(count)})
+            for count in groups
+        ]
+        # Empty payloads remain admissible when the byte allowance is exhausted.
+        rows.append(dict(template, artifacts={"0" * 64: b""}))
+        cases[name] = (plan, rows, domain, procedure, methods)
+    return cases
+
+
+def check_aggregate_artifacts(case):
+    for name, args in aggregate_artifact_arguments(arguments(case)).items():
+        report = evaluate(*args)
+        expected_counts = (4, 0) if name == "single_capture" else (1, 1, 1, 1, 0)
+        projection = [
+            {
+                "counts": row["report"]["artifact_counts"],
+                "findings": row["report"]["artifact_findings"],
+            }
+            for row in report["captures"]
+        ]
+        expected = [
+            {
+                "counts": {
+                    "referenced": 1,
+                    "supplied": count or 1,
+                    "matched": 0,
+                    "missing": 1,
+                    "mismatched": 0,
+                    "unreferenced": count or 1,
+                    "supplied_bytes": count * 1048576,
+                },
+                "findings": ["artifact_missing", "artifact_unreferenced"],
+            }
+            for count in expected_counts
+        ]
+        if canonical(projection) != canonical(expected):
+            raise AssertionError("aggregate_assessment_report_mismatch:" + name)
+        for nested in (report, *(row["report"] for row in report["captures"])):
+            for key in (
+                "artifact_bytes_verified",
+                "software_checks_passed",
+                "artifact_authenticity_verified",
+                "physical_qualification_passed",
+            ):
+                if nested[key] is not False:
+                    raise AssertionError("aggregate_assessment_claim:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification.assessment_cli"],
+            input=frame(args),
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        # Independently pinned counts/findings above plus full library/CLI parity.
+        expected_process = (1, (canonical(report) + os.linesep).encode("ascii"), b"")
+        if (result.returncode, result.stdout, result.stderr) != expected_process:
+            raise AssertionError("aggregate_assessment_process_mismatch:" + name)
+    return 2
+
+
 def bundle_corpus(path):
     with path.open("rb") as stream:
         raw = stream.read(32769)
@@ -358,6 +429,9 @@ def assessment_malformed_frames(args):
             + _blob(row["manifest"])
             + _byte_map(row["artifacts"])
         )
+    for name, boundary in aggregate_artifact_arguments(args).items():
+        boundary[1][-1]["artifacts"]["0" * 64] = b"x"
+        cases["aggregate_" + name + "_frame"] = frame(boundary)
     return cases
 
 
@@ -409,6 +483,7 @@ def main():
         check_bundle_case(data, case)
     complete = next(case for case in cases if case["id"] == "complete")
     check_opaque_artifacts(complete)
+    aggregate_artifact_cases = check_aggregate_artifacts(complete)
     assessment_malformed = check_malformed_frames(
         "qualification.assessment_cli",
         assessment_malformed_frames(arguments(complete)),
@@ -427,6 +502,7 @@ def main():
                 "bundle_vectors": 6,
                 "artifact_vectors": 7,
                 "assessment_opaque_artifact_cases": 1,
+                "assessment_aggregate_artifact_cases": aggregate_artifact_cases,
                 "assessment_malformed_frames": assessment_malformed,
                 "bundle_malformed_frames": bundle_malformed,
                 "isolated_install": True,

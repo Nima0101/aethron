@@ -138,6 +138,137 @@ class OpaqueArtifactConsumerTests(unittest.TestCase):
                         consumer.check_opaque_artifacts(self.case)
 
 
+class AggregateArtifactConsumerTests(unittest.TestCase):
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        self.boundaries = consumer.aggregate_artifact_arguments(consumer.arguments(self.case))
+        self.reports = {name: consumer.evaluate(*args) for name, args in self.boundaries.items()}
+
+    def result(self, report):
+        return SimpleNamespace(
+            returncode=1,
+            stdout=(consumer.canonical(report) + os.linesep).encode("ascii"),
+            stderr=b"",
+        )
+
+    def test_complete_frames_reject_only_after_exceeding_aggregate_allowance(self):
+        from qualification import assessment_cli
+        from qualification.tests.test_assessment_cli import frame
+        from qualification.tests.test_campaign_bundle_cli import NoReadPastHeader
+
+        malformed = consumer.assessment_malformed_frames(consumer.arguments(self.case))
+        for name, args in self.boundaries.items():
+            with self.subTest(case=name):
+                rows = args[1]
+                self.assertEqual(len(rows), 2 if name == "single_capture" else 5)
+                self.assertEqual(
+                    sum(len(raw) for r in rows for raw in r["artifacts"].values()), 4194304
+                )
+                self.assertTrue(
+                    all(len(raw) <= 1048576 for r in rows for raw in r["artifacts"].values())
+                )
+                self.assertEqual(rows[-1]["artifacts"], {"0" * 64: b""})
+                if name == "across_captures":
+                    self.assertTrue(
+                        all(row["artifacts"] == rows[0]["artifacts"] for row in rows[:-1])
+                    )
+                self.assertEqual(consumer.frame(args), frame(args))
+                self.assertEqual(
+                    assessment_cli._report(io.BytesIO(frame(args))), self.reports[name]
+                )
+                oversized = copy.deepcopy(args)
+                oversized[1][-1]["artifacts"]["0" * 64] = b"x"
+                raw = malformed["aggregate_" + name + "_frame"]
+                self.assertEqual(raw, frame(oversized))
+                with self.assertRaisesRegex(ValueError, "^invalid_qualification_assessment$"):
+                    consumer.evaluate(*oversized)
+                # Removing only the final byte leaves its length header intact;
+                # the parser must reject before trying to read that byte.
+                with patch.object(assessment_cli, "evaluate") as evaluate:
+                    with self.assertRaises(ValueError):
+                        assessment_cli._report(NoReadPastHeader(raw[:-1]))
+                    evaluate.assert_not_called()
+
+    def test_exact_limit_uses_binary_isolated_process_and_preserves_corpus(self):
+        from qualification.tests.test_assessment_cli import frame
+
+        original = copy.deepcopy(self.case)
+        with patch.object(
+            consumer.subprocess, "run", side_effect=[self.result(r) for r in self.reports.values()]
+        ) as run:
+            self.assertEqual(consumer.check_aggregate_artifacts(self.case), 2)
+        self.assertEqual(self.case, original)
+        self.assertEqual(run.call_count, 2)
+        for call, args in zip(run.call_args_list, self.boundaries.values()):
+            self.assertEqual(
+                call.args[0], [consumer.sys.executable, "-I", "-m", "qualification.assessment_cli"]
+            )
+            self.assertEqual(
+                call.kwargs,
+                {"input": frame(args), "capture_output": True, "check": False, "timeout": 10},
+            )
+
+    def test_counts_negative_evidence_and_false_claims_are_checked_for_each_capture(self):
+        for index, (name, original) in enumerate(self.reports.items()):
+            mutations = []
+            for i in range(len(original["captures"])):
+                prefix = ("captures", i, "report")
+                mutations.append(((*prefix, "artifact_findings"), [], "report_mismatch"))
+                for key in original["captures"][i]["report"]["artifact_counts"]:
+                    mutations.append(((*prefix, "artifact_counts", key), True, "report_mismatch"))
+            for prefix in (
+                (),
+                *(("captures", i, "report") for i in range(len(original["captures"]))),
+            ):
+                for key in (
+                    "artifact_bytes_verified",
+                    "software_checks_passed",
+                    "artifact_authenticity_verified",
+                    "physical_qualification_passed",
+                ):
+                    for value in (True, 0):
+                        mutations.append(((*prefix, key), value, "claim"))
+            for path, value, error in mutations:
+                with self.subTest(case=name, path=path, value=value):
+                    report = copy.deepcopy(original)
+                    target = report
+                    for key in path[:-1]:
+                        target = target[key]
+                    target[path[-1]] = value
+                    preceding = list(self.reports.values())[:index]
+                    with (
+                        patch.object(consumer, "evaluate", side_effect=[*preceding, report]),
+                        patch.object(
+                            consumer.subprocess,
+                            "run",
+                            side_effect=[self.result(r) for r in preceding],
+                        ),
+                    ):
+                        with self.assertRaisesRegex(
+                            AssertionError, "^aggregate_assessment_" + error + ":" + name + "$"
+                        ):
+                            consumer.check_aggregate_artifacts(self.case)
+
+    def test_process_cannot_reject_exact_limit_hide_findings_or_change_status(self):
+        for index, (name, report) in enumerate(self.reports.items()):
+            good = self.result(report)
+            for status, stdout, stderr in (
+                (0, good.stdout, b""),
+                (2, b"", b"invalid_qualification_assessment" + os.linesep.encode("ascii")),
+                (1, b"{}" + os.linesep.encode("ascii"), b""),
+                (1, good.stdout + b"PRIVATE", b""),
+                (1, good.stdout, b"PRIVATE"),
+            ):
+                with self.subTest(case=name, status=status, stderr=stderr):
+                    preceding = [self.result(r) for r in list(self.reports.values())[:index]]
+                    bad = SimpleNamespace(returncode=status, stdout=stdout, stderr=stderr)
+                    with patch.object(consumer.subprocess, "run", side_effect=[*preceding, bad]):
+                        with self.assertRaisesRegex(
+                            AssertionError, "^aggregate_assessment_process_mismatch:" + name + "$"
+                        ):
+                            consumer.check_aggregate_artifacts(self.case)
+
+
 class BundleConsumerTests(unittest.TestCase):
     def setUp(self):
         self.data = consumer.bundle_corpus(BUNDLE_CORPUS)
@@ -246,7 +377,7 @@ class MalformedConsumerTests(unittest.TestCase):
                 "qualification.assessment_cli",
                 consumer.assessment_malformed_frames(consumer.arguments(assessment)),
                 "invalid_qualification_assessment",
-                47,
+                49,
             ),
             (
                 "qualification.campaign_bundle_cli",
