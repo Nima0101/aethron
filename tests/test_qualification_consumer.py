@@ -378,6 +378,45 @@ class DeclarationClockBoundaryTests(DeclarationCollectionBoundaryTests):
             self.save(name, doc, 2, 6, findings)
 
 
+class DeclarationFreshnessBoundaryTests(DeclarationCollectionBoundaryTests):
+    generate = staticmethod(consumer.declaration_freshness_boundaries)
+    check = staticmethod(consumer.check_declaration_freshness_boundaries)
+    diagnostic = "declaration_freshness_"
+    count = 16
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        original = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        self.cases = {}
+        # Literal times and findings independently pin the two distinct age
+        # windows and inclusive capture endpoints; no validator-derived oracle.
+        for name, start, end, findings in (
+            ("capture_age_0", 1000, 1050, []),
+            ("capture_age_100", 900, 950, []),
+            ("capture_age_101", 899, 949, ["capture_stale"]),
+            ("capture_age_-1", 1001, 1051, ["capture_future"]),
+        ):
+            doc = copy.deepcopy(original)
+            doc["capture"].update(start_ms=start, end_ms=end)
+            for index in (1, 2, 4, 5):
+                doc["records"][index]["data"]["at_ms"] = end
+            self.save(name, doc, 2, 6, findings)
+        for kind, index in (("clock", 1), ("environment", 2)):
+            self.assertEqual(original["records"][index]["kind"], kind)
+            for suffix, start, at_ms, findings in (
+                ("age_100", 900, 950, []),
+                ("age_101", 900, 949, ["record_stale"]),
+                ("start_ms_equal", 1000, 1000, []),
+                ("start_ms_outside", 1000, 999, ["record_outside_capture"]),
+                ("end_ms_equal", 1000, 1050, []),
+                ("end_ms_outside", 1000, 1051, ["record_outside_capture"]),
+            ):
+                doc = copy.deepcopy(original)
+                doc["capture"]["start_ms"] = start
+                doc["records"][index]["data"]["at_ms"] = at_ms
+                self.save(kind + "_" + suffix, doc, 2, 6, findings)
+
+
 class DeclarationArgumentConsumerTests(unittest.TestCase):
     def setUp(self):
         self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")

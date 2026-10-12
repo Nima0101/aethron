@@ -540,6 +540,79 @@ def check_declaration_clock_boundaries(case):
     return len(cases)
 
 
+def declaration_freshness_boundaries(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    template = case["expected_report"]["captures"][0]["report"]["declaration"]
+    cases = {}
+
+    def save(name, changed, findings):
+        raw = canonical(changed).encode("ascii")
+        expected = copy.deepcopy(template)
+        expected.update(
+            input_sha256=hashlib.sha256(raw).hexdigest(),
+            declaration_checks_passed=not findings,
+            findings=findings,
+        )
+        cases[name] = raw, expected
+
+    for age in (0, 100, 101, -1):
+        changed = copy.deepcopy(doc)
+        # Move the complete capture and its observations together. Record age
+        # stays zero, isolating capture freshness at the pinned caller instant.
+        for key in ("start_ms", "end_ms"):
+            changed["capture"][key] -= age
+        for row in changed["records"]:
+            if row["kind"] != "calibration":
+                row["data"]["at_ms"] -= age
+        findings = ["capture_future"] if age < 0 else ["capture_stale"] if age > 100 else []
+        save("capture_age_" + str(age), changed, findings)
+
+    for kind in ("clock", "environment"):
+        for age in (100, 101):
+            changed = copy.deepcopy(doc)
+            # Widen the capture so stale records remain inside it. The record
+            # window is relative to capture end, not the caller's instant.
+            changed["capture"]["start_ms"] = 900
+            row = next(row for row in changed["records"] if row["kind"] == kind)
+            row["data"]["at_ms"] = changed["capture"]["end_ms"] - age
+            save(kind + "_age_" + str(age), changed, ["record_stale"] if age > 100 else [])
+        for endpoint in ("start_ms", "end_ms"):
+            for outside in (False, True):
+                changed = copy.deepcopy(doc)
+                row = next(row for row in changed["records"] if row["kind"] == kind)
+                step = -1 if endpoint == "start_ms" else 1
+                row["data"]["at_ms"] = changed["capture"][endpoint] + step * outside
+                save(
+                    kind + "_" + endpoint + ("_outside" if outside else "_equal"),
+                    changed,
+                    ["record_outside_capture"] if outside else [],
+                )
+    return cases
+
+
+def check_declaration_freshness_boundaries(case):
+    cases = declaration_freshness_boundaries(case)
+    instant = case["captures"][0]["now_ms"]
+    for name, (raw, expected_report) in cases.items():
+        if canonical(validate(raw, now_ms=instant)) != canonical(expected_report):
+            raise AssertionError("declaration_freshness_report_mismatch:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        expected = (
+            0 if expected_report["declaration_checks_passed"] else 1,
+            (canonical(expected_report) + os.linesep).encode("ascii"),
+            b"",
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_freshness_process_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -1394,6 +1467,7 @@ def main():
     declaration_boundary_cases = check_declaration_input_boundary(complete)
     declaration_collection_cases = check_declaration_collection_boundaries(complete)
     declaration_clock_cases = check_declaration_clock_boundaries(complete)
+    declaration_freshness_cases = check_declaration_freshness_boundaries(complete)
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -1447,6 +1521,7 @@ def main():
                 "declaration_exact_limit_cases": declaration_boundary_cases,
                 "declaration_collection_boundary_cases": declaration_collection_cases,
                 "declaration_clock_boundary_cases": declaration_clock_cases,
+                "declaration_freshness_boundary_cases": declaration_freshness_cases,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,
