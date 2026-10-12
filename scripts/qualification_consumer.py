@@ -1098,6 +1098,70 @@ def check_declaration_case_references(case):
     return len(cases)
 
 
+def declaration_partial_records(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    template = case["expected_report"]["captures"][0]["report"]["declaration"]
+    mapping = dict(zip((sensor["id"] for sensor in doc["rig"]["sensors"]), ("Sensor", "sensor")))
+    for sensor in doc["rig"]["sensors"]:
+        sensor["id"] = mapping[sensor["id"]]
+    digest = hashlib.sha256(canonical(doc["rig"]).encode("ascii")).hexdigest()
+    provenance = {
+        "calibration": "synthetic",
+        "clock": "recorded",
+        "environment": "external_unverified",
+    }
+    for row in doc["records"]:
+        row.update(
+            sensor_id=mapping[row["sensor_id"]],
+            rig_sha256=digest,
+            evidence=provenance[row["kind"]],
+        )
+    cases = {}
+    for index, row in enumerate(doc["records"]):
+        changed = copy.deepcopy(doc)
+        removed = changed["records"].pop(index)
+        for state in ("missing", "restored"):
+            if state == "restored":
+                changed["records"].insert(index, removed)
+            raw = canonical(changed).encode("ascii")
+            counts = dict.fromkeys(provenance.values(), 2)
+            if state == "missing":
+                counts[row["evidence"]] -= 1
+            expected = copy.deepcopy(template)
+            expected.update(
+                input_sha256=hashlib.sha256(raw).hexdigest(),
+                declaration_checks_passed=state == "restored",
+                record_count=5 if state == "missing" else 6,
+                evidence_counts=counts,
+                findings=["missing_" + row["kind"]] if state == "missing" else [],
+            )
+            cases[row["sensor_id"] + "_" + row["kind"] + "_" + state] = raw, expected
+    return cases
+
+
+def check_declaration_partial_records(case):
+    cases = declaration_partial_records(case)
+    instant = case["captures"][0]["now_ms"]
+    for name, (raw, expected_report) in cases.items():
+        if canonical(validate(raw, now_ms=instant)) != canonical(expected_report):
+            raise AssertionError("declaration_partial_record_report_mismatch:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        expected = (
+            0 if expected_report["declaration_checks_passed"] else 1,
+            (canonical(expected_report) + os.linesep).encode("ascii"),
+            b"",
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_partial_record_process_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_wrong_case_references(case):
     doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
     cases = {}
@@ -1996,6 +2060,7 @@ def main():
     declaration_token_cases = check_declaration_token_boundaries(complete)
     declaration_case_references_count = check_declaration_case_references(complete)
     declaration_wrong_case_count = check_declaration_wrong_case_references(complete)
+    declaration_partial_record_count = check_declaration_partial_records(complete)
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -2057,6 +2122,7 @@ def main():
                 "declaration_token_boundary_cases": declaration_token_cases,
                 "declaration_case_reference_cases": declaration_case_references_count,
                 "declaration_wrong_case_references": declaration_wrong_case_count,
+                "declaration_partial_record_cases": declaration_partial_record_count,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,

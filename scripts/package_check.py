@@ -111,6 +111,7 @@ def run():
             "declaration_token_boundary_cases": 44,
             "declaration_case_reference_cases": 14,
             "declaration_wrong_case_references": 6,
+            "declaration_partial_record_cases": 12,
             "declaration_malformed_inputs": 389,
             "declaration_closed_pipe_cases": 6,
             "bundle_vectors": 6,

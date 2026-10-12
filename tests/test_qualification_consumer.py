@@ -472,6 +472,74 @@ class DeclarationCaseReferenceTests(DeclarationCollectionBoundaryTests):
             self.assertEqual(self.encode(doc), repaired)
 
 
+class DeclarationPartialRecordTests(DeclarationCollectionBoundaryTests):
+    generate = staticmethod(consumer.declaration_partial_records)
+    check = staticmethod(consumer.check_declaration_partial_records)
+    diagnostic = "declaration_partial_record_"
+    count = 12
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        doc = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        for index, token in enumerate(("Sensor", "sensor")):
+            doc["rig"]["sensors"][index]["id"] = token
+            for row in doc["records"][index * 3 : index * 3 + 3]:
+                row["sensor_id"] = token
+        digest = hashlib.sha256(self.encode(doc["rig"])).hexdigest()
+        evidence = ("synthetic", "recorded", "external_unverified") * 2
+        for row, kind in zip(doc["records"], evidence):
+            row.update(rig_sha256=digest, evidence=kind)
+        self.complete = doc
+        self.cases = {}
+        # Select by exact sensor/kind instead of the generator's positional removal.
+        for sensor in ("Sensor", "sensor"):
+            for kind, provenance in zip(("calibration", "clock", "environment"), evidence[:3]):
+                for state in ("missing", "restored"):
+                    changed = copy.deepcopy(doc)
+                    missing = state == "missing"
+                    if missing:
+                        changed["records"] = [
+                            row
+                            for row in changed["records"]
+                            if (row["sensor_id"], row["kind"]) != (sensor, kind)
+                        ]
+                    name = sensor + "_" + kind + "_" + state
+                    self.save(
+                        name,
+                        changed,
+                        2,
+                        5 if missing else 6,
+                        ["missing_" + kind] if missing else [],
+                    )
+                    self.cases[name][1]["evidence_counts"] = {
+                        value: 1 if missing and value == provenance else 2 for value in evidence[:3]
+                    }
+
+    def test_restoring_only_the_missing_record_recovers_the_complete_report(self):
+        for index, row in enumerate(self.complete["records"]):
+            name = row["sensor_id"] + "_" + row["kind"]
+            raw, expected = self.cases[name + "_missing"]
+            restored, passing = self.cases[name + "_restored"]
+            with self.subTest(case=name):
+                doc = json.loads(raw)
+                same_kind = [entry for entry in doc["records"] if entry["kind"] == row["kind"]]
+                self.assertEqual(len(same_kind), 1)
+                self.assertEqual(
+                    same_kind[0]["sensor_id"],
+                    "Sensor" if row["sensor_id"] == "sensor" else "sensor",
+                )
+                self.assertEqual(expected["findings"], ["missing_" + row["kind"]])
+                self.assertFalse(expected["declaration_checks_passed"])
+                doc["records"].insert(index, copy.deepcopy(row))
+                self.assertEqual(doc, self.complete)
+                self.assertEqual(self.encode(doc), restored)
+                self.assertEqual(passing["findings"], [])
+                self.assertTrue(passing["declaration_checks_passed"])
+                self.assertEqual(
+                    self.encode(consumer.validate(restored, now_ms=1050)), self.encode(passing)
+                )
+
+
 class DeclarationWrongCaseReferenceTests(unittest.TestCase):
     encode = DeclarationCollectionBoundaryTests.encode
     assert_process_call = DeclarationCollectionBoundaryTests.assert_process_call
