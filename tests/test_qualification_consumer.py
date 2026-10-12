@@ -544,6 +544,89 @@ class DeclarationProvenanceTests(DeclarationCollectionBoundaryTests):
                 self.assertEqual(reports[0], reports[2])
 
 
+class DeclarationRigBindingTests(DeclarationCollectionBoundaryTests):
+    generate = staticmethod(consumer.declaration_rig_binding_cases)
+    check = staticmethod(consumer.check_declaration_rig_bindings)
+    diagnostic = "declaration_rig_binding_"
+    count = 32
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        original = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        self.cases = {}
+        # Pin each mutation independently of the installed generator and never
+        # derive expected findings from the implementation under test.
+        changes = (
+            ("id", ("id",), "changed-rig"),
+            ("configuration_sha256", ("configuration_sha256",), "a" * 64),
+            ("thermal_device_sha256", ("sensors", 0, "device_sha256"), "b" * 64),
+            ("thermal_mount_sha256", ("sensors", 0, "mount_sha256"), "b" * 64),
+            ("depth_device_sha256", ("sensors", 1, "device_sha256"), "b" * 64),
+            ("depth_mount_sha256", ("sensors", 1, "mount_sha256"), "b" * 64),
+            ("sensor_order", ("sensors",), original["rig"]["sensors"][::-1]),
+        )
+        for state, findings in (("valid", []), ("invalid", ["calibration_interval"])):
+            baseline = copy.deepcopy(original)
+            if state == "invalid":
+                self.assertEqual(baseline["records"][0]["kind"], "calibration")
+                baseline["records"][0]["data"]["valid_until_ms"] = 1049
+            for name, path, value in changes:
+                doc = copy.deepcopy(baseline)
+                parent = doc["rig"]
+                for key in path[:-1]:
+                    parent = parent[key]
+                self.assertNotEqual(parent[path[-1]], value)
+                parent[path[-1]] = value
+                prefix = state + "_" + name
+                self.save(prefix + "_old", doc, 2, 6, findings + ["rig_binding_mismatch"])
+                digest = hashlib.sha256(self.encode(doc["rig"])).hexdigest()
+                for record in doc["records"]:
+                    self.assertNotEqual(record["rig_sha256"], digest)
+                    record["rig_sha256"] = digest
+                self.save(prefix + "_repaired", doc, 2, 6, findings)
+            self.save(state + "_members_forward", baseline, 2, 6, findings)
+            ordered = json.loads(
+                self.encode(baseline), object_pairs_hook=lambda pairs: dict(reversed(pairs))
+            )
+            raw = json.dumps(ordered, separators=(",", ":")).encode("ascii")
+            report = copy.deepcopy(self.cases[state + "_members_forward"][1])
+            report["input_sha256"] = hashlib.sha256(raw).hexdigest()
+            self.cases[state + "_members_reverse"] = raw, report
+
+    def test_every_record_requires_the_new_rig_commitment(self):
+        for name, (raw, expected) in self.cases.items():
+            if not name.endswith("_repaired"):
+                continue
+            old, _ = self.cases[name.removesuffix("_repaired") + "_old"]
+            old_doc = json.loads(old)
+            for index in range(6):
+                with self.subTest(case=name, record=index):
+                    doc = json.loads(raw)
+                    doc["records"][index]["rig_sha256"] = old_doc["records"][index]["rig_sha256"]
+                    partial = self.encode(doc)
+                    report = copy.deepcopy(expected)
+                    report.update(
+                        input_sha256=hashlib.sha256(partial).hexdigest(),
+                        declaration_checks_passed=False,
+                        findings=expected["findings"] + ["rig_binding_mismatch"],
+                    )
+                    self.assertEqual(
+                        self.encode(consumer.validate(partial, now_ms=1050)), self.encode(report)
+                    )
+
+    def test_member_order_preserves_rig_binding_but_changes_input_commitment(self):
+        for state in ("valid", "invalid"):
+            forward, expected = self.cases[state + "_members_forward"]
+            reverse, reverse_expected = self.cases[state + "_members_reverse"]
+            self.assertNotEqual(forward, reverse)
+            self.assertEqual(json.loads(forward), json.loads(reverse))
+            self.assertNotEqual(expected["input_sha256"], reverse_expected["input_sha256"])
+            reports = [consumer.validate(raw, now_ms=1050) for raw in (forward, reverse)]
+            for report in reports:
+                report.pop("input_sha256")
+            self.assertEqual(self.encode(reports[0]), self.encode(reports[1]))
+
+
 class DeclarationArgumentConsumerTests(unittest.TestCase):
     def setUp(self):
         self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")

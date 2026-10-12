@@ -106,6 +106,7 @@ def run():
             "declaration_freshness_boundary_cases": 16,
             "declaration_domain_boundary_cases": 26,
             "declaration_provenance_cases": 24,
+            "declaration_rig_binding_cases": 32,
             "declaration_malformed_inputs": 293,
             "declaration_closed_pipe_cases": 6,
             "bundle_vectors": 6,
