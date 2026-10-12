@@ -26,6 +26,8 @@ def main():
     try:
         args = parser.parse_args()
         report = validate(sys.stdin.buffer.read(MAX_BYTES + 1), now_ms=args.now_ms)
+        if sys.stdout is None:
+            raise ValueError("invalid_qualification_manifest")
         print(
             json.dumps(report, sort_keys=True, separators=(",", ":"), allow_nan=False), flush=True
         )

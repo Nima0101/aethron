@@ -15,3 +15,5 @@ Release checks: [current clean reproduction](evidence/phase2/provider-clean.json
 - [x] Checks: 28 focused CLI/report/pipe tests pass; absent-stream regressions first reproduced two failures and one error; diff whitespace clean.
 - [ ] Blocker: origin is public Nima0101/aethron; Git push cannot connect to its configured proxy. PR #21 head matches local baseline, checks are green, reviews empty, protection read denied (403); no merge eligibility established.
 - [ ] Next: publish this code/checkpoint on parallel/p4-qualification-20261009 once Git transport works; retain staged historical review files and unfinished peer work. Native OpenCV verification separately lacks a working local environment.
+- [x] Reject absent stdout in both qualification CLIs instead of reporting successful delivery; two negative controls failed before correction, then all 29 focused tests and whitespace checks passed.
+- [ ] Publication remains blocked: push of 1350f1c failed at the configured Git proxy; preserve commit order and push both repairs together when transport returns. Required reviews/protection visibility and platform qualification remain open.

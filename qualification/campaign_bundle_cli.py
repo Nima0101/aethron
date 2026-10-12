@@ -57,6 +57,8 @@ def main():
         if len(sys.argv) != 1:
             raise ValueError("invalid_campaign_bundle")
         report = _report(sys.stdin.buffer)
+        if sys.stdout is None:
+            raise ValueError("invalid_campaign_bundle")
         print(
             json.dumps(report, sort_keys=True, separators=(",", ":"), allow_nan=False), flush=True
         )

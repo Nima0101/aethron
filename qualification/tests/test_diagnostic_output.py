@@ -24,6 +24,30 @@ COMMANDS = (
 
 
 class DiagnosticOutputTests(unittest.TestCase):
+    def test_absent_report_stream_cannot_report_success(self):
+        for module, name, args in COMMANDS:
+            with self.subTest(module=name):
+                raw = (
+                    (ROOT / "qualification/rigs/synthetic-v1.json").read_bytes()
+                    if module is declaration
+                    else frame()
+                )
+                errors = io.StringIO()
+                with (
+                    patch.object(sys, "argv", [name, *args]),
+                    patch.object(sys, "stdin", SimpleNamespace(buffer=io.BytesIO(raw))),
+                    patch.object(sys, "stdout", None),
+                    contextlib.redirect_stderr(errors),
+                ):
+                    self.assertEqual(module.main(), 2)
+                expected = (
+                    "invalid_qualification_manifest\n"
+                    if module is declaration
+                    else "invalid_campaign_bundle\n"
+                )
+                self.assertEqual(errors.getvalue(), expected)
+                self.assertFalse(errors.closed)
+
     def test_absent_diagnostic_stream_never_redirects_into_report_stream(self):
         for module, name, args in COMMANDS:
             with self.subTest(module=name):
