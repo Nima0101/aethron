@@ -4,7 +4,7 @@ import json
 import struct
 import sys
 
-from ._process_exit import finish
+from ._process_exit import failure, finish
 from .campaign import MAX_CAPTURES
 from .campaign_bundle import evaluate
 from .campaign_references import MAX_REFERENCE_BYTES
@@ -61,8 +61,7 @@ def main():
             json.dumps(report, sort_keys=True, separators=(",", ":"), allow_nan=False), flush=True
         )
     except (ValueError, OSError):
-        print("invalid_campaign_bundle", file=sys.stderr)
-        return 2
+        return failure("invalid_campaign_bundle")
     return 0 if report["software_checks_passed"] else 1
 
 

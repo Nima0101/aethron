@@ -4,7 +4,7 @@ import argparse
 import json
 import sys
 
-from ._process_exit import finish
+from ._process_exit import failure, finish
 from .evidence import MAX_BYTES, validate
 
 
@@ -30,8 +30,7 @@ def main():
             json.dumps(report, sort_keys=True, separators=(",", ":"), allow_nan=False), flush=True
         )
     except (ValueError, OSError):
-        print("invalid_qualification_manifest", file=sys.stderr)
-        return 2
+        return failure("invalid_qualification_manifest")
     return 0 if report["declaration_checks_passed"] else 1
 
 
