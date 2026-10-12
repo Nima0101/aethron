@@ -400,6 +400,71 @@ def bundle_frame(args):
     return b"".join(parts)
 
 
+def bundle_exact_limit_arguments(args):
+    # Bundle references are opaque 1 MiB payloads, unlike assessment documents.
+    plan, rows, _domain, _procedure = copy.deepcopy(args)
+    row = dict(rows[0], case_id="a" * 64, manifest=rows[0]["manifest"].ljust(65536, b" "))
+    return (
+        plan.ljust(65536, b" "),
+        [dict(row) for _ in range(64)],
+        b"\xff" * 1048576,
+        b"\0" * 1048576,
+    )
+
+
+def check_bundle_exact_limits(data, case):
+    args = bundle_exact_limit_arguments(bundle_arguments(data, case))
+    report = evaluate_bundle(*args)
+    plan_digest = hashlib.sha256(args[0]).hexdigest()
+    bindings = [
+        [row["case_id"], hashlib.sha256(row["manifest"]).hexdigest(), row["now_ms"]]
+        for row in args[1]
+    ]
+    capture_digest = hashlib.sha256(
+        b"aethron.qualification.captures.v1\0" + canonical(bindings).encode("ascii")
+    ).hexdigest()
+    common = {
+        "version": 1,
+        "plan_sha256": plan_digest,
+        "domain_verified": False,
+        "procedure_verified": False,
+        "artifact_authenticity_verified": False,
+        "physical_qualification_passed": False,
+    }
+    expected_report = dict(
+        common,
+        artifact_bytes_verified=False,
+        software_checks_passed=False,
+        coverage=dict(
+            common,
+            captures_sha256=capture_digest,
+            capture_counts={"submitted": 64, "eligible": 0, "rejected": 64},
+            cases=[{"case_index": 0, "required": 1, "eligible": 0}],
+            findings=["capture_coverage_missing", "capture_reused", "capture_unplanned"],
+            declaration_coverage_complete=False,
+        ),
+        references=dict(
+            common,
+            reference_counts={"supplied": 2, "matched": 0, "supplied_bytes": 2097152},
+            reference_findings=["domain_digest_mismatch", "procedure_digest_mismatch"],
+            reference_bytes_verified=False,
+        ),
+    )
+    if canonical(report) != canonical(expected_report):
+        raise AssertionError("exact_limit_bundle_report_mismatch")
+    result = subprocess.run(
+        [sys.executable, "-I", "-m", "qualification.campaign_bundle_cli"],
+        input=bundle_frame(args),
+        capture_output=True,
+        check=False,
+        timeout=10,
+    )
+    expected = (1, (canonical(expected_report) + os.linesep).encode("ascii"), b"")
+    if (result.returncode, result.stdout, result.stderr) != expected:
+        raise AssertionError("exact_limit_bundle_process_mismatch")
+    return 1
+
+
 def check_bundle_case(data, case):
     args = bundle_arguments(data, case)
     report = evaluate_bundle(*args)
@@ -598,7 +663,22 @@ def bundle_malformed_frames(args):
         "manifest": capture + struct.pack(">QI", row["now_ms"], 65537),
         "uint32": magic + b"\xff" * 4,
     }
-    return malformed_frames(bundle_frame(args), magic, oversized)
+    cases = malformed_frames(bundle_frame(args), magic, oversized)
+    # Complete frames distinguish bound rejection from a missing payload/EOF.
+    for name in ("plan", "domain", "procedure", "manifest", "capture_count", "case_id"):
+        enlarged = list(copy.deepcopy(args))
+        if name in ("plan", "domain", "procedure"):
+            index = {"plan": 0, "domain": 2, "procedure": 3}[name]
+            limit = 65536 if name == "plan" else 1048576
+            enlarged[index] = enlarged[index].ljust(limit + 1, b" ")
+        elif name == "manifest":
+            enlarged[1][0]["manifest"] = row["manifest"].ljust(65537, b" ")
+        elif name == "capture_count":
+            enlarged[1] = [dict(row) for _ in range(65)]
+        else:
+            enlarged[1][0]["case_id"] = "a" * 65
+        cases["oversized_" + name + "_frame"] = bundle_frame(enlarged)
+    return cases
 
 
 def check_malformed_frames(module, cases, diagnostic):
@@ -639,6 +719,7 @@ def main():
         "invalid_qualification_assessment",
     )
     complete_bundle = next(case for case in data["cases"] if case["id"] == "complete")
+    bundle_exact_limit_cases = check_bundle_exact_limits(data, complete_bundle)
     bundle_malformed = check_malformed_frames(
         "qualification.campaign_bundle_cli",
         bundle_malformed_frames(bundle_arguments(data, complete_bundle)),
@@ -653,6 +734,7 @@ def main():
                 "assessment_opaque_artifact_cases": 1,
                 "assessment_aggregate_artifact_cases": aggregate_artifact_cases,
                 "assessment_exact_limit_cases": exact_limit_cases,
+                "bundle_exact_limit_cases": bundle_exact_limit_cases,
                 "assessment_malformed_frames": assessment_malformed,
                 "bundle_malformed_frames": bundle_malformed,
                 "isolated_install": True,

@@ -495,6 +495,88 @@ class BundleConsumerTests(unittest.TestCase):
                         consumer.check_bundle_case(self.data, case)
 
 
+class BundleExactLimitConsumerTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.data = consumer.bundle_corpus(BUNDLE_CORPUS)
+        cls.case = next(case for case in cls.data["cases"] if case["id"] == "complete")
+        cls.args = consumer.bundle_exact_limit_arguments(
+            consumer.bundle_arguments(cls.data, cls.case)
+        )
+        cls.report = consumer.evaluate_bundle(*cls.args)
+        cls.output = (consumer.canonical(cls.report) + os.linesep).encode("ascii")
+
+    def test_exact_bounds_match_independent_source_encoder_and_binary_process(self):
+        from qualification import campaign_bundle_cli
+        from qualification.tests.test_campaign_bundle_cli import frame
+
+        plan, rows, domain, procedure = self.args
+        self.assertEqual(len(plan), 65536)
+        self.assertEqual(domain, b"\xff" * 1048576)
+        self.assertEqual(procedure, b"\0" * 1048576)
+        self.assertEqual(len(rows), 64)
+        for row in rows:
+            self.assertEqual(row["case_id"], "a" * 64)
+            self.assertEqual(len(row["manifest"]), 65536)
+        raw = frame(*self.args)
+        self.assertEqual(raw, consumer.bundle_frame(self.args))
+        self.assertEqual(campaign_bundle_cli._report(io.BytesIO(raw)), self.report)
+        original = copy.deepcopy(self.data)
+        good = SimpleNamespace(returncode=1, stdout=self.output, stderr=b"")
+        with patch.object(consumer.subprocess, "run", return_value=good) as run:
+            self.assertEqual(consumer.check_bundle_exact_limits(self.data, self.case), 1)
+        self.assertEqual(self.data, original)
+        self.assertEqual(
+            run.call_args.args[0],
+            [consumer.sys.executable, "-I", "-m", "qualification.campaign_bundle_cli"],
+        )
+        self.assertEqual(
+            run.call_args.kwargs,
+            {"input": raw, "capture_output": True, "check": False, "timeout": 10},
+        )
+
+    def test_every_report_leaf_is_checked_including_types_and_false_claims(self):
+        def leaves(value, path=()):
+            if isinstance(value, dict):
+                for key, child in value.items():
+                    yield from leaves(child, (*path, key))
+            elif isinstance(value, list):
+                for index, child in enumerate(value):
+                    yield from leaves(child, (*path, index))
+            else:
+                yield path, value
+
+        for path, original in leaves(self.report):
+            for value in (None, 0 if type(original) is bool else True):
+                with self.subTest(path=path, value=value):
+                    report = copy.deepcopy(self.report)
+                    target = report
+                    for key in path[:-1]:
+                        target = target[key]
+                    target[path[-1]] = value
+                    with patch.object(consumer, "evaluate_bundle", return_value=report):
+                        with self.assertRaisesRegex(
+                            AssertionError, "^exact_limit_bundle_report_mismatch$"
+                        ):
+                            consumer.check_bundle_exact_limits(self.data, self.case)
+
+    def test_process_cannot_reject_exact_limit_or_hide_negative_result(self):
+        for status, stdout, stderr in (
+            (0, self.output, b""),
+            (2, b"", b"invalid_campaign_bundle" + os.linesep.encode("ascii")),
+            (1, b"{}" + os.linesep.encode("ascii"), b""),
+            (1, self.output + b"PRIVATE", b""),
+            (1, self.output, b"PRIVATE"),
+        ):
+            with self.subTest(status=status, stderr=stderr):
+                result = SimpleNamespace(returncode=status, stdout=stdout, stderr=stderr)
+                with patch.object(consumer.subprocess, "run", return_value=result):
+                    with self.assertRaisesRegex(
+                        AssertionError, "^exact_limit_bundle_process_mismatch$"
+                    ):
+                        consumer.check_bundle_exact_limits(self.data, self.case)
+
+
 class MalformedConsumerTests(unittest.TestCase):
     def cases(self):
         assessment = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
@@ -511,7 +593,7 @@ class MalformedConsumerTests(unittest.TestCase):
                 "qualification.campaign_bundle_cli",
                 consumer.bundle_malformed_frames(consumer.bundle_arguments(data, bundle)),
                 "invalid_campaign_bundle",
-                13,
+                19,
             ),
         )
 
@@ -594,6 +676,56 @@ class MalformedConsumerTests(unittest.TestCase):
                 report = assessment_cli._report(io.BytesIO(frame(args)))
                 self.assertIs(report["physical_qualification_passed"], False)
                 self.assertEqual(report, consumer.evaluate(*args))
+
+    def test_bundle_complete_oversized_frames_have_single_field_repairs(self):
+        from qualification import campaign_bundle_cli
+        from qualification.tests.test_campaign_bundle_cli import NoReadPastHeader, frame
+
+        data = consumer.bundle_corpus(BUNDLE_CORPUS)
+        case = next(case for case in data["cases"] if case["id"] == "complete")
+        original = consumer.bundle_arguments(data, case)
+        cases = consumer.bundle_malformed_frames(original)
+        limits = {
+            "plan": ((0,), 65536),
+            "domain": ((2,), 1048576),
+            "procedure": ((3,), 1048576),
+            "manifest": ((1, 0, "manifest"), 65536),
+            "capture_count": ((1,), 64),
+            "case_id": ((1, 0, "case_id"), 64),
+        }
+        for name, (path, limit) in limits.items():
+            with self.subTest(case=name):
+                args = list(copy.deepcopy(original))
+                target = args
+                for key in path[:-1]:
+                    target = target[key]
+                key = path[-1]
+                if name == "capture_count":
+                    value = [dict(original[1][0]) for _ in range(limit + 1)]
+                elif name == "case_id":
+                    value = "a" * (limit + 1)
+                else:
+                    value = target[key].ljust(limit + 1, b" ")
+                target[key] = value
+                raw = cases["oversized_" + name + "_frame"]
+                self.assertEqual(raw, frame(*args))
+                header = cases["oversized_" + name]
+                self.assertTrue(raw.startswith(header))
+                with patch.object(campaign_bundle_cli, "evaluate") as evaluate:
+                    for stream in (io.BytesIO(raw), NoReadPastHeader(header)):
+                        with self.assertRaises(ValueError):
+                            campaign_bundle_cli._report(stream)
+                    evaluate.assert_not_called()
+                target[key] = value[:-1]
+                sentinel = object()
+                with patch.object(
+                    campaign_bundle_cli, "evaluate", return_value=sentinel
+                ) as evaluate:
+                    self.assertIs(campaign_bundle_cli._report(io.BytesIO(frame(*args))), sentinel)
+                    evaluate.assert_called_once_with(*args)
+                report = campaign_bundle_cli._report(io.BytesIO(frame(*args)))
+                self.assertIs(report["physical_qualification_passed"], False)
+                self.assertEqual(report, consumer.evaluate_bundle(*args))
 
     def test_bad_keys_fail_before_value_read_and_have_complete_envelopes(self):
         from qualification import assessment_cli

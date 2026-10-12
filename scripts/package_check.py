@@ -103,8 +103,9 @@ def run():
             "assessment_opaque_artifact_cases": 1,
             "assessment_aggregate_artifact_cases": 2,
             "assessment_exact_limit_cases": 1,
+            "bundle_exact_limit_cases": 1,
             "assessment_malformed_frames": 58,
-            "bundle_malformed_frames": 13,
+            "bundle_malformed_frames": 19,
             "isolated_install": True,
         }
         print(
