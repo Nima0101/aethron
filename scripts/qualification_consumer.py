@@ -7,6 +7,7 @@ paths. The corpora supply bytes and expected results, never executable helpers.
 import contextlib
 import copy
 import hashlib
+import itertools
 import json
 import os
 import struct
@@ -654,6 +655,87 @@ def check_declaration_clock_boundaries(case):
         )
         if (result.returncode, result.stdout, result.stderr) != expected:
             raise AssertionError("declaration_clock_process_mismatch:" + name)
+    return len(cases)
+
+
+def declaration_clock_isolation(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    template = case["expected_report"]["captures"][0]["report"]["declaration"]
+    sensor = copy.deepcopy(doc["rig"]["sensors"][0])
+    sensor.update(id="radar", kind="radar")
+    doc["rig"]["sensors"].append(sensor)
+    extra = copy.deepcopy(doc["records"][:3])
+    for row in extra:
+        row["sensor_id"] = "radar"
+    doc["records"].extend(extra)
+    digest = hashlib.sha256(canonical(doc["rig"]).encode("ascii")).hexdigest()
+    for row in doc["records"]:
+        row["rig_sha256"] = digest
+    positions = [index for index, row in enumerate(doc["records"]) if row["kind"] == "clock"]
+    cases = {}
+    for excess in (0, 1):
+        for family, third in (("neutral", (0, 0)), ("pair", (0, 50)), ("reference", (100, 1))):
+            for order in itertools.permutations(range(3)):
+                for repaired in (False, True):
+                    changed = copy.deepcopy(doc)
+                    clocks = [changed["records"][index] for index in positions]
+                    for row, (offset, uncertainty) in zip(
+                        clocks, ((-24, 1), (24, 1 + excess), third)
+                    ):
+                        row["data"].update(offset_ms=offset, uncertainty_ms=uncertainty)
+                    if not repaired:
+                        clocks[2]["clock_domain"] = "foreign_clock"
+                    for position, index in zip(positions, order):
+                        changed["records"][position] = clocks[index]
+                    # The foreign clock cannot affect either skew finding. Once
+                    # comparable, its pair-only/reference defects become visible.
+                    findings = [] if repaired else ["clock_domain_mismatch"]
+                    if excess or (repaired and family != "neutral"):
+                        findings.append("clock_pair_skew")
+                    if repaired and family == "reference":
+                        findings.append("clock_reference_skew")
+                    raw = canonical(changed).encode("ascii")
+                    expected = copy.deepcopy(template)
+                    expected.update(
+                        input_sha256=hashlib.sha256(raw).hexdigest(),
+                        sensor_count=3,
+                        record_count=9,
+                        evidence_counts={"synthetic": 9, "recorded": 0, "external_unverified": 0},
+                        declaration_checks_passed=not findings,
+                        findings=findings,
+                    )
+                    name = (
+                        family
+                        + "_"
+                        + str(50 + excess)
+                        + "_"
+                        + "".join(map(str, order))
+                        + ("_repaired" if repaired else "_foreign")
+                    )
+                    cases[name] = raw, expected
+    return cases
+
+
+def check_declaration_clock_isolation(case):
+    cases = declaration_clock_isolation(case)
+    instant = case["captures"][0]["now_ms"]
+    for name, (raw, expected_report) in cases.items():
+        if canonical(validate(raw, now_ms=instant)) != canonical(expected_report):
+            raise AssertionError("declaration_clock_isolation_report_mismatch:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        expected = (
+            0 if expected_report["declaration_checks_passed"] else 1,
+            (canonical(expected_report) + os.linesep).encode("ascii"),
+            b"",
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_clock_isolation_process_mismatch:" + name)
     return len(cases)
 
 
@@ -2127,6 +2209,7 @@ def main():
     declaration_boundary_cases = check_declaration_input_boundary(complete)
     declaration_collection_cases = check_declaration_collection_boundaries(complete)
     declaration_clock_cases = check_declaration_clock_boundaries(complete)
+    declaration_clock_isolation_count = check_declaration_clock_isolation(complete)
     declaration_freshness_cases = check_declaration_freshness_boundaries(complete)
     declaration_domain_cases = check_declaration_domain_boundaries(complete)
     declaration_provenance = check_declaration_provenance(complete)
@@ -2190,6 +2273,7 @@ def main():
                 "declaration_exact_limit_cases": declaration_boundary_cases,
                 "declaration_collection_boundary_cases": declaration_collection_cases,
                 "declaration_clock_boundary_cases": declaration_clock_cases,
+                "declaration_clock_isolation_cases": declaration_clock_isolation_count,
                 "declaration_freshness_boundary_cases": declaration_freshness_cases,
                 "declaration_domain_boundary_cases": declaration_domain_cases,
                 "declaration_provenance_cases": declaration_provenance,

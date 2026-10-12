@@ -810,6 +810,114 @@ class DeclarationClockBoundaryTests(DeclarationCollectionBoundaryTests):
             self.save(name, doc, 2, 6, findings)
 
 
+class DeclarationClockIsolationTests(DeclarationCollectionBoundaryTests):
+    generate = staticmethod(consumer.declaration_clock_isolation)
+    check = staticmethod(consumer.check_declaration_clock_isolation)
+    diagnostic = "declaration_clock_isolation_"
+    count = 72
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        original = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        original["rig"]["sensors"].append(
+            dict(original["rig"]["sensors"][0], id="radar", kind="radar")
+        )
+        digest = hashlib.sha256(self.encode(original["rig"])).hexdigest()
+        original["records"] += [
+            dict(copy.deepcopy(row), sensor_id="radar") for row in original["records"][:3]
+        ]
+        for row in original["records"]:
+            row["rig_sha256"] = digest
+        self.cases = {}
+        # Literal findings for every repair/boundary; neither generator nor
+        # validator computes this oracle. Enumerate all six clock orders.
+        for bound, uncertainty in ((50, 1), (51, 2)):
+            for family, third, repaired_findings in (
+                ("neutral", (0, 0), [] if bound == 50 else ["clock_pair_skew"]),
+                ("pair", (0, 50), ["clock_pair_skew"]),
+                ("reference", (100, 1), ["clock_pair_skew", "clock_reference_skew"]),
+            ):
+                for order in ("012", "021", "102", "120", "201", "210"):
+                    for domain in ("foreign", "repaired"):
+                        doc = copy.deepcopy(original)
+                        for slot, offset, error in ((1, -24, 1), (4, 24, uncertainty), (7, *third)):
+                            doc["records"][slot]["data"] = {
+                                "at_ms": 1050,
+                                "offset_ms": offset,
+                                "uncertainty_ms": error,
+                            }
+                        if domain == "foreign":
+                            doc["records"][7]["clock_domain"] = "foreign_clock"
+                        clocks = [doc["records"][1], doc["records"][4], doc["records"][7]]
+                        for slot, index in zip((1, 4, 7), order):
+                            doc["records"][slot] = clocks[int(index)]
+                        findings = (
+                            repaired_findings
+                            if domain == "repaired"
+                            else (
+                                ["clock_domain_mismatch"]
+                                if bound == 50
+                                else ["clock_domain_mismatch", "clock_pair_skew"]
+                            )
+                        )
+                        self.save(f"{family}_{bound}_{order}_{domain}", doc, 3, 9, findings)
+
+    def test_single_domain_repairs_and_record_permutation_invariance(self):
+        for name, (raw, report) in self.cases.items():
+            family, bound, order, domain = name.split("_")
+            with self.subTest(case=name):
+                baseline_raw, baseline_report = self.cases[f"{family}_{bound}_012_{domain}"]
+                self.assertEqual(
+                    dict(report, input_sha256=None), dict(baseline_report, input_sha256=None)
+                )
+                doc, baseline = json.loads(raw), json.loads(baseline_raw)
+                self.assertEqual(
+                    sorted(doc["records"], key=lambda row: (row["sensor_id"], row["kind"])),
+                    sorted(baseline["records"], key=lambda row: (row["sensor_id"], row["kind"])),
+                )
+                if domain == "foreign":
+                    clock = next(
+                        row
+                        for row in doc["records"]
+                        if (row["sensor_id"], row["kind"]) == ("radar", "clock")
+                    )
+                    clock["clock_domain"] = doc["capture"]["clock_domain"]
+                    self.assertEqual(
+                        self.encode(doc), self.cases[f"{family}_{bound}_{order}_repaired"][0]
+                    )
+
+    def test_each_skew_and_domain_finding_is_required(self):
+        for name, (raw, report) in self.cases.items():
+            for finding in report["findings"]:
+                changed = copy.deepcopy(report)
+                changed["findings"].remove(finding)
+                for mode in ("report", "process"):
+                    with self.subTest(case=name, omitted=finding, mode=mode):
+                        with (
+                            patch.object(
+                                consumer, self.generate.__name__, return_value={name: (raw, report)}
+                            ),
+                            patch.object(
+                                consumer,
+                                "validate",
+                                return_value=changed if mode == "report" else report,
+                            ) as validate,
+                            patch.object(
+                                consumer.subprocess, "run", return_value=self.result(changed)
+                            ) as run,
+                        ):
+                            with self.assertRaisesRegex(
+                                AssertionError,
+                                "^" + self.diagnostic + mode + "_mismatch:" + name + "$",
+                            ):
+                                self.check(self.case)
+                        validate.assert_called_once_with(raw, now_ms=1050)
+                        if mode == "report":
+                            run.assert_not_called()
+                        else:
+                            self.assert_process_call(run, raw)
+
+
 class DeclarationNumericBoundaryTests(DeclarationCollectionBoundaryTests):
     generate = staticmethod(consumer.declaration_numeric_boundaries)
     check = staticmethod(consumer.check_declaration_numeric_boundaries)

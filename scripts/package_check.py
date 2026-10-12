@@ -103,6 +103,7 @@ def run():
             "declaration_exact_limit_cases": 1,
             "declaration_collection_boundary_cases": 7,
             "declaration_clock_boundary_cases": 12,
+            "declaration_clock_isolation_cases": 72,
             "declaration_freshness_boundary_cases": 16,
             "declaration_domain_boundary_cases": 26,
             "declaration_provenance_cases": 24,
