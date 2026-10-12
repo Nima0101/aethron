@@ -2608,10 +2608,10 @@ class MalformedConsumerTests(unittest.TestCase):
                         self.assertIs(type(evaluate.call_args.args[1][0]["now_ms"]), int)
 
     def test_wrong_status_output_or_diagnostic_fails_at_any_case(self):
-        for module, cases, diagnostic, _count in self.cases():
+        for module, cases, diagnostic, count in self.cases():
+            self.assertEqual(len(cases), count)
             fixed = (diagnostic + os.linesep).encode("ascii")
-            good = SimpleNamespace(returncode=2, stdout=b"", stderr=fixed)
-            for index, name in enumerate(cases):
+            for name, raw in cases.items():
                 for status, stdout, stderr in (
                     (0, b"", fixed),
                     (1, b"", fixed),
@@ -2622,14 +2622,19 @@ class MalformedConsumerTests(unittest.TestCase):
                 ):
                     with self.subTest(module=module, case=name, status=status, stderr=stderr):
                         bad = SimpleNamespace(returncode=status, stdout=stdout, stderr=stderr)
-                        with patch.object(
-                            consumer.subprocess, "run", side_effect=[good] * index + [bad]
-                        ):
+                        with patch.object(consumer.subprocess, "run", return_value=bad) as run:
                             with self.assertRaises(AssertionError) as error:
-                                consumer.check_malformed_frames(module, cases, diagnostic)
+                                consumer.check_malformed_frames(module, {name: raw}, diagnostic)
                         self.assertEqual(
                             str(error.exception),
                             "malformed_process_mismatch:" + module + ":" + name,
+                        )
+                        run.assert_called_once_with(
+                            [consumer.sys.executable, "-I", "-m", module],
+                            input=raw,
+                            capture_output=True,
+                            check=False,
+                            timeout=10,
                         )
 
     def test_every_case_uses_isolated_binary_process_with_timeout(self):
