@@ -417,6 +417,66 @@ class DeclarationFreshnessBoundaryTests(DeclarationCollectionBoundaryTests):
                 self.save(kind + "_" + suffix, doc, 2, 6, findings)
 
 
+class DeclarationDomainBoundaryTests(DeclarationCollectionBoundaryTests):
+    generate = staticmethod(consumer.declaration_domain_boundaries)
+    check = staticmethod(consumer.check_declaration_domain_boundaries)
+    diagnostic = "declaration_domain_"
+    count = 26
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        original = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        self.cases = {}
+        # Literal times/findings independently pin coverage and domain handling
+        # for each sensor, without obtaining expectations from the validator.
+        for base in (0, 3):
+            sensor_id = original["records"][base]["sensor_id"]
+            self.assertEqual(original["records"][base]["kind"], "calibration")
+            for field, value, suffix, findings in (
+                ("valid_from_ms", 1000, "equal", []),
+                ("valid_from_ms", 1001, "outside", ["calibration_interval"]),
+                ("valid_until_ms", 1050, "equal", []),
+                ("valid_until_ms", 1049, "outside", ["calibration_interval"]),
+            ):
+                doc = copy.deepcopy(original)
+                doc["records"][base]["data"][field] = value
+                self.save(sensor_id + "_" + field + "_" + suffix, doc, 2, 6, findings)
+            for offset, kind, changes, local_findings in (
+                (
+                    0,
+                    "calibration",
+                    {"valid_from_ms": 0, "valid_until_ms": 0},
+                    ["calibration_interval"],
+                ),
+                (
+                    1,
+                    "clock",
+                    {"at_ms": 0, "offset_ms": 100, "uncertainty_ms": 1},
+                    [
+                        "clock_pair_skew",
+                        "clock_reference_skew",
+                        "record_outside_capture",
+                        "record_stale",
+                    ],
+                ),
+                (2, "environment", {"at_ms": 0}, ["record_outside_capture", "record_stale"]),
+            ):
+                for mode, findings in (
+                    ("comparable", local_findings),
+                    ("foreign", ["clock_domain_mismatch"]),
+                    ("foreign_unbound", ["clock_domain_mismatch", "rig_binding_mismatch"]),
+                ):
+                    doc = copy.deepcopy(original)
+                    record = doc["records"][base + offset]
+                    self.assertEqual(record["kind"], kind)
+                    record["data"].update(changes)
+                    if mode in ("foreign", "foreign_unbound"):
+                        record["clock_domain"] = "foreign_clock"
+                    if mode == "foreign_unbound":
+                        record["rig_sha256"] = "0" * 64
+                    self.save(sensor_id + "_" + kind + "_" + mode, doc, 2, 6, findings)
+
+
 class DeclarationArgumentConsumerTests(unittest.TestCase):
     def setUp(self):
         self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")

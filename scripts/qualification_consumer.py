@@ -613,6 +613,92 @@ def check_declaration_freshness_boundaries(case):
     return len(cases)
 
 
+def declaration_domain_boundaries(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    template = case["expected_report"]["captures"][0]["report"]["declaration"]
+    cases = {}
+
+    def save(name, changed, findings):
+        raw = canonical(changed).encode("ascii")
+        expected = copy.deepcopy(template)
+        expected.update(
+            input_sha256=hashlib.sha256(raw).hexdigest(),
+            declaration_checks_passed=not findings,
+            findings=findings,
+        )
+        cases[name] = raw, expected
+
+    for sensor in doc["rig"]["sensors"]:
+        sensor_id = sensor["id"]
+        for field, endpoint, step in (
+            ("valid_from_ms", "start_ms", 1),
+            ("valid_until_ms", "end_ms", -1),
+        ):
+            for outside in (False, True):
+                changed = copy.deepcopy(doc)
+                row = next(
+                    row
+                    for row in changed["records"]
+                    if row["sensor_id"] == sensor_id and row["kind"] == "calibration"
+                )
+                row["data"][field] = changed["capture"][endpoint] + step * outside
+                save(
+                    sensor_id + "_" + field + ("_outside" if outside else "_equal"),
+                    changed,
+                    ["calibration_interval"] if outside else [],
+                )
+        for kind in ("calibration", "clock", "environment"):
+            for mode in ("comparable", "foreign", "foreign_unbound"):
+                changed = copy.deepcopy(doc)
+                row = next(
+                    row
+                    for row in changed["records"]
+                    if row["sensor_id"] == sensor_id and row["kind"] == kind
+                )
+                # Bad local times expose accidental comparisons across domains,
+                # including both orders of the pairwise clock-skew check.
+                if kind == "calibration":
+                    row["data"].update(valid_from_ms=0, valid_until_ms=0)
+                    findings = ["calibration_interval"]
+                else:
+                    row["data"]["at_ms"] = 0
+                    findings = ["record_outside_capture", "record_stale"]
+                    if kind == "clock":
+                        row["data"].update(offset_ms=100, uncertainty_ms=1)
+                        findings = ["clock_pair_skew", "clock_reference_skew"] + findings
+                if mode != "comparable":
+                    row["clock_domain"] = "foreign_clock"
+                    findings = ["clock_domain_mismatch"]
+                if mode == "foreign_unbound":
+                    row["rig_sha256"] = "0" * 64
+                    findings.append("rig_binding_mismatch")
+                save(sensor_id + "_" + kind + "_" + mode, changed, findings)
+    return cases
+
+
+def check_declaration_domain_boundaries(case):
+    cases = declaration_domain_boundaries(case)
+    instant = case["captures"][0]["now_ms"]
+    for name, (raw, expected_report) in cases.items():
+        if canonical(validate(raw, now_ms=instant)) != canonical(expected_report):
+            raise AssertionError("declaration_domain_report_mismatch:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        expected = (
+            0 if expected_report["declaration_checks_passed"] else 1,
+            (canonical(expected_report) + os.linesep).encode("ascii"),
+            b"",
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_domain_process_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -1468,6 +1554,7 @@ def main():
     declaration_collection_cases = check_declaration_collection_boundaries(complete)
     declaration_clock_cases = check_declaration_clock_boundaries(complete)
     declaration_freshness_cases = check_declaration_freshness_boundaries(complete)
+    declaration_domain_cases = check_declaration_domain_boundaries(complete)
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -1522,6 +1609,7 @@ def main():
                 "declaration_collection_boundary_cases": declaration_collection_cases,
                 "declaration_clock_boundary_cases": declaration_clock_cases,
                 "declaration_freshness_boundary_cases": declaration_freshness_cases,
+                "declaration_domain_boundary_cases": declaration_domain_cases,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,
