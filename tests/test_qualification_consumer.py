@@ -540,6 +540,142 @@ class DeclarationPartialRecordTests(DeclarationCollectionBoundaryTests):
                 )
 
 
+class DeclarationCombinedFailureTests(DeclarationCollectionBoundaryTests):
+    generate = staticmethod(consumer.declaration_combined_failures)
+    check = staticmethod(consumer.check_declaration_combined_failures)
+    diagnostic = "declaration_combined_failure_"
+    count = 72
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        doc = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        kinds = ("calibration", "clock", "environment")
+        evidence = ("synthetic", "recorded", "external_unverified")
+        for index, token in enumerate(("Sensor", "sensor")):
+            doc["rig"]["sensors"][index]["id"] = token
+            for row, provenance in zip(doc["records"][index * 3 : index * 3 + 3], evidence):
+                row.update(sensor_id=token, evidence=provenance)
+        digest = hashlib.sha256(self.encode(doc["rig"])).hexdigest()
+        for row in doc["records"]:
+            row["rig_sha256"] = digest
+        self.complete = doc
+        self.cases = {}
+        self.repairs = {}
+        # Independent selection and literal findings; do not derive reports from
+        # the consumer generator or the validator under test.
+        for sensor in ("Sensor", "sensor"):
+            for missing_kind, provenance in zip(kinds, evidence):
+                for bad_kind in kinds:
+                    base = sensor + "_" + missing_kind + "_missing_" + bad_kind
+                    for repair in ("none", "missing", "domain", "binding"):
+                        changed = copy.deepcopy(doc)
+                        if repair != "missing":
+                            changed["records"] = [
+                                row
+                                for row in changed["records"]
+                                if (row["sensor_id"], row["kind"]) != (sensor, missing_kind)
+                            ]
+                        bad = next(
+                            row
+                            for row in changed["records"]
+                            if row["sensor_id"] != sensor and row["kind"] == bad_kind
+                        )
+                        if repair != "domain":
+                            bad["clock_domain"] = "foreign_clock"
+                        if repair != "binding":
+                            bad["rig_sha256"] = "0" * 64
+                        if bad_kind == "calibration":
+                            bad["data"] = {"valid_from_ms": 0, "valid_until_ms": 0}
+                        else:
+                            bad["data"]["at_ms"] = 0
+                            if bad_kind == "clock":
+                                bad["data"].update(offset_ms=100, uncertainty_ms=1)
+                        findings = []
+                        if repair != "missing":
+                            findings.append("missing_" + missing_kind)
+                        if repair != "binding":
+                            findings.append("rig_binding_mismatch")
+                        if repair != "domain":
+                            findings.append("clock_domain_mismatch")
+                        elif bad_kind == "calibration":
+                            findings.append("calibration_interval")
+                        else:
+                            findings.extend(["record_outside_capture", "record_stale"])
+                            if bad_kind == "clock":
+                                findings.append("clock_reference_skew")
+                                if missing_kind != "clock":
+                                    findings.append("clock_pair_skew")
+                        name = base + "_repair_" + repair
+                        self.save(
+                            name, changed, 2, 6 if repair == "missing" else 5, sorted(findings)
+                        )
+                        self.cases[name][1]["evidence_counts"] = {
+                            value: 1 if repair != "missing" and value == provenance else 2
+                            for value in evidence
+                        }
+                    self.repairs[base] = sensor, missing_kind, bad_kind
+
+    def test_each_repair_changes_only_one_defect(self):
+        for base, (sensor, missing_kind, bad_kind) in self.repairs.items():
+            original = json.loads(self.cases[base + "_repair_none"][0])
+            for repair in ("missing", "domain", "binding"):
+                with self.subTest(case=base, repair=repair):
+                    changed = copy.deepcopy(original)
+                    if repair == "missing":
+                        index, row = next(
+                            (index, row)
+                            for index, row in enumerate(self.complete["records"])
+                            if (row["sensor_id"], row["kind"]) == (sensor, missing_kind)
+                        )
+                        changed["records"].insert(index, copy.deepcopy(row))
+                    else:
+                        row = next(
+                            row
+                            for row in changed["records"]
+                            if row["sensor_id"] != sensor and row["kind"] == bad_kind
+                        )
+                        if repair == "domain":
+                            row["clock_domain"] = changed["capture"]["clock_domain"]
+                        else:
+                            row["rig_sha256"] = hashlib.sha256(
+                                self.encode(changed["rig"])
+                            ).hexdigest()
+                    self.assertEqual(
+                        self.encode(changed), self.cases[base + "_repair_" + repair][0]
+                    )
+
+    def test_dropping_any_one_finding_is_rejected(self):
+        for name, (raw, report) in self.cases.items():
+            for finding in report["findings"]:
+                changed = copy.deepcopy(report)
+                changed["findings"].remove(finding)
+                for mode in ("report", "process"):
+                    with self.subTest(case=name, omitted=finding, mode=mode):
+                        with (
+                            patch.object(
+                                consumer, self.generate.__name__, return_value={name: (raw, report)}
+                            ),
+                            patch.object(
+                                consumer,
+                                "validate",
+                                return_value=changed if mode == "report" else report,
+                            ) as validate,
+                            patch.object(
+                                consumer.subprocess, "run", return_value=self.result(changed)
+                            ) as run,
+                        ):
+                            with self.assertRaisesRegex(
+                                AssertionError,
+                                "^" + self.diagnostic + mode + "_mismatch:" + name + "$",
+                            ):
+                                self.check(self.case)
+                        validate.assert_called_once_with(raw, now_ms=1050)
+                        if mode == "report":
+                            run.assert_not_called()
+                        else:
+                            self.assert_process_call(run, raw)
+
+
 class DeclarationWrongCaseReferenceTests(unittest.TestCase):
     encode = DeclarationCollectionBoundaryTests.encode
     assert_process_call = DeclarationCollectionBoundaryTests.assert_process_call

@@ -1162,6 +1162,81 @@ def check_declaration_partial_records(case):
     return len(cases)
 
 
+def declaration_combined_failures(case):
+    cases = {}
+    partial = declaration_partial_records(case)
+    for name, (raw, template) in partial.items():
+        if not name.endswith("_missing"):
+            continue
+        doc = json.loads(raw)
+        restored = json.loads(partial[name.removesuffix("_missing") + "_restored"][0])
+        missing = next(row for row in restored["records"] if row not in doc["records"])
+        for index, record in enumerate(doc["records"]):
+            if record["sensor_id"] == missing["sensor_id"]:
+                continue
+            kind = record["kind"]
+            for repair in ("none", "missing", "domain", "binding"):
+                changed = copy.deepcopy(doc)
+                row = changed["records"][index]
+                row.update(clock_domain="foreign_clock", rig_sha256="0" * 64)
+                if kind == "calibration":
+                    row["data"].update(valid_from_ms=0, valid_until_ms=0)
+                    temporal = ["calibration_interval"]
+                else:
+                    row["data"]["at_ms"] = 0
+                    temporal = ["record_outside_capture", "record_stale"]
+                    if kind == "clock":
+                        row["data"].update(offset_ms=100, uncertainty_ms=1)
+                        temporal.append("clock_reference_skew")
+                        if missing["kind"] != "clock":
+                            temporal.append("clock_pair_skew")
+                findings = [
+                    "clock_domain_mismatch",
+                    "missing_" + missing["kind"],
+                    "rig_binding_mismatch",
+                ]
+                expected = copy.deepcopy(template)
+                if repair == "missing":
+                    position = restored["records"].index(missing)
+                    changed["records"].insert(position, copy.deepcopy(missing))
+                    findings.remove("missing_" + missing["kind"])
+                    expected["record_count"] = 6
+                    expected["evidence_counts"][missing["evidence"]] += 1
+                elif repair == "domain":
+                    row["clock_domain"] = changed["capture"]["clock_domain"]
+                    findings.remove("clock_domain_mismatch")
+                    findings.extend(temporal)
+                elif repair == "binding":
+                    row["rig_sha256"] = record["rig_sha256"]
+                    findings.remove("rig_binding_mismatch")
+                changed_raw = canonical(changed).encode("ascii")
+                expected.update(
+                    input_sha256=hashlib.sha256(changed_raw).hexdigest(),
+                    findings=sorted(findings),
+                )
+                cases[name + "_" + kind + "_repair_" + repair] = changed_raw, expected
+    return cases
+
+
+def check_declaration_combined_failures(case):
+    cases = declaration_combined_failures(case)
+    instant = case["captures"][0]["now_ms"]
+    for name, (raw, expected_report) in cases.items():
+        if canonical(validate(raw, now_ms=instant)) != canonical(expected_report):
+            raise AssertionError("declaration_combined_failure_report_mismatch:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        expected = (1, (canonical(expected_report) + os.linesep).encode("ascii"), b"")
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_combined_failure_process_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_wrong_case_references(case):
     doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
     cases = {}
@@ -2061,6 +2136,7 @@ def main():
     declaration_case_references_count = check_declaration_case_references(complete)
     declaration_wrong_case_count = check_declaration_wrong_case_references(complete)
     declaration_partial_record_count = check_declaration_partial_records(complete)
+    declaration_combined_failure_count = check_declaration_combined_failures(complete)
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -2123,6 +2199,7 @@ def main():
                 "declaration_case_reference_cases": declaration_case_references_count,
                 "declaration_wrong_case_references": declaration_wrong_case_count,
                 "declaration_partial_record_cases": declaration_partial_record_count,
+                "declaration_combined_failure_cases": declaration_combined_failure_count,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,
