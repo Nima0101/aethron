@@ -60,6 +60,126 @@ class QualificationConsumerTests(unittest.TestCase):
                         consumer.check_case(self.cases["stale"])
 
 
+class DeclarationConsumerTests(unittest.TestCase):
+    def setUp(self):
+        self.cases = {
+            case["id"]: case
+            for case in consumer.corpus(CORPUS)
+            if case["id"] in ("complete", "stale")
+        }
+
+    def report(self, case):
+        return case["expected_report"]["captures"][0]["report"]["declaration"]
+
+    def result(self, case, report=None):
+        if report is None:
+            report = self.report(case)
+        return SimpleNamespace(
+            returncode=0 if case["id"] == "complete" else 1,
+            stdout=(consumer.canonical(report) + os.linesep).encode("ascii"),
+            stderr=b"",
+        )
+
+    def mutations(self, case):
+        report = self.report(case)
+        for key, value in (
+            ("version", True),
+            ("input_sha256", "0" * 64),
+            ("declaration_checks_passed", int(report["declaration_checks_passed"])),
+            ("sensor_count", 2.0),
+            ("record_count", True),
+            ("findings", ["capture_stale"] if case["id"] == "complete" else []),
+            ("artifacts_verified", True),
+            ("artifacts_verified", 0),
+            ("physical_qualification_passed", True),
+            ("physical_qualification_passed", 0),
+            ("physical_status", "qualified"),
+        ):
+            changed = copy.deepcopy(report)
+            changed[key] = value
+            yield key, changed
+        for key in report["evidence_counts"]:
+            changed = copy.deepcopy(report)
+            changed["evidence_counts"][key] = float(changed["evidence_counts"][key])
+            yield "evidence_counts:" + key, changed
+
+    def test_pinned_reports_and_instants_reach_both_isolated_cli_forms(self):
+        for name, instant in (("complete", 1050), ("stale", 1151)):
+            with self.subTest(case=name):
+                case = self.cases[name]
+                original = copy.deepcopy(case)
+                raw = bytes.fromhex(case["captures"][0]["manifest_hex"])
+                with (
+                    patch.object(consumer, "validate", wraps=consumer.validate) as validate,
+                    patch.object(consumer.subprocess, "run", return_value=self.result(case)) as run,
+                ):
+                    self.assertEqual(consumer.check_declaration(case), 2)
+                validate.assert_called_once_with(raw, now_ms=instant)
+                self.assertEqual(run.call_count, 2)
+                for call, args in zip(
+                    run.call_args_list, (["--now-ms", str(instant)], ["--now-ms=" + str(instant)])
+                ):
+                    self.assertEqual(
+                        call.args[0],
+                        [consumer.sys.executable, "-I", "-m", "qualification", *args],
+                    )
+                    self.assertEqual(
+                        call.kwargs,
+                        {"input": raw, "capture_output": True, "check": False, "timeout": 10},
+                    )
+                self.assertEqual(case, original)
+
+    def test_library_cannot_change_types_findings_or_qualification_flags(self):
+        for case in self.cases.values():
+            for name, report in self.mutations(case):
+                with self.subTest(case=case["id"], mutation=name):
+                    with (
+                        patch.object(consumer, "validate", return_value=report),
+                        patch.object(consumer.subprocess, "run") as run,
+                    ):
+                        with self.assertRaisesRegex(
+                            AssertionError, "^declaration_report_mismatch$"
+                        ):
+                            consumer.check_declaration(case)
+                        run.assert_not_called()
+
+    def test_each_cli_form_rejects_changed_typed_report(self):
+        for case in self.cases.values():
+            for name, report in self.mutations(case):
+                for index in range(2):
+                    with self.subTest(case=case["id"], mutation=name, form=index):
+                        results = [self.result(case), self.result(case)]
+                        results[index] = self.result(case, report)
+                        with patch.object(consumer.subprocess, "run", side_effect=results):
+                            with self.assertRaisesRegex(
+                                AssertionError, "^declaration_process_mismatch$"
+                            ):
+                                consumer.check_declaration(case)
+
+    def test_each_cli_form_checks_status_bytes_and_stderr(self):
+        for case in self.cases.values():
+            good = self.result(case)
+            for key, value in (
+                ("returncode", 1 - good.returncode),
+                ("returncode", 2),
+                ("stdout", good.stdout.rstrip(b"\r\n")),
+                ("stdout", good.stdout + b"PRIVATE"),
+                ("stdout", b""),
+                ("stderr", b"PRIVATE"),
+            ):
+                for index in range(2):
+                    with self.subTest(case=case["id"], mutation=key, value=value, form=index):
+                        bad = copy.copy(good)
+                        setattr(bad, key, value)
+                        results = [good, good]
+                        results[index] = bad
+                        with patch.object(consumer.subprocess, "run", side_effect=results):
+                            with self.assertRaisesRegex(
+                                AssertionError, "^declaration_process_mismatch$"
+                            ):
+                                consumer.check_declaration(case)
+
+
 class OpaqueArtifactConsumerTests(unittest.TestCase):
     def setUp(self):
         self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")

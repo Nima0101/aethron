@@ -19,6 +19,7 @@ import qualification
 from qualification.artifacts import verify
 from qualification.assessment import evaluate
 from qualification.campaign_bundle import evaluate as evaluate_bundle
+from qualification.evidence import validate
 
 CORPUS_SHA256 = "afe52af644bbc67dc0bdb0df3d13839ab1a3c3d768471ce32b02d314d899fa2c"
 CASE_IDS = {
@@ -103,6 +104,33 @@ def frame(args):
 def canonical(value):
     # Serialized comparison distinguishes booleans, integers and floats.
     return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
+
+
+def check_declaration(case):
+    row = case["captures"][0]
+    raw = bytes.fromhex(row["manifest_hex"])
+    # Reuse the independently pinned declaration, including typed counts,
+    # retained stale findings and false artifact/physical qualification flags.
+    expected_report = case["expected_report"]["captures"][0]["report"]["declaration"]
+    if canonical(validate(raw, now_ms=row["now_ms"])) != canonical(expected_report):
+        raise AssertionError("declaration_report_mismatch")
+    expected = (
+        0 if case["id"] == "complete" else 1,
+        (canonical(expected_report) + os.linesep).encode("ascii"),
+        b"",
+    )
+    instant = str(row["now_ms"])
+    for args in (["--now-ms", instant], ["--now-ms=" + instant]):
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", *args],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_process_mismatch")
+    return 2
 
 
 def check_case(case):
@@ -854,6 +882,10 @@ def main():
     cases = corpus(Path(sys.argv[1]))
     for case in cases:
         check_case(case)
+    declaration_cases = sum(
+        check_declaration(next(case for case in cases if case["id"] == name))
+        for name in ("complete", "stale")
+    )
     data = bundle_corpus(Path(sys.argv[2]))
     for case in data["cases"]:
         check_bundle_case(data, case)
@@ -898,6 +930,7 @@ def main():
         json.dumps(
             {
                 "assessment_vectors": 10,
+                "declaration_cases": declaration_cases,
                 "bundle_vectors": 6,
                 "artifact_vectors": 7,
                 "assessment_opaque_artifact_cases": 1,

@@ -98,6 +98,7 @@ def run():
         qualification_result = json.loads(qualification.stdout)
         assert qualification_result == {
             "assessment_vectors": 10,
+            "declaration_cases": 4,
             "bundle_vectors": 6,
             "artifact_vectors": 7,
             "assessment_opaque_artifact_cases": 1,
