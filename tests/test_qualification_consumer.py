@@ -1100,6 +1100,145 @@ class DeclarationUTF8ValueTests(unittest.TestCase):
                     self.assert_process_call(run, raw)
 
 
+class DeclarationEncodingControlTests(DeclarationCollectionBoundaryTests):
+    generate = staticmethod(consumer.declaration_encoding_controls)
+    check = staticmethod(consumer.check_declaration_encoding_controls)
+    diagnostic = "declaration_encoding_"
+    count = 1
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        doc = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        self.cases = {}
+        self.save("utf8", doc, 2, 6, [])
+
+    def test_stale_control_preserves_report_and_binary_exit_status(self):
+        stale = next(case for case in consumer.corpus(CORPUS) if case["id"] == "stale")
+        raw, report = self.cases["utf8"]
+        report = dict(report, findings=["capture_stale"], declaration_checks_passed=False)
+        self.assertEqual(self.generate(stale), {"utf8": (raw, report)})
+        with patch.object(consumer.subprocess, "run", return_value=self.result(report)) as run:
+            self.assertEqual(self.check(stale), 1)
+        run.assert_called_once_with(
+            [consumer.sys.executable, "-I", "-m", "qualification", "--now-ms", "1151"],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+
+
+class DeclarationAlternateEncodingTests(unittest.TestCase):
+    assert_process_call = DeclarationCollectionBoundaryTests.assert_process_call
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        self.doc = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        self.raw = json.dumps(self.doc, sort_keys=True, separators=(",", ":")).encode("ascii")
+        # Build ASCII code units independently of the generator's text codecs.
+        self.cases = {"utf8_bom": bytes([239, 187, 191]) + self.raw}
+        for width in (2, 4):
+            for order, suffix in (("little", "le"), ("big", "be")):
+                name = "utf" + str(width * 8) + suffix
+                raw = b"".join(value.to_bytes(width, order) for value in self.raw)
+                self.cases[name] = raw
+                self.cases[name + "_bom"] = (0xFEFF).to_bytes(width, order) + raw
+        self.good = SimpleNamespace(
+            returncode=2,
+            stdout=b"",
+            stderr=("invalid_qualification_manifest" + os.linesep).encode("ascii"),
+        )
+
+    def test_independent_encodings_and_full_binary_traversal(self):
+        original = copy.deepcopy(self.case)
+        self.assertEqual(consumer.declaration_alternate_encodings(self.case), self.cases)
+        self.assertEqual(len(set(self.cases.values())), 9)
+        with patch.object(consumer.subprocess, "run", return_value=self.good) as run:
+            self.assertEqual(consumer.check_declaration_alternate_encodings(self.case), 9)
+        self.assertEqual(run.call_count, 9)
+        for call, raw in zip(run.call_args_list, self.cases.values()):
+            self.assertLessEqual(len(raw), 65536)
+            self.assertEqual(
+                call.args[0],
+                [consumer.sys.executable, "-I", "-m", "qualification", "--now-ms", "1050"],
+            )
+            self.assertEqual(
+                call.kwargs, {"input": raw, "capture_output": True, "check": False, "timeout": 10}
+            )
+        self.assertEqual(self.case, original)
+
+    def test_autodetection_accepts_each_document_but_validator_requires_utf8(self):
+        control, report = consumer.declaration_encoding_controls(self.case)["utf8"]
+        self.assertEqual(control, self.raw)
+        for name, raw in self.cases.items():
+            with self.subTest(case=name):
+                # These are valid JSON documents under alternate encodings,
+                # not schema failures or oversized/truncated input.
+                self.assertEqual(json.loads(raw), self.doc)
+                repaired = json.dumps(
+                    json.loads(raw), sort_keys=True, separators=(",", ":")
+                ).encode("utf-8")
+                self.assertEqual(repaired, control)
+                self.assertNotEqual(hashlib.sha256(raw).hexdigest(), report["input_sha256"])
+                with self.assertRaisesRegex(ValueError, "^invalid_qualification_manifest$"):
+                    consumer.validate(raw, now_ms=1050)
+                self.assertEqual(
+                    consumer.canonical(consumer.validate(repaired, now_ms=1050)),
+                    consumer.canonical(report),
+                )
+
+    def test_every_encoding_requires_fixed_library_rejection(self):
+        for name, raw in self.cases.items():
+            for error in (None, ValueError("PRIVATE")):
+                with self.subTest(case=name, error=error):
+                    with (
+                        patch.object(
+                            consumer, "declaration_alternate_encodings", return_value={name: raw}
+                        ),
+                        patch.object(
+                            consumer, "validate", side_effect=error, return_value={}
+                        ) as validate,
+                        patch.object(consumer.subprocess, "run") as run,
+                    ):
+                        suffix = "missing" if error is None else "mismatch"
+                        with self.assertRaisesRegex(
+                            AssertionError,
+                            "^declaration_encoding_error_" + suffix + ":" + name + "$",
+                        ):
+                            consumer.check_declaration_alternate_encodings(self.case)
+                    validate.assert_called_once_with(raw, now_ms=1050)
+                    run.assert_not_called()
+
+    def test_every_encoding_requires_fixed_process_rejection(self):
+        for name, raw in self.cases.items():
+            for field, value in (
+                ("returncode", 0),
+                ("returncode", 1),
+                ("stdout", raw),
+                ("stdout", b"{}"),
+                ("stderr", b""),
+                ("stderr", self.good.stderr + b"PRIVATE"),
+                ("stderr", b"Traceback"),
+            ):
+                with self.subTest(case=name, field=field):
+                    result = copy.copy(self.good)
+                    setattr(result, field, value)
+                    with (
+                        patch.object(
+                            consumer, "declaration_alternate_encodings", return_value={name: raw}
+                        ),
+                        patch.object(consumer, "validate", wraps=consumer.validate) as validate,
+                        patch.object(consumer.subprocess, "run", return_value=result) as run,
+                    ):
+                        with self.assertRaisesRegex(
+                            AssertionError,
+                            "^declaration_encoding_rejection_mismatch:" + name + "$",
+                        ):
+                            consumer.check_declaration_alternate_encodings(self.case)
+                    validate.assert_called_once_with(raw, now_ms=1050)
+                    self.assert_process_call(run, raw)
+
+
 class DeclarationTokenBoundaryTests(DeclarationCollectionBoundaryTests):
     generate = staticmethod(consumer.declaration_token_boundaries)
     check = staticmethod(consumer.check_declaration_token_boundaries)

@@ -120,6 +120,8 @@ def run():
             "declaration_unicode_value_inputs": 120,
             "declaration_utf8_value_controls": 10,
             "declaration_utf8_value_inputs": 180,
+            "declaration_encoding_controls": 2,
+            "declaration_alternate_encodings": 9,
             "declaration_malformed_inputs": 389,
             "declaration_closed_pipe_cases": 6,
             "bundle_vectors": 6,

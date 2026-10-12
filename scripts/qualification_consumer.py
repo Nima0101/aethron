@@ -1711,6 +1711,78 @@ def check_declaration_utf8_value_inputs(case):
     return len(cases)
 
 
+def declaration_encoding_controls(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    raw = canonical(doc).encode("utf-8")
+    report = copy.deepcopy(case["expected_report"]["captures"][0]["report"]["declaration"])
+    report["input_sha256"] = hashlib.sha256(raw).hexdigest()
+    return {"utf8": (raw, report)}
+
+
+def declaration_alternate_encodings(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    source = canonical(doc)
+    cases = {"utf8_bom": b"\xef\xbb\xbf" + source.encode("utf-8")}
+    for encoding, bom in (
+        ("utf-16-le", b"\xff\xfe"),
+        ("utf-16-be", b"\xfe\xff"),
+        ("utf-32-le", b"\xff\xfe\x00\x00"),
+        ("utf-32-be", b"\x00\x00\xfe\xff"),
+    ):
+        raw = source.encode(encoding)
+        name = encoding.replace("-", "")
+        cases[name] = raw
+        cases[name + "_bom"] = bom + raw
+    return cases
+
+
+def check_declaration_encoding_controls(case):
+    cases = declaration_encoding_controls(case)
+    instant = case["captures"][0]["now_ms"]
+    for name, (raw, report) in cases.items():
+        if canonical(validate(raw, now_ms=instant)) != canonical(report):
+            raise AssertionError("declaration_encoding_report_mismatch:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        expected = (
+            0 if report["declaration_checks_passed"] else 1,
+            (canonical(report) + os.linesep).encode("ascii"),
+            b"",
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_encoding_process_mismatch:" + name)
+    return len(cases)
+
+
+def check_declaration_alternate_encodings(case):
+    cases = declaration_alternate_encodings(case)
+    instant = case["captures"][0]["now_ms"]
+    expected = (2, b"", ("invalid_qualification_manifest" + os.linesep).encode("ascii"))
+    for name, raw in cases.items():
+        try:
+            validate(raw, now_ms=instant)
+        except ValueError as exc:
+            if str(exc) != "invalid_qualification_manifest":
+                raise AssertionError("declaration_encoding_error_mismatch:" + name) from exc
+        else:
+            raise AssertionError("declaration_encoding_error_missing:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_encoding_rejection_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -2583,6 +2655,12 @@ def main():
     declaration_unicode = check_declaration_unicode_value_inputs(complete)
     declaration_utf8_controls = check_declaration_utf8_value_controls(complete)
     declaration_utf8_inputs = check_declaration_utf8_value_inputs(complete)
+    declaration_encoding_controls_count = sum(
+        check_declaration_encoding_controls(case)
+        for case in cases
+        if case["id"] in ("complete", "stale")
+    )
+    declaration_alternate_encoding_count = check_declaration_alternate_encodings(complete)
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -2653,6 +2731,8 @@ def main():
                 "declaration_unicode_value_inputs": declaration_unicode,
                 "declaration_utf8_value_controls": declaration_utf8_controls,
                 "declaration_utf8_value_inputs": declaration_utf8_inputs,
+                "declaration_encoding_controls": declaration_encoding_controls_count,
+                "declaration_alternate_encodings": declaration_alternate_encoding_count,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,
