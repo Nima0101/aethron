@@ -180,6 +180,103 @@ class DeclarationConsumerTests(unittest.TestCase):
                                 consumer.check_declaration(case)
 
 
+class DeclarationArgumentConsumerTests(unittest.TestCase):
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        self.raw = bytes.fromhex(self.case["captures"][0]["manifest_hex"])
+        self.fixed = ("invalid_qualification_manifest" + os.linesep).encode("ascii")
+        self.good = SimpleNamespace(returncode=2, stdout=b"", stderr=self.fixed)
+
+    def test_complete_manifest_and_isolated_argument_vectors(self):
+        original = copy.deepcopy(self.case)
+        self.assertIs(consumer.validate(self.raw, now_ms=1050)["declaration_checks_passed"], True)
+        self.assertEqual(consumer.validate(self.raw, now_ms=1151)["findings"], ["capture_stale"])
+        args = list(consumer.invalid_declaration_arguments().values())
+        self.assertEqual(len(args), 29)
+        self.assertEqual(len({tuple(item) for item in args}), 29)
+        for required in (
+            ["--now-ms", "1151", "--now-ms", "1050"],
+            ["--now-ms=1050", "--now-ms=1151"],
+            ["--now-ms", "1050", "--now-ms=1050"],
+            ["--now-ms=1151", "--now-ms", "1050"],
+            [],
+            ["--now-ms"],
+            ["--now-ms="],
+            ["--now-ms", "1050", "PRIVATE path with spaces"],
+            ["--now-ms", "1050", ""],
+            ["--now-ms", "1050", "--", "PRIVATE"],
+            ["--now-ms", "1050", "--PRIVATE"],
+        ):
+            self.assertIn(required, args)
+        for option in ("--n", "--now", "--now-m"):
+            self.assertIn([option, "1050"], args)
+            self.assertIn([option + "=1050"], args)
+        for value in (
+            "PRIVATE instant with spaces",
+            "1.5",
+            "NaN",
+            "True",
+            "-1",
+            "9007199254739993",
+        ):
+            self.assertIn(["--now-ms", value], args)
+            self.assertIn(["--now-ms=" + value], args)
+        with patch.object(consumer.subprocess, "run", return_value=self.good) as run:
+            self.assertEqual(consumer.check_declaration_arguments(self.case), 29)
+        self.assertEqual(run.call_count, 29)
+        for call, argv in zip(run.call_args_list, args):
+            self.assertEqual(
+                call.args[0], [consumer.sys.executable, "-I", "-m", "qualification", *argv]
+            )
+            self.assertEqual(
+                call.kwargs,
+                {"input": self.raw, "capture_output": True, "check": False, "timeout": 10},
+            )
+        self.assertEqual(self.case, original)
+
+    def test_source_cli_rejects_every_case_with_valid_manifest(self):
+        from qualification import __main__ as cli
+
+        for name, args in consumer.invalid_declaration_arguments().items():
+            with self.subTest(case=name):
+                stdout, stderr = io.StringIO(), io.StringIO()
+                with (
+                    patch.object(cli.sys, "argv", ["qualification", *args]),
+                    patch.object(cli.sys, "stdin", SimpleNamespace(buffer=io.BytesIO(self.raw))),
+                    patch.object(cli.sys, "stdout", stdout),
+                    patch.object(cli.sys, "stderr", stderr),
+                ):
+                    status = cli.main()
+                self.assertEqual(
+                    (status, stdout.getvalue(), stderr.getvalue()),
+                    (2, "", "invalid_qualification_manifest\n"),
+                )
+
+    def test_each_argument_case_checks_status_stdout_and_fixed_diagnostic(self):
+        for index, name in enumerate(consumer.invalid_declaration_arguments()):
+            for status, stdout, stderr in (
+                (0, b"", self.fixed),
+                (1, b"", self.fixed),
+                (2, self.raw, self.fixed),
+                (2, b"PRIVATE", self.fixed),
+                (2, b"", b""),
+                (2, b"", self.fixed + b"PRIVATE"),
+                (2, b"", self.raw),
+                (2, b"usage: qualification --help", b""),
+                (2, b"", b"usage: qualification --help"),
+            ):
+                with self.subTest(case=name, status=status, stdout=stdout, stderr=stderr):
+                    bad = SimpleNamespace(returncode=status, stdout=stdout, stderr=stderr)
+                    with patch.object(
+                        consumer.subprocess, "run", side_effect=[self.good] * index + [bad]
+                    ):
+                        with self.assertRaises(AssertionError) as error:
+                            consumer.check_declaration_arguments(self.case)
+                    self.assertEqual(
+                        str(error.exception), "declaration_argument_process_mismatch:" + name
+                    )
+
+
 class OpaqueArtifactConsumerTests(unittest.TestCase):
     def setUp(self):
         self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")

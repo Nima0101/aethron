@@ -99,6 +99,7 @@ def run():
         assert qualification_result == {
             "assessment_vectors": 10,
             "declaration_cases": 4,
+            "declaration_invalid_argument_cases": 29,
             "bundle_vectors": 6,
             "artifact_vectors": 7,
             "assessment_opaque_artifact_cases": 1,

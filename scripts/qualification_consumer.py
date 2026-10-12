@@ -133,6 +133,60 @@ def check_declaration(case):
     return 2
 
 
+def invalid_declaration_arguments():
+    # Help is supported by this CLI. Only ambiguous, missing, invalid or
+    # unexpected arguments belong in these rejection cases.
+    cases = {
+        "repeated_separate": ["--now-ms", "1151", "--now-ms", "1050"],
+        "repeated_equals": ["--now-ms=1050", "--now-ms=1151"],
+        "mixed_equal_instants": ["--now-ms", "1050", "--now-ms=1050"],
+        "mixed_stale_override": ["--now-ms=1151", "--now-ms", "1050"],
+        "missing_option": [],
+        "missing_value": ["--now-ms"],
+        "empty_value": ["--now-ms="],
+    }
+    for option in ("--now", "--now-m", "--n"):
+        cases["abbreviated_separate:" + option] = [option, "1050"]
+        cases["abbreviated_equals:" + option] = [option + "=1050"]
+    for name, value in (
+        ("text", "PRIVATE instant with spaces"),
+        ("fraction", "1.5"),
+        ("nonfinite", "NaN"),
+        ("boolean", "True"),
+        ("negative", "-1"),
+        ("over_maximum", "9007199254739993"),
+    ):
+        cases[name + ":separate"] = ["--now-ms", value]
+        cases[name + ":equals"] = ["--now-ms=" + value]
+    for name, extra in (
+        ("positional", ["PRIVATE path with spaces"]),
+        ("empty_positional", [""]),
+        ("after_separator", ["--", "PRIVATE"]),
+        ("unknown_option", ["--PRIVATE"]),
+    ):
+        cases[name] = ["--now-ms", "1050", *extra]
+    return cases
+
+
+def check_declaration_arguments(case):
+    # The same complete manifest passes at 1050 and is stale at 1151 in
+    # check_declaration; neither malformed stdin nor missing time masks argv.
+    raw = bytes.fromhex(case["captures"][0]["manifest_hex"])
+    cases = invalid_declaration_arguments()
+    expected = (2, b"", ("invalid_qualification_manifest" + os.linesep).encode("ascii"))
+    for name, args in cases.items():
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", *args],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_argument_process_mismatch:" + name)
+    return len(cases)
+
+
 def check_case(case):
     args = arguments(case)
     error = case["expected_error"]
@@ -890,6 +944,7 @@ def main():
     for case in data["cases"]:
         check_bundle_case(data, case)
     complete = next(case for case in cases if case["id"] == "complete")
+    declaration_argument_cases = check_declaration_arguments(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
     exact_limit_cases = check_exact_limits(complete)
@@ -931,6 +986,7 @@ def main():
             {
                 "assessment_vectors": 10,
                 "declaration_cases": declaration_cases,
+                "declaration_invalid_argument_cases": declaration_argument_cases,
                 "bundle_vectors": 6,
                 "artifact_vectors": 7,
                 "assessment_opaque_artifact_cases": 1,
