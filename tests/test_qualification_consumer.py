@@ -800,7 +800,7 @@ class DeclarationArgumentConsumerTests(unittest.TestCase):
                 )
 
     def test_each_argument_case_checks_status_stdout_and_fixed_diagnostic(self):
-        for index, name in enumerate(consumer.invalid_declaration_arguments()):
+        for name, args in consumer.invalid_declaration_arguments().items():
             for status, stdout, stderr in (
                 (0, b"", self.fixed),
                 (1, b"", self.fixed),
@@ -814,13 +814,25 @@ class DeclarationArgumentConsumerTests(unittest.TestCase):
             ):
                 with self.subTest(case=name, status=status, stdout=stdout, stderr=stderr):
                     bad = SimpleNamespace(returncode=status, stdout=stdout, stderr=stderr)
-                    with patch.object(
-                        consumer.subprocess, "run", side_effect=[self.good] * index + [bad]
+                    # Full traversal is checked above; isolate each failing case
+                    # instead of replaying every successful prefix per corruption.
+                    with (
+                        patch.object(
+                            consumer, "invalid_declaration_arguments", return_value={name: args}
+                        ),
+                        patch.object(consumer.subprocess, "run", return_value=bad) as run,
                     ):
                         with self.assertRaises(AssertionError) as error:
                             consumer.check_declaration_arguments(self.case)
                     self.assertEqual(
                         str(error.exception), "declaration_argument_process_mismatch:" + name
+                    )
+                    run.assert_called_once_with(
+                        [consumer.sys.executable, "-I", "-m", "qualification", *args],
+                        input=self.raw,
+                        capture_output=True,
+                        check=False,
+                        timeout=10,
                     )
 
 
