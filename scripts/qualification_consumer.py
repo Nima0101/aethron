@@ -312,7 +312,26 @@ def assessment_malformed_frames(args):
         "artifact_count": manifest + struct.pack(">I", 16),
         "artifact": manifest + struct.pack(">I", 1) + b"a" * 64 + struct.pack(">I", 1048577),
     }
-    return malformed_frames(frame(args), magic, oversized)
+    cases = malformed_frames(frame(args), magic, oversized)
+    capture_fields = _blob(row["case_id"].encode("ascii")) + instant + _blob(row["manifest"])
+    # Include complete envelopes as well as headers: rejection must not pass
+    # solely because a missing value or trailing capture count reaches EOF.
+    for kind, prefix, suffix in (
+        ("method", docs, struct.pack(">I", 1) + capture_fields + _byte_map(row["artifacts"])),
+        ("artifact", mapped + struct.pack(">I", 1) + capture_fields, b""),
+    ):
+        for name, key in (
+            ("uppercase", b"A" * 64),
+            ("non_ascii", b"\xff" * 64),
+            ("non_hex", b"g" * 64),
+        ):
+            header = prefix + struct.pack(">I", 1) + key
+            cases[kind + "_" + name + "_key_header"] = header
+            cases[kind + "_" + name + "_key_frame"] = header + _blob(b"PRIVATE") + suffix
+        header = prefix + struct.pack(">I", 2) + b"a" * 64 + _blob(b"abc") + b"a" * 64
+        cases[kind + "_duplicate_key_header"] = header
+        cases[kind + "_duplicate_key_frame"] = header + _blob(b"PRIVATE") + suffix
+    return cases
 
 
 def bundle_malformed_frames(args):

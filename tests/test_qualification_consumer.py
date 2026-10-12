@@ -246,7 +246,7 @@ class MalformedConsumerTests(unittest.TestCase):
                 "qualification.assessment_cli",
                 consumer.assessment_malformed_frames(consumer.arguments(assessment)),
                 "invalid_qualification_assessment",
-                17,
+                33,
             ),
             (
                 "qualification.campaign_bundle_cli",
@@ -270,6 +270,29 @@ class MalformedConsumerTests(unittest.TestCase):
                         with self.assertRaises(ValueError):
                             command._report(io.BytesIO(raw))
                 evaluate.assert_not_called()
+
+    def test_bad_keys_fail_before_value_read_and_have_complete_envelopes(self):
+        from qualification import assessment_cli
+        from qualification.tests.test_campaign_bundle_cli import NoReadPastHeader
+
+        _module, cases, _diagnostic, _count = self.cases()[0]
+        headers = {name: raw for name, raw in cases.items() if name.endswith("_key_header")}
+        self.assertEqual(len(headers), 8)
+        for name, header in headers.items():
+            with self.subTest(case=name):
+                with patch.object(assessment_cli, "evaluate") as evaluate:
+                    with self.assertRaises(ValueError):
+                        assessment_cli._report(NoReadPastHeader(header))
+                    evaluate.assert_not_called()
+                full = cases[name.removesuffix("_header") + "_frame"]
+                self.assertTrue(full.startswith(header))
+                # Repair only the offending key; the otherwise complete frame
+                # must reach evaluation, proving EOF is not the rejection cause.
+                repaired = header[:-64] + b"b" * 64 + full[len(header) :]
+                sentinel = object()
+                with patch.object(assessment_cli, "evaluate", return_value=sentinel) as evaluate:
+                    self.assertIs(assessment_cli._report(io.BytesIO(repaired)), sentinel)
+                    evaluate.assert_called_once()
 
     def test_wrong_status_output_or_diagnostic_fails_at_any_case(self):
         for module, cases, diagnostic, _count in self.cases():
