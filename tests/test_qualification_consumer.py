@@ -379,6 +379,106 @@ class DeclarationClockBoundaryTests(DeclarationCollectionBoundaryTests):
             self.save(name, doc, 2, 6, findings)
 
 
+class DeclarationNumericBoundaryTests(DeclarationCollectionBoundaryTests):
+    generate = staticmethod(consumer.declaration_numeric_boundaries)
+    check = staticmethod(consumer.check_declaration_numeric_boundaries)
+    diagnostic = "declaration_numeric_"
+    count = 28
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        original = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        self.cases = {}
+        maximum = 2**53 - 1000
+        # Pin record positions and complete data objects independently of the
+        # generator's field traversal. Equal calibration ends isolate admission
+        # of the maximum valid_from instant from reversed-interval rejection.
+        for base in (0, 3):
+            for offset, name, data, findings in (
+                (0, "zero", {"valid_from_ms": 0, "valid_until_ms": 0}, ["calibration_interval"]),
+                (
+                    0,
+                    "maximum",
+                    {"valid_from_ms": maximum, "valid_until_ms": maximum},
+                    ["calibration_interval"],
+                ),
+                (0, "full_range", {"valid_from_ms": 0, "valid_until_ms": maximum}, []),
+                (
+                    1,
+                    "at_zero",
+                    {"at_ms": 0, "offset_ms": 0, "uncertainty_ms": 1},
+                    ["record_outside_capture", "record_stale"],
+                ),
+                (
+                    1,
+                    "at_maximum",
+                    {"at_ms": maximum, "offset_ms": 0, "uncertainty_ms": 1},
+                    ["record_outside_capture"],
+                ),
+                (
+                    1,
+                    "offset_minimum",
+                    {"at_ms": 1050, "offset_ms": -maximum, "uncertainty_ms": 1},
+                    ["clock_pair_skew", "clock_reference_skew"],
+                ),
+                (1, "offset_zero", {"at_ms": 1050, "offset_ms": 0, "uncertainty_ms": 1}, []),
+                (
+                    1,
+                    "offset_maximum",
+                    {"at_ms": 1050, "offset_ms": maximum, "uncertainty_ms": 1},
+                    ["clock_pair_skew", "clock_reference_skew"],
+                ),
+                (1, "uncertainty_zero", {"at_ms": 1050, "offset_ms": 0, "uncertainty_ms": 0}, []),
+                (
+                    1,
+                    "uncertainty_maximum",
+                    {"at_ms": 1050, "offset_ms": 0, "uncertainty_ms": maximum},
+                    ["clock_pair_skew", "clock_reference_skew"],
+                ),
+                (
+                    2,
+                    "at_zero",
+                    {"at_ms": 0, "lighting": "zero_visible"},
+                    ["record_outside_capture", "record_stale"],
+                ),
+                (
+                    2,
+                    "at_maximum",
+                    {"at_ms": maximum, "lighting": "zero_visible"},
+                    ["record_outside_capture"],
+                ),
+            ):
+                doc = copy.deepcopy(original)
+                doc["records"][base + offset]["data"] = data
+                self.save(f"record_{base + offset}_{name}", doc, 2, 6, findings)
+        for name, left, right, uncertainty, findings in (
+            ("equal_minimum", -maximum, -maximum, 0, ["clock_reference_skew"]),
+            ("equal_maximum", maximum, maximum, 0, ["clock_reference_skew"]),
+            (
+                "opposite_forward",
+                -maximum,
+                maximum,
+                maximum,
+                ["clock_pair_skew", "clock_reference_skew"],
+            ),
+            (
+                "opposite_reverse",
+                maximum,
+                -maximum,
+                maximum,
+                ["clock_pair_skew", "clock_reference_skew"],
+            ),
+        ):
+            doc = copy.deepcopy(original)
+            for index, value in ((1, left), (4, right)):
+                doc["records"][index]["data"] = {
+                    "at_ms": 1050,
+                    "offset_ms": value,
+                    "uncertainty_ms": uncertainty,
+                }
+            self.save(name, doc, 2, 6, findings)
+
+
 class DeclarationFreshnessBoundaryTests(DeclarationCollectionBoundaryTests):
     generate = staticmethod(consumer.declaration_freshness_boundaries)
     check = staticmethod(consumer.check_declaration_freshness_boundaries)
@@ -834,8 +934,8 @@ class DeclarationInputConsumerTests(unittest.TestCase):
 
     def test_every_invalid_input_reaches_isolated_binary_cli(self):
         with patch.object(consumer.subprocess, "run", return_value=self.rejected) as run:
-            self.assertEqual(consumer.check_declaration_malformed_inputs(self.case), 293)
-        self.assertEqual(run.call_count, 293)
+            self.assertEqual(consumer.check_declaration_malformed_inputs(self.case), 389)
+        self.assertEqual(run.call_count, 389)
         for call, raw in zip(
             run.call_args_list, consumer.declaration_malformed_inputs(self.raw).values()
         ):
@@ -868,7 +968,9 @@ class DeclarationInputConsumerTests(unittest.TestCase):
             {
                 name
                 for name in cases
-                if not name.startswith(("numeric_", "structure_", "value_", "collection_"))
+                if not name.startswith(
+                    ("numeric_", "record_numeric_", "structure_", "value_", "collection_")
+                )
             }
             - {
                 "one_byte_over",
@@ -977,6 +1079,56 @@ class DeclarationInputConsumerTests(unittest.TestCase):
                     consumer.canonical(consumer.validate(fixed, now_ms=1050)),
                     consumer.canonical(expected),
                 )
+
+    def test_record_numeric_cases_reject_one_scalar_and_repair_to_complete(self):
+        original = json.loads(self.raw)
+        cases = consumer.declaration_record_numeric_inputs(self.raw)
+        expected_cases = {}
+        maximum = 2**53 - 1000
+        for base in (0, 3):
+            for offset, key, valid, minimum in (
+                (0, "valid_from_ms", 0, 0),
+                (0, "valid_until_ms", 1100, 0),
+                (1, "at_ms", 1050, 0),
+                (1, "offset_ms", 0, -maximum),
+                (1, "uncertainty_ms", 1, 0),
+                (2, "at_ms", 1050, 0),
+            ):
+                for label, token in (
+                    ("boolean", b"true"),
+                    ("float", f"{valid}.0".encode()),
+                    ("string", f'"{valid}"'.encode()),
+                    ("null", b"null"),
+                    ("array", b"[]"),
+                    ("object", b"{}"),
+                    ("below_minimum", str(minimum - 1).encode()),
+                    ("above_maximum", str(maximum + 1).encode()),
+                ):
+                    name = f"record_numeric_{base + offset}_{key}_{label}"
+                    with self.subTest(case=name):
+                        doc = copy.deepcopy(original)
+                        data = doc["records"][base + offset]["data"]
+                        self.assertIs(type(data[key]), int)
+                        self.assertEqual(data[key], valid)
+                        data[key] = "NUMERIC_PLACEHOLDER"
+                        encoded = json.dumps(doc, sort_keys=True, separators=(",", ":")).encode()
+                        raw = encoded.replace(b'"NUMERIC_PLACEHOLDER"', token, 1)
+                        expected_cases[name] = raw
+                        with self.assertRaisesRegex(ValueError, "^invalid_qualification_manifest$"):
+                            consumer.validate(cases[name], now_ms=1050)
+                        data[key] = valid
+                        fixed = json.dumps(doc, sort_keys=True, separators=(",", ":")).encode()
+                        self.assertEqual(fixed, self.raw.rstrip())
+                        report = copy.deepcopy(
+                            self.case["expected_report"]["captures"][0]["report"]["declaration"]
+                        )
+                        report["input_sha256"] = hashlib.sha256(fixed).hexdigest()
+                        self.assertEqual(
+                            consumer.canonical(consumer.validate(fixed, now_ms=1050)),
+                            consumer.canonical(report),
+                        )
+        self.assertEqual(cases, expected_cases)
+        self.assertEqual(len(cases), 96)
 
     def test_structure_cases_remove_required_members_or_replace_one_container(self):
         original = json.loads(self.raw)

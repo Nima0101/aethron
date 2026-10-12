@@ -220,6 +220,123 @@ def declaration_numeric_inputs(raw):
     return cases
 
 
+def declaration_record_numeric_inputs(raw):
+    doc = json.loads(raw)
+    cases = {}
+    for index, record in enumerate(doc["records"]):
+        for key, value in record["data"].items():
+            if type(value) is not int:
+                continue
+            minimum = -9007199254739992 if key == "offset_ms" else 0
+            for name, invalid in (
+                ("boolean", True),
+                ("float", float(value)),
+                ("string", str(value)),
+                ("null", None),
+                ("array", []),
+                ("object", {}),
+                ("below_minimum", minimum - 1),
+                ("above_maximum", 9007199254739993),
+            ):
+                changed = copy.deepcopy(doc)
+                changed["records"][index]["data"][key] = invalid
+                cases[f"record_numeric_{index}_{key}_{name}"] = canonical(changed).encode("ascii")
+    return cases
+
+
+def declaration_numeric_boundaries(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    template = case["expected_report"]["captures"][0]["report"]["declaration"]
+    maximum = 9007199254739992
+    cases = {}
+
+    def save(name, changed, findings):
+        raw = canonical(changed).encode("ascii")
+        expected = copy.deepcopy(template)
+        expected.update(
+            input_sha256=hashlib.sha256(raw).hexdigest(),
+            declaration_checks_passed=not findings,
+            findings=findings,
+        )
+        cases[name] = raw, expected
+
+    for index, record in enumerate(doc["records"]):
+        if record["kind"] == "calibration":
+            variants = (
+                ("zero", {"valid_from_ms": 0, "valid_until_ms": 0}, ["calibration_interval"]),
+                (
+                    "maximum",
+                    {"valid_from_ms": maximum, "valid_until_ms": maximum},
+                    ["calibration_interval"],
+                ),
+                ("full_range", {"valid_from_ms": 0, "valid_until_ms": maximum}, []),
+            )
+        else:
+            variants = (
+                ("at_zero", {"at_ms": 0}, ["record_outside_capture", "record_stale"]),
+                ("at_maximum", {"at_ms": maximum}, ["record_outside_capture"]),
+            )
+            if record["kind"] == "clock":
+                skew = ["clock_pair_skew", "clock_reference_skew"]
+                variants += (
+                    ("offset_minimum", {"offset_ms": -maximum}, skew),
+                    ("offset_zero", {"offset_ms": 0}, []),
+                    ("offset_maximum", {"offset_ms": maximum}, skew),
+                    ("uncertainty_zero", {"uncertainty_ms": 0}, []),
+                    ("uncertainty_maximum", {"uncertainty_ms": maximum}, skew),
+                )
+        for name, updates, findings in variants:
+            changed = copy.deepcopy(doc)
+            changed["records"][index]["data"].update(updates)
+            save(f"record_{index}_{name}", changed, findings)
+
+    for name, offsets, uncertainty, findings in (
+        ("equal_minimum", (-maximum, -maximum), 0, ["clock_reference_skew"]),
+        ("equal_maximum", (maximum, maximum), 0, ["clock_reference_skew"]),
+        (
+            "opposite_forward",
+            (-maximum, maximum),
+            maximum,
+            ["clock_pair_skew", "clock_reference_skew"],
+        ),
+        (
+            "opposite_reverse",
+            (maximum, -maximum),
+            maximum,
+            ["clock_pair_skew", "clock_reference_skew"],
+        ),
+    ):
+        changed = copy.deepcopy(doc)
+        clocks = [row for row in changed["records"] if row["kind"] == "clock"]
+        for row, offset in zip(clocks, offsets):
+            row["data"].update(offset_ms=offset, uncertainty_ms=uncertainty)
+        save(name, changed, findings)
+    return cases
+
+
+def check_declaration_numeric_boundaries(case):
+    cases = declaration_numeric_boundaries(case)
+    instant = case["captures"][0]["now_ms"]
+    for name, (raw, expected_report) in cases.items():
+        if canonical(validate(raw, now_ms=instant)) != canonical(expected_report):
+            raise AssertionError("declaration_numeric_report_mismatch:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        expected = (
+            0 if expected_report["declaration_checks_passed"] else 1,
+            (canonical(expected_report) + os.linesep).encode("ascii"),
+            b"",
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_numeric_process_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_structure_inputs(raw):
     doc = json.loads(raw)
     paths = {
@@ -892,6 +1009,7 @@ def declaration_malformed_inputs(raw):
             changed = b"{" + member + b"," + original[1:]
             cases[name + "_" + defect] = encoded.replace(original, changed, 1)
     cases.update(declaration_numeric_inputs(raw))
+    cases.update(declaration_record_numeric_inputs(raw))
     cases.update(declaration_structure_inputs(raw))
     cases.update(declaration_value_inputs(raw))
     cases.update(declaration_collection_inputs(raw))
@@ -1714,6 +1832,7 @@ def main():
     declaration_domain_cases = check_declaration_domain_boundaries(complete)
     declaration_provenance = check_declaration_provenance(complete)
     declaration_rig_bindings = check_declaration_rig_bindings(complete)
+    declaration_numeric_cases = check_declaration_numeric_boundaries(complete)
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -1771,6 +1890,7 @@ def main():
                 "declaration_domain_boundary_cases": declaration_domain_cases,
                 "declaration_provenance_cases": declaration_provenance,
                 "declaration_rig_binding_cases": declaration_rig_bindings,
+                "declaration_numeric_boundary_cases": declaration_numeric_cases,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,
