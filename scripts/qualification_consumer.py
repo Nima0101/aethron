@@ -4,6 +4,7 @@ Run with the consumer venv's Python -I, outside the checkout, and pass the corpu
 paths. The corpora supply bytes and expected results, never executable helpers.
 """
 
+import copy
 import hashlib
 import json
 import os
@@ -133,6 +134,39 @@ def check_case(case):
     )
     if (result.returncode, result.stdout, result.stderr) != expected:
         raise AssertionError("assessment_process_mismatch")
+
+
+def check_opaque_artifacts(case):
+    args = arguments(case)
+    artifacts = args[1][0]["artifacts"]
+    # Match the source binary-process contract: Windows text input would
+    # translate CRLF and stop at Ctrl-Z; the artifact must remain opaque.
+    for digest in artifacts:
+        artifacts[digest] += b"\r\n\x1a\x00\xffPRIVATE"
+    expected_report = copy.deepcopy(case["expected_report"])
+    expected_report["submission_sha256"] = (
+        "fbea20aaff18a378bb6aec803d1079948913f19e19d3f4ecb5b0ebb8082f4d25"
+    )
+    artifact = expected_report["captures"][0]["report"]
+    artifact["artifact_counts"].update(matched=0, mismatched=1, supplied_bytes=15)
+    artifact["artifact_findings"] = ["artifact_digest_mismatch"]
+    for report in (artifact, expected_report):
+        report["artifact_bytes_verified"] = False
+        report["software_checks_passed"] = False
+    # Everything else remains pinned to the complete vector, including every
+    # false qualification flag. The new commitment binds the exact opaque bytes.
+    if canonical(evaluate(*args)) != canonical(expected_report):
+        raise AssertionError("opaque_assessment_report_mismatch")
+    result = subprocess.run(
+        [sys.executable, "-I", "-m", "qualification.assessment_cli"],
+        input=frame(args),
+        capture_output=True,
+        check=False,
+        timeout=10,
+    )
+    expected = (1, (canonical(expected_report) + os.linesep).encode("ascii"), b"")
+    if (result.returncode, result.stdout, result.stderr) != expected:
+        raise AssertionError("opaque_assessment_process_mismatch")
 
 
 def bundle_corpus(path):
@@ -328,6 +362,7 @@ def main():
     for case in data["cases"]:
         check_bundle_case(data, case)
     complete = next(case for case in cases if case["id"] == "complete")
+    check_opaque_artifacts(complete)
     assessment_malformed = check_malformed_frames(
         "qualification.assessment_cli",
         assessment_malformed_frames(arguments(complete)),
@@ -345,6 +380,7 @@ def main():
                 "assessment_vectors": 10,
                 "bundle_vectors": 6,
                 "artifact_vectors": 7,
+                "assessment_opaque_artifact_cases": 1,
                 "assessment_malformed_frames": assessment_malformed,
                 "bundle_malformed_frames": bundle_malformed,
                 "isolated_install": True,

@@ -59,6 +59,85 @@ class QualificationConsumerTests(unittest.TestCase):
                         consumer.check_case(self.cases["stale"])
 
 
+class OpaqueArtifactConsumerTests(unittest.TestCase):
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        self.args = consumer.arguments(self.case)
+        for digest in self.args[1][0]["artifacts"]:
+            self.args[1][0]["artifacts"][digest] += b"\r\n\x1a\x00\xffPRIVATE"
+        self.report = consumer.evaluate(*self.args)
+        self.output = (consumer.canonical(self.report) + os.linesep).encode("ascii")
+
+    def test_binary_frame_matches_source_contract_without_mutating_corpus(self):
+        from qualification.tests.test_assessment_cli import frame
+
+        original = copy.deepcopy(self.case)
+        result = SimpleNamespace(returncode=1, stdout=self.output, stderr=b"")
+        with patch.object(consumer.subprocess, "run", return_value=result) as run:
+            consumer.check_opaque_artifacts(self.case)
+        self.assertEqual(self.case, original)
+        self.assertEqual(
+            run.call_args.args[0],
+            [consumer.sys.executable, "-I", "-m", "qualification.assessment_cli"],
+        )
+        self.assertEqual(
+            run.call_args.kwargs,
+            {"input": frame(self.args), "capture_output": True, "check": False, "timeout": 10},
+        )
+        self.assertNotIn(b"PRIVATE", self.output)
+
+    def test_library_cannot_hide_mismatch_or_claim_qualification(self):
+        mutations = [
+            (("submission_sha256",), self.case["expected_report"]["submission_sha256"]),
+            (("captures", 0, "report", "artifact_findings"), []),
+            (("captures", 0, "report", "artifact_counts", "supplied_bytes"), 14),
+            (("captures", 0, "report", "artifact_counts", "mismatched"), True),
+        ]
+        for path in ((), ("captures", 0, "report")):
+            for key in (
+                "artifact_bytes_verified",
+                "software_checks_passed",
+                "artifact_authenticity_verified",
+                "physical_qualification_passed",
+            ):
+                for value in (True, 0):
+                    mutations.append(((*path, key), value))
+        for path, value in mutations:
+            with self.subTest(path=path, value=value):
+                report = copy.deepcopy(self.report)
+                target = report
+                for key in path[:-1]:
+                    target = target[key]
+                target[path[-1]] = value
+                with patch.object(consumer, "evaluate", return_value=report):
+                    with self.assertRaisesRegex(
+                        AssertionError, "^opaque_assessment_report_mismatch$"
+                    ):
+                        consumer.check_opaque_artifacts(self.case)
+
+    def test_process_cannot_translate_bytes_leak_payload_or_change_status(self):
+        translated = copy.deepcopy(self.args)
+        for digest, raw in translated[1][0]["artifacts"].items():
+            translated[1][0]["artifacts"][digest] = raw.replace(b"\r\n", b"\n")
+        translated_output = (
+            consumer.canonical(consumer.evaluate(*translated)) + os.linesep
+        ).encode("ascii")
+        for status, stdout, stderr in (
+            (0, self.output, b""),
+            (2, b"", b"invalid_qualification_assessment" + os.linesep.encode("ascii")),
+            (1, translated_output, b""),
+            (1, self.output + b"PRIVATE", b""),
+            (1, self.output, b"PRIVATE"),
+        ):
+            with self.subTest(status=status, stdout=stdout, stderr=stderr):
+                result = SimpleNamespace(returncode=status, stdout=stdout, stderr=stderr)
+                with patch.object(consumer.subprocess, "run", return_value=result):
+                    with self.assertRaisesRegex(
+                        AssertionError, "^opaque_assessment_process_mismatch$"
+                    ):
+                        consumer.check_opaque_artifacts(self.case)
+
+
 class BundleConsumerTests(unittest.TestCase):
     def setUp(self):
         self.data = consumer.bundle_corpus(BUNDLE_CORPUS)

@@ -100,6 +100,7 @@ def run():
             "assessment_vectors": 10,
             "bundle_vectors": 6,
             "artifact_vectors": 7,
+            "assessment_opaque_artifact_cases": 1,
             "assessment_malformed_frames": 17,
             "bundle_malformed_frames": 13,
             "isolated_install": True,
