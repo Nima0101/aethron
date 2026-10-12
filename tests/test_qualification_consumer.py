@@ -1143,7 +1143,17 @@ class ClosedPipeConsumerTests(unittest.TestCase):
 
         assessments = consumer.corpus(CORPUS)
         data = consumer.bundle_corpus(BUNDLE_CORPUS)
+        declarations, declaration_args = consumer.declaration_closed_pipe_inputs(assessments)
+        complete = next(case for case in assessments if case["id"] == "complete")
+        manifest = bytes.fromhex(complete["captures"][0]["manifest_hex"])
         return (
+            (
+                consumer.qualification,
+                declarations,
+                {"complete": manifest, "stale": manifest, "malformed": b"PRIVATE malformed"},
+                "invalid_qualification_manifest",
+                declaration_args,
+            ),
             (
                 assessment_cli,
                 consumer.closed_pipe_frames(
@@ -1153,6 +1163,7 @@ class ClosedPipeConsumerTests(unittest.TestCase):
                     assessments, lambda case: frame(consumer.arguments(case))
                 ),
                 "invalid_qualification_assessment",
+                None,
             ),
             (
                 campaign_bundle_cli,
@@ -1164,18 +1175,35 @@ class ClosedPipeConsumerTests(unittest.TestCase):
                     data["cases"], lambda case: bundle_frame(*consumer.bundle_arguments(data, case))
                 ),
                 "invalid_campaign_bundle",
+                None,
             ),
         )
 
     def test_inputs_reach_distinct_outcomes_and_pipes_have_no_readers(self):
-        for module, cases, independent, diagnostic in self.cases():
+        for module, cases, independent, diagnostic, arguments in self.cases():
             self.assertEqual(cases, independent)
             self.assertEqual(list(cases), ["complete", "stale", "malformed"])
+            if arguments is not None:
+                self.assertEqual(
+                    arguments,
+                    {
+                        "complete": ["--now-ms", "1050"],
+                        "stale": ["--now-ms", "1151"],
+                        "malformed": ["--now-ms", "1050"],
+                    },
+                )
             for name, expected in (("complete", True), ("stale", False)):
-                report = module._report(io.BytesIO(cases[name]))
-                self.assertIs(report["software_checks_passed"], expected)
+                if arguments is None:
+                    report = module._report(io.BytesIO(cases[name]))
+                    self.assertIs(report["software_checks_passed"], expected)
+                else:
+                    report = consumer.validate(cases[name], now_ms=int(arguments[name][1]))
+                    self.assertIs(report["declaration_checks_passed"], expected)
             with self.assertRaises(ValueError):
-                module._report(io.BytesIO(cases["malformed"]))
+                if arguments is None:
+                    module._report(io.BytesIO(cases["malformed"]))
+                else:
+                    consumer.validate(cases["malformed"], now_ms=1050)
 
             streams = []
 
@@ -1191,9 +1219,14 @@ class ClosedPipeConsumerTests(unittest.TestCase):
                 module=module,
                 cases=cases,
                 diagnostic=diagnostic,
+                arguments=arguments,
             ):
                 index = len(streams)
-                self.assertEqual(command, [consumer.sys.executable, "-I", "-m", module.__name__])
+                name = list(cases)[index // 2]
+                args = [] if arguments is None else arguments[name]
+                self.assertEqual(
+                    command, [consumer.sys.executable, "-I", "-m", module.__name__, *args]
+                )
                 self.assertEqual(input, list(cases.values())[index // 2])
                 self.assertIs(check, False)
                 self.assertEqual(timeout, 10)
@@ -1219,12 +1252,17 @@ class ClosedPipeConsumerTests(unittest.TestCase):
                 )
 
             with patch.object(consumer.subprocess, "run", side_effect=run):
-                self.assertEqual(consumer.check_closed_pipes(module.__name__, cases, diagnostic), 6)
+                self.assertEqual(
+                    consumer.check_closed_pipes(
+                        module.__name__, cases, diagnostic, case_arguments=arguments
+                    ),
+                    6,
+                )
             self.assertEqual(len(streams), 6)
             self.assertTrue(all(stream.closed for opened in streams for stream in opened))
 
     def test_every_pipe_case_checks_status_and_observable_diagnostic(self):
-        for module, cases, _independent, diagnostic in self.cases():
+        for module, cases, _independent, diagnostic, arguments in self.cases():
             fixed = (diagnostic + os.linesep).encode("ascii")
             preceding = []
             for name in cases:
@@ -1244,7 +1282,9 @@ class ClosedPipeConsumerTests(unittest.TestCase):
                                 consumer.subprocess, "run", side_effect=[*preceding, bad]
                             ):
                                 with self.assertRaises(AssertionError) as error:
-                                    consumer.check_closed_pipes(module.__name__, cases, diagnostic)
+                                    consumer.check_closed_pipes(
+                                        module.__name__, cases, diagnostic, case_arguments=arguments
+                                    )
                             mode = "both" if close_errors else "stdout"
                             self.assertEqual(
                                 str(error.exception),

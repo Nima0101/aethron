@@ -102,6 +102,7 @@ def run():
             "declaration_invalid_argument_cases": 29,
             "declaration_exact_limit_cases": 1,
             "declaration_malformed_inputs": 5,
+            "declaration_closed_pipe_cases": 6,
             "bundle_vectors": 6,
             "artifact_vectors": 7,
             "assessment_opaque_artifact_cases": 1,

@@ -941,9 +941,22 @@ def closed_pipe_frames(cases, encode):
     return dict(selected, malformed=b"PRIVATE malformed")
 
 
-def check_closed_pipes(module, cases, diagnostic):
+def declaration_closed_pipe_inputs(cases):
+    selected = {
+        name: next(case for case in cases if case["id"] == name)["captures"][0]
+        for name in ("complete", "stale")
+    }
+    frames = {name: bytes.fromhex(row["manifest_hex"]) for name, row in selected.items()}
+    arguments = {name: ["--now-ms", str(row["now_ms"])] for name, row in selected.items()}
+    frames["malformed"] = b"PRIVATE malformed"
+    arguments["malformed"] = list(arguments["complete"])
+    return frames, arguments
+
+
+def check_closed_pipes(module, cases, diagnostic, *, case_arguments=None):
     checked = 0
     for name, raw in cases.items():
+        args = () if case_arguments is None else case_arguments[name]
         for close_errors in (False, True):
             with contextlib.ExitStack() as stack:
                 read_fd, write_fd = os.pipe()
@@ -957,7 +970,7 @@ def check_closed_pipes(module, cases, diagnostic):
                     os.close(read_fd)
                     errors = stack.enter_context(os.fdopen(write_fd, "wb"))
                 result = subprocess.run(
-                    [sys.executable, "-I", "-m", module],
+                    [sys.executable, "-I", "-m", module, *args],
                     input=raw,
                     stdout=output,
                     stderr=errors,
@@ -1021,6 +1034,13 @@ def main():
         bundle_frame(bundle_arguments(data, complete_bundle)),
         "invalid_campaign_bundle",
     )
+    declaration_frames, declaration_arguments = declaration_closed_pipe_inputs(cases)
+    declaration_closed_pipes = check_closed_pipes(
+        "qualification",
+        declaration_frames,
+        "invalid_qualification_manifest",
+        case_arguments=declaration_arguments,
+    )
     assessment_closed_pipes = check_closed_pipes(
         "qualification.assessment_cli",
         closed_pipe_frames(cases, lambda case: frame(arguments(case))),
@@ -1039,6 +1059,7 @@ def main():
                 "declaration_invalid_argument_cases": declaration_argument_cases,
                 "declaration_exact_limit_cases": declaration_boundary_cases,
                 "declaration_malformed_inputs": declaration_malformed,
+                "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,
                 "artifact_vectors": 7,
                 "assessment_opaque_artifact_cases": 1,
