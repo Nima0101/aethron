@@ -1532,6 +1532,73 @@ def check_declaration_escaped_value_controls(case):
     return len(cases)
 
 
+def declaration_unicode_value_inputs(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    encoded = canonical(doc).encode("ascii")
+    fields = [
+        ("rig_id", doc["rig"], "id"),
+        ("rig_configuration", doc["rig"], "configuration_sha256"),
+        ("sensor_id", doc["rig"]["sensors"][0], "id"),
+        ("sensor_device", doc["rig"]["sensors"][0], "device_sha256"),
+        ("sensor_mount", doc["rig"]["sensors"][0], "mount_sha256"),
+        ("capture_clock", doc["capture"], "clock_domain"),
+        ("record_sensor", doc["records"][0], "sensor_id"),
+        ("record_clock", doc["records"][0], "clock_domain"),
+        ("record_artifact", doc["records"][0], "artifact_sha256"),
+        ("record_rig", doc["records"][0], "rig_sha256"),
+    ]
+    escapes = {
+        "high_min": rb"\ud800",
+        "high_max": rb"\udbff",
+        "low_min": rb"\udc00",
+        "low_max": rb"\udfff",
+        "pair_min": rb"\ud800\udc00",
+        "pair_max": rb"\udbff\udfff",
+        "reversed_pair": rb"\udc00\ud800",
+        "high_ascii": rb"\ud800\u0061",
+        "short_escape": rb"\u123",
+        "empty_escape": rb"\u",
+        "nonhex_escape": rb"\u12x4",
+        "uppercase_prefix": rb"\U0061",
+    }
+    cases = {}
+    for name, obj, key in fields:
+        original = canonical(obj).encode("ascii")
+        member = canonical(key).encode("ascii") + b":"
+        value = canonical(obj[key]).encode("ascii")
+        for form, escape in escapes.items():
+            # Replace the last ASCII character so short escapes end at the
+            # closing quote and cannot consume trailing hex digits. Valid
+            # surrogate pairs still violate the ASCII schema.
+            changed = original.replace(member + value, member + value[:-2] + escape + b'"', 1)
+            cases[name + "_" + form] = encoded.replace(original, changed, 1)
+    return cases
+
+
+def check_declaration_unicode_value_inputs(case):
+    cases = declaration_unicode_value_inputs(case)
+    instant = case["captures"][0]["now_ms"]
+    expected = (2, b"", ("invalid_qualification_manifest" + os.linesep).encode("ascii"))
+    for name, raw in cases.items():
+        try:
+            validate(raw, now_ms=instant)
+        except ValueError as exc:
+            if str(exc) != "invalid_qualification_manifest":
+                raise AssertionError("declaration_unicode_error_mismatch:" + name) from exc
+        else:
+            raise AssertionError("declaration_unicode_error_missing:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_unicode_process_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -2401,6 +2468,7 @@ def main():
     declaration_escaped_controls = check_declaration_escaped_key_controls(complete)
     declaration_escaped_duplicates = check_declaration_escaped_key_duplicates(complete)
     declaration_escaped_values = check_declaration_escaped_value_controls(complete)
+    declaration_unicode = check_declaration_unicode_value_inputs(complete)
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -2468,6 +2536,7 @@ def main():
                 "declaration_escaped_key_controls": declaration_escaped_controls,
                 "declaration_escaped_key_duplicates": declaration_escaped_duplicates,
                 "declaration_escaped_value_controls": declaration_escaped_values,
+                "declaration_unicode_value_inputs": declaration_unicode,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,

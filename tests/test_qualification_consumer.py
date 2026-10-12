@@ -715,6 +715,165 @@ class DeclarationEscapedKeyDuplicateTests(unittest.TestCase):
                     self.assert_process_call(run, raw)
 
 
+class DeclarationUnicodeValueTests(unittest.TestCase):
+    assert_process_call = DeclarationCollectionBoundaryTests.assert_process_call
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        self.doc = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        paths = {
+            "rig_id": ("rig", "id"),
+            "rig_configuration": ("rig", "configuration_sha256"),
+            "sensor_id": ("rig", "sensors", 0, "id"),
+            "sensor_device": ("rig", "sensors", 0, "device_sha256"),
+            "sensor_mount": ("rig", "sensors", 0, "mount_sha256"),
+            "capture_clock": ("capture", "clock_domain"),
+            "record_sensor": ("records", 0, "sensor_id"),
+            "record_clock": ("records", 0, "clock_domain"),
+            "record_artifact": ("records", 0, "artifact_sha256"),
+            "record_rig": ("records", 0, "rig_sha256"),
+        }
+        # Encode code points independently; the installed checker uses raw JSON
+        # escape bytes. Paired surrogates decode to one non-ASCII scalar.
+        values = {
+            "high_min": chr(0xD800),
+            "high_max": chr(0xDBFF),
+            "low_min": chr(0xDC00),
+            "low_max": chr(0xDFFF),
+            "pair_min": chr(0x10000),
+            "pair_max": chr(0x10FFFF),
+            "reversed_pair": chr(0xDC00) + chr(0xD800),
+            "high_ascii": chr(0xD800) + "a",
+        }
+        escapes = {name: json.dumps(value)[1:-1].encode() for name, value in values.items()}
+        escapes["high_ascii"] = escapes["high_ascii"][:-1] + b"\\u0061"
+        escapes.update(
+            short_escape=b"\\u123",
+            empty_escape=b"\\u",
+            nonhex_escape=b"\\u12x4",
+            uppercase_prefix=b"\\U0061",
+        )
+        self.cases, self.details = {}, {}
+        for name, path in paths.items():
+            doc = copy.deepcopy(self.doc)
+            obj = doc
+            for part in path[:-1]:
+                obj = obj[part]
+            original = obj[path[-1]]
+            obj[path[-1]] = "UNICODE_VALUE_PLACEHOLDER"
+            template = json.dumps(doc, sort_keys=True, separators=(",", ":")).encode()
+            marker = b'"UNICODE_VALUE_PLACEHOLDER"'
+            self.assertEqual(template.count(marker), 1)
+            for form, escape in escapes.items():
+                value = b'"' + original[:-1].encode() + escape + b'"'
+                raw = template.replace(marker, value)
+                key = name + "_" + form
+                self.cases[key] = raw
+                self.details[key] = path, original, template, marker, values.get(form)
+        self.good = SimpleNamespace(
+            returncode=2,
+            stdout=b"",
+            stderr=("invalid_qualification_manifest" + os.linesep).encode("ascii"),
+        )
+
+    def test_independent_documents_and_full_binary_traversal(self):
+        original = copy.deepcopy(self.case)
+        self.assertEqual(consumer.declaration_unicode_value_inputs(self.case), self.cases)
+        self.assertEqual(len(self.cases), 120)
+        self.assertEqual(len(set(self.cases.values())), 120)
+        with patch.object(consumer.subprocess, "run", return_value=self.good) as run:
+            self.assertEqual(consumer.check_declaration_unicode_value_inputs(self.case), 120)
+        self.assertEqual(run.call_count, 120)
+        for call, raw in zip(run.call_args_list, self.cases.values()):
+            self.assertLessEqual(len(raw), 65536)
+            self.assertEqual(
+                call.args[0],
+                [consumer.sys.executable, "-I", "-m", "qualification", "--now-ms", "1050"],
+            )
+            self.assertEqual(
+                call.kwargs, {"input": raw, "capture_output": True, "check": False, "timeout": 10}
+            )
+        self.assertEqual(self.case, original)
+
+    def test_syntax_schema_boundaries_and_single_value_repairs(self):
+        for name, raw in self.cases.items():
+            path, original, template, marker, decoded_suffix = self.details[name]
+            with self.subTest(case=name):
+                if decoded_suffix is None:
+                    with self.assertRaises(json.JSONDecodeError):
+                        json.loads(raw)
+                else:
+                    decoded = json.loads(raw)
+                    obj = decoded
+                    for part in path[:-1]:
+                        obj = obj[part]
+                    self.assertEqual(obj[path[-1]], original[:-1] + decoded_suffix)
+                    obj[path[-1]] = original
+                    self.assertEqual(decoded, self.doc)
+                with self.assertRaisesRegex(ValueError, "^invalid_qualification_manifest$"):
+                    consumer.validate(raw, now_ms=1050)
+                # An escaped ASCII last character repairs only the bad value;
+                # references, rig commitments and every other member stay intact.
+                repaired_value = ('"' + original[:-1] + '\\u%04x"' % ord(original[-1])).encode()
+                repaired = template.replace(marker, repaired_value)
+                self.assertEqual(json.loads(repaired), self.doc)
+                report = consumer.validate(repaired, now_ms=1050)
+                self.assertTrue(report["declaration_checks_passed"])
+                self.assertFalse(report["artifacts_verified"])
+                self.assertFalse(report["physical_qualification_passed"])
+                self.assertEqual(report["input_sha256"], hashlib.sha256(repaired).hexdigest())
+
+    def test_every_value_requires_fixed_library_rejection(self):
+        for name, raw in self.cases.items():
+            for error in (None, ValueError("PRIVATE")):
+                with self.subTest(case=name, error=error):
+                    with (
+                        patch.object(
+                            consumer, "declaration_unicode_value_inputs", return_value={name: raw}
+                        ),
+                        patch.object(
+                            consumer, "validate", side_effect=error, return_value={}
+                        ) as validate,
+                        patch.object(consumer.subprocess, "run") as run,
+                    ):
+                        suffix = "missing" if error is None else "mismatch"
+                        with self.assertRaisesRegex(
+                            AssertionError,
+                            "^declaration_unicode_error_" + suffix + ":" + name + "$",
+                        ):
+                            consumer.check_declaration_unicode_value_inputs(self.case)
+                    validate.assert_called_once_with(raw, now_ms=1050)
+                    run.assert_not_called()
+
+    def test_every_value_requires_fixed_process_rejection(self):
+        for name, raw in self.cases.items():
+            for field, value in (
+                ("returncode", 0),
+                ("returncode", 1),
+                ("stdout", raw),
+                ("stdout", b"{}"),
+                ("stderr", b""),
+                ("stderr", self.good.stderr + b"PRIVATE"),
+                ("stderr", b"Traceback"),
+            ):
+                with self.subTest(case=name, field=field):
+                    result = copy.copy(self.good)
+                    setattr(result, field, value)
+                    with (
+                        patch.object(
+                            consumer, "declaration_unicode_value_inputs", return_value={name: raw}
+                        ),
+                        patch.object(consumer, "validate", wraps=consumer.validate) as validate,
+                        patch.object(consumer.subprocess, "run", return_value=result) as run,
+                    ):
+                        with self.assertRaisesRegex(
+                            AssertionError, "^declaration_unicode_process_mismatch:" + name + "$"
+                        ):
+                            consumer.check_declaration_unicode_value_inputs(self.case)
+                    validate.assert_called_once_with(raw, now_ms=1050)
+                    self.assert_process_call(run, raw)
+
+
 class DeclarationTokenBoundaryTests(DeclarationCollectionBoundaryTests):
     generate = staticmethod(consumer.declaration_token_boundaries)
     check = staticmethod(consumer.check_declaration_token_boundaries)
