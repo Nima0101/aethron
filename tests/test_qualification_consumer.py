@@ -3,6 +3,7 @@
 import copy
 import io
 import os
+import struct
 import tempfile
 import unittest
 from pathlib import Path
@@ -577,6 +578,108 @@ class BundleExactLimitConsumerTests(unittest.TestCase):
                         consumer.check_bundle_exact_limits(self.data, self.case)
 
 
+class BundleScalarConsumerTests(unittest.TestCase):
+    def setUp(self):
+        self.data = consumer.bundle_corpus(BUNDLE_CORPUS)
+        self.case = next(case for case in self.data["cases"] if case["id"] == "complete")
+        self.args = []
+        self.reports = []
+        self.results = []
+        for instant in (0, 2**53 - 1000):
+            args = consumer.bundle_arguments(self.data, self.case)
+            args[1][0]["now_ms"] = instant
+            report = consumer.evaluate_bundle(*args)
+            self.args.append(args)
+            self.reports.append(report)
+            self.results.append(
+                SimpleNamespace(
+                    returncode=1,
+                    stdout=(consumer.canonical(report) + os.linesep).encode("ascii"),
+                    stderr=b"",
+                )
+            )
+
+    def test_boundaries_preserve_uint64_frames_and_negative_evidence(self):
+        from qualification import campaign_bundle_cli
+        from qualification.tests.test_campaign_bundle_cli import frame
+
+        with patch.object(consumer.subprocess, "run", side_effect=self.results) as run:
+            self.assertEqual(consumer.check_bundle_scalar_boundaries(self.data, self.case), 2)
+        for args, report, call in zip(self.args, self.reports, run.call_args_list):
+            raw = frame(*args)
+            self.assertEqual(
+                call.args[0],
+                [consumer.sys.executable, "-I", "-m", "qualification.campaign_bundle_cli"],
+            )
+            self.assertEqual(
+                call.kwargs,
+                {
+                    "input": raw,
+                    "capture_output": True,
+                    "check": False,
+                    "timeout": 10,
+                },
+            )
+            self.assertEqual(campaign_bundle_cli._report(io.BytesIO(raw)), report)
+            with patch.object(campaign_bundle_cli, "evaluate") as evaluate:
+                campaign_bundle_cli._report(io.BytesIO(raw))
+                evaluate.assert_called_once_with(*args)
+                self.assertIs(type(evaluate.call_args.args[1][0]["now_ms"]), int)
+
+    def test_library_cannot_hide_time_findings_or_change_typed_report(self):
+        mutations = [
+            (("coverage", "findings"), []),
+            (("coverage", "captures_sha256"), "0" * 64),
+            (("coverage", "capture_counts", "eligible"), False),
+            (("coverage", "cases", 0, "eligible"), 0.0),
+            (("coverage", "declaration_coverage_complete"), True),
+            (("software_checks_passed",), True),
+        ]
+        for prefix in ((), ("coverage",), ("references",)):
+            for key in (
+                "physical_qualification_passed",
+                "artifact_authenticity_verified",
+                "domain_verified",
+                "procedure_verified",
+            ):
+                mutations.append(((*prefix, key), True))
+        for index in range(2):
+            for path, value in mutations:
+                with self.subTest(index=index, path=path):
+                    reports = copy.deepcopy(self.reports)
+                    target = reports[index]
+                    for key in path[:-1]:
+                        target = target[key]
+                    target[path[-1]] = value
+                    with (
+                        patch.object(consumer, "evaluate_bundle", side_effect=reports),
+                        patch.object(consumer.subprocess, "run", side_effect=self.results),
+                        self.assertRaisesRegex(
+                            AssertionError, "^scalar_boundary_bundle_report_mismatch$"
+                        ),
+                    ):
+                        consumer.check_bundle_scalar_boundaries(self.data, self.case)
+
+    def test_process_outcome_is_checked_at_both_boundaries(self):
+        for index in range(2):
+            for status, stdout, stderr in (
+                (0, self.results[index].stdout, b""),
+                (2, b"", b"invalid_campaign_bundle" + os.linesep.encode("ascii")),
+                (1, self.results[1 - index].stdout, b""),
+                (1, self.results[index].stdout, b"PRIVATE"),
+            ):
+                with self.subTest(index=index, status=status, stderr=stderr):
+                    results = list(self.results)
+                    results[index] = SimpleNamespace(
+                        returncode=status, stdout=stdout, stderr=stderr
+                    )
+                    with patch.object(consumer.subprocess, "run", side_effect=results):
+                        with self.assertRaisesRegex(
+                            AssertionError, "^scalar_boundary_bundle_process_mismatch$"
+                        ):
+                            consumer.check_bundle_scalar_boundaries(self.data, self.case)
+
+
 class MalformedConsumerTests(unittest.TestCase):
     def cases(self):
         assessment = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
@@ -593,7 +696,7 @@ class MalformedConsumerTests(unittest.TestCase):
                 "qualification.campaign_bundle_cli",
                 consumer.bundle_malformed_frames(consumer.bundle_arguments(data, bundle)),
                 "invalid_campaign_bundle",
-                19,
+                25,
             ),
         )
 
@@ -726,6 +829,63 @@ class MalformedConsumerTests(unittest.TestCase):
                 report = campaign_bundle_cli._report(io.BytesIO(frame(*args)))
                 self.assertIs(report["physical_qualification_passed"], False)
                 self.assertEqual(report, consumer.evaluate_bundle(*args))
+
+    def test_bundle_scalar_frames_reject_before_later_reads_and_have_repairs(self):
+        from qualification import campaign_bundle_cli
+        from qualification.tests.test_campaign_bundle_cli import (
+            MAGIC,
+            NoReadPastHeader,
+            blob,
+            frame,
+        )
+
+        data = consumer.bundle_corpus(BUNDLE_CORPUS)
+        case = next(case for case in data["cases"] if case["id"] == "complete")
+        args = consumer.bundle_arguments(data, case)
+        plan, rows, domain, procedure = args
+        row = rows[0]
+        prefix = MAGIC + blob(plan) + blob(domain) + blob(procedure) + struct.pack(">I", 1)
+        cases = consumer.bundle_malformed_frames(args)
+        names = set()
+        for name, token in (
+            ("empty", b""),
+            ("space", b"PRIVATE name"),
+            ("path", b"a/b"),
+            ("non_ascii", b"\xff"),
+        ):
+            names.add("case_id_" + name + "_frame")
+            header = prefix + blob(token)
+            suffix = struct.pack(">Q", row["now_ms"]) + blob(row["manifest"])
+            raw = cases["case_id_" + name + "_frame"]
+            self.assertEqual(raw, header + suffix)
+            with self.subTest(case=name), patch.object(campaign_bundle_cli, "evaluate") as evaluate:
+                for stream in (io.BytesIO(raw), NoReadPastHeader(header)):
+                    with self.assertRaises(ValueError):
+                        campaign_bundle_cli._report(stream)
+                evaluate.assert_not_called()
+                repaired = prefix + blob(row["case_id"].encode("ascii")) + suffix
+                self.assertEqual(repaired, frame(*args))
+                campaign_bundle_cli._report(io.BytesIO(repaired))
+                evaluate.assert_called_once_with(*args)
+        for name, instant in (("above_maximum", 2**53 - 999), ("uint64_maximum", 2**64 - 1)):
+            names.add("instant_" + name + "_frame")
+            args[1][0]["now_ms"] = instant
+            raw = cases["instant_" + name + "_frame"]
+            self.assertEqual(raw, frame(*args))
+            header = raw[: len(prefix) + 4 + len(row["case_id"]) + 8]
+            with self.subTest(case=name), patch.object(campaign_bundle_cli, "evaluate") as evaluate:
+                for stream in (io.BytesIO(raw), NoReadPastHeader(header)):
+                    with self.assertRaises(ValueError):
+                        campaign_bundle_cli._report(stream)
+                evaluate.assert_not_called()
+                args[1][0]["now_ms"] = 2**53 - 1000
+                repaired = header[:-8] + struct.pack(">Q", 2**53 - 1000) + raw[len(header) :]
+                self.assertEqual(repaired, frame(*args))
+                campaign_bundle_cli._report(io.BytesIO(repaired))
+                evaluate.assert_called_once_with(*args)
+        self.assertEqual(
+            names, {name for name in cases if name.startswith(("instant_", "case_id_"))}
+        )
 
     def test_bad_keys_fail_before_value_read_and_have_complete_envelopes(self):
         from qualification import assessment_cli

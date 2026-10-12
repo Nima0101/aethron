@@ -465,6 +465,62 @@ def check_bundle_exact_limits(data, case):
     return 1
 
 
+def check_bundle_scalar_boundaries(data, case):
+    for instant, finding in (
+        (0, "declaration_capture_future"),
+        (9007199254739992, "declaration_capture_stale"),
+    ):
+        args = bundle_arguments(data, case)
+        args[1][0]["now_ms"] = instant
+        row = args[1][0]
+        bindings = [[row["case_id"], hashlib.sha256(row["manifest"]).hexdigest(), instant]]
+        common = {
+            "version": 1,
+            "plan_sha256": hashlib.sha256(args[0]).hexdigest(),
+            "domain_verified": False,
+            "procedure_verified": False,
+            "artifact_authenticity_verified": False,
+            "physical_qualification_passed": False,
+        }
+        expected = dict(
+            common,
+            artifact_bytes_verified=False,
+            software_checks_passed=False,
+            coverage=dict(
+                common,
+                captures_sha256=hashlib.sha256(
+                    b"aethron.qualification.captures.v1\0" + canonical(bindings).encode("ascii")
+                ).hexdigest(),
+                capture_counts={"submitted": 1, "eligible": 0, "rejected": 1},
+                cases=[{"case_index": 0, "required": 1, "eligible": 0}],
+                findings=["capture_coverage_missing", finding],
+                declaration_coverage_complete=False,
+            ),
+            references=dict(
+                common,
+                reference_counts={"supplied": 2, "matched": 2, "supplied_bytes": 6},
+                reference_findings=[],
+                reference_bytes_verified=True,
+            ),
+        )
+        if canonical(evaluate_bundle(*args)) != canonical(expected):
+            raise AssertionError("scalar_boundary_bundle_report_mismatch")
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification.campaign_bundle_cli"],
+            input=bundle_frame(args),
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        if (result.returncode, result.stdout, result.stderr) != (
+            1,
+            (canonical(expected) + os.linesep).encode("ascii"),
+            b"",
+        ):
+            raise AssertionError("scalar_boundary_bundle_process_mismatch")
+    return 2
+
+
 def check_bundle_case(data, case):
     args = bundle_arguments(data, case)
     report = evaluate_bundle(*args)
@@ -678,6 +734,25 @@ def bundle_malformed_frames(args):
         else:
             enlarged[1][0]["case_id"] = "a" * 65
         cases["oversized_" + name + "_frame"] = bundle_frame(enlarged)
+    # Binary uint64 instants have no JSON types/coercions. Exercise both the
+    # semantic maximum and the wire maximum with every later field present.
+    for name, instant in (("above_maximum", 9007199254739993), ("uint64_maximum", 2**64 - 1)):
+        cases["instant_" + name + "_frame"] = (
+            capture + struct.pack(">Q", instant) + _blob(row["manifest"])
+        )
+    for name, token in (
+        ("empty", b""),
+        ("space", b"PRIVATE name"),
+        ("path", b"a/b"),
+        ("non_ascii", b"\xff"),
+    ):
+        cases["case_id_" + name + "_frame"] = (
+            docs
+            + struct.pack(">I", 1)
+            + _blob(token)
+            + struct.pack(">Q", row["now_ms"])
+            + _blob(row["manifest"])
+        )
     return cases
 
 
@@ -720,6 +795,7 @@ def main():
     )
     complete_bundle = next(case for case in data["cases"] if case["id"] == "complete")
     bundle_exact_limit_cases = check_bundle_exact_limits(data, complete_bundle)
+    bundle_scalar_boundary_cases = check_bundle_scalar_boundaries(data, complete_bundle)
     bundle_malformed = check_malformed_frames(
         "qualification.campaign_bundle_cli",
         bundle_malformed_frames(bundle_arguments(data, complete_bundle)),
@@ -735,6 +811,7 @@ def main():
                 "assessment_aggregate_artifact_cases": aggregate_artifact_cases,
                 "assessment_exact_limit_cases": exact_limit_cases,
                 "bundle_exact_limit_cases": bundle_exact_limit_cases,
+                "bundle_scalar_boundary_cases": bundle_scalar_boundary_cases,
                 "assessment_malformed_frames": assessment_malformed,
                 "bundle_malformed_frames": bundle_malformed,
                 "isolated_install": True,

@@ -104,8 +104,9 @@ def run():
             "assessment_aggregate_artifact_cases": 2,
             "assessment_exact_limit_cases": 1,
             "bundle_exact_limit_cases": 1,
+            "bundle_scalar_boundary_cases": 2,
             "assessment_malformed_frames": 58,
-            "bundle_malformed_frames": 19,
+            "bundle_malformed_frames": 25,
             "isolated_install": True,
         }
         print(
