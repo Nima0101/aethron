@@ -1040,6 +1040,99 @@ def check_declaration_token_boundaries(case):
     return len(cases)
 
 
+def declaration_case_references(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    template = case["expected_report"]["captures"][0]["report"]["declaration"]
+    cases = {}
+
+    def save(name, changed, findings):
+        raw = canonical(changed).encode("ascii")
+        expected = copy.deepcopy(template)
+        expected.update(
+            input_sha256=hashlib.sha256(raw).hexdigest(),
+            declaration_checks_passed=not findings,
+            findings=findings,
+        )
+        cases[name] = raw, expected
+
+    # Neither uniqueness nor record lookup may normalize these distinct IDs.
+    changed = copy.deepcopy(doc)
+    mapping = dict(zip((sensor["id"] for sensor in doc["rig"]["sensors"]), ("Sensor", "sensor")))
+    for sensor in changed["rig"]["sensors"]:
+        sensor["id"] = mapping[sensor["id"]]
+    digest = hashlib.sha256(canonical(changed["rig"]).encode("ascii")).hexdigest()
+    for row in changed["records"]:
+        row.update(sensor_id=mapping[row["sensor_id"]], rig_sha256=digest)
+    save("sensors_forward", changed, [])
+    changed["records"].reverse()
+    save("sensors_reverse", changed, [])
+    for index in range(len(doc["records"])):
+        changed = copy.deepcopy(doc)
+        changed["records"][index]["clock_domain"] = doc["capture"]["clock_domain"].swapcase()
+        save(f"clock_{index}_mismatch", changed, ["clock_domain_mismatch"])
+        changed["records"][index]["clock_domain"] = doc["capture"]["clock_domain"]
+        save(f"clock_{index}_repaired", changed, [])
+    return cases
+
+
+def check_declaration_case_references(case):
+    cases = declaration_case_references(case)
+    instant = case["captures"][0]["now_ms"]
+    for name, (raw, expected_report) in cases.items():
+        if canonical(validate(raw, now_ms=instant)) != canonical(expected_report):
+            raise AssertionError("declaration_case_reference_report_mismatch:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        expected = (
+            0 if expected_report["declaration_checks_passed"] else 1,
+            (canonical(expected_report) + os.linesep).encode("ascii"),
+            b"",
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_case_reference_process_mismatch:" + name)
+    return len(cases)
+
+
+def declaration_wrong_case_references(case):
+    doc = json.loads(bytes.fromhex(case["captures"][0]["manifest_hex"]))
+    cases = {}
+    for index in range(len(doc["records"])):
+        changed = copy.deepcopy(doc)
+        row = changed["records"][index]
+        row["sensor_id"] = row["sensor_id"].swapcase()
+        cases[f"sensor_{index}"] = canonical(changed).encode("ascii")
+    return cases
+
+
+def check_declaration_wrong_case_references(case):
+    cases = declaration_wrong_case_references(case)
+    instant = case["captures"][0]["now_ms"]
+    expected = (2, b"", ("invalid_qualification_manifest" + os.linesep).encode("ascii"))
+    for name, raw in cases.items():
+        try:
+            validate(raw, now_ms=instant)
+        except ValueError as exc:
+            if str(exc) != "invalid_qualification_manifest":
+                raise AssertionError("declaration_case_reference_error_mismatch:" + name) from exc
+        else:
+            raise AssertionError("declaration_case_reference_error_missing:" + name)
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "qualification", "--now-ms", str(instant)],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+        if (result.returncode, result.stdout, result.stderr) != expected:
+            raise AssertionError("declaration_wrong_case_process_mismatch:" + name)
+    return len(cases)
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -1901,6 +1994,8 @@ def main():
     declaration_rig_bindings = check_declaration_rig_bindings(complete)
     declaration_numeric_cases = check_declaration_numeric_boundaries(complete)
     declaration_token_cases = check_declaration_token_boundaries(complete)
+    declaration_case_references_count = check_declaration_case_references(complete)
+    declaration_wrong_case_count = check_declaration_wrong_case_references(complete)
     declaration_malformed = check_declaration_malformed_inputs(complete)
     check_opaque_artifacts(complete)
     aggregate_artifact_cases = check_aggregate_artifacts(complete)
@@ -1960,6 +2055,8 @@ def main():
                 "declaration_rig_binding_cases": declaration_rig_bindings,
                 "declaration_numeric_boundary_cases": declaration_numeric_cases,
                 "declaration_token_boundary_cases": declaration_token_cases,
+                "declaration_case_reference_cases": declaration_case_references_count,
+                "declaration_wrong_case_references": declaration_wrong_case_count,
                 "declaration_malformed_inputs": declaration_malformed,
                 "declaration_closed_pipe_cases": declaration_closed_pipes,
                 "bundle_vectors": 6,

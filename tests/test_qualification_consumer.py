@@ -432,6 +432,144 @@ class DeclarationTokenBoundaryTests(DeclarationCollectionBoundaryTests):
                 )
 
 
+class DeclarationCaseReferenceTests(DeclarationCollectionBoundaryTests):
+    generate = staticmethod(consumer.declaration_case_references)
+    check = staticmethod(consumer.check_declaration_case_references)
+    diagnostic = "declaration_case_reference_"
+    count = 14
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        original = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        self.cases = {}
+        doc = copy.deepcopy(original)
+        for index, token in enumerate(("Sensor", "sensor")):
+            doc["rig"]["sensors"][index]["id"] = token
+            for record in doc["records"][index * 3 : index * 3 + 3]:
+                record["sensor_id"] = token
+        digest = hashlib.sha256(self.encode(doc["rig"])).hexdigest()
+        for record in doc["records"]:
+            record["rig_sha256"] = digest
+        self.save("sensors_forward", doc, 2, 6, [])
+        doc["records"] = list(reversed(doc["records"]))
+        self.save("sensors_reverse", doc, 2, 6, [])
+        for index in range(6):
+            doc = copy.deepcopy(original)
+            self.assertEqual(doc["capture"]["clock_domain"], "synthetic-boot")
+            doc["records"][index]["clock_domain"] = "SYNTHETIC-BOOT"
+            self.save(f"clock_{index}_mismatch", doc, 2, 6, ["clock_domain_mismatch"])
+            doc["records"][index]["clock_domain"] = "synthetic-boot"
+            self.save(f"clock_{index}_repaired", doc, 2, 6, [])
+
+    def test_case_repairs_change_only_the_reference(self):
+        for index in range(6):
+            wrong, expected = self.cases[f"clock_{index}_mismatch"]
+            repaired, passing = self.cases[f"clock_{index}_repaired"]
+            self.assertEqual(expected["findings"], ["clock_domain_mismatch"])
+            self.assertEqual(passing["findings"], [])
+            doc = json.loads(wrong)
+            doc["records"][index]["clock_domain"] = doc["capture"]["clock_domain"]
+            self.assertEqual(self.encode(doc), repaired)
+
+
+class DeclarationWrongCaseReferenceTests(unittest.TestCase):
+    encode = DeclarationCollectionBoundaryTests.encode
+    assert_process_call = DeclarationCollectionBoundaryTests.assert_process_call
+
+    def setUp(self):
+        self.case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        self.original = json.loads(bytes.fromhex(self.case["captures"][0]["manifest_hex"]))
+        self.cases = {}
+        for index, token in enumerate(("THERMAL",) * 3 + ("DEPTH",) * 3):
+            doc = copy.deepcopy(self.original)
+            doc["records"][index]["sensor_id"] = token
+            self.cases[f"sensor_{index}"] = self.encode(doc)
+        self.good = SimpleNamespace(
+            returncode=2,
+            stdout=b"",
+            stderr=("invalid_qualification_manifest" + os.linesep).encode("ascii"),
+        )
+
+    def test_independent_documents_rejection_and_single_reference_repairs(self):
+        original = copy.deepcopy(self.case)
+        self.assertEqual(consumer.declaration_wrong_case_references(self.case), self.cases)
+        with patch.object(consumer.subprocess, "run", return_value=self.good) as run:
+            self.assertEqual(consumer.check_declaration_wrong_case_references(self.case), 6)
+        self.assertEqual(run.call_count, 6)
+        for call, (name, raw) in zip(run.call_args_list, self.cases.items()):
+            self.assertEqual(
+                call.args[0],
+                [consumer.sys.executable, "-I", "-m", "qualification", "--now-ms", "1050"],
+            )
+            self.assertEqual(
+                call.kwargs,
+                {"input": raw, "capture_output": True, "check": False, "timeout": 10},
+            )
+            doc = json.loads(raw)
+            index = int(name[-1])
+            doc["records"][index]["sensor_id"] = self.original["records"][index]["sensor_id"]
+            self.assertEqual(doc, self.original)
+            repaired = self.encode(doc)
+            expected = copy.deepcopy(
+                self.case["expected_report"]["captures"][0]["report"]["declaration"]
+            )
+            expected["input_sha256"] = hashlib.sha256(repaired).hexdigest()
+            self.assertEqual(
+                self.encode(consumer.validate(repaired, now_ms=1050)), self.encode(expected)
+            )
+        self.assertEqual(self.case, original)
+
+    def test_every_case_requires_the_fixed_library_error(self):
+        for name, raw in self.cases.items():
+            for error in (None, ValueError("PRIVATE wrong reference")):
+                with self.subTest(case=name, error=error):
+                    with (
+                        patch.object(
+                            consumer, "declaration_wrong_case_references", return_value={name: raw}
+                        ),
+                        patch.object(
+                            consumer, "validate", side_effect=error, return_value={}
+                        ) as validate,
+                        patch.object(consumer.subprocess, "run") as run,
+                    ):
+                        suffix = "missing" if error is None else "mismatch"
+                        with self.assertRaisesRegex(
+                            AssertionError,
+                            "^declaration_case_reference_error_" + suffix + ":" + name + "$",
+                        ):
+                            consumer.check_declaration_wrong_case_references(self.case)
+                    validate.assert_called_once_with(raw, now_ms=1050)
+                    run.assert_not_called()
+
+    def test_every_case_checks_status_bytes_and_diagnostic(self):
+        for name, raw in self.cases.items():
+            for key, value in (
+                ("returncode", 0),
+                ("returncode", 1),
+                ("stdout", b"PRIVATE"),
+                ("stdout", b"{}"),
+                ("stderr", b""),
+                ("stderr", self.good.stderr + b"PRIVATE"),
+                ("stderr", b"different_error" + os.linesep.encode("ascii")),
+            ):
+                with self.subTest(case=name, key=key, value=value):
+                    result = copy.copy(self.good)
+                    setattr(result, key, value)
+                    with (
+                        patch.object(
+                            consumer, "declaration_wrong_case_references", return_value={name: raw}
+                        ),
+                        patch.object(consumer, "validate", wraps=consumer.validate) as validate,
+                        patch.object(consumer.subprocess, "run", return_value=result) as run,
+                    ):
+                        with self.assertRaisesRegex(
+                            AssertionError, "^declaration_wrong_case_process_mismatch:" + name + "$"
+                        ):
+                            consumer.check_declaration_wrong_case_references(self.case)
+                    validate.assert_called_once_with(raw, now_ms=1050)
+                    self.assert_process_call(run, raw)
+
+
 class DeclarationClockBoundaryTests(DeclarationCollectionBoundaryTests):
     generate = staticmethod(consumer.declaration_clock_boundaries)
     check = staticmethod(consumer.check_declaration_clock_boundaries)
