@@ -2103,8 +2103,7 @@ class UnexpectedArgumentConsumerTests(unittest.TestCase):
     def test_each_argument_case_checks_status_stdout_and_fixed_diagnostic(self):
         for module, raw, _report, diagnostic in self.cases():
             fixed = (diagnostic + os.linesep).encode("ascii")
-            good = SimpleNamespace(returncode=2, stdout=b"", stderr=fixed)
-            for index, name in enumerate(consumer.unexpected_arguments()):
+            for name, args in consumer.unexpected_arguments().items():
                 for status, stdout, stderr in (
                     (0, b"", fixed),
                     (1, b"", fixed),
@@ -2117,8 +2116,13 @@ class UnexpectedArgumentConsumerTests(unittest.TestCase):
                 ):
                     with self.subTest(module=module.__name__, case=name, status=status):
                         bad = SimpleNamespace(returncode=status, stdout=stdout, stderr=stderr)
-                        with patch.object(
-                            consumer.subprocess, "run", side_effect=[good] * index + [bad]
+                        # Full traversal is checked above; isolate each failing case
+                        # instead of replaying every successful prefix per corruption.
+                        with (
+                            patch.object(
+                                consumer, "unexpected_arguments", return_value={name: args}
+                            ),
+                            patch.object(consumer.subprocess, "run", return_value=bad) as run,
                         ):
                             with self.assertRaises(AssertionError) as error:
                                 consumer.check_unexpected_arguments(
@@ -2127,6 +2131,13 @@ class UnexpectedArgumentConsumerTests(unittest.TestCase):
                         self.assertEqual(
                             str(error.exception),
                             "argument_process_mismatch:" + module.__name__ + ":" + name,
+                        )
+                        run.assert_called_once_with(
+                            [consumer.sys.executable, "-I", "-m", module.__name__, *args],
+                            input=raw,
+                            capture_output=True,
+                            check=False,
+                            timeout=10,
                         )
 
 
