@@ -332,6 +332,60 @@ def declaration_value_inputs(raw):
     return cases
 
 
+def declaration_collection_inputs(raw):
+    doc = json.loads(raw)
+    cases = {}
+
+    def save(name, changed):
+        cases["collection_" + name] = canonical(changed).encode("ascii")
+
+    changed = copy.deepcopy(doc)
+    changed["rig"]["sensors"] = []
+    save("empty_sensors", changed)
+    for field in ("id", "kind"):
+        changed = copy.deepcopy(doc)
+        sensor = dict(doc["rig"]["sensors"][0], id="extra", kind="rgb")
+        sensor[field] = doc["rig"]["sensors"][0][field]
+        changed["rig"]["sensors"].append(sensor)
+        save("duplicate_sensor_" + field, changed)
+    for kind in ("calibration", "clock", "environment"):
+        index = next(i for i, row in enumerate(doc["records"]) if row["kind"] == kind)
+        changed = copy.deepcopy(doc)
+        changed["records"].append(copy.deepcopy(doc["records"][index]))
+        save("duplicate_record_" + kind, changed)
+        changed = copy.deepcopy(doc)
+        changed["records"][index]["sensor_id"] = "unknown"
+        save("unknown_sensor_" + kind, changed)
+    changed = copy.deepcopy(doc)
+    changed["capture"]["start_ms"] = doc["capture"]["end_ms"] + 1
+    save("reversed_capture", changed)
+    changed = copy.deepcopy(doc)
+    calibration = next(row["data"] for row in changed["records"] if row["kind"] == "calibration")
+    calibration["valid_from_ms"] = calibration["valid_until_ms"] + 1
+    save("reversed_calibration", changed)
+
+    # Build a complete five-sensor/fifteen-record declaration before adding
+    # one entry. More entries necessarily also repeat a modality/record key;
+    # source guard tests establish that count admission rejects them first.
+    maximum = copy.deepcopy(doc)
+    templates = [
+        row for row in doc["records"] if row["sensor_id"] == doc["rig"]["sensors"][0]["id"]
+    ]
+    for kind in ("rgb", "radar", "nir"):
+        maximum["rig"]["sensors"].append(dict(doc["rig"]["sensors"][0], id=kind, kind=kind))
+        maximum["records"].extend(dict(copy.deepcopy(row), sensor_id=kind) for row in templates)
+    digest = hashlib.sha256(canonical(maximum["rig"]).encode("ascii")).hexdigest()
+    for row in maximum["records"]:
+        row["rig_sha256"] = digest
+    changed = copy.deepcopy(maximum)
+    changed["rig"]["sensors"].append(dict(maximum["rig"]["sensors"][0], id="sixth"))
+    save("six_sensors", changed)
+    changed = copy.deepcopy(maximum)
+    changed["records"].append(copy.deepcopy(maximum["records"][0]))
+    save("sixteen_records", changed)
+    return cases
+
+
 def declaration_malformed_inputs(raw):
     cases = {
         "one_byte_over": raw.ljust(65537, b" "),
@@ -370,6 +424,7 @@ def declaration_malformed_inputs(raw):
     cases.update(declaration_numeric_inputs(raw))
     cases.update(declaration_structure_inputs(raw))
     cases.update(declaration_value_inputs(raw))
+    cases.update(declaration_collection_inputs(raw))
     return cases
 
 

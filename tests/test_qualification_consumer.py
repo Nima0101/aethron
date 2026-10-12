@@ -390,8 +390,8 @@ class DeclarationInputConsumerTests(unittest.TestCase):
 
     def test_every_invalid_input_reaches_isolated_binary_cli(self):
         with patch.object(consumer.subprocess, "run", return_value=self.rejected) as run:
-            self.assertEqual(consumer.check_declaration_malformed_inputs(self.case), 280)
-        self.assertEqual(run.call_count, 280)
+            self.assertEqual(consumer.check_declaration_malformed_inputs(self.case), 293)
+        self.assertEqual(run.call_count, 293)
         for call, raw in zip(
             run.call_args_list, consumer.declaration_malformed_inputs(self.raw).values()
         ):
@@ -421,7 +421,11 @@ class DeclarationInputConsumerTests(unittest.TestCase):
             paths["data_" + kind] = (("records", index, "data"), key)
         cases = consumer.declaration_malformed_inputs(self.raw)
         self.assertEqual(
-            {name for name in cases if not name.startswith(("numeric_", "structure_", "value_"))}
+            {
+                name
+                for name in cases
+                if not name.startswith(("numeric_", "structure_", "value_", "collection_"))
+            }
             - {
                 "one_byte_over",
                 "trailing_non_whitespace",
@@ -671,6 +675,116 @@ class DeclarationInputConsumerTests(unittest.TestCase):
                         consumer.canonical(expected),
                     )
         self.assertEqual(set(cases), seen)
+
+    def test_collection_cases_isolate_constraints_and_repair_to_complete_reports(self):
+        original = json.loads(self.raw)
+        maximum = copy.deepcopy(original)
+        for kind in ("rgb", "radar", "nir"):
+            sensor = copy.deepcopy(original["rig"]["sensors"][0])
+            sensor.update(id=kind, kind=kind)
+            maximum["rig"]["sensors"].append(sensor)
+            for template in original["records"][:3]:
+                record = copy.deepcopy(template)
+                record["sensor_id"] = kind
+                maximum["records"].append(record)
+        digest = hashlib.sha256(
+            json.dumps(maximum["rig"], sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest()
+        for record in maximum["records"]:
+            record["rig_sha256"] = digest
+
+        # Independent single-container/scalar mutations establish exactly what
+        # each case exercises and what must be restored to recover validity.
+        mutations = {
+            "empty_sensors": (original, ("rig", "sensors"), []),
+            "six_sensors": (
+                maximum,
+                ("rig", "sensors"),
+                maximum["rig"]["sensors"] + [dict(maximum["rig"]["sensors"][0], id="sixth")],
+            ),
+            "sixteen_records": (
+                maximum,
+                ("records",),
+                maximum["records"] + [maximum["records"][0]],
+            ),
+            "duplicate_sensor_id": (
+                original,
+                ("rig", "sensors"),
+                original["rig"]["sensors"] + [dict(original["rig"]["sensors"][0], kind="rgb")],
+            ),
+            "duplicate_sensor_kind": (
+                original,
+                ("rig", "sensors"),
+                original["rig"]["sensors"] + [dict(original["rig"]["sensors"][0], id="extra")],
+            ),
+            "reversed_capture": (original, ("capture", "start_ms"), 1051),
+            "reversed_calibration": (original, ("records", 0, "data", "valid_from_ms"), 1101),
+        }
+        for index, kind in enumerate(("calibration", "clock", "environment")):
+            mutations["duplicate_record_" + kind] = (
+                original,
+                ("records",),
+                original["records"] + [original["records"][index]],
+            )
+            mutations["unknown_sensor_" + kind] = (
+                original,
+                ("records", index, "sensor_id"),
+                "unknown",
+            )
+        cases = consumer.declaration_collection_inputs(self.raw)
+        self.assertEqual(set(cases), {"collection_" + name for name in mutations})
+        self.assertEqual(len(cases), 13)
+        for name, (base, path, value) in mutations.items():
+            with self.subTest(case=name):
+                raw = cases["collection_" + name]
+                self.assertLessEqual(len(raw), 65536)
+                changed = copy.deepcopy(base)
+                parent = changed
+                for key in path[:-1]:
+                    parent = parent[key]
+                saved = parent[path[-1]]
+                parent[path[-1]] = value
+                self.assertEqual(
+                    raw, json.dumps(changed, sort_keys=True, separators=(",", ":")).encode()
+                )
+                with self.assertRaisesRegex(ValueError, "^invalid_qualification_manifest$"):
+                    consumer.validate(raw, now_ms=1050)
+                parent[path[-1]] = saved
+                fixed = json.dumps(changed, sort_keys=True, separators=(",", ":")).encode()
+                expected = copy.deepcopy(
+                    self.case["expected_report"]["captures"][0]["report"]["declaration"]
+                )
+                expected["input_sha256"] = hashlib.sha256(fixed).hexdigest()
+                if base is maximum:
+                    expected.update(sensor_count=5, record_count=15)
+                    expected["evidence_counts"]["synthetic"] = 15
+                self.assertEqual(
+                    consumer.canonical(consumer.validate(fixed, now_ms=1050)),
+                    consumer.canonical(expected),
+                )
+        self.assertEqual(json.loads(self.raw), original)
+
+    def test_collection_counts_reject_before_visiting_entries(self):
+        from qualification import evidence
+
+        cases = consumer.declaration_collection_inputs(self.raw)
+        keys = evidence._keys
+        for name, entry_fields in (
+            ("empty_sensors", "clock_domain start_ms end_ms"),
+            ("six_sensors", "id kind device_sha256 mount_sha256"),
+            (
+                "sixteen_records",
+                "sensor_id kind evidence artifact_sha256 rig_sha256 clock_domain data",
+            ),
+        ):
+
+            def guard(value, names, entry_fields=entry_fields):
+                self.assertNotEqual(names, entry_fields, "entries visited before count admission")
+                return keys(value, names)
+
+            with self.subTest(case=name), patch.object(evidence, "_keys", side_effect=guard):
+                with self.assertRaisesRegex(ValueError, "^invalid_qualification_manifest$"):
+                    consumer.validate(cases["collection_" + name], now_ms=1050)
 
     def test_each_invalid_input_checks_status_empty_stdout_and_fixed_diagnostic(self):
         for index, name in enumerate(consumer.declaration_malformed_inputs(self.raw)):
