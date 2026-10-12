@@ -282,8 +282,7 @@ class DeclarationCollectionBoundaryTests(unittest.TestCase):
         self.assertEqual(self.case, original)
 
     def test_every_boundary_rejects_corrupted_library_and_process_reports(self):
-        reports = [report for _, report in self.cases.values()]
-        for index, (name, (_, report)) in enumerate(self.cases.items()):
+        for name, (raw, report) in self.cases.items():
             for key, value in (
                 ("version", True),
                 ("input_sha256", "0" * 64),
@@ -306,41 +305,67 @@ class DeclarationCollectionBoundaryTests(unittest.TestCase):
                 changed[key] = value
                 for mode in ("report", "process"):
                     with self.subTest(case=name, field=key, mode=mode):
-                        library = copy.deepcopy(reports)
-                        results = [self.result(item) for item in reports]
-                        if mode == "report":
-                            library[index] = changed
-                        else:
-                            results[index].stdout = self.encode(changed) + os.linesep.encode()
+                        result = self.result(report)
+                        if mode == "process":
+                            result.stdout = self.encode(changed) + os.linesep.encode()
                         with (
-                            patch.object(consumer, "validate", side_effect=library),
-                            patch.object(consumer.subprocess, "run", side_effect=results),
+                            patch.object(
+                                consumer, self.generate.__name__, return_value={name: (raw, report)}
+                            ),
+                            patch.object(
+                                consumer,
+                                "validate",
+                                return_value=changed if mode == "report" else report,
+                            ) as validate,
+                            patch.object(consumer.subprocess, "run", return_value=result) as run,
                         ):
                             with self.assertRaisesRegex(
                                 AssertionError,
                                 "^" + self.diagnostic + mode + "_mismatch:" + name + "$",
                             ):
                                 self.check(self.case)
+                        validate.assert_called_once_with(raw, now_ms=1050)
+                        if mode == "report":
+                            run.assert_not_called()
+                        else:
+                            self.assert_process_call(run, raw)
+
+    def assert_process_call(self, run, raw):
+        run.assert_called_once_with(
+            [consumer.sys.executable, "-I", "-m", "qualification", "--now-ms", "1050"],
+            input=raw,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
 
     def test_every_boundary_checks_exit_status_stdout_and_stderr(self):
-        good = [self.result(report) for _, report in self.cases.values()]
-        for index, name in enumerate(self.cases):
+        for name, (raw, report) in self.cases.items():
+            good = self.result(report)
             for key, value in (
-                ("returncode", 1 - good[index].returncode),
+                ("returncode", 1 - good.returncode),
                 ("returncode", 2),
                 ("stdout", b""),
-                ("stdout", good[index].stdout.rstrip(b"\r\n")),
-                ("stdout", good[index].stdout + b"PRIVATE"),
+                ("stdout", good.stdout.rstrip(b"\r\n")),
+                ("stdout", good.stdout + b"PRIVATE"),
                 ("stderr", b"PRIVATE"),
             ):
                 with self.subTest(case=name, field=key):
-                    results = copy.deepcopy(good)
-                    setattr(results[index], key, value)
-                    with patch.object(consumer.subprocess, "run", side_effect=results):
+                    result = copy.copy(good)
+                    setattr(result, key, value)
+                    with (
+                        patch.object(
+                            consumer, self.generate.__name__, return_value={name: (raw, report)}
+                        ),
+                        patch.object(consumer, "validate", wraps=consumer.validate) as validate,
+                        patch.object(consumer.subprocess, "run", return_value=result) as run,
+                    ):
                         with self.assertRaisesRegex(
                             AssertionError, "^" + self.diagnostic + "process_mismatch:" + name + "$"
                         ):
                             self.check(self.case)
+                    validate.assert_called_once_with(raw, now_ms=1050)
+                    self.assert_process_call(run, raw)
 
 
 class DeclarationClockBoundaryTests(DeclarationCollectionBoundaryTests):
