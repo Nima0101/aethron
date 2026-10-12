@@ -505,7 +505,7 @@ class MalformedConsumerTests(unittest.TestCase):
                 "qualification.assessment_cli",
                 consumer.assessment_malformed_frames(consumer.arguments(assessment)),
                 "invalid_qualification_assessment",
-                49,
+                58,
             ),
             (
                 "qualification.campaign_bundle_cli",
@@ -529,6 +529,71 @@ class MalformedConsumerTests(unittest.TestCase):
                         with self.assertRaises(ValueError):
                             command._report(io.BytesIO(raw))
                 evaluate.assert_not_called()
+
+    def test_oversized_complete_frames_have_independent_bounds_and_repairs(self):
+        from qualification import assessment_cli
+        from qualification.tests.test_assessment_cli import frame
+        from qualification.tests.test_campaign_bundle_cli import NoReadPastHeader
+
+        case = next(case for case in consumer.corpus(CORPUS) if case["id"] == "complete")
+        original = consumer.arguments(case)
+        _module, cases, _diagnostic, _count = self.cases()[0]
+        limits = {
+            "plan": ((0,), 65536),
+            "domain": ((2,), 65536),
+            "procedure": ((3,), 65536),
+            "manifest": ((1, 0, "manifest"), 65536),
+            "method_count": ((4,), 48),
+            "method": ((4,), 65536),
+            "capture_count": ((1,), 64),
+            "artifact_count": ((1, 0, "artifacts"), 15),
+            "artifact": ((1, 0, "artifacts"), 1048576),
+        }
+        for name, (path, limit) in limits.items():
+            with self.subTest(case=name):
+                args = list(copy.deepcopy(original))
+                target = args
+                for key in path[:-1]:
+                    target = target[key]
+                key = path[-1]
+                if name in ("method_count", "artifact_count"):
+                    value = {f"{i:064x}": b"" for i in range(limit + 1)}
+                    repaired = dict(list(value.items())[:-1])
+                elif name in ("method", "artifact"):
+                    value = {"a" * 64: b"\xff" * (limit + 1)}
+                    repaired = {"a" * 64: b"\xff" * limit}
+                elif name == "capture_count":
+                    value = [copy.deepcopy(original[1][0]) for _ in range(limit + 1)]
+                    repaired = value[:-1]
+                else:
+                    value = target[key] + b" " * (limit + 1 - len(target[key]))
+                    repaired = value[:-1]
+                target[key] = value
+                raw = cases["oversized_" + name + "_frame"]
+                self.assertEqual(raw, frame(args))
+                self.assertLess(
+                    sum(len(b) for row in args[1] for b in row["artifacts"].values()),
+                    4194304,
+                )
+                header = cases["oversized_" + name]
+                self.assertTrue(raw.startswith(header))
+                # Fail before reading the oversized field, even with a complete
+                # remainder available. The guarded stream catches excess reads.
+                with patch.object(assessment_cli, "evaluate") as evaluate:
+                    for stream in (io.BytesIO(raw), NoReadPastHeader(header)):
+                        with self.assertRaises(ValueError):
+                            assessment_cli._report(stream)
+                    evaluate.assert_not_called()
+                # Only this field is reduced to its exact bound. Evaluation
+                # must see every later field unchanged and retain non-authority.
+                target[key] = repaired
+                sentinel = object()
+                with patch.object(assessment_cli, "evaluate", return_value=sentinel) as evaluate:
+                    self.assertIs(assessment_cli._report(io.BytesIO(frame(args))), sentinel)
+                    evaluate.assert_called_once_with(*args)
+                report = assessment_cli._report(io.BytesIO(frame(args)))
+                self.assertIs(report["physical_qualification_passed"], False)
+                self.assertEqual(report, consumer.evaluate(*args))
 
     def test_bad_keys_fail_before_value_read_and_have_complete_envelopes(self):
         from qualification import assessment_cli

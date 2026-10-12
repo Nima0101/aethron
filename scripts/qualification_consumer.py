@@ -500,6 +500,38 @@ def assessment_malformed_frames(args):
         "artifact": manifest + struct.pack(">I", 1) + b"a" * 64 + struct.pack(">I", 1048577),
     }
     cases = malformed_frames(frame(args), magic, oversized)
+    # Complete one-over envelopes isolate each resource bound from EOF and
+    # aggregate overflow. Keep the remaining fields valid and independently
+    # exercise count limits with small payloads.
+    for name in (
+        "plan",
+        "domain",
+        "procedure",
+        "manifest",
+        "method_count",
+        "method",
+        "capture_count",
+        "artifact_count",
+        "artifact",
+    ):
+        enlarged = list(copy.deepcopy(args))
+        if name in ("plan", "domain", "procedure"):
+            index = {"plan": 0, "domain": 2, "procedure": 3}[name]
+            enlarged[index] += b" " * (65537 - len(enlarged[index]))
+        elif name == "manifest":
+            raw = enlarged[1][0]["manifest"]
+            enlarged[1][0]["manifest"] = raw + b" " * (65537 - len(raw))
+        elif name == "method_count":
+            enlarged[4] = {f"{i:064x}": b"" for i in range(49)}
+        elif name == "method":
+            enlarged[4] = {"a" * 64: b"\xff" * 65537}
+        elif name == "capture_count":
+            enlarged[1] = [copy.deepcopy(rows[0]) for _ in range(65)]
+        elif name == "artifact_count":
+            enlarged[1][0]["artifacts"] = {f"{i:064x}": b"" for i in range(16)}
+        else:
+            enlarged[1][0]["artifacts"] = {"a" * 64: b"\xff" * 1048577}
+        cases["oversized_" + name + "_frame"] = frame(enlarged)
     capture_fields = _blob(row["case_id"].encode("ascii")) + instant + _blob(row["manifest"])
     # Include complete envelopes as well as headers: rejection must not pass
     # solely because a missing value or trailing capture count reaches EOF.
