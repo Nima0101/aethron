@@ -1,6 +1,7 @@
 import time
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from aethron_edge.config import Profile
 from aethron_edge.pipeline import RuntimePipeline
@@ -9,6 +10,24 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class Pipeline(unittest.TestCase):
+    def test_failed_spawn_can_be_closed_repeatedly(self):
+        pipeline = RuntimePipeline(Profile(name="bench", driver="replay", address="missing"))
+        with patch(
+            "multiprocessing.process.BaseProcess.start", side_effect=OSError("spawn failed")
+        ):
+            with self.assertRaises(OSError):
+                pipeline.start()
+        process = pipeline.process
+        try:
+            pipeline.close()
+            pipeline.close()
+            self.assertIsNone(pipeline.process)
+            self.assertTrue(process._closed)
+            self.assertEqual(pipeline.snapshot(time.monotonic_ns())["state"], "UNKNOWN")
+        finally:
+            if not process._closed:
+                process.close()
+
     def test_headless_replay_expires_when_worker_stops(self):
         pipeline = RuntimePipeline(
             Profile(

@@ -427,6 +427,11 @@ class RuntimePipeline:
         self.sensor_state = "fault" if self.ros_guard and self.ros_guard.closed else "idle"
         if self.process is not None:
             self.stop.set()
+            # Failed spawn leaves a Process object that cannot be joined.
+            if self.process.pid is None:
+                self.process.close()
+                self.process = None
+                return
             self.process.join(timeout=1)
             if os.name == "posix" and self.group.value == self.process.pid:
                 # Only the group created by this worker; descendants share it.

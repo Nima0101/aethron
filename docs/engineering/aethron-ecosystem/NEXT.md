@@ -13,5 +13,8 @@ Release checks: [current clean reproduction](evidence/phase2/provider-clean.json
 
 - [x] 2026-10-12: clean reproduction retains compared hashes and revalidates both artifact inventories after each isolated ZIP consumer; changed, extra or missing second-build artifacts block success.
 - [x] Targeted check: six second-build regression cases failed before correction; all eight reproduction-report tests passed after it, including real synthetic ZIP consumers. Python stdlib SHA-256/inventory checks retain the existing cross-platform artifact contract.
-- [ ] Next: finish candidate edge packaging with pinned Linux vision wheels; fix observed failures, then resume committed-source reproduction subject to repository-creation restrictions.
-- [ ] Blocker: native/platform/release qualification remains open; no merge or release claim.
+- [x] 2026-10-12: parent candidate Linux vision packaging passed with pinned wheels; committed-source reproduction still blocked by the no-new-repository restriction.
+- [x] Recovery spawn failures now latch a fault, retire the unstarted process and clear recovering state; Python multiprocessing retained for its existing process lifecycle contract.
+- [x] Targeted check: two failures reproduced before correction; four lifecycle checks passed after it (1.680s). Ruff passed; Bandit reported no medium/high findings.
+- [ ] Next: reproduce shutdown racing a slow replacement start; prevent publication of a replacement after shutdown if confirmed.
+- [ ] Blocker: committed-source reproduction, native/platform/release qualification and PR #49 integration/checks remain open; no merge or release claim.
