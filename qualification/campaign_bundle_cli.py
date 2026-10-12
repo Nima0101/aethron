@@ -56,7 +56,10 @@ def main():
     try:
         if len(sys.argv) != 1:
             raise ValueError("invalid_campaign_bundle")
-        report = _report(sys.stdin.buffer)
+        source = getattr(sys.stdin, "buffer", None)
+        if source is None:
+            raise ValueError("invalid_campaign_bundle")
+        report = _report(source)
         if sys.stdout is None:
             raise ValueError("invalid_campaign_bundle")
         print(

@@ -20,12 +20,28 @@ class _Once(argparse.Action):
         setattr(namespace, self.dest, values)
 
 
+def _read_manifest(stream):
+    data = bytearray()
+    while len(data) <= MAX_BYTES:
+        remaining = MAX_BYTES + 1 - len(data)
+        chunk = stream.read(remaining)
+        if type(chunk) is not bytes or len(chunk) > remaining:
+            raise ValueError("invalid_qualification_manifest")
+        if not chunk:
+            return bytes(data)
+        data.extend(chunk)
+    raise ValueError("invalid_qualification_manifest")
+
+
 def main():
     parser = _Parser(description=__doc__, allow_abbrev=False)
     parser.add_argument("--now-ms", type=int, required=True, action=_Once)
     try:
         args = parser.parse_args()
-        report = validate(sys.stdin.buffer.read(MAX_BYTES + 1), now_ms=args.now_ms)
+        source = getattr(sys.stdin, "buffer", None)
+        if source is None:
+            raise ValueError("invalid_qualification_manifest")
+        report = validate(_read_manifest(source), now_ms=args.now_ms)
         if sys.stdout is None:
             raise ValueError("invalid_qualification_manifest")
         print(
