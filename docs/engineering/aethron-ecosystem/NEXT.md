@@ -16,5 +16,9 @@ Release checks: [current clean reproduction](evidence/phase2/provider-clean.json
 - [x] 2026-10-12: parent candidate Linux vision packaging passed with pinned wheels; committed-source reproduction still blocked by the no-new-repository restriction.
 - [x] Recovery spawn failures now latch a fault, retire the unstarted process and clear recovering state; Python multiprocessing retained for its existing process lifecycle contract.
 - [x] Targeted check: two failures reproduced before correction; four lifecycle checks passed after it (1.680s). Ruff passed; Bandit reported no medium/high findings.
-- [ ] Next: reproduce shutdown racing a slow replacement start; prevent publication of a replacement after shutdown if confirmed.
+- [ ] BLOCKED: shutdown/replacement-start race repeatedly attempted without code progress; do not retry in this session.
 - [ ] Blocker: committed-source reproduction, native/platform/release qualification and PR #49 integration/checks remain open; no merge or release claim.
+
+- [x] Release archives/manifests now use immutable Git blobs from the provenance revision; checkout changes cannot enter the payload, and links/submodules are rejected. Python stdlib + Git batch reader retains cross-platform packaging without a new runtime.
+- [x] Targeted check: source-binding regression reproduced; five tests passed, including real Git object reading. Ruff and Bandit medium/high checks passed.
+- [ ] Next: reject stale unrelated files in the release output directory before checksum generation.

@@ -12,16 +12,51 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def committed_blobs(revision):
+    """Read one immutable Git tree, never the mutable checkout behind provenance."""
+    tree = subprocess.check_output(
+        ["git", "ls-tree", "-r", "-z", "--full-tree", revision], cwd=ROOT
+    )
+    entries = []
+    for record in tree.split(b"\0"):
+        if not record:
+            continue
+        metadata, name = record.split(b"\t", 1)
+        mode, kind, oid = metadata.split()
+        if mode not in (b"100644", b"100755") or kind != b"blob":
+            raise ValueError("release_requires_regular_blobs")
+        entries.append((name.decode("utf-8"), oid))
+    entries.sort()
+    payload = io.BytesIO(
+        subprocess.check_output(
+            ["git", "cat-file", "--batch"],
+            cwd=ROOT,
+            input=b"".join(oid + b"\n" for _, oid in entries),
+        )
+    )
+    blobs = {}
+    for name, oid in entries:
+        header = payload.readline().split()
+        if len(header) != 3 or header[:2] != [oid, b"blob"] or not header[2].isdigit():
+            raise ValueError("release_blob_response_invalid")
+        size = int(header[2])
+        data = payload.read(size)
+        if len(data) != size or payload.read(1) != b"\n":
+            raise ValueError("release_blob_response_invalid")
+        blobs[name] = data
+    if payload.read(1):
+        raise ValueError("release_blob_response_invalid")
+    return blobs
+
+
 def build(destination):
-    names = subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode().split("\0")
-    names = sorted(n for n in names if n)
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     dirty = subprocess.check_output(
         ["git", "status", "--porcelain", "--untracked-files=normal"], cwd=ROOT
     )
     if dirty:
         raise SystemExit("release requires clean committed source")
-    blobs = {n: (ROOT / n).read_bytes() for n in names}
+    blobs = committed_blobs(revision)
     manifest = {n: hashlib.sha256(data).hexdigest() for n, data in blobs.items()}
     out = Path(destination)
     out.mkdir(parents=True, exist_ok=True)
