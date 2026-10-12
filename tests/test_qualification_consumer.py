@@ -1383,7 +1383,9 @@ class DeclarationInputConsumerTests(unittest.TestCase):
                     consumer.validate(cases["collection_" + name], now_ms=1050)
 
     def test_each_invalid_input_checks_status_empty_stdout_and_fixed_diagnostic(self):
-        for index, name in enumerate(consumer.declaration_malformed_inputs(self.raw)):
+        cases = consumer.declaration_malformed_inputs(self.raw)
+        self.assertEqual(len(cases), 389)
+        for name, raw in cases.items():
             for status, stdout, stderr in (
                 (0, b"", self.fixed),
                 (1, b"", self.fixed),
@@ -1395,11 +1397,24 @@ class DeclarationInputConsumerTests(unittest.TestCase):
             ):
                 with self.subTest(case=name, status=status, stdout=stdout, stderr=stderr):
                     bad = SimpleNamespace(returncode=status, stdout=stdout, stderr=stderr)
-                    with patch.object(
-                        consumer.subprocess, "run", side_effect=[self.rejected] * index + [bad]
+                    # Full traversal is checked separately; isolate this outcome
+                    # without rebuilding the corpus or replaying earlier cases.
+                    with (
+                        patch.object(
+                            consumer, "declaration_malformed_inputs", return_value={name: raw}
+                        ) as inputs,
+                        patch.object(consumer.subprocess, "run", return_value=bad) as run,
                     ):
                         with self.assertRaises(AssertionError) as error:
                             consumer.check_declaration_malformed_inputs(self.case)
+                    inputs.assert_called_once_with(self.raw)
+                    run.assert_called_once_with(
+                        [consumer.sys.executable, "-I", "-m", "qualification", "--now-ms", "1050"],
+                        input=raw,
+                        capture_output=True,
+                        check=False,
+                        timeout=10,
+                    )
                     self.assertEqual(
                         str(error.exception), "declaration_input_process_mismatch:" + name
                     )
