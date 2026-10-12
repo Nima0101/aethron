@@ -3,10 +3,12 @@
 import hashlib
 import json
 import os
+import platform
 import subprocess
 import sys
 import tempfile
 import zipfile
+from importlib.metadata import version
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -102,6 +104,11 @@ def run():
                     "byte_identical": True,
                     "isolated_install": True,
                     "runtime_dependencies": 0,
+                    "python": platform.python_version(),
+                    "platform": platform.platform(),
+                    "build_tools": {
+                        name: version(name) for name in ("build", "setuptools", "wheel")
+                    },
                     "qualification": qualification_result,
                 }
             )
