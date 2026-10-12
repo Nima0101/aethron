@@ -19,7 +19,7 @@ vision = ["numpy==2.3.5", "opencv-python-headless==4.13.0.92"]
 aethron = "aethron.__main__:main"
 
 [tool.setuptools.packages.find]
-include = ["aethron*"]
+include = ["aethron*", "qualification"]
 
 [tool.setuptools.package-data]
 "aethron" = ["_json_bounds.pxd"]

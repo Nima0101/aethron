@@ -6,6 +6,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,6 +35,10 @@ def run():
         a = next((temp / "a").glob("*.whl"))
         b = next((temp / "b").glob("*.whl"))
         assert a.read_bytes() == b.read_bytes(), "wheel builds differ"
+        with zipfile.ZipFile(a) as archive:
+            assert {name for name in archive.namelist() if name.startswith("qualification/")} == {
+                f"qualification/{path.name}" for path in (ROOT / "qualification").glob("*.py")
+            }, "qualification runtime module inventory differs"
         subprocess.run([sys.executable, "-m", "venv", str(temp / "consumer")], check=True)
         python = temp / "consumer" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
         subprocess.run(
@@ -74,6 +79,21 @@ def run():
         assert len(tracked) == 24
         assert len({r["tracks"][0]["id"] for r in tracked}) == 1
         assert tracked[-1]["tracks"][0]["sources"] == ["depth", "lwir", "radar"]
+        qualification = subprocess.run(
+            [
+                str(python),
+                "-I",
+                str(ROOT / "scripts/qualification_consumer.py"),
+                str(ROOT / "qualification/fixtures/assessment-vectors-v1.json"),
+            ],
+            cwd=temp,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        qualification_result = json.loads(qualification.stdout)
+        assert qualification_result == {"assessment_vectors": 10, "isolated_install": True}
         print(
             json.dumps(
                 {
@@ -82,6 +102,7 @@ def run():
                     "byte_identical": True,
                     "isolated_install": True,
                     "runtime_dependencies": 0,
+                    "qualification": qualification_result,
                 }
             )
         )
