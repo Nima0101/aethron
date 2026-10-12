@@ -1,0 +1,158 @@
+{
+  "scope": "offline_campaign_aggregation_audit",
+  "audit_policy_version": 2,
+  "python": "3.13.5",
+  "sqlite": "3.46.1",
+  "test_methods": 11,
+  "candidate_calls": 48,
+  "all_contract_tests_passed": true,
+  "duplicate_mutant_failures": 3,
+  "duplicate_mutant_errors": 0,
+  "maximum_cases": 16,
+  "maximum_submissions": 64,
+  "maximum_workload_report": {
+    "version": 1,
+    "plan_sha256": "e5d41a943710f3e18d879037e231fc7da7e378c3bea5cf3faa6664042ec90b9b",
+    "captures_sha256": "9297849b54d145970ee979df3cb1b2aad5bd066352e8302d67c0d34a4c9f66e2",
+    "capture_counts": {
+      "submitted": 64,
+      "eligible": 64,
+      "rejected": 0
+    },
+    "cases": [
+      {
+        "case_index": 0,
+        "required": 4,
+        "eligible": 4
+      },
+      {
+        "case_index": 1,
+        "required": 4,
+        "eligible": 4
+      },
+      {
+        "case_index": 2,
+        "required": 4,
+        "eligible": 4
+      },
+      {
+        "case_index": 3,
+        "required": 4,
+        "eligible": 4
+      },
+      {
+        "case_index": 4,
+        "required": 4,
+        "eligible": 4
+      },
+      {
+        "case_index": 5,
+        "required": 4,
+        "eligible": 4
+      },
+      {
+        "case_index": 6,
+        "required": 4,
+        "eligible": 4
+      },
+      {
+        "case_index": 7,
+        "required": 4,
+        "eligible": 4
+      },
+      {
+        "case_index": 8,
+        "required": 4,
+        "eligible": 4
+      },
+      {
+        "case_index": 9,
+        "required": 4,
+        "eligible": 4
+      },
+      {
+        "case_index": 10,
+        "required": 4,
+        "eligible": 4
+      },
+      {
+        "case_index": 11,
+        "required": 4,
+        "eligible": 4
+      },
+      {
+        "case_index": 12,
+        "required": 4,
+        "eligible": 4
+      },
+      {
+        "case_index": 13,
+        "required": 4,
+        "eligible": 4
+      },
+      {
+        "case_index": 14,
+        "required": 4,
+        "eligible": 4
+      },
+      {
+        "case_index": 15,
+        "required": 4,
+        "eligible": 4
+      }
+    ],
+    "findings": [],
+    "declaration_coverage_complete": true,
+    "domain_verified": false,
+    "procedure_verified": false,
+    "artifact_authenticity_verified": false,
+    "physical_qualification_passed": false
+  },
+  "elapsed_ns": {
+    "python": [
+      19521013,
+      91679156,
+      87122949,
+      89126693,
+      18982197,
+      85880414,
+      91494243,
+      85779891,
+      87588309,
+      19356182
+    ],
+    "sqlite": [
+      86830694,
+      89621058,
+      21312339,
+      21633301,
+      87493208,
+      90344460,
+      21781351,
+      21851087,
+      89907942,
+      89123347
+    ]
+  },
+  "python_traced_peak_bytes": {
+    "python": 37823,
+    "sqlite": 48866
+  },
+  "measurement_limits": [
+    "Shared host, ten alternating-order repetitions; descriptive only.",
+    "Both paths share admission and declaration semantics; SQL aggregation is independent.",
+    "Tracing excludes preconstructed inputs and native SQLite allocations.",
+    "Whitespace-distinct bytes test input capacity, not independent physical evidence."
+  ],
+  "source_sha256": {
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+    "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+    "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+    "qualification/tests/test_campaign_audit.py": "65938f530a0025d2f060b1f450f15ce3150bd27dcf6cb8ab9598da9f7f3bf3e0",
+    "qualification/technology/campaign_sql.py": "4deb710665852d208c1b8170a5963cc649a73e0536116d88926eff99074259c3",
+    "qualification/technology/compare_campaign.py": "e1500c6ffedcc339c3f213eabc533382bd9627b201b96061e28cbe9668722a18"
+  },
+  "physical_qualification_passed": false
+}

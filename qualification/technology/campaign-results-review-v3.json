@@ -1,0 +1,277 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_commit": "b99af17bb57edc23d0fa18246327e418501ed658",
+  "decision": "KEEP Python aggregation and SQL candidate; FIX independent exact workload result admission.",
+  "production_aggregation_changed": false,
+  "initial_red": {
+    "methods": 4,
+    "assertion_failures": 17,
+    "errors": 0,
+    "skips": 0
+  },
+  "final_measurement_regressions": {
+    "methods": 21,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "command": "python3 -m unittest qualification.tests.test_campaign_measurement_results qualification.tests.test_binding_measurement_results qualification.tests.test_measurement_review qualification.tests.test_comparison_results qualification.tests.test_comparison_sources -q"
+  },
+  "campaign_contracts": {
+    "methods": 25,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "command": "python3 -m unittest qualification.tests.test_campaign qualification.tests.test_campaign_audit qualification.tests.test_campaign_review -q"
+  },
+  "earliest_boundary_rechecks": {
+    "methods": 17,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "command": "python3 -m unittest qualification.tests.test_declaration_review qualification.tests.test_artifact_review qualification.tests.test_binding_measurement_results qualification.tests.test_campaign_review -q"
+  },
+  "fresh_campaign_controls": {
+    "review_order_version": 3,
+    "component": "campaign_coverage_and_procedures",
+    "python": "3.13.5",
+    "sqlite": "3.46.1",
+    "baseline_tests": 5,
+    "baseline_passed": true,
+    "mutations": {
+      "duplicate_counts_erased": {
+        "failures": 2,
+        "errors": 0
+      },
+      "commitment_multiplicity_erased": {
+        "failures": 1,
+        "errors": 0
+      },
+      "sql_duplicates_admitted": {
+        "failures": 1,
+        "errors": 0
+      }
+    },
+    "restored_baseline_passed": true,
+    "limits": [
+      "SQL aggregation is independent; admission and capture semantics are shared.",
+      "Finite synthetic controls do not demonstrate scientific sample independence.",
+      "No authenticated preregistration, clock, procedure or domain evidence."
+    ],
+    "physical_qualification_passed": false,
+    "source_sha256": {
+      "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+      "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+      "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+      "qualification/technology/campaign_sql.py": "4deb710665852d208c1b8170a5963cc649a73e0536116d88926eff99074259c3",
+      "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+      "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+      "qualification/tests/test_campaign_review.py": "f3bc5240549e6cd79d1861e54ad3e3e41196da176aa98ea5fbb27958b55406ed",
+      "qualification/technology/review_campaign.py": "35b7dc774472b7fa4ff46f006a9158f421826962df48904c912929e23ecb0961",
+      "qualification/technology/source_snapshot.py": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365"
+    },
+    "source_observation": "equal_before_and_after_controls"
+  },
+  "corrected_comparison": {
+    "scope": "offline_campaign_aggregation_audit",
+    "audit_policy_version": 3,
+    "python": "3.13.5",
+    "sqlite": "3.46.1",
+    "test_methods": 11,
+    "candidate_calls": 48,
+    "all_contract_tests_passed": true,
+    "duplicate_mutant_failures": 3,
+    "duplicate_mutant_errors": 0,
+    "maximum_cases": 16,
+    "maximum_submissions": 64,
+    "maximum_workload_report": {
+      "version": 1,
+      "plan_sha256": "e5d41a943710f3e18d879037e231fc7da7e378c3bea5cf3faa6664042ec90b9b",
+      "captures_sha256": "9297849b54d145970ee979df3cb1b2aad5bd066352e8302d67c0d34a4c9f66e2",
+      "capture_counts": {
+        "submitted": 64,
+        "eligible": 64,
+        "rejected": 0
+      },
+      "cases": [
+        {
+          "case_index": 0,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 1,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 2,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 3,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 4,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 5,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 6,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 7,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 8,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 9,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 10,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 11,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 12,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 13,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 14,
+          "required": 4,
+          "eligible": 4
+        },
+        {
+          "case_index": 15,
+          "required": 4,
+          "eligible": 4
+        }
+      ],
+      "findings": [],
+      "declaration_coverage_complete": true,
+      "domain_verified": false,
+      "procedure_verified": false,
+      "artifact_authenticity_verified": false,
+      "physical_qualification_passed": false
+    },
+    "maximum_result_oracle": "fixed_synthetic_v1",
+    "all_measured_results_checked": true,
+    "elapsed_ns": {
+      "python": [
+        110344475,
+        298233756,
+        104939019,
+        192512020,
+        114333566,
+        94229232,
+        191644140,
+        105153509,
+        192395735,
+        201951853
+      ],
+      "sqlite": [
+        198862613,
+        195319864,
+        193719295,
+        118928082,
+        292145643,
+        204441501,
+        116855372,
+        198557157,
+        205648201,
+        284854164
+      ]
+    },
+    "python_traced_peak_bytes": {
+      "python": 38923,
+      "sqlite": 48965
+    },
+    "measurement_limits": [
+      "Shared host, ten alternating-order repetitions; descriptive only.",
+      "Both paths share admission and declaration semantics; SQL aggregation is independent.",
+      "Tracing excludes preconstructed inputs and native SQLite allocations.",
+      "Result validation is outside measurements; traced calls retain their returned reports.",
+      "Whitespace-distinct bytes test input capacity, not independent physical evidence."
+    ],
+    "source_sha256": {
+      "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+      "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+      "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+      "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+      "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+      "qualification/tests/test_campaign_audit.py": "65938f530a0025d2f060b1f450f15ce3150bd27dcf6cb8ab9598da9f7f3bf3e0",
+      "qualification/technology/campaign_sql.py": "4deb710665852d208c1b8170a5963cc649a73e0536116d88926eff99074259c3",
+      "qualification/technology/compare_campaign.py": "226494d03bbe4d34f90aa311da9d3b425454151b8ba3968bf5b2f34e309c4609",
+      "qualification/technology/measurement.py": "4121cadfb220bef2835eefd9c3eca65501c1f535e05097711fd29c9713721bf3",
+      "qualification/technology/source_snapshot.py": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365"
+    },
+    "source_observation": "equal_before_and_after_workload",
+    "physical_qualification_passed": false
+  },
+  "independent_commitment_reconstruction": {
+    "plan_sha256": "e5d41a943710f3e18d879037e231fc7da7e378c3bea5cf3faa6664042ec90b9b",
+    "captures_sha256": "9297849b54d145970ee979df3cb1b2aad5bd066352e8302d67c0d34a4c9f66e2",
+    "method": "Explicit lexical case order and manually formatted wire triples; neither evaluator called. Standalone sha256sum agreed.",
+    "diagnostic": "Preimage creation succeeded; an accidental trailing scratch shell command exited 126. A separate sha256sum check subsequently succeeded."
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS zero findings; no suppressions",
+    "diff": "PASS"
+  },
+  "source_sha256": {
+    "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+    "qualification/technology/campaign_sql.py": "4deb710665852d208c1b8170a5963cc649a73e0536116d88926eff99074259c3",
+    "qualification/technology/compare_campaign.py": "226494d03bbe4d34f90aa311da9d3b425454151b8ba3968bf5b2f34e309c4609",
+    "qualification/technology/measurement.py": "4121cadfb220bef2835eefd9c3eca65501c1f535e05097711fd29c9713721bf3",
+    "qualification/technology/measure_binding.py": "99bb5ccd4ed3a0116296c497185195be517affa3220e07e4df0981cb6233184e",
+    "qualification/tests/test_campaign_measurement_results.py": "0fdec40a041c1723c6e432a6e5813c73f007532bfb49c52cb317de803f879f82",
+    "qualification/tests/test_binding_measurement_results.py": "650ed9350bff47563a5149c94810fecd6177b44b4399f8e6eec3c7dd71c9da6a",
+    "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+    "qualification/tests/test_campaign_audit.py": "65938f530a0025d2f060b1f450f15ce3150bd27dcf6cb8ab9598da9f7f3bf3e0",
+    "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e"
+  },
+  "source_observation": "Post-check observations, not execution attestation.",
+  "limitations": [
+    "Finite synthetic faults and fixed maximum workload only.",
+    "SQL shares admission and capture semantics; no independent end-to-end validation claim.",
+    "Ten alternating shared-host timing samples per candidate; no target deadline or general language ranking.",
+    "Python tracing excludes preconstructed inputs and native SQLite allocations.",
+    "No new Rego, Souffle, CUE or native prototype executed.",
+    "No full repository matrix, fuzz campaign, VM, clean clone, installed-product or field qualification."
+  ],
+  "physical_qualification_passed": false,
+  "lane_complete": false,
+  "next_component": "CLI/report delivery, then campaign reference and bundle consumers"
+}

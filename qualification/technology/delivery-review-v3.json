@@ -1,0 +1,128 @@
+{
+  "audit_policy_version": 3,
+  "before_head": "8534a2475c2119855ae0b151913d661ff119f49a",
+  "python": "3.13.5",
+  "scope": "Source-checkout bundle process delivery and workflow import/configuration triggers",
+  "baseline_methods": 97,
+  "trigger_red": {
+    "events": 2,
+    "controls": 14,
+    "uncovered": [
+      {
+        "event_index": 0,
+        "path": "aethron/__init__.py"
+      },
+      {
+        "event_index": 0,
+        "path": "aethron/core.py"
+      },
+      {
+        "event_index": 0,
+        "path": "aethron/actions.py"
+      },
+      {
+        "event_index": 0,
+        "path": "aethron/features.py"
+      },
+      {
+        "event_index": 0,
+        "path": "aethron/schema.py"
+      },
+      {
+        "event_index": 0,
+        "path": "pyproject.toml"
+      },
+      {
+        "event_index": 1,
+        "path": "aethron/__init__.py"
+      },
+      {
+        "event_index": 1,
+        "path": "aethron/core.py"
+      },
+      {
+        "event_index": 1,
+        "path": "aethron/actions.py"
+      },
+      {
+        "event_index": 1,
+        "path": "aethron/features.py"
+      },
+      {
+        "event_index": 1,
+        "path": "aethron/schema.py"
+      },
+      {
+        "event_index": 1,
+        "path": "pyproject.toml"
+      }
+    ],
+    "passed": false
+  },
+  "trigger_green": {
+    "events": 2,
+    "controls": 14,
+    "uncovered": [],
+    "passed": true
+  },
+  "entry_guard_mutation": {
+    "methods": 4,
+    "assertion_failures": 4,
+    "errors": 0,
+    "skips": 0,
+    "mutant_rejected": true
+  },
+  "restored_focused_suite": {
+    "command": "python3 -m unittest discover -s qualification/tests -q",
+    "methods": 101,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "passed": true
+  },
+  "new_process_methods": 4,
+  "normal_child_invocations": 5,
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS after one formatting correction",
+    "actionlint": "PASS with GOMAXPROCS=1",
+    "bandit_bundle_cli": "PASS",
+    "diff": "PASS",
+    "prior_measurement_hashes": "17 still match"
+  },
+  "limits": [
+    "Local Python 3.13 execution only; configured 3.9/3.13 hosted execution remains unverified.",
+    "Input fixtures are small and synthetic; child code and inherited environment are trusted.",
+    "Ten-second communicate timeout does not bound process creation; captured output has no independent byte cap.",
+    "Path controls test these positive glob patterns, not GitHub branch/event scheduling.",
+    "Source hashes cover listed delivery dependencies, not full runtime or full-suite provenance.",
+    "No installed-package, clean-clone or hardware execution claimed."
+  ],
+  "source_sha256": {
+    ".github/workflows/aethron-qualification.yml": "de52343ea55df49b7c41b9cb214f5a8b61557f5f17015300a16c1fb92a3fdf32",
+    "pyproject.toml": "02983462e01d72ed1c82c34a6ce1216236119714b79863998cf1ce005f805bbb",
+    "requirements-dev.txt": "a398a2fffaadc7052ef6acdfd6fe90bd686c581c3df02eca1eba65597eafee3f",
+    "qualification/technology/delivery-review-v3.md": "e220c3c19626c667e3a4debb5e3b6d941ff25f22bc92bfd57f24d50dd8ae1117",
+    "qualification/tests/test_bundle_process.py": "20547364dc7e9d184be3b413293867e7366ae103d33c6a08c9428fbed94663c2",
+    "qualification/tests/test_campaign_bundle_cli.py": "f1faaf6f7c2e80978f89dd24ca0a7744ec82b58d2eacd8b96eabb9238b2a5cb4",
+    "qualification/tests/test_campaign_references.py": "37ed0a291ecd08e28b66dabe3f0b4ab4ee37442d75ced6439391d937660e6698",
+    "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+    "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+    "qualification/rigs/synthetic-v1.json": "0b68e3a27477d5d53bc616afac23d82568ac357fdf95ce2520f114ac2efb25ea",
+    "qualification/evidence/synthetic-campaign-bundle-v1.json": "6276c611412faed43956087ac372118f00d5f9a63baf6121deb3d6ef82838e58",
+    "qualification/__init__.py": "191f75496c5beb5702479e89569da21a1914e127e1fc8dd3fe90b76852b4b2f3",
+    "qualification/campaign_bundle_cli.py": "a19cf6ed0525afb75f551dbb94d41a5d1cfce4886895dfafcbd170e09186dbb4",
+    "qualification/campaign_bundle.py": "1584e531f994fde5c612dce52eafc993adfe51044d9338b5db27d97fe843e32e",
+    "qualification/campaign_references.py": "ffae611838d8627c036c68bd3e6988dab9656cbc6aee8f7032857a34199e6686",
+    "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "aethron/__init__.py": "8ea373fbd458d5b53b6a5285584c61d14f1541e96d7a05c29f0508011b766fa7",
+    "aethron/core.py": "c5ef2d70c7ac5065b5a95836eba588fd44a78a6bceb97883ec0d0b5ac2a1619a",
+    "aethron/actions.py": "e449088fa6850f3dc11f782cc656817ab571e2d94cbc4ebb33869706e7537a2a",
+    "aethron/features.py": "f1b77e8f37e5c4724f9fb264ff32483659c5c5e0e804c95b1757a0c22e30c5d1",
+    "aethron/schema.py": "ca54580ad52105c9592bb28133f36c160d34ddb0004e07d6b61c5f8085d21c60",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e"
+  },
+  "physical_qualification_passed": false,
+  "hosted_execution_verified": false
+}

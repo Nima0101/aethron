@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_commit": "9277fb2ab4830247741fb522ecad8b10248fd937",
+  "source_state": "Working-copy correction; source hashes are post-run observations, not execution attestation.",
+  "python": "3.13.5",
+  "node": "v22.23.2",
+  "decision": "KEEP Python/Node experiment boundaries; FIX admission of the exact reviewed corpus.",
+  "production_admission_changed": false,
+  "corpus_bytes_changed": false,
+  "corpus_sha256": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff",
+  "red": {
+    "methods": 2,
+    "assertion_failures": 15,
+    "errors": 0,
+    "skips": 0
+  },
+  "baseline_node_observations": {
+    "empty": {
+      "exit": 0,
+      "cases": 0,
+      "parity": true
+    },
+    "missing": {
+      "exit": 0,
+      "cases": 14,
+      "parity": true
+    },
+    "duplicate": {
+      "exit": 0,
+      "cases": 18,
+      "parity": false
+    },
+    "rewritten_bytes": {
+      "exit": 0,
+      "cases": 18,
+      "parity": false
+    },
+    "erased_negative_expectations": {
+      "exit": 0,
+      "cases": 18,
+      "parity": true
+    }
+  },
+  "final_ingress_and_node": {
+    "methods": 8,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "related_run": {
+    "command": "python3 -m unittest qualification.tests.test_audit_reports qualification.tests.test_comparison_results qualification.tests.test_comparison_sources qualification.tests.test_measurement_review qualification.tests.test_ingress_audit qualification.tests.test_evidence -q",
+    "methods": 38,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "current_node": {
+    "cases": 18,
+    "parity": false,
+    "mismatch_ids": [
+      "duplicate-equal",
+      "duplicate-overwrite",
+      "duplicate-escaped",
+      "nested-duplicate"
+    ]
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "diff": "PASS",
+    "bandit_comparator_and_portable_test": "PASS",
+    "bandit_node_tests": "7 low findings retained and reviewed: B404, three B603, three B607. Two findings concern the added bounded subprocess call. No suppression."
+  },
+  "sources_sha256": {
+    "qualification/technology/compare_ingress.py": "8c650edabea9c32bfeefc9e5a6ff40e8bfca4aecd397558afa4183f5bef0a19c",
+    "qualification/technology/ingress-probe.mjs": "fec6a03be76426f189822036f4bbe9034b06c0e3737e67581a2a0ab8188bc92d",
+    "qualification/technology/ingress-vectors-v1.json": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff",
+    "qualification/tests/test_ingress_audit.py": "e614426850878706420ea248ec2d93f5a96f4957709d25bcf632ff4f49cdf0c4",
+    "qualification/tests/node_provenance.py": "a6e5696607d75b897c4a559fff02fd57bc778df75f8c48470474498438a73f90",
+    "qualification/technology/source_snapshot.py": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365",
+    "qualification/technology/measurement.py": "4c3e628661aaedefe3cc5b26e01bd887bb6303e13cb2099faf66382e31d7cf0a",
+    "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "qualification/rigs/synthetic-v1.json": "0b68e3a27477d5d53bc616afac23d82568ac357fdf95ce2520f114ac2efb25ea"
+  },
+  "limitations": [
+    "Finite synthetic corpus controls, not complete parser verification.",
+    "Python comparison controls use synthetic responses; no new Java run claimed.",
+    "Trusted source pin is not corpus author authentication or execution attestation.",
+    "Fixed corpus reads remain whole-file reads; no new resource/deadline claim.",
+    "No physical or installed customer-product qualification; full lane audit remains incomplete."
+  ],
+  "physical_qualification_passed": false,
+  "lane_complete": false
+}

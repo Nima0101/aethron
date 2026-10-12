@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "rig": {
+    "id": "synthetic-rig",
+    "configuration_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+    "sensors": [
+      {
+        "id": "thermal",
+        "kind": "lwir",
+        "device_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "mount_sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+      },
+      {
+        "id": "depth",
+        "kind": "depth",
+        "device_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+        "mount_sha256": "5555555555555555555555555555555555555555555555555555555555555555"
+      }
+    ]
+  },
+  "capture": {
+    "clock_domain": "synthetic-boot",
+    "start_ms": 1000,
+    "end_ms": 1050
+  },
+  "records": [
+    {
+      "sensor_id": "thermal",
+      "kind": "calibration",
+      "evidence": "synthetic",
+      "artifact_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+      "rig_sha256": "50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411",
+      "clock_domain": "synthetic-boot",
+      "data": {
+        "valid_from_ms": 0,
+        "valid_until_ms": 1049
+      }
+    },
+    {
+      "sensor_id": "thermal",
+      "kind": "clock",
+      "evidence": "synthetic",
+      "artifact_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+      "rig_sha256": "50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411",
+      "clock_domain": "synthetic-boot",
+      "data": {
+        "at_ms": 1050,
+        "offset_ms": 0,
+        "uncertainty_ms": 1
+      }
+    },
+    {
+      "sensor_id": "thermal",
+      "kind": "environment",
+      "evidence": "synthetic",
+      "artifact_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+      "rig_sha256": "50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411",
+      "clock_domain": "synthetic-boot",
+      "data": {
+        "at_ms": 1050,
+        "lighting": "zero_visible"
+      }
+    },
+    {
+      "sensor_id": "depth",
+      "kind": "calibration",
+      "evidence": "synthetic",
+      "artifact_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+      "rig_sha256": "50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411",
+      "clock_domain": "synthetic-boot",
+      "data": {
+        "valid_from_ms": 0,
+        "valid_until_ms": 1100
+      }
+    },
+    {
+      "sensor_id": "depth",
+      "kind": "clock",
+      "evidence": "synthetic",
+      "artifact_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+      "rig_sha256": "50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411",
+      "clock_domain": "synthetic-boot",
+      "data": {
+        "at_ms": 1050,
+        "offset_ms": 0,
+        "uncertainty_ms": 1
+      }
+    },
+    {
+      "sensor_id": "depth",
+      "kind": "environment",
+      "evidence": "synthetic",
+      "artifact_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+      "rig_sha256": "50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411",
+      "clock_domain": "synthetic-boot",
+      "data": {
+        "at_ms": 1050,
+        "lighting": "zero_visible"
+      }
+    }
+  ]
+}

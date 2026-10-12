@@ -1,0 +1,251 @@
+{
+  "version": 1,
+  "plan_utf8": "{\"cases\":[{\"evidence\":\"synthetic\",\"id\":\"blackout\",\"lighting\":\"zero_visible\",\"minimum_captures\":1,\"required_sensors\":[\"lwir\",\"depth\"]}],\"domain_sha256\":\"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad\",\"procedure_sha256\":\"cb8379ac2098aa165029e3938a51da0bcecfc008fd6795f401178647f96c5b34\",\"rig_sha256\":\"50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411\",\"version\":1}",
+  "manifests_utf8": {
+    "complete": "{\"capture\":{\"clock_domain\":\"synthetic-boot\",\"end_ms\":1050,\"start_ms\":1000},\"records\":[{\"artifact_sha256\":\"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad\",\"clock_domain\":\"synthetic-boot\",\"data\":{\"valid_from_ms\":0,\"valid_until_ms\":1100},\"evidence\":\"synthetic\",\"kind\":\"calibration\",\"rig_sha256\":\"50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411\",\"sensor_id\":\"thermal\"},{\"artifact_sha256\":\"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad\",\"clock_domain\":\"synthetic-boot\",\"data\":{\"at_ms\":1050,\"offset_ms\":0,\"uncertainty_ms\":1},\"evidence\":\"synthetic\",\"kind\":\"clock\",\"rig_sha256\":\"50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411\",\"sensor_id\":\"thermal\"},{\"artifact_sha256\":\"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad\",\"clock_domain\":\"synthetic-boot\",\"data\":{\"at_ms\":1050,\"lighting\":\"zero_visible\"},\"evidence\":\"synthetic\",\"kind\":\"environment\",\"rig_sha256\":\"50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411\",\"sensor_id\":\"thermal\"},{\"artifact_sha256\":\"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad\",\"clock_domain\":\"synthetic-boot\",\"data\":{\"valid_from_ms\":0,\"valid_until_ms\":1100},\"evidence\":\"synthetic\",\"kind\":\"calibration\",\"rig_sha256\":\"50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411\",\"sensor_id\":\"depth\"},{\"artifact_sha256\":\"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad\",\"clock_domain\":\"synthetic-boot\",\"data\":{\"at_ms\":1050,\"offset_ms\":0,\"uncertainty_ms\":1},\"evidence\":\"synthetic\",\"kind\":\"clock\",\"rig_sha256\":\"50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411\",\"sensor_id\":\"depth\"},{\"artifact_sha256\":\"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad\",\"clock_domain\":\"synthetic-boot\",\"data\":{\"at_ms\":1050,\"lighting\":\"zero_visible\"},\"evidence\":\"synthetic\",\"kind\":\"environment\",\"rig_sha256\":\"50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411\",\"sensor_id\":\"depth\"}],\"rig\":{\"configuration_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"id\":\"synthetic-rig\",\"sensors\":[{\"device_sha256\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"id\":\"thermal\",\"kind\":\"lwir\",\"mount_sha256\":\"3333333333333333333333333333333333333333333333333333333333333333\"},{\"device_sha256\":\"4444444444444444444444444444444444444444444444444444444444444444\",\"id\":\"depth\",\"kind\":\"depth\",\"mount_sha256\":\"5555555555555555555555555555555555555555555555555555555555555555\"}]},\"version\":1} \n",
+    "expired": "{\"capture\":{\"clock_domain\":\"synthetic-boot\",\"end_ms\":1050,\"start_ms\":1000},\"records\":[{\"artifact_sha256\":\"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad\",\"clock_domain\":\"synthetic-boot\",\"data\":{\"valid_from_ms\":0,\"valid_until_ms\":1049},\"evidence\":\"synthetic\",\"kind\":\"calibration\",\"rig_sha256\":\"50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411\",\"sensor_id\":\"thermal\"},{\"artifact_sha256\":\"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad\",\"clock_domain\":\"synthetic-boot\",\"data\":{\"at_ms\":1050,\"offset_ms\":0,\"uncertainty_ms\":1},\"evidence\":\"synthetic\",\"kind\":\"clock\",\"rig_sha256\":\"50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411\",\"sensor_id\":\"thermal\"},{\"artifact_sha256\":\"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad\",\"clock_domain\":\"synthetic-boot\",\"data\":{\"at_ms\":1050,\"lighting\":\"zero_visible\"},\"evidence\":\"synthetic\",\"kind\":\"environment\",\"rig_sha256\":\"50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411\",\"sensor_id\":\"thermal\"},{\"artifact_sha256\":\"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad\",\"clock_domain\":\"synthetic-boot\",\"data\":{\"valid_from_ms\":0,\"valid_until_ms\":1100},\"evidence\":\"synthetic\",\"kind\":\"calibration\",\"rig_sha256\":\"50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411\",\"sensor_id\":\"depth\"},{\"artifact_sha256\":\"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad\",\"clock_domain\":\"synthetic-boot\",\"data\":{\"at_ms\":1050,\"offset_ms\":0,\"uncertainty_ms\":1},\"evidence\":\"synthetic\",\"kind\":\"clock\",\"rig_sha256\":\"50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411\",\"sensor_id\":\"depth\"},{\"artifact_sha256\":\"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad\",\"clock_domain\":\"synthetic-boot\",\"data\":{\"at_ms\":1050,\"lighting\":\"zero_visible\"},\"evidence\":\"synthetic\",\"kind\":\"environment\",\"rig_sha256\":\"50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411\",\"sensor_id\":\"depth\"}],\"rig\":{\"configuration_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"id\":\"synthetic-rig\",\"sensors\":[{\"device_sha256\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"id\":\"thermal\",\"kind\":\"lwir\",\"mount_sha256\":\"3333333333333333333333333333333333333333333333333333333333333333\"},{\"device_sha256\":\"4444444444444444444444444444444444444444444444444444444444444444\",\"id\":\"depth\",\"kind\":\"depth\",\"mount_sha256\":\"5555555555555555555555555555555555555555555555555555555555555555\"}]},\"version\":1}"
+  },
+  "cases": [
+    {
+      "id": "complete",
+      "captures": [
+        {
+          "case_id": "blackout",
+          "manifest_key": "complete",
+          "now_ms": 1050
+        }
+      ],
+      "domain_hex": "616263",
+      "procedure_hex": "646566",
+      "artifacts_hex": {
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad": "616263"
+      },
+      "expected": {
+        "bundle": {
+          "coverage_findings": [],
+          "reference_findings": [],
+          "software_checks_passed": true,
+          "capture_counts": {
+            "submitted": 1,
+            "eligible": 1,
+            "rejected": 0
+          }
+        },
+        "artifacts": [
+          {
+            "declaration_findings": [],
+            "artifact_findings": [],
+            "software_checks_passed": true,
+            "artifact_bytes_verified": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "stale",
+      "captures": [
+        {
+          "case_id": "blackout",
+          "manifest_key": "complete",
+          "now_ms": 1151
+        }
+      ],
+      "domain_hex": "616263",
+      "procedure_hex": "646566",
+      "artifacts_hex": {
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad": "616263"
+      },
+      "expected": {
+        "bundle": {
+          "coverage_findings": [
+            "capture_coverage_missing",
+            "declaration_capture_stale"
+          ],
+          "reference_findings": [],
+          "software_checks_passed": false,
+          "capture_counts": {
+            "submitted": 1,
+            "eligible": 0,
+            "rejected": 1
+          }
+        },
+        "artifacts": [
+          {
+            "declaration_findings": [
+              "capture_stale"
+            ],
+            "artifact_findings": [],
+            "software_checks_passed": false,
+            "artifact_bytes_verified": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "altered_artifact",
+      "captures": [
+        {
+          "case_id": "blackout",
+          "manifest_key": "complete",
+          "now_ms": 1050
+        }
+      ],
+      "domain_hex": "616263",
+      "procedure_hex": "646566",
+      "artifacts_hex": {
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad": "6368616e676564"
+      },
+      "expected": {
+        "bundle": {
+          "coverage_findings": [],
+          "reference_findings": [],
+          "software_checks_passed": true,
+          "capture_counts": {
+            "submitted": 1,
+            "eligible": 1,
+            "rejected": 0
+          }
+        },
+        "artifacts": [
+          {
+            "declaration_findings": [],
+            "artifact_findings": [
+              "artifact_digest_mismatch"
+            ],
+            "software_checks_passed": false,
+            "artifact_bytes_verified": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "wrong_references",
+      "captures": [
+        {
+          "case_id": "blackout",
+          "manifest_key": "complete",
+          "now_ms": 1050
+        }
+      ],
+      "domain_hex": "626164",
+      "procedure_hex": "626164",
+      "artifacts_hex": {
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad": "616263"
+      },
+      "expected": {
+        "bundle": {
+          "coverage_findings": [],
+          "reference_findings": [
+            "domain_digest_mismatch",
+            "procedure_digest_mismatch"
+          ],
+          "software_checks_passed": false,
+          "capture_counts": {
+            "submitted": 1,
+            "eligible": 1,
+            "rejected": 0
+          }
+        },
+        "artifacts": [
+          {
+            "declaration_findings": [],
+            "artifact_findings": [],
+            "software_checks_passed": true,
+            "artifact_bytes_verified": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "expired_and_altered",
+      "captures": [
+        {
+          "case_id": "blackout",
+          "manifest_key": "expired",
+          "now_ms": 1050
+        }
+      ],
+      "domain_hex": "616263",
+      "procedure_hex": "646566",
+      "artifacts_hex": {
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad": "6368616e676564"
+      },
+      "expected": {
+        "bundle": {
+          "coverage_findings": [
+            "capture_coverage_missing",
+            "declaration_calibration_interval"
+          ],
+          "reference_findings": [],
+          "software_checks_passed": false,
+          "capture_counts": {
+            "submitted": 1,
+            "eligible": 0,
+            "rejected": 1
+          }
+        },
+        "artifacts": [
+          {
+            "declaration_findings": [
+              "calibration_interval"
+            ],
+            "artifact_findings": [
+              "artifact_digest_mismatch"
+            ],
+            "software_checks_passed": false,
+            "artifact_bytes_verified": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "reused_capture",
+      "captures": [
+        {
+          "case_id": "blackout",
+          "manifest_key": "complete",
+          "now_ms": 1050
+        },
+        {
+          "case_id": "blackout",
+          "manifest_key": "complete",
+          "now_ms": 1051
+        }
+      ],
+      "domain_hex": "616263",
+      "procedure_hex": "646566",
+      "artifacts_hex": {
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad": "616263"
+      },
+      "expected": {
+        "bundle": {
+          "coverage_findings": [
+            "capture_coverage_missing",
+            "capture_reused"
+          ],
+          "reference_findings": [],
+          "software_checks_passed": false,
+          "capture_counts": {
+            "submitted": 2,
+            "eligible": 0,
+            "rejected": 2
+          }
+        },
+        "artifacts": [
+          {
+            "declaration_findings": [],
+            "artifact_findings": [],
+            "software_checks_passed": true,
+            "artifact_bytes_verified": true
+          },
+          {
+            "declaration_findings": [],
+            "artifact_findings": [],
+            "software_checks_passed": true,
+            "artifact_bytes_verified": true
+          }
+        ]
+      }
+    }
+  ]
+}

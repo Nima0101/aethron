@@ -1,0 +1,33 @@
+{
+  "review_order_version": 3,
+  "component": "artifact_byte_binding",
+  "python": "3.13.5",
+  "hash_backend_module": "_hashlib",
+  "baseline_tests": 4,
+  "baseline_passed": true,
+  "mutations": {
+    "constant_digest": {
+      "failures": 1,
+      "errors": 0
+    },
+    "erased_declaration_negatives": {
+      "failures": 1,
+      "errors": 0
+    },
+    "relaxed_total_budget": {
+      "failures": 1,
+      "errors": 0
+    }
+  },
+  "restored_baseline_passed": true,
+  "physical_qualification_passed": false,
+  "source_sha256": {
+    "qualification/artifacts.py": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+    "qualification/tests/test_artifacts.py": "b0e4a20dc2a92a0b0773b0d6749a15495e0e8361b89da3e46197f88267077563",
+    "qualification/tests/test_artifact_review.py": "00c5afdbba6c71fe6f9ebe1ea9057ea3c7a80688ba04b0130f13a6608ae17d1b",
+    "qualification/technology/review_artifacts.py": "7e52ebb63464198cc1b6070e3316baaea8e4e925ebfc4f5a147b0cd78d16ad94"
+  }
+}

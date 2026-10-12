@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "baseline_commit": "d0e46e4988ad75917460bac8a5debb1e10144f79",
+  "scope": "Non-executing joint domain profile declarations v1",
+  "source_sha256": {
+    "qualification/domains.py": "7ef976b0936b0b6c2db701767e4f31e84ec51193b81c4ec2fb2489c2aea3e2a0",
+    "qualification/tests/test_domains.py": "87a3329f8fdb1804cfdcdf98b7918458625332211e8515d687db5c5a9523831d",
+    "qualification/domains-v1.md": "386c51e767cb92eda83098ad635de60be18443cd5def6a273d8b816ba75cfeae",
+    "qualification/fixtures/domains-v1.json": "500bd6139ff802c87a292e2462da5cabcb4e3be57969d061713b3268c08a9727",
+    "qualification/technology/domain-decision-v1.json": "d5a260eff22cc99d8c06d7d2971034fa4f1b91bdb6fb9023484ab1ab3f765fb5",
+    "qualification/technology/domain-decision-v1.schema.json": "f8131443f20008acb20e7f8955c455f0de4f7bb4f207352fe7b99df9e45f9256",
+    "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "qualification/procedures.py": "5c6bc37c7eb4a8a45ad9ba8f592838065ebea1a9b95090bf7f6f7a345fd6923a",
+    "qualification/campaign_bundle.py": "1584e531f994fde5c612dce52eafc993adfe51044d9338b5db27d97fe843e32e"
+  },
+  "source_observations_unchanged": true,
+  "red": {
+    "test": "test_complete_domain_is_only_a_consistent_declaration",
+    "expected_failures": 1,
+    "reason": "API module absent before implementation"
+  },
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "qualification.tests.test_domains",
+        "qualification.tests.test_procedures",
+        "qualification.tests.test_campaign",
+        "qualification.tests.test_campaign_references",
+        "qualification.tests.test_campaign_bundle",
+        "qualification.tests.test_consumer_vectors",
+        "-q"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 2.489011,
+      "stdout": "",
+      "stderr": "----------------------------------------------------------------------\nRan 53 tests in 2.079s\n\nOK\n"
+    },
+    {
+      "command": [
+        "ruff",
+        "check",
+        "qualification/domains.py",
+        "qualification/tests/test_domains.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.278065,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "ruff",
+        "format",
+        "--check",
+        "qualification/domains.py",
+        "qualification/tests/test_domains.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.034715,
+      "stdout": "2 files already formatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "bandit",
+        "qualification/domains.py",
+        "-q"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 2.908565,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "negative_controls": [
+    {
+      "control": "ignored_sensor_set",
+      "test": "test_sensor_subsets_and_evidence_substitutions_never_match",
+      "expected_assertion_failures": 1,
+      "unexpected_errors": 0
+    },
+    {
+      "control": "lost_reverse_coverage",
+      "test": "test_cartesian_product_does_not_invent_a_supported_combination",
+      "expected_assertion_failures": 1,
+      "unexpected_errors": 0
+    },
+    {
+      "control": "lost_unknown_state",
+      "test": "test_null_fields_are_unknown_not_wildcards",
+      "expected_assertion_failures": 1,
+      "unexpected_errors": 0
+    },
+    {
+      "control": "promoted_hardware_claim",
+      "test": "test_complete_domain_is_only_a_consistent_declaration",
+      "expected_assertion_failures": 1,
+      "unexpected_errors": 0
+    }
+  ],
+  "portable_synthetic_vectors": 4,
+  "re_review": {
+    "scope": "Earliest declaration, artifact, campaign, reference, bundle, process and checklist boundaries; retained source fingerprints matched",
+    "baseline_tests_passed": 57,
+    "runtime_decision": "KEEP for bounded offline declaration APIs; no measured native runtime deficit or target ABI requirement",
+    "correction": "Implement the missing joint-profile relation without changing prior reference or report semantics"
+  },
+  "limits": [
+    "Finite synthetic cases only, no field-domain suitability or preregistration proof",
+    "No comparative runtime benchmark, hard real-time or cryptographic certification claim",
+    "Source observations are not execution attestation or complete dependency closure",
+    "ADR schema supplied; external JSON Schema conformance not executed",
+    "Python 3.9 and hosted checks not claimed locally"
+  ],
+  "physical_qualification_passed": false,
+  "phase_complete": false
+}

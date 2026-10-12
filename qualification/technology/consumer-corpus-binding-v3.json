@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_commit": "42c787f24afe387565cc15c94afd457096999d9c",
+  "python": "3.13.5",
+  "platform": "Linux",
+  "decision": "KEEP JSON and direct Python runner; FIX exact reviewed corpus admission",
+  "production_files_changed": false,
+  "fixture_bytes_changed": false,
+  "red": {
+    "methods": 2,
+    "assertion_failures": 6,
+    "errors": 0,
+    "skips": 0,
+    "replacements": "Five individual negative cases and all negatives replaced with passing inputs and matching expectations; IDs retained"
+  },
+  "focused_green": {
+    "methods": 24,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "command": "python3 -m unittest qualification.tests.test_consumer_corpus_binding qualification.tests.test_consumer_vector_types qualification.tests.test_consumer_vectors qualification.tests.test_bundle_artifact_integration qualification.tests.test_campaign_bundle qualification.tests.test_campaign_references -q"
+  },
+  "baseline_green": {
+    "methods": 20,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "disabled_count_checker_control": {
+    "methods": 2,
+    "expected_failures_observed": 12,
+    "errors": 0,
+    "skips": 0,
+    "purpose": "Confirm deliberately re-pinned fixture controls still exercise exact type admission"
+  },
+  "static": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS zero findings"
+  },
+  "source_sha256": {
+    "qualification/tests/test_consumer_vectors.py": "b952ea464d227469f58708104df33f76bfbace3787dca6b6ab9b8f01a2d43e74",
+    "qualification/tests/test_consumer_vector_types.py": "d27efcae1c387fe4ccfe8f7a8e0bd7a5c0fd46bde968c86098c069a5907d9183",
+    "qualification/tests/test_consumer_corpus_binding.py": "d98eb7f6f5dcecea18a7049049b80bc91c73fd0ada7567da8f276c7e3a24b5ff",
+    "qualification/fixtures/consumer-vectors-v1.json": "8c3f345a6e8e3b947ca94ca4b4e0817e2d3961ff43bade6cff2adc5f2b4daff9"
+  },
+  "source_observation": "Post-check file hashes, not execution attestation",
+  "physical_qualification_passed": false,
+  "lane_complete": false,
+  "next_review": "Remaining audit tooling and hosted verification configuration"
+}

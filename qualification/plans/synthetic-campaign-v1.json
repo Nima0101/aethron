@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "rig_sha256": "50ace572b6b339dd4a0f2c2c42243ae77e1fc8fe9235cc497dcca32d0651a411",
+  "domain_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "procedure_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+  "cases": [
+    {
+      "id": "blackout",
+      "lighting": "zero_visible",
+      "required_sensors": [
+        "lwir",
+        "depth"
+      ],
+      "evidence": "synthetic",
+      "minimum_captures": 1
+    }
+  ]
+}

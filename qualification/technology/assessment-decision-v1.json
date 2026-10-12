@@ -1,0 +1,42 @@
+{
+  "$schema": "./assessment-decision-v1.schema.json",
+  "version": 1,
+  "id": "qualification-software-assessment-v1",
+  "decision": "KEEP",
+  "technology": "Python immutable payloads, bounded envelope snapshots and direct gate composition",
+  "constraints": [
+    "Offline source-checkout evidence API; no device or authorization actions",
+    "At most 64 captures, 48 method documents and 4 MiB aggregate artifact payloads",
+    "Exact byte identities, fixed errors and retention of independent negative results",
+    "No hard deadline, native ABI or supervised-service requirement"
+  ],
+  "alternatives": [
+    {
+      "technology": "CUE",
+      "source": "https://cuelang.org/docs/concept/how-cue-enables-data-validation/",
+      "assessment": "Constraint unification suits declaration shape; byte snapshots, commitments and independent per-attempt error retention need a host boundary."
+    },
+    {
+      "technology": "Erlang/OTP",
+      "source": "https://www.erlang.org/doc/system/expressions.html",
+      "assessment": "Immutable binaries/maps suit evidence inputs; process supervision is useful for a service boundary but not required by this synchronous function."
+    },
+    {
+      "technology": "C# / Utf8JsonReader",
+      "source": "https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/use-utf8jsonreader",
+      "assessment": "Forward-only UTF-8 intake is credible for streamed native deployments; no such target constraint or demonstrated material benefit is established for this bounded in-process composition."
+    }
+  ],
+  "rationale": "Select direct in-process composition over a second semantic engine: admitted immutable bytes feed the same versioned gates and bounded envelope copies prevent subsequent caller mutation from changing their inputs. This preserves report parity and independent failures without trusting serialized approvals. Resource bounds constrain admitted payloads, not execution deadlines. No measured comparative speed claim.",
+  "source": "https://docs.python.org/3.13/library/json.html",
+  "reopen_when": [
+    "A target native ABI is required",
+    "Measured resource limits are unmet",
+    "Rules require independent policy distribution"
+  ],
+  "validation": [
+    "qualification.tests.test_assessment",
+    "qualification/assessment-v1.md"
+  ],
+  "physical_qualification_passed": false
+}

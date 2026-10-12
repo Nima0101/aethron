@@ -1,0 +1,91 @@
+{
+  "review_order_version": 3,
+  "before_head": "5f0f3a7f4ef25f185f8e0c0d07242a0ef4a94565",
+  "baseline_methods": 71,
+  "red": {
+    "assertion_failures": 8,
+    "errors": 0,
+    "note": "Corrected initially mislabeled vector indices from 8/13 to 9/14 before implementation; both RED runs had eight assertion failures."
+  },
+  "bypass_document_check_mutation": {
+    "methods": 3,
+    "assertion_failures": 8,
+    "errors": 0,
+    "skips": 0,
+    "passed": false
+  },
+  "restored_audit_tests": {
+    "methods": 10,
+    "assertion_failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "passed": true
+  },
+  "focused_suite": {
+    "methods": 75,
+    "assertion_failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "passed": true
+  },
+  "java_composition": {
+    "audit_policy_version": 2,
+    "scope": "Java ingress with unchanged Python semantic oracle; not a Java validator",
+    "python": "3.13.5",
+    "ingress_cases": 18,
+    "semantic_requests": 63,
+    "mismatch_indices": [],
+    "report_mismatch_indices": [],
+    "document_mismatch_indices": [],
+    "all_reports_match": true,
+    "all_documents_match": true,
+    "request_transport_sha256": "7c1ddc2d27791242716bfa836e681f0b3b8fa92e05350806b4536350620255e0",
+    "response_transport_sha256": "5059be25311cb6c0e60f0c9e0636ccc3e62535d233661267ee152a5d5f55668f",
+    "python_65536_byte_measurement": {
+      "iterations": 20,
+      "elapsed_ns": [
+        6070655,
+        5761296,
+        5824528,
+        5946717,
+        68609643,
+        6015195,
+        6118801,
+        5819790,
+        6042684,
+        76044430,
+        6527460,
+        6990822,
+        5480944,
+        5786134,
+        5507826,
+        68785596,
+        6844584,
+        6904882,
+        5696334,
+        6700154
+      ],
+      "traced_peak_bytes_one_call": 73620,
+      "acceptance_threshold": null
+    },
+    "source_sha256": {
+      "qualification/technology/IngressProbe.java": "abbe803c05d3d10039d68e3e044d1c8578f5259733bd1bf554dc8486433fd4d3",
+      "qualification/technology/compare_ingress.py": "fa825359edb0c14194a0d70fb9bd34c15b2b0eaedd223260fd9e41fff2bd077e",
+      "qualification/technology/ingress-vectors-v1.json": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff",
+      "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+      "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+      "qualification/rigs/synthetic-v1.json": "0b68e3a27477d5d53bc616afac23d82568ac357fdf95ce2520f114ac2efb25ea",
+      "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034"
+    },
+    "physical_qualification_passed": false
+  },
+  "source_sha256": {
+    "qualification/technology/compare_ingress.py": "fa825359edb0c14194a0d70fb9bd34c15b2b0eaedd223260fd9e41fff2bd077e",
+    "qualification/tests/test_audit_reports.py": "b83bef9357afc466b120812d9f85ef4d5554026e622e33c528fc7a0ac711b613",
+    "qualification/technology/review-v3.md": "9d459e95164cb4520ed1164928e9079860cbbab0060d57bb267d28ef1bf578e3",
+    "qualification/campaign_references.py": "ffae611838d8627c036c68bd3e6988dab9656cbc6aee8f7032857a34199e6686",
+    "qualification/tests/test_campaign_references.py": "37ed0a291ecd08e28b66dabe3f0b4ab4ee37442d75ced6439391d937660e6698"
+  },
+  "physical_qualification_passed": false,
+  "hosted_execution_verified": false
+}

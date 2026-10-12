@@ -1,0 +1,117 @@
+{
+  "scope": "ingress_token_probe_only_no_schema_or_semantic_validation",
+  "runtime": "v22.23.2",
+  "source_aware_reviver": true,
+  "cases": [
+    {
+      "id": "valid-incomplete",
+      "accepted": true,
+      "expected_accepted": true,
+      "matches": true
+    },
+    {
+      "id": "integer-negative-zero",
+      "accepted": true,
+      "expected_accepted": true,
+      "matches": true
+    },
+    {
+      "id": "escaped-key-valid",
+      "accepted": true,
+      "expected_accepted": true,
+      "matches": true
+    },
+    {
+      "id": "float-integral",
+      "accepted": false,
+      "expected_accepted": false,
+      "matches": true
+    },
+    {
+      "id": "exponent-integral",
+      "accepted": false,
+      "expected_accepted": false,
+      "matches": true
+    },
+    {
+      "id": "float-underflow",
+      "accepted": false,
+      "expected_accepted": false,
+      "matches": true
+    },
+    {
+      "id": "nonfinite",
+      "accepted": false,
+      "expected_accepted": false,
+      "matches": true
+    },
+    {
+      "id": "infinite",
+      "accepted": false,
+      "expected_accepted": false,
+      "matches": true
+    },
+    {
+      "id": "oversized-number",
+      "accepted": false,
+      "expected_accepted": false,
+      "matches": true
+    },
+    {
+      "id": "duplicate-equal",
+      "accepted": true,
+      "expected_accepted": false,
+      "matches": false
+    },
+    {
+      "id": "duplicate-overwrite",
+      "accepted": true,
+      "expected_accepted": false,
+      "matches": false
+    },
+    {
+      "id": "duplicate-escaped",
+      "accepted": true,
+      "expected_accepted": false,
+      "matches": false
+    },
+    {
+      "id": "nested-duplicate",
+      "accepted": true,
+      "expected_accepted": false,
+      "matches": false
+    },
+    {
+      "id": "utf8-bom",
+      "accepted": false,
+      "expected_accepted": false,
+      "matches": true
+    },
+    {
+      "id": "invalid-utf8",
+      "accepted": false,
+      "expected_accepted": false,
+      "matches": true
+    },
+    {
+      "id": "utf16",
+      "accepted": false,
+      "expected_accepted": false,
+      "matches": true
+    },
+    {
+      "id": "trailing-document",
+      "accepted": false,
+      "expected_accepted": false,
+      "matches": true
+    },
+    {
+      "id": "malformed",
+      "accepted": false,
+      "expected_accepted": false,
+      "matches": true
+    }
+  ],
+  "parity": false,
+  "physical_qualification_passed": false
+}

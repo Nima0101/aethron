@@ -1,0 +1,315 @@
+{
+  "audit_policy_version": 3,
+  "baseline_commit": "98915375470aff1f55da4ed47834a1e48135f2e6",
+  "component": "P4/P15 comparison and measurement source observations",
+  "decision": "KEEP Python orchestration; FIX before/after source observations",
+  "python": "3.13.5",
+  "red": {
+    "methods": 4,
+    "assertion_failures": 15,
+    "execution_errors": 0,
+    "failure_boundary_cases": 12,
+    "metadata_controls": 3,
+    "elapsed_seconds": 14.704
+  },
+  "green": {
+    "related_methods": 22,
+    "skips": 0,
+    "elapsed_seconds": 34.007,
+    "fresh_report_processes": 3,
+    "fresh_export_processes": 1,
+    "fresh_source_observations": 26,
+    "export_request_rows": 81,
+    "export_matches_compared_request_commitment": true
+  },
+  "static": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "targeted_bandit": "PASS",
+    "python39_syntax_files": 4,
+    "python39_runtime": "not run locally"
+  },
+  "fresh_reports": {
+    "measure_binding": {
+      "scope": "four_mib_production_artifact_binding",
+      "audit_policy_version": 3,
+      "python": "3.13.5",
+      "hash_backend_module": "_hashlib",
+      "four_mib_digests": [
+        "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58",
+        "ee78cd29d3a534713b36e6ff6fa3668c8a8f851a542d5eb2401c25ca4e057d02",
+        "2fa4430272111c7854b204001461e16f2c73725b07dde2b6d1dc4f2aa8fe18da",
+        "9ed3b916b5b6b1dbe61b8844c8130657b9bc4f7ff80a07c7835989c911ad430a"
+      ],
+      "verify_elapsed_ns": [
+        85715354,
+        3780291,
+        2975485,
+        2668651,
+        2971667,
+        2519110,
+        81817755,
+        4744108,
+        5724308,
+        3093990
+      ],
+      "traced_peak_bytes_one_call": 11069,
+      "input_storage_excluded_from_tracing": true,
+      "artifact_counts": {
+        "referenced": 4,
+        "supplied": 4,
+        "matched": 4,
+        "missing": 0,
+        "mismatched": 0,
+        "unreferenced": 0,
+        "supplied_bytes": 4194304
+      },
+      "manifest_sha256": "11e2cdcb0c5511aa2132f6136bf36033d6bae99f7935f33baa90eee722e55ef7",
+      "source_sha256": {
+        "qualification/artifacts.py": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+        "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+        "qualification/technology/measure_binding.py": "eacd3929cc24120a9c4a6c91e41bf9ba27d5cdf5d460cac9916b8eaf2672442d",
+        "qualification/technology/measurement.py": "4c3e628661aaedefe3cc5b26e01bd887bb6303e13cb2099faf66382e31d7cf0a",
+        "qualification/technology/source_snapshot.py": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365"
+      },
+      "source_observation": "equal_before_and_after_workload",
+      "physical_qualification_passed": false
+    },
+    "compare_campaign": {
+      "scope": "offline_campaign_aggregation_audit",
+      "audit_policy_version": 3,
+      "python": "3.13.5",
+      "sqlite": "3.46.1",
+      "test_methods": 11,
+      "candidate_calls": 48,
+      "all_contract_tests_passed": true,
+      "duplicate_mutant_failures": 3,
+      "duplicate_mutant_errors": 0,
+      "maximum_cases": 16,
+      "maximum_submissions": 64,
+      "maximum_workload_report": {
+        "version": 1,
+        "plan_sha256": "e5d41a943710f3e18d879037e231fc7da7e378c3bea5cf3faa6664042ec90b9b",
+        "captures_sha256": "9297849b54d145970ee979df3cb1b2aad5bd066352e8302d67c0d34a4c9f66e2",
+        "capture_counts": {
+          "submitted": 64,
+          "eligible": 64,
+          "rejected": 0
+        },
+        "cases": [
+          {
+            "case_index": 0,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 1,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 2,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 3,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 4,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 5,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 6,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 7,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 8,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 9,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 10,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 11,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 12,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 13,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 14,
+            "required": 4,
+            "eligible": 4
+          },
+          {
+            "case_index": 15,
+            "required": 4,
+            "eligible": 4
+          }
+        ],
+        "findings": [],
+        "declaration_coverage_complete": true,
+        "domain_verified": false,
+        "procedure_verified": false,
+        "artifact_authenticity_verified": false,
+        "physical_qualification_passed": false
+      },
+      "elapsed_ns": {
+        "python": [
+          77460177,
+          20915321,
+          87886164,
+          80770326,
+          18799465,
+          78460410,
+          21289339,
+          82036317,
+          81884950,
+          21794567
+        ],
+        "sqlite": [
+          26281030,
+          81096651,
+          22970273,
+          21499033,
+          82680752,
+          21657818,
+          82484635,
+          87531981,
+          22584199,
+          171031191
+        ]
+      },
+      "python_traced_peak_bytes": {
+        "python": 39833,
+        "sqlite": 48762
+      },
+      "measurement_limits": [
+        "Shared host, ten alternating-order repetitions; descriptive only.",
+        "Both paths share admission and declaration semantics; SQL aggregation is independent.",
+        "Tracing excludes preconstructed inputs and native SQLite allocations.",
+        "Whitespace-distinct bytes test input capacity, not independent physical evidence."
+      ],
+      "source_sha256": {
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+        "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+        "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+        "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+        "qualification/tests/test_campaign_audit.py": "65938f530a0025d2f060b1f450f15ce3150bd27dcf6cb8ab9598da9f7f3bf3e0",
+        "qualification/technology/campaign_sql.py": "4deb710665852d208c1b8170a5963cc649a73e0536116d88926eff99074259c3",
+        "qualification/technology/compare_campaign.py": "61e6865f133ebf9967916b131e19ff8dac8a5d88d4e4ad836facfe859458dbba",
+        "qualification/technology/measurement.py": "4c3e628661aaedefe3cc5b26e01bd887bb6303e13cb2099faf66382e31d7cf0a",
+        "qualification/technology/source_snapshot.py": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365"
+      },
+      "source_observation": "equal_before_and_after_workload",
+      "physical_qualification_passed": false
+    },
+    "compare_ingress": {
+      "audit_policy_version": 3,
+      "scope": "Java ingress with unchanged Python semantic oracle; not a Java validator",
+      "python": "3.13.5",
+      "ingress_cases": 18,
+      "semantic_requests": 63,
+      "mismatch_indices": [],
+      "report_mismatch_indices": [],
+      "document_mismatch_indices": [],
+      "all_reports_match": true,
+      "all_documents_match": true,
+      "request_transport_sha256": "7c1ddc2d27791242716bfa836e681f0b3b8fa92e05350806b4536350620255e0",
+      "response_transport_sha256": "2a5cb0ae96fe83104a5ef9a12e46f07883a546ae8034c34abef150350cb6f174",
+      "python_65536_byte_measurement": {
+        "iterations": 20,
+        "elapsed_ns": [
+          9475319,
+          5838527,
+          4880484,
+          69103403,
+          7216432,
+          5543228,
+          7122904,
+          5992225,
+          66463213,
+          12475997,
+          7299472,
+          11185869,
+          7945457,
+          64967361,
+          5230481,
+          5617873,
+          5526217,
+          5839165,
+          6057082,
+          5594839
+        ],
+        "traced_peak_bytes_one_call": 73735,
+        "acceptance_threshold": null
+      },
+      "source_sha256": {
+        "qualification/technology/IngressProbe.java": "a80beabc94ee985a0f1cb6db95424926d52c88a335e44564caf32e7bdf0c7601",
+        "qualification/technology/compare_ingress.py": "f0318a6a1cfb96f49b7486e84a96ee4b74bfdbea97ca2bfeb4e4bd2d2cdf97ae",
+        "qualification/technology/measurement.py": "4c3e628661aaedefe3cc5b26e01bd887bb6303e13cb2099faf66382e31d7cf0a",
+        "qualification/technology/ingress-vectors-v1.json": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff",
+        "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "qualification/rigs/synthetic-v1.json": "0b68e3a27477d5d53bc616afac23d82568ac357fdf95ce2520f114ac2efb25ea",
+        "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+        "qualification/technology/source_snapshot.py": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365"
+      },
+      "source_observation": "equal_before_and_after_workload",
+      "physical_qualification_passed": false
+    }
+  },
+  "ingress_response_producer": "Synthetic Python fixture from test_comparison_sources.ingress_responses; no Java execution in this run",
+  "source_sha256": {
+    "qualification/technology/compare_ingress.py": "f0318a6a1cfb96f49b7486e84a96ee4b74bfdbea97ca2bfeb4e4bd2d2cdf97ae",
+    "qualification/technology/compare_campaign.py": "61e6865f133ebf9967916b131e19ff8dac8a5d88d4e4ad836facfe859458dbba",
+    "qualification/technology/measure_binding.py": "eacd3929cc24120a9c4a6c91e41bf9ba27d5cdf5d460cac9916b8eaf2672442d",
+    "qualification/technology/source_snapshot.py": "833a0660d354465a5058400d3fe8e675749505cd76dfa575c74ce5c2bd47b365",
+    "qualification/tests/test_comparison_sources.py": "acaf3be25f6ae28c1388ed705e30e383fe83978e73e0856e67574de2a9ff3cf7",
+    "qualification/technology/comparison-source-observation-v3.md": "5a2f71b40b403c5db2225b5dc97bc451aa94d0fa421471bd9cbdf05890fa8884",
+    "qualification/technology/review-v3.md": "3999466eb0dab37deb65b0eedc4651d076de53f10cafef88f215ae3c45763a04"
+  },
+  "limits": [
+    "File observations do not authenticate execution, import resolution or a complete dependency closure.",
+    "Changes reverted between observations or made after the final check may be invisible.",
+    "Source checking remains outside timed/traced windows; measurements are descriptive shared-host samples.",
+    "Historical evidence is retained unchanged; no actual hardware or installed-product acceptance occurred."
+  ],
+  "audit_complete": false,
+  "product_acceptance_passed": false,
+  "physical_qualification_passed": false
+}

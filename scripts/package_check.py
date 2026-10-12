@@ -3,9 +3,12 @@
 import hashlib
 import json
 import os
+import platform
 import subprocess
 import sys
 import tempfile
+import zipfile
+from importlib.metadata import version
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,6 +37,10 @@ def run():
         a = next((temp / "a").glob("*.whl"))
         b = next((temp / "b").glob("*.whl"))
         assert a.read_bytes() == b.read_bytes(), "wheel builds differ"
+        with zipfile.ZipFile(a) as archive:
+            assert {name for name in archive.namelist() if name.startswith("qualification/")} == {
+                f"qualification/{path.name}" for path in (ROOT / "qualification").glob("*.py")
+            }, "qualification runtime module inventory differs"
         subprocess.run([sys.executable, "-m", "venv", str(temp / "consumer")], check=True)
         python = temp / "consumer" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
         subprocess.run(
@@ -74,6 +81,69 @@ def run():
         assert len(tracked) == 24
         assert len({r["tracks"][0]["id"] for r in tracked}) == 1
         assert tracked[-1]["tracks"][0]["sources"] == ["depth", "lwir", "radar"]
+        qualification = subprocess.run(
+            [
+                str(python),
+                "-I",
+                str(ROOT / "scripts/qualification_consumer.py"),
+                str(ROOT / "qualification/fixtures/assessment-vectors-v1.json"),
+                str(ROOT / "qualification/fixtures/consumer-vectors-v1.json"),
+            ],
+            cwd=temp,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        qualification_result = json.loads(qualification.stdout)
+        assert qualification_result == {
+            "assessment_vectors": 10,
+            "declaration_cases": 4,
+            "declaration_invalid_argument_cases": 29,
+            "declaration_exact_limit_cases": 1,
+            "declaration_collection_boundary_cases": 7,
+            "declaration_clock_boundary_cases": 12,
+            "declaration_clock_isolation_cases": 72,
+            "declaration_freshness_boundary_cases": 16,
+            "declaration_domain_boundary_cases": 26,
+            "declaration_provenance_cases": 24,
+            "declaration_rig_binding_cases": 32,
+            "declaration_numeric_boundary_cases": 28,
+            "declaration_token_boundary_cases": 44,
+            "declaration_case_reference_cases": 14,
+            "declaration_wrong_case_references": 6,
+            "declaration_partial_record_cases": 12,
+            "declaration_combined_failure_cases": 72,
+            "declaration_escaped_key_controls": 16,
+            "declaration_escaped_key_duplicates": 24,
+            "declaration_escaped_value_controls": 16,
+            "declaration_unicode_value_inputs": 120,
+            "declaration_utf8_value_controls": 10,
+            "declaration_utf8_value_inputs": 180,
+            "declaration_encoding_controls": 2,
+            "declaration_alternate_encodings": 9,
+            "declaration_whitespace_controls": 42,
+            "declaration_invalid_separators": 9,
+            "declaration_invalid_punctuation": 46,
+            "declaration_number_inputs": 80,
+            "declaration_integer_controls": 12,
+            "declaration_malformed_inputs": 389,
+            "declaration_closed_pipe_cases": 6,
+            "bundle_vectors": 6,
+            "artifact_vectors": 7,
+            "assessment_opaque_artifact_cases": 1,
+            "assessment_aggregate_artifact_cases": 2,
+            "assessment_exact_limit_cases": 1,
+            "bundle_exact_limit_cases": 1,
+            "bundle_scalar_boundary_cases": 2,
+            "assessment_malformed_frames": 58,
+            "bundle_malformed_frames": 25,
+            "assessment_unexpected_argument_cases": 8,
+            "bundle_unexpected_argument_cases": 8,
+            "assessment_closed_pipe_cases": 6,
+            "bundle_closed_pipe_cases": 6,
+            "isolated_install": True,
+        }
         print(
             json.dumps(
                 {
@@ -82,6 +152,12 @@ def run():
                     "byte_identical": True,
                     "isolated_install": True,
                     "runtime_dependencies": 0,
+                    "python": platform.python_version(),
+                    "platform": platform.platform(),
+                    "build_tools": {
+                        name: version(name) for name in ("build", "setuptools", "wheel")
+                    },
+                    "qualification": qualification_result,
                 }
             )
         )

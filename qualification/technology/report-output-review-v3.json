@@ -1,0 +1,48 @@
+{
+  "audit_policy_version": 3,
+  "baseline_commit": "21a67bd11b1024a1ef037953a0623f1f89aaa48f",
+  "component": "P4 declaration command output boundary",
+  "decision": "KEEP Python direct report serialization; FIX checked write and flush lifecycle",
+  "verification": {
+    "baseline_methods_passed": 37,
+    "new_methods": 3,
+    "red_assertion_failures": 4,
+    "red_errors": 0,
+    "green_output_and_process_methods": 10,
+    "skips": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_changed_runtime": "PASS"
+  },
+  "prior_bridge": {
+    "status": "committed",
+    "commit": "21a67bd11b1024a1ef037953a0623f1f89aaa48f",
+    "files": 5,
+    "immutable_tree_link_check": "PASS",
+    "pushed": true,
+    "ci": "QUEUED at observation; not polled"
+  },
+  "limits": [
+    "Controlled stream tests validate main(), not all interpreter shutdown paths.",
+    "Output can be partial or complete on delivery failure.",
+    "Flush is not durable storage or a downstream acknowledgement.",
+    "Writable stderr is required for the fixed diagnostic.",
+    "No physical qualification or performance claim."
+  ],
+  "source_sha256": {
+    "qualification/__main__.py": "69406a26c5ac76d934f055504be90f749d1072a3edb49660658dc509b7baa695",
+    "qualification/tests/test_report_output.py": "2f42746ada76ed5537db98e4eeea0a5e95080c59a8f6d19ecc4c3d7f6548b2ca",
+    "qualification/tests/test_cli_review.py": "6e10783f1e9f53f6412479956beba3070f3949846677c9f570445ac60c5b644f",
+    "qualification/tests/test_bundle_process.py": "20547364dc7e9d184be3b413293867e7366ae103d33c6a08c9428fbed94663c2",
+    "qualification/README.md": "a1836eb4aba7bf4f90bc749914abbfd0cc7605c8c3e58615714c06365ba819b5",
+    "qualification/technology/report-output-review-v3.md": "1cf1da073e69b9a2e95c787b169a91ddc85f47ea92ab0c6781cf45e9c93a8187",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "qualification/rigs/synthetic-v1.json": "0b68e3a27477d5d53bc616afac23d82568ac357fdf95ce2520f114ac2efb25ea",
+    "qualification/rigs/expired-calibration-v1.json": "4c7ca70d035358964252a5fa31002f9edd6f69a2bb1dc9f40fb60dc33e806eb7",
+    "qualification/evidence/synthetic-report-v1.json": "4351cfca35268ef684f16c6cd98f8de3a41e5020fa10479c7b760fd46b4c1f35",
+    "qualification/evidence/expired-calibration-report-v1.json": "ebb63392fd6d48fdadd860091438f2181569fdcbf569130651b3e974b2981133"
+  },
+  "audit_complete": false,
+  "physical_qualification_passed": false
+}

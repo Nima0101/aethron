@@ -1,0 +1,44 @@
+{
+  "$schema": "./ingress-admission-decision-v3.schema.json",
+  "version": 1,
+  "id": "qualification-ingress-admission-v3",
+  "decision": "KEEP",
+  "technology": "Python direct semantic-oracle driver; separate Java/Jackson and Node token experiments",
+  "constraints": [
+    "Offline source-checkout diagnostic; maximum 256 request rows and 8 MiB transport, no target device or real-time deadline",
+    "Independently compare pinned byte-token admission, decoded document preservation and downstream declaration reports",
+    "Invoke and measure the actual Python reference API without including interprocess transport in that measurement",
+    "Preserve candidate failures and raw request/response hashes; no cross-runtime speed or hardware qualification inference"
+  ],
+  "alternatives": [
+    {
+      "technology": "Erlang/OTP Common Test",
+      "source": "https://www.erlang.org/doc/apps/common_test/basics_chapter.html",
+      "assessment": "Supports external-system suites and distributed test orchestration. A credible alternative for multi-device qualification; this finite offline driver requires direct reference calls and Python allocation instrumentation, so an Erlang host would still require a separate Python measurement boundary. No distributed target requirement exists in this component."
+    },
+    {
+      "technology": "Java/Jackson streaming parser and driver",
+      "source": "https://github.com/FasterXML/jackson-core",
+      "assessment": "Streaming token access is appropriate for the independent Java candidate. The pinned 2.21.5 probe passes the current 18 admission cases and 63 semantic transports. It is not an independent schema validator or a Python allocation observer; these results do not demonstrate a materially better host for the reference measurement."
+    },
+    {
+      "technology": "Node.js test runner and source-aware JSON probe",
+      "source": "https://nodejs.org/api/test.html",
+      "assessment": "Provides native JavaScript test execution. The actual v22.23.2 token probe retains four duplicate-key admission mismatches in this corpus. Keep it as explicit negative experimental evidence, not as a replacement admission implementation."
+    }
+  ],
+  "rationale": "Keep direct Python execution for the specifically named Python semantic and allocation observables, with byte-exact process separation for candidate parsers. Correct the independent acceptance comparison: equal downstream schema failures can mask forbidden token admission even when decoded values are preserved. Every pinned corpus expectation now contributes to the aggregate failure exit. This is a scoped suitability judgment, not a general Python performance preference; no candidate demonstrated a material win for this measurement boundary.",
+  "source": "https://docs.python.org/3.13/library/json.html",
+  "reopen_when": [
+    "An independent schema implementation replaces the reference oracle",
+    "Qualification requires distributed targets or total process/native memory measurement",
+    "Target deployment constraints or bounded comparative evidence show a material alternative advantage"
+  ],
+  "validation": [
+    "qualification.tests.test_audit_reports",
+    "qualification.tests.test_ingress_audit",
+    "qualification.tests.java_transport",
+    "qualification/technology/ingress-admission-verification-v3.json"
+  ],
+  "physical_qualification_passed": false
+}

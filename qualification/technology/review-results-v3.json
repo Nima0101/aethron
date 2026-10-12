@@ -1,0 +1,140 @@
+{
+  "audit_policy_version": 3,
+  "baseline_commit": "0f7bc5ed1773a294436bcbe5929997884fa6fe9f",
+  "decision": "KEEP Python unittest; FIX nonempty and unambiguous result admission",
+  "python": "3.13.5",
+  "verification": {
+    "red_assertion_failures": 27,
+    "red_errors": 0,
+    "negative_combinations": 33,
+    "new_test_methods": 4,
+    "focused_methods_passed": 23,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_changed_drivers": "PASS",
+    "python39_syntax": "PASS"
+  },
+  "driver_reports": {
+    "declaration_validation": {
+      "review_order_version": 3,
+      "component": "declaration_validation",
+      "python": "3.13.5",
+      "baseline_tests": 4,
+      "baseline_passed": true,
+      "negative_finding_mutations": {
+        "capture_stale": {
+          "failures": 2,
+          "errors": 0
+        },
+        "record_stale": {
+          "failures": 1,
+          "errors": 0
+        },
+        "clock_pair_skew": {
+          "failures": 1,
+          "errors": 0
+        },
+        "clock_domain_mismatch": {
+          "failures": 1,
+          "errors": 0
+        }
+      },
+      "restored_baseline_passed": true,
+      "scope": "synthetic offline declarations; not live admission or authentication",
+      "physical_qualification_passed": false,
+      "source_sha256": {
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+        "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+        "qualification/tests/test_declaration_review.py": "f2b1798f19ee679868cf50e7f08e5c94bae5950a7bf6412e80611094e97a03c1",
+        "qualification/technology/review_declarations.py": "89eefdbd19b9be498e7eef133b9198650e7dfec47aed562e1c83f9ca89f9893b"
+      }
+    },
+    "artifact_byte_binding": {
+      "review_order_version": 3,
+      "component": "artifact_byte_binding",
+      "python": "3.13.5",
+      "hash_backend_module": "_hashlib",
+      "baseline_tests": 4,
+      "baseline_passed": true,
+      "mutations": {
+        "constant_digest": {
+          "failures": 1,
+          "errors": 0
+        },
+        "erased_declaration_negatives": {
+          "failures": 1,
+          "errors": 0
+        },
+        "relaxed_total_budget": {
+          "failures": 1,
+          "errors": 0
+        }
+      },
+      "restored_baseline_passed": true,
+      "physical_qualification_passed": false,
+      "source_sha256": {
+        "qualification/artifacts.py": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+        "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+        "qualification/tests/test_artifacts.py": "b0e4a20dc2a92a0b0773b0d6749a15495e0e8361b89da3e46197f88267077563",
+        "qualification/tests/test_artifact_review.py": "00c5afdbba6c71fe6f9ebe1ea9057ea3c7a80688ba04b0130f13a6608ae17d1b",
+        "qualification/technology/review_artifacts.py": "6190e2320124cca0b8bbc090eff660ba9cad7fc74e24d7838ac9ce9c1d482162"
+      }
+    },
+    "campaign_coverage_and_procedures": {
+      "review_order_version": 3,
+      "component": "campaign_coverage_and_procedures",
+      "python": "3.13.5",
+      "sqlite": "3.46.1",
+      "baseline_tests": 5,
+      "baseline_passed": true,
+      "mutations": {
+        "duplicate_counts_erased": {
+          "failures": 2,
+          "errors": 0
+        },
+        "commitment_multiplicity_erased": {
+          "failures": 1,
+          "errors": 0
+        },
+        "sql_duplicates_admitted": {
+          "failures": 1,
+          "errors": 0
+        }
+      },
+      "restored_baseline_passed": true,
+      "limits": [
+        "SQL aggregation is independent; admission and capture semantics are shared.",
+        "Finite synthetic controls do not demonstrate scientific sample independence.",
+        "No authenticated preregistration, clock, procedure or domain evidence."
+      ],
+      "physical_qualification_passed": false,
+      "source_sha256": {
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+        "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+        "qualification/technology/campaign_sql.py": "4deb710665852d208c1b8170a5963cc649a73e0536116d88926eff99074259c3",
+        "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+        "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+        "qualification/tests/test_campaign_review.py": "f3bc5240549e6cd79d1861e54ad3e3e41196da176aa98ea5fbb27958b55406ed",
+        "qualification/technology/review_campaign.py": "234ca9ac1269bd833fec35c84d79ec162be1de6891b15fda9dc559ff32066e0d"
+      }
+    }
+  },
+  "source_sha256": {
+    "qualification/technology/review_declarations.py": "89eefdbd19b9be498e7eef133b9198650e7dfec47aed562e1c83f9ca89f9893b",
+    "qualification/technology/review_artifacts.py": "6190e2320124cca0b8bbc090eff660ba9cad7fc74e24d7838ac9ce9c1d482162",
+    "qualification/technology/review_campaign.py": "234ca9ac1269bd833fec35c84d79ec162be1de6891b15fda9dc559ff32066e0d",
+    "qualification/tests/test_review_results.py": "5cdf94d7e63f3bd43f2c2eba3a8fd52134b4c093e6e3dd915fc9e1b44f02f2ac",
+    "qualification/technology/review-results-v3.md": "c2807e8f44fe87ff617753b44d2e85e3a8f8dcb5ec4449289c20d02846d50a2b"
+  },
+  "audit_complete": false,
+  "physical_qualification_passed": false,
+  "limits": [
+    "Finite result controls do not prove full discovery or an independent oracle.",
+    "Current reruns do not upgrade historical results to current-source evidence.",
+    "No target-hardware performance or authenticity claim."
+  ]
+}

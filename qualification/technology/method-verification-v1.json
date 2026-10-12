@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "baseline_commit": "ac7221b8746e8bd113e3320511b0a011fa9e5aee",
+  "scope": "Non-executing software declaration-method references v1",
+  "source_sha256": {
+    "qualification/methods.py": "ac80ba3089447ac3d23bb37b98555e0b9bdb6b42360bb59901f02e84baeec388",
+    "qualification/tests/test_methods.py": "15dcec87b3edc8dbde14f27b20148dc96ab731fdd04ca8cc88dcdbcf8f37fccb",
+    "qualification/methods-v1.md": "33c523e55f30577eb826e3f8c4c401d399a73cb5a3812f61e739d69bc6b76930",
+    "qualification/fixtures/methods-v1.json": "52f1b203cc66908d4be42feda1511977427ad26c0a285da508899dcf63f3b452",
+    "qualification/technology/method-decision-v1.json": "737efc9ebe3fac9c7239f1bff50e366f923cd887e911aef1cc47f010e7553d75",
+    "qualification/technology/method-decision-v1.schema.json": "28119c0f018d4c8553ab1331a58940e1843caf8dd403f839d8d8f3ef57d9eb6f",
+    "qualification/procedures.py": "5c6bc37c7eb4a8a45ad9ba8f592838065ebea1a9b95090bf7f6f7a345fd6923a",
+    "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e"
+  },
+  "source_observations_unchanged": true,
+  "red": {
+    "test": "test_bound_content_remains_unverified",
+    "expected_failures": 1,
+    "reason": "API module absent before implementation"
+  },
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "qualification.tests.test_methods",
+        "qualification.tests.test_procedures",
+        "qualification.tests.test_domains",
+        "qualification.tests.test_campaign",
+        "qualification.tests.test_campaign_references",
+        "qualification.tests.test_campaign_bundle",
+        "-q"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 2.803367,
+      "stdout": "",
+      "stderr": "----------------------------------------------------------------------\nRan 63 tests in 2.472s\n\nOK\n"
+    },
+    {
+      "command": [
+        "ruff",
+        "check",
+        "qualification/methods.py",
+        "qualification/tests/test_methods.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.07088,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "ruff",
+        "format",
+        "--check",
+        "qualification/methods.py",
+        "qualification/tests/test_methods.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.016833,
+      "stdout": "2 files already formatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "bandit",
+        "qualification/methods.py",
+        "-q"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.820914,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "negative_controls": [
+    {
+      "control": "dropped_checklist_gate",
+      "test": "test_partial_unknown_checklist_cannot_pass_with_remaining_bound_methods",
+      "expected_assertion_failures": 1,
+      "unexpected_errors": 0
+    },
+    {
+      "control": "ignored_rule_change",
+      "test": "test_unknown_and_changed_rules_do_not_change_frozen_execution",
+      "expected_assertion_failures": 1,
+      "unexpected_errors": 0
+    },
+    {
+      "control": "ignored_method_kind",
+      "test": "test_reusing_one_method_for_another_check_is_rejected",
+      "expected_assertion_failures": 1,
+      "unexpected_errors": 0
+    },
+    {
+      "control": "promoted_hardware_claim",
+      "test": "test_bound_content_remains_unverified",
+      "expected_assertion_failures": 1,
+      "unexpected_errors": 0
+    }
+  ],
+  "portable_synthetic_vectors": 3,
+  "review": {
+    "scope": "Earliest evidence/type constraints, artifact/reference binding and current checklist/domain boundaries",
+    "decision": "KEEP bounded immutable-byte and direct relation APIs; new method composition retains raw checks",
+    "gap_corrected": "Method hashes previously had no supplied-content binding or rule-declaration checks"
+  },
+  "limits": [
+    "Declaration rules only, not physical acquisition-method instructions or execution evidence",
+    "No hardware, deadline, source-authentication or independent-review claim",
+    "Source observations are not execution attestation or complete dependency closure",
+    "ADR schema supplied; external JSON Schema conformance not executed",
+    "Python 3.9 and hosted checks not claimed locally"
+  ],
+  "physical_qualification_passed": false,
+  "phase_complete": false
+}

@@ -1,0 +1,49 @@
+{
+  "audit_policy_version": 2,
+  "audit_complete": false,
+  "decision": null,
+  "cursor": "declaration_validation",
+  "base_head": "8e76aad81d45f01e782de8ff1f8fbfa9b29a1280",
+  "python": "3.13.5",
+  "production_corpus": {
+    "cases": 18,
+    "matched": 18
+  },
+  "node_ingress_probe": {
+    "version": "v22.23.2",
+    "cases": 18,
+    "matched": 14,
+    "parity": false,
+    "retained_mismatches": [
+      "duplicate-equal",
+      "duplicate-overwrite",
+      "duplicate-escaped",
+      "nested-duplicate"
+    ]
+  },
+  "checks": {
+    "qualification_unit_tests": 32,
+    "ruff_lint": "PASS",
+    "ruff_format": "PASS",
+    "bandit_production_findings": 0,
+    "node_syntax": "PASS",
+    "duplicate_detection_disabled_mutation": {
+      "failures": 4,
+      "errors": 0
+    }
+  },
+  "limitations": [
+    "Ingress probe is not a full validator or semantic parity benchmark.",
+    "Intermittent process and namespace exhaustion prevented credible latency measurement.",
+    "No KEEP or MIGRATE decision yet; strict streaming candidate experiment remains."
+  ],
+  "source_sha256": {
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "qualification/tests/test_ingress_audit.py": "f79c83bd9aa0a4c89d3488c6ee7f0f05fb7d722e2dccaf6ff8e4731a07321338",
+    "qualification/technology/ingress-probe.mjs": "05d762763df94a878b91209499c5d51e47fb9bbec81747bcba39ef6637db50b8",
+    "qualification/technology/ingress-vectors-v1.json": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff",
+    "qualification/technology/ingress-node-result-v1.json": "9759f25130c6a6e4c060d766c7c0c2c89bf820459719bfd71377ba53cdffe4e2"
+  },
+  "physical_qualification_passed": false
+}

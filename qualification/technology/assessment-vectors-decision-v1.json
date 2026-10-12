@@ -1,0 +1,41 @@
+{
+  "$schema": "./assessment-vectors-decision-v1.schema.json",
+  "version": 1,
+  "id": "qualification-assessment-vectors-v1",
+  "decision": "KEEP",
+  "technology": "JSON with lowercase hexadecimal byte fields; Python direct API reference runner",
+  "constraints": [
+    "Portable offline finite synthetic evidence for existing raw-byte contracts",
+    "Preserve invalid UTF-8, duplicate JSON keys, whitespace, rejected bytes and exact expectation types",
+    "Bound trusted fixture read to 262145 bytes and reject above 262144",
+    "No runtime admission protocol, target transport or device measurement requirement"
+  ],
+  "alternatives": [
+    {
+      "technology": "CBOR",
+      "source": "https://www.rfc-editor.org/rfc/rfc8949.html",
+      "assessment": "Native byte strings avoid hex expansion and support compact generic values. This small review corpus prioritizes text diff inspection; no constrained transport size requirement exists."
+    },
+    {
+      "technology": "Protocol Buffers",
+      "source": "https://protobuf.dev/programming-guides/encoding/",
+      "assessment": "Bytes fields preserve opaque inputs and generated schemas suit published service APIs; this fixture has no service schema or target SDK requirement and must expose malformed embedded bytes directly for review."
+    },
+    {
+      "technology": "Java/JUnit or Node test runners",
+      "source": "qualification/technology/coverage-review-v3.md",
+      "assessment": "Credible consumers for their respective runtime implementations. Calling a second process to exercise only the existing Python API adds a transport boundary without independently checking another implementation. External consumer parity remains unverified."
+    }
+  ],
+  "rationale": "Use language-neutral JSON metadata plus hex for byte-exact inputs; decoded documents must never be normalized. Full report expectations and strict recursive type comparison expose nested regressions. Pin the entire reviewed corpus before parsing to prevent replacement by internally consistent passing cases. Python is retained only for the direct reference implementation runner; the fixture does not depend on Python builders or assert other-language conformance.",
+  "source": "https://www.rfc-editor.org/rfc/rfc8259.html",
+  "reopen_when": [
+    "Corpus size makes textual byte encoding materially excessive",
+    "A published native consumer or installed transport requires another representation"
+  ],
+  "validation": [
+    "qualification.tests.test_assessment_vectors",
+    "qualification/fixtures/assessment-vectors-v1.json"
+  ],
+  "physical_qualification_passed": false
+}

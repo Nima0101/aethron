@@ -1,0 +1,204 @@
+{
+  "audit_policy_version": 3,
+  "baseline_commit": "e6f458cfeec48576e67e0fbc1e404f74774d4268",
+  "component": "P4/P15 Node audit probe source observations",
+  "decision": "KEEP JavaScript on Node as the experiment subject; FIX before/after observations",
+  "red": {
+    "methods": 5,
+    "assertion_failures": 6,
+    "execution_errors": 0,
+    "elapsed_seconds": 2.723
+  },
+  "green": {
+    "methods": 5,
+    "skips": 0,
+    "elapsed_seconds": 1.926,
+    "fresh_report_processes": 2,
+    "nested_source_bindings": 3,
+    "four_mib_hashes_independently_matched": 4
+  },
+  "static": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "node_syntax_files": 2,
+    "bandit_medium_high": "PASS",
+    "python39_syntax_files": 1,
+    "python39_runtime": "not run locally"
+  },
+  "fresh_reports": {
+    "hash-probe.mjs": {
+      "audit_policy_version": 3,
+      "scope": "native_sha256_and_ownership_probe_only",
+      "runtime": "v22.23.2",
+      "known_vectors": [
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+      ],
+      "four_mib_digests": [
+        "30e14955ebf1352266dc2ff8067e68104607e750abb9d3b36582b8af909fcb58",
+        "ee78cd29d3a534713b36e6ff6fa3668c8a8f851a542d5eb2401c25ca4e057d02",
+        "2fa4430272111c7854b204001461e16f2c73725b07dde2b6d1dc4f2aa8fe18da",
+        "9ed3b916b5b6b1dbe61b8844c8130657b9bc4f7ff80a07c7835989c911ad430a"
+      ],
+      "copy_and_hash_elapsed_ns": [
+        6872685,
+        6391202,
+        5973971,
+        6055545,
+        6539699,
+        69294750,
+        11806718,
+        7394532,
+        5277772,
+        5235794
+      ],
+      "alias_changed": true,
+      "owned_preserved": true,
+      "physical_qualification_passed": false,
+      "source_observation": "equal_before_and_after_workload",
+      "source_sha256": {
+        "qualification/technology/hash-probe.mjs": "4451b2d84f3deb1d8f1202d7e8391e00ba1dd0b4ddc9db7980ee3abf97a89ae0"
+      }
+    },
+    "ingress-probe.mjs": {
+      "audit_policy_version": 3,
+      "scope": "ingress_token_probe_only_no_schema_or_semantic_validation",
+      "runtime": "v22.23.2",
+      "source_aware_reviver": true,
+      "cases": [
+        {
+          "id": "valid-incomplete",
+          "accepted": true,
+          "expected_accepted": true,
+          "matches": true
+        },
+        {
+          "id": "integer-negative-zero",
+          "accepted": true,
+          "expected_accepted": true,
+          "matches": true
+        },
+        {
+          "id": "escaped-key-valid",
+          "accepted": true,
+          "expected_accepted": true,
+          "matches": true
+        },
+        {
+          "id": "float-integral",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "exponent-integral",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "float-underflow",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "nonfinite",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "infinite",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "oversized-number",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "duplicate-equal",
+          "accepted": true,
+          "expected_accepted": false,
+          "matches": false
+        },
+        {
+          "id": "duplicate-overwrite",
+          "accepted": true,
+          "expected_accepted": false,
+          "matches": false
+        },
+        {
+          "id": "duplicate-escaped",
+          "accepted": true,
+          "expected_accepted": false,
+          "matches": false
+        },
+        {
+          "id": "nested-duplicate",
+          "accepted": true,
+          "expected_accepted": false,
+          "matches": false
+        },
+        {
+          "id": "utf8-bom",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "invalid-utf8",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "utf16",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "trailing-document",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        },
+        {
+          "id": "malformed",
+          "accepted": false,
+          "expected_accepted": false,
+          "matches": true
+        }
+      ],
+      "parity": false,
+      "source_observation": "equal_before_and_after_workload",
+      "source_sha256": {
+        "qualification/technology/ingress-probe.mjs": "b77ae20803ff0f7a5a43832668a4f8b53855f1ed66c651df4dc85fd508c4af72",
+        "qualification/technology/ingress-vectors-v1.json": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff"
+      },
+      "physical_qualification_passed": false
+    }
+  },
+  "source_sha256": {
+    "qualification/technology/hash-probe.mjs": "4451b2d84f3deb1d8f1202d7e8391e00ba1dd0b4ddc9db7980ee3abf97a89ae0",
+    "qualification/technology/ingress-probe.mjs": "b77ae20803ff0f7a5a43832668a4f8b53855f1ed66c651df4dc85fd508c4af72",
+    "qualification/technology/ingress-vectors-v1.json": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff",
+    "qualification/tests/node_provenance.py": "c9c85afa49dfe8bc6b7c5a9c04535af65bfde25977fdea581a4bfc0d0fcb775e",
+    "qualification/technology/node-source-observation-v3.md": "aa506d7c526285f590e629fcd061dfe9462f58f3b72725a989848d2d182c8b80",
+    "qualification/technology/review-v3.md": "c4c80789d23ba579c613998328492dc71efdcad596868940bd255583419befb9"
+  },
+  "limits": [
+    "Before/after observations are non-atomic and do not authenticate execution or dependencies.",
+    "Transient reverted edits, stale loaded code and post-check changes may be invisible.",
+    "Hash timings are descriptive shared-host samples, not target hardware deadlines.",
+    "Historical evidence remains unchanged; four Node ingress duplicate-key mismatches remain."
+  ],
+  "audit_complete": false,
+  "product_acceptance_passed": false,
+  "physical_qualification_passed": false
+}

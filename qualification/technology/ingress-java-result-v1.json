@@ -1,0 +1,57 @@
+{
+  "audit_policy_version": 2,
+  "scope": "Java ingress with unchanged Python semantic oracle; not a Java validator",
+  "python": "3.13.5",
+  "ingress_cases": 18,
+  "semantic_requests": 63,
+  "mismatch_indices": [],
+  "all_reports_match": true,
+  "request_transport_sha256": "7c1ddc2d27791242716bfa836e681f0b3b8fa92e05350806b4536350620255e0",
+  "response_transport_sha256": "5059be25311cb6c0e60f0c9e0636ccc3e62535d233661267ee152a5d5f55668f",
+  "python_65536_byte_measurement": {
+    "iterations": 20,
+    "elapsed_ns": [
+      7007776,
+      6014246,
+      5650426,
+      5810551,
+      5815483,
+      5737557,
+      61422922,
+      6199850,
+      5992143,
+      5881842,
+      5862127,
+      5927654,
+      5779968,
+      64194118,
+      5748134,
+      5626068,
+      5637388,
+      5584808,
+      5653874,
+      5543462
+    ],
+    "traced_peak_bytes_one_call": 73615,
+    "acceptance_threshold": null
+  },
+  "source_sha256": {
+    "qualification/technology/IngressProbe.java": "abbe803c05d3d10039d68e3e044d1c8578f5259733bd1bf554dc8486433fd4d3",
+    "qualification/technology/compare_ingress.py": "706bb7386936f55c06260c2d72e77ce51e63196adec05193d0c868adba3a448b",
+    "qualification/technology/ingress-vectors-v1.json": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034"
+  },
+  "physical_qualification_passed": false,
+  "dependency": {
+    "url": "https://repo.maven.apache.org/maven2/com/fasterxml/jackson/core/jackson-core/2.21.5/jackson-core-2.21.5.jar",
+    "bytes": 594187,
+    "sha256": "b64b5874162b503a0e58a8f7758266e8dd9f91bf49e3a59ae0b5f47589a231b7"
+  },
+  "java_release": "21.0.11",
+  "retained_failures": [
+    "Initial Java invocation exited 1; its diagnostics were not captured.",
+    "Subsequent Java child-process launches failed during startup with native-thread EAGAIN.",
+    "A sequential export/run/compare execution with -Xint succeeded; no cross-language performance ranking is claimed."
+  ]
+}

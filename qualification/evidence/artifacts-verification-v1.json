@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "scope": "synthetic offline artifact byte-binding tests",
+  "python": "3.13.5",
+  "platform": "Linux",
+  "focused_tests": {
+    "total": 22,
+    "new_artifact_tests": 8,
+    "result": "PASS",
+    "retained_red": "All 8 artifact test methods failed before implementation; 18 assertion/subtest failures."
+  },
+  "static": {
+    "ruff": "0.16.10 lint and format PASS",
+    "bandit": "1.9.4 zero production findings"
+  },
+  "source_sha256": {
+    "qualification/artifacts.py": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+    "qualification/artifacts-v1.md": "f4ee973eaf665186e65e61d414fca5b0fe20485ea0d0bbf27bb04cb85130d598",
+    "qualification/tests/test_artifacts.py": "b0e4a20dc2a92a0b0773b0d6749a15495e0e8361b89da3e46197f88267077563",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034"
+  },
+  "artifact_authenticity_verified": false,
+  "physical_qualification_passed": false,
+  "hosted_checks_claimed": false
+}

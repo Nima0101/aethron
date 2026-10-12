@@ -1,0 +1,53 @@
+{
+  "$schema": "./procedure-decision-v1.schema.json",
+  "version": 1,
+  "id": "qualification-procedure-checklist-v1",
+  "decision": "KEEP",
+  "technology": "Python bounded JSON hooks and direct semantic checks",
+  "constraints": [
+    "Offline in-process source-checkout API",
+    "Two immutable UTF-8 byte inputs, each at most 65536 bytes and depth eight",
+    "At most sixteen cases and three method references per case",
+    "No commands, reference resolution, authority or physical approval",
+    "No specified native ABI or hard real-time deadline"
+  ],
+  "alternatives": [
+    {
+      "technology": "CUE",
+      "source": "https://cuelang.org/docs/concept/how-cue-enables-data-validation/",
+      "assessment": "Declarative constraints are useful; raw-byte admission and report composition still require a host boundary."
+    },
+    {
+      "technology": "Rego",
+      "source": "https://www.openpolicyagent.org/docs/policy-language",
+      "assessment": "Policy queries suit independently distributed rules. This fixed small checklist has no distribution requirement."
+    },
+    {
+      "technology": "C# Utf8JsonReader",
+      "source": "https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/use-utf8jsonreader",
+      "assessment": "Streaming tokens are credible for larger input; this bounded complete-message API has no streaming requirement."
+    },
+    {
+      "technology": "Rust Serde",
+      "source": "https://docs.rs/serde_json/latest/serde_json/",
+      "assessment": "Typed native decoding is credible for native deployment; no current ABI or measured resource deficit selects it here."
+    },
+    {
+      "technology": "Pydantic strict mode",
+      "source": "https://docs.pydantic.dev/latest/concepts/strict_mode/",
+      "assessment": "Strict types reduce coercion but do not remove raw-token admission, relation checks or fixed-error wrapping."
+    }
+  ],
+  "rationale": "Python object_pairs_hook and parse_int expose duplicate keys and numeric tokens before normalization. Exact immutable bytes allow hashing and both bounded contracts to share one input without a serialization bridge. Direct checks expose all independent findings. This is a qualitative mechanism decision, not a speed ranking.",
+  "source": "https://docs.python.org/3.13/library/json.html",
+  "reopen_when": [
+    "A target native ABI is required",
+    "Measured resource limits are unmet",
+    "Rules require independent policy distribution"
+  ],
+  "validation": [
+    "qualification.tests.test_procedures",
+    "qualification/fixtures/procedures-v1.json"
+  ],
+  "physical_qualification_passed": false
+}

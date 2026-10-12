@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_commit": "9e36a15e5696d2c29d629a57ef9f0be92e031eae",
+  "source_state": "Working-copy test correction over baseline. Hashes below are post-run file observations, not execution attestation.",
+  "python": "3.13.5",
+  "decision": "KEEP direct Python API consumer tests; FIX exact integer count assertions on expectations and responses.",
+  "production_files_changed": false,
+  "fixture_bytes_changed": false,
+  "red": {
+    "methods": 2,
+    "assertion_failures": 12,
+    "errors": 0,
+    "skips": 0
+  },
+  "controls": {
+    "fields": [
+      "submitted",
+      "eligible",
+      "rejected"
+    ],
+    "substitutions": [
+      "bool",
+      "float"
+    ],
+    "boundaries": [
+      "temporary fixture expectation",
+      "real evaluator returned response"
+    ],
+    "variations": 12,
+    "admission": "Each variation requires a passing baseline, assertion failure without errors/skips under substitution, then a passing restored baseline.",
+    "scope": "Patch runner aliases only; production implementation runs unchanged. Temporary fixture copies are removed."
+  },
+  "related_run": {
+    "command": "python3 -m unittest qualification.tests.test_consumer_vector_types qualification.tests.test_consumer_vectors qualification.tests.test_bundle_artifact_integration qualification.tests.test_campaign_bundle qualification.tests.test_campaign_bundle_cli qualification.tests.test_campaign_references qualification.tests.test_campaign qualification.tests.test_artifacts qualification.tests.test_evidence -q",
+    "methods": 64,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "timing": "Before binding loop variables explicitly for lint; the five affected methods passed again after that correction."
+  },
+  "final_affected_run": {
+    "methods": 5,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "checks": {
+    "ruff_initial": "Four B023 loop-variable capture diagnostics; corrected with bound defaults.",
+    "ruff_final": "PASS",
+    "format": "PASS",
+    "bandit_changed_tests": "PASS",
+    "diff": "PASS"
+  },
+  "sources_sha256": {
+    "qualification/tests/test_consumer_vectors.py": "b6a446baef6a6f454d13ba5baefe558ee2a3c40e36787348afba66e8c99a111e",
+    "qualification/tests/test_consumer_vector_types.py": "a6f1c6d2dab6447bf894c925da2c52d7859e753309479be9e79481b583623a5f",
+    "qualification/fixtures/consumer-vectors-v1.json": "8c3f345a6e8e3b947ca94ca4b4e0817e2d3961ff43bade6cff2adc5f2b4daff9",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "qualification/artifacts.py": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+    "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+    "qualification/campaign_references.py": "ffae611838d8627c036c68bd3e6988dab9656cbc6aee8f7032857a34199e6686",
+    "qualification/campaign_bundle.py": "1584e531f994fde5c612dce52eafc993adfe51044d9338b5db27d97fe843e32e",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e"
+  },
+  "limitations": [
+    "Finite reference API count-type controls, not comprehensive report schema conformance.",
+    "Trusted repository fixture loader, not hostile-upload admission.",
+    "No independent native or installed-distribution consumer execution.",
+    "No physical evidence, source authentication, procedure approval or real-time qualification.",
+    "Remaining audit tools and unfinished P15/P19 software remain outside this completed correction."
+  ],
+  "physical_qualification_passed": false,
+  "lane_complete": false
+}

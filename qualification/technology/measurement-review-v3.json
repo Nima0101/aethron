@@ -1,0 +1,68 @@
+{
+  "audit_policy_version": 3,
+  "before_head": "c91306de5272737bf11689073e9167ae3f60560a",
+  "scope": "Offline Python allocation measurement lifecycle in three audit drivers",
+  "python": "3.13.5",
+  "decision": "KEEP narrowly scoped tracemalloc measurement; FIX ownership, cleanup and current report metadata",
+  "baseline": {
+    "methods": 93,
+    "passed": true
+  },
+  "red": {
+    "methods": 4,
+    "assertion_failures": 12,
+    "errors": 0,
+    "skips": 0,
+    "note": "Initial module discovery also ran ten imported baseline methods; changed import to avoid duplicate discovery before the retained four-method RED run."
+  },
+  "focused_suite": {
+    "command": "python3 -m unittest discover -s qualification/tests -q",
+    "methods": 97,
+    "errors": 0,
+    "failures": 0,
+    "skips": 0,
+    "passed": true
+  },
+  "optimized_controls": {
+    "command": "python3 -O -m unittest qualification.tests.test_measurement_review -q",
+    "methods": 4,
+    "errors": 0,
+    "failures": 0,
+    "skips": 0,
+    "passed": true
+  },
+  "static_checks": {
+    "ruff": "PASS after correcting a closure binding finding",
+    "format": "PASS",
+    "bandit_changed_measurement_code": "PASS",
+    "diff_check": "PASS"
+  },
+  "limits": [
+    "Synchronous exclusive process-tracing ownership required; no concurrent tracing-state protection.",
+    "Python-traced allocation peak excludes preconstructed inputs and unregistered native allocations; not RSS or an acceptance threshold.",
+    "Ingress integration controls use synthetic responses; no fresh Java runtime execution is asserted.",
+    "Historical measurement result files remain unchanged and cannot establish absence of caller tracing.",
+    "The source manifest binds test and driver dependencies, not the whole runtime environment."
+  ],
+  "source_sha256": {
+    "qualification/technology/measurement.py": "4c3e628661aaedefe3cc5b26e01bd887bb6303e13cb2099faf66382e31d7cf0a",
+    "qualification/technology/compare_ingress.py": "86ef4e961121383878e994da16710a070cf6e1f1ca8331ce2976ad63618a79ea",
+    "qualification/technology/measure_binding.py": "b525da174546ba89e6248ec53dfe4384058ca3066b7bea0583c5d48c0b2610f7",
+    "qualification/technology/compare_campaign.py": "84ee115742e5c51e65b583a64bfa4cca66794ffad2c4a7e86a083c78b45f51e9",
+    "qualification/technology/campaign_sql.py": "4deb710665852d208c1b8170a5963cc649a73e0536116d88926eff99074259c3",
+    "qualification/technology/ingress-vectors-v1.json": "a62278050b822b70a4d40dd37aa51899ccc49ef5b94f1d2b4ff259299193aeff",
+    "qualification/tests/test_measurement_review.py": "c26ba9514d70195917a1f1db5c67724b47ed1d223eb44ba785133eafb5c45453",
+    "qualification/tests/test_audit_reports.py": "b83bef9357afc466b120812d9f85ef4d5554026e622e33c528fc7a0ac711b613",
+    "qualification/tests/test_evidence.py": "03f340e1decbfcb795b601f8081def65d052e4bab16f4319c47e896f40482034",
+    "qualification/tests/test_campaign.py": "31f5c01e8583ce2ec87a0324f7f452344175e9d7e30ddb8a2bf892cc95dff3a5",
+    "qualification/tests/test_campaign_audit.py": "65938f530a0025d2f060b1f450f15ce3150bd27dcf6cb8ab9598da9f7f3bf3e0",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "qualification/artifacts.py": "5e07f0bda57a29d874e7f7101bf2f6b68219a1f49b5af989e486e3ea1c4f7c59",
+    "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "qualification/rigs/synthetic-v1.json": "0b68e3a27477d5d53bc616afac23d82568ac357fdf95ce2520f114ac2efb25ea",
+    "qualification/technology/review-v3.md": "cb37a0f4ede5b2b2b9d8d47e0b74da50a01eff575084069c7ecf8bbe4ca4f8c4"
+  },
+  "physical_qualification_passed": false,
+  "hosted_execution_verified": false
+}

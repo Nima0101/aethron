@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "baseline_commit": "013108a431b3d93d00526412aae3169db2907542",
+  "scope": "Non-executing procedure checklist declarations v1",
+  "source_sha256": {
+    "qualification/procedures.py": "5c6bc37c7eb4a8a45ad9ba8f592838065ebea1a9b95090bf7f6f7a345fd6923a",
+    "qualification/tests/test_procedures.py": "99ebb7f7ef256077065e16b5cd64daf9125ab192c0c58c352dd6d3177433cab5",
+    "qualification/fixtures/procedures-v1.json": "a3ab39694a0ed6f7351a6a41a010db56eca72c00d95e338f874b8541aa19344a",
+    "qualification/procedures-v1.md": "d1d2fd60982536e881830ba956ed933b43356dc739b754ba76e282c083047fc4",
+    "qualification/technology/procedure-decision-v1.json": "ba2e4e59d6f95bc8ba9120c16491ddadda9a005d4cc458ac2866dbbd92e23cce",
+    "qualification/technology/procedure-decision-v1.schema.json": "36ed736749ebb328d829c6b80f44d74ce844aad53c9c020fc2025008789804be",
+    "qualification/campaign.py": "1e5e34d200afa2175049bd5888a7166357958c2f89b1d37b24f0b3d369a35626",
+    "qualification/evidence.py": "1c5771835bb246e8307acca6276184c3dbd5a3e4f638a90a839a16ece283efa3",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e"
+  },
+  "source_observations_unchanged": true,
+  "red": {
+    "test": "test_complete_checklist_remains_unverified",
+    "expected_failures": 1,
+    "reason": "API module absent before implementation"
+  },
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "qualification.tests.test_procedures",
+        "qualification.tests.test_campaign",
+        "qualification.tests.test_campaign_references",
+        "qualification.tests.test_campaign_bundle",
+        "qualification.tests.test_consumer_vectors",
+        "-q"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 1.769982,
+      "stdout": "",
+      "stderr": "----------------------------------------------------------------------\nRan 38 tests in 1.465s\n\nOK\n"
+    },
+    {
+      "command": [
+        "ruff",
+        "check",
+        "qualification/procedures.py",
+        "qualification/tests/test_procedures.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.014294,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "ruff",
+        "format",
+        "--check",
+        "qualification/procedures.py",
+        "qualification/tests/test_procedures.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.071715,
+      "stdout": "2 files already formatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "bandit",
+        "qualification/procedures.py",
+        "-q"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.709491,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "negative_controls": [
+    {
+      "control": "promoted_physical_claim",
+      "test": "test_complete_checklist_remains_unverified",
+      "expected_assertion_failures": 1,
+      "unexpected_errors": 0
+    },
+    {
+      "control": "ignored_digest_mismatch",
+      "test": "test_raw_bytes_are_pinned_even_when_json_is_equivalent",
+      "expected_assertion_failures": 1,
+      "unexpected_errors": 0
+    },
+    {
+      "control": "lost_extra_case_negative",
+      "test": "test_independent_binding_and_coverage_negatives_are_retained",
+      "expected_assertion_failures": 1,
+      "unexpected_errors": 0
+    }
+  ],
+  "portable_vectors": 4,
+  "limits": [
+    "Finite synthetic declaration cases only; no method-content inspection or physical measurements",
+    "No comparative language benchmark or hard real-time claim",
+    "Source observations do not authenticate execution or capture complete dependency closure",
+    "ADR JSON Schema supplied; no external JSON Schema engine conformance run",
+    "Hosted results pending; Python 3.9 not executed locally"
+  ],
+  "physical_qualification_passed": false,
+  "phase_complete": false
+}
