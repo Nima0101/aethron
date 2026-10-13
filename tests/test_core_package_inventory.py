@@ -5,6 +5,7 @@ import io
 import subprocess
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -75,7 +76,11 @@ class CorePackageInventory(unittest.TestCase):
         self.assertEqual(str(error), "wheel builds differ")
 
     def test_equal_single_wheels_reach_consumer_boundary(self):
-        inventory = {self.wheel: b"synthetic"}
+        archive = io.BytesIO()
+        with zipfile.ZipFile(archive, "w") as wheel:
+            for name, data in package_check.snapshot_source_payload(package_check.ROOT).items():
+                wheel.writestr(name, data)
+        inventory = {self.wheel: archive.getvalue()}
         error = self.compare(inventory, inventory)
         self.assertIsInstance(error, RuntimeError)
         self.assertEqual(str(error), "inventory_accepted")

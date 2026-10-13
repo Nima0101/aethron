@@ -46,6 +46,10 @@ class CorePackageReport(unittest.TestCase):
                 "[console_scripts]\naethron = aethron.__main__:main\n",
             )
             wheel.writestr("aethron-0.2.0.dist-info/RECORD", "")
+        with zipfile.ZipFile(archive) as wheel:
+            source_payload = {
+                name: wheel.read(name) for name in wheel.namelist() if name.startswith("aethron/")
+            }
         real_process = subprocess.run
         output = io.StringIO()
         installed = []
@@ -119,6 +123,7 @@ class CorePackageReport(unittest.TestCase):
             return result
 
         with (
+            patch.object(package_check, "snapshot_source_payload", return_value=source_payload),
             patch.object(package_check.subprocess, "run", side_effect=process),
             contextlib.redirect_stdout(output),
         ):
