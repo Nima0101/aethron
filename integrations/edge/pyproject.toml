@@ -22,3 +22,6 @@ aethron-edge = "aethron_edge.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["aethron_edge*"]
+
+[tool.setuptools.cmdclass]
+bdist_wheel = "_build.ReproducibleWheel"
