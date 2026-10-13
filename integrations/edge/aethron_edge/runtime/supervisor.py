@@ -236,11 +236,15 @@ class ApplianceSupervisor:
             if cleanup_failed:
                 self.faults.add("shutdown_cleanup")
             if self.config is not None:
-                result = self.status(time.monotonic_ns())
-                result["state"] = "fault" if cleanup_failed else "stopped"
                 try:
+                    result = self.status(time.monotonic_ns())
+                    result["state"] = "fault" if cleanup_failed else "stopped"
                     publish_status(Path(self.config.status_file), result)
-                except OSError:
-                    pass
+                except Exception:
+                    # Diagnostics can fail after resource cleanup. Preserve the
+                    # fixed failure boundary and allow an explicit retry; never
+                    # invent a successful status or expose the reporting error.
+                    cleanup_failed = True
+                    self.faults.add("shutdown_cleanup")
         if cleanup_failed:
             raise RuntimeError("appliance_cleanup_failed") from None

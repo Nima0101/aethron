@@ -147,3 +147,40 @@ class ApplianceShutdown(unittest.TestCase):
         self.runtime.maintenance[0].is_alive.side_effect = OSError("private diagnostic")
         self.assert_failed_shutdown()
         self.runtime.maintenance[1].is_alive.assert_called_once_with()
+
+    def assert_reporting_failure(self):
+        with self.assertRaises(Exception) as caught:
+            self.runtime.shutdown()
+        self.assert_cleanup_attempts()
+        self.assertIs(type(caught.exception), RuntimeError)
+        self.assertEqual(str(caught.exception), "appliance_cleanup_failed")
+        self.assertIsNone(caught.exception.__context__)
+        self.assertIn("shutdown_cleanup", self.runtime.faults)
+
+    def test_status_collection_failure_is_private_after_cleanup(self):
+        snapshot = self.runtime.telemetry["first"].snapshot
+        snapshot.side_effect = ValueError("private diagnostic")
+        self.assert_reporting_failure()
+        snapshot.side_effect = None
+        self.runtime.shutdown()
+        status = json.loads(Path(self.runtime.config.status_file).read_text())
+        self.assertEqual(status["state"], "stopped")
+
+    def test_reporting_failure_does_not_replace_existing_cleanup_fault(self):
+        self.processes[0].join.side_effect = OSError("private cleanup diagnostic")
+        self.runtime.telemetry["first"].snapshot.side_effect = ValueError("private diagnostic")
+        self.assert_reporting_failure()
+        self.assertIs(self.runtime.pipelines["first"].process, self.processes[0])
+        self.processes[0].close.assert_not_called()
+
+    def test_status_publication_failures_are_not_successful_shutdowns(self):
+        for error in (OSError, ValueError):
+            with self.subTest(error=error.__name__):
+                with patch(
+                    "aethron_edge.runtime.supervisor.publish_status",
+                    side_effect=error("private diagnostic"),
+                ):
+                    self.assert_reporting_failure()
+                self.runtime.shutdown()
+                status = json.loads(Path(self.runtime.config.status_file).read_text())
+                self.assertEqual(status["state"], "stopped")
