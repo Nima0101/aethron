@@ -37,11 +37,23 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                 env=env,
                 stdout=subprocess.DEVNULL,
             )
-    for wheel in (output / "a").glob("*.whl"):
-        assert wheel.read_bytes() == (output / "b" / wheel.name).read_bytes(), (
-            "nonreproducible wheel"
-        )
-        hashes[wheel.name] = hashlib.sha256(wheel.read_bytes()).hexdigest()
+    first = {wheel.name: wheel for wheel in (output / "a").glob("*.whl")}
+    second = {wheel.name: wheel for wheel in (output / "b").glob("*.whl")}
+    if not first or first.keys() != second.keys():
+        raise ValueError("wheel_inventory_mismatch")
+    # Filename identity is necessary evidence, not authentication of wheel contents.
+    from packaging.utils import InvalidWheelFilename, parse_wheel_filename
+
+    try:
+        distributions = [parse_wheel_filename(name)[0] for name in first]
+    except InvalidWheelFilename:
+        raise ValueError("wheel_distribution_mismatch") from None
+    if sorted(distributions) != ["aethron", "aethron-edge"]:
+        raise ValueError("wheel_distribution_mismatch")
+    for name, wheel in sorted(first.items()):
+        compared_bytes = wheel.read_bytes()
+        assert compared_bytes == second[name].read_bytes(), "nonreproducible wheel"
+        hashes[name] = hashlib.sha256(compared_bytes).hexdigest()
     with tempfile.TemporaryDirectory(prefix="aethron-installed-") as temporary:
         work = Path(temporary)
         subprocess.run([sys.executable, "-m", "venv", str(work / "venv")], check=True)
