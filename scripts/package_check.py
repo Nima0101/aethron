@@ -1,11 +1,13 @@
 """Build wheels twice and install into a fresh environment outside the source tree."""
 
 import hashlib
+import io
 import json
 import os
 import subprocess
 import sys
 import tempfile
+import zipfile
 from pathlib import Path
 
 # Optimized execution removes the assertions that establish this evidence.
@@ -15,9 +17,53 @@ if sys.flags.optimize:
 ROOT = Path(__file__).resolve().parents[1]
 
 
+SOURCE_SUFFIXES = (".py", ".pxd", ".json")
+
+
+def snapshot_source_payload(root, package_name="aethron"):
+    payload = {}
+    package = root / package_name
+    if package.is_symlink():
+        raise ValueError("invalid_source_payload_file")
+    if not package.exists():
+        raise ValueError("empty_source_payload")
+
+    def unreadable(error):
+        raise error
+
+    for directory, directories, files in os.walk(package, onerror=unreadable):
+        for name in directories:
+            path = Path(directory) / name
+            if path.is_symlink() or path.suffix in SOURCE_SUFFIXES:
+                raise ValueError("invalid_source_payload_file")
+        for name in files:
+            path = Path(directory) / name
+            if path.suffix in SOURCE_SUFFIXES:
+                if path.is_symlink() or not path.is_file():
+                    raise ValueError("invalid_source_payload_file")
+                payload[path.relative_to(root).as_posix()] = path.read_bytes()
+    if not payload:
+        raise ValueError("empty_source_payload")
+    return payload
+
+
+def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
+    with zipfile.ZipFile(io.BytesIO(wheel_bytes)) as wheel:
+        names = [
+            name
+            for name in wheel.namelist()
+            if name.startswith(package_name + "/") and name.endswith(SOURCE_SUFFIXES)
+        ]
+        if len(names) != len(set(names)) or set(names) != set(payload):
+            raise ValueError("wheel_source_payload_mismatch")
+        if any(wheel.read(name) != payload[name] for name in names):
+            raise ValueError("wheel_source_payload_mismatch")
+
+
 def run():
     with tempfile.TemporaryDirectory(prefix="aethron-wheel-") as directory:
         temp = Path(directory)
+        source_payload = snapshot_source_payload(ROOT)
         env = dict(os.environ, SOURCE_DATE_EPOCH="1767225600")
         for name in ("a", "b"):
             subprocess.run(
@@ -42,6 +88,7 @@ def run():
         a, b = first[0], second[0]
         compared_bytes = a.read_bytes()
         assert compared_bytes == b.read_bytes(), "wheel builds differ"
+        validate_source_payload(compared_bytes, source_payload)
         wheel_sha256 = hashlib.sha256(compared_bytes).hexdigest()
         subprocess.run([sys.executable, "-m", "venv", str(temp / "consumer")], check=True)
         python = temp / "consumer" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")

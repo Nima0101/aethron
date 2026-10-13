@@ -6,6 +6,7 @@ import io
 import json
 import subprocess
 import unittest
+import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -17,7 +18,11 @@ class PackageFinalIntegrityTests(unittest.TestCase):
         output = io.StringIO()
         builds = {}
         wheel_name = "aethron-0.2.0-py3-none-any.whl"
-        wheel_bytes = b"synthetic compared wheel"
+        archive = io.BytesIO()
+        with zipfile.ZipFile(archive, "w") as wheel:
+            for name, data in package_check.snapshot_source_payload(package_check.ROOT).items():
+                wheel.writestr(name, data)
+        wheel_bytes = archive.getvalue()
 
         def process(args, **kwargs):
             if args[1:4] == ["-m", "build", "--no-isolation"]:
