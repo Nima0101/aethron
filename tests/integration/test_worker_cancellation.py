@@ -156,3 +156,40 @@ class WorkerCancellation(unittest.TestCase):
         messages = self.run_worker("opencv")
         self.assertEqual([m["reason"] for m in messages], ["clock_untrusted", "source_lost"])
         self.assertNotIn("cancellation", self.detector.infer.call_args.kwargs)
+
+    def test_source_cleanup_failure_publishes_only_fixed_fault(self):
+        self.source.read.return_value = SourceFault("source_lost")
+        self.source.close.side_effect = RuntimeError("private source cleanup details")
+        messages = self.run_worker("opencv")
+        self.assertEqual([m["reason"] for m in messages], ["source_lost", "model_error"])
+        self.assertEqual(messages[-1], {"data": None, "reason": "model_error", "latency_ms": 0})
+        self.detector.infer.assert_not_called()
+
+    def test_watcher_cleanup_failure_still_closes_source(self):
+        self.source.read.return_value = SourceFault("source_lost")
+        close = pipeline._InferenceStop.close
+
+        def fail_after_join(watcher):
+            close(watcher)
+            raise RuntimeError("private watcher cleanup details")
+
+        with patch.object(pipeline._InferenceStop, "close", fail_after_join):
+            messages = self.run_worker()
+        self.source.close.assert_called_once()
+        self.assertEqual([m["reason"] for m in messages], ["source_lost", "model_error"])
+        self.assertEqual(messages[-1], {"data": None, "reason": "model_error", "latency_ms": 0})
+
+    def test_execution_and_both_cleanup_failures_remain_fixed_faults(self):
+        self.detector.infer.side_effect = RuntimeError("private inference details")
+        self.source.close.side_effect = RuntimeError("private source cleanup details")
+        close = pipeline._InferenceStop.close
+
+        def fail_after_join(watcher):
+            close(watcher)
+            raise RuntimeError("private watcher cleanup details")
+
+        with patch.object(pipeline._InferenceStop, "close", fail_after_join):
+            messages = self.run_worker()
+        self.detector.infer.assert_called_once()
+        self.source.close.assert_called_once()
+        self.assertEqual(messages, [{"data": None, "reason": "model_error", "latency_ms": 0}] * 2)

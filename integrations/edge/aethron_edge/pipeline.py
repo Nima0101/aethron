@@ -267,10 +267,18 @@ def _worker(
     except Exception:
         _latest(channel, {"data": None, "reason": "model_error", "latency_ms": 0})
     finally:
-        if cancellation is not None:
-            cancellation.close()
-        if source:
-            source.close()
+        cleanup_failed = False
+        for resource in (cancellation, source):
+            if resource is not None:
+                try:
+                    resource.close()
+                except Exception:
+                    # Attempt both cleanups without exposing native/source
+                    # exception text through the process traceback. The parent
+                    # still owns descendant termination if cleanup fails.
+                    cleanup_failed = True
+        if cleanup_failed:
+            _latest(channel, {"data": None, "reason": "model_error", "latency_ms": 0})
 
 
 class RuntimePipeline:
