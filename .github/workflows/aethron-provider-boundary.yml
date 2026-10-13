@@ -102,7 +102,7 @@ jobs:
           suite.addTests(unittest.defaultTestLoader.discover('tests/integration', pattern='test_appliance_startup.py'))
           suite.addTests(unittest.defaultTestLoader.discover('tests/integration', pattern='test_recovery_scheduling.py'))
           result = unittest.TextTestRunner(verbosity=2).run(suite)
-          if not result.wasSuccessful() or result.testsRun != 60 or result.skipped or result.expectedFailures:
+          if not result.wasSuccessful() or result.testsRun != 62 or result.skipped or result.expectedFailures:
               raise SystemExit('worker cancellation coverage incomplete')
           " > build/provider/worker-cancellation.txt 2>&1
       - name: Build and install optional bounded CPU validator

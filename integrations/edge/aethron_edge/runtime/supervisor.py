@@ -83,29 +83,34 @@ class ApplianceSupervisor:
                     continue
                 try:
                     p.tick(now_ns)
+                    revoked = p.ros_guard is not None and p.ros_guard.closed
+                    failed = (
+                        not revoked
+                        and p.process is not None
+                        and (
+                            not p.process.is_alive()
+                            or now_ns - p.last_message_ns
+                            > (
+                                10_000_000_000
+                                if p.profile.driver in {"replay", "sensor-replay", "sensor-ros"}
+                                else 60_000_000_000
+                            )
+                        )
+                    )
                 except Exception:
-                    # A failed message/read is not fresh evidence and must not
-                    # stop supervision of other profiles. Retire this scene
+                    # Failed message or worker-health checks must not stop
+                    # supervision of other profiles. Retire this scene
                     # immediately, then reap outside the watchdog without retry
                     # or publication of potentially private exception details.
                     self.faults.add(name)
                     self._recover(name, p, restart=False)
                     continue
-                if p.ros_guard is not None and p.ros_guard.closed:
+                if revoked:
                     # A revoked boot authority cannot recover through a worker
                     # restart. Withdraw immediately and reap outside the watchdog.
                     self.faults.add(name)
                     self._recover(name, p, restart=False)
                     continue
-                failed = p.process is not None and (
-                    not p.process.is_alive()
-                    or now_ns - p.last_message_ns
-                    > (
-                        10_000_000_000
-                        if p.profile.driver in {"replay", "sensor-replay", "sensor-ros"}
-                        else 60_000_000_000
-                    )
-                )
                 if failed and name not in self.faults and now_ns >= self.next_restart[name]:
                     attempts = self.restarts[name]
                     while attempts and now_ns - attempts[0] > 60_000_000_000:

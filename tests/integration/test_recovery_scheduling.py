@@ -1,6 +1,8 @@
 """Recovery scheduling failure must leave the shared watchdog usable."""
 
 import json
+import multiprocessing
+import queue
 import tempfile
 import threading
 import unittest
@@ -186,7 +188,7 @@ class RecoveryScheduling(unittest.TestCase):
     def test_started_recovery_failure_retires_unpublished_replacement(self):
         self.exercise_started_failure(shutdown=False)
 
-    def exercise_tick_failure(self, *, malformed=False, cleanup_failure=False):
+    def exercise_tick_failure(self, *, malformed=False, cleanup_failure=False, liveness=False):
         runtime, failed, healthy = self.make_runtime()
         # Exercise the real parent message path with an existing PRESENT scene.
         del failed.tick
@@ -195,9 +197,12 @@ class RecoveryScheduling(unittest.TestCase):
             overwritten=SimpleNamespace(value=0),
             rejected=SimpleNamespace(value=0),
         )
-        if not malformed:
+        if not malformed and not liveness:
             failed.channel.get_nowait.side_effect = OSError("private mailbox diagnostic")
         process = failed.process
+        if liveness:
+            failed.channel.get_nowait.side_effect = queue.Empty
+            process.is_alive.side_effect = OSError("private process diagnostic")
         entered, release = threading.Event(), threading.Event()
         stop_worker = failed.stop_worker
 
@@ -242,6 +247,7 @@ class RecoveryScheduling(unittest.TestCase):
                 self.assertNotIn("private", Path(runtime.config.status_file).read_text())
         finally:
             release.set()
+            process.is_alive.side_effect = None
             runtime.shutdown()
         self.assertIsNone(failed.process)
         process.close.assert_called_once_with()
@@ -254,3 +260,39 @@ class RecoveryScheduling(unittest.TestCase):
 
     def test_tick_fault_preserves_worker_ownership_after_failed_cleanup(self):
         self.exercise_tick_failure(cleanup_failure=True)
+
+    def test_liveness_fault_withdraws_scene_and_retains_failed_cleanup(self):
+        self.exercise_tick_failure(cleanup_failure=True, liveness=True)
+
+    def test_closed_process_handle_cannot_stop_other_profile_supervision(self):
+        runtime, failed, healthy = self.make_runtime()
+        # Real multiprocessing state error, without spawning a worker or
+        # replacing the native liveness method with a substitute.
+        process = multiprocessing.get_context("spawn").Process()
+        process.close()
+        failed.process = process
+        try:
+            with patch("aethron_edge.runtime.supervisor.RuntimePipeline") as replacement:
+                status = runtime.tick(self.now_ns)
+                self.assertEqual(status["state"], "fault")
+                task = runtime.maintenance[0]
+                task.join(timeout=2)
+                self.assertFalse(task.is_alive())
+                self.assertEqual(runtime.faults, {"failed"})
+                self.assertEqual(runtime.recovering, set())
+                self.assertIs(failed.process, process)
+                self.assertEqual(runtime.snapshot("failed")["state"], "UNKNOWN")
+                self.assertEqual(runtime.snapshot("failed")["tracks"], [])
+                runtime.tick(self.now_ns + 3_000_000_000)
+                self.assertEqual(healthy.tick.call_count, 2)
+                failed.tick.assert_called_once_with(self.now_ns)
+                self.assertEqual(list(runtime.restarts["failed"]), [])
+                replacement.assert_not_called()
+                self.assertNotIn(
+                    "process object is closed", Path(runtime.config.status_file).read_text()
+                )
+        finally:
+            # Already closed by this fixture; shutdown still owns all other
+            # resources. No failed handle is discarded by production code.
+            failed.process = None
+            runtime.shutdown()
