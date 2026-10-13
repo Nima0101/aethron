@@ -79,6 +79,59 @@ class VisionOutput(unittest.TestCase):
         for actual, expected in zip(detections[0]["box"], (0.04375, 0.04375, 0.0125, 0.0125)):
             self.assertAlmostEqual(actual, expected, places=6)
 
+    def test_finite_centres_cannot_overflow_into_empty_success(self):
+        np = self.np
+        for policy in ("ignore", "warn", "raise"):
+            for column in (0, 1):
+                for sign in (-1, 1):
+                    with self.subTest(policy=policy, column=column, sign=sign):
+                        raw = self.output()
+                        raw[0, 0, 4:6] = 1
+                        raw[0, 0, column] = sign * np.finfo(np.float32).max
+                        with np.errstate(over=policy):
+                            before = np.geterr()
+                            with patch.object(self.detector.cv.dnn, "NMSBoxes") as nms:
+                                with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                                    self.infer(raw)
+                            self.assertEqual(np.geterr(), before)
+                        nms.assert_not_called()
+
+    def test_rescaling_overflow_withdraws_other_valid_candidates(self):
+        np = self.np
+        self.pixels = np.zeros((64, 1280, 3), dtype=np.uint8)
+        raw = self.output()
+        raw[0, :2, :2] = 4
+        raw[0, :2, 4:6] = 1
+        # Multiplication by stride 8 is finite; division by scale 0.5 overflows.
+        raw[0, 1, 0] = np.finfo(np.float32).max / np.float32(8)
+        with np.errstate(over="ignore"):
+            with patch.object(self.detector.cv.dnn, "NMSBoxes") as nms:
+                with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                    self.infer(raw)
+        nms.assert_not_called()
+
+    def test_finite_offscreen_centres_remain_empty(self):
+        for column in (0, 1):
+            for sign in (-1, 1):
+                with self.subTest(column=column, sign=sign):
+                    raw = self.output()
+                    raw[0, 0, 4:6] = 1
+                    raw[0, 0, column] = sign * 1e30
+                    self.assertEqual(self.infer(raw), [])
+
+    def test_valid_decoding_preserves_clipping_and_classwise_nms(self):
+        raw = self.output()
+        raw[0, :3, :2] = 0
+        raw[0, :3, 4] = 1
+        raw[0, :2, 5] = 1  # Identical person boxes suppress to one.
+        raw[0, 2, 7] = 1  # Same box, COCO car class: kept separately.
+        detections = self.infer(raw)
+        self.assertEqual([d["class"] for d in detections], ["person", "vehicle"])
+        for detection in detections:
+            self.assertEqual(detection["score"], 1)
+            for actual, expected in zip(detection["box"], (0, 0, 0.00625, 0.00625)):
+                self.assertAlmostEqual(actual, expected, places=8)
+
     def test_seeded_probability_mutations_raise_fixed_error(self):
         rng = random.Random(20261010)
         np = self.np

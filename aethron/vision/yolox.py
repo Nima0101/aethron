@@ -332,7 +332,13 @@ class RGBDetector:
             if kind is None:
                 continue
             stride = float(self.strides[idx])
-            cx, cy = (values[idx, :2] + self.grids[idx]) * stride / scale
+            # Finite model values can still overflow during decoding. Reject
+            # before clipping can disguise that failure as an offscreen box.
+            try:
+                with np.errstate(over="raise", invalid="raise"):
+                    cx, cy = (values[idx, :2] + self.grids[idx]) * stride / scale
+            except FloatingPointError:
+                raise ValueError("invalid_input") from None
             # Bound exponent before numeric overflow; a malformed output is an error.
             require(bool(np.abs(values[idx, 2:4]).max() <= 20))
             bw, bh = np.exp(values[idx, 2:4]) * stride / scale
