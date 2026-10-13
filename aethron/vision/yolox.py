@@ -60,8 +60,17 @@ class RGBDetector:
             import onnxruntime as ort
 
             require("CoreMLExecutionProvider" in ort.get_available_providers())
+            # Bound ORT-managed CPU pools instead of sizing them from the host.
+            # Provider-internal threads and inference deadlines remain separate.
+            options = ort.SessionOptions()
+            options.intra_op_num_threads = 1
+            options.inter_op_num_threads = 1
+            options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
+            options.add_session_config_entry("session.intra_op.allow_spinning", "0")
+            options.add_session_config_entry("session.inter_op.allow_spinning", "0")
             self.ort_session = ort.InferenceSession(
                 blob,
+                sess_options=options,
                 # Disable construction retry too: the post-construction call
                 # cannot prevent an earlier CPU rebuild or native error print.
                 enable_fallback=False,

@@ -11,7 +11,7 @@ import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import ANY, Mock, patch
 
 from aethron.vision import yolox
 
@@ -144,3 +144,53 @@ class VisionProvider(unittest.TestCase):
         detector = self.detector()
         self.assertEqual(detector.infer(self.pixels, lighting="daylight"), [])
         self.assertEqual(self.session.get_providers()[0], "CoreMLExecutionProvider")
+
+    def test_coreml_request_preserves_explicit_execution_policy(self):
+        factory = Mock(return_value=self.session)
+        detector = self.detector(session_factory=factory)
+        self.assertIs(detector.ort_session, self.session)
+        factory.assert_called_once_with(
+            b"synthetic provider boundary fixture",
+            sess_options=ANY,
+            enable_fallback=False,
+            providers=["CoreMLExecutionProvider", "CPUExecutionProvider"],
+            provider_options=[
+                {
+                    "ModelFormat": "MLProgram",
+                    "MLComputeUnits": "ALL",
+                    "RequireStaticInputShapes": "1",
+                },
+                {},
+            ],
+        )
+
+    def test_requested_thread_policy_runs_native_cpu_graph(self):
+        import onnxruntime as ort
+
+        # Use the actual production options on a tiny authored CPU Identity graph.
+        model = bytes.fromhex(
+            "08083a420a100a017812017922084964656e74697479120c7032335f6964656e74697479"
+            "5a0f0a0178120a0a08080112040a020801620f0a0179120a0a08080112040a0208014202100d"
+        )
+        factory = Mock(return_value=self.session)
+        self.detector(session_factory=factory)
+        options = factory.call_args.kwargs.get("sess_options")
+        self.assertIsInstance(options, ort.SessionOptions)
+        self.assertEqual(options.intra_op_num_threads, 1)
+        self.assertEqual(options.inter_op_num_threads, 1)
+        self.assertEqual(options.execution_mode, ort.ExecutionMode.ORT_SEQUENTIAL)
+        for pool in ("intra_op", "inter_op"):
+            self.assertEqual(
+                options.get_session_config_entry(f"session.{pool}.allow_spinning"), "0"
+            )
+        session = ort.InferenceSession(
+            model, sess_options=options, providers=["CPUExecutionProvider"], enable_fallback=False
+        )
+        actual = session.get_session_options()
+        self.assertEqual(actual.intra_op_num_threads, 1)
+        self.assertEqual(actual.inter_op_num_threads, 1)
+        self.assertEqual(actual.execution_mode, ort.ExecutionMode.ORT_SEQUENTIAL)
+        for pool in ("intra_op", "inter_op"):
+            self.assertEqual(actual.get_session_config_entry(f"session.{pool}.allow_spinning"), "0")
+        value = self.np.array([3.25], dtype=self.np.float32)
+        self.np.testing.assert_array_equal(session.run(None, {"x": value})[0], value)
