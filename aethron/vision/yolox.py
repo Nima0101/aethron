@@ -159,11 +159,12 @@ class RGBDetector:
             require(type(outputs) is list and len(outputs) == 1)
             raw = outputs[0]
         else:
-            self.net.setInput(tensor)
             try:
+                self.net.setInput(tensor)
                 raw = self.net.forward()
             finally:
-                # Release native input reference; not a secure memory-erasure claim.
+                # Attempt replacement even if setInput partially succeeded then
+                # raised. This does not guarantee release or secure memory erasure.
                 self.net.setInput(np.zeros((1, 3, 640, 640), dtype=np.float32))
         values = _validated_output(raw)
         scores = values[:, 4, None] * values[:, 5:]
