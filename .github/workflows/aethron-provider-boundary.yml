@@ -4,6 +4,9 @@ on:
     paths:
       - 'aethron/vision/**'
       - 'tests/test_vision*.py'
+      - 'scripts/verify.py'
+      - 'tests/test_verify*.py'
+      - 'requirements-links.lock'
       - 'integrations/native-vision/**'
       - 'scripts/vision_admission_audit.py'
       - 'scripts/vision_preprocess_audit.py'
@@ -19,6 +22,9 @@ on:
     paths:
       - 'aethron/vision/**'
       - 'tests/test_vision*.py'
+      - 'scripts/verify.py'
+      - 'tests/test_verify*.py'
+      - 'requirements-links.lock'
       - 'integrations/native-vision/**'
       - 'scripts/vision_admission_audit.py'
       - 'scripts/vision_preprocess_audit.py'
@@ -50,6 +56,17 @@ jobs:
         run: |
           python -m pip install --only-binary=:all: -r requirements-coreml.txt
           python -m pip install --only-binary=:all: --require-hashes -r integrations/edge/requirements-server.lock
+          python -m pip install --only-binary=:all: --require-hashes -r requirements-links.lock
+      - name: Verifier telemetry opt-out before native import
+        run: |
+          mkdir -p build/provider
+          python - <<'PY' > build/provider/verifier-telemetry.txt 2>&1
+          import unittest
+          suite = unittest.defaultTestLoader.loadTestsFromName('tests.test_verify_telemetry')
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          if not result.wasSuccessful() or result.testsRun != 2 or result.skipped or result.expectedFailures:
+              raise SystemExit('verifier telemetry coverage incomplete')
+          PY
       - name: Real ORT wrapper with injected native execution faults
         run: |
           mkdir -p build/provider

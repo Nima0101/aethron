@@ -3,6 +3,7 @@
 import contextlib
 import io
 import json
+import os
 import subprocess
 import tempfile
 import unittest
@@ -39,7 +40,14 @@ class StaticCheckClaims(unittest.TestCase):
             calls = []
 
             def child(args, **kwargs):
-                self.assertEqual(kwargs, {"cwd": root, "check": True})
+                self.assertEqual(
+                    kwargs,
+                    {
+                        "cwd": root,
+                        "check": True,
+                        "env": dict(os.environ, ORT_DISABLE_TELEMETRY="1"),
+                    },
+                )
                 calls.append(args)
                 if len(calls) == failure:
                     if child_error is not None:

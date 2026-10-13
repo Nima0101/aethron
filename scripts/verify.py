@@ -232,7 +232,12 @@ def run():
 
     require_default_git_context(os.environ)
     require_worktree_root()
-    subprocess.run([sys.executable, "scripts/public_links.py", "HEAD"], cwd=ROOT, check=True)
+    # ORT's 1DS telemetry initializes at import, before API-level opt-out.
+    # Disable it in each child before native imports without changing the parent.
+    env = dict(os.environ, ORT_DISABLE_TELEMETRY="1")
+    subprocess.run(
+        [sys.executable, "scripts/public_links.py", "HEAD"], cwd=ROOT, check=True, env=env
+    )
     for manifest in [
         "governance-freeze.json",
         "architecture-freeze.json",
@@ -346,11 +351,14 @@ def run():
             scanned.add(relative.as_posix())
     assert expected <= scanned, "missing tracked content"
     subprocess.run(
-        [sys.executable, "-m", "unittest", "discover", "-s", "tests"], cwd=ROOT, check=True
+        [sys.executable, "-m", "unittest", "discover", "-s", "tests"],
+        cwd=ROOT,
+        check=True,
+        env=env,
     )
-    subprocess.run([sys.executable, "scripts/evaluate_dataset.py"], cwd=ROOT, check=True)
-    subprocess.run([sys.executable, "scripts/consumer.py"], cwd=ROOT, check=True)
-    subprocess.run([sys.executable, "scripts/temporal_e2e.py"], cwd=ROOT, check=True)
+    subprocess.run([sys.executable, "scripts/evaluate_dataset.py"], cwd=ROOT, check=True, env=env)
+    subprocess.run([sys.executable, "scripts/consumer.py"], cwd=ROOT, check=True, env=env)
+    subprocess.run([sys.executable, "scripts/temporal_e2e.py"], cwd=ROOT, check=True, env=env)
     print(
         "PASS: freeze hashes, source syntax rules, public-content/links, "
         "tests, dataset, consumer, temporal E2E"
