@@ -118,21 +118,36 @@ class ApplianceSupervisor:
         pipeline.core.close()
 
         def work():
-            pipeline.stop_worker()
             replacement = None
-            if restart and not self.stop.is_set():
-                replacement = RuntimePipeline(
-                    pipeline.profile, ros_grant=pipeline.ros_grant, ros_guard=pipeline.ros_guard
-                )
-                replacement.processed = pipeline.processed
-                replacement.inferences = pipeline.inferences
-                replacement.sensor_batches = pipeline.sensor_batches
-                replacement.prior_drops = pipeline.drop_counts()
-                replacement.start()
-            with self.lock:
+            try:
+                pipeline.stop_worker()
+                if restart and not self.stop.is_set():
+                    replacement = RuntimePipeline(
+                        pipeline.profile, ros_grant=pipeline.ros_grant, ros_guard=pipeline.ros_guard
+                    )
+                    replacement.processed = pipeline.processed
+                    replacement.inferences = pipeline.inferences
+                    replacement.sensor_batches = pipeline.sensor_batches
+                    replacement.prior_drops = pipeline.drop_counts()
+                    replacement.start()
+                with self.lock:
+                    if replacement is not None:
+                        self.pipelines[name] = replacement
+            except Exception:
+                # A failed recovery is terminal, not an indefinitely recovering
+                # service. Never expose exception text from worker startup.
+                with self.lock:
+                    self.faults.add(name)
                 if replacement is not None:
-                    self.pipelines[name] = replacement
-                self.recovering.discard(name)
+                    try:
+                        replacement.close()
+                    except Exception:
+                        # Retain ownership so shutdown can retry cleanup.
+                        with self.lock:
+                            self.pipelines[name] = replacement
+            finally:
+                with self.lock:
+                    self.recovering.discard(name)
 
         task = threading.Thread(target=work, name="aethron-recovery", daemon=True)
         self.maintenance = [t for t in self.maintenance if t.is_alive()]
