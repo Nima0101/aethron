@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "source_commit": "a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46",
+  "source_sha256": {
+    "integrations/edge/aethron_edge/__init__.py": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9",
+    "integrations/edge/aethron_edge/mailbox.py": "84b6c32191d1cd21f5469c908be50b38179d6d594cc9fd1865e2b06e3851b090",
+    "integrations/edge/aethron_edge/sensors/__init__.py": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a",
+    "integrations/edge/aethron_edge/sensors/geometry.py": "24dbd7e248990f426d985d05e9add08615621381f4391209a85682102f50d02b",
+    "integrations/edge/aethron_edge/sensors/packets.py": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192",
+    "integrations/edge/aethron_edge/sensors/rectification.py": "b034b4f5b2e0c5c4bda51f5adfcb4a15193ebe7497ab4099c7887fb57c49f6db",
+    "integrations/edge/aethron_edge/sensors/ros2.py": "41aece1eff1dd5e6ae77272959354c8a9bcc6465ec10da2da7b747ad97589912",
+    "integrations/edge/aethron_edge/sources/__init__.py": "c68be66b7a8e4e95cafcc1cdcf108c0532d1d2a53b55def660cbfdc4b8034f48",
+    "integrations/edge/aethron_edge/sources/base.py": "0617c1b46c55416ff779189c270c7f5e46cd52a7cc0eaa03328c6800b8bbc319"
+  },
+  "message": {
+    "header": {
+      "stamp": {
+        "sec": 1,
+        "nanosec": 0
+      },
+      "frame_id": "fixture_optical"
+    },
+    "height": 1,
+    "width": 2,
+    "encoding": "16UC1",
+    "is_bigendian": 0,
+    "step": 4
+  },
+  "data_hex": "0000c409",
+  "cases": [
+    {
+      "name": "idle",
+      "evidence": "{\"clock_domain\":\"host_monotonic\",\"emitted_ns\":2000000000,\"expires_ns\":2100000000,\"overwritten\":0,\"qualified\":false,\"received\":0,\"source_state\":\"lost\",\"state\":\"UNKNOWN\",\"version\":1}",
+      "envelope": "{\"payload\":\"eyJhc3N1cmFuY2UiOiJzZWxmX2RlY2xhcmVkIiwiY2FwYWJpbGl0aWVzIjpbeyJldmlkZW5jZV9zaGEyNTYiOlsiNTcxNjEwOGNlNTk1ZTdlZWViNjQ5MmFmYTQ1YWM4MzhiZmY4ZTc4NjcwNmEyMjExZmNhMmE4YzJkZmQwYTM0NiJdLCJuYW1lIjoiZXZpZGVuY2Uub2ZmbGluZS52MSJ9XSwiZXZpZGVuY2UiOlt7ImtpbmQiOiJzeW50aGV0aWMiLCJvdXRjb21lIjoidW5rbm93biIsInNoYTI1NiI6IjU3MTYxMDhjZTU5NWU3ZWVlYjY0OTJhZmE0NWFjODM4YmZmOGU3ODY3MDZhMjIxMWZjYTJhOGMyZGZkMGEzNDYifV0sImV4cGlyZXNfYXQiOjIwMDAsImlzc3VlZF9hdCI6MTAwMCwiaXNzdWVyIjoiZml4dHVyZS1wdWJsaXNoZXIiLCJtb3Rpb25fYXV0aG9yaXR5IjpmYWxzZSwicGFzc3BvcnRfaWQiOiJmaXh0dXJlLXN0YXRlbWVudC0xIiwic3ViamVjdF9zaGEyNTYiOiJhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwidmVyc2lvbiI6MX0=\",\"payloadType\":\"application/vnd.aethron.capability-passport.v1+json\",\"signatures\":[{\"keyid\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"sig\":\"D+M0f8D38QbatfDSu1Xp9uB7idaVCZ4APPMkmnMAspex5A7CzohVrvAQS2q/tc1nShUHKpGDJdEywnkUauc8BA==\"}]}",
+      "policy": "{\"expires_at\":2100,\"issued_at\":900,\"keys\":[{\"capabilities\":[\"evidence.offline.v1\"],\"expires_at\":3000,\"issuer\":\"fixture-publisher\",\"key_id\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"not_before\":800,\"public_key\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\"}],\"revision\":3,\"revoked_evidence\":[],\"revoked_keys\":[],\"revoked_passports\":[],\"version\":1}",
+      "arguments": {
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_policy_revision": 3,
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "name": "receiving",
+      "evidence": "{\"clock_domain\":\"host_monotonic\",\"emitted_ns\":2010000000,\"expires_ns\":2110000000,\"overwritten\":0,\"qualified\":false,\"received\":1,\"source_state\":\"receiving\",\"state\":\"UNKNOWN\",\"version\":1}",
+      "envelope": "{\"payload\":\"eyJhc3N1cmFuY2UiOiJzZWxmX2RlY2xhcmVkIiwiY2FwYWJpbGl0aWVzIjpbeyJldmlkZW5jZV9zaGEyNTYiOlsiN2IyZDcyZmM3ZjhiZGIzNDc4ODRmZDczNWQ2ZjQ3NDU1NWQyNWFkYjI4MmRjMzdkN2EzMTk1YTFlZDAwMmM0OCJdLCJuYW1lIjoiZXZpZGVuY2Uub2ZmbGluZS52MSJ9XSwiZXZpZGVuY2UiOlt7ImtpbmQiOiJzeW50aGV0aWMiLCJvdXRjb21lIjoidW5rbm93biIsInNoYTI1NiI6IjdiMmQ3MmZjN2Y4YmRiMzQ3ODg0ZmQ3MzVkNmY0NzQ1NTVkMjVhZGIyODJkYzM3ZDdhMzE5NWExZWQwMDJjNDgifV0sImV4cGlyZXNfYXQiOjIwMDAsImlzc3VlZF9hdCI6MTAwMCwiaXNzdWVyIjoiZml4dHVyZS1wdWJsaXNoZXIiLCJtb3Rpb25fYXV0aG9yaXR5IjpmYWxzZSwicGFzc3BvcnRfaWQiOiJmaXh0dXJlLXN0YXRlbWVudC0xIiwic3ViamVjdF9zaGEyNTYiOiJhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwidmVyc2lvbiI6MX0=\",\"payloadType\":\"application/vnd.aethron.capability-passport.v1+json\",\"signatures\":[{\"keyid\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"sig\":\"KrXFrcZB1Q+5EmofdoIsC9PhYEROf6Y01RYLA2EV6EMFROR/jMfyn0Jk3BMsxwC7ygjZ75V0sMNNOr+SCmJ6Bw==\"}]}",
+      "policy": "{\"expires_at\":2100,\"issued_at\":900,\"keys\":[{\"capabilities\":[\"evidence.offline.v1\"],\"expires_at\":3000,\"issuer\":\"fixture-publisher\",\"key_id\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"not_before\":800,\"public_key\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\"}],\"revision\":3,\"revoked_evidence\":[],\"revoked_keys\":[],\"revoked_passports\":[],\"version\":1}",
+      "arguments": {
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_policy_revision": 3,
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "name": "lost",
+      "evidence": "{\"clock_domain\":\"host_monotonic\",\"emitted_ns\":2110000001,\"expires_ns\":2210000001,\"overwritten\":0,\"qualified\":false,\"received\":1,\"source_state\":\"lost\",\"state\":\"UNKNOWN\",\"version\":1}",
+      "envelope": "{\"payload\":\"eyJhc3N1cmFuY2UiOiJzZWxmX2RlY2xhcmVkIiwiY2FwYWJpbGl0aWVzIjpbeyJldmlkZW5jZV9zaGEyNTYiOlsiNzFiYjIxNWM4ZWU0ZjE1Y2FlNjM4NDhhYjAwZGI4ZWE1MGNjYWYzMGNlODMyMWU1ZTJhNTE2MzI2ZTgwNGE4NSJdLCJuYW1lIjoiZXZpZGVuY2Uub2ZmbGluZS52MSJ9XSwiZXZpZGVuY2UiOlt7ImtpbmQiOiJzeW50aGV0aWMiLCJvdXRjb21lIjoidW5rbm93biIsInNoYTI1NiI6IjcxYmIyMTVjOGVlNGYxNWNhZTYzODQ4YWIwMGRiOGVhNTBjY2FmMzBjZTgzMjFlNWUyYTUxNjMyNmU4MDRhODUifV0sImV4cGlyZXNfYXQiOjIwMDAsImlzc3VlZF9hdCI6MTAwMCwiaXNzdWVyIjoiZml4dHVyZS1wdWJsaXNoZXIiLCJtb3Rpb25fYXV0aG9yaXR5IjpmYWxzZSwicGFzc3BvcnRfaWQiOiJmaXh0dXJlLXN0YXRlbWVudC0xIiwic3ViamVjdF9zaGEyNTYiOiJhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwidmVyc2lvbiI6MX0=\",\"payloadType\":\"application/vnd.aethron.capability-passport.v1+json\",\"signatures\":[{\"keyid\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"sig\":\"Lm9vLZ0AtSZ57JqfyNAkOvsGP2RQsdxGQh4g/hL242go8ABfTvYh7N1TENyRwo7VTVFA+46kCPeols8Q77YqCA==\"}]}",
+      "policy": "{\"expires_at\":2100,\"issued_at\":900,\"keys\":[{\"capabilities\":[\"evidence.offline.v1\"],\"expires_at\":3000,\"issuer\":\"fixture-publisher\",\"key_id\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"not_before\":800,\"public_key\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\"}],\"revision\":3,\"revoked_evidence\":[],\"revoked_keys\":[],\"revoked_passports\":[],\"version\":1}",
+      "arguments": {
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_policy_revision": 3,
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "name": "invalid",
+      "evidence": "{\"clock_domain\":\"host_monotonic\",\"emitted_ns\":2120000000,\"expires_ns\":2220000000,\"overwritten\":0,\"qualified\":false,\"received\":1,\"source_state\":\"invalid\",\"state\":\"UNKNOWN\",\"version\":1}",
+      "envelope": "{\"payload\":\"eyJhc3N1cmFuY2UiOiJzZWxmX2RlY2xhcmVkIiwiY2FwYWJpbGl0aWVzIjpbeyJldmlkZW5jZV9zaGEyNTYiOlsiNzlhYWU1MzE3ZWIxMWZhNDc5YmMwODE1YjAyYmJmNmMyN2EwMDVhNmI2ODk3YmNiYTgyYzg4NDVlMGJmMjlhYyJdLCJuYW1lIjoiZXZpZGVuY2Uub2ZmbGluZS52MSJ9XSwiZXZpZGVuY2UiOlt7ImtpbmQiOiJzeW50aGV0aWMiLCJvdXRjb21lIjoidW5rbm93biIsInNoYTI1NiI6Ijc5YWFlNTMxN2ViMTFmYTQ3OWJjMDgxNWIwMmJiZjZjMjdhMDA1YTZiNjg5N2JjYmE4MmM4ODQ1ZTBiZjI5YWMifV0sImV4cGlyZXNfYXQiOjIwMDAsImlzc3VlZF9hdCI6MTAwMCwiaXNzdWVyIjoiZml4dHVyZS1wdWJsaXNoZXIiLCJtb3Rpb25fYXV0aG9yaXR5IjpmYWxzZSwicGFzc3BvcnRfaWQiOiJmaXh0dXJlLXN0YXRlbWVudC0xIiwic3ViamVjdF9zaGEyNTYiOiJhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhIiwidmVyc2lvbiI6MX0=\",\"payloadType\":\"application/vnd.aethron.capability-passport.v1+json\",\"signatures\":[{\"keyid\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"sig\":\"WincEjObLBvD3cxtaWq14X2FEgKWHYwODGO+0cepxrwQyqcm8ueImmbfxBr9xNNkOx3mtoM8mEA7UBBnsuzmAA==\"}]}",
+      "policy": "{\"expires_at\":2100,\"issued_at\":900,\"keys\":[{\"capabilities\":[\"evidence.offline.v1\"],\"expires_at\":3000,\"issuer\":\"fixture-publisher\",\"key_id\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"not_before\":800,\"public_key\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\"}],\"revision\":3,\"revoked_evidence\":[],\"revoked_keys\":[],\"revoked_passports\":[],\"version\":1}",
+      "arguments": {
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_policy_revision": 3,
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    }
+  ],
+  "limitations": [
+    "Public RFC 8032 test key only; no deployment credentials.",
+    "Analytical dictionary replay; no ROS/DDS network or physical source.",
+    "Byte authentication does not establish capture freshness or qualify UNKNOWN diagnostics."
+  ]
+}

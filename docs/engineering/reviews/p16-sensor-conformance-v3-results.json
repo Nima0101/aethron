@@ -1,0 +1,59 @@
+{
+  "audit_policy_version": 3,
+  "baseline_head": "a3c9a815d8c81717dd58fd5b4ce47f50bad174c9",
+  "producer_commit": "a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46",
+  "decision": "KEEP public APIs; FIX consumer conformance coverage",
+  "audit_complete": false,
+  "checks": {
+    "red_assertion_failures": 5,
+    "red_errors": 0,
+    "consumer_methods": 5,
+    "passport_methods": 64,
+    "interop_methods": 43,
+    "skips": 0,
+    "ruff": "PASS after import-order correction",
+    "format": "PASS",
+    "actionlint": "PASS after YAML block-scalar correction",
+    "bandit_runtime": "PASS",
+    "pip_check": "PASS",
+    "diff": "PASS"
+  },
+  "retained_failures": [
+    "Replay source does not match protected-main bytes; excluded from this conformance slice.",
+    "First interop run: test_concurrent_admission_cannot_overbook RuntimeError: cannot start new thread; sequential retry 43 PASS.",
+    "Initial Ruff check/format and actionlint attempts could not spawn OS threads (EAGAIN).",
+    "Ruff I001 import order corrected.",
+    "Actionlint line 61 mapping values are not allowed: --only-binary=:all: required block scalar."
+  ],
+  "source_sha256": {
+    ".github/workflows/aethron-passports.yml": "9db5119916f977ffa4ab4b226217f2e90d6e174db93bc888f8c6788fbca8eae5",
+    "tests/interop_consumers/test_sensor_packets.py": "e988e2ade679d68f839cc99c52335d100685ac99e18ad713a6ceccdda49fbd70",
+    "examples/interop/sensor-packet-vectors-v1.json": "80fb60be05c18f87f8954332c2d4f8be28762c16d335d004527555fb3d3aa4fc",
+    "requirements-passport-sensor-conformance.txt": "b6b85e1f3f15fa42ee3d3676bd1a95b0800a672c38106a9a1d8366f818f3393d",
+    "docs/architecture/interop/schema-conformance-v1.md": "a002aed55c4092f85387bf52e899b31a5ce8eeb5c2ccc7e7a30ddb5de6a075aa",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "30a1b8a98cea1a0d7484887fb1994386c0d37da50eb49289086dcc445f42b4e8",
+    "docs/engineering/reviews/p16-sensor-conformance-v3.md": "37a9cfb5d5b2653ed0c6e0fcaa6b3ab1858a8a9787ffee2b54acf295b8ad04a3",
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "integrations/edge/aethron_edge/sensors/packets.py": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192",
+    "integrations/edge/aethron_edge/__init__.py": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9",
+    "integrations/edge/aethron_edge/sensors/__init__.py": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a"
+  },
+  "runtime_log_sha256": {
+    "sensor-conformance-red.log": "6b8403184a22c338a912384e55a7f8f7f8337c77793378831aa571db6e00b09b",
+    "sensor-conformance-final.log": "924183668614c29da1c65b55ee3ba785d864442ac0e9bad1da1101b13c212861",
+    "sensor-passport-baseline.log": "57f42d69070ef671d26de117d822f95b4be2aacc32e91be4b38e3c9c68b70f92",
+    "sensor-interop-baseline.log": "3ebeb7241958e3579c10863dabd4399851dc9ace37d091ae24ca47e5bd02a18a",
+    "sensor-interop-retry.log": "e99268828c1593c18f6a9fc17d2f0082ac276a57790485d4e13de6b185165768",
+    "sensor-peer-source-check.json": "cd7de97fd362f6f446a969174138f35fd5ac84e61241350192c9ad1daa63036d"
+  },
+  "limits": [
+    "Only direct listed project files are bound, not environment/dependency closure or loaded-bytecode attestation.",
+    "Synthetic two-pixel inputs and a public test key, not physical evidence.",
+    "Packet decoding and byte authentication are separate; malformed signed bytes can authenticate.",
+    "No hardware timing, calibration, measurement truth, live source, recorded-clock mapping or hosted CI qualification."
+  ]
+}

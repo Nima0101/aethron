@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_commit": "8cc440edeab8f217851781a513075632ffb2217e",
+  "scope": "Fresh federation/inbox/composition reassessment; concurrency test harness corrected. Production and wire contracts unchanged.",
+  "decisions": {
+    "direct_federation": "KEEP",
+    "inbox_accounting": "KEEP",
+    "test_supervision": "KEEP Python; FIX worker-deadlock containment with child process"
+  },
+  "checks": {
+    "baseline_methods": 27,
+    "focused_methods": 28,
+    "adr_methods": 4,
+    "skips": 0,
+    "production_red": false,
+    "harness_fault_before": "outer timeout after future timeout",
+    "harness_fault_after": "one assertion failure, no outer timeout",
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS; test-only B404/B603 exceptions",
+    "initial_lint_failure": "I001 import order; corrected",
+    "initial_bandit_warnings": "comment-parser warnings; corrected; no findings"
+  },
+  "source_sha256": {
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "tests/test_interop_federation.py": "377a0b31b252dfd9aca8983c65e5c718aff7b3d72164a25808f37f1cd23fd0c0",
+    "tests/test_interop_inbox.py": "f126a8b302f1ca5ca0432810a2c62ad9a5172c60b088e9a725a3768c180a7564",
+    "tests/test_interop_delivery.py": "d7142d775869f91a124ba81fc179c7b7b9912b6044c6188e98ca53a28b497fed",
+    "examples/interop/federation-vectors-v1.json": "00c8ee5d07f2dfd976a2e3ec77f6bc7cd3acca8183f338900e99f3c70b9ab0ba",
+    "examples/interop/inbox-vectors-v1.json": "0c3cb8ce0c8c2ce10525a63158e2ca0b6970c3953b6a09c386b133b0dace5ec3",
+    "docs/architecture/interop/federation-v1.md": "91762aa7ae923dc6cbf5da8ed1663f96ef4a09c875550378df60ddce6274ab62",
+    "docs/architecture/interop/inbox-v1.md": "bb6050d4ab9ddd222351a8a4bc212d8a27a9a22c140bf305bc79102d06454368",
+    "docs/decisions/p16-federation-reassessment-v3.json": "6b23f015d518bd9deee985ee7218dfb4a01b73ac737f55522a32d36b6d24824f",
+    "docs/decisions/p16-inbox-reassessment-v3.json": "e171a8a1a1fd33c036d46ac1f5a9252e453a35272246a1385e62019647b793e9",
+    "docs/engineering/reviews/p16-federation-inbox-reassessment-v3.md": "0772947134b1c7856c8b5a88322b12444d2e5da752d4709011753a974203a70b"
+  },
+  "local_artifact_sha256": {
+    "check_inbox_deadlock.py": "c18d2bf11b2a99ee7f1d7a4de77227bb63946209484e00392a0222dd52351082",
+    "federation-inbox-adr.log": "d5d85d0b031d2809ad737e279c5684fcc0d84a864d579f7e6fc1698ebef9eaf2",
+    "federation-inbox-bandit-initial.log": "afa4a5fa7de216d300b36a4d54bd0c2e313d78b71698f5443161828fca23cb13",
+    "federation-inbox-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "federation-inbox-baseline.log": "a0f8424665b2186f809e12be62d3bc7df1e0a4ea32be12addb201952990113ce",
+    "federation-inbox-focused.log": "33bc39cb86d509cf817e62af4c1ccfc13b6a83b6caccacfcf84bdbbaea800ca7",
+    "federation-inbox-format.log": "eee76f865de5a9f2456950f710ae5d5f9b5bd0ea02aa54f614c5eed6642a0bfd",
+    "federation-inbox-ruff-initial.log": "2a3165d1d1e611ba265235281459bcefcc5f6f24fb48f06f5a867f2ea9845d6a",
+    "federation-inbox-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "inbox-deadlock-green.json": "92726b6ad2a062e932e1b024e8b21acc4d79d7593f853e5b54c250a7ae29aa05",
+    "inbox-deadlock-red.json": "0df654bc8eb39dc31de146cc6765116daa96a574d5716ac2a41ad9f7d2828599"
+  },
+  "reproduction": {
+    "focused": "PYTHONPATH=tests:. python -m unittest test_passport_lexical test_interop_federation test_interop_inbox test_interop_delivery -v",
+    "adr": "PYTHONPATH=tests:. python -m unittest test_passport_schemas.ArchitectureDecisionConformance -v",
+    "deadlock_control": "Read test source; require exactly one q = BoundedInbox(max_items=8, max_bytes=8, max_per_peer=8), append ; q._lock.acquire(). Replace timeout=10 with timeout=1. Compile only this in-memory source in an isolated Python runner with trusted checkout sys.path, execute InboxTests.test_concurrent_admission_cannot_overbook under an outer subprocess.run timeout=3. Baseline runner times out; corrected runner returns one unittest assertion failure. No production source is mutated."
+  },
+  "limits": [
+    "Current technology comparisons are source-based, not full alternative implementation or target benchmarks.",
+    "Injected harness fault is not a demonstrated production deadlock.",
+    "Listed file hashes do not attest loaded code or dependency closure.",
+    "Process creation can delay timeout delivery; no exact wall-clock, runtime lock deadline, scheduler fairness or arbitrary-script isolation claim.",
+    "No full distribution, hosted CI, hardware, MLS/CNSA or availability qualification."
+  ],
+  "next_component": "Installed packaging identity and conformance evidence, then remaining assurance tooling",
+  "audit_complete": false
+}

@@ -1,0 +1,76 @@
+{
+  "review_order_version": 3,
+  "baseline_commit": "7e34cc66328d81281dccc802b8f3fed736bfb50e",
+  "review": "Public P16 architecture and release evidence claims",
+  "decision": "CLARIFY configured hosted checks versus observed results; document source/installed boundaries",
+  "runtime_changed": false,
+  "tests_changed": false,
+  "workflow_changed": false,
+  "production_red": false,
+  "checks": {
+    "focused_methods": 8,
+    "skips": 0,
+    "readme_python_examples": 2,
+    "local_public_file_links": 20,
+    "whitespace": "PASS"
+  },
+  "example_results": [
+    {
+      "evidence_verified": false,
+      "example": 1,
+      "motion_authority": false,
+      "status": "authenticated"
+    },
+    {
+      "evidence_verified": false,
+      "example": 2,
+      "motion_authority": false,
+      "status": "bound"
+    },
+    {
+      "examples": 2,
+      "readme_sha256": "23d6641166e58d87fe0d64ace90f6ad14595d63c0621437233857dd08950edef",
+      "scope": "Current source imports; existing local dependencies; not an installation or hosted execution."
+    }
+  ],
+  "source_sha256": {
+    ".github/workflows/aethron-passports.yml": "f2e52752fcda9ff25b5792b2639d45704cb8568f8cdb8eee5fe0cb4cc2051e72",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "docs/architecture/interop/evidence-binding-v1.md": "815e821ae7674210c01799e428c3fda736743f46fbe1e6edbf68efc05c918904",
+    "docs/architecture/interop/federation-v1.md": "91762aa7ae923dc6cbf5da8ed1663f96ef4a09c875550378df60ddce6274ab62",
+    "docs/architecture/interop/inbox-v1.md": "bb6050d4ab9ddd222351a8a4bc212d8a27a9a22c140bf305bc79102d06454368",
+    "docs/architecture/interop/passport-v1.md": "6900aa79ad16189f615a17cf1e0afbae2b3cd6afc050beb0ebccd3704184ba97",
+    "docs/architecture/interop/schema-conformance-v1.md": "055a416a29ee5455de07b68106ebccd3438292a35f3a399df9e8b6add6c33574",
+    "docs/architecture/interop/task-bundle-v1.md": "e1fc6b638906d6bba75fdc885ac636d50b4324c5e6a6e833c0d8c9dabc4f6765",
+    "docs/architecture/interop/task-v1.md": "5b5eb7215196f293813af2b6b5af0d0ee3b5fd0892c2f6858f2810b52db276ee",
+    "docs/architecture/interop/verification-evidence-v1.md": "de1d3b67c7ed41d87f891e393938d57789979a394d636f33bfb443532d8e9e84",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "a62f0dcd452b45c4524aa4d7a94101c78a32e263176fb7917a9e699295e9fd31",
+    "docs/engineering/reviews/p16-packaging-retention-v3.md": "8bff0fc677f37b2ee0ae467d9400ac1e38544fe108c3e5395db303d90f7064d5",
+    "examples/passports/README.md": "23d6641166e58d87fe0d64ace90f6ad14595d63c0621437233857dd08950edef",
+    "examples/passports/evidence-vectors.json": "9ab7461a842ee783d4a1ddafa7e89fc40b7385e6f18b74b4bad7673ae7c91dfb",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "tests/test_interop_delivery.py": "d7142d775869f91a124ba81fc179c7b7b9912b6044c6188e98ca53a28b497fed",
+    "tests/test_passport_lexical.py": "0272780452980ec03e9b180a84e35db7e2aefd04f7bc6cf0ac21cfd9288b1887",
+    "tests/test_passports.py": "20bdc75b84aa566867197604e2462053e366016638828bb0ba59e990ffd56c3d"
+  },
+  "runtime_artifacts_sha256": {
+    "claims-current-examples.log": "74cb9261f2592564ea134fa6fbc3cb3b34428e46b091882fd16619b3a166f2b1",
+    "claims-current-focused.log": "a7030f8b01a00475e60c4692d629d1f355bfc39cc5cd8f8911919356ffeed62e"
+  },
+  "reproduction": [
+    "Run both python code fences from examples/passports/README.md with normal (not optimized) Python and current source imports; these contain assertions.",
+    "PYTHONPATH=tests:. python -m unittest test_passport_lexical test_interop_delivery test_passports.PassportVerificationTests.test_revocation_rejection_does_not_persist_the_new_policy_floor test_passports.PassportVerificationTests.test_expiry_rejection_does_not_persist_a_trusted_time_floor test_passports.PassportVerificationTests.test_real_signature_authenticates_only_statement -v"
+  ],
+  "limits": [
+    "No new runtime/framework selection; existing component decisions remain scoped evidence.",
+    "No new installation, archive build, hosted run or CI polling performed.",
+    "Fixed developer checks do not qualify physical, tactical, MLS/CNSA, availability or installed customer product claims.",
+    "Listed source hashes are not loaded-code identity or complete dependencies."
+  ],
+  "next": "Derive requirements and compare technologies for missing P16 durable caller-floor boundary."
+}

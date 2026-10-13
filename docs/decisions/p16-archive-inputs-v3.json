@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "id": "p16-archive-inputs-v3",
+  "component": "P16 source-archive input evidence",
+  "decision": "KEEP",
+  "constraints": [
+    "Inspect the 22 published conformance inputs in the actual backend source archive; do not infer archive contents from manifest selection.",
+    "Hosted Python 3.13 build job; portable offline comparison of selected regular members. No extraction, member execution, native compilation, throughput SLA or untrusted archive service.",
+    "Local verification uses only small synthetic archives and focused tests; whole distribution builds remain hosted."
+  ],
+  "alternatives": [
+    "Python tarfile inspection with PyPA build frontend.",
+    "Go archive/tar streaming inspection with a standards-compliant build frontend.",
+    "Java Apache Commons Compress tar/gzip inspection.",
+    "Rust-based uv build frontend or Hatch build orchestration."
+  ],
+  "rationale": [
+    "KEEP Python for this extension to the packaging checks: the standard library directly exposes regular-member type, size, duplicate names and bytes without extraction. The finite inventory is shared with the existing manifest check, avoiding two independently maintained path lists.",
+    "Go provides sequential tar access, and Java Commons Compress supports tar and gzip. Both are credible archive readers, but neither eliminates the application-specific inventory and equality checks. No native deployment or throughput constraint favors a compiled inspector; this is a functional fit decision without performance ranking.",
+    "PyPA build invokes the declared backend and confines its purpose to producing distributions. uv and Hatch offer build orchestration, but changing the frontend alone does not provide the missing member-content assertions. Retain the declared backend and add the actual archive comparison.",
+    "Six focused archive methods exercise exact bytes, missing/wrong root, duplicate names, size, links and directories. A separate isolated CLI exercise accepts a synthetic archive of all 22 selected inputs and rejects an altered input without emitting successful evidence."
+  ],
+  "limits": [
+    "The local RED run recorded six missing-module errors before implementation, not six demonstrated production assertion failures. No backend source distribution was built locally.",
+    "The hosted workflow change has been statically checked, not observed running. Successful hosted evidence requires a later exact-head run.",
+    "Only selected exact member names are checked. Unselected entries and aliases are not validated; no extraction safety, complete dependency closure, installed-product qualification or archive authentication claim.",
+    "The archive reader scans a trusted locally built archive; no total archive size, member count, decompression or hard memory bound is asserted. A ten-minute hosted job timeout bounds job duration operationally.",
+    "No runtime/peer module changes and no hardware, MLS, CNSA, five-nines or tactical qualification."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/tarfile.html",
+    "https://build.pypa.io/en/stable/",
+    "https://pkg.go.dev/archive/tar",
+    "https://commons.apache.org/proper/commons-compress/",
+    "https://docs.astral.sh/uv/concepts/projects/build/",
+    "https://hatch.pypa.io/latest/config/build/"
+  ]
+}

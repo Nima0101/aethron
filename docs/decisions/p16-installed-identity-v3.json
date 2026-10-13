@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "id": "p16-installed-identity-v3",
+  "component": "Installed distribution identity versus static source metadata",
+  "decision": "KEEP",
+  "constraints": [
+    "Compare name and version in the current interpreter distribution metadata with static pyproject.toml values, without a second version constant or executing source build scripts.",
+    "Existing Python 3.9/3.13 developer CI matrix; no runtime dependency change, network lookup during checking, throughput or hard-real-time requirement."
+  ],
+  "alternatives": [
+    "Python tomllib plus pinned Tomli on Python below 3.11, with importlib.metadata.",
+    "Rust uv inspection with TOML/package metadata orchestration.",
+    "Java TomlJ parsing with a Python interpreter metadata probe.",
+    "Go TOML parsing and interpreter subprocess inspection; discovery page was unavailable, so no unsupported capability claim informs selection."
+  ],
+  "rationale": [
+    "KEEP same-interpreter metadata inspection and use standard TOML parsing. The required values already reside in pyproject.toml; parsing them directly avoids inventing a subset parser or maintaining a duplicate version flag.",
+    "Python 3.11 introduced tomllib. Tomli documents the conditional compatibility pattern and its 2.5.0 package supports Python >=3.8. The existing declared metadata uses TOML syntax understood by both; this does not claim equivalence for all TOML features.",
+    "TomlJ provides Java TOML parsing and uv provides package tooling. These are credible options, but a separate process still must identify the tested Python environment and implement the static equality gate. No requirement justifies an added orchestration boundary here.",
+    "Four methods use real temporary METADATA and pyproject files. They reject wrong/missing installed fields, invalid static source version declarations and duplicate TOML keys. A no-op sensitivity control produces ten expected assertion failures across three negative methods."
+  ],
+  "limits": [
+    "This compares exact declared strings for this project profile, not all equivalent normalized package names or PEP 440 version spellings. Dynamic name/version is rejected, not resolved.",
+    "Local tests and isolated installed check use Linux Python 3.13 only. Python 3.9/Tomli and the hosted matrix remain unobserved; no alternate-language performance benchmark.",
+    "Metadata is a trusted local build input. This is not publisher authentication, full metadata schema validation, package __version__ validation, dependency closure or source provenance attestation.",
+    "No new installation/build/clean clone, operational runtime or hardware behavior."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/tomllib.html",
+    "https://pypi.org/project/tomli/2.5.0/",
+    "https://packaging.python.org/en/latest/specifications/pyproject-toml/",
+    "https://docs.python.org/3.9/library/importlib.metadata.html",
+    "https://docs.astral.sh/uv/reference/cli/",
+    "https://github.com/tomlj/tomlj"
+  ]
+}

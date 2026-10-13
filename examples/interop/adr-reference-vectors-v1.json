@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "purpose": "Offline ADR reference character profile; not retrieval or full URI validation.",
+  "cases": [
+    {
+      "name": "host",
+      "reference": "https://example.com",
+      "valid": true
+    },
+    {
+      "name": "root",
+      "reference": "https://example.com/",
+      "valid": true
+    },
+    {
+      "name": "path",
+      "reference": "https://example.com/a-b_1.2~",
+      "valid": true
+    },
+    {
+      "name": "query-fragment",
+      "reference": "https://example.com/path?x=1&y=two#part",
+      "valid": true
+    },
+    {
+      "name": "encoded-unicode",
+      "reference": "https://example.com/%C3%A9",
+      "valid": true
+    },
+    {
+      "name": "reserved-path",
+      "reference": "https://example.com/!$&'()*+,;=:@/",
+      "valid": true
+    },
+    {
+      "name": "nul",
+      "reference": "https://example.com/a\u0000/tail",
+      "valid": false
+    },
+    {
+      "name": "unit-separator",
+      "reference": "https://example.com/a\u001f/tail",
+      "valid": false
+    },
+    {
+      "name": "delete",
+      "reference": "https://example.com/a\u007f/tail",
+      "valid": false
+    },
+    {
+      "name": "next-line",
+      "reference": "https://example.com/a\u0085/tail",
+      "valid": false
+    },
+    {
+      "name": "bom",
+      "reference": "https://example.com/a\ufeff/tail",
+      "valid": false
+    },
+    {
+      "name": "raw-unicode",
+      "reference": "https://example.com/a\u00e9/tail",
+      "valid": false
+    },
+    {
+      "name": "space",
+      "reference": "https://example.com/a /tail",
+      "valid": false
+    },
+    {
+      "name": "lf",
+      "reference": "https://example.com/a\n/tail",
+      "valid": false
+    },
+    {
+      "name": "backslash",
+      "reference": "https://example.com/a\\/tail",
+      "valid": false
+    },
+    {
+      "name": "left-angle",
+      "reference": "https://example.com/a</tail",
+      "valid": false
+    },
+    {
+      "name": "quote",
+      "reference": "https://example.com/a\"/tail",
+      "valid": false
+    },
+    {
+      "name": "brace",
+      "reference": "https://example.com/a{/tail",
+      "valid": false
+    },
+    {
+      "name": "pipe",
+      "reference": "https://example.com/a|/tail",
+      "valid": false
+    },
+    {
+      "name": "bare-percent",
+      "reference": "https://example.com/a%/tail",
+      "valid": false
+    },
+    {
+      "name": "short-percent",
+      "reference": "https://example.com/a%0/tail",
+      "valid": false
+    },
+    {
+      "name": "nonhex-percent",
+      "reference": "https://example.com/a%GG/tail",
+      "valid": false
+    }
+  ]
+}

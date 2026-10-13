@@ -1,0 +1,75 @@
+{
+  "baseline_commit": "67ce70500d179c12b5c2b11e2634b3cd61b34c67",
+  "review_order_version": 3,
+  "decision": "KEEP",
+  "scope": "P16 structural schemas and payload reference-integrity conformance",
+  "production_changed": false,
+  "production_red": false,
+  "checks": {
+    "schema_methods": 20,
+    "additional_adr_methods": 4,
+    "skips": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS without exclusions",
+    "mutation_observations": {
+      "observations": [
+        {
+          "errors": 0,
+          "failures": 1,
+          "methods": 1,
+          "removed_guard": "_require(item[\"name\"] not in names)",
+          "skips": 0
+        },
+        {
+          "errors": 0,
+          "failures": 1,
+          "methods": 1,
+          "removed_guard": "_require(item[\"sha256\"] not in evidence)",
+          "skips": 0
+        },
+        {
+          "errors": 0,
+          "failures": 2,
+          "methods": 1,
+          "removed_guard": "_require(references == evidence)",
+          "skips": 0
+        }
+      ],
+      "source_sha256": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+      "source_unchanged": true
+    }
+  },
+  "source_sha256": {
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "tests/test_passport_schemas.py": "4afdf2bb31c5b94c68676e83b58fe7b73f1947d20dcbc73070ed0b96a1609188",
+    "requirements-passport-conformance.txt": "1d137f508c86edba0b3bf6d5c5e9d6cf673b31c3e4cfed2d57a3122ccad73dd3",
+    "requirements-passports.txt": "f6a456c822fb9de2a51699bdbacf232070362b51371790526c4a33b2a09fd801",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "docs/architecture/interop/passport-v1.md": "eb2059302ccad44a8a600ac80422f4e870195598adc09c1efca5c72ee4d02930",
+    "docs/decisions/p16-schema-integrity-v3.json": "1b80b1f599f4787b1678aaa5376d1e184a700fb5374919adc3ec18464019be1c",
+    "contracts/interop/architecture-decision-v1.schema.json": "b61c4a23bf0784799681402ad893d1a5e4cfb493c432fa75a30e301ba681ebd7",
+    "contracts/interop/federation-v1.schema.json": "4ff8cd0e24028ec8ee4a99477c5a80ebb25c32e7b821a9a3ebc7d01c76ecdb13",
+    "contracts/interop/passport-envelope-v1.schema.json": "6e3872ba208a573aa792e321342eda6788518e2e3bf638ff833e4c60db984c38",
+    "contracts/interop/passport-policy-v1.schema.json": "b6172dac43bce1a5905cd6c91ef2b7b485d0e70a988593571f2529a2bfad23b0",
+    "contracts/interop/passport-v1.schema.json": "df89ef1e467821c429aaddcbd9b4e530e4f622cdbec64b85854ba578cc231d88",
+    "contracts/interop/task-v1.schema.json": "6e3ce2bbf2c6ad3022c45ea30c9fe5c8d00d25e1d47d71499ecdc0c37cf2eb6e",
+    ".github/workflows/aethron-passports.yml": "f2e52752fcda9ff25b5792b2639d45704cb8568f8cdb8eee5fe0cb4cc2051e72"
+  },
+  "runtime_evidence_sha256": {
+    "schema-integrity-adr.log": "284fa65ff4ed58a33adca67111a357f62fb74d60798155ebeee4f817f8c34575",
+    "schema-integrity-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "schema-integrity-control.log": "32623b1d5df3fd7898b058e3a4cc437abf96227ee448158bf968bd8c64dafa19",
+    "schema-integrity-focused.log": "85dc5ab896e3905759dc0fc553b2a63dac8f7d3bd04d32079d1f55c0aa5a27aa",
+    "schema-integrity-format.log": "fd2299c9f1c6dc869070883e281051bfe93aacf66c1a3b0069f45b4aa410ca50",
+    "schema-integrity-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+  },
+  "runtime_probe_sha256": "d0ce1c159c705f0b5a4aa5d9b08d5c661906b7f6f98fc0a4defb503818f64a2c",
+  "limits": [
+    "Only scoped local checks; no hosted run or alternate validator execution observed.",
+    "Mutation failures are expected sensitivity controls, not production failures.",
+    "File digests cover listed inputs, not all dependencies or loaded bytecode. Runtime logs are local, not published.",
+    "No whole-lane, physical, security accreditation or real-time qualification."
+  ]
+}

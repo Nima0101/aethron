@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "id": "p16-comparison-recheck-v3",
+  "component": "P16 direct comparison and measurement probe recheck",
+  "decision": "KEEP",
+  "constraints": [
+    "Offline observation of actual Python verifier return objects and interpreter-traced allocations, with an independent Node Ed25519/hash primitive check.",
+    "Six primitive cases, five lexical rejections, one batch of 128 admissions. Parent bounds input at 64 KiB and counts each output stream against 4 KiB; no target-class latency or memory SLA."
+  ],
+  "alternatives": [
+    "Python asyncio subprocess protocol and a Node native-crypto primitive observer.",
+    "Julia BenchmarkTools trials with configurable samples, evaluations and timing budget.",
+    "C#/F#/VB BenchmarkDotNet runtime jobs and statistical summaries.",
+    "Dedicated foreign-process supervision with an explicit Python observation/report boundary."
+  ],
+  "rationale": [
+    "KEEP the Python observer: actual return types and Python traced allocations are the required observables. A foreign harness still needs this boundary; independently reimplementing the verifier would change the experiment.",
+    "KEEP the Node primitive check: documented native crypto verifies the same fixed messages and hash input through a separate runtime. It is explicitly not full passport admission parity.",
+    "BenchmarkTools and BenchmarkDotNet materially improve statistical experiment design when that is required. This probe intentionally emits single-batch diagnostics and denies runtime ranking, jitter and worst-case bounds. A framework migration does not strengthen the stated object/capture checks; no performance winner is inferred.",
+    "Nineteen current focused methods pass without skips, including real subprocess overflow/exit/timeout, response types, integer intervals, tracing ownership and changed-source rejection. A fresh live run confirms six primitive cases and five lexical rejections. No new mismatch was demonstrated."
+  ],
+  "limits": [
+    "These are trusted developer diagnostics, not deployed command, sensor, transport or authority services. No hardware, hard-real-time, MLS/CNSA, availability or complete-phase qualification.",
+    "Five listed files per tool are compared before/after execution. This is not an atomic snapshot, loaded-code attestation or dependency closure and misses transient restoration.",
+    "Alternatives were researched from official sources, not executed or benchmarked. KEEP is not based on installation, familiarity or rewrite cost.",
+    "Exchange timeout excludes OS process creation and has separate cooperative cleanup. Direct-child termination does not manage descendants; retained bytes are not total RSS or kernel/transient buffers.",
+    "Node stdin is read as a trusted parent-generated input; the subsequent size assertion is not hostile-stream admission. Local timing samples include scheduling effects and loop overhead."
+  ],
+  "evidence": [
+    "https://docs.python.org/3/library/asyncio-protocol.html",
+    "https://nodejs.org/docs/latest-v22.x/api/crypto.html",
+    "https://juliaci.github.io/BenchmarkTools.jl/stable/manual/",
+    "https://benchmarkdotnet.org/articles/overview.html"
+  ]
+}

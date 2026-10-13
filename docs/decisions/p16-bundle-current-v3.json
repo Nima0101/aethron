@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "decision": "KEEP",
+  "limits": [
+    "Current primary documentation was inspected; no complete alternate implementation or comparative benchmark was run.",
+    "No target hardware, service SLA, hard deadline or process memory envelope is specified. Input-byte bounds are not RSS or execution-time bounds.",
+    "These APIs do not authenticate their pin provider, persist time/revision floors, prevent replay or confer execution authority. Insufficient information for tactical deployment."
+  ],
+  "id": "p16-bundle-current-v3",
+  "component": "P16 immutable bundle composition",
+  "constraints": [
+    "Three exact byte inputs and zero to sixteen exact byte blobs, each capped at 65536 bytes; tighter task budget applies.",
+    "Preserve bytes across hashing and parsing; revalidate supplied signature/policy snapshot through existing public APIs; return no partial metadata on rejection."
+  ],
+  "alternatives": [
+    "Python immutable bytes/tuple and composition of existing public verification APIs.",
+    "Rust immutable borrowing with explicit ownership of foreign storage.",
+    "Java/Kotlin immutable ByteString containers without changing the JSON wire profile."
+  ],
+  "rationale": [
+    "KEEP immutable input snapshots and one public verification boundary: exact types prevent mutable aliases across the repeated parse and native cryptographic calls.",
+    "Rust ownership and JVM immutable containers can meet the same stability requirement. No IPC or mandatory-copy penalty is assumed for either. No deployment requirement or measurement establishes a material migration advantage.",
+    "Eleven bundle methods pass. Separate envelope-pin and policy-pin removals are each detected by the existing test, including a whitespace-only policy substitution. No runtime correction is required."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/stdtypes.html#bytes-objects",
+    "https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html",
+    "https://protobuf.dev/reference/java/api-docs/com/google/protobuf/ByteString"
+  ]
+}

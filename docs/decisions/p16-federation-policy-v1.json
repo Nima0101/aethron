@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "id": "p16-federation-policy-v1",
+  "component": "Independent pinned federation snapshot admission",
+  "decision": "KEEP",
+  "constraints": [
+    "Offline immutable bytes, at most 65536 bytes and depth eight; existing canonical ASCII/safe-integer v1 profile, all rows validated, zero to sixteen peers.",
+    "External authenticated digest pin, local software-domain alias, trusted UTC and revision/time floors. Admit a valid empty deny-all table without invoking bundle or signature verification.",
+    "Return bounded immutable metadata with authority and qualification false. No I/O, enrollment, durable floors, implicit clock or new cryptographic protocol.",
+    "Portable desktop library boundary; no identified embedded target, WCET, memory budget or throughput SLA. Preserve existing federation bundle outcomes."
+  ],
+  "alternatives": [
+    "Python lexical JSON hooks, immutable bytes and native-backed SHA-256 using the shared v1 validator.",
+    "Erlang/Elixir OTP JSON object/number callbacks with immutable binaries.",
+    "C#/F# Utf8JsonReader token spans with explicit duplicate and canonical-profile checks.",
+    "Rust serde_json custom visitor/raw-token handling and immutable borrowed input."
+  ],
+  "rationale": [
+    "KEEP the bounded lexical validator for this additive API: callbacks preserve duplicate keys and numeric spellings before conversion, and the exact immutable input remains stable through canonical equality and digest comparison.",
+    "OTP callbacks and native token readers are credible alternatives outside the incumbent language. None inherently supplies the canonical profile, complete-table validation or externally trusted pins. Sharing the actual v1 validator prevents a second acceptance policy; merely selecting another runtime does not supply a demonstrated resource or trust benefit here.",
+    "Expose snapshot admission separately from peer/bundle acceptance so deny-all metadata is available to a future floor store even when no bundle can succeed. Existing bundle verification is unchanged; portable cases and negative boundary tests must establish parity of overlapping gates.",
+    "No alternative runtime was executed or benchmarked, and no latency superiority is inferred. Reopen selection for measured native/embedded constraints; installed tooling, familiarity and rewrite cost do not justify this choice."
+  ],
+  "limits": [
+    "Validation is not transport authentication, key enrollment, authorization, storage or same-revision equivocation detection. Pins and time must be independently trusted.",
+    "All peer metadata is checked, but referenced policy bytes and signatures are not fetched or validated. Empty peers is valid denial of all peers, not a grant.",
+    "No hard-real-time, hardware, MLS/CNSA, availability, tactical or customer-product qualification. Existing wire bounds are unchanged."
+  ],
+  "evidence": [
+    "https://docs.python.org/3/library/json.html",
+    "https://www.erlang.org/doc/apps/stdlib/json.html",
+    "https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/use-utf8jsonreader",
+    "https://docs.rs/serde_json/latest/serde_json/"
+  ]
+}

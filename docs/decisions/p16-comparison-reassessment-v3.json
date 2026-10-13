@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "p16-comparison-reassessment-v3",
+  "component": "P16 local comparison capture, response validation and measurement reporting",
+  "decision": "KEEP",
+  "constraints": [
+    "Local trusted Python API inspection plus a separate Node primitive comparison; no service, device transport or target timing contract.",
+    "At most 64 KiB sent to one reviewed child; retained stdout at most 4 KiB and stderr counted/discarded above 4 KiB.",
+    "Report source identities, exact response types, raw Python batch intervals and tracing scope; reject missing comparison, optimized mode and visible source changes."
+  ],
+  "alternatives": [
+    "Direct Python driver with asyncio subprocess callbacks and independent Node primitive probe.",
+    "Node child_process orchestration with maxBuffer and timeout controls.",
+    "Rust Tokio process/pipe orchestration with explicit output quotas and child cleanup.",
+    "Java/Kotlin Process orchestration with explicit stream consumption and destruction.",
+    "pyperf worker calibration or JVM JMH for a separately specified statistical benchmark."
+  ],
+  "rationale": [
+    "KEEP the driver in the interpreter whose API objects and allocations are inspected. Another-language orchestrator still needs a Python execution boundary; it does not remove response typing, source or cleanup obligations.",
+    "The small private callback helper counts data before retaining it. High-level accumulating capture followed by a size check would not provide that retained-output bound. Existing real-child tests cover overflow, exit failure and timeout cleanup.",
+    "KEEP integer Python clock subtraction and explicit tracing ownership. Single batches describe diagnostic elapsed samples; pyperf/JMH address statistical benchmarking, which this tool explicitly does not claim.",
+    "Twenty focused methods pass. A live Python/Node run passes six primitive comparisons. Removing the final source-change check in memory causes five existing rejection assertions to fail. No new implementation defect demonstrated."
+  ],
+  "limits": [
+    "Current alternatives are compared by official documented properties, not implemented end-to-end or ranked by speed.",
+    "Retained-output bounds are not total RSS or child CPU bounds. Creation precedes exchange timeout; cleanup has a separate cooperative timeout; descendants are not managed.",
+    "Node checks primitives and parser observations, not full passport semantics. Python and Node single hash samples do not justify runtime ranking.",
+    "Before/after source reads are not atomic, do not attest loaded code or dependencies, and miss transient changes restored between reads.",
+    "No target latency, jitter, hard real-time, MLS/CNSA or availability qualification. Insufficient information for tactical deployment."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/asyncio-protocol.html#subprocess-protocols",
+    "https://nodejs.org/api/child_process.html",
+    "https://docs.rs/tokio/latest/tokio/process/index.html",
+    "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Process.html",
+    "https://docs.python.org/3.13/library/time.html#time.perf_counter_ns",
+    "https://docs.python.org/3.13/library/tracemalloc.html",
+    "https://pyperf.readthedocs.io/en/latest/run_benchmark.html",
+    "https://github.com/openjdk/jmh"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "id": "p16-installed-floor-v3",
+  "component": "Installed-package floor persistence assurance",
+  "decision": "KEEP",
+  "constraints": [
+    "Exercise the actual installed Python API on hosted Linux/macOS/Windows Python 3.9/3.13 without source imports, using temporary local synthetic data and bounded operations.",
+    "Source identity alone cannot demonstrate persistence. Require complete returned metadata, reopened state, rollback rejection and unchanged state after rejection. No device, power-loss or latency qualification."
+  ],
+  "alternatives": [
+    "Python direct API harness and tempfile, with the package native SQLite-backed store.",
+    "C#/F# Microsoft.Data.Sqlite harness for independent database inspection.",
+    "JavaScript/TypeScript external process driver plus installed Python child.",
+    "Shell orchestration of a Python conformance process."
+  ],
+  "rationale": [
+    "KEEP direct Python execution: it observes the exact exported package behavior without translating the API into another storage implementation. Independent C#/F# database access could check file compatibility but would not test these installed API methods.",
+    "An external process driver adds orchestration rather than additional persistence semantics; existing hosted isolated execution supplies the process boundary. No measured advantage justifies migration for this finite harness.",
+    "FIX the missing floor-store behavioral coverage: add one real-file scenario to the fifty pinned corpus cases. Reopen after creation and updates, check all authority flags, and reject older time/revision without losing committed state."
+  ],
+  "limits": [
+    "Local verification imports reviewed source; the hosted isolated installed-package job has not yet been observed at this new change.",
+    "Temporary local file reopen does not establish power-loss durability, whole-file rollback detection, cryptographic storage protection or physical qualification.",
+    "Bandit B101 findings are retained; the runner explicitly rejects optimized execution before reading fixtures. No authority controls reside in this assurance script."
+  ],
+  "evidence": [
+    "https://docs.python.org/3/library/sqlite3.html",
+    "https://docs.python.org/3/library/tempfile.html",
+    "https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/"
+  ]
+}

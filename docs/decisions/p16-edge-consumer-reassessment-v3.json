@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "p16-edge-consumer-reassessment-v3",
+  "component": "P16 published edge UNKNOWN conformance tests",
+  "decision": "KEEP",
+  "constraints": [
+    "Offline comparison of one published OpenAPI 3.1.1 schema/fixture pair and six exact-byte authentication cases.",
+    "Structural validation must be independent of producer model validation; external reference retrieval is denied. Scene milliseconds and UTC seconds remain separate."
+  ],
+  "alternatives": [
+    "Python unittest direct API tests with portable JSON fixtures; jsonschema plus an explicit reference registry for structural checks.",
+    "JavaScript/TypeScript Node test runner and Ajv draft-2020-12 for portable structural validation.",
+    "Java/Kotlin JUnit with a process or foreign-function adapter to the actual Python APIs.",
+    "Robot Framework keyword-driven acceptance tests backed by Python libraries.",
+    "Rust proptest for generated contract cases with a process or foreign-function adapter."
+  ],
+  "rationale": [
+    "KEEP direct unittest plus jsonschema: independently interpret the published structural schema, then call the actual verifier without an IPC result translation layer.",
+    "Ajv supplies a credible second draft-2020-12 implementation and would help independent cross-runtime differential validation. The present requirement is a fixed consumer check against the producer schema and actual verifier; neither schema engine alone verifies signatures or clock provenance.",
+    "JUnit and Robot Framework provide test orchestration but do not add producer-independent semantics to these API checks. Rust proptest serves generated property exploration rather than the fixed six-case inventory.",
+    "Three existing methods pass. Two wrapped-result sensitivity experiments produce twelve expected assertion failures with no errors or skips. No new mismatch demonstrated."
+  ],
+  "limits": [
+    "This decision concerns offline conformance tests, not the implementation language of a peer-owned decoder or a future transport.",
+    "No alternative performance benchmark or language ranking. No throughput or hard-real-time requirement is assigned to this fixed local corpus.",
+    "Source digests and module paths are not loaded-bytecode attestation, atomic snapshots or complete dependency closure.",
+    "No physical, ROS/DDS, MLS/CNSA, tactical, availability or whole-product qualification."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/unittest.html",
+    "https://python-jsonschema.readthedocs.io/en/stable/referencing/",
+    "https://ajv.js.org/json-schema.html",
+    "https://docs.junit.org/6.1.3/overview.html",
+    "https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html",
+    "https://docs.rs/proptest/latest/proptest/"
+  ]
+}

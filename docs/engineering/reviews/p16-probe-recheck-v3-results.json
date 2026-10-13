@@ -1,0 +1,174 @@
+{
+  "review_order_version": 3,
+  "baseline_commit": "e4e38c04ce15df942d46d795d450fbe85dfa08de",
+  "review": "Comparison and fixed mutation probe recheck",
+  "decisions": {
+    "comparison": "KEEP",
+    "mutation": "KEEP"
+  },
+  "code_changed": false,
+  "tests_changed": false,
+  "new_production_red": false,
+  "checks": {
+    "focused_methods": 19,
+    "adr_methods": 4,
+    "skips": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "node_syntax": "PASS",
+    "reported_source_entries_verified": 10,
+    "bandit": {
+      "filter": "--ignore-nosec; no rule exclusions",
+      "exit_code": 1,
+      "low": 13,
+      "medium": 1,
+      "high": 0,
+      "rules": {
+        "B101": 10,
+        "B102": 1,
+        "B404": 1,
+        "B603": 2
+      },
+      "assessment": "Assertions are guarded diagnostic checks; B102 executes trusted captured local source only; test subprocess commands use fixed interpreter/script and no shell. Retained findings, not an unfiltered clean scan."
+    }
+  },
+  "live_reports": {
+    "comparison": {
+      "audit_policy_version": 3,
+      "python": "3.13.5",
+      "source_sha256": {
+        "scripts/passport_technology_probe.py": "2fe524081bb31f00b7d97975e8cc810c10db5d00e7902a02f3b92b3cd0d25a72",
+        "scripts/passport_technology_probe.mjs": "4ac119d787fde5c2b3ef0fbd5cc269436790e3d84c03ed1a0a1182b12d8a4f2b",
+        "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6"
+      },
+      "source_scope": "Listed project files matched before/after execution; fixture parsed from captured bytes. Not an atomic snapshot, loaded-code attestation or dependency closure; transient changes restored between reads are not detected.",
+      "fixture_sha256": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+      "cases": 6,
+      "crypto_accepts": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "admissions": [
+        "authenticated",
+        "rejected",
+        "rejected",
+        "rejected",
+        "rejected",
+        "rejected"
+      ],
+      "python_lexical_rejections": 5,
+      "python_hash_1mib_ms": 0.613672,
+      "python_verify_mean_ms_128": 1.7369431640625,
+      "timing_method": {
+        "python_clock": "time.perf_counter_ns",
+        "python_elapsed_ns": {
+          "hash_batch": 613672,
+          "verify_batch": 222328725
+        },
+        "node_clock": "performance.now",
+        "hash_operations": 16,
+        "hash_bytes_per_operation": 65536,
+        "verify_operations": 128,
+        "batches_per_metric": 1,
+        "target_hardware_qualified": false,
+        "runtime_ranking_supported": false,
+        "scope": "Hash timers cover sixteen independent hashes of one reused 64 KiB buffer, including digest hex conversion. The reported digest covers 64 KiB, not 1 MiB. Verify timing covers one batch of 128 full Python admissions plus loop/assert overhead; initialization, fixture checks, Node startup and tracing are outside that interval. Sequential local elapsed-time samples include scheduling delays; no controlled warmup, distribution, jitter or worst-case bound is measured."
+      },
+      "python_traced_peak_bytes": 412024,
+      "node_probe": {
+        "node": "v22.23.2",
+        "crypto_accepts": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          true
+        ],
+        "hash_digest": "bf718b6f653bebc184e1479f1935b8da974d701b893afcf49e701f3e2f9f9c5a",
+        "hash_1mib_ms": 2.9264239999999972,
+        "duplicate_keys_collapsed": true,
+        "float_lexemes_collapsed": true
+      },
+      "limits": "Single-threaded local sample; Python traced allocations only, including input construction; not all native allocations. No hard real-time, RSS, platform or qualification claim. Node primitive probe is not a full verifier."
+    },
+    "mutation": {
+      "review_order_version": 3,
+      "python": "3.13.5",
+      "baseline_tests": 4,
+      "source_sha256": {
+        "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+        "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+        "tests/test_passports.py": "43f48e5813bc28e88c30bbf6982a02b902cf165cbc48b03855c84538c3dee29b",
+        "scripts/passport_trust_review.py": "118ce6a5232af5099294658c03326b01bd32107b08f16cb69eb4c241253dd195",
+        "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6"
+      },
+      "source_scope": "Listed project files matched before/after execution; mutants compiled from captured passport source. Not an atomic snapshot, loaded-code attestation or dependency closure; transient changes restored between reads are not detected.",
+      "mutations": [
+        {
+          "guard": "unselected_metadata",
+          "expected_assertion_failures": 5
+        },
+        {
+          "guard": "effective_expiry",
+          "expected_assertion_failures": 1
+        },
+        {
+          "guard": "evidence_revocation",
+          "expected_assertion_failures": 1
+        },
+        {
+          "guard": "rejection_metadata",
+          "expected_assertion_failures": 1
+        }
+      ],
+      "limit": "In-memory guard-removal tests; not a cryptographic validation or hardware qualification."
+    }
+  },
+  "source_sha256": {
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "docs/decisions/p16-comparison-recheck-v3.json": "66ee7440513f7673d5261d3c025c699fb6c0df2ec17e98a997d5fb34ea83808b",
+    "docs/decisions/p16-mutation-recheck-v3.json": "ceda289d833ca9c8f34922c6631d21af5a42abf10f264b9505427b7657bd134f",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "63b83cbb8fa303b91afa349ce8c0ddfe2b6ae742a24d097bb1dd39430cb71ce0",
+    "docs/engineering/reviews/p16-probe-recheck-v3.md": "b28281e6d274d30aa6062527f4630fe45f2b8775220bb0148469670d30e55480",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "scripts/passport_technology_probe.mjs": "4ac119d787fde5c2b3ef0fbd5cc269436790e3d84c03ed1a0a1182b12d8a4f2b",
+    "scripts/passport_technology_probe.py": "2fe524081bb31f00b7d97975e8cc810c10db5d00e7902a02f3b92b3cd0d25a72",
+    "scripts/passport_trust_review.py": "118ce6a5232af5099294658c03326b01bd32107b08f16cb69eb4c241253dd195",
+    "tests/test_passport_probe.py": "cf8af1cc320e366049ee4f6f4547f393d7d774e3fb226fd7e8067fb003e87c6f",
+    "tests/test_passports.py": "43f48e5813bc28e88c30bbf6982a02b902cf165cbc48b03855c84538c3dee29b"
+  },
+  "runtime_artifacts_sha256": {
+    "probe-recheck-focused.log": "0c45abc9d08eeaf0fa4c9ce21f70214241de1c634fdb7390ee5f1ec049f811e0",
+    "probe-recheck-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "probe-recheck-format.log": "eee76f865de5a9f2456950f710ae5d5f9b5bd0ea02aa54f614c5eed6642a0bfd",
+    "probe-recheck-adr.log": "97cfc8cc6e7c46277a20d64f39b5d9e54cdfc8518ca53b5ac6d8b0592f7556d2",
+    "probe-recheck-bandit.json": "341291edd5d3c17b338e8cedf385038f9004c0be720d111330f9ad873b1cfc23",
+    "probe-recheck-comparison.json": "9181199fc02aea296f8e95ad4895ec9052524e4c101f4211b551ee5b0a1c2c02",
+    "probe-recheck-mutation.json": "7bc8373236e537b69febeee7adda49b18dd8fd4702c26de2067cb98cdc8aa279"
+  },
+  "reproduction": [
+    "python -m unittest discover -s tests -p test_passport_probe.py -v",
+    "python -I scripts/passport_technology_probe.py",
+    "python -I scripts/passport_trust_review.py",
+    "python -m ruff check scripts/passport_technology_probe.py scripts/passport_trust_review.py tests/test_passport_probe.py",
+    "python -m ruff format --check scripts/passport_technology_probe.py scripts/passport_trust_review.py tests/test_passport_probe.py",
+    "node --check scripts/passport_technology_probe.mjs",
+    "python -m bandit -q --ignore-nosec -f json scripts/passport_technology_probe.py scripts/passport_trust_review.py tests/test_passport_probe.py",
+    "PYTHONPATH=tests python -m unittest test_passport_schemas.ArchitectureDecisionConformance -v"
+  ],
+  "limits": [
+    "Finite developer diagnostics, not target-class latency, jitter, runtime ranking, hardware or deployment qualification.",
+    "No alternative runtimes/frameworks benchmarked.",
+    "Listed hashes are not atomic snapshots, loaded-code identity, dependency closure or authenticated provenance.",
+    "Mutation failures are expected selected altered-code assertions; unchanged baseline passes.",
+    "Remaining cross-phase/lifecycle review and P16-P19 software remain unfinished."
+  ]
+}

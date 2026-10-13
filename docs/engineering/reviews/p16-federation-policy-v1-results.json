@@ -1,0 +1,89 @@
+{
+  "baseline_commit": "e22c67bafcf78969c4909636ad66a9d498314818",
+  "review_order_version": 3,
+  "date": "2026-10-10",
+  "decision": "KEEP shared bounded lexical/table validator; ADD independent pinned federation admission",
+  "changes": "Add non-authorizing metadata API, ten portable cases, eight API methods, two runner methods, installed-runner case execution and package-input coverage. Existing bundle runtime unchanged.",
+  "checks": {
+    "api_red": {
+      "methods": 7,
+      "errors": 46,
+      "cause": "Missing validate_pinned_federation API; subtest errors included"
+    },
+    "runner_red": {
+      "methods": 2,
+      "errors": 13,
+      "cause": "Missing check_federation_policy scenario; subtest errors included"
+    },
+    "final_focused_methods": 52,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "no_site_methods": 10,
+    "no_site_skips": 0,
+    "portable_cases": 10,
+    "runner_total_fixture_cases": 60,
+    "runner_file_scenarios": 1,
+    "wrong_result_substitutions_rejected": 12,
+    "ruff": "PASS after five retained warnings corrected",
+    "format": "PASS",
+    "bandit": {
+      "exit_code": 1,
+      "low": 37,
+      "medium": 0,
+      "high": 0,
+      "ids": [
+        "B101"
+      ],
+      "locations": "Developer installed-vector runner assertions only; production and other scoped files had no reported finding. No blanket exclusions."
+    }
+  },
+  "source_sha256": {
+    "aethron/interop_federation.py": "2ff7c09270d98a5b7a3aa0eea73981ea3a3f23f50381dc0b5f6b9ce04c4f7cd4",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "tests/test_interop_federation_policy.py": "452cc8feff782f8f3916b8c70a2cf3b82e9f386db63198aa86babb1ae865ce06",
+    "tests/test_interop_federation.py": "6dc97318721d6e634ec54abc1e95d245f06737401c35b6833714396acbf2958a",
+    "tests/test_interop_delivery.py": "451cd554b41cf592a96d3cff1b2209e6a1bb85101635aa98e3330fe4f234bebd",
+    "tests/test_passport_installed_vectors.py": "f9be945fa9783211336b34a591cd21a5d10758f9bd006b908a0b8a3b29408bdc",
+    "tests/test_passport_optional_backend.py": "40dea2bde03a7813dcc976920081593984212043a22da54ddc0c5a72348b35e5",
+    "tests/packaging/test_passport_manifest.py": "30d35a49196113c09cb1745a26a9201cc18e6270e6f7653c2c340029977f69cf",
+    "tests/packaging/test_passport_sdist.py": "5a41f7517791c9e6691a0a99004c2258b5b40901d51ff1cd7e82d04e5ee89819",
+    "scripts/passport_installed_vectors.py": "dd8f8b958316401598d811d180889e089d41acb08330245fa570976fea96e6f5",
+    "scripts/passport_sdist_check.py": "b9a87f3468a081751131709281f9c0e7853b100769e55617633fb26bf5fc1649",
+    "examples/interop/federation-policy-vectors-v1.json": "74cd12782e8e418e3e2270c4a0c578a75062e6863211da0311a7b9b34ac6087d",
+    "docs/decisions/p16-federation-policy-v1.json": "3bf9684cc6aee225b2081e1c6599eba831f8b26c272e06ad2573d6b67aca68b0",
+    "docs/architecture/interop/federation-policy-v1.md": "60bece70039b181e383e43455c73f70b37d740e7ffaa0ee4304848c076b1cf92",
+    "docs/architecture/interop/federation-v1.md": "c75ee949c57c0b51b0698c7853f9d802b94d65620323d97b0801dd84196ca651",
+    "docs/architecture/interop/verification-evidence-v1.md": "0e3f5129afec2ee6a49c423f2de730dd7cb2576c686ce01f8e823cd4a7663d58",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "10ae974c1231ca2ec8573a64b2fcd49853ac01246d592d5c60418880823a969d",
+    "MANIFEST.in": "af220709a64d24ca1606a7b48abab7e7ef68d6976d237242715872f3fb9084f1",
+    ".github/workflows/aethron-passports.yml": "f2e52752fcda9ff25b5792b2639d45704cb8568f8cdb8eee5fe0cb4cc2051e72"
+  },
+  "runtime_artifacts_sha256": {
+    "federation-policy-red.log": "51d691561a92abc1fd3a9a23f3970738d7b574778f51b671dc3405a54a733911",
+    "federation-policy-green.log": "d13f1653b7e3c4fa8e1e815380e682cd8ffde7e05afb3ed1f3bf2e4ea1aadfd1",
+    "federation-policy-installed-red.log": "0721048a9cce003e76626561637933a8740a77b80e792700988e174f50aa1a1f",
+    "federation-policy-installed-green.log": "e838d5e383e2d8b29da0b208e7869010bea976aa09958614d213dc64b30df51e",
+    "federation-policy-final.log": "d157de8aa8c45e2d6192b493db70381575bb7aa8f1fc6b548a297e5d3882dafb",
+    "federation-policy-final-recheck.log": "de6cad1b9dd90522d4d065df45797785c383765c34ac407948e59a8ce7b72d34",
+    "federation-policy-no-site.log": "ec0915f9887ad65fd18d466c9c79eb03367d4a9846d8f8efc0c39bac53b7cbbf",
+    "federation-policy-ruff.log": "a78d3d1ee13cbfb91ec14ff2069d4d3ef2e6b0f5f0e5ba45a57fe6fba590f912",
+    "federation-policy-ruff-final.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "federation-policy-bandit.json": "7147c64e470b03d47f7e3a674df180b25acb2ca3d33b8ec4d8a868dc7f277491",
+    "federation-policy-no-site-final.log": "bc6c0d6ed7ec78b0c00b392ea24661602977d792464c6711c309180e1c00c7a4"
+  },
+  "reproduction": [
+    "PYTHONPATH=tests:tests/packaging:. python -m unittest test_interop_federation_policy test_interop_federation test_interop_delivery test_passport_installed_vectors test_passport_manifest test_passport_sdist test_passport_schemas.ArchitectureDecisionConformance test_passport_optional_backend.OptionalBackendTests.test_dependency_free_assurance_reports_only_explicit_crypto_skips -v",
+    "Run Python with -I -S, assert cryptography is unavailable, explicitly insert the checkout and tests paths, and load test_interop_federation_policy plus the two InstalledVectorTests.test_federation_admission_* methods. Require successful results with zero skips."
+  ],
+  "limits": [
+    "All execution is local source evidence; no new installed distribution, hosted CI PASS, complete matrix or hardware qualification.",
+    "No alternatives executed or benchmarked; source-based candidate comparison is not a runtime speed ranking.",
+    "Pinned snapshot validation neither authenticates the configuration channel nor stores floors, detects same-revision conflicts across calls, grants authority or qualifies peer data.",
+    "Listed file hashes and local logs are not loaded-code attestation, atomic snapshots, dependency closure or signed release provenance.",
+    "No P16-P19 completion or technology-audit-complete marker."
+  ],
+  "next": "Implement durable federation revision/digest/time floor persistence using the independent validator."
+}

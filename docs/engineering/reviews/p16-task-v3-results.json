@@ -1,0 +1,42 @@
+{
+  "review_order_version": 3,
+  "baseline_head": "0686debb698f84299b0fa4531448ca1b803e88a7",
+  "component": "P16 task descriptions",
+  "decision": "KEEP implementation; FIX coverage; CLARIFY claims",
+  "production_changed": false,
+  "checks": {
+    "task_before": 7,
+    "task_after": 10,
+    "interop_family": 34,
+    "passport_family": 41,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_production": "PASS",
+    "diff": "PASS",
+    "local_links": "PASS after correcting initial bundle document link"
+  },
+  "retained_negative_evidence": [
+    "Repeated valid description checks succeed: no replay protection.",
+    "Saved validated metadata is not fresh authority at a later time.",
+    "Canonicalization cannot authenticate a pin or establish freshness.",
+    "Initial task-schema read failed: no task JSON Schema exists at this baseline.",
+    "Host namespace/fork resource errors prevented initial focused check launches; normal retries passed.",
+    "Initial new bundle-document link check failed; corrected bundle-v1.md to task-bundle-v1.md and rechecked."
+  ],
+  "qualification": {
+    "hardware": false,
+    "real_time": false,
+    "availability": false,
+    "mls": false,
+    "cnsa": false
+  },
+  "source_sha256": {
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "tests/test_interop_tasks.py": "2cbf9761590b24410bfed2026f504b720c97a58329ebbbe5d835021c48bbed97",
+    "docs/architecture/interop/task-v1.md": "45869eb218063022f140ec4b2dced26489195bc18f7fd50eb7aa5cd36b5b668c",
+    "examples/interop/task-vectors-v1.json": "17510988868b8fb57f2af7b8375db21ebc980bd845450f6c9cd44bfc0fa4794c",
+    "docs/engineering/reviews/p16-task-v3.md": "69c93621e07e03a764b22eb96b202cf7553b4f3b8e9bb82490606074231d19dd"
+  },
+  "next_component": "P16 bundle verification"
+}

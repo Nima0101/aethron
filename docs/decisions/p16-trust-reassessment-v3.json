@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "p16-trust-reassessment-v3",
+  "component": "P16 offline signature backend, trust metadata, expiry and revocation",
+  "decision": "KEEP",
+  "constraints": [
+    "Exact bounded software-statement bytes, one Ed25519 signature, at most 16 provisioned keys and 256 entries per revocation list.",
+    "Caller-authenticated policy, expected artifact digest, trusted time and rollback floors; no network, private-key handling or authority grant.",
+    "Half-open time intervals, complete key-metadata validation and fixed rejection reasons; optional crypto absence must reject without authentication metadata.",
+    "No specified embedded OS, hardware class, throughput, hard deadline or process-memory acceptance budget."
+  ],
+  "alternatives": [
+    "CPython validation with cryptography native Ed25519 verification.",
+    "Erlang/Elixir OTP crypto and explicit binary/record validation.",
+    "Java/Kotlin JCA Ed25519 provider with bounded admission.",
+    "Rust ed25519-dalek, including separately specified strict verification semantics.",
+    "C or memory-safe bindings to libsodium detached Ed25519.",
+    "JavaScript/TypeScript Node crypto with a lexical admission layer."
+  ],
+  "rationale": [
+    "KEEP the narrow native verification boundary: raw public-key and signature APIs, explicit dependency-failure mapping and bounded lexical policy validation satisfy the current offline contract without custom cryptographic arithmetic.",
+    "Fresh tests exercise expiry/revocation and real dependency absence in normal and optimized isolated interpreters. Six existing primitive cases agree between Python and Node; that is limited interoperability evidence, not full candidate parity.",
+    "OTP and JCA are credible managed alternatives but still need application admission and backend availability checks. Dalek strict verification is a potentially different acceptance profile, not a transparent language substitution. Sodium multipart Ed25519ph is not this wire profile.",
+    "No material winning migration is evidenced for this constrained contract. Language familiarity, existing code, installed tools and rewrite cost do not justify the decision. Actual native-target requirements or a revised cryptographic profile reopen it."
+  ],
+  "limits": [
+    "No universal backend acceptance equivalence, mathematical enrollment validation, live revocation discovery or persisted rollback floors.",
+    "Only Python and Node were executed; OTP, JCA, dalek and sodium comparisons are source-based. No controlled comparative benchmark or runtime ranking.",
+    "No encryption-at-rest/in-transit, MLS, CNSA, five-nines, hard-real-time, physical qualification or whole-lane completion.",
+    "Insufficient information for tactical deployment."
+  ],
+  "evidence": [
+    "https://cryptography.io/en/50.0.2/hazmat/primitives/asymmetric/ed25519/",
+    "https://www.erlang.org/doc/apps/crypto/crypto.html",
+    "https://docs.oracle.com/en/java/javase/25/docs/specs/security/standard-names.html",
+    "https://docs.rs/ed25519-dalek/latest/ed25519_dalek/struct.VerifyingKey.html",
+    "https://doc.libsodium.org/public-key_cryptography/public-key_signatures",
+    "https://nodejs.org/api/crypto.html"
+  ]
+}

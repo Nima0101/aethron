@@ -1,0 +1,262 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_commit": "2859c59477c1bea7256efabf5629e15bb3b5330d",
+  "scope": "Fresh review of owned offline cross-phase consumer tests; documentation-only patch.",
+  "decisions": {
+    "edge": "KEEP",
+    "packet_encoding": "KEEP",
+    "ros_diagnostic": "KEEP"
+  },
+  "checks": {
+    "focused_methods": 14,
+    "adr_methods": 4,
+    "skips": 0,
+    "production_red": false,
+    "sensitivity_runs": 6,
+    "sensitivity_assertion_failures": 30,
+    "sensitivity_errors": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_unfiltered": "PASS",
+    "diff": "PASS"
+  },
+  "producer_comparison": {
+    "main": "fce89d3904ddbfb004b55718fab955c91a9c49a0",
+    "bindings": [
+      {
+        "corpus": "edge-unknown-vectors-v1.json",
+        "path": "contracts/openapi/aethron-edge-v1.json",
+        "sha256": "4d562382b803e59dac1ab24a7ead52cd2cdbbc9533aa6d9dc68fca9f6e9b0b83",
+        "main_matches": true,
+        "local_matches": true
+      },
+      {
+        "corpus": "edge-unknown-vectors-v1.json",
+        "path": "contracts/fixtures/v3/unknown-output.json",
+        "sha256": "2b91d797820cce663134417d5b52b016aebcaca02c7a710bc16984487b35a754",
+        "main_matches": true,
+        "local_matches": true
+      },
+      {
+        "corpus": "sensor-packet-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/packets.py",
+        "sha256": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192",
+        "main_matches": true,
+        "local_matches": true
+      },
+      {
+        "corpus": "sensor-packet-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/__init__.py",
+        "sha256": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9",
+        "main_matches": true,
+        "local_matches": true
+      },
+      {
+        "corpus": "sensor-packet-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/__init__.py",
+        "sha256": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a",
+        "main_matches": true,
+        "local_matches": true
+      },
+      {
+        "corpus": "sensor-encoding-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/packets.py",
+        "sha256": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192",
+        "main_matches": true,
+        "local_matches": true
+      },
+      {
+        "corpus": "sensor-encoding-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/__init__.py",
+        "sha256": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9",
+        "main_matches": true,
+        "local_matches": true
+      },
+      {
+        "corpus": "sensor-encoding-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/__init__.py",
+        "sha256": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a",
+        "main_matches": true,
+        "local_matches": true
+      },
+      {
+        "corpus": "ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/__init__.py",
+        "sha256": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9",
+        "main_matches": true,
+        "local_matches": true
+      },
+      {
+        "corpus": "ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/mailbox.py",
+        "sha256": "84b6c32191d1cd21f5469c908be50b38179d6d594cc9fd1865e2b06e3851b090",
+        "main_matches": true,
+        "local_matches": true
+      },
+      {
+        "corpus": "ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/__init__.py",
+        "sha256": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a",
+        "main_matches": true,
+        "local_matches": true
+      },
+      {
+        "corpus": "ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/geometry.py",
+        "sha256": "24dbd7e248990f426d985d05e9add08615621381f4391209a85682102f50d02b",
+        "main_matches": true,
+        "local_matches": true
+      },
+      {
+        "corpus": "ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/packets.py",
+        "sha256": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192",
+        "main_matches": true,
+        "local_matches": true
+      },
+      {
+        "corpus": "ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/rectification.py",
+        "sha256": "b034b4f5b2e0c5c4bda51f5adfcb4a15193ebe7497ab4099c7887fb57c49f6db",
+        "main_matches": true,
+        "local_matches": true
+      },
+      {
+        "corpus": "ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sensors/ros2.py",
+        "sha256": "41aece1eff1dd5e6ae77272959354c8a9bcc6465ec10da2da7b747ad97589912",
+        "main_matches": true,
+        "local_matches": true
+      },
+      {
+        "corpus": "ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sources/__init__.py",
+        "sha256": "c68be66b7a8e4e95cafcc1cdcf108c0532d1d2a53b55def660cbfdc4b8034f48",
+        "main_matches": true,
+        "local_matches": true
+      },
+      {
+        "corpus": "ros-status-vectors-v1.json",
+        "path": "integrations/edge/aethron_edge/sources/base.py",
+        "sha256": "0617c1b46c55416ff779189c270c7f5e46cd52a7cc0eaa03328c6800b8bbc319",
+        "main_matches": true,
+        "local_matches": true
+      }
+    ]
+  },
+  "remote_main_read_only": "fce89d3904ddbfb004b55718fab955c91a9c49a0",
+  "fetch_status": "Denied: read-only FETCH_HEAD; remote main SHA independently matched cached origin/main using ls-remote.",
+  "source_sha256": {
+    "tests/test_passport_lexical.py": "0272780452980ec03e9b180a84e35db7e2aefd04f7bc6cf0ac21cfd9288b1887",
+    "tests/test_passport_schemas.py": "494e0b7345892bb2cfea3109f8c05735e8328f0cbf4de5b5319913a585ee0cb7",
+    "tests/interop_consumers/test_sensor_packets.py": "891eee7a0f9f7612dae89d5fbbc4aa49bc37784afb2b82f4d3a1c5f13e6af0dd",
+    "tests/interop_consumers/test_ros_status.py": "64b64d989c8361e4a508631b9fd13caf3a0fd447f6a406a7b4c0fe4b1623c75e",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "requirements-passport-sensor-conformance.txt": "b6b85e1f3f15fa42ee3d3676bd1a95b0800a672c38106a9a1d8366f818f3393d",
+    "requirements-passport-conformance.txt": "1d137f508c86edba0b3bf6d5c5e9d6cf673b31c3e4cfed2d57a3122ccad73dd3",
+    ".github/workflows/aethron-passports.yml": "abd88979695dd2b169e4ac5ea38b7d4af2b7da360e2a636468cf42e6585fa680",
+    "examples/interop/edge-unknown-vectors-v1.json": "ee56de5eaa3b597aace551fc93f8faf6e1f3b9d72ceca9872ee6b0d2886144d7",
+    "examples/interop/sensor-packet-vectors-v1.json": "80fb60be05c18f87f8954332c2d4f8be28762c16d335d004527555fb3d3aa4fc",
+    "examples/interop/sensor-encoding-vectors-v1.json": "60ead91ad5b69d10edc7487028823d1acfab8c4259b9a41dae10c6fc922bd39e",
+    "examples/interop/ros-status-vectors-v1.json": "d9d64c2a2869c6dec3151c969dd343c475a3b610adfbbaf6b641a568be5d9738",
+    "docs/decisions/p16-edge-consumer-reassessment-v3.json": "dbb6502d901700abe300c0ceb8c5f4f60e4176ee130f66b7c9df297d53bb4c48",
+    "docs/decisions/p16-packet-consumer-reassessment-v3.json": "73336038cfa5f4644edb0bd95e47f4c124e4d53f31dd78067180b25e79cf12cc",
+    "docs/decisions/p16-ros-consumer-reassessment-v3.json": "15c33dfd83dc9323863e143f2048c0a2ae933e9d6c3d4c5b0d9b4cf698124712",
+    "docs/engineering/reviews/p16-cross-phase-reassessment-v3.md": "d9a0fced13ab3deae3a8aa38ab608cd859c1a88b39f1376e3e278f5366318ccb"
+  },
+  "local_artifact_sha256": {
+    "cross-phase-reassessment-adr.log": "284fa65ff4ed58a33adca67111a357f62fb74d60798155ebeee4f817f8c34575",
+    "cross-phase-reassessment-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cross-phase-reassessment-checks.json": "9cb5dad083b3799156ffa636fdc525702cdaeaa054cd13685e3d38caabf5e9f5",
+    "cross-phase-reassessment-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cross-phase-reassessment-edge-always_rejected.log": "35957a6e354c09ec470125d5e71e72fb60a73c36f6034573a8ff422a45bd6c58",
+    "cross-phase-reassessment-edge-unearned_qualification.log": "f3ac337d8149152bf4bb7d5fc77df98d00b055e0e05a518f2501a515d0dd904f",
+    "cross-phase-reassessment-focused.log": "0c8e75683d0aba52f23129c10ad67a38e9d8257047fe29caba7952e8bc32eb4e",
+    "cross-phase-reassessment-format.log": "eee76f865de5a9f2456950f710ae5d5f9b5bd0ea02aa54f614c5eed6642a0bfd",
+    "cross-phase-reassessment-main.json": "fd6e840c500b1d1865dcf14879859c92b47f3941386e6976a5a662a953f9deca",
+    "cross-phase-reassessment-negative.json": "d0a0b4770e77b224b300de3a64cf90aeae2bcdcfefc9ec5611f0c317bed9c8a0",
+    "cross-phase-reassessment-packet-always_rejected.log": "eae24aef27f707ff6f66a1455029283921e0ec692fb340e6fe381610877d0577",
+    "cross-phase-reassessment-packet-unearned_qualification.log": "880af41a36629556edce078854a4ccd1d020629bff651302b064c37f2380f985",
+    "cross-phase-reassessment-ros-always_rejected.log": "a45251732708a12ea486e30fc460642b9ec0aa381477faea2fc6aef9db67cff8",
+    "cross-phase-reassessment-ros-unearned_qualification.log": "71bb55167de636b7f106b1078480acbef0ca3e79b3944c9717783e238c75d0a7",
+    "cross-phase-reassessment-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "cross_phase_reassessment_controls.py": "2c28196c9c45b2123d0ee5a2e85c0b987905a95b12cb609d5492cb4548ac35fa"
+  },
+  "sensitivity": [
+    {
+      "component": "edge",
+      "defect": "unearned_qualification",
+      "method": "test_exact_binding_and_negative_portable_cases",
+      "methods": 1,
+      "assertion_failures": 6,
+      "errors": 0,
+      "skips": 0,
+      "restored": true
+    },
+    {
+      "component": "edge",
+      "defect": "always_rejected",
+      "method": "test_exact_binding_and_negative_portable_cases",
+      "methods": 1,
+      "assertion_failures": 6,
+      "errors": 0,
+      "skips": 0,
+      "restored": true
+    },
+    {
+      "component": "packet",
+      "defect": "unearned_qualification",
+      "method": "test_real_binding_preserves_every_portable_outcome",
+      "methods": 1,
+      "assertion_failures": 5,
+      "errors": 0,
+      "skips": 0,
+      "restored": true
+    },
+    {
+      "component": "packet",
+      "defect": "always_rejected",
+      "method": "test_real_binding_preserves_every_portable_outcome",
+      "methods": 1,
+      "assertion_failures": 5,
+      "errors": 0,
+      "skips": 0,
+      "restored": true
+    },
+    {
+      "component": "ros",
+      "defect": "unearned_qualification",
+      "method": "test_actual_status_transitions_bind_without_qualification",
+      "methods": 1,
+      "assertion_failures": 4,
+      "errors": 0,
+      "skips": 0,
+      "restored": true
+    },
+    {
+      "component": "ros",
+      "defect": "always_rejected",
+      "method": "test_actual_status_transitions_bind_without_qualification",
+      "methods": 1,
+      "assertion_failures": 4,
+      "errors": 0,
+      "skips": 0,
+      "restored": true
+    }
+  ],
+  "reproduction": {
+    "focused": "PYTHONPATH=tests:tests/interop_consumers:.:integrations/edge python -m unittest test_passport_lexical test_passport_schemas.EdgeEvidenceConformance test_sensor_packets test_ros_status -v",
+    "sensitivity": "For each selected method, wrap the actual verifier to copy dataclass fields to a SimpleNamespace and either set evidence_verified=True or status/reason=rejected/injected_rejection. Patch only the consumer lookup binding in a scoped context. Run one method; require assertion failures, no errors/skips, and restored original binding."
+  },
+  "limits": [
+    "Fixed synthetic examples; no runtime, producer, fixture or test changes.",
+    "Sensitivity failures demonstrate assertion behavior, not a production defect or exhaustive mutation score.",
+    "Listed file hashes are not loaded-code attestation or dependency closure.",
+    "No alternate-runtime benchmark, hosted CI, installed product, physical, real-time or accreditation evidence."
+  ],
+  "next_component": "Trust-floor lifecycle claims and remaining historical inventory reconciliation",
+  "audit_complete": false
+}

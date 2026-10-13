@@ -1,0 +1,149 @@
+{
+  "review_order_version": 3,
+  "baseline_commit": "8c6ccdb9c4e9fa4aa49f9644398e47e5305973da",
+  "component": "Explicit single-scope local policy-floor persistence",
+  "decision": "Select SQLite rollback transactions with Python binding and actual pinned-policy validator",
+  "runtime_changed": true,
+  "existing_stateless_runtime_changed": false,
+  "checks": {
+    "floor_store_methods": 16,
+    "dependency_methods": 9,
+    "adr_methods": 4,
+    "packaging_methods": 7,
+    "install_checker_methods": 17,
+    "total_methods": 79,
+    "skips": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS, new production module and changed packaging helpers, no exclusions",
+    "passport_methods": 26,
+    "resource_warnings": 0
+  },
+  "retained_failures": {
+    "missing_api_assertions": 13,
+    "path_encoding_errors_before_fix": 1,
+    "explicit_manifest_selection_failures_before_fix": 1,
+    "note": "Manifest checker tests explicit selection; no claim a built sdist omitted the module.",
+    "unchecked_page_limit_assertions_before_fix": 1,
+    "initial_resource_warnings": "Unclosed test-owned SQLite connections in original floor-focused-final.log; fixed using explicit closing contexts."
+  },
+  "observations": [
+    "Fifteen real-file tests include a second-process update, competing connection, actual SQL update with injected commit failure and reread after rollback.",
+    "New revision revoking every signer persists independently of passport rejection. Same-revision different digest rejects without persisting a later time.",
+    "Whole-file restore exposes old floors: retained negative evidence, no privileged rollback protection.",
+    "Fresh continuation: 16 store methods; under-64-KiB database with more than 16 pages now rejects without changing file bytes. Effective SQLite page-limit response is checked."
+  ],
+  "environment": {
+    "python": "3.13.5",
+    "sqlite": "3.46.1",
+    "system": "Linux",
+    "hardware_qualified": false
+  },
+  "prior_stateless_runtime_bytes_unchanged": {
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb"
+  },
+  "source_sha256": {
+    "MANIFEST.in": "af220709a64d24ca1606a7b48abab7e7ef68d6976d237242715872f3fb9084f1",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "aethron/passport_floor_store.py": "c9e0f4deb9589b3139296f9eb506113108168561e794cd4c45d3579ad75977e7",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "docs/architecture/interop/passport-v1.md": "d6b2a943e9887729077e4b5648d808c841ab69d9d6ed5ddd37724c3ed1b4e09e",
+    "docs/architecture/interop/policy-floor-store-v1.md": "e3c1fe9e4ff0e48c079df3f462e1956572f2a34f3b402cc5dd102602eaae9caf",
+    "docs/architecture/interop/verification-evidence-v1.md": "e5232d755a83e3a944e3469fd70d58805e6f7eeaaec60cd1379802d11da0c3fc",
+    "docs/decisions/p16-policy-floor-store-v1.json": "3fc9e5203e608cf18584c98f6dce8e9b97a2bb1b5ab0602a2aada528948c2dec",
+    "docs/engineering/plans/p16-policy-floor-store-v1.md": "e21fc5c961397dd4b719b7068293cfbb7fadf71796d5ca5f6605a861a68321dc",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "4b6d59056c94fce304329b863f8e35333f9162a4dc10f4a43d05af7c81048b5b",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "scripts/passport_install_check.py": "841237a8123416f0645a9af8b6173d45a6fe6fbaf0b8da2e6a53ea5b4940b512",
+    "scripts/passport_sdist_check.py": "06d34901d68f475005ddcf93b0937549c087539f91cb46d3062b8b43343fdcaf",
+    "tests/packaging/test_passport_manifest.py": "30d35a49196113c09cb1745a26a9201cc18e6270e6f7653c2c340029977f69cf",
+    "tests/packaging/test_passport_sdist.py": "5a41f7517791c9e6691a0a99004c2258b5b40901d51ff1cd7e82d04e5ee89819",
+    "tests/test_passport_floor_store.py": "9c519a03e78c7a2ede461ef786dbe7dd1ffc43c3a02bba6d71204adf934c8026",
+    "tests/test_passport_install_check.py": "1914ba8d17fc7b6b416e3b85416313b13f55e90b9c0fe7a8ac5240f2b0ffa1be",
+    "tests/test_passport_lexical.py": "0272780452980ec03e9b180a84e35db7e2aefd04f7bc6cf0ac21cfd9288b1887",
+    "tests/test_passport_policy.py": "2ff348136a8b174c53d72e96318462c35d7c4163f3dcfc1f0836a138d6f55acd",
+    "tests/test_passport_schemas.py": "0c423ffb3e53e8edc3f7a9bad16b460c1ca92b76ebeeb05f32492cda0d8f40b2",
+    "docs/engineering/reviews/p16-floor-current-v3.md": "0efa4a99eba35a0f1d2775c54a5459a28184a0334419658939be17cac5824ea8"
+  },
+  "runtime_artifacts_sha256": {
+    "floor-red.log": "5042e855cf9f18aa5a5ad36baab9a176fff1a7791b2469ea354bd97106cf0619",
+    "floor-green-initial.log": "d9649021941fa000d5075b411cf9cfa0db2f1dd49684635ec418d5d28e6fe880",
+    "floor-path-red.log": "680aa87e03c55a6ea21d755a8d9539e6bf1d1dffa5ad9b8c111e8c63f41a26c1",
+    "floor-focused-final.log": "c117b76dbd319b24265d6e971b71532875833fab612824adb8bc0f0ee9f20353",
+    "floor-packaging.log": "60b2f139a97e7fb727a0b18f267d9afc426ac0d7d86b3ac9b3f2a1624ffe97e5",
+    "floor-packaging-fixed.log": "42c3af400cc6fcfb4352f3c548fc715b31c22acb49dc06e3f8455eada0cdda3b",
+    "floor-install-check.log": "1033510f2ef0b58aa9572245871d15d86926db09d4fc79c3ff84686040dd3cbd",
+    "floor-ruff-final.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "floor-format-final.log": "177f260a5645724013185e4b140c7045cc39e56c0c97b120f5cb23599f85f0de",
+    "floor-bandit-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "floor-page-bound-red.log": "b37776ab94a5f7fb13b1e54232def1f656a50c7057ef34b90eae5265e2b894b8",
+    "floor-current-focused.log": "fd0ed5e750cbeadf6a7a62821bf40cb46fedf39dd3b971c6d00c1fa461757988",
+    "floor-current-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "floor-current-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "floor-current-format.log": "177f260a5645724013185e4b140c7045cc39e56c0c97b120f5cb23599f85f0de"
+  },
+  "reproduction": [
+    "PYTHONPATH=tests:tests/packaging:. python -W always::ResourceWarning -m unittest test_passport_floor_store test_passport_policy test_passport_lexical test_passports test_passport_schemas.ArchitectureDecisionConformance test_passport_manifest test_passport_sdist test_passport_install_check -v",
+    "PYTHONPATH=tests:. python -m unittest test_passport_floor_store test_passport_policy test_passport_lexical test_passport_schemas.ArchitectureDecisionConformance -v",
+    "PYTHONPATH=tests:tests/packaging:. python -m unittest test_passport_manifest test_passport_sdist -v",
+    "PYTHONPATH=tests:. python -m unittest test_passport_install_check -v"
+  ],
+  "limits": [
+    "No target latency, power-loss or filesystem-fault qualification; no benchmark ranking of alternative languages or engines.",
+    "Caller-protected local storage, trusted clock and authenticated policy pins remain preconditions. No adversarial-database or whole-filesystem rollback defense.",
+    "No new installation, hosted run, archive build or release qualification was performed. Existing hosted selectors include the new source test; isolated module identity inventory now includes the store.",
+    "No P17/P18/P19 completion or operational military capability. No audit-complete marker."
+  ],
+  "next": "Continue fresh review at evidence-byte binding; installed-package floor conformance remains unfinished.",
+  "initial_implementation_checks": {
+    "floor_store_methods": 15,
+    "dependency_methods": 9,
+    "adr_methods": 4,
+    "packaging_methods": 7,
+    "install_checker_methods": 17,
+    "total_methods": 52,
+    "skips": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS, new production module and changed packaging helpers, no exclusions"
+  },
+  "initial_implementation_source_sha256": {
+    "MANIFEST.in": "af220709a64d24ca1606a7b48abab7e7ef68d6976d237242715872f3fb9084f1",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "aethron/passport_floor_store.py": "d2939ef3aedddf00d6fbcaf6c251a8835dd0f8672db167b49a30e765852567c8",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "docs/architecture/interop/passport-v1.md": "d6b2a943e9887729077e4b5648d808c841ab69d9d6ed5ddd37724c3ed1b4e09e",
+    "docs/architecture/interop/policy-floor-store-v1.md": "80f142e8d7e779843d9f04a546409ce147935263e6684d8175424f4232fa02ad",
+    "docs/architecture/interop/verification-evidence-v1.md": "e5232d755a83e3a944e3469fd70d58805e6f7eeaaec60cd1379802d11da0c3fc",
+    "docs/decisions/p16-policy-floor-store-v1.json": "3fc9e5203e608cf18584c98f6dce8e9b97a2bb1b5ab0602a2aada528948c2dec",
+    "docs/engineering/plans/p16-policy-floor-store-v1.md": "e21fc5c961397dd4b719b7068293cfbb7fadf71796d5ca5f6605a861a68321dc",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "6641510a8c42ca7be6e7ea9f4abfc761b64b9588ad731a780f63d0d121fbec17",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "scripts/passport_install_check.py": "841237a8123416f0645a9af8b6173d45a6fe6fbaf0b8da2e6a53ea5b4940b512",
+    "scripts/passport_sdist_check.py": "06d34901d68f475005ddcf93b0937549c087539f91cb46d3062b8b43343fdcaf",
+    "tests/packaging/test_passport_manifest.py": "30d35a49196113c09cb1745a26a9201cc18e6270e6f7653c2c340029977f69cf",
+    "tests/packaging/test_passport_sdist.py": "5a41f7517791c9e6691a0a99004c2258b5b40901d51ff1cd7e82d04e5ee89819",
+    "tests/test_passport_floor_store.py": "6e41f44920b37e43efe8532826be19e1564218866a6f783e718597ae4415212c",
+    "tests/test_passport_install_check.py": "1914ba8d17fc7b6b416e3b85416313b13f55e90b9c0fe7a8ac5240f2b0ffa1be",
+    "tests/test_passport_lexical.py": "0272780452980ec03e9b180a84e35db7e2aefd04f7bc6cf0ac21cfd9288b1887",
+    "tests/test_passport_policy.py": "2ff348136a8b174c53d72e96318462c35d7c4163f3dcfc1f0836a138d6f55acd",
+    "tests/test_passport_schemas.py": "0c423ffb3e53e8edc3f7a9bad16b460c1ca92b76ebeeb05f32492cda0d8f40b2"
+  },
+  "review_restart": {
+    "baseline": "8c6ccdb9c4e9fa4aa49f9644398e47e5305973da",
+    "decisions": {
+      "parser": "KEEP",
+      "signature_trust_expiry_revocation": "KEEP",
+      "pinned_policy": "KEEP",
+      "pending_policy_floor_store": "KEEP with effective-page-limit FIX"
+    },
+    "next_earliest_unreviewed": "Evidence-byte binding",
+    "complete": false,
+    "review": "docs/engineering/reviews/p16-floor-current-v3.md"
+  }
+}

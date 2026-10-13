@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "id": "p16-source-selection-v3",
+  "component": "P16 source-distribution consumer input selection",
+  "decision": "KEEP",
+  "constraints": [
+    "Source archives must select the published consumer tests and their pinned project inputs together; peer-owned source bytes must remain unchanged.",
+    "Bounded metadata-only local verification: no archive build, full clone, device, network schema lookup or runtime dependency change."
+  ],
+  "alternatives": [
+    "Setuptools MANIFEST.in explicit selection with a bounded FileList regression check.",
+    "Hatchling build include/exclude and force-include configuration.",
+    "Meson-python source-distribution selection through Meson packaging.",
+    "Dhall-generated manifest configuration with typed reusable declarations."
+  ],
+  "rationale": [
+    "KEEP the native declarative manifest and correct twelve omissions: eleven pinned producer/contract files and the passport fixture README. The real Setuptools selector initially omits twelve of twenty-two required inputs and selects all twenty-two after the correction.",
+    "Hatchling offers file selection and Meson-python supports a native-build-oriented backend. Both still require explicit coverage of these consumer inputs; neither is shown to infer the published fixture dependencies. No native compilation or archive throughput requirement favors a backend migration for this component.",
+    "Dhall can express reusable typed configuration, but no shared generation requirement is present. The finite selection is directly expressible in the backend input; extra generation supplies no demonstrated selection correctness advantage.",
+    "A dedicated hosted step uses Setuptools 84.0.0, matching the Python 3.13 build configuration. Its FileList API is a backend-specific test dependency, not a production runtime dependency. Future backend changes must replace or adapt this test."
+  ],
+  "limits": [
+    "This check evaluates the manifest over a finite candidate set. It is not a complete source archive, wheel contents test, dependency closure analysis or independent install dry run.",
+    "Expected missing-pattern warnings concern unrelated candidates deliberately absent from this bounded probe. They are retained in logs.",
+    "No peer source implementation changes, package-discovery changes or transport/hardware functionality.",
+    "No alternative backend benchmark, hosted execution, whole-product, physical, real-time or accreditation claim."
+  ],
+  "evidence": [
+    "https://setuptools.pypa.io/en/latest/userguide/miscellaneous.html",
+    "https://hatch.pypa.io/latest/config/build/",
+    "https://mesonbuild.com/meson-python/",
+    "https://dhall-lang.org/"
+  ]
+}

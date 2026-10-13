@@ -1,0 +1,119 @@
+{
+  "baseline_commit": "64ac47c6d0986af09238d61a8514085849f1a36a",
+  "review_order_version": 3,
+  "reviewed_at": "2026-10-10",
+  "decisions": {
+    "comparison_observer": "KEEP",
+    "mutation_runner": "KEEP",
+    "test_dependency_boundary": "FIX"
+  },
+  "checks": {
+    "regression_red": {
+      "parent_methods": 1,
+      "parent_failures": 1,
+      "child_methods": 45,
+      "child_failures": 15,
+      "child_errors": 30,
+      "child_skips": 0
+    },
+    "intermediate_test_correction": "Overbroad floor-name assertion matched crypto-dependent federation method; retained failed log.",
+    "optional_backend_methods": 3,
+    "crypto_available_methods": 48,
+    "additional_adr_methods": 4,
+    "final_combined_methods": 52,
+    "final_failures": 0,
+    "final_errors": 0,
+    "final_skips": 0,
+    "no_site": {
+      "methods": 43,
+      "passed": 23,
+      "skipped_for_optional_crypto": 20,
+      "failures": 0,
+      "errors": 0
+    },
+    "floor_omission_control": {
+      "expected_failures": 1,
+      "errors": 0,
+      "skips": 0
+    },
+    "final_installed_runner_recheck": {
+      "methods": 14,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0
+    },
+    "live_comparison": {
+      "cases": 6,
+      "lexical_rejections": 5,
+      "primitive_outcomes": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    "live_mutation": {
+      "baseline_methods": 4,
+      "mutations": 4,
+      "expected_assertion_failures": 8
+    },
+    "ruff": "PASS after two import-order corrections",
+    "format": "PASS",
+    "bandit": {
+      "exit_code": 1,
+      "low": 3,
+      "medium": 0,
+      "high": 0,
+      "ids": [
+        "B404",
+        "B603"
+      ],
+      "blanket_exclusions": [],
+      "note": "Existing narrow nosec annotations retained; new fixed-argv subprocess calls use the same B603 annotation. Three existing probe-test warnings retained."
+    }
+  },
+  "source_sha256": {
+    "scripts/passport_technology_probe.py": "2fe524081bb31f00b7d97975e8cc810c10db5d00e7902a02f3b92b3cd0d25a72",
+    "scripts/passport_technology_probe.mjs": "4ac119d787fde5c2b3ef0fbd5cc269436790e3d84c03ed1a0a1182b12d8a4f2b",
+    "scripts/passport_trust_review.py": "118ce6a5232af5099294658c03326b01bd32107b08f16cb69eb4c241253dd195",
+    "scripts/passport_installed_vectors.py": "9fe74bb747236cc39e0588d97fb74fc8a620f981ebde12da09787ade2be303c8",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "tests/test_passports.py": "20bdc75b84aa566867197604e2462053e366016638828bb0ba59e990ffd56c3d",
+    "tests/test_passport_probe.py": "cf8af1cc320e366049ee4f6f4547f393d7d774e3fb226fd7e8067fb003e87c6f",
+    "tests/test_passport_installed_vectors.py": "8ab0a761bbde95fba529b3c7392ccd30195976cb4f0e1488d3a3eb57b862feac",
+    "tests/test_passport_optional_backend.py": "40dea2bde03a7813dcc976920081593984212043a22da54ddc0c5a72348b35e5",
+    "tests/test_passport_policy.py": "aec90f86e9f9689c0226d70bc3cbbe6e587b99293f223dd919bbb8253d533cf8",
+    "tests/test_interop_delivery.py": "451cd554b41cf592a96d3cff1b2209e6a1bb85101635aa98e3330fe4f234bebd",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    ".github/workflows/ci.yml": "b298eec6adca3630f120942d566dc9905e19c9b7754be6dd787d829e375cb8cd",
+    ".github/workflows/aethron-passports.yml": "f2e52752fcda9ff25b5792b2639d45704cb8568f8cdb8eee5fe0cb4cc2051e72",
+    "requirements-passports.txt": "f6a456c822fb9de2a51699bdbacf232070362b51371790526c4a33b2a09fd801",
+    "docs/decisions/p16-probe-optional-v3.json": "3a5d11a67fa92d06ca0514b78def04c31cd94339ec52d031a3565f3820103dbc"
+  },
+  "runtime_log_sha256": {
+    "development-42259ba.log": "855d0ae625f97a9a2267b1ff5b28b4e2179e1fc680a06095f6471d2c56961dac",
+    "probe-current-delivery-check.log": "c46d777c478373cd2358455e29c88034110436254ecf671d3de3a83bccd9a696",
+    "probe-optional-red.log": "56106f0f9c11bb11b3b9cb44d373dde64b63059ae3e105f3895c5afbcdf4062e",
+    "probe-optional-test-correction.log": "082198b7c05574c8efb80c4817c2a49351d643d893bd40776ca5db839a6919da",
+    "probe-optional-green.log": "502f93c42220029d9502f951dc98b5049a16a792b0c342b1d0717d613e597012",
+    "probe-current-focused.log": "35c0a0ae8d6d3ca3ef8153ce6fbad0c2c7cd0102ba0788eb4aed4e1b72e3f2a1",
+    "probe-current-final.log": "0e812abe3ac1a3b3e86a622771de617d5dcdf1a08eb90f86063dc77f41a6c7d0",
+    "probe-current-no-site.json": "20cfe03ed711f9f5577474805398c8e2672abdb0e43229b0dc5e8c1337beabfc",
+    "probe-current-live.json": "69a7cb6061a7c7007c2afa57ef169fde48a6815c36e0df7bc0298c9ddf592804",
+    "probe-current-mutations.json": "9d69832211da3e534df5d654cf45be783bc094872f32f1a70235a4e196a1e4b0",
+    "probe-current-ruff-red.log": "a823d8e1dcdbec0a3c5221397d34ec3310213f5749a9f880cbeec04fac6be2d0",
+    "probe-current-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "probe-current-format.log": "f114d83b30c5c657ee43a847a45bafccaea255d82673feb87c26d252c61e29c1",
+    "probe-current-bandit-final.json": "d92ae36897b4280be82be9c04105526c3fe20a9e559de20f263cc7e7c10a7a27",
+    "probe-floor-integration-control.log": "184c855e0f4c56dd23f1d423602e7fc048a96bc5bb44fdcd7e7f9f40d05283ec",
+    "probe-floor-integration-green.log": "9f7c5f6fba417150d7b94e933dcb7b285588f5c3091d92753a6b8adca914fda8"
+  },
+  "limits": [
+    "Local source execution, no hosted PASS or full local matrix. No-site skips are unavailable coverage, not crypto acceptance.",
+    "Selected source hashes and local raw logs are not atomic snapshots, dependency closure, loaded-code attestation or published raw artifacts.",
+    "No hardware latency, power-loss, MLS/CNSA, availability or operational qualification. P16\u2013P19 remain unfinished."
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "task_id",
+    "kind",
+    "subject_sha256",
+    "passport_sha256",
+    "policy_sha256",
+    "evidence_sha256",
+    "issued_at",
+    "expires_at",
+    "max_evidence_bytes",
+    "motion_authority"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}(?![\\s\\S])",
+      "maxLength": 64
+    },
+    "kind": {
+      "enum": [
+        "passport.verify.v1",
+        "evidence.bind.v1"
+      ]
+    },
+    "subject_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "minLength": 64,
+      "maxLength": 64
+    },
+    "passport_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "minLength": 64,
+      "maxLength": 64
+    },
+    "policy_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "minLength": 64,
+      "maxLength": 64
+    },
+    "evidence_sha256": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$",
+        "minLength": 64,
+        "maxLength": 64
+      },
+      "minItems": 0,
+      "maxItems": 16,
+      "uniqueItems": true
+    },
+    "issued_at": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "expires_at": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "max_evidence_bytes": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1048576
+    },
+    "motion_authority": {
+      "type": "boolean",
+      "const": false
+    }
+  },
+  "if": {
+    "properties": {
+      "kind": {
+        "const": "passport.verify.v1"
+      }
+    }
+  },
+  "then": {
+    "properties": {
+      "evidence_sha256": {
+        "maxItems": 0
+      },
+      "max_evidence_bytes": {
+        "const": 0
+      }
+    }
+  },
+  "else": {
+    "properties": {
+      "evidence_sha256": {
+        "minItems": 1
+      },
+      "max_evidence_bytes": {
+        "minimum": 1
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AETHRON offline task v1 structural profile",
+  "$comment": "Structural tooling only; never authentication, execution authority or evidence qualification. The normative task-v1.md profile additionally requires bounded UTF-8 bytes/depth, rejection of duplicate keys and float lexical forms, canonical bytes, interval limits, externally authenticated pins and caller-trusted time/floors. Federation additionally requires unique remote-domain names distinct from local_domain and runtime bundle/scope verification."
+}

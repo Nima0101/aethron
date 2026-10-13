@@ -1,0 +1,135 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "name": "deny-all",
+      "federation": "{\"expires_at\":1600,\"issued_at\":1400,\"local_domain\":\"local-software\",\"peers\":[],\"revision\":5,\"version\":1}",
+      "arguments": {
+        "local_domain": "local-software",
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_federation_revision": 5,
+        "expected_federation_sha256": "7c63cc1e71d9b81d2dc3fcbb01ec4a5cff5e8b31d3e81ae73ed1617741f6c60e"
+      },
+      "status": "validated",
+      "reason": "federation_matches"
+    },
+    {
+      "name": "one-peer",
+      "federation": "{\"expires_at\":1600,\"issued_at\":1400,\"local_domain\":\"local-software\",\"peers\":[{\"capabilities\":[\"evidence.offline.v1\"],\"issuers\":[\"fixture-publisher\"],\"policy_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"remote_domain\":\"peer-software\"}],\"revision\":5,\"version\":1}",
+      "arguments": {
+        "local_domain": "local-software",
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_federation_revision": 5,
+        "expected_federation_sha256": "76049981dc212332a9e5c89416809a174a309e4ce83613f6b8d8f50f05c85f78"
+      },
+      "status": "validated",
+      "reason": "federation_matches"
+    },
+    {
+      "name": "wrong-pin",
+      "federation": "{\"expires_at\":1600,\"issued_at\":1400,\"local_domain\":\"local-software\",\"peers\":[],\"revision\":5,\"version\":1}",
+      "arguments": {
+        "local_domain": "local-software",
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_federation_revision": 5,
+        "expected_federation_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "status": "rejected",
+      "reason": "federation_mismatch"
+    },
+    {
+      "name": "wrong-domain",
+      "federation": "{\"expires_at\":1600,\"issued_at\":1400,\"local_domain\":\"local-software\",\"peers\":[],\"revision\":5,\"version\":1}",
+      "arguments": {
+        "local_domain": "other-local",
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_federation_revision": 5,
+        "expected_federation_sha256": "7c63cc1e71d9b81d2dc3fcbb01ec4a5cff5e8b31d3e81ae73ed1617741f6c60e"
+      },
+      "status": "rejected",
+      "reason": "local_domain_mismatch"
+    },
+    {
+      "name": "revision-rollback",
+      "federation": "{\"expires_at\":1600,\"issued_at\":1400,\"local_domain\":\"local-software\",\"peers\":[],\"revision\":5,\"version\":1}",
+      "arguments": {
+        "local_domain": "local-software",
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_federation_revision": 6,
+        "expected_federation_sha256": "7c63cc1e71d9b81d2dc3fcbb01ec4a5cff5e8b31d3e81ae73ed1617741f6c60e"
+      },
+      "status": "rejected",
+      "reason": "federation_rollback"
+    },
+    {
+      "name": "time-rollback",
+      "federation": "{\"expires_at\":1600,\"issued_at\":1400,\"local_domain\":\"local-software\",\"peers\":[],\"revision\":5,\"version\":1}",
+      "arguments": {
+        "local_domain": "local-software",
+        "now_s": 1500,
+        "minimum_time_s": 1501,
+        "minimum_federation_revision": 5,
+        "expected_federation_sha256": "7c63cc1e71d9b81d2dc3fcbb01ec4a5cff5e8b31d3e81ae73ed1617741f6c60e"
+      },
+      "status": "rejected",
+      "reason": "federation_rollback"
+    },
+    {
+      "name": "expired",
+      "federation": "{\"expires_at\":1600,\"issued_at\":1400,\"local_domain\":\"local-software\",\"peers\":[],\"revision\":5,\"version\":1}",
+      "arguments": {
+        "local_domain": "local-software",
+        "now_s": 1600,
+        "minimum_time_s": 1400,
+        "minimum_federation_revision": 5,
+        "expected_federation_sha256": "7c63cc1e71d9b81d2dc3fcbb01ec4a5cff5e8b31d3e81ae73ed1617741f6c60e"
+      },
+      "status": "rejected",
+      "reason": "federation_not_current"
+    },
+    {
+      "name": "future",
+      "federation": "{\"expires_at\":1600,\"issued_at\":1400,\"local_domain\":\"local-software\",\"peers\":[],\"revision\":5,\"version\":1}",
+      "arguments": {
+        "local_domain": "local-software",
+        "now_s": 1399,
+        "minimum_time_s": 0,
+        "minimum_federation_revision": 5,
+        "expected_federation_sha256": "7c63cc1e71d9b81d2dc3fcbb01ec4a5cff5e8b31d3e81ae73ed1617741f6c60e"
+      },
+      "status": "rejected",
+      "reason": "federation_not_current"
+    },
+    {
+      "name": "noncanonical",
+      "federation": "{\"expires_at\":1600,\"issued_at\":1400,\"local_domain\":\"local-software\",\"peers\":[],\"revision\":5,\"version\":1}\n",
+      "arguments": {
+        "local_domain": "local-software",
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_federation_revision": 5,
+        "expected_federation_sha256": "8115c4b5517f201e778e734633e052c69388b67577cd8585c2ebd241301c1f00"
+      },
+      "status": "rejected",
+      "reason": "invalid_federation"
+    },
+    {
+      "name": "malformed-row",
+      "federation": "{\"expires_at\":1600,\"issued_at\":1400,\"local_domain\":\"local-software\",\"peers\":[{\"capabilities\":[\"evidence.offline.v1\"],\"issuers\":[],\"policy_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"remote_domain\":\"peer-software\"}],\"revision\":5,\"version\":1}",
+      "arguments": {
+        "local_domain": "local-software",
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_federation_revision": 5,
+        "expected_federation_sha256": "3d4ef8f8246e1e73d58d0697ba30c32bb2ee5df441559183ae86f5abf29088b8"
+      },
+      "status": "rejected",
+      "reason": "invalid_federation"
+    }
+  ]
+}

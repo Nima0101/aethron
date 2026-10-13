@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "p16-bundle-reassessment-v3",
+  "component": "P16 immutable offline task/input snapshot composition",
+  "decision": "KEEP",
+  "constraints": [
+    "Exact bytes for task/envelope/policy and an exact tuple of at most sixteen exact byte blobs; per-part ceiling 65536 bytes and task-specific evidence budget.",
+    "Stable bytes across hash checks, parsing and fresh verification; bounded metadata output preserves signed failed/unknown outcomes.",
+    "No transport, device SDK, executor, cache, memory-pool or hard real-time contract. Input-byte bounds are not process-memory bounds."
+  ],
+  "alternatives": [
+    "CPython immutable bytes/tuple with explicit exact-type admission and composition of public verifiers.",
+    "Rust shared immutable borrowing with ownership and foreign-buffer aliasing reviewed explicitly.",
+    "Java/Kotlin immutable protobuf ByteString containers without changing the existing JSON wire profile.",
+    "C#/F# owned storage exposed through ReadOnlyMemory, with mutable backing aliases excluded or copied."
+  ],
+  "rationale": [
+    "KEEP exact immutable snapshots and public verification composition: every digest and subsequent parse sees the same admitted byte values, and signature/policy checks remain in one verified boundary.",
+    "Native ownership and managed immutable containers can also satisfy this contract. No mandatory IPC or buffer-copy penalty is assumed for them.",
+    "Eleven bundle methods pass, including six revocation/kind combinations, expiry boundaries and discarded partial results. Removing the envelope-pin comparison in a temporary module makes the existing input-pin test fail.",
+    "No measured target workload establishes a material native or managed-runtime advantage. Installation, incumbent language and rewrite effort are not selection criteria."
+  ],
+  "limits": [
+    "Caller pins and time/revision floors must be authenticated externally; these APIs do not enroll callers, persist floors, discover revocations or prevent replay.",
+    "No comparative performance benchmark or full alternate-runtime implementation was executed; no winning migration is being deferred.",
+    "Saved results are ordinary metadata snapshots, not self-expiring authorization tokens. No motion, execution or evidence qualification follows.",
+    "No target hardware, deadline or RSS envelope is specified. Insufficient information for tactical deployment.",
+    "The bundle parses admitted task bytes again; this is safe under the exact immutable-input contract, not a claim that repeated parsing is free.",
+    "No completion-time clock is sampled. The reported expiry is the minimum task/passport/policy expiry at caller-supplied time."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/stdtypes.html#bytes-objects",
+    "https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html",
+    "https://protobuf.dev/reference/java/api-docs/com/google/protobuf/ByteString",
+    "https://learn.microsoft.com/en-us/dotnet/api/system.readonlymemory-1?view=net-10.0"
+  ]
+}

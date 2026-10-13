@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "decision": "KEEP",
+  "id": "p16-federation-reassessment-v3",
+  "component": "P16 closed direct-federation metadata validation",
+  "constraints": [
+    "Offline exact-byte JSON snapshot pinned by the caller; at most sixteen direct peers, sixteen issuers per peer and three allowed capability names per row.",
+    "Validate every row, including unselected peers; require local/remote identity, exclusive expiry and caller revision floor before composing public bundle verification.",
+    "No policy authoring language, hierarchy, transitive trust, enrollment, network service or target hardware deadline is specified."
+  ],
+  "alternatives": [
+    "CPython explicit closed-table validation using shared lexical admission and public bundle verification.",
+    "Cedar policy language and typed principal/action/resource authorization model.",
+    "OPA/Rego structured-data policy evaluation with a separate exact-byte lexical boundary.",
+    "Rust typed structures and explicit validators using the same versioned JSON profile."
+  ],
+  "rationale": [
+    "KEEP the closed-table validator: the small fixed relation can be checked completely without introducing policy-language evaluation or entity-hierarchy semantics. Exact-byte parsing and canonical equality remain explicit.",
+    "Cedar and Rego are credible dedicated policy technologies when policy authoring and richer relationships are required; neither replaces input encoding validation, caller authentication or revision-floor persistence.",
+    "Rust can express the same closed relation. No target workload or allocation/deadline contract establishes a material native advantage for this offline metadata boundary; no comparative speed claim is made.",
+    "Eleven direct-federation methods and four composition methods pass, covering malformed unselected rows, direct scope, expiry, revocation and caller floors. No production mismatch was demonstrated."
+  ],
+  "limits": [
+    "Caller pins, clock and revision floor require external provenance. A saved successful result is ordinary metadata and is not revoked in place.",
+    "Current comparison is source-based, not an executed full alternate implementation. No winning migration is deferred.",
+    "No transport, distributed consensus, anti-replay persistence, MLS/CNSA accreditation or availability evidence.",
+    "Insufficient information for tactical deployment."
+  ],
+  "evidence": [
+    "https://docs.cedarpolicy.com/overview/terminology.html",
+    "https://www.openpolicyagent.org/docs/policy-language",
+    "https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html",
+    "https://docs.python.org/3.13/library/json.html"
+  ]
+}

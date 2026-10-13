@@ -1,0 +1,232 @@
+{
+  "review_order_version": 3,
+  "baseline_commit": "5f733e4af8649d9ef61ae4a26edda320fa183006",
+  "reviewed_at": "2026-10-10",
+  "review": "Peer consumers, stateless lifecycle traces and public P16 claims",
+  "decisions": {
+    "edge_consumer": "KEEP",
+    "packet_encoding_consumer": "KEEP",
+    "ros_status_consumer": "KEEP",
+    "stateless_lifecycle_traces": "KEEP"
+  },
+  "runtime_changed": false,
+  "tests_changed": false,
+  "production_red": false,
+  "checks": {
+    "focused_methods": 24,
+    "additional_adr_methods": 4,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "controlled_methods": 4,
+    "expected_assertion_failures": 9,
+    "control_errors": 0,
+    "control_skips": 0,
+    "bindings_restored": true,
+    "readme_examples": 2,
+    "producer_bindings": 17,
+    "distinct_producer_files": 11,
+    "ruff": "PASS",
+    "bandit": {
+      "exit_code": 1,
+      "low": 2,
+      "medium": 0,
+      "high": 0,
+      "ids": [
+        "B311"
+      ],
+      "note": "Existing seeded test randomness at tests/test_passports.py lines 140 and 469; no production cryptographic randomness. No blanket exclusions."
+    }
+  },
+  "producer_source_comparison": {
+    "origin_main": "fce89d3904ddbfb004b55718fab955c91a9c49a0",
+    "entries": [
+      {
+        "corpus": "edge-unknown-vectors-v1",
+        "path": "contracts/openapi/aethron-edge-v1.json",
+        "expected": "4d562382b803e59dac1ab24a7ead52cd2cdbbc9533aa6d9dc68fca9f6e9b0b83",
+        "local": "4d562382b803e59dac1ab24a7ead52cd2cdbbc9533aa6d9dc68fca9f6e9b0b83",
+        "upstream": "4d562382b803e59dac1ab24a7ead52cd2cdbbc9533aa6d9dc68fca9f6e9b0b83"
+      },
+      {
+        "corpus": "edge-unknown-vectors-v1",
+        "path": "contracts/fixtures/v3/unknown-output.json",
+        "expected": "2b91d797820cce663134417d5b52b016aebcaca02c7a710bc16984487b35a754",
+        "local": "2b91d797820cce663134417d5b52b016aebcaca02c7a710bc16984487b35a754",
+        "upstream": "2b91d797820cce663134417d5b52b016aebcaca02c7a710bc16984487b35a754"
+      },
+      {
+        "corpus": "sensor-packet-vectors-v1",
+        "path": "integrations/edge/aethron_edge/sensors/packets.py",
+        "expected": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192",
+        "local": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192",
+        "upstream": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192"
+      },
+      {
+        "corpus": "sensor-packet-vectors-v1",
+        "path": "integrations/edge/aethron_edge/__init__.py",
+        "expected": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9",
+        "local": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9",
+        "upstream": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9"
+      },
+      {
+        "corpus": "sensor-packet-vectors-v1",
+        "path": "integrations/edge/aethron_edge/sensors/__init__.py",
+        "expected": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a",
+        "local": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a",
+        "upstream": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a"
+      },
+      {
+        "corpus": "sensor-encoding-vectors-v1",
+        "path": "integrations/edge/aethron_edge/sensors/packets.py",
+        "expected": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192",
+        "local": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192",
+        "upstream": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192"
+      },
+      {
+        "corpus": "sensor-encoding-vectors-v1",
+        "path": "integrations/edge/aethron_edge/__init__.py",
+        "expected": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9",
+        "local": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9",
+        "upstream": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9"
+      },
+      {
+        "corpus": "sensor-encoding-vectors-v1",
+        "path": "integrations/edge/aethron_edge/sensors/__init__.py",
+        "expected": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a",
+        "local": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a",
+        "upstream": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a"
+      },
+      {
+        "corpus": "ros-status-vectors-v1",
+        "path": "integrations/edge/aethron_edge/__init__.py",
+        "expected": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9",
+        "local": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9",
+        "upstream": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9"
+      },
+      {
+        "corpus": "ros-status-vectors-v1",
+        "path": "integrations/edge/aethron_edge/mailbox.py",
+        "expected": "84b6c32191d1cd21f5469c908be50b38179d6d594cc9fd1865e2b06e3851b090",
+        "local": "84b6c32191d1cd21f5469c908be50b38179d6d594cc9fd1865e2b06e3851b090",
+        "upstream": "84b6c32191d1cd21f5469c908be50b38179d6d594cc9fd1865e2b06e3851b090"
+      },
+      {
+        "corpus": "ros-status-vectors-v1",
+        "path": "integrations/edge/aethron_edge/sensors/__init__.py",
+        "expected": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a",
+        "local": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a",
+        "upstream": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a"
+      },
+      {
+        "corpus": "ros-status-vectors-v1",
+        "path": "integrations/edge/aethron_edge/sensors/geometry.py",
+        "expected": "24dbd7e248990f426d985d05e9add08615621381f4391209a85682102f50d02b",
+        "local": "24dbd7e248990f426d985d05e9add08615621381f4391209a85682102f50d02b",
+        "upstream": "24dbd7e248990f426d985d05e9add08615621381f4391209a85682102f50d02b"
+      },
+      {
+        "corpus": "ros-status-vectors-v1",
+        "path": "integrations/edge/aethron_edge/sensors/packets.py",
+        "expected": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192",
+        "local": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192",
+        "upstream": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192"
+      },
+      {
+        "corpus": "ros-status-vectors-v1",
+        "path": "integrations/edge/aethron_edge/sensors/rectification.py",
+        "expected": "b034b4f5b2e0c5c4bda51f5adfcb4a15193ebe7497ab4099c7887fb57c49f6db",
+        "local": "b034b4f5b2e0c5c4bda51f5adfcb4a15193ebe7497ab4099c7887fb57c49f6db",
+        "upstream": "b034b4f5b2e0c5c4bda51f5adfcb4a15193ebe7497ab4099c7887fb57c49f6db"
+      },
+      {
+        "corpus": "ros-status-vectors-v1",
+        "path": "integrations/edge/aethron_edge/sensors/ros2.py",
+        "expected": "41aece1eff1dd5e6ae77272959354c8a9bcc6465ec10da2da7b747ad97589912",
+        "local": "41aece1eff1dd5e6ae77272959354c8a9bcc6465ec10da2da7b747ad97589912",
+        "upstream": "41aece1eff1dd5e6ae77272959354c8a9bcc6465ec10da2da7b747ad97589912"
+      },
+      {
+        "corpus": "ros-status-vectors-v1",
+        "path": "integrations/edge/aethron_edge/sources/__init__.py",
+        "expected": "c68be66b7a8e4e95cafcc1cdcf108c0532d1d2a53b55def660cbfdc4b8034f48",
+        "local": "c68be66b7a8e4e95cafcc1cdcf108c0532d1d2a53b55def660cbfdc4b8034f48",
+        "upstream": "c68be66b7a8e4e95cafcc1cdcf108c0532d1d2a53b55def660cbfdc4b8034f48"
+      },
+      {
+        "corpus": "ros-status-vectors-v1",
+        "path": "integrations/edge/aethron_edge/sources/base.py",
+        "expected": "0617c1b46c55416ff779189c270c7f5e46cd52a7cc0eaa03328c6800b8bbc319",
+        "local": "0617c1b46c55416ff779189c270c7f5e46cd52a7cc0eaa03328c6800b8bbc319",
+        "upstream": "0617c1b46c55416ff779189c270c7f5e46cd52a7cc0eaa03328c6800b8bbc319"
+      }
+    ]
+  },
+  "consumer_control_source_record": "docs/engineering/reviews/p16-consumer-current-v3-results.json",
+  "lifecycle_control_source": "import json, unittest\nfrom unittest.mock import patch\nimport test_passports as tests\nif not __debug__:\n    raise RuntimeError(\"optimized_control_forbidden\")\nreports = []\nfor method, field, value in (\n    (\"test_revocation_rejection_does_not_persist_the_new_policy_floor\", \"minimum_policy_revision\", 3),\n    (\"test_expiry_rejection_does_not_persist_a_trusted_time_floor\", \"minimum_time_s\", 0),\n):\n    original = tests.passports.verify\n    def weakened(*args, **kwargs):\n        kwargs[field] = value\n        return original(*args, **kwargs)\n    with patch.object(tests.passports, \"verify\", weakened):\n        result = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite([tests.PassportVerificationTests(method)]))\n    if len(result.failures) != 1 or result.errors or result.skipped or tests.passports.verify is not original:\n        raise RuntimeError(\"invalid_control_run\")\n    reports.append({\"method\": method, \"assertion_failures\": len(result.failures), \"errors\": len(result.errors), \"skips\": len(result.skipped), \"restored\": True})\nprint(json.dumps(reports, sort_keys=True))\n",
+  "source_sha256": {
+    "tests/interop_consumers/test_sensor_packets.py": "69fc7bb99da6907b24997931690f03782865eab61f113e5534c5dc8c627a6770",
+    "tests/interop_consumers/test_ros_status.py": "64b64d989c8361e4a508631b9fd13caf3a0fd447f6a406a7b4c0fe4b1623c75e",
+    "tests/test_passport_schemas.py": "0c423ffb3e53e8edc3f7a9bad16b460c1ca92b76ebeeb05f32492cda0d8f40b2",
+    "tests/test_passports.py": "20bdc75b84aa566867197604e2462053e366016638828bb0ba59e990ffd56c3d",
+    "tests/test_passport_policy.py": "aec90f86e9f9689c0226d70bc3cbbe6e587b99293f223dd919bbb8253d533cf8",
+    "tests/test_passport_lexical.py": "0272780452980ec03e9b180a84e35db7e2aefd04f7bc6cf0ac21cfd9288b1887",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "aethron/passport_floor_store.py": "c9e0f4deb9589b3139296f9eb506113108168561e794cd4c45d3579ad75977e7",
+    ".github/workflows/aethron-passports.yml": "f2e52752fcda9ff25b5792b2639d45704cb8568f8cdb8eee5fe0cb4cc2051e72",
+    "examples/passports/README.md": "23d6641166e58d87fe0d64ace90f6ad14595d63c0621437233857dd08950edef",
+    "docs/decisions/p16-consumer-refresh-v3.json": "8e52567b0b3a5556d2b0f6238474e44c7d22ed237f1edb207e94a496fe7be38a",
+    "docs/engineering/reviews/p16-consumer-refresh-v3.md": "75fc520c501ec7115bf9fbddb3a97114fbaf416997f05cbef9d3d2211d906c55",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "e4c7e5e0bc00dcfff0620b39db0fd340bbcf3f6cc8182e985b45ac2006350960",
+    "docs/engineering/reviews/p16-consumer-current-v3-results.json": "379ed03c80052ccb89d9999678d88153ea75d6ab2044cbcc3f51e038f4acdd12",
+    "examples/interop/edge-unknown-vectors-v1.json": "ee56de5eaa3b597aace551fc93f8faf6e1f3b9d72ceca9872ee6b0d2886144d7",
+    "examples/interop/sensor-packet-vectors-v1.json": "80fb60be05c18f87f8954332c2d4f8be28762c16d335d004527555fb3d3aa4fc",
+    "examples/interop/sensor-encoding-vectors-v1.json": "60ead91ad5b69d10edc7487028823d1acfab8c4259b9a41dae10c6fc922bd39e",
+    "examples/interop/ros-status-vectors-v1.json": "d9d64c2a2869c6dec3151c969dd343c475a3b610adfbbaf6b641a568be5d9738",
+    "docs/architecture/interop/passport-v1.md": "d6b2a943e9887729077e4b5648d808c841ab69d9d6ed5ddd37724c3ed1b4e09e",
+    "docs/architecture/interop/evidence-binding-v1.md": "815e821ae7674210c01799e428c3fda736743f46fbe1e6edbf68efc05c918904",
+    "docs/architecture/interop/task-v1.md": "5b5eb7215196f293813af2b6b5af0d0ee3b5fd0892c2f6858f2810b52db276ee",
+    "docs/architecture/interop/task-bundle-v1.md": "e1fc6b638906d6bba75fdc885ac636d50b4324c5e6a6e833c0d8c9dabc4f6765",
+    "docs/architecture/interop/federation-v1.md": "91762aa7ae923dc6cbf5da8ed1663f96ef4a09c875550378df60ddce6274ab62",
+    "docs/architecture/interop/inbox-v1.md": "bb6050d4ab9ddd222351a8a4bc212d8a27a9a22c140bf305bc79102d06454368",
+    "docs/architecture/interop/policy-floor-store-v1.md": "e3c1fe9e4ff0e48c079df3f462e1956572f2a34f3b402cc5dd102602eaae9caf",
+    "docs/architecture/interop/schema-conformance-v1.md": "055a416a29ee5455de07b68106ebccd3438292a35f3a399df9e8b6add6c33574",
+    "docs/architecture/interop/verification-evidence-v1.md": "e5232d755a83e3a944e3469fd70d58805e6f7eeaaec60cd1379802d11da0c3fc"
+  },
+  "runtime_artifacts_sha256": {
+    "consumer-refresh-focused.log": "35ea23d9dbc5886faa9ed02c0b2ab49112f832534d4d256e0e5956e9c8b0075e",
+    "consumer-refresh-adr.log": "5f5353e1834304d23edd4927db5ca841b15dc6f1d4f9f9a89776c9c3147952f2",
+    "consumer-refresh-control.log": "cd5f09ab5183c1aa6375b2b62032ab7316a4e71c837da54f80a17b2ff1e15a39",
+    "consumer-refresh-control.py": "cb48232677617899930357fd86aaad0fc1f1f7a09d30e30315edbf999b4f630b",
+    "consumer-refresh-lifecycle-control.log": "dcf41b796a1e6a0d0b6ca05bb7bc8157ccdf3cf5daf684c49d64c0bc0545a410",
+    "consumer-refresh-lifecycle-control.py": "948e8adc2492bcfbcdb7d516b539a518adb26166d45aa1d7361e046a4193d1a7",
+    "consumer-refresh-examples.log": "f088d70f677186dfc4896f9dbf5879cd72337abe5238c369593424ba8f528bf2",
+    "consumer-refresh-examples.py": "87e0925c69e3166421223ae72be5bf0b70d54feecf77dc50aabab601f9fa2421",
+    "consumer-refresh-producers.json": "ccee2b79521dc2f58b4fffc8fb937eb9a9b74fe5a6f0deb162aa1b654cbc48bb",
+    "consumer-refresh-pr35.json": "00dbac7ac17e7d89025cb83c2b9b1431426f825d61bfab53b6f4d52a79b6916c",
+    "consumer-refresh-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "consumer-refresh-bandit.json": "1e81369e6ffa723fb148a7dfe198cdd9c7f1f624d019f2618b2bfcd4a83e8a73"
+  },
+  "delivery_snapshot": {
+    "pr": 35,
+    "url": "https://github.com/Nima0101/aethron/pull/35",
+    "head": "5f733e4af8649d9ef61ae4a26edda320fa183006",
+    "merge_state": "BEHIND",
+    "queued": 53,
+    "skipped": 1,
+    "exact_head_pass_established": false,
+    "merged": false
+  },
+  "limits": [
+    "No alternative runtime/model checker execution or performance ranking. No complete phase or lane audit marker.",
+    "Direct local source tests and selected source hashes only; no installed customer distribution, atomic source snapshot, loaded-code attestation, dependency closure or signed provenance.",
+    "Raw logs remain local artifacts; controlled assertion failures are sensitivity evidence, not production failures. Earlier failed evidence is retained.",
+    "No full local matrix, physical qualification, real-time, MLS/CNSA, availability, tactical or customer acceptance claim."
+  ],
+  "next": "Derive requirements and implement independent pinned federation-snapshot validation before retaining deny-all revisions independently of bundle success."
+}

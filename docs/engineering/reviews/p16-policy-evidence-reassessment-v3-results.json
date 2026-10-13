@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_commit": "d6edbc52de8781d41d5dcf8fa5e9f4bf3ff80474",
+  "scope": "Fresh independent pinned-policy validation and immutable evidence-binding reassessment. Documentation-only patch; no runtime or test changes.",
+  "decisions": {
+    "pinned_policy": "KEEP",
+    "evidence_binding": "KEEP"
+  },
+  "checks": {
+    "focused_methods": 20,
+    "adr_methods": 3,
+    "skips": 0,
+    "production_red": false,
+    "negative_control_methods": 2,
+    "negative_control_failures": 3,
+    "negative_control_errors": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_production": "PASS without exclusions"
+  },
+  "source_sha256": {
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "tests/test_passport_policy.py": "2ff348136a8b174c53d72e96318462c35d7c4163f3dcfc1f0836a138d6f55acd",
+    "tests/test_passport_evidence.py": "34dd2b858ae87f13008de87a54c82ac66ef9693f8c13ff162bc4a7c097f8086f",
+    "tests/test_passport_schemas.py": "f437fddf0c820bdfc487daa90383ff78ffa001112dac5227bbda92c794ef4512",
+    "tests/test_passport_lexical.py": "0272780452980ec03e9b180a84e35db7e2aefd04f7bc6cf0ac21cfd9288b1887",
+    "tests/test_passport_optional_backend.py": "dfff7466910be0337553de68d0ece1539477719ea0d82317618225c62bc23590",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "examples/passports/evidence-vectors.json": "9ab7461a842ee783d4a1ddafa7e89fc40b7385e6f18b74b4bad7673ae7c91dfb",
+    "docs/architecture/interop/passport-v1.md": "eb2059302ccad44a8a600ac80422f4e870195598adc09c1efca5c72ee4d02930",
+    "docs/architecture/interop/evidence-binding-v1.md": "641e541589cfc38abe039a94f22dc1629871c990ac22f943e2ddec8ed94c1c11",
+    "docs/decisions/p16-policy-reassessment-v3.json": "95e1c6cb356e02f02efcb5013f6f1029fcf69b52f08f63cbaf22a8ce2be2462a",
+    "docs/decisions/p16-evidence-reassessment-v3.json": "7c68837ca73254b48991efaee0c5150742750abba1e4447b374a51af0d53724a",
+    "docs/engineering/reviews/p16-policy-evidence-reassessment-v3.md": "3f0d155e440d91012788b6538de4e617275b7ba271704951e60b690f50ac0bef"
+  },
+  "local_artifact_sha256": {
+    "policy-evidence-reassessment-focused.log": "59344035cde945778eafa0fae7341fbbe20c3d1f70207d7a1b2a41568283c8c1",
+    "policy-evidence-reassessment-adr.log": "9d407f0fcce20c4a4951b2ad1361a5a8cdb000cf9464d1ee04eec7c7184a1ca5",
+    "policy-evidence-reassessment-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "policy-evidence-reassessment-format.log": "3bc53bf3e981a98a34a852e175bf9b77af841edea74fca595d9aedcbaf9a4938",
+    "policy-evidence-reassessment-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "policy-evidence-policy_pin-negative.log": "95b7b0f9fb1a6ee63c934fce1b0ce667e25bb8c44dedf72bd9131265bbfcf258",
+    "policy-evidence-evidence_extra-negative.log": "79d774393e5f383cfc303793ac965e10bdfc775004c23574ebd960df2e9b3d2d",
+    "policy-evidence-negative.json": "a2a1b6a83b0f17c71e52431af6cd9b5125d81ae420cecb3ef264a6a06236054e"
+  },
+  "negative_controls": [
+    {
+      "name": "policy_pin",
+      "source": "aethron/passports.py",
+      "source_sha256": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+      "old": "if digest != expected_policy_sha256:",
+      "new": "if False:",
+      "test": "PinnedPolicyTests.test_digest_binds_exact_bytes_without_requiring_canonical_json",
+      "methods": 1,
+      "failures": 1,
+      "errors": 0,
+      "skips": 0,
+      "source_unchanged": true
+    },
+    {
+      "name": "evidence_extra",
+      "source": "aethron/passport_evidence.py",
+      "source_sha256": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+      "old": "if set(actual) != {item[\"sha256\"] for item in statement[\"evidence\"]}:",
+      "new": "if set(actual) < {item[\"sha256\"] for item in statement[\"evidence\"]}:",
+      "test": "EvidenceBindingTests.test_incomplete_extra_substituted_and_duplicate_content_rejected",
+      "methods": 1,
+      "failures": 2,
+      "errors": 0,
+      "skips": 0,
+      "source_unchanged": true
+    }
+  ],
+  "reproduction": {
+    "acceptance": "PYTHONPATH=tests:. python -m unittest test_passport_optional_backend test_passport_lexical test_passport_policy test_passport_evidence -v",
+    "adr": "PYTHONPATH=tests:. python -m unittest test_passport_schemas.ArchitectureDecisionConformance -v",
+    "mutation_method": "For each recorded mutation, require the old text occurs once in the recorded source. Compile the single replacement into a fresh ModuleType with __package__=aethron registered temporarily in sys.modules. Patch only the named test module alias to the temporary module, execute the named unittest method, then restore both patches. Check source bytes remained unchanged. Policy alias: test_passport_policy.passports; evidence alias: test_passport_evidence.passport_evidence."
+  },
+  "peer_contract": {
+    "cached_origin_main": "fce89d3904ddbfb004b55718fab955c91a9c49a0",
+    "json_bounds_matches_cached_main": true,
+    "fresh_fetch": false
+  },
+  "limits": [
+    "Candidate comparisons are source-based; no new full alternative implementation or comparative benchmark was executed.",
+    "Mutation failures are expected sensitivity controls, not production failures.",
+    "Recorded hashes bind listed working-copy files and local logs, not atomic snapshots, loaded bytecode or dependency closure.",
+    "No persisted rollback floors, enrollment, distribution acceptance, hosted CI, MLS/CNSA, availability or physical qualification is established."
+  ],
+  "next_component": "P16 structural schemas and conformance tooling",
+  "audit_complete": false
+}

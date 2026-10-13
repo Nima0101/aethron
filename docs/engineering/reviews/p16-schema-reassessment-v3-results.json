@@ -1,0 +1,250 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_commit": "8df5c4826f943802437df95d91efc8d924608655",
+  "scope": "Six structural schemas and conformance tooling; ADR reference character-profile correction only. Runtime unchanged.",
+  "decision": "KEEP",
+  "checks": {
+    "baseline_methods": 18,
+    "new_methods": 1,
+    "regression_red_methods": 1,
+    "regression_red_assertion_failures": 12,
+    "regression_red_errors": 0,
+    "final_methods": 19,
+    "skips": 0,
+    "portable_cases": 22,
+    "valid_cases": 6,
+    "invalid_cases": 16,
+    "node_modes": [
+      "",
+      "u"
+    ],
+    "node_pattern_checks": 44,
+    "ruff": "PASS",
+    "format": "PASS after one line-format correction",
+    "bandit": "PASS without exclusions"
+  },
+  "source_sha256": {
+    "contracts/interop/architecture-decision-v1.schema.json": "b61c4a23bf0784799681402ad893d1a5e4cfb493c432fa75a30e301ba681ebd7",
+    "contracts/interop/federation-v1.schema.json": "4ff8cd0e24028ec8ee4a99477c5a80ebb25c32e7b821a9a3ebc7d01c76ecdb13",
+    "contracts/interop/passport-envelope-v1.schema.json": "6e3872ba208a573aa792e321342eda6788518e2e3bf638ff833e4c60db984c38",
+    "contracts/interop/passport-policy-v1.schema.json": "b6172dac43bce1a5905cd6c91ef2b7b485d0e70a988593571f2529a2bfad23b0",
+    "contracts/interop/passport-v1.schema.json": "df89ef1e467821c429aaddcbd9b4e530e4f622cdbec64b85854ba578cc231d88",
+    "contracts/interop/task-v1.schema.json": "6e3ce2bbf2c6ad3022c45ea30c9fe5c8d00d25e1d47d71499ecdc0c37cf2eb6e",
+    "tests/test_passport_schemas.py": "494e0b7345892bb2cfea3109f8c05735e8328f0cbf4de5b5319913a585ee0cb7",
+    "examples/interop/adr-reference-vectors-v1.json": "489b7871eeb1deec773af719fc4a6d3bf8957cd2bb2c5d6cf4db0131e2012138",
+    "requirements-passport-conformance.txt": "1d137f508c86edba0b3bf6d5c5e9d6cf673b31c3e4cfed2d57a3122ccad73dd3",
+    ".github/workflows/aethron-passports.yml": "abd88979695dd2b169e4ac5ea38b7d4af2b7da360e2a636468cf42e6585fa680",
+    "docs/decisions/p16-schema-reassessment-v3.json": "0494d68b4e24ef616aa6dbdf828adf4a91cc1a3c10b24d6a229058664f1b7303",
+    "docs/engineering/reviews/p16-schema-reassessment-v3.md": "99d31bac47a84db8b540de5a522e1f89774d8f50b552d7d158c1744ed76daeca"
+  },
+  "local_artifact_sha256": {
+    "schema-reassessment-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "schema-reassessment-final.log": "624b01334cfb2a134acbb3072676889c1810cb9349ee7e02bfb422be7dda9ce2",
+    "schema-reassessment-format.log": "fd2299c9f1c6dc869070883e281051bfe93aacf66c1a3b0069f45b4aa410ca50",
+    "schema-reassessment-green.log": "d75d9131474d753e7d929daccb65ead7923091aaba60088d06f0bb40b7b12eed",
+    "schema-reassessment-node.json": "6fcf80793662419b144f64bc2766f1799ac712b31e24b72d2200e0f99069eede",
+    "schema-reassessment-red-final.log": "8e7bff4a9f1f0f1fa8650a4d505cd799b106f339659c9d68918602683c061234",
+    "schema-reassessment-red.log": "75a823e1b2bcc3af04f20cd29199a2457f22a8bd2f9e2f72d748703c9ca2dc0b",
+    "schema-reassessment-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+  },
+  "node_probe": {
+    "node": "v22.23.2",
+    "scope": "RegExp only; no complete alternative schema validator",
+    "flags": [
+      "",
+      "u"
+    ],
+    "rows": [
+      {
+        "name": "host",
+        "expected": true,
+        "outcomes": [
+          true,
+          true
+        ]
+      },
+      {
+        "name": "root",
+        "expected": true,
+        "outcomes": [
+          true,
+          true
+        ]
+      },
+      {
+        "name": "path",
+        "expected": true,
+        "outcomes": [
+          true,
+          true
+        ]
+      },
+      {
+        "name": "query-fragment",
+        "expected": true,
+        "outcomes": [
+          true,
+          true
+        ]
+      },
+      {
+        "name": "encoded-unicode",
+        "expected": true,
+        "outcomes": [
+          true,
+          true
+        ]
+      },
+      {
+        "name": "reserved-path",
+        "expected": true,
+        "outcomes": [
+          true,
+          true
+        ]
+      },
+      {
+        "name": "nul",
+        "expected": false,
+        "outcomes": [
+          false,
+          false
+        ]
+      },
+      {
+        "name": "unit-separator",
+        "expected": false,
+        "outcomes": [
+          false,
+          false
+        ]
+      },
+      {
+        "name": "delete",
+        "expected": false,
+        "outcomes": [
+          false,
+          false
+        ]
+      },
+      {
+        "name": "next-line",
+        "expected": false,
+        "outcomes": [
+          false,
+          false
+        ]
+      },
+      {
+        "name": "bom",
+        "expected": false,
+        "outcomes": [
+          false,
+          false
+        ]
+      },
+      {
+        "name": "raw-unicode",
+        "expected": false,
+        "outcomes": [
+          false,
+          false
+        ]
+      },
+      {
+        "name": "space",
+        "expected": false,
+        "outcomes": [
+          false,
+          false
+        ]
+      },
+      {
+        "name": "lf",
+        "expected": false,
+        "outcomes": [
+          false,
+          false
+        ]
+      },
+      {
+        "name": "backslash",
+        "expected": false,
+        "outcomes": [
+          false,
+          false
+        ]
+      },
+      {
+        "name": "left-angle",
+        "expected": false,
+        "outcomes": [
+          false,
+          false
+        ]
+      },
+      {
+        "name": "quote",
+        "expected": false,
+        "outcomes": [
+          false,
+          false
+        ]
+      },
+      {
+        "name": "brace",
+        "expected": false,
+        "outcomes": [
+          false,
+          false
+        ]
+      },
+      {
+        "name": "pipe",
+        "expected": false,
+        "outcomes": [
+          false,
+          false
+        ]
+      },
+      {
+        "name": "bare-percent",
+        "expected": false,
+        "outcomes": [
+          false,
+          false
+        ]
+      },
+      {
+        "name": "short-percent",
+        "expected": false,
+        "outcomes": [
+          false,
+          false
+        ]
+      },
+      {
+        "name": "nonhex-percent",
+        "expected": false,
+        "outcomes": [
+          false,
+          false
+        ]
+      }
+    ]
+  },
+  "reproduction": {
+    "tests": "PYTHONPATH=tests:. python -m unittest test_passport_schemas -v",
+    "pattern_probe": "See executable Node snippet in p16-schema-reassessment-v3.md",
+    "red": "Run the new ArchitectureDecisionConformance.test_reference_character_profile_without_format_checker with only the ADR schema pattern restored from baseline_commit; twelve assertion failures expected."
+  },
+  "limits": [
+    "Initial corpus draft accidentally completed a deliberately short percent escape; corrected before the schema edit. Both RED logs retained.",
+    "Node checks only the reference pattern; no full alternate schema engine or performance benchmark was executed.",
+    "Hashes cover listed files and local logs, not atomic snapshots, loaded code or dependency closure.",
+    "No distribution, hosted CI, MLS/CNSA, physical timing or whole-lane acceptance claim."
+  ],
+  "next_component": "P16 task descriptions and bundle composition",
+  "audit_complete": false
+}

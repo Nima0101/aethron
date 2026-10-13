@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "id": "p16-policy-floor-store-v1",
+  "component": "Single-scope durable caller time and policy revision floors",
+  "decision": "KEEP",
+  "constraints": [
+    "New component selection, not an incumbent exemption: single local protected database, one bounded metadata row, offline caller-pinned policy validation, no network or hard-real-time SLA.",
+    "Explicit exclusive initialization, no implicit creation/reset, atomic read-check-write, monotonic floors and same-revision digest consistency. Storage errors and contention must not produce a success snapshot."
+  ],
+  "alternatives": [
+    "SQLite with Python sqlite3 and direct pinned-policy validation.",
+    "SQLite with Rust rusqlite or .NET Microsoft.Data.Sqlite.",
+    "Atomic JSON replacement, OS locking and explicit file/directory flush handling.",
+    "Erlang DETS persistence or Mnesia transactions.",
+    "LMDB native transactions; official documentation URL unavailable during this review."
+  ],
+  "rationale": [
+    "Select native SQLite transactions to implement atomic metadata updates and cooperating-process locking without a custom journal. DELETE journaling and synchronous EXTRA request database/journal/directory synchronization, subject to filesystem and hardware guarantees.",
+    "Select Python binding for exact-byte direct use of the independently checked policy API. Rust and .NET are credible native/managed alternatives but would require validator parity or IPC; no demonstrated memory/latency requirement makes that materially preferable for one row. No ranking by convenience, installed tooling or rewrite cost.",
+    "Atomic JSON needs an additional portable locking and crash-consistency protocol. DETS lacks the chosen transaction interface; Mnesia supplies transactions with a broader runtime/database model. Neither is a demonstrated improvement for this isolated local store."
+  ],
+  "limits": [
+    "KEEP records selection of a new component. No alternative implementation or performance benchmark was run.",
+    "Protected local storage and a functioning SQLite VFS are assumptions; no power-loss, filesystem fault or target-hardware qualification. Restoring/deleting the entire store can roll back state and requires independently retained evidence.",
+    "No enrollment, clock trust source, federation-floor persistence, encrypted-at-rest store, execution authority or distributed consensus.",
+    "LMDB retrieval failure limits the comparison; no claim that LMDB lacks required properties."
+  ],
+  "evidence": [
+    "https://www.sqlite.org/atomiccommit.html",
+    "https://www.sqlite.org/lang_transaction.html",
+    "https://www.sqlite.org/pragma.html",
+    "https://www.sqlite.org/whentouse.html",
+    "https://docs.python.org/3/library/sqlite3.html",
+    "https://docs.rs/rusqlite/latest/rusqlite/",
+    "https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/transactions",
+    "https://www.erlang.org/doc/apps/stdlib/dets.html",
+    "https://www.erlang.org/doc/apps/mnesia/mnesia_chap4.html"
+  ]
+}
