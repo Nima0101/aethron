@@ -147,11 +147,13 @@ class _InferenceStop:
 def _worker(
     profile, channel, stop, group, decoder_lock, descendant, ros_grant=None, ros_control=None
 ):
-    own_descendants(group)
     source = None
     cancellation = None
     inference_count = 0
     try:
+        # Isolation must succeed before dispatch, but setup failures still use
+        # the fixed worker fault boundary rather than a process traceback.
+        own_descendants(group)
         if profile.driver == "sensor-ros":
             from .sensors.ros_worker import ros_worker
 

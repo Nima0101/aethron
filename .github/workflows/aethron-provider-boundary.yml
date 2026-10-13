@@ -82,7 +82,7 @@ jobs:
           ort.disable_telemetry_events()
           suite = unittest.defaultTestLoader.discover('tests/integration', pattern='test_worker_cancellation.py')
           result = unittest.TextTestRunner(verbosity=2).run(suite)
-          if not result.wasSuccessful() or result.testsRun != 11 or result.skipped or result.expectedFailures:
+          if not result.wasSuccessful() or result.testsRun != 13 or result.skipped or result.expectedFailures:
               raise SystemExit('worker cancellation coverage incomplete')
           PY
       - name: Build and install optional bounded CPU validator

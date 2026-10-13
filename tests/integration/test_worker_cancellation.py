@@ -1,8 +1,13 @@
 """Cooperative stop must reach active ORT calls and withdraw late results."""
 
 import importlib.util
+import json
 import multiprocessing as mp
+import os
 import queue
+import subprocess
+import sys
+import textwrap
 import threading
 import time
 import unittest
@@ -26,6 +31,70 @@ class WorkerCancellation(unittest.TestCase):
             bytes(12), 2, 2, 1, None, time.monotonic_ns(), "unqualified", 0, "unqualified"
         )
         self.detector = Mock()
+
+    def test_isolation_failure_stops_before_dispatch_and_sanitizes_fault(self):
+        class UnreadProfile:
+            def __init__(self):
+                self.accessed = []
+
+            @property
+            def driver(self):
+                self.accessed.append("driver")
+                raise AssertionError("dispatch must not begin")
+
+        for error in (OSError("private isolation details"), RuntimeError("private platform")):
+            for busy in (False, True):
+                with self.subTest(error=type(error), busy=busy):
+                    profile = UnreadProfile()
+                    channel = queue.Queue(maxsize=1)
+                    retained = {"data": None, "reason": "source_lost", "latency_ms": 0}
+                    if busy:
+                        channel.put_nowait(retained)
+                    group, descendant = SimpleNamespace(value=0), SimpleNamespace(value=0)
+                    with patch.object(pipeline, "own_descendants", side_effect=error) as own:
+                        pipeline._worker(profile, channel, self.stop, group, None, descendant)
+                    own.assert_called_once_with(group)
+                    self.assertEqual(profile.accessed, [])
+                    self.assertEqual((group.value, descendant.value), (0, 0))
+                    self.assertEqual(
+                        channel.get_nowait(),
+                        retained
+                        if busy
+                        else {"data": None, "reason": "model_error", "latency_ms": 0},
+                    )
+                    self.assertTrue(channel.empty())
+
+    @unittest.skipUnless(os.name == "posix", "requires POSIX session creation")
+    def test_real_session_setup_failure_has_no_process_traceback(self):
+        # A session leader cannot call setsid again. Exercise the actual OS
+        # rejection in a separate process without changing the test runner.
+        code = textwrap.dedent("""
+            import json, os, queue, threading
+            from types import SimpleNamespace
+            from aethron_edge.pipeline import _worker
+            assert os.getsid(0) == os.getpid()
+            channel = queue.Queue()
+            group, descendant = SimpleNamespace(value=0), SimpleNamespace(value=0)
+            _worker(SimpleNamespace(driver='replay', address='unused'), channel,
+                    threading.Event(), group, None, descendant)
+            assert group.value == descendant.value == 0
+            message = channel.get_nowait()
+            assert channel.empty()
+            print(json.dumps(message))
+        """)
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            start_new_session=True,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stderr, "")
+        self.assertEqual(
+            json.loads(result.stdout), {"data": None, "reason": "model_error", "latency_ms": 0}
+        )
 
     def run_worker(self, provider="coreml", loader=None):
         before = set(threading.enumerate())
