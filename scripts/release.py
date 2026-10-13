@@ -4,12 +4,50 @@ import gzip
 import hashlib
 import io
 import json
+import stat
 import subprocess
 import tarfile
 import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def committed_blobs(revision):
+    """Read one immutable Git tree, never the mutable checkout behind provenance."""
+    tree = subprocess.check_output(
+        ["git", "ls-tree", "-r", "-z", "--full-tree", revision], cwd=ROOT
+    )
+    entries = []
+    for record in tree.split(b"\0"):
+        if not record:
+            continue
+        metadata, name = record.split(b"\t", 1)
+        mode, kind, oid = metadata.split()
+        if mode not in (b"100644", b"100755") or kind != b"blob":
+            raise ValueError("release_requires_regular_blobs")
+        entries.append((name.decode("utf-8"), oid))
+    entries.sort()
+    payload = io.BytesIO(
+        subprocess.check_output(
+            ["git", "cat-file", "--batch"],
+            cwd=ROOT,
+            input=b"".join(oid + b"\n" for _, oid in entries),
+        )
+    )
+    blobs = {}
+    for name, oid in entries:
+        header = payload.readline().split()
+        if len(header) != 3 or header[:2] != [oid, b"blob"] or not header[2].isdigit():
+            raise ValueError("release_blob_response_invalid")
+        size = int(header[2])
+        data = payload.read(size)
+        if len(data) != size or payload.read(1) != b"\n":
+            raise ValueError("release_blob_response_invalid")
+        blobs[name] = data
+    if payload.read(1):
+        raise ValueError("release_blob_response_invalid")
+    return blobs
 
 
 def build(destination):
@@ -21,10 +59,23 @@ def build(destination):
     )
     if dirty:
         raise SystemExit("release requires clean committed source")
-    blobs = {n: (ROOT / n).read_bytes() for n in names}
+    try:
+        # Preserve checkout admission; payload bytes come only from the pinned Git tree.
+        for name in names:
+            path = ROOT
+            parts = Path(name).parts
+            for index, part in enumerate(parts):
+                path = path / part
+                mode = path.lstat().st_mode
+                valid = stat.S_ISREG(mode) if index == len(parts) - 1 else stat.S_ISDIR(mode)
+                if not valid:
+                    raise SystemExit("release requires regular source files without symlinks")
+        blobs = committed_blobs(revision)
+    except OSError:
+        raise SystemExit("release source unavailable") from None
     manifest = {n: hashlib.sha256(data).hexdigest() for n, data in blobs.items()}
     out = Path(destination)
-    out.mkdir(parents=True, exist_ok=True)
+    out.mkdir(parents=True, exist_ok=False)
     buffer = io.BytesIO()
     with tarfile.open(fileobj=buffer, mode="w", format=tarfile.USTAR_FORMAT) as archive:
         for name, data in blobs.items():
