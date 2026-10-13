@@ -1,0 +1,50 @@
+name: AETHRON inference contracts
+on:
+  pull_request:
+    paths:
+      - 'aethron/vision/**'
+      - 'tests/vision/test_inference_provider.py'
+      - 'tests/test_vision_boundary.py'
+      - 'scripts/fetch_rgb_model.py'
+      - 'data/rgb-smoke/**'
+      - 'integrations/edge/requirements-vision.lock'
+      - 'scripts/inference_backend_profile.py'
+      - 'requirements-inference-probe.lock'
+      - '.github/workflows/aethron-inference-contracts.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  installed-inference:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.13.15'
+      - name: Install pinned native comparison engines and product wheel
+        run: |
+          python -m pip install setuptools==84.0.0 wheel==0.48.0
+          python -m pip install --require-hashes -r integrations/edge/requirements-vision.lock
+          python -m pip install --no-deps --require-hashes -r requirements-inference-probe.lock
+          python -m pip wheel --no-deps --no-build-isolation -w build/inference-wheels .
+          python -m pip install --no-index --no-deps --find-links build/inference-wheels aethron==0.2.0
+      - name: Installed provider loss and trusted model admission
+        run: |
+          python -I -m unittest discover -s tests/vision -p test_inference_provider.py -v
+          python -I -m unittest discover -s tests -p test_vision_boundary.py -v
+      - name: Bounded native CPU comparison
+        run: |
+          python scripts/fetch_rgb_model.py
+          python -I scripts/inference_backend_profile.py --model build/models/yolox.onnx --images data/rgb-smoke/person.png data/rgb-smoke/animal.png > build/inference-comparison.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: inference-candidate
+          path: |
+            build/inference-comparison.json
+            build/inference-wheels/*.whl
+          retention-days: 7
+          if-no-files-found: error

@@ -1,0 +1,120 @@
+{
+  "scope": "P1.3 inference provider-loss admission; broader runtime/language choice remains open",
+  "decision": "Keep the current adapter for this fail-closed fix: bounded OpenCV DNN versus ORT CPU measurement gives no migration benefit on this host; OpenVINO and native C/C++ orchestration remain unqualified candidates, not excluded technologies.",
+  "constraints": [
+    "Pinned model bytes verified before native parsing",
+    "Bounded RGB input and frozen class/confidence/NMS semantics",
+    "Explicit Core ML selection must reject CPU-only fallback",
+    "Offline execution; no runtime downloads or identity history"
+  ],
+  "official_sources": [
+    "https://onnxruntime.ai/docs/api/python/api_summary.html",
+    "https://onnxruntime.ai/docs/performance/tune-performance/threading.html",
+    "https://onnxruntime.ai/docs/execution-providers/",
+    "https://docs.openvino.ai/2024/openvino-workflow/model-preparation/convert-model-to-ir.html",
+    "https://docs.openvino.ai/2024/openvino-workflow/running-inference/dynamic-shapes.html"
+  ],
+  "source_sha256": {
+    "aethron/vision/yolox.py": "1d90a22d997d4bde07d9b07d847af5e5c75041d7ab3b53130bc9085f2730a0c6",
+    "tests/vision/test_inference_provider.py": "71d81d2694b0604b71aadd8392bd109ac40647107e474876b55400662ddec1aa",
+    "scripts/inference_backend_profile.py": "2773c340548ba8289ceaab9bb5b2a777956e0ea442cd3ba7619a1b6254249822",
+    "requirements-inference-probe.lock": "8e82cf74655d432da222a4a6bf15a197085d75f54b42676c317145df3b395b07",
+    ".github/workflows/aethron-inference-contracts.yml": "4cef82afeec56d5526f37a83dadc61c99ea310fd6f9c49d53468cde04b2e0bf7"
+  },
+  "regression": {
+    "red": "Missing provider before inference and provider loss during run both incorrectly accepted CPU-only results (2 FAIL, 1 control PASS).",
+    "focused": "5 PASS including model tamper admission and frozen class mapping.",
+    "installed": "5 PASS outside checkout using an offline-installed freshly built wheel; all packaged Python source bytes match."
+  },
+  "comparison": {
+    "latencies_ns": {
+      "opencv": [
+        4548747458,
+        3748531542,
+        4967151000,
+        4493733542,
+        6595897209,
+        5557025125,
+        2160829875,
+        5705508917,
+        4532190833
+      ],
+      "ort_cpu": [
+        6347660333,
+        5394325709,
+        7327382875,
+        8676487250,
+        9389350041,
+        4432739167,
+        11451931459,
+        13163879916,
+        18313090292
+      ]
+    },
+    "median_ns": {
+      "opencv": 4548747458,
+      "ort_cpu": 8676487250
+    },
+    "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+    "qualified": false,
+    "runtimes": {
+      "opencv": "4.13.0",
+      "ort_cpu": "1.30.0"
+    },
+    "samples": [
+      {
+        "detections": [
+          1,
+          1
+        ],
+        "exact": false,
+        "existing_parity": true,
+        "pixels_sha256": "a8c429c18afa7b0fd5673e598d73a21225d94c864a71bbb3885126fdecb41071",
+        "sample": "person.png"
+      },
+      {
+        "detections": [
+          1,
+          1
+        ],
+        "exact": false,
+        "existing_parity": true,
+        "pixels_sha256": "416b729128bfb2c3d1eb69bf9b1734a796293abc17939267b2dc94f8a5784031",
+        "sample": "animal.png"
+      },
+      {
+        "detections": [
+          0,
+          0
+        ],
+        "exact": true,
+        "existing_parity": true,
+        "pixels_sha256": "2aae7dc846aaf25f1cadf55f1666862046c6db9d65d84bdc07fa039dac405606",
+        "sample": "empty"
+      }
+    ],
+    "scope": "bounded still-image CPU comparison; no device or field qualification",
+    "threads": 2
+  },
+  "measurement_binding": {
+    "product_revision": "6e98c19ad028e5f835b98c4fdb67f9c46ee8a322",
+    "product_path": "aethron/vision/yolox.py",
+    "note": "CPU branches unchanged by this fix. Final probe adds a second bounded model hash check, explicit darkness failure and OpenCV image loading; image pixel hashes verified identical to measured inputs. Final probe rerun is assigned to hosted CI."
+  },
+  "limitations": [
+    "Three still images and nine measured forwards per engine are not a deployment or worst-case latency qualification.",
+    "Median OpenCV 4548747458ns versus ORT CPU 8676487250ns under local host load; both exceed existing runtime budgets. No threshold changed.",
+    "Person/animal outputs are not byte-identical; only the existing Core ML comparison tolerances passed.",
+    "No per-engine memory isolation, native-language orchestration benchmark, complete recorded-stream parity or OpenVINO measurement yet.",
+    "Provider-loss regression uses a simulated ORT session boundary; native Core ML failure injection/device qualification remains open.",
+    "Local ORT diagnostics reported unavailable cache writes; no causal attribution for latency."
+  ],
+  "hosted": "Installed native comparison and regression workflow added; pending, not a green qualification claim.",
+  "installed": {
+    "core_wheel_sha256": "40b74aef91adbd7a6a603765b78f605c4f32c0b24771ae4b6a86d8abe0386a0e",
+    "source_bytes_match": true,
+    "outside_checkout": true,
+    "offline_install": true,
+    "temporary_consumer_removed": true
+  }
+}
