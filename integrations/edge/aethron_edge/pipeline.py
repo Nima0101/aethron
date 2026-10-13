@@ -318,6 +318,7 @@ class RuntimePipeline:
             self.ros_guard = ClockGuard(self.ros_grant, manifest, boot_id=self.ros_grant.boot_id)
         self.core = self._new_core()
         self.process = None
+        self._stopped = False
         self.reason = "source_lost"
         self.processed = 0
         self.last_latency_ms = 0.0
@@ -384,9 +385,10 @@ class RuntimePipeline:
         self.last_message_ns = self.started_ns
         self.worker_inferences = 0
         self.worker_sensor_batches = 0
+        self._stopped = False
 
     def tick(self, now_ns):
-        if self.process is None:
+        if self._stopped or self.process is None:
             return self.snapshot(now_ns)
         if self.ros_guard is not None and not self.ros_guard.check():
             self._revoke_ros()
@@ -475,7 +477,8 @@ class RuntimePipeline:
 
     def sensor_status(self, now_ns):
         available = (
-            self.sensor_state == "processing"
+            not self._stopped
+            and self.sensor_state == "processing"
             and 0 <= now_ns - self.sensor_emitted_ns <= 100_000_000
             and now_ns <= self.sensor_expires_ns
             and self.process is not None
@@ -513,6 +516,9 @@ class RuntimePipeline:
         }
 
     def stop_worker(self):
+        # A retained cleanup handle is not authority to consume messages or
+        # renew a sensor grant. Reopen admission only after successful start.
+        self._stopped = True
         self.last_result = None
         self.sensor_expires_ns = 0
         self.sensor_state = "fault" if self.ros_guard and self.ros_guard.closed else "idle"

@@ -96,3 +96,74 @@ class WorkerShutdown(unittest.TestCase):
         self.assertEqual(len(result["tracks"]), 1)
         self.assertNotEqual(result["tracks"][0]["id"], self.old_id)
         self.assertEqual(result["evidence"], "synthetic")
+
+    def sensor_message(self):
+        return {
+            "data": None,
+            "reason": None,
+            "latency_ms": 0,
+            "sensor_state": "processing",
+            "sensor_batches": 7,
+            "sensor_emitted_ns": 1_003_000_000,
+            "sensor_expires_ns": 1_103_000_000,
+        }
+
+    def test_failed_stop_does_not_revive_sensor_diagnostics(self):
+        self.runtime.profile = Profile(
+            name="shutdown", driver="sensor-replay", address="unused", sensor_manifest="unused"
+        )
+        message = self.sensor_message()
+        self.runtime.channel.put_nowait(message)
+        # Stop-token failure is earlier than join failure; neither may leave
+        # the retained process handle as permission to consume another message.
+        self.runtime.stop.set.side_effect = OSError("stop unavailable")
+        with self.assertRaisesRegex(OSError, "^stop unavailable$"):
+            self.runtime.stop_worker()
+        before = (self.runtime.processed, self.runtime.last_message_ns, self.runtime.sensor_batches)
+        self.runtime.tick(1_003_000_000)
+        self.assertFalse(self.runtime.sensor_status(1_003_000_000)["available"])
+        self.assertEqual(self.runtime.sensor_state, "idle")
+        self.assertEqual(
+            (self.runtime.processed, self.runtime.last_message_ns, self.runtime.sensor_batches),
+            before,
+        )
+        self.assertIs(self.runtime.channel.get_nowait(), message)
+
+    def test_failed_close_does_not_check_or_renew_ros_authority(self):
+        self.runtime.profile = Profile(
+            name="shutdown", driver="sensor-ros", address="unused", sensor_manifest="unused"
+        )
+        self.runtime.ros_guard = Mock(closed=False)
+        self.runtime.ros_grant = SimpleNamespace(generation=1)
+        message = {**self.sensor_message(), "sensor_generation": 1}
+        self.runtime.channel.put_nowait(message)
+        self.process.join.side_effect = OSError("cleanup unavailable")
+        with self.assertRaisesRegex(OSError, "^cleanup unavailable$"):
+            self.runtime.close()
+        with patch.object(self.runtime, "_renew_ros") as renew:
+            self.runtime.tick(1_003_000_000)
+        self.runtime.ros_guard.check.assert_not_called()
+        renew.assert_not_called()
+        self.assertEqual(self.runtime.sensor_expires_ns, 0)
+        self.assertIs(self.runtime.channel.get_nowait(), message)
+
+    def test_sensor_messages_resume_only_after_successful_restart(self):
+        self.runtime.profile = Profile(
+            name="shutdown", driver="sensor-replay", address="unused", sensor_manifest="unused"
+        )
+        self.runtime.stop_worker()
+        with patch(
+            "multiprocessing.process.BaseProcess.start", side_effect=OSError("spawn failed")
+        ):
+            with self.assertRaisesRegex(OSError, "^spawn failed$"):
+                self.runtime.start()
+        self.runtime.channel.put_nowait(self.sensor_message())
+        self.runtime.tick(1_003_000_000)
+        self.assertFalse(self.runtime.sensor_status(1_003_000_000)["available"])
+        self.assertEqual(self.runtime.sensor_batches, 0)
+        with patch("multiprocessing.process.BaseProcess.start"):
+            self.runtime.start()
+        self.runtime.channel.put_nowait(self.sensor_message())
+        self.runtime.tick(1_003_000_000)
+        self.assertTrue(self.runtime.sensor_status(1_003_000_000)["available"])
+        self.assertEqual(self.runtime.sensor_batches, 7)

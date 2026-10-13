@@ -80,7 +80,7 @@ jobs:
         env:
           PYTHONPATH: integrations/edge
         run: |
-          python - <<'PY' > build/provider/worker-cancellation.txt 2>&1
+          python -c "
           import unittest
           import onnxruntime as ort
           ort.disable_telemetry_events()
@@ -88,9 +88,9 @@ jobs:
           suite.addTests(unittest.defaultTestLoader.discover('tests/integration', pattern='test_worker_tree.py'))
           suite.addTests(unittest.defaultTestLoader.discover('tests/integration', pattern='test_worker_shutdown.py'))
           result = unittest.TextTestRunner(verbosity=2).run(suite)
-          if not result.wasSuccessful() or result.testsRun != 22 or result.skipped or result.expectedFailures:
+          if not result.wasSuccessful() or result.testsRun != 25 or result.skipped or result.expectedFailures:
               raise SystemExit('worker cancellation coverage incomplete')
-          PY
+          " > build/provider/worker-cancellation.txt 2>&1
       - name: Build and install optional bounded CPU validator
         run: |
           python -m pip install --only-binary=:all: setuptools==84.0.0 wheel==0.48.0
