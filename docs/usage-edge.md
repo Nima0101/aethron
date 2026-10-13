@@ -20,6 +20,10 @@ The package check builds both wheels twice and executes an isolated installed HT
 
 For the actual pixel paths, explicitly download/install `integrations/edge/requirements-vision.lock` with `--require-hashes` and fetch the pinned test model using `python scripts/fetch_rgb_model.py`. To run the test RTSP server, install test-only `imageio-ffmpeg==0.6.0` and run `python scripts/edge_fetch_test_tools.py`. Then `python scripts/edge_pixel_service_e2e.py` exercises installed file and RTSP inference/service/client paths. No runtime command fetches model weights automatically.
 
+The offline `doctor`/`replay` configuration decoder rejects non-finite numeric values, including overflowing literals such as `1e309`, with `invalid_request` and no diagnostic report. Finite extension numbers retain normal floating-point decoding; this check does not validate the meaning of extension fields.
+
+With startup tracing disabled (the default), rejected command-line arguments and malformed offline configuration produce only `invalid_request` on stderr and exit status 2. Explicitly setting `AETHRON_STARTUP_TRACE=1` adds fixed stage names and monotonic timestamps on stderr; these diagnostic lines are separate from stdout reports. The direct command emits `cli_ready`, while `python -m aethron_edge` also emits `process_entry` before argument/configuration rejection. These rejection paths do not print the supplied arguments, configuration path or contents. This is a tested boundary for handled input errors, not a guarantee that arbitrary internal faults cannot produce a traceback. Startup timestamps do not establish hardware latency or real-time qualification.
+
 `doctor` opens no sensor, downloads no model and makes no qualification claim. Replay produces a bounded, explicitly labeled report. For a local service, provision a 32-byte random hex token in an owner-only file and configure named profiles, credentials and a local status file. `aethron_edge.runtime.provisioning.create_token(Path(...))` creates the token without printing it. Example configuration:
 
 ```json

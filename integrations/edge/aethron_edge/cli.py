@@ -3,11 +3,18 @@
 import argparse
 import importlib.metadata
 import json
+import math
 import os
 from pathlib import Path
 
 from . import __version__
 from ._startup_trace import mark
+
+
+class _PrivateArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        # argparse messages can contain rejected values, options and paths.
+        self.exit(2, "invalid_request\n")
 
 
 def _replay_config(path: Path, *, require_replay: bool):
@@ -30,7 +37,18 @@ def _replay_config(path: Path, *, require_replay: bool):
     def invalid(value):
         raise ValueError("invalid_request")
 
-    config = json.loads(data.decode("utf-8"), object_pairs_hook=unique, parse_constant=invalid)
+    def finite_float(value):
+        number = float(value)
+        if not math.isfinite(number):
+            raise ValueError("invalid_request")
+        return number
+
+    config = json.loads(
+        data.decode("utf-8"),
+        object_pairs_hook=unique,
+        parse_constant=invalid,
+        parse_float=finite_float,
+    )
     if (
         not isinstance(config, dict)
         or type(config.get("version")) is not int
@@ -47,7 +65,7 @@ def _replay_config(path: Path, *, require_replay: bool):
 
 def main():
     mark("cli_ready")
-    parser = argparse.ArgumentParser(prog="aethron-edge")
+    parser = _PrivateArgumentParser(prog="aethron-edge")
     parser.add_argument(
         "command",
         choices=[
@@ -76,8 +94,11 @@ def main():
 
         if args.out is None:
             parser.error("--out required")
-        args.out.parent.mkdir(parents=True, exist_ok=True)
-        args.out.write_text(json.dumps(document(), sort_keys=True, indent=2) + "\n")
+        try:
+            args.out.parent.mkdir(parents=True, exist_ok=True)
+            args.out.write_text(json.dumps(document(), sort_keys=True, indent=2) + "\n")
+        except OSError:
+            parser.exit(2, "export_failed\n")
         return
     if args.config is None:
         parser.error("--config required")
@@ -166,9 +187,13 @@ def main():
     try:
         config = _replay_config(args.config, require_replay=args.command == "replay")
         if args.command == "doctor":
+            try:
+                core_version = importlib.metadata.version("aethron")
+            except importlib.metadata.PackageNotFoundError:
+                parser.exit(2, "doctor_unavailable\n")
             result = {
                 "edge_version": __version__,
-                "core_version": importlib.metadata.version("aethron"),
+                "core_version": core_version,
                 "hardware_probed": False,
                 "qualified": False,
                 "model": "not_loaded",
@@ -177,7 +202,11 @@ def main():
         else:
             from .protocol import replay_stream
 
-            path = (args.config.parent / config["replay"]).resolve()
+            try:
+                path = (args.config.parent / config["replay"]).resolve()
+            except RuntimeError:
+                # pathlib reports symlink loops this way before Python 3.13.
+                raise ValueError("invalid_request") from None
             with path.open("rb") as stream:
                 result = replay_stream(stream).model_dump(by_alias=True)
         print(json.dumps(result, separators=(",", ":"), allow_nan=False))

@@ -15,6 +15,16 @@ bytes and eight nesting levels, with unique object keys and integer `version: 1`
 Replay requires a nonempty UTF-8 path without NUL; paths resolve relative to the
 configuration. Invalid configuration emits only `invalid_request` and no report.
 These are local configuration admission bounds, not new sensor thresholds.
+If `doctor` cannot find the core package's installation metadata, it exits with
+status 2 and `doctor_unavailable`, without a version report or traceback. This
+does not verify package integrity or hardware readiness.
+
+Invalid CLI arguments exit with status 2 and `invalid_request` on stderr without
+echoing rejected values; use `--help` for syntax. This diagnostic boundary does
+not hide arguments from shell history, process listings or caller-side logging.
+Filesystem errors during `export-openapi` exit with status 2 and `export_failed`
+without printing output paths. A failed write can leave a partial output file;
+only a successful exit indicates a completed export.
 
 The JSONL replay CLI consumes bounded lines instead of loading the entire recording.
 `aethron_edge.protocol.replay_stream(binary_stream)` returns a complete `ReplayReport`
