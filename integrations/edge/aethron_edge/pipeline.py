@@ -9,6 +9,7 @@ import signal
 import time
 from dataclasses import asdict
 from pathlib import Path
+from threading import Event, Lock, Thread
 
 from aethron.temporal.replay import replay
 from aethron.temporal.session import Session
@@ -100,11 +101,55 @@ def _load_replay_rows(path, stop):
     return rows
 
 
+class _InferenceStop:
+    """One worker-local watcher forwards shared stop to the active ORT call.
+
+    This is cooperative cancellation, not a native stop-time guarantee. The
+    parent retains process termination for stalled native calls and cleanup.
+    """
+
+    def __init__(self, stop):
+        self.stop = stop
+        self.done = Event()
+        self.lock = Lock()
+        self.active = None
+        self.thread = Thread(target=self._watch, daemon=True)
+        self.thread.start()
+
+    def _watch(self):
+        while not self.done.wait(0.01):
+            if self.stop.is_set():
+                with self.lock:
+                    if self.active is not None:
+                        self.active.cancel()
+                return
+
+    def call(self, operation, *args, **kwargs):
+        from aethron.vision.yolox import InferenceCancellation
+
+        cancellation = InferenceCancellation()
+        with self.lock:
+            self.active = cancellation
+            # Also covers stop before registration or after the watcher exits.
+            if self.stop.is_set():
+                cancellation.cancel()
+        try:
+            return operation(*args, **kwargs, cancellation=cancellation)
+        finally:
+            with self.lock:
+                self.active = None
+
+    def close(self):
+        self.done.set()
+        self.thread.join()
+
+
 def _worker(
     profile, channel, stop, group, decoder_lock, descendant, ros_grant=None, ros_control=None
 ):
     own_descendants(group)
     source = None
+    cancellation = None
     inference_count = 0
     try:
         if profile.driver == "sensor-ros":
@@ -155,7 +200,13 @@ def _worker(
         from .sources.uvc import UVCSource
 
         cv2.setNumThreads(1)
-        detector = RGBDetector(profile.model, backend=profile.provider)
+        if profile.provider == "coreml":
+            cancellation = _InferenceStop(stop)
+            detector = cancellation.call(RGBDetector, profile.model, backend=profile.provider)
+        else:
+            detector = RGBDetector(profile.model, backend=profile.provider)
+        if stop.is_set():
+            return
         source = {"file": FileSource, "uvc": UVCSource, "rtsp": RTSPSource}[profile.driver](
             decoder_lock=decoder_lock, descendant=descendant
         )
@@ -165,6 +216,8 @@ def _worker(
         previous = None
         while not stop.is_set():
             frame = source.read(time.monotonic_ns() + 2_000_000_000)
+            if stop.is_set():
+                return
             if isinstance(frame, SourceFault):
                 _latest(
                     channel,
@@ -183,13 +236,20 @@ def _worker(
             if frame.width > 1280 or frame.height > 720:
                 # Pinned detector requires <=1280x720; no implicit resize/calibration change.
                 raise ValueError()
-            proposals = detector.infer(pixels, lighting=profile.lighting)
+            if cancellation is None:
+                proposals = detector.infer(pixels, lighting=profile.lighting)
+            else:
+                proposals = cancellation.call(detector.infer, pixels, lighting=profile.lighting)
+            if stop.is_set():
+                return
             inference_count += 1
             gray = cv2.cvtColor(pixels, cv2.COLOR_RGB2GRAY)
             gray = cv2.resize(gray, (160, 120))
             pgm = b"P5\n160 120\n255\n" + gray.tobytes()
             ego = estimate_translation(previous, pgm) if previous else None
             previous = pgm
+            if stop.is_set():
+                return
             # Generic OpenCV capture provides no qualified exposure clock. Inference
             # really runs, but its proposals never become current core evidence.
             _latest(
@@ -207,6 +267,8 @@ def _worker(
     except Exception:
         _latest(channel, {"data": None, "reason": "model_error", "latency_ms": 0})
     finally:
+        if cancellation is not None:
+            cancellation.close()
         if source:
             source.close()
 

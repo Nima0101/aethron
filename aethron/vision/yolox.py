@@ -1,12 +1,73 @@
 """Pinned OpenCV Zoo RGB detector. No identity features, history or arbitrary-model loader."""
 
 import hashlib
+from contextlib import contextmanager, nullcontext
 from pathlib import Path
+from threading import Lock
 
 from ..schema import enum, require
 
 MODEL_SHA256 = "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063"
 MODEL_BYTES = 35858002
+
+
+class InferenceCancelled(RuntimeError):
+    """Explicit caller cancellation; no observations may be admitted."""
+
+    def __init__(self):
+        super().__init__("inference_cancelled")
+
+
+class InferenceCancellation:
+    """One-shot, thread-safe cancellation for one ORT load or inference call.
+
+    Pass to RGBDetector or its infer method and call cancel() from the
+    caller's thread. Requests native termination, without a stop-time guarantee.
+    Cancellation before final result admission rejects even native success;
+    cancellation after admission cannot revoke the result. No helper thread,
+    deadline or OpenCV preemption is provided. Use a fresh token for each call.
+    """
+
+    def __init__(self):
+        self._lock = Lock()
+        self._cancelled = False
+        self._used = False
+        self._options = None
+        self._loading = False
+
+    def cancel(self):
+        with self._lock:
+            self._cancelled = True
+            if self._options is not None:
+                if self._loading:
+                    self._options.set_load_cancellation_flag(True)
+                else:
+                    self._options.terminate = True
+
+    def _check(self):
+        with self._lock:
+            if self._cancelled:
+                raise InferenceCancelled()
+
+    @contextmanager
+    def _call(self, *, load=False):
+        with self._lock:
+            require(not self._used)
+            if self._cancelled:
+                raise InferenceCancelled()
+            self._used = True
+            import onnxruntime as ort
+
+            self._loading = load
+            self._options = ort.SessionOptions() if load else ort.RunOptions()
+        try:
+            yield self._options
+            self._check()
+        finally:
+            # Never retain the provider options after success or failure. Native
+            # errors propagate unchanged; cancellation must not trigger a retry.
+            with self._lock:
+                self._options = None
 
 
 def _require_coreml_providers(session):
@@ -65,7 +126,16 @@ def safe_class(index):
 
 
 class RGBDetector:
-    def __init__(self, model_path, *, backend="opencv"):
+    def __init__(self, model_path, *, backend="opencv", cancellation=None):
+        require(
+            cancellation is None
+            or (type(cancellation) is InferenceCancellation and backend == "coreml")
+        )
+        scope = nullcontext() if cancellation is None else cancellation._call(load=True)
+        with scope as load_options:
+            self._initialize(model_path, backend=backend, load_options=load_options)
+
+    def _initialize(self, model_path, *, backend, load_options):
         # Validate in Python before handing trusted bytes to any native ONNX parser.
         with Path(model_path).open("rb") as stream:
             blob = stream.read(MODEL_BYTES + 1)
@@ -91,7 +161,7 @@ class RGBDetector:
             require("CoreMLExecutionProvider" in ort.get_available_providers())
             # Bound ORT-managed CPU pools instead of sizing them from the host.
             # Provider-internal threads and inference deadlines remain separate.
-            options = ort.SessionOptions()
+            options = ort.SessionOptions() if load_options is None else load_options
             options.intra_op_num_threads = 1
             options.inter_op_num_threads = 1
             options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
@@ -135,7 +205,18 @@ class RGBDetector:
             dtype=np.float32,
         )
 
-    def infer(self, rgb, *, lighting):
+    def infer(self, rgb, *, lighting, cancellation=None):
+        require(
+            cancellation is None
+            or (type(cancellation) is InferenceCancellation and self.backend == "coreml")
+        )
+        scope = nullcontext() if cancellation is None else cancellation._call()
+        with scope as run_options:
+            return self._infer(
+                rgb, lighting=lighting, run_options=run_options, cancellation=cancellation
+            )
+
+    def _infer(self, rgb, *, lighting, run_options, cancellation):
         enum(lighting, ("daylight", "low_light", "near_dark", "zero_visible"))
         np, cv = self.np, self.cv
         require(type(rgb) is np.ndarray and rgb.dtype == np.uint8 and rgb.ndim == 3)
@@ -152,7 +233,11 @@ class RGBDetector:
             # Reassert the application policy if fallback was enabled between calls.
             self.ort_session.disable_fallback()
             _require_coreml_providers(self.ort_session)
-            outputs = self.ort_session.run(None, {self.ort_input_name: tensor})
+            if cancellation is not None:
+                cancellation._check()
+            outputs = self.ort_session.run(None, {self.ort_input_name: tensor}, run_options)
+            if cancellation is not None:
+                cancellation._check()
             # Withdraw results on observed drift. Do not mask an execution
             # exception with a finally check or retry under a different provider.
             _require_coreml_providers(self.ort_session)

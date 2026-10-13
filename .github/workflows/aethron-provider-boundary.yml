@@ -4,6 +4,8 @@ on:
     paths:
       - 'aethron/vision/**'
       - 'tests/test_vision*.py'
+      - 'integrations/edge/aethron_edge/pipeline.py'
+      - 'tests/integration/test_worker_cancellation.py'
       - 'requirements-coreml.txt'
       - 'requirements-vision.txt'
       - '.github/workflows/aethron-provider-boundary.yml'
@@ -12,6 +14,8 @@ on:
     paths:
       - 'aethron/vision/**'
       - 'tests/test_vision*.py'
+      - 'integrations/edge/aethron_edge/pipeline.py'
+      - 'tests/integration/test_worker_cancellation.py'
       - 'requirements-coreml.txt'
       - 'requirements-vision.txt'
       - '.github/workflows/aethron-provider-boundary.yml'
@@ -35,11 +39,25 @@ jobs:
       - name: Install pinned binary provider packages
         run: |
           python -m pip install --only-binary=:all: -r requirements-coreml.txt
+          python -m pip install --only-binary=:all: --require-hashes -r integrations/edge/requirements-server.lock
       - name: Real ORT wrapper with injected native execution faults
         run: |
           mkdir -p build/provider
           python -c "import cv2, numpy, onnxruntime; print(cv2.__version__, numpy.__version__, onnxruntime.__version__)" > build/provider/versions.txt
           python -m unittest discover -s tests -p 'test_vision*.py' -v > build/provider/tests.txt 2>&1
+      - name: Cooperative worker cancellation with the installed CPU binding
+        env:
+          PYTHONPATH: integrations/edge
+        run: |
+          python - <<'PY' > build/provider/worker-cancellation.txt 2>&1
+          import unittest
+          import onnxruntime as ort
+          ort.disable_telemetry_events()
+          suite = unittest.defaultTestLoader.discover('tests/integration', pattern='test_worker_cancellation.py')
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          if not result.wasSuccessful() or result.testsRun != 8 or result.skipped or result.expectedFailures:
+              raise SystemExit('worker cancellation coverage incomplete')
+          PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
