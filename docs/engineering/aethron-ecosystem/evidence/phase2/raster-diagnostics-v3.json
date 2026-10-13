@@ -1,0 +1,33 @@
+{
+  "review_order_version": 3,
+  "component": "C06_recorded_raster_diagnostics",
+  "decision": "CLARIFY",
+  "full_component_review_complete": false,
+  "reviewed_head": "6d79c58219c3cf9142a5d374bebbe9334fe29a44",
+  "production_behavior_changed": false,
+  "checks": {
+    "new_methods": 2,
+    "injected_cases": 16,
+    "claims_methods": 5,
+    "before_documentation": "PASS",
+    "after_documentation": "PASS",
+    "production_red_claimed": false,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "0 findings",
+    "ast": "Identical after removing docstrings"
+  },
+  "limitations": [
+    "Injected exceptions before pixel processing, not real OOM or OS signal tests.",
+    "Fixed message does not erase exception context or traceback state.",
+    "Full V3 technology reassessment remains incomplete at C01."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/exceptions.html#exception-context"
+  ],
+  "sha256": {
+    "integrations/edge/aethron_edge/sensors/raster_rectification.py": "60a37d02e007446677faee8fa7230cb28bf8ba9d0ea43c6ead31e0d335cefec9",
+    "tests/integration/test_sensor_raster_rectification.py": "c89f7cbe4d6301fa8c5fa5eef7241fdbddb3dad70cd19bdd5ddcf958379ab710",
+    "docs/engineering/aethron-ecosystem/P21-RASTER-DIAGNOSTICS-V3.md": "6d8bf815ad91b7ba7115b5f7212b00f7aefb5040d77ef9d14e884f84632ef688"
+  }
+}
