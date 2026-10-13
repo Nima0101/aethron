@@ -144,6 +144,41 @@ def _validated_output(raw):
     return values
 
 
+def _selected_scores(raw):
+    """Reduce already-admitted products; retain old-package and strided support."""
+    import numpy as np
+
+    if raw.flags.c_contiguous:
+        try:
+            import aethron_vision_native as native
+        except ModuleNotFoundError as error:
+            if error.name != "aethron_vision_native":
+                raise
+        else:
+            require(native.CONTRACT_VERSION == 1)
+            version = getattr(native, "SCORE_CONTRACT_VERSION", None)
+            if version is not None:
+                require(type(version) is int and version == 1)
+                # Subnormal objectness is admitted but measured slower in the
+                # native reduction. Select NumPy before execution, not on error.
+                objectness = raw[0, :, 4]
+                subnormal = (objectness > 0) & (objectness < np.finfo(np.float32).tiny)
+                if not bool(subnormal.any()):
+                    result = native.select_scores(raw)
+                    require(type(result) is tuple and len(result) == 2)
+                    require(type(result[0]) is bytes and len(result[0]) == 8400)
+                    require(type(result[1]) is bytes and len(result[1]) == 33600)
+                    categories = np.frombuffer(result[0], dtype=np.uint8)
+                    confidence = np.frombuffer(result[1], dtype=np.float32)
+                    require(bool((categories < 80).all()))
+                    require(bool(confidence.min() >= 0 and confidence.max() <= 1))
+                    return categories, confidence
+    values = raw[0]
+    scores = values[:, 4, None] * values[:, 5:]
+    categories = np.argmax(scores, axis=1)
+    return categories, scores[np.arange(8400), categories]
+
+
 def safe_class(index):
     if index == 0:
         return "person"
@@ -289,9 +324,7 @@ class RGBDetector:
                 # raised. This does not guarantee release or secure memory erasure.
                 self.net.setInput(np.zeros((1, 3, 640, 640), dtype=np.float32))
         values = _validated_output(raw)
-        scores = values[:, 4, None] * values[:, 5:]
-        categories = np.argmax(scores, axis=1)
-        confidence = scores[np.arange(8400), categories]
+        categories, confidence = _selected_scores(raw)
         candidates = []
         for idx in np.flatnonzero(confidence >= 0.35):
             category = int(categories[idx])

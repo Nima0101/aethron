@@ -13,25 +13,18 @@ static PyObject *invalid_input(void) {
     return NULL;
 }
 
-static PyObject *validate_output(PyObject *self, PyObject *arg) {
-    (void)self;
-    Py_buffer view;
-    if (PyObject_GetBuffer(arg, &view, PyBUF_C_CONTIGUOUS | PyBUF_FORMAT) < 0) {
-        PyErr_Clear();
-        return invalid_input();
+static int output_view_valid(const Py_buffer *view) {
+    int format_ok = view->format &&
+        (strcmp(view->format, "f") == 0 || strcmp(view->format, "=f") == 0 ||
+         strcmp(view->format, "@f") == 0);
+    int shape_ok = view->ndim == 3 && view->shape && view->shape[0] == 1 &&
+        view->shape[1] == 8400 && view->shape[2] == 85;
+    if (sizeof(float) != 4 || view->itemsize != 4 || view->len != 2856000 ||
+        !view->buf || !format_ok || !shape_ok || view->suboffsets ||
+        !PyBuffer_IsContiguous(view, 'C')) {
+        return -1;
     }
-    int format_ok = view.format &&
-        (strcmp(view.format, "f") == 0 || strcmp(view.format, "=f") == 0 ||
-         strcmp(view.format, "@f") == 0);
-    int shape_ok = view.ndim == 3 && view.shape && view.shape[0] == 1 &&
-        view.shape[1] == 8400 && view.shape[2] == 85;
-    if (sizeof(float) != 4 || view.itemsize != 4 || view.len != 2856000 ||
-        !view.buf || !format_ok || !shape_ok || view.suboffsets ||
-        !PyBuffer_IsContiguous(&view, 'C')) {
-        PyBuffer_Release(&view);
-        return invalid_input();
-    }
-    const char *base = (const char *)view.buf;
+    const char *base = (const char *)view->buf;
     unsigned valid = 1;
     /* Keep the GIL and buffer export. No allocation, retained pointer or writes.
        memcpy handles even an unaligned native-endian binary32 buffer safely. */
@@ -47,8 +40,69 @@ static PyObject *validate_output(PyObject *self, PyObject *arg) {
             valid &= (value >= 0) & (value <= 1);
         }
     }
+    return (int)valid;
+}
+
+static int acquire_output(PyObject *arg, Py_buffer *view) {
+    if (PyObject_GetBuffer(arg, view, PyBUF_C_CONTIGUOUS | PyBUF_FORMAT) < 0) {
+        PyErr_Clear();
+        return 0;
+    }
+    return 1;
+}
+
+static PyObject *validate_output(PyObject *self, PyObject *arg) {
+    (void)self;
+    Py_buffer view;
+    if (!acquire_output(arg, &view)) return invalid_input();
+    int valid = output_view_valid(&view);
     PyBuffer_Release(&view);
+    if (valid < 0) return invalid_input();
     return PyBool_FromLong(valid);
+}
+
+static PyObject *select_scores(PyObject *self, PyObject *arg) {
+    (void)self;
+    Py_buffer view;
+    if (!acquire_output(arg, &view)) return invalid_input();
+    if (output_view_valid(&view) != 1) {
+        PyBuffer_Release(&view);
+        return invalid_input();
+    }
+    PyObject *categories = PyBytes_FromStringAndSize(NULL, 8400);
+    PyObject *confidence = PyBytes_FromStringAndSize(NULL, 33600);
+    if (!categories || !confidence) {
+        Py_XDECREF(categories);
+        Py_XDECREF(confidence);
+        PyBuffer_Release(&view);
+        return NULL;
+    }
+    char *indices = PyBytes_AsString(categories);
+    char *scores = PyBytes_AsString(confidence);
+    const char *source = (const char *)view.buf;
+    /* No output is exposed until filled. Retain GIL and input export.
+       Multiply each class in binary32 before comparing; first ties win. */
+    for (size_t row = 0; row < 8400; ++row) {
+        float objectness, products[80];
+        memcpy(&objectness, source + (row * 85 + 4) * 4, 4);
+        for (size_t col = 0; col < 80; ++col) {
+            float probability;
+            memcpy(&probability, source + (row * 85 + 5 + col) * 4, 4);
+            products[col] = objectness * probability;
+        }
+        float best = products[0];
+        unsigned char index = 0;
+        for (unsigned char col = 1; col < 80; ++col) {
+            if (products[col] > best) { best = products[col]; index = col; }
+        }
+        indices[row] = (char)index;
+        memcpy(scores + row * 4, &best, 4);
+    }
+    PyBuffer_Release(&view);
+    PyObject *result = PyTuple_Pack(2, categories, confidence);
+    Py_DECREF(categories);
+    Py_DECREF(confidence);
+    return result;
 }
 
 static void pack_channels(const unsigned char *restrict source,
@@ -105,6 +159,7 @@ static PyObject *pack_rgb(PyObject *self, PyObject *args) {
 static PyMethodDef methods[] = {
     {"validate_output", validate_output, METH_O, "Check a bounded contiguous float32 output."},
     {"pack_rgb", pack_rgb, METH_VARARGS, "Pack a fixed RGB canvas into caller-owned float32 NCHW."},
+    {"select_scores", select_scores, METH_O, "Reduce admitted float32 products with first-tie ordering."},
     {NULL, NULL, 0, NULL}
 };
 static struct PyModuleDef module = {

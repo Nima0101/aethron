@@ -1,12 +1,13 @@
 # Optional native vision kernels
 
-`aethron-vision-native` 0.2.0 implements output-admission contract 1. It validates
+`aethron-vision-native` 0.3.0 implements output-admission contract 1. It validates
 the pinned detector's native-endian float32 tensor `(1, 8400, 85)`. Geometry must
 be finite; probability channels must be in `[0, 1]`. It returns a boolean for
 tensor contents and raises fixed `ValueError("invalid_input")` for invalid buffer
 metadata. The Python detector still admits the exact ndarray type, dtype and
 shape before dispatch. No model parsing, inference, NMS or provider selection
-runs in this module. Version 0.2.0 also exposes RGB packing contract 1, described below.
+runs in this module. RGB packing contract 1 was introduced in 0.2.0; score
+contract 1 was added in 0.3.0. Both are described below.
 
 When installed, the detector uses the module for C-contiguous output. Other
 layouts and installations without the optional package use the equivalent
@@ -31,15 +32,16 @@ Build with the pinned tools and installed vision dependencies:
 python -m pip install setuptools==84.0.0 wheel==0.48.0
 python -m pip wheel --no-deps --no-build-isolation integrations/native-vision --wheel-dir build/native-vision
 python -m pip install --no-deps --no-index build/native-vision/*.whl
-python -m unittest discover -s integrations/native-vision/tests -p test_bounds.py -v
+python -m unittest discover -s integrations/native-vision/tests -p 'test_*.py' -v
 python -m scripts.vision_admission_audit
 ```
 
 The bounded profile reports all five wall/CPU timing samples per implementation
 and layout, plus separately traced scratch allocation. Native heap accounting,
 process RSS, inference latency and hardware qualification are outside its scope.
-The provider workflow tests portable and installed-native paths and preserves
-the wheel, profile and fault logs; a separate hosted job runs UBSan/bounds checks.
+The provider workflow is configured to test portable and installed-native paths
+and retain the wheel, profile and fault logs; a separate job configures
+UBSan/bounds checks. Configuration alone does not establish hosted results.
 
 ## RGB packing contract 1
 
@@ -66,3 +68,24 @@ speedup or inference-latency claim. Build the tiny comparison probe and run:
 cc -std=c11 -O3 -fno-fast-math -shared -fPIC tests/probes/vision_pack.c -o build/native-vision/pack.so
 python -m scripts.vision_preprocess_audit --probe build/native-vision/pack.so
 ```
+
+### Score contract 1 (package 0.3.0)
+
+`select_scores(raw)` independently validates the contiguous native binary32
+`(1,8400,85)` tensor and returns `(category_bytes, confidence_bytes)`: 8,400
+uint8 class indices and 33,600 native-endian float32 confidence bytes. Each row
+multiplies objectness by all 80 class probabilities before choosing the first
+maximum. Outputs are immutable, separately owned bytes; input export and GIL
+remain held through computation. A 320-byte row scratch permits vectorized
+multiplication without changing tie order. Invalid input raises fixed
+`ValueError("invalid_input")`. The standalone admission API retains its prior
+metadata-error versus invalid-value-False distinction.
+
+The detector selects this optional path for contiguous tensors with no positive
+subnormal objectness. Subnormal objectness uses NumPy by pre-execution policy:
+bounded measurements showed native regression there. Absent/older modules and
+strided tensors also use NumPy. Declared native errors never trigger fallback.
+This is not a universal speedup, real-time guarantee or physical qualification.
+Run `python -m scripts.vision_score_audit` for bounded bit parity and raw timings.
+The default floating-point environment and unchanging input ownership are
+required; process-wide rounding/flush changes are not qualified.
