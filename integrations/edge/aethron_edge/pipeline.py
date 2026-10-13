@@ -515,7 +515,8 @@ class RuntimePipeline:
             + (channel.rejected.value if channel else 0),
         }
 
-    def stop_worker(self):
+    def withdraw_scene(self):
+        """Close observation admission without waiting for worker cleanup."""
         # A retained cleanup handle is not authority to consume messages or
         # renew a sensor grant. Reopen admission only after successful start.
         self._stopped = True
@@ -526,6 +527,9 @@ class RuntimePipeline:
         # failed stop retains process ownership, never tracks or permission to
         # admit queued observations. Only start() creates a new core session.
         self.core.close()
+
+    def stop_worker(self):
+        self.withdraw_scene()
         if self.process is not None:
             self.stop.set()
             # Failed spawn leaves a Process object that cannot be joined.

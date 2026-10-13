@@ -228,7 +228,6 @@ class ApplianceSupervisor:
             return self.pipelines[profile].snapshot(time.monotonic_ns())
 
     def shutdown(self, reason="maintenance"):
-        self.stop.set()
         cleanup_failed = False
 
         def attempt(operation, **kwargs):
@@ -248,6 +247,13 @@ class ApplianceSupervisor:
             if task.is_alive():
                 cleanup_failed = True
 
+        with self.lock:
+            self.stop.set()
+            # Withdraw every public scene before any thread join or telemetry
+            # cleanup can wait. Keep worker ownership for the cleanup below;
+            # queued observations must not revive a scene during that wait.
+            for pipeline in self.pipelines.values():
+                attempt(pipeline.withdraw_scene)
         if self.thread:
             attempt(join, task=self.thread, timeout=2)
         for task in self.maintenance:

@@ -2,6 +2,7 @@
 
 import json
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -123,6 +124,93 @@ class ApplianceShutdown(unittest.TestCase):
         status = json.loads(Path(self.runtime.config.status_file).read_text())
         self.assertEqual(status["state"], "stopped")
         self.assertEqual(status["fault_count"], 0)
+
+    def test_shutdown_withdraws_all_scenes_before_blocking_cleanup(self):
+        for index in range(3):
+            with self.subTest(boundary=index):
+                if index:
+                    self.make_runtime()
+                runtime = self.runtime
+                sensor = runtime.pipelines["second"]
+                sensor.profile = Profile(
+                    name="second",
+                    driver="sensor-replay",
+                    address="unused",
+                    sensor_manifest="unused",
+                )
+                sensor.sensor_state = "processing"
+                sensor.sensor_emitted_ns = 1_001_000_000
+                sensor.sensor_expires_ns = 1_101_000_000
+                sensor.channel = SimpleNamespace(
+                    get_nowait=Mock(),
+                    overwritten=SimpleNamespace(value=0),
+                    rejected=SimpleNamespace(value=0),
+                )
+                self.assertTrue(sensor.sensor_status(1_001_000_000)["available"])
+                entered, release = threading.Event(), threading.Event()
+                failures = []
+
+                def delayed_cleanup(*, entered=entered, release=release, **kwargs):
+                    entered.set()
+                    if not release.wait(5):
+                        raise TimeoutError("test did not release cleanup")
+
+                def shutdown(runtime=runtime, failures=failures):
+                    try:
+                        runtime.shutdown()
+                    except Exception as error:
+                        failures.append(error)
+
+                self.failpoints()[index].side_effect = delayed_cleanup
+                caller = threading.Thread(target=shutdown)
+                with patch("time.monotonic_ns", return_value=1_001_000_000):
+                    caller.start()
+                    try:
+                        self.assertTrue(entered.wait(2))
+                        self.assertTrue(caller.is_alive())
+                        # Observe from another thread while the actual shutdown
+                        # is waiting. Neither expiry nor completed cleanup may
+                        # mask continued publication or queued-message admission.
+                        for name in runtime.pipelines:
+                            scene = runtime.snapshot(name)
+                            self.assertEqual(scene["state"], "UNKNOWN")
+                            self.assertEqual(scene["tracks"], [])
+                            self.assertIsNone(scene["evidence"])
+                        self.assertFalse(sensor.sensor_status(1_001_000_000)["available"])
+                        sensor.tick(1_001_000_000)
+                        sensor.channel.get_nowait.assert_not_called()
+                    finally:
+                        release.set()
+                        caller.join(timeout=2)
+                self.assertFalse(caller.is_alive())
+                self.assertEqual(failures, [])
+                self.assert_cleanup_attempts()
+
+    def test_scene_retirement_failure_still_attempts_every_cleanup(self):
+        core = self.runtime.pipelines["first"].core
+        close = core.close
+        first = True
+
+        def fail_once():
+            nonlocal first
+            if first:
+                first = False
+                raise OSError("private diagnostic")
+            close()
+
+        with patch.object(core, "close", side_effect=fail_once):
+            # The first withdrawal fails; the ordinary cleanup must still retry
+            # that owner and attempt every other resource before reporting fault.
+            with self.assertRaisesRegex(RuntimeError, "^appliance_cleanup_failed$"):
+                self.runtime.shutdown()
+        self.assert_cleanup_attempts()
+        self.assertIsNone(self.runtime.pipelines["first"].process)
+        self.assertIsNone(self.runtime.pipelines["second"].process)
+        for source in self.runtime.telemetry.values():
+            source.close.assert_called_once_with()
+        status = Path(self.runtime.config.status_file).read_text()
+        self.assertNotIn("private diagnostic", status)
+        self.assertEqual(json.loads(status)["state"], "fault")
 
     def test_incomplete_joins_report_fault_and_retain_cleanup_ownership(self):
         for index in range(3):
