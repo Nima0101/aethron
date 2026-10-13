@@ -50,7 +50,8 @@ class ReleaseSourceBinding(unittest.TestCase):
             self.addCleanup(patcher.stop)
 
     def git(self, args, **kwargs):
-        command = args[1:]
+        self.assertEqual(args[:2], ["git", "--no-replace-objects"])
+        command = args[2:]
         # Both the old working-tree reader and the corrected object reader use
         # this same committed fixture. No repository or real release is created.
         if command == ["ls-files", "-z"]:
@@ -131,7 +132,7 @@ class ReleaseSourceBinding(unittest.TestCase):
         expected = GIT_OUTPUT(["git", "show", revision + ":LICENSE"], cwd=REPOSITORY)
 
         def only_license(args, **kwargs):
-            if args[1] == "ls-tree":
+            if args[2] == "ls-tree":
                 args = [*args, "--", "LICENSE"]
             return GIT_OUTPUT(args, **kwargs)
 

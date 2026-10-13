@@ -21,11 +21,17 @@ class ReleaseSourceAdmission(unittest.TestCase):
 
         def git_output(args, **kwargs):
             self.assertEqual(kwargs["cwd"], source)
-            if args == ["git", "ls-files", "-z"]:
+            if args == ["git", "--no-replace-objects", "ls-files", "-z"]:
                 return ("\0".join(names) + "\0").encode()
-            if args == ["git", "rev-parse", "HEAD"]:
+            if args == ["git", "--no-replace-objects", "rev-parse", "HEAD"]:
                 return "1" * 40 + "\n"
-            if args == ["git", "status", "--porcelain", "--untracked-files=normal"]:
+            if args == [
+                "git",
+                "--no-replace-objects",
+                "status",
+                "--porcelain",
+                "--untracked-files=normal",
+            ]:
                 return b""
             self.fail(f"unexpected Git request: {args}")
 

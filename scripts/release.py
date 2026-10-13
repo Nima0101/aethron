@@ -16,7 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def committed_blobs(revision):
     """Read one immutable Git tree, never the mutable checkout behind provenance."""
     tree = subprocess.check_output(
-        ["git", "ls-tree", "-r", "-z", "--full-tree", revision], cwd=ROOT
+        ["git", "--no-replace-objects", "ls-tree", "-r", "-z", "--full-tree", revision],
+        cwd=ROOT,
     )
     entries = []
     for record in tree.split(b"\0"):
@@ -30,7 +31,7 @@ def committed_blobs(revision):
     entries.sort()
     payload = io.BytesIO(
         subprocess.check_output(
-            ["git", "cat-file", "--batch"],
+            ["git", "--no-replace-objects", "cat-file", "--batch"],
             cwd=ROOT,
             input=b"".join(oid + b"\n" for _, oid in entries),
         )
@@ -51,11 +52,19 @@ def committed_blobs(revision):
 
 
 def build(destination):
-    names = subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode().split("\0")
+    # Local refs/replace must not redefine the revision named by provenance.
+    names = (
+        subprocess.check_output(["git", "--no-replace-objects", "ls-files", "-z"], cwd=ROOT)
+        .decode()
+        .split("\0")
+    )
     names = sorted(n for n in names if n)
-    revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    revision = subprocess.check_output(
+        ["git", "--no-replace-objects", "rev-parse", "HEAD"], cwd=ROOT, text=True
+    ).strip()
     dirty = subprocess.check_output(
-        ["git", "status", "--porcelain", "--untracked-files=normal"], cwd=ROOT
+        ["git", "--no-replace-objects", "status", "--porcelain", "--untracked-files=normal"],
+        cwd=ROOT,
     )
     if dirty:
         raise SystemExit("release requires clean committed source")
