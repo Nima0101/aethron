@@ -32,6 +32,55 @@ class WorkerCancellation(unittest.TestCase):
         )
         self.detector = Mock()
 
+    def test_pre_stopped_worker_never_dispatches(self):
+        self.stop.set()
+        for driver in ("file", "uvc", "rtsp", "replay", "sensor-replay", "sensor-ros"):
+            with self.subTest(driver=driver):
+                profile = Profile(
+                    name="cancel",
+                    driver=driver,
+                    address="unused",
+                    sensor_manifest="unused" if driver.startswith("sensor-") else None,
+                )
+                with (
+                    patch.object(pipeline, "own_descendants") as own,
+                    patch.object(pipeline, "_load_replay_rows") as replay,
+                    patch("aethron_edge.sensors.worker.replay_worker") as sensor,
+                    patch("aethron_edge.sensors.ros_worker.ros_worker") as ros,
+                    patch("aethron.vision.yolox.RGBDetector") as detector,
+                    patch.object(pipeline, "_InferenceStop") as watcher,
+                ):
+                    group = SimpleNamespace(value=0)
+                    pipeline._worker(
+                        profile, self.channel, self.stop, group, None, SimpleNamespace(value=0)
+                    )
+                own.assert_called_once_with(group)
+                for operation in (replay, sensor, ros, detector, watcher):
+                    operation.assert_not_called()
+                self.assertTrue(self.channel.empty())
+
+    def test_stop_during_native_setup_prevents_model_loading(self):
+        for provider in ("opencv", "coreml"):
+            with self.subTest(provider=provider):
+                self.setUp()
+                with (
+                    patch("cv2.setNumThreads", side_effect=lambda count: self.stop.set()),
+                    patch("aethron.vision.yolox.RGBDetector") as detector,
+                    patch.object(pipeline, "_InferenceStop") as watcher,
+                    patch.object(pipeline, "own_descendants"),
+                ):
+                    pipeline._worker(
+                        Profile(name="cancel", driver="file", address="unused", provider=provider),
+                        self.channel,
+                        self.stop,
+                        SimpleNamespace(value=0),
+                        None,
+                        SimpleNamespace(value=0),
+                    )
+                detector.assert_not_called()
+                watcher.assert_not_called()
+                self.assertTrue(self.channel.empty())
+
     def test_watcher_cancellation_failure_rejects_late_success_and_reuse(self):
         attempted = threading.Event()
 

@@ -168,6 +168,8 @@ def _worker(
         # Isolation must succeed before dispatch, but setup failures still use
         # the fixed worker fault boundary rather than a process traceback.
         own_descendants(group)
+        if stop.is_set():
+            return
         if profile.driver == "sensor-ros":
             from .sensors.ros_worker import ros_worker
 
@@ -216,6 +218,10 @@ def _worker(
         from .sources.uvc import UVCSource
 
         cv2.setNumThreads(1)
+        # Imports/native setup may outlast a stop request. Do not begin a new
+        # model load or watcher after shutdown has already been observed.
+        if stop.is_set():
+            return
         if profile.provider == "coreml":
             cancellation = _InferenceStop(stop)
             detector = cancellation.call(RGBDetector, profile.model, backend=profile.provider)
