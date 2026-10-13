@@ -326,3 +326,74 @@ class RecoveryScheduling(unittest.TestCase):
             if destination.is_dir():
                 destination.rmdir()
             runtime.shutdown()
+
+    def test_invalid_worker_latency_cannot_poison_shared_status(self):
+        for latency in (float("nan"), float("inf"), float("-inf"), "private", None, True, -1):
+            with self.subTest(latency=latency):
+                runtime, failed, healthy = self.make_runtime()
+                del failed.tick
+                process = failed.process
+                process.is_alive.return_value = True
+                # The fixture worker exits when joined; keep liveness valid
+                # until cleanup so the negative control cannot trigger restart.
+                process.join.side_effect = lambda process=process, **kwargs: setattr(
+                    process.is_alive, "return_value", False
+                )
+                failed.last_message_ns = self.now_ns
+                failed.channel = SimpleNamespace(
+                    get_nowait=Mock(
+                        return_value={"data": None, "reason": "model_error", "latency_ms": latency}
+                    ),
+                    overwritten=SimpleNamespace(value=0),
+                    rejected=SimpleNamespace(value=0),
+                )
+                try:
+                    with patch("aethron_edge.runtime.supervisor.RuntimePipeline") as replacement:
+                        status = runtime.tick(self.now_ns)
+                        self.assertEqual(status["state"], "fault")
+                        self.assertEqual(status["fault_count"], 1)
+                        self.assertEqual(status["last_processing_ms"], 0)
+                        self.assertEqual(failed.processed, 0)
+                        self.assertEqual(runtime.snapshot("failed")["state"], "UNKNOWN")
+                        self.assertEqual(runtime.snapshot("failed")["tracks"], [])
+                        runtime.maintenance[0].join(timeout=2)
+                        self.assertFalse(runtime.maintenance[0].is_alive())
+                        self.assertIsNone(failed.process)
+                        runtime.tick(self.now_ns + 1_000_000_000)
+                        self.assertEqual(healthy.tick.call_count, 2)
+                        failed.channel.get_nowait.assert_called_once_with()
+                        replacement.assert_not_called()
+                        published = Path(runtime.config.status_file).read_text()
+                        self.assertNotIn("private", published)
+                        self.assertEqual(json.loads(published)["state"], "fault")
+                finally:
+                    # Pre-fix failures poison status; restore only the diagnostic
+                    # scalar so teardown does not mask the original counterexample.
+                    failed.last_latency_ms = 0
+                    if failed.process is not None:
+                        failed.process.is_alive.return_value = False
+                    runtime.shutdown()
+
+    def test_finite_worker_latency_remains_accepted(self):
+        for latency in (0, 1, 0.125):
+            with self.subTest(latency=latency):
+                runtime, pipeline, healthy = self.make_runtime()
+                del pipeline.tick
+                pipeline.process.is_alive.return_value = True
+                pipeline.channel = SimpleNamespace(
+                    get_nowait=Mock(
+                        return_value={"data": None, "reason": "model_error", "latency_ms": latency}
+                    ),
+                    overwritten=SimpleNamespace(value=0),
+                    rejected=SimpleNamespace(value=0),
+                )
+                try:
+                    status = runtime.tick(self.now_ns)
+                    self.assertEqual(status["state"], "running")
+                    self.assertEqual(status["last_processing_ms"], latency)
+                    self.assertEqual(pipeline.processed, 1)
+                    self.assertEqual(runtime.maintenance, [])
+                    healthy.tick.assert_called_once_with(self.now_ns)
+                finally:
+                    pipeline.process.is_alive.return_value = False
+                    runtime.shutdown()

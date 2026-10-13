@@ -2,6 +2,7 @@
 
 import copy
 import json
+import math
 import multiprocessing as mp
 import os
 import queue
@@ -403,6 +404,12 @@ class RuntimePipeline:
                 return self.snapshot(now_ns)
             if message.get("sensor_generation") != self.ros_grant.generation:
                 return self.snapshot(now_ns)
+        # Reject invalid worker diagnostics before mutating parent state. A
+        # nonfinite/nonnumeric latency can otherwise escape profile isolation
+        # later during aggregate status comparison or strict JSON publication.
+        latency_ms = message["latency_ms"]
+        if type(latency_ms) not in (int, float) or not math.isfinite(latency_ms) or latency_ms < 0:
+            raise ValueError("invalid_worker_latency")
         if self.profile.driver in {"sensor-replay", "sensor-ros"}:
             observed_batches = message.get("sensor_batches", self.worker_sensor_batches)
             self.sensor_batches += max(0, observed_batches - self.worker_sensor_batches)
@@ -414,7 +421,7 @@ class RuntimePipeline:
         self.processed += 1
         self.last_message_ns = now_ns
         self.reason = message["reason"]
-        self.last_latency_ms = message["latency_ms"]
+        self.last_latency_ms = latency_ms
         if message["data"] is not None:
             self.last_latency_ms = max(0, now_ns / 1e6 - json.loads(message["data"])["at_ms"])
         self.proposal_count = message.get("proposal_count", 0)
