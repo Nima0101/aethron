@@ -154,10 +154,19 @@ class ApplianceSupervisor:
                 with self.lock:
                     self.recovering.discard(name)
 
-        task = threading.Thread(target=work, name="aethron-recovery", daemon=True)
-        self.maintenance = [t for t in self.maintenance if t.is_alive()]
-        self.maintenance.append(task)
-        task.start()
+        try:
+            task = threading.Thread(target=work, name="aethron-recovery", daemon=True)
+            self.maintenance = [t for t in self.maintenance if t.is_alive()]
+            task.start()
+        except Exception:
+            # Scheduling itself can fail before work() owns cleanup. Keep the
+            # original pipeline for shutdown, latch its fault and let the shared
+            # watchdog continue. Never join an unstarted recovery thread.
+            self.faults.add(name)
+            self.recovering.discard(name)
+        else:
+            # The caller holds self.lock, so shutdown cannot miss a started task.
+            self.maintenance.append(task)
 
     def status(self, now_ns):
         telemetry = {name: source.snapshot() for name, source in self.telemetry.items()}

@@ -18,6 +18,7 @@ on:
       - 'tests/integration/test_worker_shutdown.py'
       - 'integrations/edge/aethron_edge/runtime/supervisor.py'
       - 'tests/integration/test_appliance_shutdown.py'
+      - 'tests/integration/test_recovery_scheduling.py'
       - 'requirements-coreml.txt'
       - 'requirements-vision.txt'
       - '.github/workflows/aethron-provider-boundary.yml'
@@ -40,6 +41,7 @@ on:
       - 'tests/integration/test_worker_shutdown.py'
       - 'integrations/edge/aethron_edge/runtime/supervisor.py'
       - 'tests/integration/test_appliance_shutdown.py'
+      - 'tests/integration/test_recovery_scheduling.py'
       - 'requirements-coreml.txt'
       - 'requirements-vision.txt'
       - '.github/workflows/aethron-provider-boundary.yml'
@@ -92,8 +94,9 @@ jobs:
           suite.addTests(unittest.defaultTestLoader.discover('tests/integration', pattern='test_worker_tree.py'))
           suite.addTests(unittest.defaultTestLoader.discover('tests/integration', pattern='test_worker_shutdown.py'))
           suite.addTests(unittest.defaultTestLoader.discover('tests/integration', pattern='test_appliance_shutdown.py'))
+          suite.addTests(unittest.defaultTestLoader.discover('tests/integration', pattern='test_recovery_scheduling.py'))
           result = unittest.TextTestRunner(verbosity=2).run(suite)
-          if not result.wasSuccessful() or result.testsRun != 28 or result.skipped or result.expectedFailures:
+          if not result.wasSuccessful() or result.testsRun != 32 or result.skipped or result.expectedFailures:
               raise SystemExit('worker cancellation coverage incomplete')
           " > build/provider/worker-cancellation.txt 2>&1
       - name: Build and install optional bounded CPU validator
