@@ -338,8 +338,10 @@ class RGBDetector:
             stride = float(self.strides[idx])
             # Finite model values can still overflow during decoding. Reject
             # before clipping can disguise that failure as an offscreen box.
+            # Underflow instead preserves valid float32 centres near zero;
+            # isolate it from caller policy without changing the geometry.
             try:
-                with np.errstate(over="raise", invalid="raise"):
+                with np.errstate(over="raise", invalid="raise", under="ignore"):
                     cx, cy = (values[idx, :2] + self.grids[idx]) * stride / scale
             except FloatingPointError:
                 raise ValueError("invalid_input") from None

@@ -5,6 +5,7 @@ import importlib.util
 import random
 import sys
 import unittest
+import warnings
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -123,6 +124,61 @@ class VisionOutput(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "^invalid_input$"):
                     self.infer(raw)
         nms.assert_not_called()
+
+    def test_tiny_centres_preserve_clipped_geometry_across_caller_policies(self):
+        np = self.np
+        for column in (0, 1):
+            for sign in (-1, 1):
+                for tiny in (np.finfo(np.float32).smallest_subnormal, np.finfo(np.float32).tiny):
+                    raw = self.output()
+                    raw[0, 0, 4:6] = 1
+                    raw[0, 0, column] = sign * tiny
+                    for data in (raw, np.asfortranarray(raw)):
+                        with np.errstate(under="ignore"):
+                            expected = self.infer(data)
+                        self.assertEqual(len(expected), 1)
+                        self.assertEqual(expected[0]["class"], "person")
+                        box = expected[0]["box"]
+                        self.assertEqual(box[column], 0)
+                        self.assertAlmostEqual(box[column + 2], 0.00625, places=8)
+                        for policy in ("warn", "raise"):
+                            with self.subTest(axis=column, sign=sign, tiny=tiny, policy=policy):
+                                with np.errstate(all="raise", under=policy):
+                                    before = np.geterr()
+                                    with warnings.catch_warnings(record=True) as caught:
+                                        warnings.simplefilter("always")
+                                        self.assertEqual(self.infer(data), expected)
+                                    self.assertEqual(caught, [])
+                                    self.assertEqual(np.geterr(), before)
+
+    def test_decode_underflow_is_local_and_later_overflow_still_withdraws_result(self):
+        np = self.np
+        raw = self.output()
+        raw[0, 0, 0] = np.finfo(np.float32).smallest_subnormal
+        raw[0, 0, 4:6] = 1
+        calls = []
+
+        def callback(*args):
+            calls.append(args)
+
+        with np.errstate(all="call", call=callback):
+            before = np.geterr()
+            self.assertEqual(len(self.infer(raw)), 1)
+            self.assertEqual(calls, [])
+            # A subsequent overflowing candidate must still withdraw the first.
+            raw[0, 1, 0] = np.finfo(np.float32).max
+            raw[0, 1, 4:6] = 1
+            with patch.object(self.detector.cv.dnn, "NMSBoxes") as nms:
+                with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                    self.infer(raw)
+            nms.assert_not_called()
+            self.assertEqual(calls, [])
+            self.assertEqual(np.geterr(), before)
+            self.assertIs(np.geterrcall(), callback)
+            # The caller's handler remains active outside the decoder.
+            np.array([np.finfo(np.float32).smallest_subnormal]) / np.float32(2)
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(calls[0][0], "underflow")
 
     def test_finite_offscreen_centres_remain_empty(self):
         for column in (0, 1):
