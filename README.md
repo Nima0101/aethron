@@ -92,6 +92,15 @@ The frozen AOT excerpt contains tiny **fixed-wing aircraft**, not verified drone
 
 LWIR/RGB-T/radar/depth semantic adapters and zero-light fusion are implemented and synthetically tested. Representative physical thermal data, trained thermal/UAV weights, calibrated uncertainty, power/range/latency and device/controller validation remain explicit qualification gaps. No phone, vehicle, drone or sensor is declared production-supported. [Capability matrix](docs/architecture/capabilities-v3.md) · [Hardware evidence](docs/verification/hardware.md).
 
+## Offline capability passports
+
+The optional [passport verifier](examples/passports/README.md) authenticates bounded,
+self-declared software capability statements using Ed25519 and a separately provisioned
+trust policy. It checks expiry, revocation, artifact binding and caller-supplied rollback
+floors. [Portable positive and negative fixtures](examples/passports/vectors.json) retain
+failed evidence. A valid signature grants no motion authority and establishes neither
+evidence truth, accreditation nor hardware qualification.
+
 ## Reproduce the candidate
 
 ```sh
