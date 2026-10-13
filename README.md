@@ -33,6 +33,7 @@ Original synthetic scene, **actual CLI output**. The slowed replay shows dayligh
 Python 3.9+; no runtime dependencies for the core. From this checkout:
 
 ```sh
+python3 -m pip install --only-binary=:all: --require-hashes -r requirements-links.lock
 python3 scripts/verify.py
 python3 -m aethron replay examples/temporal-blackout.jsonl
 python3 scripts/temporal_evaluate.py --out build/v3-registered
