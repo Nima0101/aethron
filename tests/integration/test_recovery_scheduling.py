@@ -185,3 +185,72 @@ class RecoveryScheduling(unittest.TestCase):
 
     def test_started_recovery_failure_retires_unpublished_replacement(self):
         self.exercise_started_failure(shutdown=False)
+
+    def exercise_tick_failure(self, *, malformed=False, cleanup_failure=False):
+        runtime, failed, healthy = self.make_runtime()
+        # Exercise the real parent message path with an existing PRESENT scene.
+        del failed.tick
+        failed.channel = SimpleNamespace(
+            get_nowait=Mock(return_value={} if malformed else None),
+            overwritten=SimpleNamespace(value=0),
+            rejected=SimpleNamespace(value=0),
+        )
+        if not malformed:
+            failed.channel.get_nowait.side_effect = OSError("private mailbox diagnostic")
+        process = failed.process
+        entered, release = threading.Event(), threading.Event()
+        stop_worker = failed.stop_worker
+
+        def slow_cleanup():
+            entered.set()
+            if not release.wait(5):
+                raise TimeoutError("test did not release cleanup")
+            if cleanup_failure:
+                raise OSError("private cleanup diagnostic")
+            stop_worker()
+
+        try:
+            with (
+                patch.object(failed, "stop_worker", side_effect=slow_cleanup),
+                patch("aethron_edge.runtime.supervisor.RuntimePipeline") as replacement,
+            ):
+                status = runtime.tick(self.now_ns)
+                self.assertEqual(status["state"], "fault")
+                self.assertTrue(entered.wait(2))
+                self.assertIn("failed", runtime.faults)
+                # Withdrawal cannot wait for a slow or unsuccessful reap.
+                scene = runtime.snapshot("failed")
+                self.assertEqual(scene["state"], "UNKNOWN")
+                self.assertEqual(scene["tracks"], [])
+                self.assertIsNone(scene["evidence"])
+                self.assertEqual(failed.sensor_expires_ns, 0)
+                runtime.tick(self.now_ns + 3_000_000_000)
+                self.assertEqual(healthy.tick.call_count, 2)
+                failed.channel.get_nowait.assert_called_once_with()
+                self.assertEqual(len(runtime.maintenance), 1)
+                self.assertEqual(list(runtime.restarts["failed"]), [])
+                release.set()
+                runtime.maintenance[0].join(timeout=2)
+                self.assertFalse(runtime.maintenance[0].is_alive())
+                self.assertEqual(runtime.recovering, set())
+                replacement.assert_not_called()
+                self.assertIs(runtime.pipelines["failed"], failed)
+                if cleanup_failure:
+                    self.assertIs(failed.process, process)
+                else:
+                    self.assertIsNone(failed.process)
+                self.assertNotIn("private", Path(runtime.config.status_file).read_text())
+        finally:
+            release.set()
+            runtime.shutdown()
+        self.assertIsNone(failed.process)
+        process.close.assert_called_once_with()
+
+    def test_mailbox_read_error_withdraws_scene_and_preserves_other_profiles(self):
+        self.exercise_tick_failure()
+
+    def test_malformed_worker_message_isolated_without_restart(self):
+        self.exercise_tick_failure(malformed=True)
+
+    def test_tick_fault_preserves_worker_ownership_after_failed_cleanup(self):
+        self.exercise_tick_failure(cleanup_failure=True)

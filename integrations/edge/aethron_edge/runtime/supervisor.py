@@ -81,7 +81,16 @@ class ApplianceSupervisor:
             for name, p in list(self.pipelines.items()):
                 if name in self.recovering or name in self.faults:
                     continue
-                p.tick(now_ns)
+                try:
+                    p.tick(now_ns)
+                except Exception:
+                    # A failed message/read is not fresh evidence and must not
+                    # stop supervision of other profiles. Retire this scene
+                    # immediately, then reap outside the watchdog without retry
+                    # or publication of potentially private exception details.
+                    self.faults.add(name)
+                    self._recover(name, p, restart=False)
+                    continue
                 if p.ros_guard is not None and p.ros_guard.closed:
                     # A revoked boot authority cannot recover through a worker
                     # restart. Withdraw immediately and reap outside the watchdog.
