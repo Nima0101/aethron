@@ -17,6 +17,55 @@ from scripts import reproduce
 
 
 class ReproductionReport(unittest.TestCase):
+    def test_replacement_refs_cannot_hide_changed_source(self):
+        for kind in ("commit", "tree"):
+            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as directory:
+                clone = Path(directory)
+
+                def git(*args, clone=clone):
+                    return subprocess.check_output(
+                        [
+                            "git",
+                            "-c",
+                            "user.name=Reproduction Fixture",
+                            "-c",
+                            "user.email=fixture@example.invalid",
+                            "-c",
+                            "commit.gpgsign=false",
+                            "-c",
+                            "core.hooksPath=" + str(clone / "no-hooks"),
+                            *args,
+                        ],
+                        cwd=clone,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                        timeout=5,
+                    ).strip()
+
+                git("init", "--quiet")
+                source = clone / "source.txt"
+                source.write_bytes(b"original source\n")
+                git("add", "source.txt")
+                git("commit", "--quiet", "-m", "original source")
+                revision = git("rev-parse", "HEAD")
+                original = git("rev-parse", "HEAD^{tree}") if kind == "tree" else revision
+                source.write_bytes(b"replacement source\n")
+                git("add", "source.txt")
+                git("commit", "--quiet", "-m", "replacement source")
+                replacement = git("rev-parse", "HEAD^{tree}" if kind == "tree" else "HEAD")
+                git("reset", "--hard", revision)
+                git("replace", original, replacement)
+
+                # Merely having a replacement ref must not reject original source.
+                with self.subTest(source="original"):
+                    reproduce.validate_source(clone, revision)
+                git("read-tree", "--reset", "-u", "HEAD")
+                self.assertEqual(source.read_bytes(), b"replacement source\n")
+                self.assertEqual(git("rev-parse", "HEAD"), revision)
+                self.assertEqual(git("status", "--porcelain"), "")
+                with self.assertRaisesRegex(ValueError, "^reproduction_source_changed$"):
+                    reproduce.validate_source(clone, revision)
+
     def test_source_validation_with_real_git_changes(self):
         for mutation in (None, "ignored", "modified", "deleted", "staged", "untracked", "revision"):
             with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as directory:
@@ -216,9 +265,15 @@ class ReproductionReport(unittest.TestCase):
             return subprocess.CompletedProcess(args, 0)
 
         def git_output(args, **kwargs):
-            if args == ["git", "rev-parse", "HEAD"]:
+            if args == ["git", "--no-replace-objects", "rev-parse", "HEAD"]:
                 return clone_revision + "\n"
-            if args == ["git", "status", "--porcelain", "--untracked-files=normal"]:
+            if args == [
+                "git",
+                "--no-replace-objects",
+                "status",
+                "--porcelain",
+                "--untracked-files=normal",
+            ]:
                 return source_status
             self.fail(f"Unexpected Git request: {args}")
 

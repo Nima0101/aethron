@@ -35,9 +35,13 @@ def validate_artifacts(directory, manifest):
 
 def validate_source(clone, revision):
     """Bind sequential checks to one clean revision, excluding ignored build outputs."""
-    current = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=clone, text=True).strip()
+    current = subprocess.check_output(
+        ["git", "--no-replace-objects", "rev-parse", "HEAD"], cwd=clone, text=True
+    ).strip()
+    # Compare the original tree named by evidence, as the release builder does.
     dirty = subprocess.check_output(
-        ["git", "status", "--porcelain", "--untracked-files=normal"], cwd=clone
+        ["git", "--no-replace-objects", "status", "--porcelain", "--untracked-files=normal"],
+        cwd=clone,
     )
     if current != revision or dirty:
         raise ValueError("reproduction_source_changed")
@@ -63,7 +67,7 @@ def run():
         clone = root / "source"
         call(["git", "clone", "--no-local", str(ROOT), str(clone)], ROOT, capture_output=True)
         revision = subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=clone, text=True
+            ["git", "--no-replace-objects", "rev-parse", "HEAD"], cwd=clone, text=True
         ).strip()
         validate_source(clone, revision)
         # Quickstart commands as documented, with the active Python interpreter.
