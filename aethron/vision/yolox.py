@@ -353,6 +353,16 @@ class RGBDetector:
         for category in sorted({v[0] for v in candidates}):
             group = [v for v in candidates if v[0] == category]
             indices = cv.dnn.NMSBoxes([v[1] for v in group], [v[2] for v in group], 0.35, 0.5)
+            # The pinned binding returns an empty tuple or a flat vector<int>.
+            # Validate before indexing: Python accepts negative indices and int()
+            # would silently truncate malformed native floating-point values.
+            if type(indices) is tuple:
+                require(len(indices) == 0)
+            else:
+                require(type(indices) is np.ndarray and indices.dtype == np.int32)
+                require(indices.ndim == 1 and indices.size <= len(group))
+                require(bool(((indices >= 0) & (indices < len(group))).all()))
+                require(len(set(indices.tolist())) == indices.size)
             keep.extend(group[int(i)] for i in indices)
         keep.sort(key=lambda v: (-v[2], v[0], v[1]))
         return [

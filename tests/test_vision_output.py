@@ -132,6 +132,92 @@ class VisionOutput(unittest.TestCase):
             for actual, expected in zip(detection["box"], (0, 0, 0.00625, 0.00625)):
                 self.assertAlmostEqual(actual, expected, places=8)
 
+    def test_nms_rejects_negative_out_of_range_and_duplicate_indices(self):
+        np = self.np
+        raw = self.output()
+        raw[0, :2, :2] = ((4, 4), (20, 20))
+        raw[0, :2, 4:6] = 1
+        for values in ([-1], [2], [0, 0], [0, 1, 0], [0, 2]):
+            with self.subTest(indices=values):
+                indices = np.array(values, dtype=np.int32)
+                with patch.object(self.detector.cv.dnn, "NMSBoxes", return_value=indices) as nms:
+                    with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                        self.infer(raw)
+                nms.assert_called_once()
+
+    def test_nms_rejects_malformed_native_index_containers(self):
+        np = self.np
+        raw = self.output()
+        raw[0, 0, 4:6] = 1
+        invalid = (
+            None,
+            [0],
+            (0,),
+            "0",
+            {},
+            np.array(0, dtype=np.int32),
+            np.array([[0]], dtype=np.int32),
+            np.array([False]),
+            np.array([0.9], dtype=np.float32),
+            np.array([0], dtype=np.int64),
+            np.array([0], dtype=object),
+            np.array([], dtype=np.float32),
+        )
+        for indices in invalid:
+            with self.subTest(container=type(indices), dtype=getattr(indices, "dtype", None)):
+                with patch.object(self.detector.cv.dnn, "NMSBoxes", return_value=indices):
+                    with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                        self.infer(raw)
+
+    def test_late_nms_rejection_withdraws_previously_selected_class(self):
+        np = self.np
+        raw = self.output()
+        raw[0, :2, :2] = 4
+        raw[0, :2, 4] = 1
+        raw[0, 0, 5] = 1  # Person group succeeds first.
+        raw[0, 1, 7] = 1  # Vehicle group returns an invalid local index.
+        results = [np.array([0], dtype=np.int32), np.array([-1], dtype=np.int32)]
+        with patch.object(self.detector.cv.dnn, "NMSBoxes", side_effect=results) as nms:
+            with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                self.infer(raw)
+        self.assertEqual(nms.call_count, 2)
+
+    def test_nms_empty_results_and_existing_score_boundary_are_preserved(self):
+        np = self.np
+        raw = self.output()
+        raw[0, 0, 4:6] = 1
+        for indices in ((), np.array([], dtype=np.int32)):
+            with patch.object(self.detector.cv.dnn, "NMSBoxes", return_value=indices):
+                self.assertEqual(self.infer(raw), [])
+        # Keep the pinned native strict score comparison, including float32
+        # rounding at 0.35; index admission must not tune the frozen threshold.
+        raw[0, 0, 5] = np.float32(0.35)
+        self.assertEqual(self.infer(raw), [])
+        raw[0, 0, 5] = np.nextafter(np.float32(0.35), np.float32(1))
+        self.assertEqual(len(self.infer(raw)), 1)
+
+    def test_nms_error_propagates_once_without_retry(self):
+        raw = self.output()
+        raw[0, 0, 4:6] = 1
+        error = RuntimeError("injected NMS failure")
+        with patch.object(self.detector.cv.dnn, "NMSBoxes", side_effect=error) as nms:
+            with self.assertRaises(RuntimeError) as caught:
+                self.infer(raw)
+        self.assertIs(caught.exception, error)
+        nms.assert_called_once()
+
+    def test_native_nms_preserves_score_order_and_final_detection_bound(self):
+        raw = self.output()
+        for row in range(40):
+            raw[0, row, :2] = (4 + 10 * (row % 8), 4 + 10 * (row // 8))
+            raw[0, row, 4] = 1
+            raw[0, row, 5] = 0.4 + row * 0.01
+        detections = self.infer(raw)
+        self.assertEqual(len(detections), 32)
+        self.assertEqual([d["score"] for d in detections], raw[0, 8:40, 5][::-1].tolist())
+        self.assertTrue(all(d["class"] == "person" for d in detections))
+        self.assertEqual(len({tuple(d["box"]) for d in detections}), 32)
+
     def test_seeded_probability_mutations_raise_fixed_error(self):
         rng = random.Random(20261010)
         np = self.np
