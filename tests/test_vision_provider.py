@@ -438,15 +438,15 @@ class VisionProvider(unittest.TestCase):
     def test_cancellation_during_preprocessing_never_submits_pixels(self):
         detector = self.detector()
         cancellation = yolox.InferenceCancellation()
-        pack = self.np.ascontiguousarray
+        pack = yolox._packed_rgb
 
-        def cancel_after_packing(canvas, **kwargs):
-            tensor = pack(canvas, **kwargs)
+        def cancel_after_packing(canvas):
+            tensor = pack(canvas)
             cancellation.cancel()
             return tensor
 
         with (
-            patch.object(self.np, "ascontiguousarray", side_effect=cancel_after_packing),
+            patch.object(yolox, "_packed_rgb", side_effect=cancel_after_packing),
             patch.object(self.session, "run", return_value=[]) as run,
         ):
             with self.assertRaisesRegex(yolox.InferenceCancelled, "^inference_cancelled$"):

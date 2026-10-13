@@ -85,3 +85,49 @@ class OutputBounds(unittest.TestCase):
                 )
                 self.assertEqual(validate_output(self.raw), expected)
                 bits_view[0, 8399, column] = 0
+
+
+class RGBPacking(unittest.TestCase):
+    def setUp(self):
+        import aethron_vision_native
+
+        self.pack = getattr(aethron_vision_native, "pack_rgb", None)
+        self.assertIsNotNone(self.pack, "build/install native RGB packing")
+        self.source = np.zeros((640, 640, 3), dtype=np.uint8)
+        self.output = np.empty((1, 3, 640, 640), dtype=np.float32)
+
+    def test_channels_readonly_source_and_unaligned_output(self):
+        self.source[:] = (17, 89, 203)
+        self.source.setflags(write=False)
+        output = np.ndarray(
+            self.output.shape, dtype=np.float32, buffer=bytearray(self.output.nbytes + 1), offset=1
+        )
+        self.assertIs(self.pack(self.source, output), True)
+        for channel, expected in enumerate((17, 89, 203)):
+            self.assertTrue((output[0, channel] == expected).all())
+
+    def test_invalid_metadata_or_alias_never_writes(self):
+        storage = bytearray(self.output.nbytes)
+        aliased_source = np.ndarray(self.source.shape, dtype=np.uint8, buffer=storage)
+        aliased_output = np.ndarray(self.output.shape, dtype=np.float32, buffer=storage)
+        for source, output in (
+            (self.source[:, ::-1], self.output),
+            (self.source.astype(np.uint16), self.output),
+            (self.source, self.output.astype(np.float64)),
+            (self.source, self.output.reshape(3, 640, 640)),
+            (aliased_source, aliased_output),
+        ):
+            before = output.tobytes()
+            with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                self.pack(source, output)
+            self.assertEqual(output.tobytes(), before)
+        self.output.setflags(write=False)
+        with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+            self.pack(self.source, self.output)
+
+    def test_pattern_parity_and_buffer_release(self):
+        self.source[:] = np.arange(640, dtype=np.uint16)[None, :, None].astype(np.uint8)
+        expected = np.ascontiguousarray(self.source.transpose(2, 0, 1)[None], dtype=np.float32)
+        self.pack(self.source, self.output)
+        np.testing.assert_array_equal(self.output, expected)
+        self.output.resize((3 * 640 * 640,), refcheck=True)

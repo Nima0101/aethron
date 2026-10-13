@@ -11,7 +11,7 @@ setup(
             ["aethron_vision_native/bounds.c"],
             define_macros=[("Py_LIMITED_API", "0x030b0000")],
             py_limited_api=True,
-            extra_compile_args=["/O2", "/fp:strict"]
+            extra_compile_args=["/std:c11", "/O2", "/fp:strict"]
             if sys.platform == "win32"
             else [
                 "-std=c11",

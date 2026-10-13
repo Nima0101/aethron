@@ -6,6 +6,8 @@ on:
       - 'tests/test_vision*.py'
       - 'integrations/native-vision/**'
       - 'scripts/vision_admission_audit.py'
+      - 'scripts/vision_preprocess_audit.py'
+      - 'tests/probes/vision_pack.c'
       - 'integrations/edge/aethron_edge/pipeline.py'
       - 'tests/integration/test_worker_cancellation.py'
       - 'requirements-coreml.txt'
@@ -18,6 +20,8 @@ on:
       - 'tests/test_vision*.py'
       - 'integrations/native-vision/**'
       - 'scripts/vision_admission_audit.py'
+      - 'scripts/vision_preprocess_audit.py'
+      - 'tests/probes/vision_pack.c'
       - 'integrations/edge/aethron_edge/pipeline.py'
       - 'tests/integration/test_worker_cancellation.py'
       - 'requirements-coreml.txt'
@@ -72,6 +76,10 @@ jobs:
           python -m unittest discover -s integrations/native-vision/tests -p test_bounds.py -v > build/provider/native-tests.txt 2>&1
           python -m unittest discover -s tests -p 'test_vision*.py' -v > build/provider/native-vision-tests.txt 2>&1
           python -m scripts.vision_admission_audit > build/provider/native-admission-profile.json
+      - name: Bounded preprocessing parity and comparison
+        run: |
+          cc -std=c11 -O3 -fno-fast-math -Wall -Wextra -Werror -shared -fPIC tests/probes/vision_pack.c -o build/provider/vision-pack-probe.so
+          python -m scripts.vision_preprocess_audit --probe build/provider/vision-pack-probe.so > build/provider/preprocess-profile.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

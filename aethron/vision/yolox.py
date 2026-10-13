@@ -99,6 +99,26 @@ def _ort_tensor_name(nodes, expected_shape):
     return name
 
 
+def _packed_rgb(canvas):
+    """Use packing contract 1 when installed; older validators remain compatible."""
+    import numpy as np
+
+    try:
+        import aethron_vision_native as native
+    except ModuleNotFoundError as error:
+        if error.name != "aethron_vision_native":
+            raise
+    else:
+        require(native.CONTRACT_VERSION == 1)
+        version = getattr(native, "PACK_CONTRACT_VERSION", None)
+        if version is not None:
+            require(type(version) is int and version == 1)
+            tensor = np.empty((1, 3, 640, 640), dtype=np.float32)
+            require(native.pack_rgb(canvas, tensor) is True)
+            return tensor
+    return np.ascontiguousarray(canvas.transpose(2, 0, 1)[None], dtype=np.float32)
+
+
 def _validated_output(raw):
     """Admit the pinned float tensor before any confidence arithmetic."""
     import numpy as np
@@ -245,7 +265,7 @@ class RGBDetector:
         resized = cv.resize(rgb, (resize_width, resize_height), interpolation=cv.INTER_LINEAR)
         canvas = np.full((640, 640, 3), 114, dtype=np.uint8)
         canvas[: resized.shape[0], : resized.shape[1]] = resized
-        tensor = np.ascontiguousarray(canvas.transpose(2, 0, 1)[None], dtype=np.float32)
+        tensor = _packed_rgb(canvas)
         if self.backend == "coreml":
             # Reassert the application policy if fallback was enabled between calls.
             self.ort_session.disable_fallback()
