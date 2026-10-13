@@ -5,6 +5,7 @@ import builtins
 import json
 import signal
 import tempfile
+import threading
 import time
 import unittest
 from pathlib import Path
@@ -34,6 +35,71 @@ def config(directory):
 
 
 class Startup(unittest.TestCase):
+    def exercise_watchdog_start_failure(self, *, started):
+        from aethron_edge.pipeline import RuntimePipeline
+        from aethron_edge.runtime.entrypoint import run
+
+        runtime = ApplianceSupervisor()
+        workers = []
+        start = RuntimePipeline.start
+        start_thread = threading.Thread.start
+        failure = RuntimeError("test-only watchdog scheduling failure")
+
+        def start_worker(pipeline):
+            start(pipeline)
+            workers.append(pipeline.process)
+
+        def fail_start(task):
+            if started:
+                start_thread(task)
+            raise failure
+
+        handlers = {s: signal.getsignal(s) for s in (signal.SIGINT, signal.SIGTERM)}
+        with tempfile.TemporaryDirectory() as directory:
+            settings = config(directory)
+            with (
+                patch("aethron_edge.runtime.entrypoint.ApplianceSupervisor", return_value=runtime),
+                patch.object(RuntimePipeline, "start", start_worker),
+                patch.object(threading.Thread, "start", fail_start),
+            ):
+                with self.assertRaises(RuntimeError) as caught:
+                    run(settings)
+            # Real spawned worker ownership must survive the later scheduling
+            # failure; cleanup must not replace it with an unstarted-join error.
+            self.assertTrue(workers)
+            self.assertTrue(all(worker._closed for worker in workers))
+            self.assertTrue(all(p.process is None for p in runtime.pipelines.values()))
+            self.assertIs(caught.exception, failure)
+            if started:
+                self.assertIsNotNone(runtime.thread)
+                self.assertFalse(runtime.thread.is_alive())
+            else:
+                self.assertIsNone(runtime.thread)
+            runtime.shutdown()
+            self.assertEqual(json.loads(Path(settings.status_file).read_text())["state"], "stopped")
+        for sig, handler in handlers.items():
+            self.assertIs(signal.getsignal(sig), handler)
+
+    def test_watchdog_start_failure_preserves_boot_error_and_reaps_workers(self):
+        self.exercise_watchdog_start_failure(started=False)
+
+    def test_watchdog_started_before_error_retains_cleanup_ownership(self):
+        self.exercise_watchdog_start_failure(started=True)
+
+    def test_watchdog_construction_failure_remains_cleanable(self):
+        runtime = ApplianceSupervisor()
+        failure = RuntimeError("test-only watchdog construction failure")
+        with tempfile.TemporaryDirectory() as directory:
+            settings = config(directory)
+            with patch("aethron_edge.runtime.supervisor.threading.Thread", side_effect=failure):
+                with self.assertRaises(RuntimeError) as caught:
+                    runtime.boot(settings)
+            workers = [p.process for p in runtime.pipelines.values()]
+            runtime.shutdown()
+            self.assertIs(caught.exception, failure)
+            self.assertIsNone(runtime.thread)
+            self.assertTrue(all(worker._closed for worker in workers))
+
     def exercise(self, outcome):
         from aethron_edge.runtime.entrypoint import run
 

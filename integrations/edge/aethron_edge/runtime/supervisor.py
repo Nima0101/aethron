@@ -62,7 +62,14 @@ class ApplianceSupervisor:
         for pipeline in self.pipelines.values():
             pipeline.start()
         self.thread = threading.Thread(target=self._loop, name="aethron-watchdog", daemon=True)
-        self.thread.start()
+        try:
+            self.thread.start()
+        except Exception:
+            # A thread that never started cannot be joined. Preserve ownership
+            # if it did start, including a thread that has already finished.
+            if self.thread.ident is None:
+                self.thread = None
+            raise
         return self.status(time.monotonic_ns())
 
     def _loop(self):
