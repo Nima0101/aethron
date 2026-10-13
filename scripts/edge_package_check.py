@@ -12,13 +12,80 @@ import time
 import urllib.request
 from pathlib import Path
 
+# The evidence below depends on assertions; optimized execution cannot qualify it.
+if sys.flags.optimize:
+    raise SystemExit("package_check_requires_assertions")
+
+if __package__:
+    from . import package_check
+else:
+    import package_check
+
 ROOT = Path(__file__).resolve().parents[1]
+
+# unittest success alone permits skipped tests and expected failures. These
+# installed-suite claims require nonempty, entirely passing selected suites.
+_INSTALLED_TEST_RUNNER = """
+import sys
+import unittest
+
+suite = unittest.defaultTestLoader.discover(sys.argv[1], pattern=sys.argv[2])
+result = unittest.TextTestRunner(verbosity=2).run(suite)
+complete = (result.testsRun > 0 and result.wasSuccessful()
+            and not result.skipped and not result.expectedFailures)
+if not complete:
+    print("installed_suite_incomplete", file=sys.stderr)
+    sys.exit(1)
+"""
+
+
+def verify_installed_console(python: Path, work: Path, env):
+    console = python.with_name("aethron-edge.exe" if os.name == "nt" else "aethron-edge")
+    console_env = dict(env, PYTHONNOUSERSITE="1")
+    for variable in ("PYTHONPATH", "PYTHONHOME"):
+        console_env.pop(variable, None)
+    result = subprocess.run(
+        [str(console), "--help"],
+        cwd=work,
+        env=console_env,
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if not result.stdout.strip():
+        raise ValueError("installed_console_help_empty")
 
 
 def run(wheelhouse: Path, output: Path, vision: bool = False):
-    output.mkdir(parents=True, exist_ok=True)
+    # Preserve earlier evidence and prevent a failed attempt from reusing its report.
+    output.mkdir(parents=True, exist_ok=False)
+    # Observations of selected files, not a complete or immutable build snapshot.
+    input_names = [
+        "scripts/edge_package_check.py",
+        "scripts/package_check.py",
+        "pyproject.toml",
+        "integrations/edge/pyproject.toml",
+        "integrations/edge/requirements-server.lock",
+    ]
+    if vision:
+        input_names.append("integrations/edge/requirements-vision.lock")
+    input_hashes = {
+        name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in input_names
+    }
+    payloads = {
+        "aethron": package_check.snapshot_source_payload(ROOT),
+        "aethron-edge": package_check.snapshot_source_payload(
+            ROOT / "integrations/edge", "aethron_edge"
+        ),
+    }
+    source_manifests = {
+        distribution: {name: hashlib.sha256(data).hexdigest() for name, data in payload.items()}
+        for distribution, payload in payloads.items()
+    }
     env = dict(os.environ, SOURCE_DATE_EPOCH="1767225600", PIP_DISABLE_PIP_VERSION_CHECK="1")
-    env.pop("PYTHONPATH", None)
+    for variable in ("PYTHONPATH", "PYTHONHOME"):
+        env.pop(variable, None)
     hashes = {}
     for lane in ("a", "b"):
         for project in (ROOT, ROOT / "integrations/edge"):
@@ -37,11 +104,27 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                 env=env,
                 stdout=subprocess.DEVNULL,
             )
-    for wheel in (output / "a").glob("*.whl"):
-        assert wheel.read_bytes() == (output / "b" / wheel.name).read_bytes(), (
-            "nonreproducible wheel"
+    first = {wheel.name: wheel for wheel in (output / "a").glob("*.whl")}
+    second = {wheel.name: wheel for wheel in (output / "b").glob("*.whl")}
+    if not first or first.keys() != second.keys():
+        raise ValueError("wheel_inventory_mismatch")
+    # Filename identity is necessary evidence, not authentication of wheel contents.
+    from packaging.utils import InvalidWheelFilename, parse_wheel_filename
+
+    try:
+        distributions = [parse_wheel_filename(name)[0] for name in first]
+    except InvalidWheelFilename:
+        raise ValueError("wheel_distribution_mismatch") from None
+    if sorted(distributions) != ["aethron", "aethron-edge"]:
+        raise ValueError("wheel_distribution_mismatch")
+    for name, wheel in sorted(first.items()):
+        compared_bytes = wheel.read_bytes()
+        assert compared_bytes == second[name].read_bytes(), "nonreproducible wheel"
+        distribution = parse_wheel_filename(name)[0]
+        package_check.validate_source_payload(
+            compared_bytes, payloads[distribution], distribution.replace("-", "_")
         )
-        hashes[wheel.name] = hashlib.sha256(wheel.read_bytes()).hexdigest()
+        hashes[wheel.name] = hashlib.sha256(compared_bytes).hexdigest()
     with tempfile.TemporaryDirectory(prefix="aethron-installed-") as temporary:
         work = Path(temporary)
         subprocess.run([sys.executable, "-m", "venv", str(work / "venv")], check=True)
@@ -70,14 +153,34 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                 "pip",
                 "install",
                 "--no-index",
-                "--find-links",
-                str(output.resolve() / "a"),
-                "aethron-edge[server]==0.1.0",
+                "--no-deps",
+                "--force-reinstall",
+                "--require-hashes",
+                *[
+                    first[name].resolve().as_uri() + "#sha256=" + digest
+                    for name, digest in sorted(hashes.items())
+                ],
             ],
             check=True,
             env=env,
             stdout=subprocess.DEVNULL,
         )
+        for distribution, flag in (
+            ("aethron", "--installed-payload"),
+            ("aethron-edge", "--installed-edge-payload"),
+        ):
+            installed = subprocess.run(
+                [str(python), "-I", str(ROOT / "scripts/package_check.py"), flag],
+                cwd=work,
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            if json.loads(installed.stdout) != source_manifests[distribution]:
+                raise ValueError("installed_source_payload_mismatch")
+        verify_installed_console(python, work, env)
         # Exercise new raw sensor contracts from installed wheels, outside checkout.
         for test_name in (
             "test_sensor_packets.py",
@@ -101,14 +204,10 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
             [
                 str(python),
                 "-I",
-                "-m",
-                "unittest",
-                "discover",
-                "-s",
+                "-c",
+                _INSTALLED_TEST_RUNNER,
                 str(work),
-                "-p",
                 "test_sensor*.py",
-                "-v",
             ],
             cwd=work,
             env=env,
@@ -231,24 +330,52 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                 [
                     str(python),
                     "-I",
-                    "-m",
-                    "unittest",
-                    "discover",
-                    "-s",
+                    "-c",
+                    _INSTALLED_TEST_RUNNER,
                     str(work),
-                    "-p",
                     "test*rectification.py",
-                    "-v",
                 ],
                 cwd=work,
                 env=env,
                 check=True,
                 timeout=60,
             )
+        try:
+            final_input_hashes = {
+                name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in input_names
+            }
+        except OSError:
+            raise ValueError("package_input_changed") from None
+        if final_input_hashes != input_hashes:
+            raise ValueError("package_input_changed")
+        try:
+            for lane in ("a", "b"):
+                final_wheels = {
+                    wheel.name: hashlib.sha256(wheel.read_bytes()).hexdigest()
+                    for wheel in (output / lane).glob("*.whl")
+                }
+                if final_wheels != hashes:
+                    raise ValueError("package_artifact_changed")
+        except OSError:
+            raise ValueError("package_artifact_changed") from None
         record = {
+            "observed_input_sha256": input_hashes,
+            # Source payload parity does not prove native binaries or all build inputs.
+            "source_tree_bound": False,
+            "source_payload_sha256": {
+                distribution: hashlib.sha256(
+                    json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode("utf-8")
+                ).hexdigest()
+                for distribution, manifest in source_manifests.items()
+            },
+            "source_payload_files": {
+                distribution: len(payload) for distribution, payload in payloads.items()
+            },
+            "installed_source_payload": True,
             "wheels": hashes,
             "byte_identical": True,
             "installed_consumer": True,
+            "console_wrapper": True,
             "installed_sensor_contracts": True,
             "installed_rectification": vision,
             "consumer_events": 3,

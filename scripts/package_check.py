@@ -210,5 +210,7 @@ def run():
 if __name__ == "__main__":
     if sys.argv[1:] == ["--installed-payload"]:
         print(json.dumps(installed_source_manifest(), sort_keys=True))
+    elif sys.argv[1:] == ["--installed-edge-payload"]:
+        print(json.dumps(installed_source_manifest("aethron_edge", "aethron-edge"), sort_keys=True))
     else:
         run()
