@@ -45,6 +45,22 @@ arbitrary precision. Native compilation does not establish exposure trust, chang
 expiry bounds or qualify live capture; the live source still fails closed when
 its clock is untrusted.
 
+Recorded `file` sources resolve their address as a filesystem path and permit
+only FFmpeg's `file` protocol, including when media references a nested resource.
+Inherited `OPENCV_FFMPEG_CAPTURE_OPTIONS` cannot enable network protocols for that
+isolated decoder. Network cameras use the explicit `rtsp` source. This is a
+protocol boundary, not an operating-system filesystem sandbox: a mounted network
+filesystem remains subject to appliance provisioning policy.
+
+A failed native read from a live source invalidates its unread frame and reports
+`source_lost` without waiting for a consumer. Recorded playback preserves its
+final unread frame before EOF. Neither behavior qualifies physical capture timing
+or makes an untrusted live clock fresh evidence.
+
+Observed live decoder process exit also invalidates its unread slot, including
+crashes that cannot publish a loss marker. Recorded playback can still drain its
+final owned frame after its worker exits.
+
 Fleet health has a local, bounded library interface:
 
 ```python

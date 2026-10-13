@@ -4,6 +4,7 @@ import multiprocessing as mp
 import os
 import time
 from dataclasses import dataclass, field
+from pathlib import Path
 from urllib.parse import urlsplit
 
 from ..mailbox import StopToken
@@ -57,6 +58,10 @@ class FrameEnvelope:
 
 
 def _decode(config, slot, metadata, lock, stop):
+    if config.driver == "file":
+        # This child serves one source. Recorded input must not inherit network
+        # protocols, including URLs reached indirectly through media playlists.
+        os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "protocol_whitelist;file"
     # Native decoder diagnostics may contain camera credentials. Suppress both
     # C-level streams in this worker; parent exposes only fixed fault codes.
     with open(os.devnull, "wb") as sink:
@@ -74,6 +79,8 @@ def _decode(config, slot, metadata, lock, stop):
     cap = None
     try:
         address = int(config.address) if config.driver == "uvc" else config.address
+        if config.driver == "file":
+            address = str(Path(address).resolve())
         cap = cv2.VideoCapture()
         parameters = (
             [cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 3000, cv2.CAP_PROP_READ_TIMEOUT_MSEC, 500]
@@ -94,7 +101,13 @@ def _decode(config, slot, metadata, lock, stop):
         while not stop.is_set():
             okay, pixels = cap.read()
             if not okay:
-                # Keep the final unread frame available before publishing EOF.
+                if config.driver != "file":
+                    # Live loss invalidates queued pixels immediately. Only
+                    # recorded playback may drain a final frame after EOF.
+                    with lock:
+                        metadata[0] = -1
+                    return
+                # Keep the final recorded frame available before publishing EOF.
                 while not stop.wait(0.01):
                     with lock:
                         if metadata[0] == 0:
@@ -205,6 +218,11 @@ class CaptureSource:
             if self.lock.acquire(timeout=0.01):
                 try:
                     sequence, w, h, received = self.metadata[:]
+                    if self.driver != "file" and not self.alive:
+                        # A crash or forced exit cannot publish its own loss
+                        # marker. Never drain a dead live decoder's queued slot.
+                        self.metadata[0] = -1
+                        return SourceFault("source_lost")
                     if sequence < 0:
                         return SourceFault("source_lost")
                     if sequence > 0:
