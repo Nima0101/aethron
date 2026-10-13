@@ -13,6 +13,75 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class Lifecycle(unittest.TestCase):
+    def test_late_replacement_is_reaped_after_shutdown_join_times_out(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config = ApplianceConfig.model_validate(
+                {
+                    "version": 1,
+                    "status_file": str(Path(directory) / "status.json"),
+                    "profiles": [
+                        {
+                            "name": "bench",
+                            "driver": "replay",
+                            "address": str(ROOT / "examples/temporal-blackout.jsonl"),
+                        }
+                    ],
+                }
+            )
+            runtime = ApplianceSupervisor()
+            runtime.config = config
+            original = RuntimePipeline(config.profiles[0])
+            runtime.pipelines = {"bench": original}
+            runtime.restarts = {"bench": []}
+            entered, release = threading.Event(), threading.Event()
+            replacements, processes, failures = [], [], []
+            start = RuntimePipeline.start
+
+            def slow_start(pipeline):
+                replacements.append(pipeline)
+                entered.set()
+                if not release.wait(10):
+                    raise TimeoutError("test did not release replacement startup")
+                start(pipeline)
+                processes.append(pipeline.process)
+
+            with (
+                patch.object(RuntimePipeline, "start", autospec=True, side_effect=slow_start),
+                patch(
+                    "threading.excepthook", side_effect=lambda args: failures.append(args.exc_type)
+                ),
+            ):
+                with runtime.lock:
+                    runtime._recover("bench", original, restart=True)
+                task = runtime.maintenance[0]
+                try:
+                    self.assertTrue(entered.wait(5))
+                    # Model an expired join budget without a four-second sleep.
+                    # The actual recovery thread remains blocked inside start.
+                    with patch.object(task, "join", return_value=None) as join:
+                        runtime.shutdown()
+                    join.assert_called_once_with(timeout=4)
+                    self.assertTrue(task.is_alive())
+                    self.assertIs(runtime.pipelines["bench"], original)
+                    self.assertEqual(runtime.snapshot("bench")["state"], "UNKNOWN")
+                    release.set()
+                    task.join(timeout=5)
+                    self.assertFalse(task.is_alive())
+                    self.assertEqual(failures, [])
+                    self.assertEqual(len(processes), 1)
+                    self.assertIsNone(replacements[0].process)
+                    self.assertTrue(processes[0]._closed)
+                    self.assertIs(runtime.pipelines["bench"], original)
+                    self.assertEqual(runtime.recovering, set())
+                    self.assertEqual(runtime.faults, set())
+                    self.assertEqual(runtime.snapshot("bench")["state"], "UNKNOWN")
+                finally:
+                    release.set()
+                    task.join(timeout=5)
+                    runtime.shutdown()
+                    for pipeline in replacements:
+                        pipeline.close()
+
     def test_replacement_spawn_failure_latches_fault_and_retires_process(self):
         with tempfile.TemporaryDirectory() as directory:
             config = ApplianceConfig.model_validate(

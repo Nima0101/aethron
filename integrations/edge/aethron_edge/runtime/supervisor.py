@@ -131,8 +131,13 @@ class ApplianceSupervisor:
                     replacement.prior_drops = pipeline.drop_counts()
                     replacement.start()
                 with self.lock:
-                    if replacement is not None:
+                    if replacement is not None and not self.stop.is_set():
                         self.pipelines[name] = replacement
+                        return
+                # Startup can outlive shutdown's bounded join. The recovery
+                # thread still owns this unpublished worker and must reap it.
+                if replacement is not None:
+                    replacement.close()
             except Exception:
                 # A failed recovery is terminal, not an indefinitely recovering
                 # service. Never expose exception text from worker startup.
