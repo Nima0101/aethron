@@ -9,6 +9,18 @@ MODEL_SHA256 = "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063
 MODEL_BYTES = 35858002
 
 
+def _validated_output(raw):
+    """Admit the pinned float tensor before any confidence arithmetic."""
+    import numpy as np
+
+    require(type(raw) is np.ndarray and raw.dtype == np.float32)
+    require(raw.shape == (1, 8400, 85) and np.isfinite(raw).all())
+    values = raw[0]
+    probabilities = values[:, 4:]
+    require(bool((probabilities >= 0).all() and (probabilities <= 1).all()))
+    return values
+
+
 def safe_class(index):
     if index == 0:
         return "person"
@@ -110,8 +122,7 @@ class RGBDetector:
             finally:
                 # Release native input reference; not a secure memory-erasure claim.
                 self.net.setInput(np.zeros((1, 3, 640, 640), dtype=np.float32))
-        require(raw.shape == (1, 8400, 85) and np.isfinite(raw).all())
-        values = raw[0]
+        values = _validated_output(raw)
         scores = values[:, 4, None] * values[:, 5:]
         categories = np.argmax(scores, axis=1)
         confidence = scores[np.arange(8400), categories]
