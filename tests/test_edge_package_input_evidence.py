@@ -143,7 +143,9 @@ class PackageInputEvidence(unittest.TestCase):
                             warnings.simplefilter("ignore", UserWarning)
                             with zipfile.ZipFile(wheel, "w") as archive:
                                 for name, data in records:
-                                    archive.writestr(name, data)
+                                    # Mock builds must differ only by the requested defect.
+                                    member = zipfile.ZipInfo(name, (2026, 1, 1, 0, 0, 0))
+                                    archive.writestr(member, data)
                     if mutate_source:
                         (root / "integrations/edge/aethron_edge/__init__.py").write_bytes(
                             b"changed"
@@ -251,6 +253,15 @@ class PackageInputEvidence(unittest.TestCase):
 
     def test_vision_report_also_identifies_vision_lock(self):
         self.probe(vision=True)
+
+    def test_fixture_build_clock_cannot_mask_source_validation(self):
+        for package in ("aethron", "aethron_edge"):
+            for defect in (None, "changed", "missing", "extra", "duplicate"):
+                with self.subTest(package=package, defect=defect):
+                    # Cross ZIP's two-second timestamp boundary without sleeping.
+                    times = [(2026, 1, 1, 0, 0, second) for second in range(0, 60, 2)]
+                    with patch.object(zipfile.time, "localtime", side_effect=times):
+                        self.probe(wheel_defect=defect, package=package)
 
     def test_changed_checker_or_manifest_prevents_success_report(self):
         for name in (
