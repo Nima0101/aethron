@@ -8,6 +8,10 @@ import sys
 import tempfile
 from pathlib import Path
 
+# Optimized execution removes the assertions that establish this evidence.
+if sys.flags.optimize:
+    raise SystemExit("package_check_requires_assertions")
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -31,17 +35,46 @@ def run():
                 check=True,
                 stdout=subprocess.DEVNULL,
             )
-        a = next((temp / "a").glob("*.whl"))
-        b = next((temp / "b").glob("*.whl"))
-        assert a.read_bytes() == b.read_bytes(), "wheel builds differ"
+        first = sorted((temp / "a").glob("*.whl"))
+        second = sorted((temp / "b").glob("*.whl"))
+        if len(first) != 1 or len(second) != 1 or first[0].name != second[0].name:
+            raise ValueError("wheel_inventory_mismatch")
+        a, b = first[0], second[0]
+        compared_bytes = a.read_bytes()
+        assert compared_bytes == b.read_bytes(), "wheel builds differ"
+        wheel_sha256 = hashlib.sha256(compared_bytes).hexdigest()
         subprocess.run([sys.executable, "-m", "venv", str(temp / "consumer")], check=True)
         python = temp / "consumer" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
         subprocess.run(
-            [str(python), "-m", "pip", "install", "--no-index", "--no-deps", str(a)],
+            [
+                str(python),
+                "-m",
+                "pip",
+                "install",
+                "--no-index",
+                "--no-deps",
+                "--force-reinstall",
+                "--require-hashes",
+                a.resolve().as_uri() + "#sha256=" + wheel_sha256,
+            ],
             cwd=temp,
             check=True,
             stdout=subprocess.DEVNULL,
         )
+        console = python.with_name("aethron.exe" if os.name == "nt" else "aethron")
+        console_env = dict(os.environ, PYTHONNOUSERSITE="1")
+        for variable in ("PYTHONPATH", "PYTHONHOME"):
+            console_env.pop(variable, None)
+        help_result = subprocess.run(
+            [str(console), "--help"],
+            cwd=temp,
+            env=console_env,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        assert help_result.stdout.strip(), "console help is empty"
         result = subprocess.run(
             [str(python), "-I", "-m", "aethron", "demo"],
             cwd=temp,
@@ -74,14 +107,24 @@ def run():
         assert len(tracked) == 24
         assert len({r["tracks"][0]["id"] for r in tracked}) == 1
         assert tracked[-1]["tracks"][0]["sources"] == ["depth", "lwir", "radar"]
+        # Consumers must not invalidate the artifacts qualified by the comparison.
+        # Keep the original digest; never re-label replacement bytes as verified.
+        for wheel in (a, b):
+            if sorted(wheel.parent.glob("*.whl")) != [wheel]:
+                raise ValueError("wheel_artifacts_changed")
+            if wheel.is_symlink() or not wheel.is_file():
+                raise ValueError("wheel_artifacts_changed")
+            if wheel.read_bytes() != compared_bytes:
+                raise ValueError("wheel_artifacts_changed")
         print(
             json.dumps(
                 {
                     "wheel": a.name,
-                    "sha256": hashlib.sha256(a.read_bytes()).hexdigest(),
+                    "sha256": wheel_sha256,
                     "byte_identical": True,
                     "isolated_install": True,
-                    "runtime_dependencies": 0,
+                    "console_wrapper": True,
+                    "dependency_installation": False,
                 }
             )
         )
