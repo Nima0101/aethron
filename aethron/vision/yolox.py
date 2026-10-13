@@ -9,6 +9,17 @@ MODEL_SHA256 = "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063
 MODEL_BYTES = 35858002
 
 
+def _require_coreml_providers(session):
+    """Check registered precedence; this is not native node-placement evidence."""
+    providers = session.get_providers()
+    require(
+        type(providers) is list
+        and len(providers) == 2
+        and all(type(provider) is str for provider in providers)
+        and providers == ["CoreMLExecutionProvider", "CPUExecutionProvider"]
+    )
+
+
 def _ort_tensor_name(nodes, expected_shape):
     """Validate the pinned tensor contract before accepting an ORT session."""
     require(type(nodes) is list and len(nodes) == 1)
@@ -105,7 +116,7 @@ class RGBDetector:
             # An EP execution failure must reach the worker's model_error path,
             # never rebuild/retry the session on CPU under a Core ML label.
             self.ort_session.disable_fallback()
-            require("CoreMLExecutionProvider" in self.ort_session.get_providers())
+            _require_coreml_providers(self.ort_session)
             inputs = self.ort_session.get_inputs()
             outputs = self.ort_session.get_outputs()
             self.ort_input_name = _ort_tensor_name(inputs, [1, 3, 640, 640])
@@ -140,7 +151,11 @@ class RGBDetector:
         if self.backend == "coreml":
             # Reassert the application policy if fallback was enabled between calls.
             self.ort_session.disable_fallback()
+            _require_coreml_providers(self.ort_session)
             outputs = self.ort_session.run(None, {self.ort_input_name: tensor})
+            # Withdraw results on observed drift. Do not mask an execution
+            # exception with a finally check or retry under a different provider.
+            _require_coreml_providers(self.ort_session)
             require(type(outputs) is list and len(outputs) == 1)
             raw = outputs[0]
         else:

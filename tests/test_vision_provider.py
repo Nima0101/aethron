@@ -132,6 +132,68 @@ class VisionProvider(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.detector()
 
+    def test_construction_requires_exact_provider_precedence(self):
+        for providers in (
+            ["CPUExecutionProvider", "CoreMLExecutionProvider"],
+            ["CoreMLExecutionProvider"],
+            ["CoreMLExecutionProvider", "CPUExecutionProvider", "UnexpectedProvider"],
+            ("CoreMLExecutionProvider", "CPUExecutionProvider"),
+            None,
+        ):
+            with self.subTest(providers=providers):
+                self.session._providers = providers
+                with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                    self.detector()
+
+    def test_provider_drift_before_execution_prevents_native_run(self):
+        detector = self.detector()
+        run = Mock(return_value=[self.np.zeros((1, 8400, 85), dtype=self.np.float32)])
+        self.session._sess = SimpleNamespace(run=run, is_webgpu_graph_capture_enabled=lambda: False)
+        for providers in (
+            ["CPUExecutionProvider"],
+            ["CPUExecutionProvider", "CoreMLExecutionProvider"],
+            ["CoreMLExecutionProvider", "CPUExecutionProvider", "UnexpectedProvider"],
+        ):
+            with self.subTest(providers=providers):
+                self.session._providers = providers
+                with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                    detector.infer(self.pixels, lighting="daylight")
+        run.assert_not_called()
+
+    def test_provider_drift_during_execution_withdraws_output(self):
+        detector = self.detector()
+
+        def drift(*args):
+            self.session._providers = ["CPUExecutionProvider"]
+            return [self.np.zeros((1, 8400, 85), dtype=self.np.float32)]
+
+        run = Mock(side_effect=drift)
+        self.session._sess = SimpleNamespace(run=run, is_webgpu_graph_capture_enabled=lambda: False)
+        with patch.object(yolox, "_validated_output") as validate:
+            with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                detector.infer(self.pixels, lighting="daylight")
+        run.assert_called_once()
+        validate.assert_not_called()
+
+    def test_provider_drift_does_not_mask_execution_failure_or_retry(self):
+        from onnxruntime.capi import _pybind_state as native
+
+        detector = self.detector()
+        original = native.EPFail("synthetic execution failure")
+
+        def drift_and_fail(*args):
+            self.session._providers = ["CPUExecutionProvider"]
+            raise original
+
+        run = Mock(side_effect=drift_and_fail)
+        self.session._sess = SimpleNamespace(run=run, is_webgpu_graph_capture_enabled=lambda: False)
+        with patch.object(self.session, "set_providers") as retry:
+            with self.assertRaises(native.EPFail) as caught:
+                detector.infer(self.pixels, lighting="daylight")
+        self.assertIs(caught.exception, original)
+        run.assert_called_once()
+        retry.assert_not_called()
+
     def test_missing_coreml_is_rejected(self):
         with self.assertRaises(ValueError):
             self.detector(available=["CPUExecutionProvider"])
