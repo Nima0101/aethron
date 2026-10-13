@@ -9,6 +9,24 @@ MODEL_SHA256 = "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063
 MODEL_BYTES = 35858002
 
 
+def _ort_tensor_name(nodes, expected_shape):
+    """Validate the pinned tensor contract before accepting an ORT session."""
+    require(type(nodes) is list and len(nodes) == 1)
+    node = nodes[0]
+    shape = getattr(node, "shape", None)
+    tensor_type = getattr(node, "type", None)
+    name = getattr(node, "name", None)
+    require(
+        type(shape) is list
+        and len(shape) == len(expected_shape)
+        and all(type(dimension) is int for dimension in shape)
+        and shape == expected_shape
+    )
+    require(type(tensor_type) is str and tensor_type == "tensor(float)")
+    require(type(name) is str and bool(name))
+    return name
+
+
 def _validated_output(raw):
     """Admit the pinned float tensor before any confidence arithmetic."""
     import numpy as np
@@ -90,9 +108,8 @@ class RGBDetector:
             require("CoreMLExecutionProvider" in self.ort_session.get_providers())
             inputs = self.ort_session.get_inputs()
             outputs = self.ort_session.get_outputs()
-            require(len(inputs) == 1 and inputs[0].shape == [1, 3, 640, 640])
-            require(len(outputs) == 1 and outputs[0].shape == [1, 8400, 85])
-            self.ort_input_name = inputs[0].name
+            self.ort_input_name = _ort_tensor_name(inputs, [1, 3, 640, 640])
+            _ort_tensor_name(outputs, [1, 8400, 85])
         self.grids = np.array(
             [
                 (x, y)
@@ -123,7 +140,9 @@ class RGBDetector:
         if self.backend == "coreml":
             # Reassert the application policy if fallback was enabled between calls.
             self.ort_session.disable_fallback()
-            raw = self.ort_session.run(None, {self.ort_input_name: tensor})[0]
+            outputs = self.ort_session.run(None, {self.ort_input_name: tensor})
+            require(type(outputs) is list and len(outputs) == 1)
+            raw = outputs[0]
         else:
             self.net.setInput(tensor)
             try:

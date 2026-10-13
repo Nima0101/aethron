@@ -194,3 +194,75 @@ class VisionProvider(unittest.TestCase):
             self.assertEqual(actual.get_session_config_entry(f"session.{pool}.allow_spinning"), "0")
         value = self.np.array([3.25], dtype=self.np.float32)
         self.np.testing.assert_array_equal(session.run(None, {"x": value})[0], value)
+
+    def test_metadata_dimension_types_are_strict(self):
+        for field, shape in (("_inputs_meta", [1, 3, 640, 640]), ("_outputs_meta", [1, 8400, 85])):
+            for first in (True, 1.0):
+                with self.subTest(field=field, first=first):
+                    node = SimpleNamespace(
+                        name="tensor", type="tensor(float)", shape=[first, *shape[1:]]
+                    )
+                    with patch.object(self.session, field, [node]):
+                        with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                            self.detector()
+
+    def test_metadata_tensor_type_is_float32(self):
+        for field, shape in (("_inputs_meta", [1, 3, 640, 640]), ("_outputs_meta", [1, 8400, 85])):
+            for tensor_type in (None, "tensor(double)", "tensor(uint8)", "seq(tensor(float))"):
+                with self.subTest(field=field, tensor_type=tensor_type):
+                    node = SimpleNamespace(name="tensor", type=tensor_type, shape=shape)
+                    with patch.object(self.session, field, [node]):
+                        with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                            self.detector()
+
+    def test_metadata_missing_or_invalid_fields_are_rejected(self):
+        for field, shape in (("_inputs_meta", [1, 3, 640, 640]), ("_outputs_meta", [1, 8400, 85])):
+            for values in ({"name": None}, {"name": ""}, {"name": 7}, {"shape": None}):
+                with self.subTest(field=field, values=values):
+                    node = SimpleNamespace(
+                        **({"name": "tensor", "type": "tensor(float)", "shape": shape} | values)
+                    )
+                    with patch.object(self.session, field, [node]):
+                        with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                            self.detector()
+            for missing in ("shape", "type", "name"):
+                with self.subTest(field=field, missing=missing):
+                    node = SimpleNamespace(name="tensor", type="tensor(float)", shape=shape)
+                    delattr(node, missing)
+                    with patch.object(self.session, field, [node]):
+                        with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                            self.detector()
+
+    def test_execution_requires_exactly_one_output(self):
+        raw = self.np.zeros((1, 8400, 85), dtype=self.np.float32)
+        for outputs in ([], [raw, raw], (raw,), None):
+            with self.subTest(
+                container=type(outputs).__name__, count=None if outputs is None else len(outputs)
+            ):
+                run = Mock(return_value=outputs)
+                self.session._sess = SimpleNamespace(
+                    run=run, is_webgpu_graph_capture_enabled=lambda: False
+                )
+                detector = self.detector()
+                with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                    detector.infer(self.pixels, lighting="daylight")
+                run.assert_called_once()
+
+    def test_metadata_accepts_native_cpu_nodeargs(self):
+        import onnxruntime as ort
+
+        # Authored IR8/opset13 Identity graph; validates native metadata only.
+        model = bytes.fromhex(
+            "08083a420a100a017812017922084964656e74697479120c7032335f6964656e74697479"
+            "5a0f0a0178120a0a08080112040a020801620f0a0179120a0a08080112040a0208014202100d"
+        )
+        options = ort.SessionOptions()
+        options.intra_op_num_threads = 1
+        options.inter_op_num_threads = 1
+        session = ort.InferenceSession(
+            model, sess_options=options, providers=["CPUExecutionProvider"], enable_fallback=False
+        )
+        self.assertEqual(yolox._ort_tensor_name(session.get_inputs(), [1]), "x")
+        self.assertEqual(yolox._ort_tensor_name(session.get_outputs(), [1]), "y")
+        with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+            yolox._ort_tensor_name(session.get_inputs(), [1, 3, 640, 640])
