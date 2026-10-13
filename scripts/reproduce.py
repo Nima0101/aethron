@@ -20,9 +20,13 @@ def call(args, cwd, **kw):
 
 
 def validate_artifacts(directory, manifest):
-    observed = {
-        path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in directory.iterdir()
-    }
+    if directory.is_symlink() or not directory.is_dir():
+        raise ValueError("release_artifacts_changed")
+    observed = {}
+    for path in directory.iterdir():
+        if path.is_symlink() or not path.is_file():
+            raise ValueError("release_artifacts_changed")
+        observed[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
     if observed != manifest:
         raise ValueError("release_artifacts_changed")
 

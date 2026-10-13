@@ -115,6 +115,15 @@ class ReproductionReport(unittest.TestCase):
                         artifact.unlink()
                     elif mutation == "extra":
                         artifact.with_name("uncompared.zip").write_bytes(b"extra artifact")
+                    elif mutation == "file_link":
+                        target = artifact.parent.parent / "external.pyz"
+                        artifact.replace(target)
+                        artifact.symlink_to(target)
+                    elif mutation == "directory_link":
+                        directory = artifact.parent
+                        target = directory.with_name("external-build")
+                        directory.replace(target)
+                        directory.symlink_to(target, target_is_directory=True)
                 if consumer:
                     if kwargs.get("check"):
                         raise subprocess.CalledProcessError(consumer, args)
@@ -196,6 +205,19 @@ class ReproductionReport(unittest.TestCase):
     def test_changed_artifacts_cannot_be_reported_as_compared(self):
         for lane in ("a", "b"):
             for mutation in ("changed", "extra", "removed"):
+                for mutate_at in (1, 2):
+                    with self.subTest(lane=lane, mutation=mutation, mutate_at=mutate_at):
+                        output, error, consumers, _, _ = self.invoke(
+                            mutation=mutation, mutate_at=mutate_at, mutate_lane=lane
+                        )
+                        self.assertIsInstance(error, ValueError)
+                        self.assertEqual(str(error), "release_artifacts_changed")
+                        self.assertEqual(output, "")
+                        self.assertEqual(len(consumers), mutate_at)
+
+    def test_linked_artifacts_cannot_be_reported_as_compared(self):
+        for lane in ("a", "b"):
+            for mutation in ("file_link", "directory_link"):
                 for mutate_at in (1, 2):
                     with self.subTest(lane=lane, mutation=mutation, mutate_at=mutate_at):
                         output, error, consumers, _, _ = self.invoke(
