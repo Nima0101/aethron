@@ -357,7 +357,6 @@ class RuntimePipeline:
 
     def start(self):
         self.stop_worker()
-        self.core.close()
         self.core = self._new_core()
         ctx = mp.get_context("spawn")
         self.channel = Mailbox(ctx)
@@ -517,6 +516,10 @@ class RuntimePipeline:
         self.last_result = None
         self.sensor_expires_ns = 0
         self.sensor_state = "fault" if self.ros_guard and self.ros_guard.closed else "idle"
+        # Retire the scene before any blocking/fallible process cleanup. A
+        # failed stop retains process ownership, never tracks or permission to
+        # admit queued observations. Only start() creates a new core session.
+        self.core.close()
         if self.process is not None:
             self.stop.set()
             # Failed spawn leaves a Process object that cannot be joined.
@@ -561,4 +564,3 @@ class RuntimePipeline:
 
     def close(self):
         self.stop_worker()
-        self.core.close()

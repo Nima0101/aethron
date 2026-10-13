@@ -15,6 +15,7 @@ on:
       - 'integrations/edge/aethron_edge/pipeline.py'
       - 'tests/integration/test_worker_cancellation.py'
       - 'tests/integration/test_worker_tree.py'
+      - 'tests/integration/test_worker_shutdown.py'
       - 'requirements-coreml.txt'
       - 'requirements-vision.txt'
       - '.github/workflows/aethron-provider-boundary.yml'
@@ -34,6 +35,7 @@ on:
       - 'integrations/edge/aethron_edge/pipeline.py'
       - 'tests/integration/test_worker_cancellation.py'
       - 'tests/integration/test_worker_tree.py'
+      - 'tests/integration/test_worker_shutdown.py'
       - 'requirements-coreml.txt'
       - 'requirements-vision.txt'
       - '.github/workflows/aethron-provider-boundary.yml'
@@ -84,8 +86,9 @@ jobs:
           ort.disable_telemetry_events()
           suite = unittest.defaultTestLoader.discover('tests/integration', pattern='test_worker_cancellation.py')
           suite.addTests(unittest.defaultTestLoader.discover('tests/integration', pattern='test_worker_tree.py'))
+          suite.addTests(unittest.defaultTestLoader.discover('tests/integration', pattern='test_worker_shutdown.py'))
           result = unittest.TextTestRunner(verbosity=2).run(suite)
-          if not result.wasSuccessful() or result.testsRun != 19 or result.skipped or result.expectedFailures:
+          if not result.wasSuccessful() or result.testsRun != 22 or result.skipped or result.expectedFailures:
               raise SystemExit('worker cancellation coverage incomplete')
           PY
       - name: Build and install optional bounded CPU validator
