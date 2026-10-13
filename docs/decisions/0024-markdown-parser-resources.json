@@ -1,0 +1,45 @@
+{
+  "id": "0024-markdown-parser-resources",
+  "review_order_version": 3,
+  "component": "P1.1 offline Markdown destination parser",
+  "source_revision": "3c0a473f7bceb6cab75d152e3916f5f96a2eb863",
+  "source_sha256": "cc4d06ebeaddac4d090f281bade4f01e4bc870c6ed63026349920bbffd65b71d",
+  "decision": "MIGRATE",
+  "constraints": [
+    "Extract CommonMark links/images/references in document order without rendering, fetching, or reading destination contents. Decode Markdown entities and percent escapes exactly once. Incomplete checks must fail visibly.",
+    "Developer tooling on Python 3.9/3.13, Linux/macOS/Windows, including offline hash-locked installation. Small adversarial inputs must not silently omit links. No product runtime, hardware, hard-real-time or total-memory qualification is in scope."
+  ],
+  "comparison": [
+    "Marko 2.2.4: historical bounded probes exceeded a 3-second subprocess budget for 32,128,256 nested quotes (79,271,527 bytes). Normal-case parity alone did not establish acceptable pathological behavior. Preserve these failures.",
+    "markdown-it-py: documented block/inline token API supports extraction without HTML rendering. Both 3.0.0 and 4.2.0 were executed. Default maxNesting silently omitted nested links in the saved 3.0.0 probe; explicit guards are necessary. The modified parser retains 32/63 nested quote links and explicitly rejects the boundary at 64.",
+    "Mistune: official API exposes an AST, making it a credible portable alternative. It was researched, not benchmarked in this correction; it has no demonstrated correctness/resource advantage over the tested adapter.",
+    "C cmark: official library exposes an AST and pathological-input tests. C MD4C: callback parsing can avoid a retained document AST. Both are credible native alternatives, not excluded by toolchain availability. They require a native distribution/binding plus the same application error mapping; neither was locally benchmarked or proved superior for this small offline checker. Reconsider them if total memory or sustained throughput becomes a required acceptance constraint."
+  ],
+  "rationale": [
+    "MIGRATE Marko to markdown-it-py with explicit block/inline nesting rejection. The demonstrated small-input failure and the tested replacement behavior justify this incremental change; neither installed-tool convenience nor prior language choice is the basis.",
+    "Pin MIT universal wheels: markdown-it-py 3.0.0 for Python<3.10,4.2.0 otherwise; mdurl0.1.2. Wheel SHA256 values match requirements-links.lock. Retain the versioned report contract and shared worktree/public-tree adapter.",
+    "Use guards at block tokenization, inline tokenization/lookahead and recursive inline parse entry. Upstream internal parser interfaces are pinned and covered by a new six-job OS/interpreter CI matrix. This workflow has not run remotely."
+  ],
+  "evidence": [
+    "Fresh modern-parser focused run:42 methods PASS in34.987s, including8 subprocess-bounded resource methods and both entry-point rejection tests. Standalone resource run:8 PASS in4.820s. Local interpreter CPython3.13.13 on Linux.",
+    "Removed block and inline lookahead guards in isolated in-memory negative controls: both lost explicit rejection. Removing only the recursive image guard remained rejected by another guard; this is not evidence of independent coverage for that guard.",
+    "Ruff lint/format PASS for the adapter and four relevant test files. Earlier modern/legacy test subprocess timeouts are retained; the fresh pass does not establish their cause or a worst-case time guarantee.",
+    "Compatibility parser3.0.0: same42 focused methods PASS in57.030s on CPython3.13.13, using the hash-verified wheel on PYTHONPATH. Modern lock installed offline with --no-index --require-hashes into an isolated lane-owned directory. Actual Python3.9 execution remains pending.",
+    "Bandit exit1:12 LOW findings in subprocess-based test files,0 findings in scripts/markdown_links.py,0 scan errors. No suppressed findings. git diff --check and ADR source hash PASS."
+  ],
+  "limits": [
+    "Python3.9/macOS/Windows execution is pending hosted CI. Running parser3.0.0 on CPython3.13 is compatibility evidence for the parser version only.",
+    "Nesting limits are parser-state limits, not visible delimiter counts; valid deeply nested CommonMark can be rejected. Token construction still precedes extraction. No parser CPU deadline, memory sandbox or complete CommonMark conformance claim.",
+    "Raw HTML, anchors, network availability, content rights and whole-product qualification remain outside the checker. P1.1-P1.7 review remains incomplete. No weapon/targeting integration or publication was performed."
+  ],
+  "revisit": [
+    "Next earliest review: worktree Markdown admission/resource boundaries and remaining verifier inputs; retain historical failures and qualify the dependency change on the hosted matrix before publication."
+  ],
+  "references": [
+    "https://markdown-it-py.readthedocs.io/en/latest/architecture.html",
+    "https://marko-py.readthedocs.io/en/latest/",
+    "https://mistune.lepture.com/en/latest/guide.html",
+    "https://github.com/commonmark/cmark",
+    "https://github.com/mity/md4c"
+  ]
+}

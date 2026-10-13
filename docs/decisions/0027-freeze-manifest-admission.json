@@ -1,0 +1,38 @@
+{
+  "id": "0027-freeze-manifest-admission",
+  "review_order_version": 3,
+  "component": "P1.1 freeze-manifest admission",
+  "source_revision": "7804f62e214a4e034c8a961e3663088c45f7ba86",
+  "source_sha256": "296149bc11a19c585c82993002df18791d390516cb348cf01ced9d26ab9d3a0e",
+  "decision": "KEEP",
+  "constraints": [
+    "Offline developer verification on Linux/macOS/Windows, Python3.9 compatibility and current Python. Preserve all nine frozen inventories and historical mappings without changing their bytes. Empty inventories and metadata values remain permitted.",
+    "Reject ambiguous duplicate keys and invalid file/digest shape before reading a manifest payload. Bound input allocation independently of stat; no new product thresholds or authentication claims."
+  ],
+  "comparison": [
+    "Python json.object_pairs_hook receives decoded key/value pairs before dictionary collapse. This supplies duplicate rejection including Unicode escapes within the same process that enforces bounded input and validates file entries.",
+    "C# System.Text.Json in .NET10 exposes AllowDuplicateProperties=false; its documented default is true. It is a credible different-runtime choice with explicit duplicate handling, but still requires byte admission, file/digest validation and a checkout interface. No C# runtime benchmark is claimed.",
+    "C++ simdjson offers capacity controls and on-demand parsing. A candidate must still inspect decoded names, retain duplicate information and validate the entire inventory before opening any payload; lazy access alone cannot establish that boundary. No C++ benchmark or inferred speed ranking is claimed."
+  ],
+  "rationale": [
+    "KEEP Python for this narrow developer boundary because its native JSON decoder plus ordered-pair callback directly implements the required complete validation before payload I/O without a second process/content-transfer boundary. Existing use alone is not the justification. Reconsider a parser migration if measured throughput or tighter total-memory limits become requirements.",
+    "Implement manifest admission v1:1MiB per fixed manifest and10000 file entries. Current nine manifests are137\u20133585bytes and1\u201337entries. These generous finite developer limits prevent unbounded input admission while leaving current valid inventories unchanged; they do not prove a process memory or time ceiling.",
+    "Duplicate decoded keys in any object now fail instead of silently taking the last value. Invalid root/files shape, empty names and non-lowercase64hex digest values fail before payload hashing. Paths retain existing containment semantics."
+  ],
+  "evidence": [
+    "RED:13methods,17assertion failures,0errors; duplicate files keys can erase the inventory in the old decoder. GREEN final focused66methods PASS in5.205s. Synthetic fixture product children intercepted.",
+    "Four weakened variants (duplicate overwrite, unbounded manifest input, removed entry budget, accepted growth) all rejected:9assertion failures,0errors across56method executions.",
+    "All nine current manifest file maps match the previous JSON decode; their individual byte hashes retained. Payloads were not read for this comparison and no frozen file changed.",
+    "Ruff lint/format PASS after formatting. Bandit findings retained separately, with no suppression. Existing six-job Markdown workflow already covers this test module and source path."
+  ],
+  "limits": [
+    "Input limit applies before JSON decoding; entry count after decoding. Decoded objects, metadata, callback lists and interpreter memory add overhead. No total RSS, custom nesting or elapsed-time bound. Parser errors remain fatal; metadata values are not semantically validated.",
+    "No signature/provenance authentication, concurrent-filesystem protection, full repository/release qualification, hardware or defense-compliance claim. Local execution was Linux CPython3.13.13 only.",
+    "P1.1-P1.7 review remains incomplete. Next unfinished verifier boundary: non-Markdown/source admission and directory traversal resources; preserve prior negative evidence."
+  ],
+  "references": [
+    "https://docs.python.org/3/library/json.html",
+    "https://learn.microsoft.com/en-us/dotnet/api/system.text.json.jsondocumentoptions.allowduplicateproperties?view=net-10.0",
+    "https://simdjson.org/api/4.6.4/md_doc_2basics.html"
+  ]
+}

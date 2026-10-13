@@ -1,0 +1,40 @@
+{
+  "id": "0028-worktree-scan-admission",
+  "review_order_version": 3,
+  "component": "P1.1 source/text reads and checkout enumeration",
+  "source_revision": "25aabddbd49089716e04cca4145b90d0a13b6917",
+  "source_sha256": "20a408439cb60232b19d91199d612d8ff1f71d5c48498290e0304b770ace2b56",
+  "decision": "KEEP",
+  "constraints": [
+    "Offline developer scans on Linux/macOS/Windows; Python3.9 compatibility. Preserve complete selected tracked/untracked coverage, generated-directory rules, path checks and visible errors. No frozen file or product threshold edits.",
+    "Prevent unbounded input reads and directory queue growth through explicit rejection budgets. Preserve existing AST semantics; no runtime-security, real-time or whole-process memory guarantee."
+  ],
+  "comparison": [
+    "Python os.scandir is an incremental iterator with context-managed closure; explicit shared counting rejects excess without collecting complete directory listings or changing existing path/error checks. Buffered read(size) provides bounded returned input for source and other text.",
+    "Rust walkdir2.5 offers max_depth/max_open, but max_depth deliberately avoids descending beyond its limit. That default would silently prune required coverage here; an explicit fail-on-excess visitor and shared accounting would still be required. Root symlink handling also needs explicit preservation.",
+    "Java DirectoryStream supports incremental enumeration and try-with-resources closure. It remains a credible different-language option, but still needs shared admission counting, explicit depth failure and a boundary to the Python-version-specific AST parser. No Rust/Java performance benchmark was run and no throughput ranking is inferred."
+  ],
+  "rationale": [
+    "KEEP Python/native filesystem I/O for this boundary: it supports incremental enumeration and bounded reads in the process that applies Python AST rules, with an executable rejection contract and no extra pathname/content serialization boundary. The defect was absent admission accounting; existing language familiarity is not a reason.",
+    "Implement source/text admission v1:1MiB/16MiB per-file/total source,8MiB/64MiB other text,100000 enumerated entries shared across phases,depth64 relative to each scan root. These finite generous developer defaults are not hardware-derived execution guarantees.",
+    "At the reviewed checkout,34 tracked source files total125158bytes,max14094;612 selected tracked non-Markdown files total3907965bytes,max190562;maximum tracked path depth6. Stat-only survey did not inspect credentials or file contents;untracked inputs remain subject to admission."
+  ],
+  "evidence": [
+    "RED:7methods,7assertion failures,0errors. GREEN final focused73methods PASS in5.710s. Product children intercepted in synthetic fixtures.",
+    "Five weakened variants removed source totals,content totals,shared traversal counting,depth rejection,entry counting;all rejected with6assertion failures,0errors across35method executions.",
+    "Regression cases cover UTF-8 byte boundaries,phase totals,oversize-before-open,ignored-entry charging,iterator closure,depth rejection instead of pruning,and counters shared across roots/reset across runs.",
+    "Ruff lint/format PASS after formatting. Bandit findings retained without suppression. New regression module included in existing six-job Markdown checker matrix;hosted execution pending."
+  ],
+  "limits": [
+    "Byte budgets constrain input reads,not AST objects,decoded strings,parser buffers,OS metadata calls,total RSS or elapsed time. Directory order and first failure remain filesystem-dependent. Stable trusted checkout remains required.",
+    "Payload hashing has no total-byte cap;Git inventory and product child boundaries retain their own constraints. No full suite,hardware,release or defense qualification claimed. Local validation Linux CPython3.13.13 only."
+  ],
+  "revisit": [
+    "Next earliest verifier boundary: child command failure/timeout and reporting requirements;then close source-bound P1.1 component inventory before advancing to P1.2. No audit-complete marker."
+  ],
+  "references": [
+    "https://docs.python.org/3.13/library/os.html#os.scandir",
+    "https://docs.rs/walkdir/2.5.0/walkdir/struct.WalkDir.html",
+    "https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/nio/file/DirectoryStream.html"
+  ]
+}
