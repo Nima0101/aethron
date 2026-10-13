@@ -104,10 +104,23 @@ def _validated_output(raw):
     import numpy as np
 
     require(type(raw) is np.ndarray and raw.dtype == np.float32)
-    require(raw.shape == (1, 8400, 85) and np.isfinite(raw).all())
+    require(raw.shape == (1, 8400, 85))
+    if raw.flags.c_contiguous:
+        try:
+            import aethron_vision_native as native
+        except ModuleNotFoundError as error:
+            # Missing optional package is supported; a broken installed package
+            # or a native rejection must never silently select another checker.
+            if error.name != "aethron_vision_native":
+                raise
+        else:
+            require(native.CONTRACT_VERSION == 1)
+            require(native.validate_output(raw) is True)
+            return raw[0]
     values = raw[0]
     probabilities = values[:, 4:]
-    require(bool((probabilities >= 0).all() and (probabilities <= 1).all()))
+    require(bool(np.isfinite(values[:, :4]).all()))
+    require(bool(probabilities.min() >= 0 and probabilities.max() <= 1))
     return values
 
 

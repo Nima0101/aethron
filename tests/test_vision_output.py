@@ -1,9 +1,12 @@
 """Malformed native outputs cannot become detections or apparent empty success."""
 
+import builtins
 import importlib.util
 import random
+import sys
 import unittest
 from types import SimpleNamespace
+from unittest.mock import patch
 
 from aethron.vision.yolox import RGBDetector, _validated_output
 
@@ -99,3 +102,59 @@ class VisionOutput(unittest.TestCase):
             with self.subTest(kind=type(raw)):
                 with self.assertRaisesRegex(ValueError, "^invalid_input$"):
                     _validated_output(raw)
+
+    def test_native_failure_or_rejection_never_falls_back(self):
+        def fail(raw):
+            raise RuntimeError("synthetic native failure")
+
+        for function, version, error in (
+            (lambda raw: False, 1, ValueError),
+            (lambda raw: True, 2, ValueError),
+            (fail, 1, RuntimeError),
+        ):
+            module = SimpleNamespace(CONTRACT_VERSION=version, validate_output=function)
+            with patch.dict(sys.modules, {"aethron_vision_native": module}):
+                with self.assertRaises(error):
+                    _validated_output(self.output())
+
+    def test_portable_layouts_preserve_view_and_reject_nonfinite_bits(self):
+        np = self.np
+        raw = np.zeros((1, 8400, 85), dtype=np.float32)
+        for data in (raw, np.asfortranarray(raw), raw[:, ::-1, ::-1]):
+            with patch.dict(sys.modules, {"aethron_vision_native": None}):
+                self.assertTrue(np.shares_memory(data, _validated_output(data)))
+                for bits in (0x7F800001, 0x7FC00000, 0x7F800000, 0xFF800000):
+                    data.view(np.uint32)[0, 8399, 84] = bits
+                    with np.errstate(all="raise"):
+                        with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                            _validated_output(data)
+                    data[0, 8399, 84] = 0
+
+    def test_broken_native_dependency_never_selects_portable_checker(self):
+        original_import = builtins.__import__
+        error = ModuleNotFoundError("missing native dependency", name="_bounds")
+
+        def import_module(name, *args, **kwargs):
+            if name == "aethron_vision_native":
+                raise error
+            return original_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=import_module):
+            with self.assertRaises(ModuleNotFoundError) as caught:
+                _validated_output(self.output())
+        self.assertIs(caught.exception, error)
+
+    def test_native_success_receives_original_buffer_and_returns_view(self):
+        raw = self.output()
+        calls = []
+
+        def validate(value):
+            calls.append(value)
+            return True
+
+        module = SimpleNamespace(CONTRACT_VERSION=1, validate_output=validate)
+        with patch.dict(sys.modules, {"aethron_vision_native": module}):
+            result = _validated_output(raw)
+        self.assertEqual(len(calls), 1)
+        self.assertIs(calls[0], raw)
+        self.assertTrue(self.np.shares_memory(result, raw))
