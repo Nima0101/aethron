@@ -1,5 +1,6 @@
 """Archive format evidence from tiny synthetic files, never a product build."""
 
+import gzip
 import hashlib
 import json
 import os
@@ -7,6 +8,7 @@ import tarfile
 import tempfile
 import unittest
 import zipfile
+import zlib
 from pathlib import Path
 from unittest.mock import patch
 
@@ -124,6 +126,68 @@ class ReleaseArchive(unittest.TestCase):
                     for member in archive.infolist():
                         self.assertEqual(member.create_system, 3)
                         self.assertEqual(member.external_attr >> 16, 0o644)
+            self.assertEqual(builds[0], builds[1])
+
+    def test_gzip_legacy_os_metadata_cannot_change_artifacts(self):
+        # Python 3.11/3.12 delegate mtime=0 to zlib, including its OS header byte.
+        compress = gzip.compress
+
+        def legacy_compress(data, compresslevel=9, *, mtime=None):
+            self.assertEqual(mtime, 0)
+            compressor = zlib.compressobj(compresslevel, wbits=31)
+            return compressor.compress(data) + compressor.flush()
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source, blobs = self.fixture(root)
+            builds = []
+            for index, compressor in enumerate((compress, legacy_compress)):
+                destination = root / str(index)
+                with patch.object(gzip, "compress", compressor):
+                    self.build_fixture(source, blobs, destination)
+                artifacts = {p.name: p.read_bytes() for p in destination.iterdir()}
+                builds.append(artifacts)
+                with self.subTest(compressor=index):
+                    data = artifacts["aethron-0.2.0-source.tar.gz"]
+                    self.assertEqual(data[:10], b"\x1f\x8b\x08\x00\x00\x00\x00\x00\x02\xff")
+            self.assertEqual(builds[0], builds[1])
+            self.assertEqual(
+                gzip.decompress(builds[0]["aethron-0.2.0-source.tar.gz"]),
+                gzip.decompress(builds[1]["aethron-0.2.0-source.tar.gz"]),
+            )
+
+    def test_gzip_default_compression_level_cannot_change_artifacts(self):
+        compress = gzip.compress
+        initialize = gzip.GzipFile.__init__
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source, blobs = self.fixture(root)
+            builds = []
+            for default_level in (9, 6):
+
+                def host_compress(data, compresslevel=default_level, *, mtime=None):
+                    return compress(data, compresslevel=compresslevel, mtime=mtime)
+
+                def host_initialize(
+                    stream,
+                    filename=None,
+                    mode=None,
+                    compresslevel=default_level,
+                    fileobj=None,
+                    mtime=None,
+                ):
+                    initialize(stream, filename, mode, compresslevel, fileobj, mtime)
+
+                destination = root / str(default_level)
+                with (
+                    patch.object(gzip, "compress", host_compress),
+                    patch.object(gzip.GzipFile, "__init__", host_initialize),
+                ):
+                    self.build_fixture(source, blobs, destination)
+                artifacts = {p.name: p.read_bytes() for p in destination.iterdir()}
+                builds.append(artifacts)
+                with self.subTest(default_level=default_level):
+                    self.assertEqual(artifacts["aethron-0.2.0-source.tar.gz"][8], 2)
             self.assertEqual(builds[0], builds[1])
 
     def test_text_newline_default_cannot_change_artifacts(self):

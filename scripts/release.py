@@ -84,7 +84,14 @@ def build(destination):
             info.mode = 0o644
             info.mtime = 0
             archive.addfile(info, io.BytesIO(data))
-    (out / "aethron-0.2.0-source.tar.gz").write_bytes(gzip.compress(buffer.getvalue(), mtime=0))
+    # GzipFile keeps the OS header stable on Python 3.11/3.12 too; pin all defaults
+    # that affect bytes, including the compression level changed in Python 3.15.
+    compressed = io.BytesIO()
+    with gzip.GzipFile(
+        filename="", mode="wb", compresslevel=9, fileobj=compressed, mtime=0
+    ) as stream:
+        stream.write(buffer.getvalue())
+    (out / "aethron-0.2.0-source.tar.gz").write_bytes(compressed.getvalue())
     with zipfile.ZipFile(out / "aethron.pyz", "w", compression=zipfile.ZIP_STORED) as archive:
         app = {n: data for n, data in blobs.items() if n.startswith("aethron/")}
         app["__main__.py"] = b"from aethron.__main__ import main\nraise SystemExit(main())\n"
