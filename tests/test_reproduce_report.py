@@ -119,9 +119,13 @@ class ReproductionReport(unittest.TestCase):
         real_consumers=False,
         source_mutation=None,
         source_mutate_at="consumer2",
+        verification_error=None,
+        check_workspace=False,
     ):
         output = io.StringIO()
+        diagnostics = io.StringIO()
         consumers = []
+        workspaces = []
         payload = b"synthetic archive placeholder, never executed"
         if real_consumers:
             archive = io.BytesIO()
@@ -157,11 +161,15 @@ class ReproductionReport(unittest.TestCase):
                 else:
                     source_status = b" M changed-source.py\n"
             if args[:2] == ["git", "clone"]:
+                workspaces.append(Path(args[-1]).parent)
                 (Path(args[-1]) / "aethron").mkdir(parents=True)
                 examples = Path(args[-1]) / "examples"
                 examples.mkdir()
                 (examples / "person-blackout.json").write_bytes(b"{}")
             elif args[1:2] == ["scripts/temporal_evaluate.py"]:
+                evidence = Path(args[-1])
+                evidence.mkdir()
+                (evidence / "result.json").write_bytes(b'{"fixture": "evaluation evidence"}\n')
                 return subprocess.CompletedProcess(args, evaluation)
             elif args[1:2] == ["scripts/release.py"]:
                 destination = Path(args[-1])
@@ -175,7 +183,9 @@ class ReproductionReport(unittest.TestCase):
                 data = b"different bytes" if changed and mismatch == "bytes" else payload
                 (destination / name).write_bytes(data)
             elif args[1:2] == ["scripts/verify.py"] or args[1:3] == ["-m", "aethron"]:
-                pass
+                if args[1:2] == ["scripts/verify.py"] and verification_error is not None:
+                    (workspaces[0] / "partial.bin").write_bytes(b"partial\x00evidence")
+                    raise verification_error
             elif args[1:2] == ["-I"] or args[1].endswith("aethron.pyz"):
                 consumers.append(args)
                 if mutation is not None and len(consumers) == mutate_at:
@@ -214,9 +224,12 @@ class ReproductionReport(unittest.TestCase):
 
         error = None
         with (
+            tempfile.TemporaryDirectory(prefix="reproduction-test-") as sandbox,
+            patch.object(tempfile, "tempdir", sandbox),
             patch.object(reproduce.subprocess, "run", side_effect=fake_process),
             patch.object(reproduce.subprocess, "check_output", side_effect=git_output),
             contextlib.redirect_stdout(output),
+            contextlib.redirect_stderr(diagnostics),
         ):
             try:
                 reproduce.run()
@@ -225,9 +238,94 @@ class ReproductionReport(unittest.TestCase):
                 AssertionError,
                 ValueError,
                 subprocess.CalledProcessError,
+                KeyboardInterrupt,
             ) as caught:
                 error = caught
+            if check_workspace:
+                self.assertEqual(len(workspaces), 1)
+                workspace = workspaces[0]
+                if error is None:
+                    self.assertFalse(workspace.exists())
+                    self.assertEqual(diagnostics.getvalue(), "")
+                else:
+                    self.assertTrue(workspace.is_dir(), "failed run erased its evidence")
+                    self.assertIn(str(workspace), diagnostics.getvalue())
+                    self.assertEqual(
+                        (workspace / "source/examples/person-blackout.json").read_bytes(), b"{}"
+                    )
+                    if verification_error is not None:
+                        self.assertIs(error, verification_error)
+                        self.assertEqual(
+                            (workspace / "partial.bin").read_bytes(), b"partial\x00evidence"
+                        )
+                    else:
+                        self.assertEqual(
+                            (workspace / "evaluation/result.json").read_bytes(),
+                            b'{"fixture": "evaluation evidence"}\n',
+                        )
+                        self.assertEqual((workspace / "a/aethron.pyz").read_bytes(), payload)
         return output.getvalue(), error, consumers, payload, revision
+
+    def test_failed_runs_retain_evidence_and_original_failure(self):
+        cases = (
+            {"evaluation": 1},
+            {"mismatch": "bytes"},
+            {"consumer": 7},
+            {"verification_error": subprocess.CalledProcessError(9, ["synthetic-check"])},
+            {"verification_error": KeyboardInterrupt()},
+        )
+        for case in cases:
+            with self.subTest(case=case):
+                _, error, _, _, _ = self.invoke(check_workspace=True, **case)
+                self.assertIsNotNone(error)
+
+    def test_success_removes_temporary_workspace(self):
+        _, error, _, _, _ = self.invoke(check_workspace=True, real_consumers=True)
+        self.assertIsNone(error)
+
+    def test_workspace_lifetime_survives_real_process_exit(self):
+        code = """
+import importlib.util
+import sys
+import tempfile
+from pathlib import Path
+spec = importlib.util.spec_from_file_location("reproduce", sys.argv[1])
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+tempfile.tempdir = sys.argv[2]
+with module.reproduction_workspace() as temporary:
+    print(temporary, flush=True)
+    Path(temporary, "partial.bin").write_bytes(b"retained evidence")
+    if sys.argv[3] == "fail":
+        raise SystemExit(7)
+"""
+        for outcome in ("pass", "fail"):
+            with self.subTest(outcome=outcome), tempfile.TemporaryDirectory() as sandbox:
+                result = subprocess.run(
+                    [
+                        sys.executable,
+                        "-I",
+                        "-c",
+                        code,
+                        str(Path(reproduce.__file__).resolve()),
+                        sandbox,
+                        outcome,
+                    ],
+                    cwd=sandbox,
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                    check=False,
+                )
+                self.assertEqual(result.returncode, 7 if outcome == "fail" else 0)
+                workspace = Path(result.stdout.strip())
+                self.assertEqual(workspace.parent, Path(sandbox))
+                if outcome == "fail":
+                    self.assertEqual((workspace / "partial.bin").read_bytes(), b"retained evidence")
+                    self.assertIn(str(workspace), result.stderr)
+                else:
+                    self.assertFalse(workspace.exists())
+                    self.assertEqual(result.stderr, "")
 
     def test_source_changes_cannot_be_reported_as_clean_or_relabel_revision(self):
         for stage, consumed in (("verify", 0), ("build", 0), ("consumer1", 1), ("consumer2", 2)):

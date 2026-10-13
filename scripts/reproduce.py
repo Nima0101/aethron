@@ -1,8 +1,10 @@
 """Clean clone, exact README quickstart, isolated consumer and two release builds."""
 
+import contextlib
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -41,8 +43,22 @@ def validate_source(clone, revision):
         raise ValueError("reproduction_source_changed")
 
 
+@contextlib.contextmanager
+def reproduction_workspace():
+    """Retain failed runs for diagnosis; only successful runs own automatic cleanup."""
+    temporary = tempfile.mkdtemp(prefix="aethron-clean-")
+    try:
+        yield temporary
+    except BaseException:
+        # Includes evaluation SystemExit and operator interruption.
+        print(f"reproduction evidence retained at: {temporary}", file=sys.stderr)
+        raise
+    else:
+        shutil.rmtree(temporary)
+
+
 def run():
-    with tempfile.TemporaryDirectory(prefix="aethron-clean-") as temporary:
+    with reproduction_workspace() as temporary:
         root = Path(temporary)
         clone = root / "source"
         call(["git", "clone", "--no-local", str(ROOT), str(clone)], ROOT, capture_output=True)
