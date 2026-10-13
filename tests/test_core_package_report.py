@@ -24,6 +24,7 @@ class CorePackageReport(unittest.TestCase):
         on_call=None,
         console_error=None,
         real_install=False,
+        installed_defect=None,
         console_output="usage: aethron [-h] {demo,replay,evaluate,render} ...\n",
     ):
         archive = io.BytesIO()
@@ -68,7 +69,38 @@ class CorePackageReport(unittest.TestCase):
                 self.assertIn("--no-index", args)
                 installed.append(args[-1])
                 if real_install:
-                    return real_process(args, stderr=subprocess.PIPE, text=True, **kwargs)
+                    result = real_process(args, stderr=subprocess.PIPE, text=True, **kwargs)
+                    if installed_defect is not None:
+                        python = args[0]
+                        location = real_process(
+                            [
+                                python,
+                                "-I",
+                                "-c",
+                                "import importlib.metadata; "
+                                "print(importlib.metadata.distribution('aethron').locate_file('aethron'))",
+                            ],
+                            check=True,
+                            capture_output=True,
+                            text=True,
+                        )
+                        package = Path(location.stdout.strip())
+                        if installed_defect == "changed":
+                            (package / "__init__.py").write_bytes(b"# changed after installation\n")
+                        elif installed_defect == "missing":
+                            (package / "__init__.py").unlink()
+                        elif installed_defect == "extra":
+                            (package / "unexpected.py").write_bytes(b"# untracked source\n")
+                    return result
+            elif args[1] == "-I" and args[-1] == "--installed-payload":
+                if real_install:
+                    return real_process(args, **kwargs)
+                with zipfile.ZipFile(io.BytesIO(archive.getvalue())) as wheel:
+                    manifest = {
+                        name: hashlib.sha256(wheel.read(name)).hexdigest()
+                        for name in ("aethron/__init__.py", "aethron/__main__.py")
+                    }
+                return subprocess.CompletedProcess(args, 0, stdout=json.dumps(manifest))
             elif args[1:] == ["--help"]:
                 if console_error is not None:
                     raise console_error
@@ -138,10 +170,12 @@ class CorePackageReport(unittest.TestCase):
                 report = json.loads(output.getvalue())
                 self.assertNotIn("runtime_dependencies", report)
                 self.assertIs(report["dependency_installation"], False)
+                self.assertEqual(report["source_payload_files"], 2)
+                self.assertIs(report["installed_source_payload"], True)
 
     def test_child_failure_never_emits_success_report(self):
-        # Two builds, environment creation, install, console and two module consumers.
-        for fail_at in range(1, 8):
+        # Two builds, environment, install, payload probe, console and two consumers.
+        for fail_at in range(1, 9):
             with self.subTest(fail_at=fail_at), self.fixture(fail_at=fail_at) as fixture:
                 output, _, calls = fixture
                 with self.assertRaises(subprocess.CalledProcessError) as raised:
@@ -277,3 +311,30 @@ class CorePackageReport(unittest.TestCase):
                         else:
                             package_check.run()
                             self.assertIs(json.loads(output.getvalue())["console_wrapper"], True)
+
+    def test_changed_installed_payload_cannot_emit_success(self):
+        for defect in ("changed", "missing", "extra"):
+            with (
+                self.subTest(defect=defect),
+                self.fixture(real_install=True, installed_defect=defect) as (output, _, calls),
+            ):
+                with self.assertRaisesRegex(ValueError, "installed_source_payload_mismatch"):
+                    package_check.run()
+                self.assertEqual(calls[-1][-1], "--installed-payload")
+                self.assertFalse(any(call[1:] == ["--help"] for call in calls))
+                self.assertEqual(output.getvalue(), "")
+
+    def test_report_manifest_binds_prebuild_source_snapshot(self):
+        with self.fixture() as (output, _, calls):
+            manifest = {
+                name: hashlib.sha256(data).hexdigest()
+                for name, data in package_check.snapshot_source_payload(package_check.ROOT).items()
+            }
+            package_check.run()
+            expected = hashlib.sha256(
+                json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode("utf-8")
+            ).hexdigest()
+            self.assertEqual(json.loads(output.getvalue())["source_payload_sha256"], expected)
+            probe = next(call for call in calls if call[-1] == "--installed-payload")
+            self.assertEqual(probe[1], "-I")
+            self.assertEqual(Path(probe[2]), Path(package_check.__file__).resolve())
