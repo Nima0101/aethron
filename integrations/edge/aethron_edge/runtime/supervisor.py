@@ -216,10 +216,18 @@ class ApplianceSupervisor:
                 # or retain potentially private native exception diagnostics.
                 cleanup_failed = True
 
+        def join(task, timeout):
+            nonlocal cleanup_failed
+            task.join(timeout=timeout)
+            # A timed join returns None even when the thread still owns work.
+            # Keep its handle for retry and never publish a completed stop.
+            if task.is_alive():
+                cleanup_failed = True
+
         if self.thread:
-            attempt(self.thread.join, timeout=2)
+            attempt(join, task=self.thread, timeout=2)
         for task in self.maintenance:
-            attempt(task.join, timeout=4)
+            attempt(join, task=task, timeout=4)
         for source in self.telemetry.values():
             attempt(source.close)
         with self.lock:

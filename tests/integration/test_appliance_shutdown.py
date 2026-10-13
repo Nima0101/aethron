@@ -27,8 +27,8 @@ class ApplianceShutdown(unittest.TestCase):
         self.runtime.config = SimpleNamespace(
             runtime_mode="appliance", status_file=str(Path(directory) / "status.json")
         )
-        self.runtime.thread = Mock()
-        self.runtime.maintenance = [Mock(), Mock()]
+        self.runtime.thread = Mock(is_alive=Mock(return_value=False))
+        self.runtime.maintenance = [Mock(is_alive=Mock(return_value=False)) for _ in range(2)]
         self.runtime.telemetry = {
             name: Mock(snapshot=Mock(return_value={"state": "stopped"}))
             for name in ("first", "second")
@@ -123,3 +123,27 @@ class ApplianceShutdown(unittest.TestCase):
         status = json.loads(Path(self.runtime.config.status_file).read_text())
         self.assertEqual(status["state"], "stopped")
         self.assertEqual(status["fault_count"], 0)
+
+    def test_incomplete_joins_report_fault_and_retain_cleanup_ownership(self):
+        for index in range(3):
+            with self.subTest(thread=index):
+                if index:
+                    self.make_runtime()
+                tasks = [self.runtime.thread, *self.runtime.maintenance]
+                pending = tasks[index]
+                pending.is_alive.return_value = True
+                self.assert_failed_shutdown()
+                self.assertEqual([self.runtime.thread, *self.runtime.maintenance], tasks)
+                for task in tasks:
+                    task.is_alive.assert_called_once_with()
+                # Completion permits a later explicit shutdown to succeed.
+                pending.is_alive.return_value = False
+                self.runtime.shutdown()
+                self.assert_cleanup_attempts()
+                status = json.loads(Path(self.runtime.config.status_file).read_text())
+                self.assertEqual(status["state"], "stopped")
+
+    def test_join_liveness_error_is_private_and_does_not_skip_cleanup(self):
+        self.runtime.maintenance[0].is_alive.side_effect = OSError("private diagnostic")
+        self.assert_failed_shutdown()
+        self.runtime.maintenance[1].is_alive.assert_called_once_with()

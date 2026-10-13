@@ -1,3 +1,4 @@
+import json
 import tempfile
 import threading
 import time
@@ -59,9 +60,13 @@ class Lifecycle(unittest.TestCase):
                     # Model an expired join budget without a four-second sleep.
                     # The actual recovery thread remains blocked inside start.
                     with patch.object(task, "join", return_value=None) as join:
-                        runtime.shutdown()
+                        with self.assertRaisesRegex(RuntimeError, "^appliance_cleanup_failed$"):
+                            runtime.shutdown()
                     join.assert_called_once_with(timeout=4)
                     self.assertTrue(task.is_alive())
+                    status = json.loads(Path(config.status_file).read_text())
+                    self.assertEqual(status["state"], "fault")
+                    self.assertEqual(status["fault_count"], 1)
                     self.assertIs(runtime.pipelines["bench"], original)
                     self.assertEqual(runtime.snapshot("bench")["state"], "UNKNOWN")
                     release.set()
@@ -73,7 +78,7 @@ class Lifecycle(unittest.TestCase):
                     self.assertTrue(processes[0]._closed)
                     self.assertIs(runtime.pipelines["bench"], original)
                     self.assertEqual(runtime.recovering, set())
-                    self.assertEqual(runtime.faults, set())
+                    self.assertEqual(runtime.faults, {"shutdown_cleanup"})
                     self.assertEqual(runtime.snapshot("bench")["state"], "UNKNOWN")
                 finally:
                     release.set()
