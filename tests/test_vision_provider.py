@@ -5,11 +5,13 @@ Native execution is replaced with a deterministic fault, not an accelerator clai
 
 import hashlib
 import importlib.util
+import io
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from aethron.vision import yolox
 
@@ -34,7 +36,7 @@ class VisionProvider(unittest.TestCase):
         ]
         self.pixels = np.zeros((8, 8, 3), dtype=np.uint8)
 
-    def detector(self, available=None):
+    def detector(self, available=None, session_factory=None):
         # Keep file length/digest verification real; only native model loading is
         # substituted so no downloaded model or hardware is needed for this fault.
         blob = b"synthetic provider boundary fixture"
@@ -48,9 +50,60 @@ class VisionProvider(unittest.TestCase):
                     "onnxruntime.get_available_providers",
                     return_value=available or ["CoreMLExecutionProvider", "CPUExecutionProvider"],
                 ),
-                patch("onnxruntime.InferenceSession", return_value=self.session),
+                patch(
+                    "onnxruntime.InferenceSession",
+                    return_value=self.session,
+                    side_effect=session_factory,
+                ),
             ):
                 return yolox.RGBDetector(path, backend="coreml")
+
+    def test_construction_failure_cannot_retry_or_print_native_details(self):
+        from onnxruntime.capi.onnxruntime_inference_collection import InferenceSession
+
+        for error_type in (ValueError, RuntimeError):
+            with self.subTest(error_type=error_type.__name__):
+                attempts = []
+                original = error_type("synthetic private native detail")
+
+                def fail(session, providers, *args, attempts=attempts, original=original):
+                    attempts.append(tuple(providers))
+                    session._fallback_providers = ["CPUExecutionProvider"]
+                    raise original
+
+                output = io.StringIO()
+                with (
+                    patch.object(InferenceSession, "_create_inference_session", fail),
+                    redirect_stdout(output),
+                    self.assertRaises(error_type) as caught,
+                ):
+                    self.detector(session_factory=InferenceSession)
+                self.assertIs(caught.exception, original)
+                self.assertEqual(attempts, [("CoreMLExecutionProvider", "CPUExecutionProvider")])
+                self.assertEqual(output.getvalue(), "")
+
+    def test_reenabled_fallback_is_disabled_before_each_execution(self):
+        from onnxruntime.capi import _pybind_state as native
+
+        original = native.EPFail("synthetic private provider detail")
+        run = Mock(side_effect=original)
+        self.session._sess = SimpleNamespace(run=run, is_webgpu_graph_capture_enabled=lambda: False)
+        detector = self.detector()
+        for attempt in range(2):
+            with self.subTest(attempt=attempt):
+                run.reset_mock()
+                self.session.enable_fallback()
+                output = io.StringIO()
+                with (
+                    patch.object(self.session, "set_providers") as retry,
+                    redirect_stdout(output),
+                    self.assertRaises(native.EPFail) as caught,
+                ):
+                    detector.infer(self.pixels, lighting="daylight")
+                self.assertIs(caught.exception, original)
+                self.assertEqual(output.getvalue(), "")
+                run.assert_called_once()
+                retry.assert_not_called()
 
     def test_execution_failure_cannot_retry_on_cpu(self):
         from onnxruntime.capi import _pybind_state as native

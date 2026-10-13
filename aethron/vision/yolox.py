@@ -50,6 +50,9 @@ class RGBDetector:
             require("CoreMLExecutionProvider" in ort.get_available_providers())
             self.ort_session = ort.InferenceSession(
                 blob,
+                # Disable construction retry too: the post-construction call
+                # cannot prevent an earlier CPU rebuild or native error print.
+                enable_fallback=False,
                 providers=["CoreMLExecutionProvider", "CPUExecutionProvider"],
                 provider_options=[
                     {
@@ -97,6 +100,8 @@ class RGBDetector:
         canvas[: resized.shape[0], : resized.shape[1]] = resized
         tensor = np.ascontiguousarray(canvas.transpose(2, 0, 1)[None], dtype=np.float32)
         if self.backend == "coreml":
+            # Reassert the application policy if fallback was enabled between calls.
+            self.ort_session.disable_fallback()
             raw = self.ort_session.run(None, {self.ort_input_name: tensor})[0]
         else:
             self.net.setInput(tensor)
