@@ -1,6 +1,7 @@
 """Build wheels twice and install into a fresh environment outside the source tree."""
 
 import hashlib
+import importlib.metadata
 import io
 import json
 import os
@@ -60,6 +61,15 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
             raise ValueError("wheel_source_payload_mismatch")
 
 
+def installed_source_manifest(package_name="aethron", distribution="aethron"):
+    package = Path(importlib.metadata.distribution(distribution).locate_file(package_name))
+    package.resolve().relative_to(Path(sys.prefix).resolve())
+    return {
+        name: hashlib.sha256(data).hexdigest()
+        for name, data in snapshot_source_payload(package.parent, package_name).items()
+    }
+
+
 def run():
     with tempfile.TemporaryDirectory(prefix="aethron-wheel-") as directory:
         temp = Path(directory)
@@ -89,7 +99,14 @@ def run():
         compared_bytes = a.read_bytes()
         assert compared_bytes == b.read_bytes(), "wheel builds differ"
         validate_source_payload(compared_bytes, source_payload)
+        source_manifest = {
+            name: hashlib.sha256(data).hexdigest() for name, data in source_payload.items()
+        }
+        source_payload_sha256 = hashlib.sha256(
+            json.dumps(source_manifest, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
         wheel_sha256 = hashlib.sha256(compared_bytes).hexdigest()
+
         subprocess.run([sys.executable, "-m", "venv", str(temp / "consumer")], check=True)
         python = temp / "consumer" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
         subprocess.run(
@@ -108,6 +125,16 @@ def run():
             check=True,
             stdout=subprocess.DEVNULL,
         )
+        installed = subprocess.run(
+            [str(python), "-I", str(Path(__file__).resolve()), "--installed-payload"],
+            cwd=temp,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if json.loads(installed.stdout) != source_manifest:
+            raise ValueError("installed_source_payload_mismatch")
         console = python.with_name("aethron.exe" if os.name == "nt" else "aethron")
         console_env = dict(os.environ, PYTHONNOUSERSITE="1")
         for variable in ("PYTHONPATH", "PYTHONHOME"):
@@ -172,10 +199,16 @@ def run():
                     "isolated_install": True,
                     "console_wrapper": True,
                     "dependency_installation": False,
+                    "source_payload_files": len(source_manifest),
+                    "source_payload_sha256": source_payload_sha256,
+                    "installed_source_payload": True,
                 }
             )
         )
 
 
 if __name__ == "__main__":
-    run()
+    if sys.argv[1:] == ["--installed-payload"]:
+        print(json.dumps(installed_source_manifest(), sort_keys=True))
+    else:
+        run()

@@ -34,6 +34,13 @@ class PackageFinalIntegrityTests(unittest.TestCase):
                 pass
             elif args[1:4] == ["-m", "pip", "install"]:
                 pass
+            elif args[1] == "-I" and args[-1] == "--installed-payload":
+                with zipfile.ZipFile(io.BytesIO(wheel_bytes)) as wheel:
+                    manifest = {
+                        name: hashlib.sha256(wheel.read(name)).hexdigest()
+                        for name in wheel.namelist()
+                    }
+                return subprocess.CompletedProcess(args, 0, stdout=json.dumps(manifest))
             elif args[1:] == ["--help"]:
                 return subprocess.CompletedProcess(args, 0, stdout="usage: aethron")
             elif args[1:5] == ["-I", "-m", "aethron", "demo"]:
