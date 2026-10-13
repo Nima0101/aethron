@@ -1,0 +1,34 @@
+{
+  "review_order_version": 3,
+  "component": "C01_comparison_evidence_integrity",
+  "decision": "FIX",
+  "full_component_review_complete": false,
+  "reviewed_head": "75e9bd0e3e69d7b45fcfdb563b7c03621bec71f5",
+  "runtime_sensor_processing_changed": false,
+  "checks": {
+    "red_assertion_failures": 4,
+    "red_execution_errors": 0,
+    "green_methods": 3,
+    "optimized_subcases": 4,
+    "normal_wrong_result_cases": 2,
+    "normal_candidate_calls": 16,
+    "adjacent_appliance_methods": 2,
+    "ruff": "PASS after binding lambda loop variable",
+    "format": "PASS after formatting test",
+    "bandit": "nine existing LOW findings, zero added relative to HEAD",
+    "diff": "PASS",
+    "new_benchmarks": false,
+    "hardware_checks": false
+  },
+  "limitations": [
+    "No Node worker or full comparison executed.",
+    "No new runtime KEEP/MIGRATE decision.",
+    "Historical timing reports are not requalified."
+  ],
+  "sha256": {
+    "scripts/probes/sensor_packet_audit/compare.py": "f73b9b941c7d80173d098162fc1b71ed3b938f047a43e36e96b711dcc819f35b",
+    "scripts/probes/sensor_packet_audit/README.md": "2ece9216df2915fc3dffa1934d7e682ed313e29f983aca0c58314dd5a5e2c5a6",
+    "tests/integration/test_sensor_packet_audit_modes.py": "949e16b4572b2f3b277ffca586bf2c56c936ee664356b0525232b53f9446805b",
+    "docs/engineering/aethron-ecosystem/P21-PACKET-EVIDENCE-REVIEW-V3.md": "556a3d5d391a2cba96f63feaeaef583578c4d003fcf71a5321b1d4fc900c2aa9"
+  }
+}

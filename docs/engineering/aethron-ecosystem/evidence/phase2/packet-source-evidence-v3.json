@@ -1,0 +1,34 @@
+{
+  "review_order_version": 3,
+  "component": "C01_comparison_source_fingerprints",
+  "decision": "FIX",
+  "full_component_review_complete": false,
+  "reviewed_head": "05eb78d58327527e6f14d32c375b439091a4580f",
+  "production_changed": false,
+  "checks": {
+    "red_assertion_failures": 4,
+    "red_execution_errors": 0,
+    "new_methods": 3,
+    "green_methods": 16,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "Nine LOW findings identical to baseline by rule/severity/message",
+    "existing_non_main_function_class_ast": "UNCHANGED"
+  },
+  "limitations": [
+    "Inert workers and substituted measurements; no sensor benchmark.",
+    "On-disk file fingerprints do not attest loaded code or authenticate reports.",
+    "No atomic snapshot or complete dependency closure.",
+    "Historical evidence unchanged; full technology reassessment incomplete."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/hashlib.html",
+    "https://nodejs.org/api/crypto.html"
+  ],
+  "sha256": {
+    "scripts/probes/sensor_packet_audit/compare.py": "594bcc602896bf1e5450b61c0ce787dfe9b0e531ef88688254c7779382b60c11",
+    "scripts/probes/sensor_packet_audit/README.md": "62ae660fcfcbb4ab004e2182aa398ad5a61038d6090586f15022eb37361450b4",
+    "tests/integration/test_sensor_packet_audit_modes.py": "12d896535ca349010894276774e9343542f14251a547d08164ffeb0afd455746",
+    "docs/engineering/aethron-ecosystem/P21-PACKET-SOURCE-EVIDENCE-V3.md": "aaf8adcc251aa135530ae7ac5c500a9bca1ba75d7b26475f6e5f9dfaa7b890e8"
+  }
+}
