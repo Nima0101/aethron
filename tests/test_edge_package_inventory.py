@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from scripts import edge_package_check
+from scripts import edge_package_check, package_check
 
 
 class PackageEvidenceInventory(unittest.TestCase):
@@ -25,7 +25,10 @@ class PackageEvidenceInventory(unittest.TestCase):
                     return subprocess.CompletedProcess(args, 0)
                 raise RuntimeError("inventory_accepted")
 
-            with patch.object(edge_package_check.subprocess, "run", side_effect=fake_build):
+            with (
+                patch.object(edge_package_check.subprocess, "run", side_effect=fake_build),
+                patch.object(package_check, "validate_source_payload"),
+            ):
                 try:
                     edge_package_check.run(Path(directory) / "wheelhouse", output)
                 except Exception as error:
