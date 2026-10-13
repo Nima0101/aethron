@@ -14,6 +14,7 @@ on:
       - 'tests/probes/vision_pack.c'
       - 'integrations/edge/aethron_edge/pipeline.py'
       - 'tests/integration/test_worker_cancellation.py'
+      - 'tests/integration/test_worker_tree.py'
       - 'requirements-coreml.txt'
       - 'requirements-vision.txt'
       - '.github/workflows/aethron-provider-boundary.yml'
@@ -32,6 +33,7 @@ on:
       - 'tests/probes/vision_pack.c'
       - 'integrations/edge/aethron_edge/pipeline.py'
       - 'tests/integration/test_worker_cancellation.py'
+      - 'tests/integration/test_worker_tree.py'
       - 'requirements-coreml.txt'
       - 'requirements-vision.txt'
       - '.github/workflows/aethron-provider-boundary.yml'
@@ -72,7 +74,7 @@ jobs:
           mkdir -p build/provider
           python -c "import cv2, numpy, onnxruntime; print(cv2.__version__, numpy.__version__, onnxruntime.__version__)" > build/provider/versions.txt
           python -m unittest discover -s tests -p 'test_vision*.py' -v > build/provider/tests.txt 2>&1
-      - name: Cooperative worker cancellation with the installed CPU binding
+      - name: Cooperative worker cancellation and descendant cleanup
         env:
           PYTHONPATH: integrations/edge
         run: |
@@ -81,8 +83,9 @@ jobs:
           import onnxruntime as ort
           ort.disable_telemetry_events()
           suite = unittest.defaultTestLoader.discover('tests/integration', pattern='test_worker_cancellation.py')
+          suite.addTests(unittest.defaultTestLoader.discover('tests/integration', pattern='test_worker_tree.py'))
           result = unittest.TextTestRunner(verbosity=2).run(suite)
-          if not result.wasSuccessful() or result.testsRun != 17 or result.skipped or result.expectedFailures:
+          if not result.wasSuccessful() or result.testsRun != 19 or result.skipped or result.expectedFailures:
               raise SystemExit('worker cancellation coverage incomplete')
           PY
       - name: Build and install optional bounded CPU validator

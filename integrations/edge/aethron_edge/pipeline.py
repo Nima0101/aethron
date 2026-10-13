@@ -525,6 +525,7 @@ class RuntimePipeline:
                 self.process = None
                 return
             self.process.join(timeout=1)
+            descendant_cleanup_failed = False
             if os.name == "posix" and self.group.value == self.process.pid:
                 # Only the group created by this worker; descendants share it.
                 for sig in (signal.SIGTERM, signal.SIGKILL):
@@ -538,14 +539,23 @@ class RuntimePipeline:
                     try:
                         os.kill(self.descendant.value, signal.SIGKILL)
                     except ProcessLookupError:
-                        pass
-                    self.descendant.value = 0
+                        self.descendant.value = 0
+                    except OSError:
+                        # A denied child signal must not skip the direct worker
+                        # shutdown. Retain its ownership for a later retry.
+                        descendant_cleanup_failed = True
+                    else:
+                        self.descendant.value = 0
             if self.process.is_alive():
                 self.process.terminate()
                 self.process.join(timeout=1)
             if self.process.is_alive():
                 self.process.kill()
                 self.process.join(timeout=1)
+            if descendant_cleanup_failed:
+                # Keep the process handle and descendant PID together until
+                # cleanup succeeds; never report a denied cleanup as success.
+                raise RuntimeError("worker_cleanup_failed")
             self.process.close()
             self.process = None
 
