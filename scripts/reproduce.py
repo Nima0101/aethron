@@ -8,11 +8,23 @@ import sys
 import tempfile
 from pathlib import Path
 
+# Optimized execution removes assertions used to establish this evidence.
+if sys.flags.optimize:
+    raise SystemExit("reproduce_requires_assertions")
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def call(args, cwd, **kw):
     return subprocess.run(args, cwd=cwd, check=True, **kw)
+
+
+def validate_artifacts(directory, manifest):
+    observed = {
+        path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in directory.iterdir()
+    }
+    if observed != manifest:
+        raise ValueError("release_artifacts_changed")
 
 
 def run():
@@ -63,11 +75,15 @@ def run():
         call([sys.executable, "scripts/release.py", str(root / "b")], clone)
         a, b = root / "a", root / "b"
         assert sorted(p.name for p in a.iterdir()) == sorted(p.name for p in b.iterdir())
+        artifact_manifest = {}
         for p in a.iterdir():
-            assert p.read_bytes() == (b / p.name).read_bytes(), p.name
+            compared = p.read_bytes()
+            assert compared == (b / p.name).read_bytes(), p.name
+            artifact_manifest[p.name] = hashlib.sha256(compared).hexdigest()
         call(
             [
                 sys.executable,
+                "-I",
                 str(a / "aethron.pyz"),
                 "evaluate",
                 str(clone / "examples/person-blackout.json"),
@@ -75,6 +91,8 @@ def run():
             root,
             stdout=subprocess.DEVNULL,
         )
+        for directory in (a, b):
+            validate_artifacts(directory, artifact_manifest)
         # zipimport consumer from outside the checkout, no PYTHONPATH dependency.
         env = dict(os.environ)
         env.pop("PYTHONPATH", None)
@@ -91,6 +109,8 @@ def run():
             root,
             env=env,
         )
+        for directory in (a, b):
+            validate_artifacts(directory, artifact_manifest)
         result = {
             "source_revision": subprocess.check_output(
                 ["git", "rev-parse", "HEAD"], cwd=clone, text=True
@@ -100,9 +120,7 @@ def run():
             "quickstart": evaluation.returncode == 0,
             "isolated_zipapp_consumer": True,
             "byte_identical_builds": True,
-            "artifact_sha256": {
-                p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in a.iterdir()
-            },
+            "artifact_sha256": artifact_manifest,
         }
         print(json.dumps(result, sort_keys=True))
         if evaluation.returncode != 0:
