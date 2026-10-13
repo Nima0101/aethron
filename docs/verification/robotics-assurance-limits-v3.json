@@ -1,0 +1,49 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "48de56cbd75954f3d4f790790cec807026e3a6b1",
+  "component": "P3.1 passive diagnostic assurance claims",
+  "decision": "CLARIFY documentation; production technology decision remains PENDING",
+  "production_changed": false,
+  "source_sha256": {
+    "integrations/edge/aethron_edge/telemetry/README.md": "e39bf0e7754be2d49c80ac2888af0cf846285eec35e6303366d6264e368b0855",
+    "docs/architecture/robotics-review-v3.md": "d8caec37361b8c99327de8884f8686e1b16e94ab17251eeac8a07f044208130a",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "tests/mavlink/test_telemetry.py": "00624096f3655bb2586932f1159ba84fe5ea03c54f521aee1ffa2087c4e09740",
+    "tests/mavlink/test_sdk_startup_v3.py": "dba37336e03ba1c6c7c64be39cf4a11810b59fdc7c94228f2a39a6461e2ecd3f",
+    "tests/mavlink/sdk_startup_probe_v3.py": "188f64e1fa74a0c231d8622aca8c2e9f95d2376ffaddc7a149b9028df76b431c",
+    "docs/verification/robotics-sdk-provenance-v3.json": "1218f4f96c03d8f8e5dac434afde724b76349cf5aae7e47131c34f05f0c38da7"
+  },
+  "checks": {
+    "command": "PYTHONPATH=integrations/edge:tests/mavlink .venv/bin/python -m unittest test_sdk_startup_v3 test_telemetry.TelemetryTests.test_real_sdk_packet_units_and_unverified_provenance test_telemetry.TelemetryTests.test_latest_slots_expire_independently_without_new_packets test_telemetry.TelemetryTests.test_signed_packet_cannot_be_reported_as_authenticated_without_keys",
+    "methods": 5,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "seconds": 1.394,
+    "red": "Not applicable: documentation clarification using existing checks; no production defect claimed",
+    "local_links": "PASS after receipt creation",
+    "initial_link_check": "Failed before new receipt was written: robotics-assurance-limits-v3.json did not exist; creation moved before link check",
+    "diff_check": "PASS"
+  },
+  "retained_file_sha256": {
+    "assurance-limits-green.log": "ad7841ca49494966e5f0f77fe8b755cf792119016e891ee83220821c8b7afc04"
+  },
+  "external_references": [
+    {
+      "url": "https://mavlink.io/en/guide/serialization.html",
+      "reviewed_on": "2026-10-10",
+      "use": "Checksum framing overview; not authentication or device qualification"
+    },
+    {
+      "url": "https://mavlink.io/en/guide/message_signing.html",
+      "reviewed_on": "2026-10-10",
+      "use": "Separate shared-secret message authentication; not measurement trust or host attestation"
+    }
+  ],
+  "limits": [
+    "No new algorithm, runtime selection, migration or performance comparison",
+    "No physical device, encryption certification, MLS, complete Zero Trust deployment or availability qualification",
+    "Review is limited to passive diagnostic claims; later lane components remain unreviewed",
+    "No weapon-specific code/instructions imported, integrated, executed or optimized"
+  ]
+}

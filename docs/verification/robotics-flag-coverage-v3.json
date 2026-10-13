@@ -1,0 +1,177 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "dfc7edbd3625bca651a046380b7781113754fc98",
+  "component": "passive_wire comparator coverage",
+  "decision": "FIX evidence gap; production technology PENDING",
+  "production_changed": false,
+  "source_sha256": {
+    "scripts/robotics_wire_audit_v2.py": "3e7f1f637c3bd8c8367c35d52a91b07ff78ca1c1a07450879369823697df3d3b",
+    "tests/mavlink/test_wire_audit_v2.py": "1aa176d30e85b734172ca59d548568da00347880cf6958bb5dce6594bbb3af74",
+    "scripts/robotics_native_audit_v2.py": "2a327603388d1c59d255311752b9c5a5daa42e769b2ad1a453b76362584f2e5d",
+    "scripts/robotics_lifecycle_audit_v2.py": "d763fa9c0c51a447d8f06c26032023561b5b35906fc7a4ecfb854664a5adef7a",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "tests/mavlink/audit_v2/reference.c": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483",
+    "docs/architecture/robotics-review-v3.md": "68ca7eadb8f529bfba952792b5ef3f5c8ae8318230cd2b847a93f5f878437d14",
+    "docs/verification/robotics-comparator-coverage-v3.md": "af1670b51c836914dc421298ab16a1609da52f5ce32b53059fbe364ba5d89aba"
+  },
+  "checks": {
+    "red": {
+      "methods": 1,
+      "expected_failures": 1,
+      "reason": "absent CRC-valid compatibility-flag fixture"
+    },
+    "initial_test_invocation": {
+      "methods": 30,
+      "errors": 1,
+      "reason": "nonexistent tests.mavlink.test_managed_audit_v2 module; retained log"
+    },
+    "green": {
+      "methods": 42,
+      "skips": 0,
+      "seconds": 11.687,
+      "modules": [
+        "tests.mavlink.test_wire_audit_v2",
+        "tests.mavlink.test_native_audit_v2",
+        "tests.mavlink.test_lifecycle_audit_v2"
+      ]
+    },
+    "ruff_check": "PASS",
+    "ruff_format": "PASS",
+    "bandit": "PASS",
+    "previous_19_fixture_records_unchanged": true,
+    "native_fixture_generation": {
+      "cases": 36,
+      "steps": 68,
+      "execution": false
+    }
+  },
+  "wire_run": {
+    "audit_policy_version": 3,
+    "state": "compared",
+    "decision": "PENDING",
+    "scope": "fresh unsigned packet admission only; not lifecycle/signing parity",
+    "source_sha256": {
+      "scripts/robotics_wire_audit_v2.py": "3e7f1f637c3bd8c8367c35d52a91b07ff78ca1c1a07450879369823697df3d3b",
+      "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+      "tests/mavlink/audit_v2/reference.c": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483"
+    },
+    "corpus_cases": 20,
+    "parity": true,
+    "sanitized_parity": true,
+    "python": {
+      "samples": 512,
+      "accepted": 78,
+      "p50_ns": 24053,
+      "p95_ns": 107481,
+      "max_ns": 62088782
+    },
+    "c": {
+      "samples": 512,
+      "accepted": 78,
+      "p50_ns": 32,
+      "p95_ns": 329,
+      "max_ns": 688
+    },
+    "python_version": "3.13.5",
+    "machine": "x86_64",
+    "system": "Linux",
+    "compiler": "cc (Debian 14.2.0-19) 14.2.0",
+    "xml_sha256": "fbac92d0689c9b1bc03b49ebc5cdf989f3fc23026c3c856f7224e4b9af1b5f53",
+    "driver_sha256": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483",
+    "harness_sha256": "3e7f1f637c3bd8c8367c35d52a91b07ff78ca1c1a07450879369823697df3d3b",
+    "corpus_sha256": "4f2cd419fa26a1fd6af2faf13828cbf9f527d1142ef54cf929ace81a1dd81e72",
+    "pymavlink": "2.4.50",
+    "limitations": [
+      "512 mixed valid/invalid probes; no hard-real-time claim",
+      "Python constructor excluded; C stack setup included",
+      "C omits state, provenance objects and persistent replay",
+      "No memory, cold-start, signed, UDP or SITL comparison"
+    ]
+  },
+  "negative_control": {
+    "original_19_unchanged": true,
+    "mutant": "remove p[3] guard from audit-only C copy",
+    "original_19_parity": true,
+    "new_case_rejected_by_comparator": true,
+    "new_case": "v3_compatibility_flag_valid_crc",
+    "actual": {
+      "accepted": true,
+      "message": 30,
+      "boot": 10,
+      "values": [
+        0.100000001,
+        -0.200000003,
+        0.300000012,
+        0.400000006,
+        -0.5,
+        0.600000024
+      ]
+    },
+    "expected": {
+      "accepted": false
+    },
+    "native_cases": 36,
+    "native_steps": 68,
+    "native_executed": false,
+    "mutant_sha256": "1d3af12d7c4a974f7c775c7a365285c2443e19775fac59b2b450ed087332940a"
+  },
+  "retained_file_sha256": {
+    "flag-coverage-v3-green.log": "e0a51c2dc07bf6fa83acb297ed2d31a9224ba1b9cc00e1185d9276c06701ad83",
+    "flag-coverage-v3-initial-test-invocation.log": "3ea7a19004f2e00f92495c7756698085072a7de3512a615ab6f620fa5788f1c4",
+    "flag-coverage-v3-negative-control.json": "afe9f309e493e8cee744e40b42702e99a936e6453f567ef82973ebd2dfd84e74",
+    "flag-coverage-v3-red.log": "b6b560558f4b463f22ee8a87fc4399ada8f2c47ad2ff38f44ffc917a9ece183e",
+    "flag-coverage-v3-wire/candidate-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "flag-coverage-v3-wire/candidate-stdout.log": "38b3ef54f3e8101b5888ec4523ab70b3f9e437926ffce59f5a5ac3b247ed1ae7",
+    "flag-coverage-v3-wire/compiler-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "flag-coverage-v3-wire/compiler-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "flag-coverage-v3-wire/compiler-version-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "flag-coverage-v3-wire/compiler-version-stdout.log": "78fc11ae2c3ff7c235eb18ed90989d18f6cc864fb27027f839368cd0888deebc",
+    "flag-coverage-v3-wire/corpus.json": "4f2cd419fa26a1fd6af2faf13828cbf9f527d1142ef54cf929ace81a1dd81e72",
+    "flag-coverage-v3-wire/expected.json": "7535f57e83cc03d6cdc8aebe2d5e2272bafd6da7274d9952fa6c7fd48d2bfb6b",
+    "flag-coverage-v3-wire/generated/checksum.h": "8d6cac8dee37e6d619f5aee9fdbbe83b837b8e05a645c5d44b0578ba45a09924",
+    "flag-coverage-v3-wire/generated/mavlink_conversions.h": "374fcaae7eba6314bef2ab97a2394707f92925f4c899172ed3f9ad65c8d44765",
+    "flag-coverage-v3-wire/generated/mavlink_get_info.h": "d64af08c57384019a6b1bad3940928717a60f18a13f627dc849d638b40ec08ee",
+    "flag-coverage-v3-wire/generated/mavlink_helpers.h": "20c83c437488d53c6a9825fd1b180e643fccfd767a408107715d7056c3f6d8fb",
+    "flag-coverage-v3-wire/generated/mavlink_sha256.h": "2f9e6610227896776a4414127c22cf4f3a579e51055c95b6dea65afa32ad8340",
+    "flag-coverage-v3-wire/generated/mavlink_types.h": "407273090067c0da447a0b94646cae2fe580c1fa4c2accddb13efb7270f06962",
+    "flag-coverage-v3-wire/generated/protocol.h": "056d529ef936895085700c9ad12ff0a500cb88db913df3163dbee4eabd1c8a63",
+    "flag-coverage-v3-wire/generated/subset/mavlink.h": "9df7a62dbb836a6ddc2f4bbffc7448723e71475b94c902e08019159d10014b56",
+    "flag-coverage-v3-wire/generated/subset/mavlink_msg_attitude.h": "13c5971979ef7cd2b6ef042c13ce32764b2709c6ac5c2f6ed7c7b58bd32068d7",
+    "flag-coverage-v3-wire/generated/subset/mavlink_msg_local_position_ned.h": "2b083abc2ea32b653138b7c27979c930825328e799d3a4d3216375a132f6a1e3",
+    "flag-coverage-v3-wire/generated/subset/subset.h": "0fa00cf0b9de1836dd4c3a4e346403f25cb67533f82ff22193f0abf524dfd455",
+    "flag-coverage-v3-wire/generated/subset/testsuite.h": "f6bffbcec4320ea4acee0642095cddaf047162f73ddef1cf1d21087d8852946e",
+    "flag-coverage-v3-wire/generated/subset/version.h": "d73c6dab7398078dac3f649caa009c4217eaf45ff60d80aa971e03878bff4381",
+    "flag-coverage-v3-wire/generation.log": "3c61a40e96edb1d5d1fdd34343bf60f439843ed534d4e3e21622cbfc29b5efcd",
+    "flag-coverage-v3-wire/native-fixtures.rs": "d839ac905fd5e7283ef25875cf465b76bee937389ee998dc69c21cef56344627",
+    "flag-coverage-v3-wire/negative-control-compile-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "flag-coverage-v3-wire/negative-control-compile-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "flag-coverage-v3-wire/negative-control-no-compatibility-filter": "c1e6aae343586bd727bc3d239286b7dab04e6e217c8947e44306665f79756d1a",
+    "flag-coverage-v3-wire/negative-control-no-compatibility-filter.c": "1d3af12d7c4a974f7c775c7a365285c2443e19775fac59b2b450ed087332940a",
+    "flag-coverage-v3-wire/negative-control-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "flag-coverage-v3-wire/negative-control-stdout.log": "54071fb09bd325516e97e046417c4ffea4bc7c773761af9eae0d1c41017acce0",
+    "flag-coverage-v3-wire/reference": "6b1427dce82369fdd4c25ff2472bafada8ac765728ea89bc7a46a2e957f737ab",
+    "flag-coverage-v3-wire/reference-sanitized": "d1ff02f4a76410861bce86c570f83db7f2a559841b740b0647f1d250de020f7e",
+    "flag-coverage-v3-wire/result.json": "ccdb964ac95f51059402e339a588e2254fabc8e0b0524a31cd4d34390b756af7",
+    "flag-coverage-v3-wire/sanitized-candidate-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "flag-coverage-v3-wire/sanitized-candidate-stdout.log": "f096052e3159a17d176216c10a2bc37da762d459b84ee5565dcf0750fd506a0d",
+    "flag-coverage-v3-wire/sanitized-compiler-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "flag-coverage-v3-wire/sanitized-compiler-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "flag-coverage-v3-wire/subset.xml": "8bde772f61056776b3d9a781e9bddd9f98b5997bae07429ed1a0836a2c588de9",
+    "flag-coverage-v3-wire/vectors.h": "e70e062bc6db76c3fca67c6c7b777404a2a1168cb631aa648099e8c83a08374d",
+    "flag-coverage-v3-wire.log": "ccdb964ac95f51059402e339a588e2254fabc8e0b0524a31cd4d34390b756af7"
+  },
+  "sources": [
+    {
+      "url": "https://mavlink.io/en/guide/serialization.html#compatibility-flags-mavlink-2",
+      "accessed": "2026-10-10",
+      "claim": "Unknown compatibility flags may be ignored; the diagnostic zero-flag profile is narrower."
+    }
+  ],
+  "limits": [
+    "Finite offline diagnostic corpus; no actuation or network access",
+    "No complete header, lifecycle, signing or provenance parity",
+    "No new Rust execution; generated fixtures only",
+    "Unequal work and absent target budgets prevent production runtime ranking",
+    "No full audit, hard-real-time, hardware, MLS/CNSA, availability or customer qualification"
+  ]
+}

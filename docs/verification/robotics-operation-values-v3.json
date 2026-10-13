@@ -1,0 +1,54 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "71b401b1f5eb0daab6b9a7c051909e13c0b81a61",
+  "component": "passive lifecycle experiment operation value admission",
+  "decision": "FIX divergent fixture conversion; production technology PENDING",
+  "production_adapter_changed": false,
+  "source_sha256": {
+    "scripts/robotics_lifecycle_audit_v2.py": "61aaa32f7977891bcccb02b4245a823d24411b572dac50dde103a7f561e8ecf6",
+    "scripts/robotics_native_audit_v2.py": "d884a8dcc059e7cadb5c99c506da35e1fa30a4eea3a38c65da195c4e60935b8f",
+    "tests/mavlink/test_lifecycle_audit_v2.py": "6efe844c210b932ffd33050714b985c609895ac8039eb7fe98bbf7fe4ddebc29",
+    "tests/mavlink/audit_v2/managed.mjs": "a5840ab34119e9ecb3b537b95d9dc70d85fb20a869e2a210a497595abf6771dd",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "docs/architecture/robotics-review-v3.md": "7ab2c6e16f0eb27e1956e14b80d033943eb9e126a24594043d807ead52235426",
+    "docs/verification/robotics-comparator-coverage-v3.md": "4f8f2eebe725a67bf32a67e2197a1cc37e0e79108c4b5434f1cc9d19d265fa14"
+  },
+  "checks": {
+    "red": {
+      "methods": 2,
+      "failures": 29,
+      "errors": 0
+    },
+    "green": {
+      "methods": 39,
+      "skips": 0,
+      "seconds": 22.285
+    },
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS",
+    "node_syntax": "PASS",
+    "preservation": {
+      "baseline_head": "71b401b1f5eb0daab6b9a7c051909e13c0b81a61",
+      "lifecycle_cases": 16,
+      "lifecycle_steps": 48,
+      "corpus_and_outputs_unchanged": true,
+      "native_cases": 40,
+      "native_steps": 72,
+      "native_fixture_unchanged": true,
+      "native_compiled": false,
+      "fixture_sha256": "36c80096df538990da4f68cf5c2f131c586b86f9304cb8d7babeb2efb47c3db7"
+    }
+  },
+  "retained_file_sha256": {
+    "operation-values-v3-red.log": "7771e59641604c526315b1bbc2e245960ae027f953de085f1c3863806197d348",
+    "operation-values-v3-green.log": "59d921129f259dac5e7193bd2f3b9eff90da9994a4fc15351093e6ca65541a19",
+    "operation-values-v3-preservation.json": "24b61f9975dbac5f15cb0c4d61b2fe942e86852e86b9a3f6540d71b1572c157b"
+  },
+  "limits": [
+    "Fixture lexical/value admission only",
+    "No independent JavaScript JSON admission or bounded stdin allocation claim",
+    "Native fixtures generated only; no current-revision Rust execution",
+    "No production technology, latency or deployment qualification"
+  ]
+}

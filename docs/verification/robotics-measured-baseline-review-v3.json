@@ -1,0 +1,102 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "754b019727c5db70bbef54d984fba3151abe6a1b",
+  "component": "P3.1 offline wire comparison measured reference evidence",
+  "decision": "FIX measured baseline admission and cleanup",
+  "production_changed": false,
+  "candidate_changed": false,
+  "runtime_decision": "PENDING",
+  "source_sha256": {
+    "scripts/robotics_wire_audit_v2.py": "77f2d5f371f18dd3719f0e1e882bb563b91503fdaddb7a089525a9229c55f39d",
+    "tests/mavlink/test_wire_audit_v2.py": "4f29486c1ef2c145bba6a0424b3bc4047d06ee3a040008ee68d1fcd47e65e054",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "503b317e0fa21e92fe563e3ddfc333fee5426a6d271fe33a7eab98dd5512f094",
+    "tests/mavlink/audit_v2/reference.c": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483",
+    "docs/architecture/robotics-review-v3.md": "9527acc0fb8b99229275d09f9d6f1ca068be483e650cf7c456212b2675662fda"
+  },
+  "red": {
+    "methods": 1,
+    "assertion_failures": 3,
+    "errors": 0,
+    "cases": [
+      "admission disagreement did not raise",
+      "numeric disagreement did not raise",
+      "raised reference exception skipped close"
+    ]
+  },
+  "green": {
+    "methods": 12,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 2.898
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS",
+    "live_c_receipt_source_bindings": "3 PASS"
+  },
+  "local_comparison": {
+    "audit_policy_version": 3,
+    "state": "compared",
+    "decision": "PENDING",
+    "scope": "fresh unsigned packet admission only; not lifecycle/signing parity",
+    "source_sha256": {
+      "scripts/robotics_wire_audit_v2.py": "77f2d5f371f18dd3719f0e1e882bb563b91503fdaddb7a089525a9229c55f39d",
+      "integrations/edge/aethron_edge/telemetry/mavlink.py": "503b317e0fa21e92fe563e3ddfc333fee5426a6d271fe33a7eab98dd5512f094",
+      "tests/mavlink/audit_v2/reference.c": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483"
+    },
+    "corpus_cases": 17,
+    "parity": true,
+    "sanitized_parity": true,
+    "python": {
+      "samples": 512,
+      "accepted": 92,
+      "p50_ns": 19576,
+      "p95_ns": 103827,
+      "max_ns": 57659283
+    },
+    "c": {
+      "samples": 512,
+      "accepted": 92,
+      "p50_ns": 32,
+      "p95_ns": 320,
+      "max_ns": 686
+    },
+    "python_version": "3.13.5",
+    "machine": "x86_64",
+    "system": "Linux",
+    "compiler": "cc (Debian 14.2.0-19) 14.2.0",
+    "xml_sha256": "fbac92d0689c9b1bc03b49ebc5cdf989f3fc23026c3c856f7224e4b9af1b5f53",
+    "driver_sha256": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483",
+    "harness_sha256": "77f2d5f371f18dd3719f0e1e882bb563b91503fdaddb7a089525a9229c55f39d",
+    "corpus_sha256": "d51999b7a2011a0615f9ead65d0080db8733d5c99cb42225d80e7f2c9b7aebdb",
+    "pymavlink": "2.4.50",
+    "limitations": [
+      "512 mixed valid/invalid probes; no hard-real-time claim",
+      "Python constructor excluded; C stack setup included",
+      "C omits state, provenance objects and persistent replay",
+      "No memory, cold-start, signed, UDP or SITL comparison"
+    ]
+  },
+  "retained_local_logs": {
+    "measured-baseline-red.log": "78edc43d9a6d27ed13e2deb645080c335e93a8fceb7defa2c72a66b8bec11919",
+    "measured-baseline-green.log": "8957168923eaed6d5c06d0301af1a57e476dc7dd850514cfa5ef3f39509b787d",
+    "measured-baseline-wire.log": "33989953d65a961705f79da25a08de8f7ee40f4206cae53c76721b2d16826af9",
+    "measured-baseline-wire/result.json": "33989953d65a961705f79da25a08de8f7ee40f4206cae53c76721b2d16826af9",
+    "measured-baseline-wire/candidate-stdout.log": "5cadaeebc4d23756e3ae59ae615486352d04df662a4e5c69e34dc5f14627d46d",
+    "measured-baseline-wire/sanitized-candidate-stdout.log": "4363e5785af08fcbad4b181eab648f0825bc45653770feddab2494b4f7eaa1bb"
+  },
+  "sources": [
+    "https://docs.python.org/3/tutorial/errors.html#defining-clean-up-actions"
+  ],
+  "limits": [
+    "Report correctness only; production clock exception handling remains unresolved",
+    "Controlled regression outputs do not constitute C execution; separate actual normal/sanitized results included",
+    "C omits state/provenance work; numbers do not select a production runtime",
+    "Validation and cleanup excluded from interval; no real-time, availability, hardware or audit-completion claim"
+  ],
+  "environment_failures": [
+    "Previous continuation policy read failed SIGTRAP; retry was interrupted without output",
+    "Earlier credential-helper fork failures retained; current normal push succeeded at 754b019"
+  ]
+}

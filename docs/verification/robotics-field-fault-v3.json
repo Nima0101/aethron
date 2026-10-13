@@ -1,0 +1,55 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "935f00c150e56ae6b3ce4ce0a0078d74e4dcfa45",
+  "component": "P3.1 decoded telemetry field extraction",
+  "decision": "FIX stale observations after field access/conversion exceptions; runtime selection PENDING",
+  "production_adapter_changed": true,
+  "source_sha256": {
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "5c987e8740ca52e5bfaf83daaf1f86a0e06a0b1302a417774a6d80c7f1087d5c",
+    "tests/mavlink/test_telemetry.py": "80b7188e37a5b5adcc2156b10e822ef1cf76c442c0a67bba84441718d72570d6",
+    "integrations/edge/aethron_edge/telemetry/README.md": "d82c03af91bba75bda8f94a65bb2e35455951e4a2f2c663a71eda331618ade9d",
+    "docs/architecture/robotics-review-v3.md": "1f985db709837af58c938130cfed51d05bf282c8e61023a13a75c8ed4d8da8b9"
+  },
+  "checks": {
+    "red": {
+      "methods": 1,
+      "failures": 24,
+      "errors": 0
+    },
+    "green": {
+      "command": "PYTHONPATH=integrations/edge:tests/mavlink .venv/bin/python -m unittest test_telemetry test_signing test_datagram_v1 test_lifecycle_audit_v2 -v",
+      "methods": 80,
+      "skips": 0,
+      "seconds": 16.092,
+      "note": "Before explicit closure binding and formatting of the regression test"
+    },
+    "final_regression": {
+      "methods": 4,
+      "skips": 0,
+      "seconds": 0.166,
+      "note": "After binding fault-injection defaults and formatting; production code unchanged"
+    },
+    "ruff": "PASS after correcting five B023 findings",
+    "format": "PASS after formatting one test signature",
+    "bandit": "PASS",
+    "native_compiled": false
+  },
+  "retained_file_sha256": {
+    "field-fault-v3-red.log": "09803fb9406c71a96fe708c83626731121bb941d5a846ae215e40ec555b8071a",
+    "field-fault-v3-green.log": "d6bdcea0ce943e4fc72a3e8098a707c7f1ff0e28c5acd20ec331e71ac4ad19e2",
+    "field-fault-v3-final.log": "cbbb162f02c2c4bc1955624fe75693a018325321d517f55a6c7c3884afa3aaec"
+  },
+  "contract": {
+    "field_exception": "withdraw both slots, latch decoder_fault, re-raise original exception",
+    "expected_decode_error": "recoverable invalid_packet",
+    "finite_value_rejection": "recoverable invalid_values",
+    "caller_owned_snapshots": "unchanged immutable earlier values",
+    "perception_eligible": false
+  },
+  "limits": [
+    "Synthetic SDK fault injection, not demonstrated wire-triggerable SDK failure",
+    "Does not cover all later ingest steps or interrupted cleanup",
+    "No native runtime fault equivalence or hardware qualification",
+    "No unconditional runtime winner or complete lane audit"
+  ]
+}

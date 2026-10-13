@@ -1,0 +1,89 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "18ea78922074f720996e8ae47d6821b7f05cab0f",
+  "component": "P3.1 passive state-commit fault boundary",
+  "decision": "FIX retained samples after raised state-commit failures; runtime selection PENDING",
+  "production_adapter_changed": true,
+  "source_sha256": {
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "d30fc3e0e893c2250b336b574fffda98cc44e943811452f3a07e1bd874c5fedf",
+    "integrations/edge/aethron_edge/telemetry/README.md": "cbf967fba62c06cfa5d5c68ee3fa4417b68b865eb32890f9156c576511eb30ad",
+    "tests/mavlink/test_telemetry.py": "c7568e217026927ac2e8a59c31ce834b53b1c2b22302434d13f1fa5b497c02d9",
+    "tests/mavlink/test_signing.py": "aae1ac1a3c2d033b87c95d0c28bf1c33cf27c3891291fcb8235877243f13f0e5",
+    "docs/architecture/robotics-review-v3.md": "d3b935fcaf36f8836c3f6061f80936ff5973b6b0257b48ff2f965e5555021b96"
+  },
+  "checks": {
+    "red": {
+      "methods": 2,
+      "failures": 26,
+      "errors": 0,
+      "note": "25 passive fault combinations and one signed publication fault retained old samples"
+    },
+    "focused": {
+      "methods": 2,
+      "pass": true
+    },
+    "green": {
+      "methods": 86,
+      "skips": 0,
+      "seconds": 24.353,
+      "command": "PYTHONPATH=integrations/edge:tests/mavlink .venv/bin/python -m unittest test_telemetry test_signing test_datagram_v1 test_lifecycle_audit_v2 -v"
+    },
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": {
+      "initial_findings": 3,
+      "rules": [
+        "B404",
+        "B603",
+        "B311"
+      ],
+      "disposition": "Existing test-only helpers inspected: fixed local Python program without shell, owned temp path/synthetic hex arguments, deterministic mutation positions rather than secret generation; narrowly annotated with reasons",
+      "final": "PASS",
+      "global_rules_disabled": false
+    },
+    "native_executed": false
+  },
+  "fault_points": [
+    "boot comparison",
+    "commit hook",
+    "observation construction",
+    "boot ledger write",
+    "sample slot write"
+  ],
+  "fault_classes": [
+    "RuntimeError",
+    "MemoryError",
+    "KeyboardInterrupt",
+    "SystemExit",
+    "asyncio.CancelledError"
+  ],
+  "preserved_invariants": [
+    "Original exception object propagates",
+    "Subsequent calls stay empty UNKNOWN until fresh instance",
+    "No exception detail in returned status",
+    "Earlier caller-owned snapshots remain unchanged",
+    "Actual SQLite counter remains committed after publication failure",
+    "Restart rejects failed-publication packet as replay and accepts newer signed packet"
+  ],
+  "retained_file_sha256": {
+    "state-commit-v3-red.log": "47b6ba663c413c9160132bedb59378bef259b881f9283605eea1dc4f3bf97646",
+    "state-commit-signing-v3-red.log": "3fdaf9624ac1c0ed0a16be481eb1a59df96fda40568b2f96713a137ed0918e1d",
+    "state-commit-v3-focused.log": "291f3adfcc85196e63cad089c208ad2c45e95315ce26c136273b3482667e1dc0",
+    "state-commit-v3-green.log": "7099d1a31882d26d0f68a7152c405608f95c6faf0e1e4e669264138a73d9c093",
+    "state-commit-v3-bandit-initial.log": "4302860a0a3437fa0bb4172b2db74bf20482a8884a376c5e3ad27f38a1f3f6fc",
+    "state-commit-v3-bandit-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "ci_snapshot": {
+    "head": "41c8ce1535eb517babb58f4e362a8d02a3c6e64c",
+    "check": "passive-wire",
+    "result": "No matching check returned by one-time filtered check-runs query",
+    "polled": false
+  },
+  "limits": [
+    "Synthetic fault injection does not establish actual memory exhaustion or power-loss recovery",
+    "No atomic guarantee against a second failure during cleanup",
+    "Authority callbacks and snapshot construction outside reviewed span",
+    "Signing test is a base-class regression, not completion of signing/replay re-audit",
+    "No native equivalent fault execution, hardware deadline, MLS/CNSA or uptime qualification"
+  ]
+}

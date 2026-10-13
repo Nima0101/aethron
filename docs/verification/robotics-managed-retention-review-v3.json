@@ -1,0 +1,59 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "1bbf8f5178ea2c7860c38728760edeb2128b654d",
+  "component": "passive_wire comparison evidence",
+  "decision": "FIX managed failure-output retention",
+  "production_receiver_changed": false,
+  "runtime_decision": "PENDING",
+  "red": {
+    "methods": 2,
+    "assertion_failures": 3,
+    "errors": 0,
+    "reason": "Missing stdout artifact for timeout, exit7 and rejected JSON"
+  },
+  "green": {
+    "methods": 16,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_s": 2.405,
+    "post_helper_binding_targeted_test": "1 PASS/0.381s"
+  },
+  "success_retention": {
+    "stdout_files": 6,
+    "stderr_files": 6,
+    "strict_json_parity_rechecks": 6,
+    "completed_receipt_without_failed_attempt": true,
+    "result_sha256": "d11fe33e16f873b16dcf866b2e135023ee84859e627f6433efb3cb2558a395a5"
+  },
+  "static": {
+    "ruff": "PASS after binding loop variable and organizing imports",
+    "format": "PASS",
+    "bandit": "PASS with reviewed B404 suppression for fixed local synthetic child commands",
+    "actionlint": "PASS"
+  },
+  "retained_negatives": [
+    "Ruff B023: test helper closure did not bind program; corrected with default argument",
+    "Bandit B404: fixed local subprocess fixtures reviewed and annotated",
+    "Initial explanatory nosec comment parsed as unknown test names; moved explanation to separate line",
+    "Ruff I001 import spacing corrected"
+  ],
+  "source_sha256": {
+    ".github/workflows/aethron-robotics.yml": "67ca4a7cf226f78b798bc9c64322fb9c0a006ca77b5ac8f80cef15a1fbcadde5",
+    "scripts/robotics_lifecycle_audit_v2.py": "59efd1ec140ae5d848aaf7618a49b2d9fe390afe9f080918400eacd3b463a296",
+    "tests/mavlink/test_lifecycle_audit_v2.py": "c59b49da8f054742cadde12feffd35675e5d989048d791bc31f2cd02ab58bc5e"
+  },
+  "retained_local_logs": {
+    "managed-retention-red.log": "c63b5ea5a1f5bb5fbe7df63152c90065c43b3c4c8d27f7ff9b59d00386ee35df",
+    "managed-retention-green.log": "8faa58fd9859a810c69c65ec756d82b04d4914e8124db2304ead335b6fd53ace"
+  },
+  "sources": [
+    "https://docs.python.org/3/library/subprocess.html#subprocess.TimeoutExpired"
+  ],
+  "limits": [
+    "No changed-workflow hosted result claimed",
+    "No receiver/runtime candidate/timeout-threshold change",
+    "Timing boundary excludes parent parsing/log writes; historical records differed",
+    "No retention guarantee under storage failure or abrupt process termination",
+    "No hardware or real-time qualification; V3 incomplete"
+  ]
+}

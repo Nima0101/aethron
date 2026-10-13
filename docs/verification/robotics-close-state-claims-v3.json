@@ -1,0 +1,46 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "de12d0936f51ac1ea50e1e6a603c646f819a11f2",
+  "component": "Earliest P3.1 passive receiver close-state documentation",
+  "decision": "CLARIFY exact state cleared; production technology decision remains PENDING",
+  "production_changed": false,
+  "finding": "README said decoder retained state was cleared; close leaves SDK decoder and last clock reading reachable on the receiver instance. Caller-owned observations also remain reachable.",
+  "source_sha256": {
+    "integrations/edge/aethron_edge/telemetry/README.md": "95da89e87064ce9359adcee93f6911ed52140b39f531406843288b0d9cf3dbb2",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "tests/mavlink/sdk_startup_probe_v3.py": "b48b2262cd51a90576495113e76408624242139fbdbb1b4720f26f28ddb88d80",
+    "tests/mavlink/test_sdk_startup_v3.py": "2a8ccbd6b279597dad1872ba8bbe827ab7ca268aa446bf9ef5c398e0991ba0b1",
+    "tests/mavlink/test_telemetry.py": "00624096f3655bb2586932f1159ba84fe5ea03c54f521aee1ffa2087c4e09740"
+  },
+  "checks": {
+    "command": "PYTHONPATH=integrations/edge:tests/mavlink .venv/bin/python -m unittest test_sdk_startup_v3 test_telemetry.TelemetryTests.test_local_clock_rollback_latches_and_close_erases",
+    "methods": 3,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "seconds": 1.361,
+    "red": "Not applicable: documentation correction; no production defect or new test implementation",
+    "installed_inspection": {
+      "after_close_reason": "closed",
+      "after_close_samples": 0,
+      "after_close_state": "UNKNOWN",
+      "before_close_samples": 1,
+      "boot_counters_empty": true,
+      "caller_snapshot_samples_after_close": 1,
+      "decoder_object_retained": true,
+      "last_clock_retained": true,
+      "sequence_cleared": true,
+      "source_sha256": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1"
+    }
+  },
+  "retained_file_sha256": {
+    "close-state-claims-green.log": "3f30fc2f81fea870294c45e1912ec2126b1d43df3bd43dcedb76fec745afa524",
+    "close-state-claims-probe.py": "0a04d8ddafb6dfae0056da7c4f6bb73974d349d3d80b8fa1813b97a1d3e6ff72",
+    "close-state-claims-probe.json": "4bebad0d74d4db7b3c4e32bfd1f4f94738ab02e642e071bd1c3965147b42530f"
+  },
+  "limitations": [
+    "Bounded inspection of the current passive receiver only; signed subclass close is not qualified here",
+    "No complete memory erasure, garbage collection or physical shutdown claim",
+    "No runtime selection, performance improvement, new component or completed audit"
+  ]
+}

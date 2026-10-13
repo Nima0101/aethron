@@ -1,0 +1,120 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "a34968ebee8d6c7239f189060bddec305e12d7d9",
+  "component": "P3.1 passive runtime comparison evidence",
+  "decision": "FIX validated measurement retention on later managed child failure",
+  "runtime_decision": "PENDING",
+  "production_receiver_changed": false,
+  "source_sha256": {
+    "scripts/robotics_lifecycle_audit_v2.py": "d763fa9c0c51a447d8f06c26032023561b5b35906fc7a4ecfb854664a5adef7a",
+    "tests/mavlink/test_lifecycle_audit_v2.py": "cc4fdd67a66068fdfc58c3e8bd3fc0ba3fd71e6bc42611496f8256786acb1d37",
+    "scripts/robotics_native_audit_v2.py": "2a327603388d1c59d255311752b9c5a5daa42e769b2ad1a453b76362584f2e5d",
+    "tests/mavlink/test_native_audit_v2.py": "9732c5a010cfa1d2f0c289c87603858bf13268f56525031fbc6b5f86ba338f06",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "tests/mavlink/audit_v2/managed.mjs": "b7c89cdf7ada50ed38ce9563adf699d8c5d41bb95f6327fabe416ba3f42ed0cd",
+    "docs/architecture/robotics-review-v3.md": "96b095d8ca296da37043c8ed7cec3148f136d08270d7da61667693af45129c85"
+  },
+  "retained_local_files": {
+    "partial-pair-red.log": "8d441356daa93a17a4cfb2972d769e270ad5eb8c814fd0abd06215ae28828c2d",
+    "partial-pair-green.log": "58e50c3450f3ab7c2a467dc31349ed10cea5736f3faf91bd929453369d289288",
+    "partial-pair-managed.log": "ac4eeb648a710b38f11f702ca6b8c24d8d31603b562269d33212836b40fdd3bf",
+    "partial-pair-managed/expected.json": "d867f37980cd32cbd2867c25a69fba1f373239a27b0b456c9ca1cb4c47c4b0dc",
+    "partial-pair-managed/javascript-0-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "partial-pair-managed/javascript-0-stdout.log": "bbd56b4b74692d024119abf4e5e457261037cd2ecbdd8dfb0f5f405b67217758",
+    "partial-pair-managed/javascript-1-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "partial-pair-managed/javascript-1-stdout.log": "b3c8d45b1ed868a7aaaa56a699e3bab4d64bcf6f69e763c9e98793a0ebceed3c",
+    "partial-pair-managed/javascript-2-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "partial-pair-managed/javascript-2-stdout.log": "706734018b3a7801f0fe2ca1ed167f8be95042c0f93b8fad81729a5ae58b843b",
+    "partial-pair-managed/python-0-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "partial-pair-managed/python-0-stdout.log": "f5fe4d7842805c7263cb1602a720c283f093fd248dc22214b1b6d4225eabdeb5",
+    "partial-pair-managed/python-1-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "partial-pair-managed/python-1-stdout.log": "f5fe4d7842805c7263cb1602a720c283f093fd248dc22214b1b6d4225eabdeb5",
+    "partial-pair-managed/python-2-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "partial-pair-managed/python-2-stdout.log": "f5fe4d7842805c7263cb1602a720c283f093fd248dc22214b1b6d4225eabdeb5",
+    "partial-pair-managed/result.json": "ac4eeb648a710b38f11f702ca6b8c24d8d31603b562269d33212836b40fdd3bf"
+  },
+  "verification": {
+    "red_assertion_failures": 5,
+    "red_errors": 0,
+    "green_methods": 27,
+    "green_seconds": 2.998,
+    "skips": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS"
+  },
+  "actual_managed": {
+    "audit_policy_version": 3,
+    "state": "compared",
+    "decision": "PENDING",
+    "runs": [
+      {
+        "python": {
+          "runtime": "3.13.5",
+          "peak_rss_kib": 29452,
+          "whole_process_ns": 1394487052
+        },
+        "javascript": {
+          "peak_rss_kib": 45812,
+          "runtime": "v22.23.2",
+          "whole_process_ns": 693002043
+        }
+      },
+      {
+        "python": {
+          "runtime": "3.13.5",
+          "peak_rss_kib": 29452,
+          "whole_process_ns": 507605052
+        },
+        "javascript": {
+          "peak_rss_kib": 46324,
+          "runtime": "v22.23.2",
+          "whole_process_ns": 116501463
+        }
+      },
+      {
+        "python": {
+          "runtime": "3.13.5",
+          "peak_rss_kib": 29452,
+          "whole_process_ns": 479552938
+        },
+        "javascript": {
+          "peak_rss_kib": 46328,
+          "runtime": "v22.23.2",
+          "whole_process_ns": 115798864
+        }
+      }
+    ],
+    "source_sha256": {
+      "scripts/robotics_lifecycle_audit_v2.py": "d763fa9c0c51a447d8f06c26032023561b5b35906fc7a4ecfb854664a5adef7a",
+      "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+      "tests/mavlink/audit_v2/managed.mjs": "b7c89cdf7ada50ed38ce9563adf699d8c5d41bb95f6327fabe416ba3f42ed0cd"
+    },
+    "parity": true,
+    "cases": 16,
+    "steps": 48,
+    "driver_sha256": "b7c89cdf7ada50ed38ce9563adf699d8c5d41bb95f6327fabe416ba3f42ed0cd",
+    "harness_sha256": "d763fa9c0c51a447d8f06c26032023561b5b35906fc7a4ecfb854664a5adef7a",
+    "fixture_sha256": "7870b95b978b86a62abd45749453f1549329c3a456643aeb28c26cb043269125",
+    "limitations": [
+      "Whole-process time includes startup, corpus and child JSON output",
+      "Parent JSON parsing and evidence writes excluded; older timings included parsing",
+      "Three sequential repetitions; warm filesystem cache possible",
+      "Original JS subset, not node-mavlink or NextGen SDK qualification",
+      "No signed replay, UDP, installed packaging or real-time proof"
+    ]
+  },
+  "sources": [
+    "https://mavlink.io/en/#language-generator-list",
+    "https://github.com/mavlink/rust-mavlink",
+    "https://github.com/ArduPilot/pymavlink"
+  ],
+  "limitations": [
+    "Controlled subprocess responses for five failure-path regressions",
+    "Actual managed run includes startup and workload; not isolated cold-import timing",
+    "Full Python generated dialect versus original two-layout JavaScript subset",
+    "Shared host, sequential repetitions, possible warm filesystem caches",
+    "No current native SDK execution, physical, hard-real-time or completed technology decision",
+    "Partial receipt retained on Python unwinding, not guaranteed after process kill or storage failure"
+  ]
+}

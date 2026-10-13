@@ -1,0 +1,34 @@
+{
+  "audit_policy_version": 3,
+  "baseline_head": "52509c751b58f732776e6a812668ee9385f95775",
+  "component": "P3.1 passive decoder comparison evidence",
+  "decision": "FIX",
+  "component_review_complete": false,
+  "change": "Preserve exact subprocess stdout/stderr on timeout and failed compiler version probe; propagate original failure.",
+  "sources_sha256": {
+    "scripts/robotics_native_audit_v2.py": "f5b00a7fbab134d4a1940364e72b3a47e90c0be079d22f61b7abc057b55a6509",
+    "tests/mavlink/test_native_audit_v2.py": "9ec546b667cda6a08dd1a1311aa0a7b721211c4f8c535d6ec1d21b9847fdfce4",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "503b317e0fa21e92fe563e3ddfc333fee5426a6d271fe33a7eab98dd5512f094"
+  },
+  "checks": {
+    "red": "Two missing-log regressions reproduced before implementation; compiler probe also reproduced with a real failing local executable.",
+    "targeted": "7 native-harness methods PASS",
+    "broader": "15 of 16 methods PASS; managed JavaScript candidate exceeded unchanged 10-second timeout.",
+    "bounded_retry": "Previously failing managed method PASS in 1.991 seconds; original timeout retained, cause not established.",
+    "ruff": "lint and format PASS",
+    "bandit": "PASS",
+    "diff_check": "PASS"
+  },
+  "log_sha256": {
+    "audit-failure-red.log": "3beb6176159780f6d9adbc36567a687d6322e877ee37c7115edf5a0def6c7c6c",
+    "audit-probe-red.log": "c20cc78f51784dac74793f093ae91a41c81d888d94979a6e7d45890df35012de",
+    "audit-failure-green.log": "a966115a86f784fbfe05b886f038306c09dee451096543baf8da1908fa797886",
+    "review-v3-focused.log": "dfbf429f9a888d602f64f480eefbd0576a03fd95bcee499c51769e8eb4317fb0",
+    "review-v3-managed-retry.log": "3dc1d498bb4e04c7fc0b0503f10a51680658969a45301986e6ecd6746cdc8f40"
+  },
+  "limitations": [
+    "Native Rust was not compiled or executed locally.",
+    "No complete v3 technology review or runtime choice.",
+    "No real-time, hardware, tactical, cryptographic-compliance or availability qualification."
+  ]
+}

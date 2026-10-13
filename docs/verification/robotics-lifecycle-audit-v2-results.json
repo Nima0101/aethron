@@ -1,0 +1,175 @@
+{
+  "audit_policy_version": 2,
+  "component": "passive MAVLink decoder lifecycle",
+  "decision": "PENDING",
+  "comparisons": [
+    {
+      "run": "initial_35_steps",
+      "audit_policy_version": 2,
+      "state": "compared",
+      "decision": "PENDING",
+      "parity": true,
+      "cases": 10,
+      "steps": 35,
+      "runs": [
+        {
+          "python": {
+            "runtime": "3.13.5",
+            "peak_rss_kib": 28616,
+            "whole_process_ns": 988654666
+          },
+          "javascript": {
+            "peak_rss_kib": 46192,
+            "runtime": "v22.23.2",
+            "whole_process_ns": 378446486
+          }
+        },
+        {
+          "python": {
+            "runtime": "3.13.5",
+            "peak_rss_kib": 28740,
+            "whole_process_ns": 1115644297
+          },
+          "javascript": {
+            "peak_rss_kib": 46196,
+            "runtime": "v22.23.2",
+            "whole_process_ns": 393453927
+          }
+        },
+        {
+          "python": {
+            "runtime": "3.13.5",
+            "peak_rss_kib": 28876,
+            "whole_process_ns": 1385424802
+          },
+          "javascript": {
+            "peak_rss_kib": 46036,
+            "runtime": "v22.23.2",
+            "whole_process_ns": 590650558
+          }
+        }
+      ],
+      "driver_sha256": "b7c89cdf7ada50ed38ce9563adf699d8c5d41bb95f6327fabe416ba3f42ed0cd",
+      "harness_sha256": "4dcfc82320336e3d9bcbae0f086b09128bf36583e74157c3e06e136e93ffac33",
+      "fixture_sha256": "c9739bfaf6c65fe53cff587163c61fa7edf734d37614a73183dfef9f02e0a26d",
+      "limitations": [
+        "Whole-process time includes startup, corpus and JSON output",
+        "Three sequential repetitions; warm filesystem cache possible",
+        "Original JS subset, not node-mavlink or NextGen SDK qualification",
+        "No signed replay, UDP, installed packaging or real-time proof"
+      ]
+    },
+    {
+      "run": "expanded_48_steps",
+      "audit_policy_version": 2,
+      "state": "compared",
+      "decision": "PENDING",
+      "parity": true,
+      "cases": 16,
+      "steps": 48,
+      "runs": [
+        {
+          "python": {
+            "runtime": "3.13.5",
+            "peak_rss_kib": 28920,
+            "whole_process_ns": 914908032
+          },
+          "javascript": {
+            "peak_rss_kib": 46192,
+            "runtime": "v22.23.2",
+            "whole_process_ns": 688577757
+          }
+        },
+        {
+          "python": {
+            "runtime": "3.13.5",
+            "peak_rss_kib": 28920,
+            "whole_process_ns": 1411921260
+          },
+          "javascript": {
+            "peak_rss_kib": 46204,
+            "runtime": "v22.23.2",
+            "whole_process_ns": 388068709
+          }
+        },
+        {
+          "python": {
+            "runtime": "3.13.5",
+            "peak_rss_kib": 28920,
+            "whole_process_ns": 1106915711
+          },
+          "javascript": {
+            "peak_rss_kib": 46456,
+            "runtime": "v22.23.2",
+            "whole_process_ns": 379316976
+          }
+        }
+      ],
+      "driver_sha256": "b7c89cdf7ada50ed38ce9563adf699d8c5d41bb95f6327fabe416ba3f42ed0cd",
+      "harness_sha256": "5c93f8c4dc002ceb271eedbc4169c1275c11c63bfa8e91a82571bda861ba7571",
+      "fixture_sha256": "7870b95b978b86a62abd45749453f1549329c3a456643aeb28c26cb043269125",
+      "limitations": [
+        "Whole-process time includes startup, corpus and JSON output",
+        "Three sequential repetitions; warm filesystem cache possible",
+        "Original JS subset, not node-mavlink or NextGen SDK qualification",
+        "No signed replay, UDP, installed packaging or real-time proof"
+      ]
+    },
+    {
+      "run": "typed_parity_48_steps",
+      "audit_policy_version": 2,
+      "state": "compared",
+      "decision": "PENDING",
+      "parity": true,
+      "cases": 16,
+      "steps": 48,
+      "runs": [
+        {
+          "python": {
+            "runtime": "3.13.5",
+            "peak_rss_kib": 28860,
+            "whole_process_ns": 1314956441
+          },
+          "javascript": {
+            "peak_rss_kib": 46320,
+            "runtime": "v22.23.2",
+            "whole_process_ns": 787296006
+          }
+        },
+        {
+          "python": {
+            "runtime": "3.13.5",
+            "peak_rss_kib": 28860,
+            "whole_process_ns": 1903988821
+          },
+          "javascript": {
+            "peak_rss_kib": 46452,
+            "runtime": "v22.23.2",
+            "whole_process_ns": 1918915708
+          }
+        },
+        {
+          "python": {
+            "runtime": "3.13.5",
+            "peak_rss_kib": 28860,
+            "whole_process_ns": 1700601260
+          },
+          "javascript": {
+            "peak_rss_kib": 46452,
+            "runtime": "v22.23.2",
+            "whole_process_ns": 413716899
+          }
+        }
+      ],
+      "driver_sha256": "b7c89cdf7ada50ed38ce9563adf699d8c5d41bb95f6327fabe416ba3f42ed0cd",
+      "harness_sha256": "3d96e237b1a5e51391d1a373a9c83a4195f49656d9e8fc058f88e3f178ec8881",
+      "fixture_sha256": "7870b95b978b86a62abd45749453f1549329c3a456643aeb28c26cb043269125",
+      "limitations": [
+        "Whole-process time includes startup, corpus and JSON output",
+        "Three sequential repetitions; warm filesystem cache possible",
+        "Original JS subset, not node-mavlink or NextGen SDK qualification",
+        "No signed replay, UDP, installed packaging or real-time proof"
+      ]
+    }
+  ]
+}

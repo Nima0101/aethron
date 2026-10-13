@@ -1,0 +1,118 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "063c8d7ebea65639e25a2f9fb6b6a25a15555fac",
+  "component": "P3.1 passive clock-withdrawal installed verification",
+  "decision": "VERIFY corrected receiver with completed local test prerequisites",
+  "production_changed": false,
+  "tests_changed": false,
+  "runtime_decision": "PENDING",
+  "python": "3.13.5",
+  "platform": "Linux-6.6.143-09589-gf9e106250941-x86_64-with-glibc2.41",
+  "versions": {
+    "aethron": "0.2.0",
+    "aethron-edge": "0.1.0",
+    "pymavlink": "2.4.50",
+    "fastcrc": "0.5.0",
+    "lxml": "6.1.3",
+    "pydantic": "2.13.5",
+    "pydantic_core": "2.46.5",
+    "annotated-types": "0.8.0",
+    "typing_extensions": "4.16.0",
+    "typing-inspection": "0.4.4",
+    "setuptools": "84.0.0",
+    "wheel": "0.48.0",
+    "packaging": "26.3"
+  },
+  "source_sha256": {
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "integrations/edge/aethron_edge/telemetry/signing.py": "1cd330ed8a643c89f8ff07192d866c4820044ceb6bc1c783aa898ab51fc4c96f",
+    "integrations/edge/aethron_edge/telemetry/boot_authority.py": "2c7a35df1178577316a61baca897833642cf3f7de791929f27da99e3fa9d1164",
+    "integrations/edge/aethron_edge/telemetry/datagram_v1.py": "c73c5cb5ce9aa5ec4be2698ff3e3b4c29f2c8b55e8968844549812c006324d63",
+    "tests/mavlink/test_telemetry.py": "00624096f3655bb2586932f1159ba84fe5ea03c54f521aee1ffa2087c4e09740",
+    "tests/mavlink/test_signing.py": "9eb8be5c71019af3ed125f522238012f16de5d659fc1a92a7ab2560537efecdf",
+    "tests/mavlink/test_clock_guard.py": "cbf5fa9fcc4ef6b2d168f0c85998662e610e480af6b21bc8876c5d4861c0d377",
+    "tests/mavlink/test_datagram_v1.py": "3b9525d6e244dc0d7f3f0f91430c2a3119dd25c9064f91fe30619cce64fffc93",
+    "tests/mavlink/test_lifecycle_audit_v2.py": "3a0bf0a9c00df1c36197a72461813a0bbeaccdcc4821890080ebe591b9fae066",
+    "scripts/robotics_lifecycle_audit_v2.py": "e71775e02aca061a1bbd7272ae53ba0128b720fbaf9271ee40262f971e6cb8c4",
+    "integrations/edge/requirements-server.lock": "7e73a7d3f6ed9849f305ba28b02cfb08cbfa878bbbfe883071179d3b232f1350",
+    "pyproject.toml": "02983462e01d72ed1c82c34a6ce1216236119714b79863998cf1ce005f805bbb",
+    "setup.py": "3225e55c87758412823021749c2f4219103b77cf2de8ab7ee18199551bd02071",
+    "integrations/edge/pyproject.toml": "c6c0ad39627a1d000e2341c9d7c0d953dba6aae91b2c769f57503ddf39747132",
+    "integrations/edge/setup.py": "08ae0300bbd10bd682784808856bf8607fc52febce17b430d9e66c0c1677a3e5",
+    "docs/verification/robotics-installed-clock-review-v3.md": "ea5aa3b57538a110e8b6d66dfec1110960feb609210c3c5d4a94df0210246b16",
+    "docs/architecture/robotics-review-v3.md": "40d9bfe15a88f858d289ce36444b0ed69a6f0f1eb8c0840a0f58d2025ec1c2b2"
+  },
+  "installed_modules": {
+    "isolated": true,
+    "modules": {
+      "mavlink": {
+        "installed_path": "lib/python3.13/site-packages/aethron_edge/telemetry/mavlink.py",
+        "sha256": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1"
+      },
+      "signing": {
+        "installed_path": "lib/python3.13/site-packages/aethron_edge/telemetry/signing.py",
+        "sha256": "1cd330ed8a643c89f8ff07192d866c4820044ceb6bc1c783aa898ab51fc4c96f"
+      },
+      "boot_authority": {
+        "installed_path": "lib/python3.13/site-packages/aethron_edge/telemetry/boot_authority.py",
+        "sha256": "2c7a35df1178577316a61baca897833642cf3f7de791929f27da99e3fa9d1164"
+      },
+      "datagram_v1": {
+        "installed_path": "lib/python3.13/site-packages/aethron_edge/telemetry/datagram_v1.py",
+        "sha256": "c73c5cb5ce9aa5ec4be2698ff3e3b4c29f2c8b55e8968844549812c006324d63"
+      }
+    }
+  },
+  "artifacts": {
+    "aethron-0.2.0-py3-none-any.whl": {
+      "sha256": "98c1183306acae15eb4c827fd586773f8dca9c85279cff500ad1048825e7425e",
+      "bytes": 66326,
+      "selected_members": {}
+    },
+    "aethron_edge-0.1.0-py3-none-any.whl": {
+      "sha256": "44ab6fed7f65470cf5149eb0c1a2c46c149c01c6e687059aa70b0407e7b3de60",
+      "bytes": 107978,
+      "selected_members": {
+        "aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1"
+      }
+    }
+  },
+  "verification": {
+    "installed_methods": 68,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "seconds": 2.378,
+    "initial_seconds": 3.877,
+    "separate_boot_methods": 8,
+    "pip_check": "PASS",
+    "runner_lint": "Initial I001 import order corrected before final run",
+    "initial_runner_methods": 68,
+    "runner_checks": "Ruff lint/format PASS; Bandit PASS with B101 excluded for explicit test-runner assertions"
+  },
+  "prior_errors": "Two environment errors in robotics-clock-withdrawal-review-v3.json remain historical; same affected paths now pass",
+  "retained_local_logs": {
+    "clock-env-pydantic.lock": "7c52af497ccd93399a1e2c1ed9e32dd8319de5ef59dd0b0ea5666f9ee0bcb2b5",
+    "clock-env-dependencies.log": "c0d683bd0911a8926d3ceb97b725693d475159254d865858e50dd43fbda299ab",
+    "clock-env-build-tools.log": "2de06fd54caac0e3dd0df9bc2b96fa39871448620e069d255d8f37fbc6717c19",
+    "clock-env-boot-green.log": "b7daee1dd6b93b470651c1d1c37682587bf0709c0b1d5aeb367d88677fc6475e",
+    "clock-env-wheel-build.log": "2176843a1e9b7ee8a900d0c64349b62ef8a8f3b177da452d2abe55535265e5cb",
+    "clock-env-wheel-install.log": "c622e5cbb5e05985860f8c830c325483113c39b7558c0fe86362f7d359f4828c",
+    "clock-env-installed-tests.py": "dad8b37eeede8b8338084bba166bfab41722eed5a31511b7b1f9bb2a00e08538",
+    "clock-env-installed-tests-initial.py": "a9086c1252c031331fd3574861aee03c464498aa8a2da6dd868a4ec5eef53ae5",
+    "clock-env-installed-initial-green.log": "756c321fca00492dfbf216a5afd58300ac4992eff4186183e232f5218599617f",
+    "clock-env-installed-green.log": "7556b167b66c0ec416bdc56345c3ffcd90dfbbb4ddd67c9e6e4666155ecd7fa2",
+    "clock-env-pip-check.log": "94a99cdcf40eb97c852789984a8aa7468e7e7142e596c4dddf2174c536ee5376",
+    "clock-env-artifacts.json": "4667d75c44841201d17e51d36e505133a2935729825411489a2130d2bfb244e0"
+  },
+  "sources": [
+    "https://docs.python.org/3/using/cmdline.html#cmdoption-I"
+  ],
+  "limits": [
+    "Existing virtual environment; not fresh customer install",
+    "Single portable build per project; no reproducibility or native-wheel claim",
+    "Build tools version-pinned, not hash-locked; Pydantic subset hash-locked",
+    "No full repository/package matrix or hardware qualification",
+    "No completed component technology selection"
+  ]
+}

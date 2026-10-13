@@ -1,10 +1,12 @@
 """Optional SDK lane: synthetic real wire packets, no hardware qualification."""
 
+import asyncio
 import math
 import random
 import socket
 import unittest
-from unittest.mock import patch
+from contextlib import nullcontext
+from unittest.mock import Mock, patch
 
 from aethron_edge.telemetry.mavlink import PassiveTelemetry, UdpTelemetry
 from pymavlink.dialects.v20 import common
@@ -52,6 +54,36 @@ class TelemetryTests(unittest.TestCase):
         self.assertFalse(sample.authenticated)
         self.assertEqual(sample.evidence, "external_unverified")
         self.assertFalse(status.perception_eligible)
+
+    def test_configured_sender_boundaries_and_rejection_recovery(self):
+        for system, component in ((1, 255), (255, 1), (255, 255)):
+            with self.subTest(system=system, component=component):
+                source = PassiveTelemetry(system, component, clock=lambda: self.now)
+                try:
+                    source.ingest(self.packet(system=system, component=component))
+                    source.ingest(self.packet(sequence=1, boot=200, system=2, component=2))
+                    self.assertEqual(source.snapshot().reason, "sender_mismatch")
+                    self.assertEqual(source.snapshot().samples, ())
+                    source.ingest(
+                        self.packet(sequence=1, boot=11, system=system, component=component)
+                    )
+                    status = source.snapshot()
+                    self.assertEqual(status.state, "OBSERVED_UNVERIFIED")
+                    self.assertEqual(len(status.samples), 1)
+                    sample = status.samples[0]
+                    self.assertEqual((sample.system_id, sample.component_id), (system, component))
+                    self.assertEqual(sample.source_boot_ms, 11)
+                    self.assertFalse(sample.authenticated)
+                    self.assertFalse(status.perception_eligible)
+                finally:
+                    source.close()
+        for invalid in (0, 256, -1, True, 1.0, "1", None):
+            for sender in ((invalid, 1), (1, invalid)):
+                with (
+                    self.subTest(sender=sender),
+                    self.assertRaisesRegex(ValueError, "invalid_sender"),
+                ):
+                    PassiveTelemetry(*sender)
 
     def test_latest_slots_expire_independently_without_new_packets(self):
         self.source.ingest(self.packet())
@@ -120,6 +152,196 @@ class TelemetryTests(unittest.TestCase):
         self.source.ingest(self.packet(sequence=2))
         self.assertEqual(self.source.snapshot().reason, "closed")
 
+    def test_raised_clock_fault_withdraws_and_latches_before_propagating(self):
+        for operation in ("snapshot", "ingest"):
+            for error_type in (
+                RuntimeError,
+                OSError,
+                KeyboardInterrupt,
+                SystemExit,
+                asyncio.CancelledError,
+            ):
+                with self.subTest(operation=operation, error_type=error_type.__name__):
+                    clock = Mock(return_value=self.now)
+                    source = PassiveTelemetry(1, 1, clock=clock)
+                    try:
+                        source.ingest(self.packet())
+                        source.ingest(self.packet(sequence=1, kind="position"))
+                        self.assertEqual(len(source.snapshot().samples), 2)
+                        failure = error_type("private-clock-detail")
+                        clock.side_effect = failure
+                        with self.assertRaises(error_type) as caught:
+                            if operation == "snapshot":
+                                source.snapshot()
+                            else:
+                                source.ingest(self.packet(sequence=2, boot=11))
+                        self.assertIs(caught.exception, failure)
+                        calls_after_fault = clock.call_count
+                        clock.side_effect = None
+                        status = source.snapshot()
+                        self.assertEqual(status.state, "UNKNOWN")
+                        self.assertEqual(status.reason, "local_clock_invalid")
+                        self.assertEqual(status.samples, ())
+                        self.assertFalse(status.perception_eligible)
+                        self.assertNotIn("private-clock-detail", repr(status))
+                        source.ingest(self.packet(sequence=3, boot=12))
+                        self.assertEqual(source.snapshot(), status)
+                        self.assertEqual(clock.call_count, calls_after_fault)
+                        source.close()
+                        self.assertEqual(source.snapshot().reason, "closed")
+                    finally:
+                        source.close()
+
+    def test_unexpected_decoder_fault_withdraws_and_latches_before_propagating(self):
+        for error_type in (
+            RuntimeError,
+            OSError,
+            KeyboardInterrupt,
+            SystemExit,
+            asyncio.CancelledError,
+        ):
+            with self.subTest(error_type=error_type.__name__):
+                source = PassiveTelemetry(1, 1, clock=lambda: self.now)
+                try:
+                    source.ingest(self.packet())
+                    source.ingest(self.packet(sequence=1, kind="position"))
+                    self.assertEqual(len(source.snapshot().samples), 2)
+                    failure = error_type("private-decoder-detail")
+                    with patch.object(source._decoder, "decode", side_effect=failure):
+                        with self.assertRaises(error_type) as caught:
+                            source.ingest(self.packet(sequence=2, boot=11))
+                    self.assertIs(caught.exception, failure)
+                    status = source.snapshot()
+                    self.assertEqual(status.state, "UNKNOWN")
+                    self.assertEqual(status.reason, "decoder_fault")
+                    self.assertEqual(status.samples, ())
+                    self.assertFalse(status.perception_eligible)
+                    self.assertNotIn("private-decoder-detail", repr(status))
+                    source.ingest(self.packet(sequence=3, boot=12))
+                    self.assertEqual(source.snapshot(), status)
+                finally:
+                    source.close()
+
+    def test_decoded_field_fault_withdraws_before_propagating(self):
+        # Removing extraction cleanup must expose the previous two observations.
+        for point in ("pitch", "yawspeed", "float_conversion", "time_boot_ms"):
+            for error_type in (
+                AttributeError,
+                ValueError,
+                common.MAVError,
+                KeyboardInterrupt,
+                SystemExit,
+                asyncio.CancelledError,
+            ):
+                with self.subTest(point=point, error_type=error_type.__name__):
+                    source = PassiveTelemetry(1, 1, clock=lambda: self.now)
+                    try:
+                        source.ingest(self.packet())
+                        source.ingest(self.packet(sequence=1, kind="position"))
+                        previous = source.snapshot()
+                        self.assertEqual(len(previous.samples), 2)
+                        failure = error_type("private-field-detail")
+                        decoded = common.MAVLink_attitude_message(11, 1, 2, 3, 4, 5, 6)
+
+                        class FailedNumber:
+                            def __float__(self, failure=failure):
+                                raise failure
+
+                        class FaultyMessage:
+                            def __getattr__(
+                                self, name, point=point, failure=failure, decoded=decoded
+                            ):
+                                if name == point:
+                                    raise failure
+                                if name == "pitch" and point == "float_conversion":
+                                    return FailedNumber()
+                                return getattr(decoded, name)
+
+                        with patch.object(source._decoder, "decode", return_value=FaultyMessage()):
+                            with self.assertRaises(error_type) as caught:
+                                source.ingest(self.packet(sequence=2, boot=11))
+                        self.assertIs(caught.exception, failure)
+                        status = source.snapshot()
+                        self.assertEqual(status.state, "UNKNOWN")
+                        self.assertEqual(status.reason, "decoder_fault")
+                        self.assertEqual(status.samples, ())
+                        self.assertFalse(status.perception_eligible)
+                        self.assertNotIn("private-field-detail", repr(status))
+                        source.ingest(self.packet(sequence=3, boot=12))
+                        self.assertEqual(source.snapshot(), status)
+                        self.assertEqual(len(previous.samples), 2)
+                    finally:
+                        source.close()
+
+    def test_state_commit_fault_withdraws_before_propagating(self):
+        for point in ("boot_compare", "commit_hook", "observation", "boot_write", "sample_write"):
+            for error_type in (
+                RuntimeError,
+                MemoryError,
+                KeyboardInterrupt,
+                SystemExit,
+                asyncio.CancelledError,
+            ):
+                with self.subTest(point=point, error_type=error_type.__name__):
+                    source = PassiveTelemetry(1, 1, clock=lambda: self.now)
+                    try:
+                        source.ingest(self.packet())
+                        source.ingest(self.packet(sequence=1, kind="position"))
+                        previous = source.snapshot()
+                        self.assertEqual(len(previous.samples), 2)
+                        failure = error_type("private-commit-detail")
+
+                        class FailedWrite(dict):
+                            def __setitem__(self, key, value, failure=failure):
+                                raise failure
+
+                        class FailedBoot:
+                            def __le__(self, other, failure=failure):
+                                raise failure
+
+                        context = nullcontext()
+                        if point == "boot_compare":
+                            decoded = common.MAVLink_attitude_message(11, 1, 2, 3, 4, 5, 6)
+                            decoded.time_boot_ms = FailedBoot()
+                            context = patch.object(source._decoder, "decode", return_value=decoded)
+                        elif point == "commit_hook":
+                            context = patch.object(source, "_commit_packet", side_effect=failure)
+                        elif point == "observation":
+                            context = patch(
+                                "aethron_edge.telemetry.mavlink.Observation", side_effect=failure
+                            )
+                        elif point == "boot_write":
+                            source._boot = FailedWrite(source._boot)
+                        else:
+                            source._samples = FailedWrite(source._samples)
+                        with context, self.assertRaises(error_type) as caught:
+                            source.ingest(self.packet(sequence=2, boot=11))
+                        self.assertIs(caught.exception, failure)
+                        status = source.snapshot()
+                        self.assertEqual(status.state, "UNKNOWN")
+                        self.assertEqual(status.reason, "state_commit_fault")
+                        self.assertEqual(status.samples, ())
+                        self.assertFalse(status.perception_eligible)
+                        self.assertNotIn("private-commit-detail", repr(status))
+                        source.ingest(self.packet(sequence=3, boot=12))
+                        self.assertEqual(source.snapshot(), status)
+                        self.assertEqual(len(previous.samples), 2)
+                        source.close()
+                        self.assertEqual(source.snapshot().reason, "closed")
+                    finally:
+                        source.close()
+
+    def test_expected_decoder_rejection_remains_recoverable(self):
+        self.source.ingest(self.packet())
+        with patch.object(
+            self.source._decoder, "decode", side_effect=common.MAVError("bad packet")
+        ):
+            self.source.ingest(self.packet(sequence=1, boot=11))
+        self.assertEqual(self.source.snapshot().reason, "invalid_packet")
+        self.assertEqual(self.source.snapshot().samples, ())
+        self.source.ingest(self.packet(sequence=2, boot=12))
+        self.assertEqual(self.source.snapshot().state, "OBSERVED_UNVERIFIED")
+
     def test_signed_packet_cannot_be_reported_as_authenticated_without_keys(self):
         encoder = common.MAVLink(None, srcSystem=1, srcComponent=1)
         encoder.signing.secret_key = bytes(32)
@@ -147,7 +369,8 @@ class TelemetryTests(unittest.TestCase):
         for system, component in ((True, 1), (0, 1), (256, 1), (1, -1), (1, 1.0)):
             with self.assertRaises(ValueError):
                 PassiveTelemetry(system, component)
-        rng = random.Random(16031)
+        # Reproducible parser mutations only; never keys, tokens or security entropy.
+        rng = random.Random(16031)  # nosec B311
         for _ in range(2000):
             self.source.ingest(rng.randbytes(rng.randrange(400)))
             self.assertEqual(self.source.snapshot().state, "UNKNOWN")
