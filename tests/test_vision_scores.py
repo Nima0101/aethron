@@ -43,6 +43,24 @@ class VisionScores(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "^invalid_input$"):
                     self.select(raw)
 
+    def test_malformed_base_or_declared_score_version_cannot_fall_back(self):
+        raw = np.zeros((1, 8400, 85), dtype=np.float32)
+        for field in ("CONTRACT_VERSION", "SCORE_CONTRACT_VERSION"):
+            for version in (True, 1.0, np.int64(1), None, "1", 0, 2):
+                with self.subTest(field=field, version=repr(version)):
+                    native = SimpleNamespace(
+                        CONTRACT_VERSION=1, SCORE_CONTRACT_VERSION=1, select_scores=Mock()
+                    )
+                    setattr(native, field, version)
+                    with (
+                        patch.dict(sys.modules, {"aethron_vision_native": native}),
+                        patch.object(np, "argmax") as portable,
+                    ):
+                        with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                            self.select(raw)
+                    native.select_scores.assert_not_called()
+                    portable.assert_not_called()
+
     def test_selected_bits_match_portable_at_threshold_and_ties(self):
         raw = np.zeros((1, 8400, 85), dtype=np.float32)
         raw[0, :3, 4] = 1

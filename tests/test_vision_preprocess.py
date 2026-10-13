@@ -127,6 +127,26 @@ class VisionPreprocess(unittest.TestCase):
                 else:
                     pack.assert_not_called()
 
+    def test_malformed_base_or_declared_packing_version_cannot_fall_back(self):
+        pixels = self.np.zeros((64, 64, 3), dtype=self.np.uint8)
+        for field in ("CONTRACT_VERSION", "PACK_CONTRACT_VERSION"):
+            for version in (True, 1.0, self.np.int64(1), None, "1", 0, 2):
+                with self.subTest(field=field, version=repr(version)):
+                    self.inputs.clear()
+                    native = SimpleNamespace(
+                        CONTRACT_VERSION=1, PACK_CONTRACT_VERSION=1, pack_rgb=Mock()
+                    )
+                    setattr(native, field, version)
+                    with (
+                        patch.dict(sys.modules, {"aethron_vision_native": native}),
+                        patch.object(self.np, "ascontiguousarray") as portable,
+                    ):
+                        with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                            self.detector.infer(pixels, lighting="daylight")
+                    native.pack_rgb.assert_not_called()
+                    portable.assert_not_called()
+                    self.assertEqual(self.inputs, [])
+
     def test_broken_dependency_does_not_select_portable_packing(self):
         import builtins
 

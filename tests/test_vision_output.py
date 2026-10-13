@@ -7,7 +7,7 @@ import sys
 import unittest
 import warnings
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from aethron.vision.yolox import RGBDetector, _validated_output
 
@@ -325,6 +325,25 @@ class VisionOutput(unittest.TestCase):
             with patch.dict(sys.modules, {"aethron_vision_native": module}):
                 with self.assertRaises(error):
                     _validated_output(self.output())
+
+    def test_native_base_contract_requires_exact_integer_before_validation(self):
+        class EqualToOne:
+            def __eq__(self, other):
+                raise AssertionError("untrusted version comparison")
+
+        for version in (True, 1.0, self.np.int64(1), None, "1", 0, 2, EqualToOne()):
+            with self.subTest(version_type=type(version), version=repr(version)):
+                validate = Mock(return_value=True)
+                native = SimpleNamespace(CONTRACT_VERSION=version, validate_output=validate)
+                with patch.dict(sys.modules, {"aethron_vision_native": native}):
+                    with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                        _validated_output(self.output())
+                validate.assert_not_called()
+        native = SimpleNamespace(validate_output=Mock(return_value=True))
+        with patch.dict(sys.modules, {"aethron_vision_native": native}):
+            with self.assertRaisesRegex(ValueError, "^invalid_input$"):
+                _validated_output(self.output())
+        native.validate_output.assert_not_called()
 
     def test_portable_layouts_preserve_view_and_reject_nonfinite_bits(self):
         np = self.np

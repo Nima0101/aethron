@@ -99,6 +99,16 @@ def _ort_tensor_name(nodes, expected_shape):
     return name
 
 
+def _native_contract(native, name="CONTRACT_VERSION", *, optional=False):
+    """Only absent optional declarations select the older-package path."""
+    missing = object()
+    version = getattr(native, name, missing)
+    if optional and version is missing:
+        return False
+    require(type(version) is int and version == 1)
+    return True
+
+
 def _packed_rgb(canvas):
     """Use packing contract 1 when installed; older validators remain compatible."""
     import numpy as np
@@ -109,10 +119,8 @@ def _packed_rgb(canvas):
         if error.name != "aethron_vision_native":
             raise
     else:
-        require(native.CONTRACT_VERSION == 1)
-        version = getattr(native, "PACK_CONTRACT_VERSION", None)
-        if version is not None:
-            require(type(version) is int and version == 1)
+        _native_contract(native)
+        if _native_contract(native, "PACK_CONTRACT_VERSION", optional=True):
             tensor = np.empty((1, 3, 640, 640), dtype=np.float32)
             require(native.pack_rgb(canvas, tensor) is True)
             return tensor
@@ -134,7 +142,7 @@ def _validated_output(raw):
             if error.name != "aethron_vision_native":
                 raise
         else:
-            require(native.CONTRACT_VERSION == 1)
+            _native_contract(native)
             require(native.validate_output(raw) is True)
             return raw[0]
     values = raw[0]
@@ -155,10 +163,8 @@ def _selected_scores(raw):
             if error.name != "aethron_vision_native":
                 raise
         else:
-            require(native.CONTRACT_VERSION == 1)
-            version = getattr(native, "SCORE_CONTRACT_VERSION", None)
-            if version is not None:
-                require(type(version) is int and version == 1)
+            _native_contract(native)
+            if _native_contract(native, "SCORE_CONTRACT_VERSION", optional=True):
                 # Subnormal objectness is admitted but measured slower in the
                 # native reduction. Select NumPy before execution, not on error.
                 objectness = raw[0, :, 4]
