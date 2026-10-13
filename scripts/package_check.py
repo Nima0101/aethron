@@ -33,7 +33,9 @@ def run():
             )
         a = next((temp / "a").glob("*.whl"))
         b = next((temp / "b").glob("*.whl"))
-        assert a.read_bytes() == b.read_bytes(), "wheel builds differ"
+        compared_bytes = a.read_bytes()
+        assert compared_bytes == b.read_bytes(), "wheel builds differ"
+        wheel_sha256 = hashlib.sha256(compared_bytes).hexdigest()
         subprocess.run([sys.executable, "-m", "venv", str(temp / "consumer")], check=True)
         python = temp / "consumer" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
         subprocess.run(
@@ -74,11 +76,20 @@ def run():
         assert len(tracked) == 24
         assert len({r["tracks"][0]["id"] for r in tracked}) == 1
         assert tracked[-1]["tracks"][0]["sources"] == ["depth", "lwir", "radar"]
+        # Consumers must not invalidate the artifacts qualified by the comparison.
+        # Keep the original digest; never re-label replacement bytes as verified.
+        for wheel in (a, b):
+            if sorted(wheel.parent.glob("*.whl")) != [wheel]:
+                raise ValueError("wheel_artifacts_changed")
+            if wheel.is_symlink() or not wheel.is_file():
+                raise ValueError("wheel_artifacts_changed")
+            if wheel.read_bytes() != compared_bytes:
+                raise ValueError("wheel_artifacts_changed")
         print(
             json.dumps(
                 {
                     "wheel": a.name,
-                    "sha256": hashlib.sha256(a.read_bytes()).hexdigest(),
+                    "sha256": wheel_sha256,
                     "byte_identical": True,
                     "isolated_install": True,
                     "runtime_dependencies": 0,
