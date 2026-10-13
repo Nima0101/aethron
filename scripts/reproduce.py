@@ -21,14 +21,22 @@ def call(args, cwd, **kw):
     return subprocess.run(args, cwd=cwd, check=True, **kw)
 
 
-def validate_artifacts(directory, manifest):
+def artifact_paths(directory):
+    """Admit the complete inventory before reading any artifact payload."""
     if directory.is_symlink() or not directory.is_dir():
         raise ValueError("release_artifacts_changed")
-    observed = {}
-    for path in directory.iterdir():
+    paths = sorted(directory.iterdir())
+    for path in paths:
         if path.is_symlink() or not path.is_file():
             raise ValueError("release_artifacts_changed")
-        observed[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return paths
+
+
+def validate_artifacts(directory, manifest):
+    observed = {
+        path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in artifact_paths(directory)
+    }
     if observed != manifest:
         raise ValueError("release_artifacts_changed")
 
@@ -121,9 +129,10 @@ def run():
         call([sys.executable, "scripts/release.py", str(root / "b")], clone)
         validate_source(clone, revision)
         a, b = root / "a", root / "b"
-        assert sorted(p.name for p in a.iterdir()) == sorted(p.name for p in b.iterdir())
+        paths_a, paths_b = artifact_paths(a), artifact_paths(b)
+        assert [p.name for p in paths_a] == [p.name for p in paths_b]
         artifact_manifest = {}
-        for p in a.iterdir():
+        for p in paths_a:
             compared = p.read_bytes()
             assert compared == (b / p.name).read_bytes(), p.name
             artifact_manifest[p.name] = hashlib.sha256(compared).hexdigest()

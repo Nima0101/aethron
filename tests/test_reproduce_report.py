@@ -195,6 +195,7 @@ class ReproductionReport(unittest.TestCase):
         source_mutate_at="consumer2",
         verification_error=None,
         check_workspace=False,
+        guard_artifact_reads=False,
     ):
         output = io.StringIO()
         diagnostics = io.StringIO()
@@ -220,6 +221,38 @@ class ReproductionReport(unittest.TestCase):
         source_status = b""
         index_entries = b"H examples/person-blackout.json\0"
         real_process = subprocess.run
+        real_read = Path.read_bytes
+
+        def checked_read(path):
+            if guard_artifact_reads and path.parent.name in ("a", "b"):
+                self.assertFalse(path.parent.is_symlink(), "read through linked directory")
+                self.assertFalse(path.is_symlink(), "read linked artifact")
+                self.assertTrue(path.is_file(), "read non-regular artifact")
+            return real_read(path)
+
+        def mutate_artifact(root):
+            artifact = root / mutate_lane / "aethron.pyz"
+            if mutation == "changed":
+                artifact.write_bytes(b"changed after comparison")
+            elif mutation == "removed":
+                artifact.unlink()
+            elif mutation == "extra":
+                artifact.with_name("uncompared.zip").write_bytes(b"extra artifact")
+            elif mutation == "file_link":
+                target = artifact.parent.parent / "external.pyz"
+                artifact.replace(target)
+                artifact.symlink_to(target)
+            elif mutation == "directory_link":
+                directory = artifact.parent
+                target = directory.with_name("external-build")
+                directory.replace(target)
+                directory.symlink_to(target, target_is_directory=True)
+            elif mutation == "directory_entry":
+                artifact.unlink()
+                artifact.mkdir()
+            elif mutation == "fifo":
+                artifact.unlink()
+                os.mkfifo(artifact)
 
         def fake_process(args, **kwargs):
             nonlocal clone_revision, source_status, index_entries
@@ -264,6 +297,8 @@ class ReproductionReport(unittest.TestCase):
                 name = "unexpected.pyz" if changed and mismatch == "names" else "aethron.pyz"
                 data = b"different bytes" if changed and mismatch == "bytes" else payload
                 (destination / name).write_bytes(data)
+                if destination.name == "b" and mutation is not None and mutate_at == 0:
+                    mutate_artifact(destination.parent)
             elif args[1:2] == ["scripts/verify.py"] or args[1:3] == ["-m", "aethron"]:
                 if args[1:2] == ["scripts/verify.py"] and verification_error is not None:
                     (workspaces[0] / "partial.bin").write_bytes(b"partial\x00evidence")
@@ -271,22 +306,7 @@ class ReproductionReport(unittest.TestCase):
             elif args[1:2] == ["-I"] or args[1].endswith("aethron.pyz"):
                 consumers.append(args)
                 if mutation is not None and len(consumers) == mutate_at:
-                    artifact = Path(kwargs["cwd"]) / mutate_lane / "aethron.pyz"
-                    if mutation == "changed":
-                        artifact.write_bytes(b"changed after comparison")
-                    elif mutation == "removed":
-                        artifact.unlink()
-                    elif mutation == "extra":
-                        artifact.with_name("uncompared.zip").write_bytes(b"extra artifact")
-                    elif mutation == "file_link":
-                        target = artifact.parent.parent / "external.pyz"
-                        artifact.replace(target)
-                        artifact.symlink_to(target)
-                    elif mutation == "directory_link":
-                        directory = artifact.parent
-                        target = directory.with_name("external-build")
-                        directory.replace(target)
-                        directory.symlink_to(target, target_is_directory=True)
+                    mutate_artifact(Path(kwargs["cwd"]))
                 if consumer:
                     if kwargs.get("check"):
                         raise subprocess.CalledProcessError(consumer, args)
@@ -318,6 +338,7 @@ class ReproductionReport(unittest.TestCase):
             patch.object(tempfile, "tempdir", sandbox),
             patch.object(reproduce.subprocess, "run", side_effect=fake_process),
             patch.object(reproduce.subprocess, "check_output", side_effect=git_output),
+            patch.object(Path, "read_bytes", checked_read),
             contextlib.redirect_stdout(output),
             contextlib.redirect_stderr(diagnostics),
         ):
@@ -511,6 +532,36 @@ with module.reproduction_workspace() as temporary:
                         self.assertEqual(str(error), "release_artifacts_changed")
                         self.assertEqual(output, "")
                         self.assertEqual(len(consumers), mutate_at)
+
+    def test_linked_build_outputs_are_rejected_before_consumers(self):
+        for lane in ("a", "b"):
+            for mutation in ("file_link", "directory_link"):
+                with self.subTest(lane=lane, mutation=mutation):
+                    output, error, consumers, _, _ = self.invoke(
+                        mutation=mutation, mutate_at=0, mutate_lane=lane
+                    )
+                    self.assertIsInstance(error, ValueError)
+                    self.assertEqual(str(error), "release_artifacts_changed")
+                    self.assertEqual(output, "")
+                    self.assertEqual(consumers, [])
+
+    def test_invalid_build_outputs_are_rejected_before_payload_reads(self):
+        mutations = ["file_link", "directory_link", "directory_entry"]
+        if hasattr(os, "mkfifo"):
+            mutations.append("fifo")
+        for lane in ("a", "b"):
+            for mutation in mutations:
+                with self.subTest(lane=lane, mutation=mutation):
+                    output, error, consumers, _, _ = self.invoke(
+                        mutation=mutation,
+                        mutate_at=0,
+                        mutate_lane=lane,
+                        guard_artifact_reads=True,
+                    )
+                    self.assertIsInstance(error, ValueError)
+                    self.assertEqual(str(error), "release_artifacts_changed")
+                    self.assertEqual(output, "")
+                    self.assertEqual(consumers, [])
 
     def test_zip_consumers_ignore_caller_import_path(self):
         with tempfile.TemporaryDirectory() as directory:
