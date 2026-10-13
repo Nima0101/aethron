@@ -29,6 +29,8 @@ class PackageFinalIntegrityTests(unittest.TestCase):
                 pass
             elif args[1:4] == ["-m", "pip", "install"]:
                 pass
+            elif args[1:] == ["--help"]:
+                return subprocess.CompletedProcess(args, 0, stdout="usage: aethron")
             elif args[1:5] == ["-I", "-m", "aethron", "demo"]:
                 row = {
                     "scenario": "person-zero-visible-thermal",
