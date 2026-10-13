@@ -1,0 +1,91 @@
+{
+  "audit_policy_version": 3,
+  "component": "P3.3 transport exceptions and caller cancellation",
+  "baseline": "78e8cd98ffef6e5c7a0aac2a03b5669ae87676b1",
+  "source_binding": "Hashes name reviewed post-change bytes delivered with this evidence; baseline names pre-change commit.",
+  "decision": "KEEP TypeScript/native fetch; FIX narrow transport diagnostics and per-event cancellation checkpoints",
+  "source_sha256": {
+    "examples/clients/typescript/src/client.ts": "182fbe1e22875609d663699eec2b0c7babb46e441e275d99a8fd340a688d0022",
+    "examples/clients/typescript/src/scene.schema.json": "57547fac9399c84cd7db554faf14055c8a7bad9a8efa3232ccc6f62da0f2c417",
+    "examples/clients/typescript/src/types.ts": "79c889063624704f04a14b0dac3c46f3da653cb09cd3e5e372e628f4e891ef9d",
+    "examples/clients/typescript/src/validators.d.cts": "7ade1e5425d23c2707f4fdd7cda0108d9e57ad007181c7aa0fb322ce90f964b4",
+    "examples/clients/typescript/src/wire.ts": "a48da9c2746819b10a72c09054787711d282a6c29bf5cc64ad588c41639309ba",
+    "examples/clients/typescript/src/session.ts": "17cabbb49e597f78aa0b41ddd00fad91391e5b108de14652f91129429da56155",
+    "examples/clients/typescript/generate-validators.mjs": "1db7c830977d035bf069cddb25581fcb6073f33ddd80f4b75e42c33a7c47faef",
+    "examples/clients/typescript/package.json": "b7c10bba0504236fae11e5fe8110a54475d8b52bfd804ad721a669649e4b5612",
+    "examples/clients/typescript/package-lock.json": "e9851168f26e274480aa106a84f447bbd5429cf9c3e8462ec44c58c2158666c1",
+    "examples/clients/typescript/tsconfig.json": "f0a2fb4639eab2cb4c22884c54ddd948f0a8f5c1bc0d6b61f1698ea61fc955cf",
+    "examples/clients/typescript/test.mjs": "80947c49fd6dcc4628383cf6b0ef788a93d192acfef03e4453b077d8ce28fb22",
+    "examples/clients/typescript/validation.test.mjs": "88ac29f1ea09498530b9edf7ec0fdde523cdbd890aae67cb054842fba536f8f3",
+    "examples/clients/typescript/transport.test.mjs": "9e3a1089d907904ac2af575e454a33924546fe87968d4de140f345cbc4b1cd15",
+    "examples/clients/typescript/wire.test.mjs": "001e55f149ea79574d474d945a35b9bad591f6c796d77da09bdfb96956390b67",
+    "examples/clients/typescript/session.test.mjs": "448c00e8e65b70e17ee6f14a02bbeb0436da8e3ec2c217b41f6a1de94d9d2776",
+    "examples/clients/typescript/redirect.test.mjs": "4f67dc638e1b56501913e7eb423d26d448b8ee8fecc16f2ae37e985ca6b58e41",
+    "examples/clients/typescript/disposal.test.mjs": "7285c4501b8dd12bfd5b5bb64269dc68eca7d47174bec26c6f3a3f254d46cecb",
+    "examples/clients/typescript/README.md": "ce2636eac772b7c9178beaa71bc78a39dc9a5b85a257391d72135d61a744ef24",
+    "contracts/fixtures/v3/blackout-output.json": "39cce631744143dd5e8114e791098dfd308ab95de33f0cafeb4b77e38027bbfb",
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "1df68291bf25e8d8b8a21f8694425537071aa5428a04c04c2d71be7962eefe43",
+    "examples/clients/typescript/errors.test.mjs": "0fe085746feca67003d7d5f16bf7ad9dff75efacc3b5223d1d00a294a032ca33"
+  },
+  "reports": {
+    "errors-red-v3.tap": {
+      "sha256": "09f75a83567ac371cc7e083046fe96fda29746ef3c89a62fd2010749e3584ee6",
+      "pass": 1,
+      "fail": 13
+    },
+    "errors-red-complete-v3.tap": {
+      "sha256": "83155c4d041f8131933f9db584c567c332431af8c9ed8f843a0bfdc79914de16",
+      "pass": 1,
+      "fail": 15
+    },
+    "errors-source-v3.tap": {
+      "sha256": "d700fcdcc5ecb40af9126678e853a77eb77a2de6d6236515e068b4267615c078",
+      "pass": 142,
+      "fail": 0
+    },
+    "errors-validation-v3.tap": {
+      "sha256": "d737769e7ec4d2e24fea7d01250edbd51dd3e5a234f769cd1a4010122ecfc953",
+      "pass": 4,
+      "fail": 0
+    },
+    "errors-installed-v3.tap": {
+      "sha256": "bdca1486fc615dedc902eba8f94bce091ecc9109884c09f914f50ce882116e2c",
+      "pass": 138,
+      "fail": 0
+    }
+  },
+  "green": {
+    "focused_tests": 146,
+    "installed_public_tests": 138,
+    "typescript_build": "PASS",
+    "installed_artifact_bytes": "All 10 dist implementation/schema/declaration files equal tested build",
+    "strict_typescript_consumer": "PASS",
+    "test_syntax": "PASS"
+  },
+  "package": {
+    "id": "aethron-edge-client-example@0.1.0",
+    "size": 21036,
+    "unpacked_size": 132513,
+    "sha256": "c9eb4f2eaabc929833f2aa382895e46d76ca529be47932fc714600d166bab1b3"
+  },
+  "sources": [
+    "https://dom.spec.whatwg.org/#interface-abortsignal",
+    "https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/ensure-active.html",
+    "https://dart.dev/libraries/async/futures-error-handling"
+  ],
+  "environment": {
+    "node": "v22.23.2",
+    "platform": "linux",
+    "network": "synthetic loopback only"
+  },
+  "negative_evidence": [
+    "Initial 14-case baseline: 13 assertion failures and one pass. Final 16-case baseline: 15 assertion failures and one pass; no test errors, skips or cancellations.",
+    "Session-body error normalization already passed; no new defect is claimed in that path.",
+    "Application callback exceptions retain their identity; they are outside the transport diagnostic normalization boundary.",
+    "Checkpoints do not preempt synchronous work or terminate arbitrary sources that ignore abort; five-second test watchdogs are not deployment deadlines.",
+    "Two EAGAIN host spawn failures while reading policy recovered on retry; earlier read-only FETCH_HEAD prevents claiming a refreshed main.",
+    "Initial endpoint trust, lexical-number forms and producer whole-event size reconciliation remain open. Remote deletion remains best effort."
+  ],
+  "security_review": "Fixed transport errors contain no original rejection value or cause. Native caller cancellation at headers/body and before POST is exercised. Same-chunk cancellation stops before the next parsed event. Existing renderer identity, validated-handle binding and independent DELETE controls pass. No authority, identity storage, dependencies or server changes.",
+  "audit_complete": false
+}

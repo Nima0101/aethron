@@ -1,0 +1,92 @@
+{
+  "baseline": "6fcc6dcaf39b14298a59bd3cd4f8e64cf9fbe5ea",
+  "component": "P12 state/action help inventory and coverage enforcement",
+  "review_order_version": 3,
+  "audit_complete": false,
+  "decision": "KEEP pinned TypeScript AST with build-time ECMAScript; FIX stale remaining-action-help coverage claim.",
+  "adr": "examples/operator/state-help-adr.json",
+  "source_sha256": {
+    "examples/operator/help-inventory.mjs": "1a1b0384fb3dc5e538ab803b58146d397bfa1fd29e80a2f9b368701b6d31fb47",
+    "examples/operator/help-inventory.test.mjs": "0b515d4d76edee8f32adf9fb370464c5af310c27d6c9cbbc7466ff6ec4ee687c",
+    "examples/operator/action-help.test.mjs": "cf7ae23a1e1547ff2674036dd3175b07e60b33318c4878207798c0b94ad4ceb3",
+    "examples/operator/browser.test.mjs": "5208342270dcaf5849c084bc7563a50b4e65cb64f5ae97c43a1734e9211e26bb",
+    "examples/operator/state-help-adr.json": "11e616428f479d221a2bee8b8e3a3fef2a06c65899ea2d92386cf3780ceeb26b",
+    "examples/operator/state-help-adr.schema.json": "6a5ba62f42ed5f10110203ac28ef79281551972f0a1dda1cf99ed31132695756",
+    "examples/operator/action-help-adr.json": "23e00f4961dbfc03c046266a1854d469398d971457d75580a7024c84d05f74ea",
+    "examples/operator/action-help-adr.schema.json": "8a303022b45c17e5534a524fc40622191f1f15677aa8d77c2291cb9603243aab",
+    "examples/operator/src/presenter.ts": "ca6048627c403caf55038d46118b4246e656fd95900a1af509593c4fd53be286",
+    "examples/operator/src/connection.ts": "d9f969d9090fcaade3db0d4f7c7a922ac27c009811c23013430eeeaef1b16c12",
+    "examples/operator/src/action-help.ts": "a812898c3eeea6d2e78d259d310ca6c52a5dd3b8de6478653f7e2512a820d66e",
+    "examples/operator/package.json": "d4001605a8790064d85341b5e447711e8f2a2ef467ab5bf0bdff475c446ad060",
+    "examples/operator/README.md": "d1c77d2b9cfcb7dfdb1ea77ce798c26e55c1e4faa65325df22c86fc9d18aa641",
+    ".github/workflows/aethron-typescript-client.yml": "4514e589dbdc585d278c208ad37c9802c9da7bb1f02d667046fcdfa9d3778094",
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "2588f2639369e63d862546d80be650ba8901788a3b42a484fbffc08c62a5ccba"
+  },
+  "log_directory": "build/p33-sdk-linux",
+  "report_sha256": {
+    "help-inventory-review-red.log": "d47bb158569cde033c2a94b501658e1744c77ee6ec724579f4d23cdbcbe96a1c",
+    "help-inventory-review-green.log": "dad55ede8dca068be694ac9bf795a007aba32b6bd7898bfece996e2a1b55c40f",
+    "help-inventory-review-build.log": "157124070fefcae646f4a16fe892b82669d9fb8ff62444afd858c52160e68b74",
+    "help-inventory-review-artifacts.log": "7cbf29dc3364ffd3c3d1eabffd516ebfdfdccbbc21b4f98cc0f88c15b5f6a927",
+    "help-review-pr44.json": "9909014512e2379a6247961cf5d472bdd4c2fcf0ee416acd497dcd5b5d9bfcf7"
+  },
+  "distribution_sha256": {
+    "examples/operator/browser-dist/ACTION-HELP.json": "2a966147e94582b5025eacaccf7ded82c8bbe67c53de6337d45dc2adcda55ad7",
+    "examples/operator/browser-dist/AJV-LICENSE": "a05350a88e318e4f5f2c2a1ff1e2e88daa4dd38e6e78b71cccae422bdc762cc3",
+    "examples/operator/browser-dist/ESBUILD-LICENSE": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681",
+    "examples/operator/browser-dist/LICENSE": "fb981668c18a279e285fc4d83fba1e836cc84dd4daa73c9697d3cfd2d8aca6e0",
+    "examples/operator/browser-dist/STATE-HELP.json": "4a59c5b39249e89fd029a03bac2ba3e48df9dddb8150dd455f72658c22054eae",
+    "examples/operator/browser-dist/aethron-observation.mjs": "1d4d87f92c47aadbc486952083712b5a6f505a545b66668e99a68f4ada4ee30b",
+    "examples/operator/browser-dist/manifest.json": "19303f55296f2bc50d4d44347fc1028410b8eed0c059cf3005d2a5ac1ce680fc",
+    "examples/operator/dist/action-help.d.ts": "ac620671b9053ee53d3e5b2d1a5602987f9c059f95136a4de53b12b10fd00780",
+    "examples/operator/dist/action-help.js": "ace36b50ae250363215d9fdbf3c343b3d1763a62ada5037dddf90ac0d21e0c61",
+    "examples/operator/dist/browser.d.ts": "f2f37b0d20f20828032de474a92586b4595a4e1b4695f328d75d576eea89c4b7",
+    "examples/operator/dist/browser.js": "f2f37b0d20f20828032de474a92586b4595a4e1b4695f328d75d576eea89c4b7",
+    "examples/operator/dist/client.d.ts": "100d5412387f0a62e7226382459776ca206f4ca005c68d66ce32293fcbb63266",
+    "examples/operator/dist/client.js": "accb73d1024863e001fcf0fed3c43d7fbe47478909bff87864bc8f8012add918",
+    "examples/operator/dist/connection.d.ts": "3795a0fefa3a29663b5ac4fe419e26348da23be00619b6a1714152de4cbd2878",
+    "examples/operator/dist/connection.js": "984139522c778883bf9719274f861fe46b953117c659a83103473006a93d8218",
+    "examples/operator/dist/lifecycle.d.ts": "5d82f6ed79dff918f3456c565e2381c534a6491c05761d202e91ea7009bb2013",
+    "examples/operator/dist/lifecycle.js": "21acce417c6eca107c2a17a71c62089ae41e91d23dcf335ce66d69548e21bbc6",
+    "examples/operator/dist/panel.d.ts": "48473f57f5d1607c7887cd5eea5e555d512b82dc3577eb35d2ba31bac94e18fe",
+    "examples/operator/dist/panel.js": "c6a1b7d8cec3386c842a7d7919b43fde8817cd73a52550e5752167111a8191d4",
+    "examples/operator/dist/presenter.d.ts": "8282396e83b722d3684e3b5bb623be356536d2676a519634b3e6b46425b7f92d",
+    "examples/operator/dist/presenter.js": "3d84b3f1d06229e56bff834057a440b071c2a5b306deb769d67588fb62f2a51f"
+  },
+  "red": {
+    "methods": 1,
+    "failures": 1,
+    "reason": "State inventory incorrectly retained action-specific topics in remaining product coverage despite companion action inventory."
+  },
+  "checks": {
+    "focused_help_methods": 22,
+    "artifact_help_methods": 2,
+    "failures": 0,
+    "skips": 0,
+    "component_build": "PASS",
+    "syntax_diff": "PASS",
+    "unchanged_generated_files": 18,
+    "unchanged_operator_files": 14,
+    "bundle_bytes": 148568,
+    "runtime_bundle_byte_identical": true
+  },
+  "technology_sources_reviewed": [
+    "https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API",
+    "https://tree-sitter.github.io/tree-sitter/using-parsers/1-getting-started.html",
+    "https://swc.rs/docs/usage/core",
+    "https://rescript-lang.org/docs/manual/bind-to-js-function/"
+  ],
+  "technology_comparative_benchmark": null,
+  "pr": 44,
+  "published_head": "6fcc6dcaf39b14298a59bd3cd4f8e64cf9fbe5ea",
+  "ci": {
+    "QUEUED": 40,
+    "SKIPPED": 1
+  },
+  "next_earliest_unreviewed": "P12 contextual action-help runtime binding and accessibility/lifecycle boundaries",
+  "limits": [
+    "Build-time extractor and Node structural DOM verification only; not arbitrary-program semantic proof.",
+    "No native browser, screen reader, role enforcement or independent installed acceptance qualification.",
+    "Full lane/P12/P19 incomplete. Insufficient information for tactical deployment."
+  ]
+}

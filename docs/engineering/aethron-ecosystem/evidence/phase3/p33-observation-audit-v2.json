@@ -1,0 +1,237 @@
+{
+  "audit_policy_version": 2,
+  "component": "P3.3 observation ownership, clocks and projection",
+  "baseline": "bb36aafed2e90e271dc46935c9f2f1b888dd8172",
+  "origin_main_reviewed": "e2431752d61a1bf1edb5b5aa9985131d27334665",
+  "contract_reconciliation": "Fetched protected main; consumed schema and generated type files unchanged. No peer modules edited.",
+  "decision": {
+    "language": "KEEP TypeScript/ECMAScript",
+    "clock": "KEEP local performance.now with explicit finite/nonnegative millisecond injection",
+    "state": "MIGRATE to native private fields and minimal retained projection",
+    "implemented": true
+  },
+  "source_sha256": {
+    "examples/clients/typescript/src/client.ts": "971ee2350b3f4bf0967c846b1eb9fc710008e3e3b84f31c8d6f06ed4fb4ec259",
+    "examples/clients/typescript/test.mjs": "155c26c27a51f59939b8d0909f08b874eade959922b049b3392ef2ae440a4dd2",
+    "examples/clients/typescript/audit-observation.mjs": "a0588404b59c22bb98fd8051dd2deb00b305a03da84cecf29f57a0470b39757b",
+    "examples/clients/typescript/package.json": "79b85e6e70df900b2bf1e79461952a3c9d423d79235b2eb17d434f2ecaf59d28",
+    "examples/clients/typescript/package-lock.json": "e9851168f26e274480aa106a84f447bbd5429cf9c3e8462ec44c58c2158666c1",
+    "examples/clients/typescript/src/scene.schema.json": "57547fac9399c84cd7db554faf14055c8a7bad9a8efa3232ccc6f62da0f2c417"
+  },
+  "probe": {
+    "node": "v22.23.2",
+    "platform": "linux",
+    "arch": "x64",
+    "parity_traces": 45,
+    "parity_views": 162,
+    "legacy_exceptions": "Four ownership regressions intentionally corrected; see test.mjs",
+    "cycles_per_round": 100,
+    "views_per_cycle": 20,
+    "tracks": 32,
+    "measurements": [
+      {
+        "round": 0,
+        "strategy": "legacy",
+        "elapsed_ms": 289.9549269999999,
+        "covariance_rows": 64000
+      },
+      {
+        "round": 0,
+        "strategy": "closure",
+        "elapsed_ms": 103.34063100000003,
+        "covariance_rows": 64000
+      },
+      {
+        "round": 0,
+        "strategy": "native_private",
+        "elapsed_ms": 90.06575399999997,
+        "covariance_rows": 64000
+      },
+      {
+        "round": 1,
+        "strategy": "native_private",
+        "elapsed_ms": 95.31771800000001,
+        "covariance_rows": 64000
+      },
+      {
+        "round": 1,
+        "strategy": "closure",
+        "elapsed_ms": 30.12189000000012,
+        "covariance_rows": 64000
+      },
+      {
+        "round": 1,
+        "strategy": "legacy",
+        "elapsed_ms": 173.1028389999999,
+        "covariance_rows": 64000
+      },
+      {
+        "round": 2,
+        "strategy": "legacy",
+        "elapsed_ms": 100.15607799999998,
+        "covariance_rows": 64000
+      },
+      {
+        "round": 2,
+        "strategy": "closure",
+        "elapsed_ms": 26.352615000000014,
+        "covariance_rows": 64000
+      },
+      {
+        "round": 2,
+        "strategy": "native_private",
+        "elapsed_ms": 90.99686900000006,
+        "covariance_rows": 64000
+      }
+    ],
+    "sha256": {
+      "src/client.ts": "971ee2350b3f4bf0967c846b1eb9fc710008e3e3b84f31c8d6f06ed4fb4ec259",
+      "dist/client.js": "ebd1e2ee8463096f8660f5fd8801f51aa87848b9e47b3e0987736733751f361b",
+      "audit-observation.mjs": "9e28892071bea834568b2b9c8dd63032e288f0bdaab104ac8888bfb21cae849b",
+      "src/scene.schema.json": "57547fac9399c84cd7db554faf14055c8a7bad9a8efa3232ccc6f62da0f2c417"
+    }
+  },
+  "probe_note": "Timing report predates only the addition of the --check switch around the timing loop. Its original probe hash is retained. Final deterministic --check output binds the current probe source; production source bytes are the same in both records.",
+  "final_trace_check": {
+    "node": "v22.23.2",
+    "platform": "linux",
+    "arch": "x64",
+    "parity_traces": 45,
+    "parity_views": 162,
+    "legacy_exceptions": "Four ownership regressions intentionally corrected; see test.mjs",
+    "cycles_per_round": 100,
+    "views_per_cycle": 20,
+    "tracks": 32,
+    "measurements": [],
+    "sha256": {
+      "src/client.ts": "971ee2350b3f4bf0967c846b1eb9fc710008e3e3b84f31c8d6f06ed4fb4ec259",
+      "dist/client.js": "ebd1e2ee8463096f8660f5fd8801f51aa87848b9e47b3e0987736733751f361b",
+      "audit-observation.mjs": "a0588404b59c22bb98fd8051dd2deb00b305a03da84cecf29f57a0470b39757b",
+      "src/scene.schema.json": "57547fac9399c84cd7db554faf14055c8a7bad9a8efa3232ccc6f62da0f2c417"
+    }
+  },
+  "package": {
+    "sha256": "d4834a56ff325fba1b52bed1f19f6a3143de86214be6642c58bef5132091fe14",
+    "id": "aethron-edge-client-example@0.1.0",
+    "name": "aethron-edge-client-example",
+    "version": "0.1.0",
+    "size": 16658,
+    "unpackedSize": 109808,
+    "shasum": "0d94eec1c33579f7de8f01f47de08e05c4b9f219",
+    "integrity": "sha512-6rYVsAanxW4yDPp9cBr8vchNGjWiwyUQo9JhT/F7350vvOYeBUSfDT3jpJjgNLQFe58upCKYic5qH+S4lOE6zA==",
+    "filename": "aethron-edge-client-example-0.1.0.tgz",
+    "files": [
+      {
+        "path": "README.md",
+        "size": 4622,
+        "mode": 420
+      },
+      {
+        "path": "dist/client.d.ts",
+        "size": 771,
+        "mode": 420
+      },
+      {
+        "path": "dist/client.js",
+        "size": 5756,
+        "mode": 420
+      },
+      {
+        "path": "dist/scene.schema.json",
+        "size": 20344,
+        "mode": 420
+      },
+      {
+        "path": "dist/types.d.ts",
+        "size": 2791,
+        "mode": 420
+      },
+      {
+        "path": "dist/types.js",
+        "size": 11,
+        "mode": 420
+      },
+      {
+        "path": "dist/validators.cjs",
+        "size": 74916,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 597,
+        "mode": 420
+      }
+    ],
+    "entryCount": 8,
+    "bundled": []
+  },
+  "red": {
+    "passed": 35,
+    "failed": 4,
+    "cases": [
+      "ordinary object serialization does not disclose the retained scene",
+      "a JavaScript property collision cannot extend the accepted lease",
+      "a JavaScript property collision cannot replace an admitted scene",
+      "a failing input getter cannot leave a reentrant observation admitted"
+    ],
+    "outcomes": [
+      "transport handle disclosed by reflection",
+      "view(101) remained delayed after public received=50",
+      "FORGED observed state replaced validated state",
+      "failing clone retained the getter-admitted scene"
+    ]
+  },
+  "checks": {
+    "compile": "PASS TypeScript 5.9.3",
+    "source": "39 PASS with --disallow-code-generation-from-strings",
+    "installed": "39 PASS with --disallow-code-generation-from-strings; implementation/declarations byte equality verified",
+    "validation": "3 PASS including 682-case validator parity",
+    "trace_parity": "45 traces, 162 views; legacy, closure and native-private candidates agree outside four intentional ownership corrections",
+    "consumer_declarations": "PASS strict NodeNext noEmit",
+    "syntax": "PASS node --check on test and probe",
+    "dependency_audit": {
+      "auditReportVersion": 2,
+      "vulnerabilities": {},
+      "metadata": {
+        "vulnerabilities": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "total": 0
+        },
+        "dependencies": {
+          "prod": 6,
+          "dev": 1,
+          "optional": 0,
+          "peer": 0,
+          "peerOptional": 0,
+          "total": 6
+        }
+      }
+    },
+    "diff_check": "PASS"
+  },
+  "negative_evidence": [
+    "Closure prototype has lower median total time (30.12ms) than selected native-private projection (91.00ms); legacy 173.10ms. No speed superiority claimed for the chosen primitive.",
+    "Other-language emitted implementations were not benchmarked; official platform semantics inform the comparison.",
+    "Private fields protect ordinary reflection/property writes, not hostile code controlling the process or physical memory erasure.",
+    "No performance.now OS-suspend/platform qualification; explicit local clocks do not establish network freshness.",
+    "Initial failing cases retained in this record; previous validation and observation failure records remain unchanged."
+  ],
+  "limits": [
+    "Bounded shared-host synthetic probe; combined strategy timings include cloning, validation, projection and reads, with JIT/order effects",
+    "No heavy local suite, VM, Docker, full fuzz, clean clone or hardware work",
+    "No live server/browser validation in this slice"
+  ],
+  "audit_remaining": [
+    "Authenticated stream/session/renderer lifecycle",
+    "Package distribution and fixture tooling",
+    "Foundation P1.5 producer decision reconciliation"
+  ],
+  "publication": {
+    "pr": null,
+    "state": "local focused audit migration; audit incomplete"
+  }
+}

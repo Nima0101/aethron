@@ -1,0 +1,196 @@
+{
+  "audit_policy_version": 2,
+  "component": "P3.3 Node contract admission",
+  "baseline": "20d54aeaaca1d20078112335d5dd12a2d5acdcc3",
+  "decision": {
+    "boundary_language": "KEEP TypeScript/ECMAScript",
+    "validation_strategy": "MIGRATE runtime compilation to build-time AJV standalone validators",
+    "implemented": true
+  },
+  "source_sha256": {
+    "examples/clients/typescript/src/client.ts": "6e6ba21d671af54fc994b6e1440b9716ff750e5439c0cb6177bac023cc1d174e",
+    "examples/clients/typescript/src/validators.d.cts": "acdc3360394332be1765477c74342845ba1887ec58f5ab67ef2ccf8a73f124a4",
+    "examples/clients/typescript/src/scene.schema.json": "57547fac9399c84cd7db554faf14055c8a7bad9a8efa3232ccc6f62da0f2c417",
+    "examples/clients/typescript/generate-validators.mjs": "68cd9cae17698c6b841d3484ce76d662df86d2298f63771d226d352602a1c5c4",
+    "examples/clients/typescript/audit-validation.mjs": "7d334b29a133f0b82b8323f72ab6d004c05c3cecb4532b960deaf5d050348bce",
+    "examples/clients/typescript/validation.test.mjs": "15fd2c921b2bf870fe39fa2eaa31c41361d8460df0c850cbb19856a0adb075a6",
+    "examples/clients/typescript/test.mjs": "af6302231c47fd423cfaa272ce891cd62021f89deb0430e75d4a259585b0a7b8",
+    "examples/clients/typescript/package.json": "218b57feb08bb85bde81ea147003b3a2d3fbe0d06ee409acfbeeb271747ff190",
+    "examples/clients/typescript/package-lock.json": "e9851168f26e274480aa106a84f447bbd5429cf9c3e8462ec44c58c2158666c1"
+  },
+  "probe": {
+    "node": "v22.23.2",
+    "platform": "linux",
+    "arch": "x64",
+    "rounds": 3,
+    "warm_iterations": 10000,
+    "measurements": [
+      {
+        "round": 0,
+        "mode": "runtime",
+        "ready_ms": 1859.7734229999999,
+        "rss_delta_bytes": 15536128,
+        "warm_ms": 702.439282,
+        "accepted": 5000
+      },
+      {
+        "round": 0,
+        "mode": "standalone",
+        "ready_ms": 110.94505699999996,
+        "rss_delta_bytes": 8781824,
+        "warm_ms": 495.44878600000004,
+        "accepted": 5000
+      },
+      {
+        "round": 1,
+        "mode": "standalone",
+        "ready_ms": 163.392991,
+        "rss_delta_bytes": 9678848,
+        "warm_ms": 386.94918499999994,
+        "accepted": 5000
+      },
+      {
+        "round": 1,
+        "mode": "runtime",
+        "ready_ms": 2086.547935,
+        "rss_delta_bytes": 16224256,
+        "warm_ms": 681.8604370000003,
+        "accepted": 5000
+      },
+      {
+        "round": 2,
+        "mode": "runtime",
+        "ready_ms": 1169.709512,
+        "rss_delta_bytes": 15376384,
+        "warm_ms": 491.2187610000001,
+        "accepted": 5000
+      },
+      {
+        "round": 2,
+        "mode": "standalone",
+        "ready_ms": 96.26506499999996,
+        "rss_delta_bytes": 10616832,
+        "warm_ms": 295.06857199999996,
+        "accepted": 5000
+      }
+    ],
+    "sha256": {
+      "src/scene.schema.json": "57547fac9399c84cd7db554faf14055c8a7bad9a8efa3232ccc6f62da0f2c417",
+      "generate-validators.mjs": "68cd9cae17698c6b841d3484ce76d662df86d2298f63771d226d352602a1c5c4",
+      "dist/validators.cjs": "d339fd0a06c326adf5ba849ea39ac30d6fc7f4ac7e14e2e0e27b46247d466306",
+      "package-lock.json": "e9851168f26e274480aa106a84f447bbd5429cf9c3e8462ec44c58c2158666c1"
+    },
+    "generated_bytes": 74916
+  },
+  "package": {
+    "sha256": "3a8bf28bdb6f85a049c1588d021df84a75d7bd0fe1941bac289b13bd84c547b3",
+    "id": "aethron-edge-client-example@0.1.0",
+    "name": "aethron-edge-client-example",
+    "version": "0.1.0",
+    "size": 16179,
+    "unpackedSize": 108538,
+    "shasum": "a72ea3f01c61640eec0fc59a34aaab3483c943ff",
+    "integrity": "sha512-+eJNcN0EKAIHyicqSI6ufhD7Hmrl1AAmUKlaKZPXQRS1gN5LJvdQlb8vgaP120Crq6kdePgRyWlCqRW91rcEkA==",
+    "filename": "aethron-edge-client-example-0.1.0.tgz",
+    "files": [
+      {
+        "path": "README.md",
+        "size": 3919,
+        "mode": 420
+      },
+      {
+        "path": "dist/client.d.ts",
+        "size": 822,
+        "mode": 420
+      },
+      {
+        "path": "dist/client.js",
+        "size": 5216,
+        "mode": 420
+      },
+      {
+        "path": "dist/scene.schema.json",
+        "size": 20344,
+        "mode": 420
+      },
+      {
+        "path": "dist/types.d.ts",
+        "size": 2791,
+        "mode": 420
+      },
+      {
+        "path": "dist/types.js",
+        "size": 11,
+        "mode": 420
+      },
+      {
+        "path": "dist/validators.cjs",
+        "size": 74916,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 519,
+        "mode": 420
+      }
+    ],
+    "entryCount": 8,
+    "bundled": []
+  },
+  "checks": {
+    "typescript_build": "PASS, generator then TypeScript 5.9.3 compiler",
+    "source_client": "35 PASS with --disallow-code-generation-from-strings",
+    "validation_migration": "3 PASS; 682 cases x 2 validators; deterministic generation and no-eval import",
+    "installed_consumer": "35 PASS with --disallow-code-generation-from-strings; installed implementation bytes equal tested build",
+    "installed_declarations": "PASS, strict NodeNext noEmit consumer",
+    "syntax": "PASS, node --check on three new .mjs files",
+    "dependency_audit": {
+      "auditReportVersion": 2,
+      "vulnerabilities": {},
+      "metadata": {
+        "vulnerabilities": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 0,
+          "critical": 0,
+          "total": 0
+        },
+        "dependencies": {
+          "prod": 6,
+          "dev": 1,
+          "optional": 0,
+          "peer": 0,
+          "peerOptional": 0,
+          "total": 6
+        }
+      }
+    },
+    "diff_check": "PASS"
+  },
+  "negative_evidence": [
+    "Original no-eval import regression failed (exit 1). Reference runtime compiler reproduces EvalError: Code generation from strings disallowed for this context.",
+    "Initial Unicode boundary assertion used reasons instead of track id; both validators agreed. Corrected test target without schema/implementation changes.",
+    "Initial combined test/probe execution hit uv_thread_create SIGABRT; benchmark child had null exit status. Sequential bounded reruns passed.",
+    "Initial npm pack attempted read-only default cache and returned EROFS. Reran with workspace cache, then installed and verified new bytes.",
+    "Initial consumer preparation used unavailable python command; reran successfully using python3 before final consumer verification.",
+    "Generated validators add 74916 uncompressed bytes; final tarball is 16179 bytes versus approximately 6.7 KB before migration.",
+    "AJV remains installed for generated Unicode-length helper; no dependency-removal claim."
+  ],
+  "limits": [
+    "Same AJV compiler parity, not independent validator qualification",
+    "Three rounds on loaded shared Linux host, no portable latency/memory guarantee",
+    "Other language runtimes not benchmarked",
+    "No live server, browser, native device, VM, Docker, full repository matrix, full fuzz or clean-clone run"
+  ],
+  "audit_remaining": [
+    "Observation timing/ownership/projection",
+    "Authenticated stream/session/renderer lifecycle",
+    "Distribution and fixture tooling",
+    "Reconcile P1.5 producer technology audit"
+  ],
+  "publication": {
+    "pr": null,
+    "status": "local audit slice; protected hosted gates still required"
+  }
+}

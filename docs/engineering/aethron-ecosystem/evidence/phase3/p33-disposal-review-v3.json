@@ -1,0 +1,95 @@
+{
+  "audit_policy_version": 3,
+  "component": "P3.3 unused HTTP response ownership",
+  "baseline": "d1f927461ecacae72b3bb36176c1d223caaf98a0",
+  "source_binding": "Hashes name reviewed post-change bytes delivered with this evidence; baseline names the pre-change commit.",
+  "decision": "KEEP TypeScript/native fetch; FIX explicit unused-body cancellation; retain asynchronous cleanup limits",
+  "source_sha256": {
+    "examples/clients/typescript/src/client.ts": "7780e06460c5cc49f5cbdaffc8924d66fcc213dc44b0b7b9b63196159c525a6a",
+    "examples/clients/typescript/src/scene.schema.json": "57547fac9399c84cd7db554faf14055c8a7bad9a8efa3232ccc6f62da0f2c417",
+    "examples/clients/typescript/src/types.ts": "79c889063624704f04a14b0dac3c46f3da653cb09cd3e5e372e628f4e891ef9d",
+    "examples/clients/typescript/src/validators.d.cts": "7ade1e5425d23c2707f4fdd7cda0108d9e57ad007181c7aa0fb322ce90f964b4",
+    "examples/clients/typescript/src/wire.ts": "a48da9c2746819b10a72c09054787711d282a6c29bf5cc64ad588c41639309ba",
+    "examples/clients/typescript/src/session.ts": "17cabbb49e597f78aa0b41ddd00fad91391e5b108de14652f91129429da56155",
+    "examples/clients/typescript/generate-validators.mjs": "1db7c830977d035bf069cddb25581fcb6073f33ddd80f4b75e42c33a7c47faef",
+    "examples/clients/typescript/package.json": "3251c44760315373e1815269212a8cffcc8d33565f2b73cec531f588956f7276",
+    "examples/clients/typescript/package-lock.json": "e9851168f26e274480aa106a84f447bbd5429cf9c3e8462ec44c58c2158666c1",
+    "examples/clients/typescript/tsconfig.json": "f0a2fb4639eab2cb4c22884c54ddd948f0a8f5c1bc0d6b61f1698ea61fc955cf",
+    "examples/clients/typescript/test.mjs": "80947c49fd6dcc4628383cf6b0ef788a93d192acfef03e4453b077d8ce28fb22",
+    "examples/clients/typescript/validation.test.mjs": "88ac29f1ea09498530b9edf7ec0fdde523cdbd890aae67cb054842fba536f8f3",
+    "examples/clients/typescript/transport.test.mjs": "9e3a1089d907904ac2af575e454a33924546fe87968d4de140f345cbc4b1cd15",
+    "examples/clients/typescript/wire.test.mjs": "001e55f149ea79574d474d945a35b9bad591f6c796d77da09bdfb96956390b67",
+    "examples/clients/typescript/session.test.mjs": "448c00e8e65b70e17ee6f14a02bbeb0436da8e3ec2c217b41f6a1de94d9d2776",
+    "examples/clients/typescript/redirect.test.mjs": "4f67dc638e1b56501913e7eb423d26d448b8ee8fecc16f2ae37e985ca6b58e41",
+    "examples/clients/typescript/disposal.test.mjs": "7285c4501b8dd12bfd5b5bb64269dc68eca7d47174bec26c6f3a3f254d46cecb",
+    "examples/clients/typescript/README.md": "3fbc700e10fa31a76268e7c4ce36a33a17b83c9ce72842ab3d586b55facf3cac",
+    "contracts/fixtures/v3/blackout-output.json": "39cce631744143dd5e8114e791098dfd308ab95de33f0cafeb4b77e38027bbfb",
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "abe736dbb4b3eb142bd93f1f771a5ec831631c4d36a35cf187b8a0f03d53b3a8"
+  },
+  "reports": {
+    "disposal-red-v3.tap": {
+      "sha256": "f7d2566f9ea8c6fac6bf6123ed0a700a7117c16c5501c108b259551093acb948",
+      "pass": 3,
+      "fail": 11
+    },
+    "disposal-red-final-v3.tap": {
+      "sha256": "2e1d24f9490464ff964e94fe0ee67c756f799c352589b472b72e01892269be52",
+      "pass": 4,
+      "fail": 10
+    },
+    "disposal-green-v3.tap": {
+      "sha256": "8cc5239fc3876bdf8039d4cd280fe6bf31f85e1fb4a1e02475e44e444258f633",
+      "pass": 14,
+      "fail": 0
+    },
+    "disposal-source-v3.tap": {
+      "sha256": "4bdfc4784380413ff7c3323201e98b794805eb64062c2734e9d08b05d460ee0b",
+      "pass": 126,
+      "fail": 0
+    },
+    "disposal-validation-v3.tap": {
+      "sha256": "a440da84c11881acdd7c6bb69f3d1836c1417d9c9f1c52f672cf4a11077e1bb3",
+      "pass": 4,
+      "fail": 0
+    },
+    "disposal-installed-v3.tap": {
+      "sha256": "2354e75d669a3e396e9683a8b0cb52fbec2df6d7b7b0726e850b2bb68f435e74",
+      "pass": 122,
+      "fail": 0
+    }
+  },
+  "green": {
+    "focused_tests": 130,
+    "installed_public_tests": 122,
+    "typescript_build_and_consumer": "PASS",
+    "installed_artifact_bytes": "All dist implementation, schema and declarations equal tested build",
+    "diff_check": "PASS"
+  },
+  "package": {
+    "id": "aethron-edge-client-example@0.1.0",
+    "size": 20555,
+    "unpacked_size": 131009,
+    "sha256": "10d054bb47b55565f7ee3468df370058a73f1417bdaea63ee4a89acdb8d2adcd"
+  },
+  "sources": [
+    "https://github.com/nodejs/undici#garbage-collection",
+    "https://streams.spec.whatwg.org/#rs-cancel",
+    "https://ktor.io/docs/client-responses.html#streaming",
+    "https://api.dart.dev/dart-async/StreamSubscription/cancel.html"
+  ],
+  "environment": {
+    "node": "v22.23.2",
+    "platform": "linux",
+    "network": "synthetic loopback only"
+  },
+  "negative_evidence": [
+    "Native GET cancellation already passed via the existing abort path; no new GET socket leak is claimed",
+    "Initial DELETE fixtures incorrectly supplied null successful GET bodies; corrected before production edit; both RED runs retained",
+    "One-second native regression timeout is not a production resource or latency guarantee",
+    "Two SIGTRAP policy-read failures recovered on retry; earlier interrupted reads did not return evidence",
+    "origin/main refresh failed with read-only FETCH_HEAD; last local main is a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46, not asserted current",
+    "Remote cleanup remains best effort; caller abort phases, endpoint trust/native error disclosure, lexical-number and producer byte-cap questions remain open"
+  ],
+  "security_review": "Discards unnecessary response data without draining or parsing, preserves primary results, observes rejected source cancellation, and adds no authority/dependency/retry/identity storage. Source that ignores cancellation can retain its own resources. No hardware/TLS/MLS/CNSA/realtime qualification.",
+  "audit_complete": false
+}

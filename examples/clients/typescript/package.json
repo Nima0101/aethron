@@ -5,8 +5,15 @@
   "type": "module",
   "license": "GPL-3.0-only",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "test": "npm run build && node --test test.mjs"
+    "build": "node build.mjs",
+    "test": "npm run build && node --test test.mjs validation.test.mjs validation-audit.test.mjs transport.test.mjs wire.test.mjs session.test.mjs session-boundary.test.mjs redirect.test.mjs disposal.test.mjs errors.test.mjs endpoint.test.mjs numeric.test.mjs generation.test.mjs source.test.mjs offline-consumer.test.mjs && node --disallow-code-generation-from-strings audit-observation.mjs --check && npm run audit:cancellation && npm run audit:redirect && npm run audit:session && npm run test:build && npm run test:package && npm run test:types",
+    "test:package": "node package.test.mjs",
+    "generate": "node generate-contract.mjs --write",
+    "test:types": "tsc --strict --noEmit --target es2022 --module nodenext --moduleResolution nodenext contract-types.test.ts",
+    "test:build": "node --test build.test.mjs",
+    "audit:session": "node audit-session-boundary.mjs",
+    "audit:cancellation": "node audit-cancellation.mjs",
+    "audit:redirect": "node audit-redirect.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0"
@@ -18,6 +25,16 @@
   "exports": "./dist/client.js",
   "types": "./dist/client.d.ts",
   "files": [
-    "dist"
+    "LICENSE",
+    "dist/client.js",
+    "dist/client.d.ts",
+    "dist/session.js",
+    "dist/session.d.ts",
+    "dist/wire.js",
+    "dist/wire.d.ts",
+    "dist/types.js",
+    "dist/types.d.ts",
+    "dist/validators.cjs",
+    "dist/scene.schema.json"
   ]
 }

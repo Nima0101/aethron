@@ -1,0 +1,108 @@
+{
+  "baseline": "7368b197466796688fc9b8c43a56095ff8fd5b89",
+  "component": "P3.3 endpoint/redirect admission and offline package lock adapter",
+  "review_order_version": 3,
+  "audit_complete": false,
+  "decision": "KEEP host URL/Fetch and Node lock projection; FIX record/dev validation before filtering. SDK runtime unchanged.",
+  "adr": "examples/clients/typescript/transport-install-adr.json",
+  "source_sha256": {
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "a004791d6617e2901aa46806f1996b73119ace86a2dad44140a0ecbbb69f7eb2",
+    "examples/clients/typescript/README.md": "830c1bf0edf02473e579d98307803d1434b25ab8cedfa48079071159037af218",
+    "examples/clients/typescript/audit-redirect.mjs": "10da17e1767dab482af80e95209c8e54f89b6bda75722d4eecc456262d305e3b",
+    "examples/clients/typescript/offline-consumer.mjs": "056a97f71e2b8138765d882426e0ce9c4511e2ff86e80ab3117778321258d359",
+    "examples/clients/typescript/offline-consumer.test.mjs": "8e868c9ffc1cff196d532cd0b3fa6cc9e2abeeba72823d4c0ede6bda291fc8ab",
+    "examples/clients/typescript/package.json": "38b4e8d4b39102063c7e76604938161dbfc08f9045cb581eeb4584fc882c30bf",
+    "examples/clients/typescript/transport-install-adr.json": "7cc0e8db5f279e55eb2e476fdb563a9269637160525b0bfa1fdfce1fc710539d",
+    "examples/clients/typescript/transport-install-adr.schema.json": "83859f589e8fab6100731cbaed66ad75b239380386deebe3f2d99e86b6ec9c4c",
+    "examples/clients/typescript/package-lock.json": "e9851168f26e274480aa106a84f447bbd5429cf9c3e8462ec44c58c2158666c1",
+    "examples/clients/typescript/src/client.ts": "2ad3ccf7651ae6dfb7da865b110b0161959878d56d5a64364066a4440ad79bc5",
+    "examples/clients/typescript/endpoint.test.mjs": "d12a4efc5e97e817e21dc2d26bbe1e0b8f2e59062cce8331156019a19d4e968f",
+    "examples/clients/typescript/redirect.test.mjs": "4f67dc638e1b56501913e7eb423d26d448b8ee8fecc16f2ae37e985ca6b58e41",
+    "examples/clients/typescript/package.test.mjs": "3739199152c69ceeaf78af7806988bac776b847c9f159ab9e695a97b76abcdf6",
+    "examples/clients/typescript/installed-runtime.mjs": "3852e80e06269b7f3d19a931aa248cff3451ddbe1d175ceb310a2412d8049974",
+    "examples/clients/typescript/public-types.test.ts": "50bdb4234d3acfe413f998fbed32f7e47e398bbf4cc5f66055f0c61546ee333e",
+    "scripts/edge_node_e2e.py": "0cca0beb9048ab22384e4cb5f355afe3638b4f5aca73256e81bdfe18f52071f1",
+    "tests/integration/test_node_consumer_smoke.py": "5b780513ddc2f787627e1327710ecc5d419596e7a397f2ca593aca15e4c90824"
+  },
+  "log_directory": "build/p33-sdk-linux",
+  "report_sha256": {
+    "offline-records-red.log": "43bee7ad30cd667f0cc5ed7515340b52bdfff053eea47e321e1db8f760263c82",
+    "offline-records-green.log": "951afce0a0db01447571273c835bea1958ee348773cfaf28eac6e4510526e31d",
+    "transport-install-focused.log": "d6280bc3446747b6ad616601aaacc9292f342f31f9dcc55731855810749d7f9a",
+    "transport-install-smoke-tests.log": "ebb197aba4bc38fe720b129ff397e8f2fa9cdfe3da498b8bc50ca4d7f974d1c2",
+    "transport-install-package.log": "869e3815a1a8ff78c6562196475c38dffc31206f47484e47bb2df70de4f7415f",
+    "transport-install-package-retry.log": "73bba384dccd7d2ef6df15e246b50e86a4248760080ef64a742dc2a905328b0a",
+    "redirect-controls.log": "badbdf38ec6994b778199b734fb36d1ed04afb291c3ce145c8bb2c8d8f19bbce",
+    "redirect-controls-final.log": "3f762415c16d267ab6ed53f0ce0840707473ecbb2e9d68757efd7ee78537adad",
+    "transport-install-pr44.json": "e65907c41eb7b74fa576d23d5290606149baa6402d816e7b1ce039ac95fd042d"
+  },
+  "distribution_sha256": {
+    "examples/clients/typescript/dist/client.d.ts": "af30b39d8e1db5983826abc2a17d3875fa06aaa3dbedb41c25e39e91c691ffc3",
+    "examples/clients/typescript/dist/client.js": "fd1fd0155e3f20d107b2bd039fed69e52507a6a7fca6ca2a07f0b51fbfae62c9",
+    "examples/clients/typescript/dist/scene.schema.json": "39d0180c8c3d8ec0376c029b7e2e2724668343f58d4695d27cd1613bb96b460a",
+    "examples/clients/typescript/dist/session.d.ts": "c371ffcdfef108e3e49ea04fb333c8c18f799eee2aa1cfd51d526ae3a586aa87",
+    "examples/clients/typescript/dist/session.js": "30d353bfb91747d72426b6f47ea148b3d5e92cbe36f2c9b9d510f411d54778db",
+    "examples/clients/typescript/dist/types.d.ts": "acd854e2abeca3ed1c2849e2a5e1d563944c78cdfc33d9ffcd9eafaef0e63338",
+    "examples/clients/typescript/dist/types.js": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+    "examples/clients/typescript/dist/validators.cjs": "7046fcbc5f655e1f6768207d366ff0cac69502dd7147457bed0ebe4e512fdec3",
+    "examples/clients/typescript/dist/wire.d.ts": "58023ff80c20e478e5a951255687883542e91e1cccfb7bbcdc8af663fdd5a238",
+    "examples/clients/typescript/dist/wire.js": "55d6ee1a9cc38a898195027880b1752650ae8786af806ea7693f7c13b638940c"
+  },
+  "red": {
+    "command": "node --test offline-consumer.test.mjs",
+    "tests": 18,
+    "passed": 10,
+    "failed": 8,
+    "reason": "Null lock entry threw TypeError; seven non-boolean dev markers were accepted. Other malformed record and valid-input controls passed."
+  },
+  "checks": {
+    "focused_methods": 98,
+    "focused_failures": 0,
+    "focused_skips": 0,
+    "controlled_service_harness_methods": 16,
+    "controlled_service_harness_failures": 0,
+    "redirect_mutations": 3,
+    "expected_mutation_assertion_failures": 30,
+    "unchanged_controls_per_mutation": 21,
+    "package_initial": {
+      "passed": 2,
+      "failed": 1,
+      "cause": "External consumer tsc subprocess ETIMEDOUT under unchanged 30000 ms cap; no compiler diagnostic. Root cause not established."
+    },
+    "package_retry": {
+      "passed": 3,
+      "failed": 0,
+      "skips": 0,
+      "threshold_changed": false
+    },
+    "syntax_diff": "PASS",
+    "unchanged_distribution_files": 10,
+    "previous_commit_source_hashes_verified": 19,
+    "previous_report_hashes_verified": 6
+  },
+  "security_review": [
+    "Record shape and optional boolean classification checked before any dev dereference/filter. Valid outputs retain archive binding and pinned runtime metadata; no new resolver or coercion.",
+    "Native redirect controls use synthetic IPv4 loopback requests. Copied modules only; fixed child arguments, shell:false, 15000 ms timeout, 1 MiB output cap, temporary directory cleanup in finally.",
+    "Mutation admission requires 31 executed methods, ten matching phase failures at the destination-I/O assertion, 21 passes, no skips/cancellations or import/syntax failures.",
+    "Package allowlist excludes adapter/audits/ADRs; three package checks include archive-only offline cache and expected tarball-only ENOTCACHED negative control."
+  ],
+  "publication": {
+    "pr": "https://github.com/Nima0101/aethron/pull/44",
+    "published_head": "7368b197466796688fc9b8c43a56095ff8fd5b89",
+    "push": "PASS fast-forward prior verified cancellation-oracle commit",
+    "observed_ci": {
+      "QUEUED": 35,
+      "IN_PROGRESS": 4,
+      "SUCCESS": 1,
+      "SKIPPED": 1
+    },
+    "merge": "Not attempted; queued checks not polled. Current correction not yet committed or pushed."
+  },
+  "previous_evidence": "docs/engineering/aethron-ecosystem/evidence/phase3/p33-cancellation-oracle-v1.json",
+  "next_earliest_unreviewed": "Service-harness technology reassessment, then remaining P12 display/help review",
+  "limits": [
+    "Controlled service-harness tests substitute package/server boundaries; no new production-service or hardware qualification.",
+    "Package retry PASS does not erase the first timed-out external type check. No timeout or frozen threshold changed.",
+    "Full lane review and P19 installed-product/help gates remain incomplete. No audit completion marker. Insufficient information for tactical deployment."
+  ]
+}

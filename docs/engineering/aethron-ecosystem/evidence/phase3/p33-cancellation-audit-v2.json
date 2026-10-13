@@ -1,0 +1,114 @@
+{
+  "audit_policy_version": 2,
+  "review_order_version": 3,
+  "component": "P3.3 source cancellation safety correction",
+  "baseline": "0310a092bf45334f1b94ae2855ef032d3705073c",
+  "decision": "KEEP TypeScript/fetch; replace awaited source cleanup with observed cancellation and reader release",
+  "audit_complete": false,
+  "source_sha256": {
+    "examples/clients/typescript/src/client.ts": "59f3ed0426beb2691aa9a8ce80f9a0fda563cd57b50fc083f01b3bcbc3e5f49d",
+    "examples/clients/typescript/transport.test.mjs": "1e4710594f109c3ce3ce2cc182ff673151708146a0828e134b552c8da2b93af0",
+    "examples/clients/typescript/validation.test.mjs": "ceb8a67e9a3501621c0a971dd32fcb273ebe2b3342c10c61ee270439619578ef"
+  },
+  "red": {
+    "pass": 16,
+    "fail": 4,
+    "cases": "pending/rejecting reader cancellation after parser/renderer failure"
+  },
+  "green": {
+    "transport_tests": 20,
+    "source_client_transport_wire_tests": 63,
+    "validation_tests": 4,
+    "independent_negative_safety_cases": 14,
+    "installed_public_tests": 59,
+    "installed_bytes_match": true,
+    "typescript_consumer": "PASS"
+  },
+  "retained_failures": [
+    {
+      "phase": "concurrent focused checks and npm pack",
+      "result": "Host process/thread exhaustion: uv_thread_create assertion; packaging exit 134; shell fork EAGAIN; initial combined test reports incomplete.",
+      "resolution": "Reran focused tests directly in one Node process; sequential package retry and offline installation passed. No code or limits changed to conceal this failure."
+    }
+  ],
+  "report_sha256": {
+    "cancellation-red-v2.tap": "8b374bb034f8f36ee8437f38f8207da769a425fccd772a6237a423c15249c59c",
+    "cancellation-green-v2.tap": "50cf8a57a4130d7d76da169bb7f4c2ae99a1e00581a5f715c246830c338876e7",
+    "cancellation-source-sequential-v3.tap": "1af05c6421954b784e7b5027df8fb29fbf90c3f92516c8f99ae32a15be607f7d",
+    "validation-review-v3.tap": "22053333e6e8b34a4a85fba2f5d90d7bdca1a77b1520e9846dfba564f753dd77",
+    "cancellation-installed-v3.tap": "a193f3bde8ce8e0d99ba15e5298c14f80cc06bbd15ccab133c773bf199de2adc"
+  },
+  "package": {
+    "id": "aethron-edge-client-example@0.1.0",
+    "name": "aethron-edge-client-example",
+    "version": "0.1.0",
+    "size": 18762,
+    "unpackedSize": 115821,
+    "shasum": "bfccd86d88148e9aef5341a706c9aabba40f2980",
+    "integrity": "sha512-VGVqEgR9pxNjrrxsCMRRf6uDQXkm/ExqZT/59A6TLOkughcwFIAQ1MY6khJcyYMhOD8GT08BNlErBfQE+bkolQ==",
+    "filename": "aethron-edge-client-example-0.1.0.tgz",
+    "files": [
+      {
+        "path": "README.md",
+        "size": 6017,
+        "mode": 420
+      },
+      {
+        "path": "dist/client.d.ts",
+        "size": 771,
+        "mode": 420
+      },
+      {
+        "path": "dist/client.js",
+        "size": 5651,
+        "mode": 420
+      },
+      {
+        "path": "dist/scene.schema.json",
+        "size": 20344,
+        "mode": 420
+      },
+      {
+        "path": "dist/types.d.ts",
+        "size": 2791,
+        "mode": 420
+      },
+      {
+        "path": "dist/types.js",
+        "size": 11,
+        "mode": 420
+      },
+      {
+        "path": "dist/validators.cjs",
+        "size": 74916,
+        "mode": 420
+      },
+      {
+        "path": "dist/wire.d.ts",
+        "size": 357,
+        "mode": 420
+      },
+      {
+        "path": "dist/wire.js",
+        "size": 4333,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 630,
+        "mode": 420
+      }
+    ],
+    "entryCount": 10,
+    "bundled": []
+  },
+  "package_sha256": "1aa356c818dfa4d30adef9c7b3b8423ed51d2f0b2c0fdc59e5001c4a90b333d2",
+  "security_review": "No new dependencies, storage, credentials in URLs, command channel or actuation. Cancellation errors observed without input echo; original admission/renderer errors retained. Fixed tests use synthetic tokens. Dependency audit not rerun; previous zero findings are historical only.",
+  "limitations": [
+    "Arbitrary source can ignore cancellation; no resource termination guarantee",
+    "DELETE relies on cooperative fetch timeout and does not establish remote deletion",
+    "V3 review restarted; observation, transport, distribution and outstanding clients remain",
+    "Session-response bounds, lexical integer forms and producer cap mismatch unresolved",
+    "No full repository suite, live hardware, browser, hard-real-time or deployment qualification"
+  ]
+}

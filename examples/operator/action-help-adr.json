@@ -1,0 +1,51 @@
+{
+  "id": "P12-ACTION-HELP-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "KEEP TypeScript and native DOM for synchronous action descriptions after source/lifecycle review; FIX collision checks to include the mount root tree.",
+  "constraints": [
+    "Four existing buttons, two locales, offline fixed public text, no extra transport/storage or authority.",
+    "Short visible button names plus paragraphs linked by aria-describedby IDs. Check the owner document and mount-root tree, including shadow/detached trees, with at most 32 allocation attempts; locale changes and disposal remain synchronous.",
+    "Closed bilingual source extraction and exact executed-button to topic parity in the distributed ESM, with unsigned source/artifact binding."
+  ],
+  "alternatives": [
+    {
+      "technology": "TypeScript with native DOM",
+      "assessment": "Selected for direct synchronous mutation of standard button/paragraph nodes and native accessible descriptions. The runtime boundary already exposes DOM nodes; no scheduler, widget abstraction or foreign memory is needed."
+    },
+    {
+      "technology": "Lit and custom elements",
+      "assessment": "Credible declarative reactive-property support, but asynchronous update lifecycle and custom-element registration introduce a second lifecycle boundary without a current custom-element reuse requirement."
+    },
+    {
+      "technology": "ReScript with DOM/JS bindings",
+      "assessment": "Credible alternative static typing and JavaScript interoperability. Fixed literal text and four DOM mutations do not exhibit a data-model or effect-system gap that would materially improve this component through a second binding/compiler boundary."
+    },
+    {
+      "technology": "Rust with wasm-bindgen/web-sys",
+      "assessment": "Documented DOM manipulation through JavaScript bindings. There is no native numerical or memory-processing workload here; additional Wasm/JS artifact and DOM bindings do not address a demonstrated requirement."
+    }
+  ],
+  "sources": [
+    "https://www.w3.org/WAI/ARIA/apg/practices/names-and-descriptions/",
+    "https://developer.mozilla.org/en-US/docs/Web/API/Document/createElement",
+    "https://lit.dev/docs/components/lifecycle/",
+    "https://rescript-lang.org/docs/manual/bind-to-js-function/",
+    "https://wasm-bindgen.github.io/wasm-bindgen/examples/dom.html",
+    "https://developer.mozilla.org/en-US/docs/Web/API/Node/getRootNode",
+    "https://developer.mozilla.org/en-US/docs/Web/API/Document/getElementById"
+  ],
+  "limits": [
+    "Only four button actions are covered. Native details toggles retain existing state guidance; full route/permission/help-center coverage is not claimed.",
+    "Generated IDs identify DOM help elements only. One counter per Document per loaded module; checks cover existing IDs at mount, including the root element itself. Host exclusively owns component DOM. Moving roots between trees, later host ID mutations or separately loaded copies composing detached trees require host coordination.",
+    "Structural DOM parity and source/hash bindings are not screen-reader, signed-release, security-certification or installed-product acceptance. product_help_complete remains false.",
+    "No timing benchmark or hard-real-time, hardware, MLS, CNSA or availability qualification.",
+    "Allocation attempts are bounded at 32; DOM query cost depends on host tree size and is not a measured latency bound. Exhaustion throws and the containing client disposes partially mounted resources. Structural shadow-root checks do not qualify native browser or assistive-technology behavior."
+  ],
+  "c4": {
+    "context": "flowchart LR\nOperator --> Buttons[Four existing client buttons]\nButtons --> Help[Visible bilingual descriptions]\nHost[Authorized host adapter] --> Client[Read-only client]",
+    "containers": "flowchart LR\nSource[TypeScript literal text] --> Build[Node AST extractor]\nBuild --> Inventory[ACTION-HELP.json]\nSource --> ESM[Offline browser module]\nInventory --> Check[Offline artifact coverage]\nESM --> Check",
+    "components": "flowchart LR\nPanel[Locale buttons] --> Help[Native descriptions]\nConnection[Start and Stop] --> Help\nLocale[Shared locale owner] --> Help\nDispose[Component disposal] --> Clear[Remove descriptions and links]",
+    "code": "classDiagram\nclass ActionHelp {\n bindActionHelp(button, action, locale, scope) binding\n setLocale(locale) void\n dispose() void\n}\nActionHelp --> HTMLButtonElement\nActionHelp --> HTMLParagraphElement\nActionHelpInventory --> SourceHashes"
+  }
+}

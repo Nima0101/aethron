@@ -1,0 +1,58 @@
+{
+  "id": "P12-002",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "Use TypeScript and native DOM for a reusable observation panel. Keep the validated presenter and host-owned transport/refresh boundary. Add no rendering framework or runtime dependency.",
+  "constraints": [
+    "Read-only aggregate display; current state always UNKNOWN, no identifiers or raw scene.",
+    "Explicit refresh and disposal; stable native controls; English and Swedish contextual guidance available without network.",
+    "Host must supply an exclusively owned root and fresh SDK view reader, enforce authorization, and schedule expiry refreshes. No scheduler or freshness claim is supplied by the renderer."
+  ],
+  "alternatives": [
+    {
+      "technology": "TypeScript / native DOM",
+      "assessment": "Selected for this fixed three-state panel: DOM typings and existing versioned view types, textContent, native disclosure/buttons and explicit synchronous lifetime without an additional runtime. Choice is scoped to this panel, not the complete future operator application."
+    },
+    {
+      "technology": "Plain ECMAScript / native DOM",
+      "assessment": "Equivalent runtime available; static DOM and locale contracts would require separate checked annotations/declarations. TypeScript preserves those checks without extra deployed runtime."
+    },
+    {
+      "technology": "Lit",
+      "assessment": "Provides reactive web components and declarative templates. Credible for a growing reusable design system; this fixed panel needs neither custom-element registration nor reactive scheduling. No demonstrated capability gain for its current size."
+    },
+    {
+      "technology": "Elm",
+      "assessment": "Typed messages and JS ports are credible for an application. The host SDK reader still needs interop and runtime validation; no performance or safety advantage has been established for this small synchronous DOM boundary."
+    },
+    {
+      "technology": "ReScript",
+      "assessment": "Typed JavaScript interop remains a credible alternative. Native DOM bindings can express this component, but do not remove host trust or freshness responsibilities; no material runtime improvement established."
+    },
+    {
+      "technology": "LinkeDOM test DOM",
+      "assessment": "Development-only structural DOM testing, lock-pinned. Selected over hand-written DOM mocks to exercise actual tree creation/events; its documented non-browser scope prevents treating these tests as keyboard, screen-reader or layout qualification."
+    }
+  ],
+  "sources": [
+    "https://dom.spec.whatwg.org/#dom-node-textcontent",
+    "https://html.spec.whatwg.org/multipage/interactive-elements.html#the-details-element",
+    "https://lit.dev/docs/",
+    "https://guide.elm-lang.org/interop/",
+    "https://rescript-lang.org/docs/manual/latest/json",
+    "https://github.com/WebReflection/linkedom"
+  ],
+  "limits": [
+    "No complete operator app, authentication, role enforcement, Help Center search, release-bound help inventory or P19 acceptance.",
+    "DOM structural tests do not establish actual browser, assistive-technology or customer-install acceptance. Local browser probes timed out.",
+    "No measured real-time latency, MLS/CNSA, DDS/Link16, five-nines, hardware or tactical deployment claim.",
+    "The host must refresh on every SDK display callback and relevant UI activation. Stalled host execution can leave delayed historical text visible; current conditions always remain UNKNOWN.",
+    "Caller-controlled functions and DOM are trusted in-process integration; this is not an isolation boundary."
+  ],
+  "c4": {
+    "context": "flowchart LR\nOperator --> Panel[Read-only observation panel]\nPanel --> Guidance[Local en and sv-SE help]\nHost[Host authorized client] --> Panel",
+    "containers": "flowchart LR\nService[Peer service] --> SDK[Existing SDK]\nSDK --> Host[Host display callback and expiry scheduling]\nHost --> Panel[Browser DOM panel]\nPanel --> Presenter[Validated presenter]",
+    "components": "flowchart LR\nRefresh[Refresh or language or help activation] --> Reader[Fresh host view reader]\nReader --> Guard[Presentation guard]\nGuard --> Text[Fixed textContent and topic ID]\nText --> DOM[Stable native controls and status]\nDispose[Dispose] --> Clear[Remove listeners and owned content]",
+    "code": "classDiagram\nclass Panel {\n refresh() void\n setLocale(locale) void\n dispose() void\n}\nclass Presenter {\n presentObservation(input, locale) OperatorStatus\n}\nPanel --> Presenter"
+  }
+}

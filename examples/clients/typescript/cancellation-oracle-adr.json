@@ -1,0 +1,48 @@
+{
+  "id": "P33-CANCELLATION-ORACLE-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "KEEP TypeScript/native Fetch cancellation and Node test tooling; FIX the test watchdog masking lost request cancellation. Runtime unchanged.",
+  "constraints": [
+    "Single-session read-only Node SDK/P12 source; caller abort must stop admitted streaming, revoke displayed state and keep private transport reasons local. No automatic restart or additional host scheduler.",
+    "POST/GET fetch signals, session/reader disposal, fixed errors and independent viewer DELETE remain versioned behavior. A test cleanup watchdog must not be accepted as proof of client cancellation.",
+    "Focused offline/loopback execution on Linux with Node 22; fixed five-second cleanup watchdog and existing production bounds stay unchanged. No browser/device deadline qualification."
+  ],
+  "alternatives": [
+    {
+      "technology": "TypeScript with native Fetch/AbortSignal and ECMAScript node:test",
+      "assessment": "Selected: a single owned abort graph and explicit synchronous revocation map directly onto host semantics. Native loopback tests exercise request cancellation and independent deletion. The defect is an oracle that accepted watchdog-forced socket errors, corrected by an explicit watchdog-fired rejection. No language migration would remove this evidence requirement."
+    },
+    {
+      "technology": "Plain ECMAScript runtime with native Fetch",
+      "assessment": "Equivalent host cancellation behavior; retained for tests and the copied-module mutation driver. Removing SDK types provides no demonstrated lifecycle advantage and would require a separate declaration boundary for consumers."
+    },
+    {
+      "technology": "Kotlin/JS",
+      "assessment": "Credible option for shared JVM/JavaScript logic. Official documentation supports JavaScript runtimes and interoperation, but this component has no required shared JVM implementation. Host cancellation and explicit ownership still need equivalent tests. No demonstrated benefit warrants migration."
+    },
+    {
+      "technology": "ReScript compiled JavaScript promises",
+      "assessment": "Official promise types model JavaScript promises; this is a credible typed alternative beyond the incumbent. A promise type alone does not establish request cancellation or distinguish cleanup from success. It would retain the native abort/stream boundary and test oracle; no material lifecycle improvement demonstrated."
+    }
+  ],
+  "sources": [
+    "https://fetch.spec.whatwg.org/#abort-fetch",
+    "https://nodejs.org/api/test.html",
+    "https://nodejs.org/api/http.html#servercloseallconnections",
+    "https://kotlinlang.org/docs/js-overview.html",
+    "https://rescript-lang.org/docs/manual/promise/"
+  ],
+  "limits": [
+    "Baseline copied POST code without a fetch signal passed the old native cancellation test after watchdog cleanup. This is a demonstrated verification defect, not a demonstrated production cancellation failure.",
+    "Two mutations exercise lost POST and GET signals independently; child tests must fail at the watchdog assertion. A 15-second child timeout bounds the audit process and is not a performance threshold.",
+    "The five-second test watchdog is unchanged. Supported behavior requires Fetch to honor abort; nonconforming host implementations can retain a busy source until settlement. Remote DELETE is attempted, not guaranteed.",
+    "No foreign runtime benchmark, browser/mobile/Windows acceptance, full lane re-audit completion, release-bound help coverage, MLS/CNSA, uptime or tactical-deployment qualification."
+  ],
+  "c4": {
+    "context": "flowchart LR\nCaller[Authorized display host] --> SDK[Read-only SDK]\nSDK --> Service[API-v1 service]\nCaller --> Abort[Operator cancellation]",
+    "containers": "flowchart LR\nSDK[TypeScript module] --> Fetch[Host Fetch]\nTests[Node test process] --> Loopback[Local synthetic HTTP server]\nAudit[Bounded mutation driver] --> Tests",
+    "components": "flowchart LR\nAbort --> Request[POST or GET signal]\nRequest --> Revoke[Clear local observation]\nRevoke --> Delete[Independent viewer DELETE]\nWatchdog[Test cleanup watchdog] --> Close[Close fixture sockets]\nWatchdog --> Fail[Test must fail]",
+    "code": "classDiagram\nclass CancellationTest {\n boolean watchdogFired\n observe() Promise\n assertNoWatchdog() void\n}\nclass MutationAudit {\n copyClientWithoutSignal() module\n runSelectedTest() result\n requireWatchdogFailure() void\n}\nMutationAudit --> CancellationTest"
+  }
+}
