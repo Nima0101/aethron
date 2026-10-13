@@ -174,7 +174,11 @@ def _selected_scores(raw):
                     require(bool(confidence.min() >= 0 and confidence.max() <= 1))
                     return categories, confidence
     values = raw[0]
-    scores = values[:, 4, None] * values[:, 5:]
+    # Admitted probabilities may produce subnormals or round to zero. Keep
+    # those float32 results regardless of the caller's NumPy underflow policy,
+    # matching native reduction without changing other error policies.
+    with np.errstate(under="ignore"):
+        scores = values[:, 4, None] * values[:, 5:]
     categories = np.argmax(scores, axis=1)
     return categories, scores[np.arange(8400), categories]
 

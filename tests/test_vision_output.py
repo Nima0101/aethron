@@ -96,6 +96,20 @@ class VisionOutput(unittest.TestCase):
                             self.assertEqual(np.geterr(), before)
                         nms.assert_not_called()
 
+    def test_tiny_unselected_score_cannot_withdraw_valid_detection(self):
+        np = self.np
+        raw = self.output()
+        raw[0, 0, 4:6] = 1
+        raw[0, 8399, 4] = np.finfo(np.float32).tiny
+        raw[0, 8399, 5] = 0.1
+        for value in (raw, np.asfortranarray(raw)):
+            with patch.dict(sys.modules, {"aethron_vision_native": None}):
+                with np.errstate(under="ignore"):
+                    expected = self.infer(value)
+                self.assertEqual(len(expected), 1)
+                with np.errstate(all="raise"):
+                    self.assertEqual(self.infer(value), expected)
+
     def test_rescaling_overflow_withdraws_other_valid_candidates(self):
         np = self.np
         self.pixels = np.zeros((64, 1280, 3), dtype=np.uint8)

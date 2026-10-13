@@ -2,6 +2,7 @@
 
 import sys
 import unittest
+import warnings
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -125,3 +126,53 @@ class VisionScores(unittest.TestCase):
         self.assertIs(raised.exception, error)
         self.assertEqual(detector.net.forward.call_count, 1)
         self.assertEqual(native.select_scores.call_count, 1)
+
+    def test_admitted_underflow_preserves_bits_across_portable_routes(self):
+        raw = np.zeros((1, 8400, 85), dtype=np.float32)
+        raw[0, 0, 4:6] = 1
+        raw[0, 1, 4] = np.finfo(np.float32).tiny
+        raw[0, 1, 5:7] = 0.1  # Equal subnormal products: first class wins.
+        raw[0, 2, 4] = np.finfo(np.float32).tiny
+        raw[0, 2, 6] = np.finfo(np.float32).tiny  # Rounds to zero.
+        old_package = SimpleNamespace(CONTRACT_VERSION=1)
+        for value in (raw, raw[:, ::-1]):
+            with np.errstate(under="ignore"):
+                products = value[0, :, 4, None] * value[0, :, 5:]
+            expected = products.argmax(axis=1)
+            bits = products[np.arange(8400), expected].view(np.uint32)
+            for module in (None, old_package):
+                for policy in ("ignore", "warn", "raise", "call"):
+                    with self.subTest(strides=value.strides, module=module, policy=policy):
+                        callback = Mock()
+                        with (
+                            patch.dict(sys.modules, {"aethron_vision_native": module}),
+                            np.errstate(all="raise", under=policy, call=callback),
+                            warnings.catch_warnings(),
+                        ):
+                            warnings.simplefilter("error", RuntimeWarning)
+                            before = np.geterr()
+                            categories, scores = self.select(value)
+                            self.assertEqual(np.geterr(), before)
+                            self.assertIs(np.geterrcall(), callback)
+                        callback.assert_not_called()
+                        np.testing.assert_array_equal(categories, expected)
+                        np.testing.assert_array_equal(scores.view(np.uint32), bits)
+
+    def test_subnormal_native_preselection_preserves_strict_caller_policy(self):
+        raw = np.zeros((1, 8400, 85), dtype=np.float32)
+        raw[0, 0, 4] = np.finfo(np.float32).smallest_subnormal
+        raw[0, 0, 6] = 0.25
+        native = SimpleNamespace(CONTRACT_VERSION=1, SCORE_CONTRACT_VERSION=1, select_scores=Mock())
+        with (
+            patch.dict(sys.modules, {"aethron_vision_native": native}),
+            np.errstate(all="raise"),
+        ):
+            before = np.geterr()
+            categories, scores = self.select(raw)
+            self.assertEqual(np.geterr(), before)
+            # The caller still receives underflow errors after score selection.
+            with self.assertRaises(FloatingPointError):
+                np.multiply(raw[0, 0, 4], raw[0, 0, 6])
+        native.select_scores.assert_not_called()
+        np.testing.assert_array_equal(categories, np.zeros(8400))
+        np.testing.assert_array_equal(scores.view(np.uint32), np.zeros(8400, dtype=np.uint32))
