@@ -225,7 +225,11 @@ class RGBDetector:
         if lighting != "daylight":
             return []
         scale = min(640 / w, 640 / h)
-        resized = cv.resize(rgb, (int(w * scale), int(h * scale)), interpolation=cv.INTER_LINEAR)
+        resize_width, resize_height = int(w * scale), int(h * scale)
+        # Extreme aspect ratios can round an admitted one-pixel axis to zero.
+        # Reject before the native resize; never clamp or change pixel geometry.
+        require(resize_width > 0 and resize_height > 0)
+        resized = cv.resize(rgb, (resize_width, resize_height), interpolation=cv.INTER_LINEAR)
         canvas = np.full((640, 640, 3), 114, dtype=np.uint8)
         canvas[: resized.shape[0], : resized.shape[1]] = resized
         tensor = np.ascontiguousarray(canvas.transpose(2, 0, 1)[None], dtype=np.float32)
