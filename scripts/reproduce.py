@@ -31,11 +31,25 @@ def validate_artifacts(directory, manifest):
         raise ValueError("release_artifacts_changed")
 
 
+def validate_source(clone, revision):
+    """Bind sequential checks to one clean revision, excluding ignored build outputs."""
+    current = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=clone, text=True).strip()
+    dirty = subprocess.check_output(
+        ["git", "status", "--porcelain", "--untracked-files=normal"], cwd=clone
+    )
+    if current != revision or dirty:
+        raise ValueError("reproduction_source_changed")
+
+
 def run():
     with tempfile.TemporaryDirectory(prefix="aethron-clean-") as temporary:
         root = Path(temporary)
         clone = root / "source"
         call(["git", "clone", "--no-local", str(ROOT), str(clone)], ROOT, capture_output=True)
+        revision = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=clone, text=True
+        ).strip()
+        validate_source(clone, revision)
         # Quickstart commands as documented, with the active Python interpreter.
         call([sys.executable, "scripts/verify.py"], clone)
         evaluation = subprocess.run(
@@ -65,6 +79,7 @@ def run():
                 clone,
                 stdout=stream,
             )
+        validate_source(clone, revision)
         probe = clone / "aethron" / "untracked_release_probe.py"
         probe.write_text("# An untracked runtime change must block release.\n", encoding="utf-8")
         refused = subprocess.run(
@@ -77,6 +92,7 @@ def run():
         probe.unlink()
         call([sys.executable, "scripts/release.py", str(root / "a")], clone)
         call([sys.executable, "scripts/release.py", str(root / "b")], clone)
+        validate_source(clone, revision)
         a, b = root / "a", root / "b"
         assert sorted(p.name for p in a.iterdir()) == sorted(p.name for p in b.iterdir())
         artifact_manifest = {}
@@ -97,6 +113,7 @@ def run():
         )
         for directory in (a, b):
             validate_artifacts(directory, artifact_manifest)
+        validate_source(clone, revision)
         # zipimport consumer from outside the checkout, no PYTHONPATH dependency.
         env = dict(os.environ)
         env.pop("PYTHONPATH", None)
@@ -115,10 +132,9 @@ def run():
         )
         for directory in (a, b):
             validate_artifacts(directory, artifact_manifest)
+        validate_source(clone, revision)
         result = {
-            "source_revision": subprocess.check_output(
-                ["git", "rev-parse", "HEAD"], cwd=clone, text=True
-            ).strip(),
+            "source_revision": revision,
             "clean_clone": True,
             "evaluation_gate_passed": evaluation.returncode == 0,
             "quickstart": evaluation.returncode == 0,

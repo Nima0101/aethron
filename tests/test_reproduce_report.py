@@ -17,6 +17,60 @@ from scripts import reproduce
 
 
 class ReproductionReport(unittest.TestCase):
+    def test_source_validation_with_real_git_changes(self):
+        for mutation in (None, "ignored", "modified", "deleted", "staged", "untracked", "revision"):
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as directory:
+                clone = Path(directory)
+
+                def git(*args, clone=clone):
+                    return subprocess.check_output(
+                        [
+                            "git",
+                            "-c",
+                            "user.name=Reproduction Fixture",
+                            "-c",
+                            "user.email=fixture@example.invalid",
+                            "-c",
+                            "commit.gpgsign=false",
+                            "-c",
+                            "core.hooksPath=" + str(clone / "no-hooks"),
+                            *args,
+                        ],
+                        cwd=clone,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                        timeout=5,
+                    ).strip()
+
+                git("init", "--quiet")
+                source = clone / "source.txt"
+                source.write_bytes(b"original source\n")
+                (clone / ".gitignore").write_bytes(b"build/\n")
+                git("add", "source.txt", ".gitignore")
+                git("commit", "--quiet", "-m", "synthetic source")
+                revision = git("rev-parse", "HEAD")
+                if mutation in ("modified", "staged"):
+                    source.write_bytes(b"changed source\n")
+                    if mutation == "staged":
+                        git("add", "source.txt")
+                elif mutation == "deleted":
+                    source.unlink()
+                elif mutation == "untracked":
+                    (clone / "extra.txt").write_bytes(b"extra source\n")
+                    # The checker must override a user preference hiding untracked files.
+                    git("config", "status.showUntrackedFiles", "no")
+                elif mutation == "revision":
+                    # Even a clean new commit with identical source cannot relabel evidence.
+                    git("commit", "--quiet", "--allow-empty", "-m", "different revision")
+                elif mutation == "ignored":
+                    (clone / "build").mkdir()
+                    (clone / "build" / "output.txt").write_bytes(b"ignored output\n")
+                if mutation in (None, "ignored"):
+                    reproduce.validate_source(clone, revision)
+                else:
+                    with self.assertRaisesRegex(ValueError, "^reproduction_source_changed$"):
+                        reproduce.validate_source(clone, revision)
+
     def test_optimized_execution_is_rejected_before_cloning(self):
         for flag in ("-O", "-OO"):
             with self.subTest(flag=flag), tempfile.TemporaryDirectory() as directory:
@@ -63,6 +117,8 @@ class ReproductionReport(unittest.TestCase):
         mutate_at=1,
         mutate_lane="a",
         real_consumers=False,
+        source_mutation=None,
+        source_mutate_at="consumer2",
     ):
         output = io.StringIO()
         consumers = []
@@ -82,9 +138,24 @@ class ReproductionReport(unittest.TestCase):
                 )
             payload = archive.getvalue()
         revision = "a" * 40
+        clone_revision = revision
+        source_status = b""
         real_process = subprocess.run
 
         def fake_process(args, **kwargs):
+            nonlocal clone_revision, source_status
+            stage = None
+            if args[1:2] == ["scripts/verify.py"]:
+                stage = "verify"
+            elif args[1:2] == ["scripts/release.py"] and Path(args[-1]).name == "b":
+                stage = "build"
+            elif args[1:2] == ["-I"]:
+                stage = "consumer" + str(len(consumers) + 1)
+            if source_mutation and stage == source_mutate_at:
+                if source_mutation == "revision":
+                    clone_revision = "b" * 40
+                else:
+                    source_status = b" M changed-source.py\n"
             if args[:2] == ["git", "clone"]:
                 (Path(args[-1]) / "aethron").mkdir(parents=True)
                 examples = Path(args[-1]) / "examples"
@@ -134,10 +205,17 @@ class ReproductionReport(unittest.TestCase):
                 self.fail(f"Unexpected process request: {args}")
             return subprocess.CompletedProcess(args, 0)
 
+        def git_output(args, **kwargs):
+            if args == ["git", "rev-parse", "HEAD"]:
+                return clone_revision + "\n"
+            if args == ["git", "status", "--porcelain", "--untracked-files=normal"]:
+                return source_status
+            self.fail(f"Unexpected Git request: {args}")
+
         error = None
         with (
             patch.object(reproduce.subprocess, "run", side_effect=fake_process),
-            patch.object(reproduce.subprocess, "check_output", return_value=revision + "\n"),
+            patch.object(reproduce.subprocess, "check_output", side_effect=git_output),
             contextlib.redirect_stdout(output),
         ):
             try:
@@ -150,6 +228,18 @@ class ReproductionReport(unittest.TestCase):
             ) as caught:
                 error = caught
         return output.getvalue(), error, consumers, payload, revision
+
+    def test_source_changes_cannot_be_reported_as_clean_or_relabel_revision(self):
+        for stage, consumed in (("verify", 0), ("build", 0), ("consumer1", 1), ("consumer2", 2)):
+            for mutation in ("dirty", "revision"):
+                with self.subTest(stage=stage, mutation=mutation):
+                    output, error, consumers, _, _ = self.invoke(
+                        source_mutation=mutation, source_mutate_at=stage
+                    )
+                    self.assertIsInstance(error, ValueError)
+                    self.assertEqual(str(error), "reproduction_source_changed")
+                    self.assertEqual(output, "")
+                    self.assertEqual(len(consumers), consumed)
 
     def test_success_reports_compared_bytes_and_clone_revision(self):
         output, error, consumers, payload, revision = self.invoke()
