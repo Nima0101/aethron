@@ -99,7 +99,8 @@ class BackendParityProbe(unittest.TestCase):
         validate = probe.validate_wheel
         for mutation in (None, "after_read", "after_validation"):
             with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as directory:
-                out = Path(directory) / "out # space"
+                # Match the probe's resolved paths, including temporary-directory aliases.
+                out = Path(directory).resolve() / "out # space"
                 wheel = out / "setuptools-fixture/b/probe_package-0.0.1-py3-none-any.whl"
                 installs = []
                 consoles = []
