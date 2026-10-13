@@ -138,11 +138,15 @@ class ApplianceSupervisor:
                     replacement.prior_drops = pipeline.drop_counts()
                     replacement.start()
                 with self.lock:
-                    if replacement is not None and not self.stop.is_set():
+                    if (
+                        replacement is not None
+                        and not self.stop.is_set()
+                        and name not in self.faults
+                    ):
                         self.pipelines[name] = replacement
                         return
-                # Startup can outlive shutdown's bounded join. The recovery
-                # thread still owns this unpublished worker and must reap it.
+                # Startup can outlive shutdown's bounded join or a scheduling
+                # fault. Recovery still owns the unpublished worker and reaps it.
                 if replacement is not None:
                     replacement.close()
             except Exception:
@@ -161,16 +165,20 @@ class ApplianceSupervisor:
                 with self.lock:
                     self.recovering.discard(name)
 
+        task = None
         try:
             task = threading.Thread(target=work, name="aethron-recovery", daemon=True)
             self.maintenance = [t for t in self.maintenance if t.is_alive()]
             task.start()
         except Exception:
-            # Scheduling itself can fail before work() owns cleanup. Keep the
-            # original pipeline for shutdown, latch its fault and let the shared
-            # watchdog continue. Never join an unstarted recovery thread.
+            # A start error does not prove that work() never started. Retain
+            # started tasks for shutdown; only their finally retires recovery.
+            # Unstarted tasks cannot be joined and leave the original owner.
             self.faults.add(name)
-            self.recovering.discard(name)
+            if task is not None and task.ident is not None:
+                self.maintenance.append(task)
+            else:
+                self.recovering.discard(name)
         else:
             # The caller holds self.lock, so shutdown cannot miss a started task.
             self.maintenance.append(task)

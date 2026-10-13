@@ -116,3 +116,72 @@ class RecoveryScheduling(unittest.TestCase):
             healthy.tick.assert_called_once_with(self.now_ns)
         finally:
             runtime.shutdown()
+
+    def exercise_started_failure(self, *, shutdown):
+        runtime, failed, healthy = self.make_runtime()
+        entered, release = threading.Event(), threading.Event()
+        tasks, errors = [], []
+        start_thread = threading.Thread.start
+        replacement = RuntimePipeline(failed.profile)
+
+        def slow_start():
+            entered.set()
+            if not release.wait(5):
+                raise TimeoutError("test did not release startup")
+
+        def start_then_fail(task):
+            tasks.append(task)
+            start_thread(task)
+            self.assertTrue(entered.wait(2))
+            raise RuntimeError("private scheduling diagnostic")
+
+        with (
+            patch("aethron_edge.runtime.supervisor.RuntimePipeline", return_value=replacement),
+            patch.object(replacement, "start", side_effect=slow_start),
+            patch.object(replacement, "close", wraps=replacement.close) as close,
+            patch.object(threading.Thread, "start", start_then_fail),
+            patch("threading.excepthook", side_effect=lambda args: errors.append(args.exc_type)),
+        ):
+            try:
+                status = runtime.tick(self.now_ns)
+                self.assertEqual(status["state"], "fault")
+                healthy.tick.assert_called_once_with(self.now_ns)
+                task = tasks[0]
+                if shutdown:
+                    # The actual thread still owns startup. Expire its join
+                    # budget without sleeping through the production timeout.
+                    with patch.object(task, "join", return_value=None) as join:
+                        with self.assertRaisesRegex(RuntimeError, "^appliance_cleanup_failed$"):
+                            runtime.shutdown()
+                    join.assert_called_once_with(timeout=4)
+                    self.assertTrue(task.is_alive())
+                    self.assertEqual(runtime.maintenance, [task])
+                    self.assertIn("failed", runtime.recovering)
+                release.set()
+                task.join(timeout=2)
+                self.assertFalse(task.is_alive())
+                self.assertEqual(errors, [])
+                # Even without shutdown, a scheduling fault must prevent this
+                # late replacement from becoming the public scene owner.
+                self.assertIs(runtime.pipelines["failed"], failed)
+                close.assert_called_once_with()
+                self.assertEqual(runtime.recovering, set())
+                self.assertIn("failed", runtime.faults)
+                scene = runtime.snapshot("failed")
+                self.assertEqual(scene["state"], "UNKNOWN")
+                self.assertEqual(scene["tracks"], [])
+                self.assertNotIn(
+                    "private scheduling diagnostic", Path(runtime.config.status_file).read_text()
+                )
+            finally:
+                release.set()
+                for task in tasks:
+                    task.join(timeout=2)
+                runtime.shutdown()
+                replacement.close()
+
+    def test_started_recovery_failure_remains_owned_by_shutdown(self):
+        self.exercise_started_failure(shutdown=True)
+
+    def test_started_recovery_failure_retires_unpublished_replacement(self):
+        self.exercise_started_failure(shutdown=False)
