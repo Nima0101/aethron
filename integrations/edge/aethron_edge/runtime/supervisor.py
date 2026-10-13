@@ -196,20 +196,34 @@ class ApplianceSupervisor:
 
     def shutdown(self, reason="maintenance"):
         self.stop.set()
+        cleanup_failed = False
+
+        def attempt(operation, **kwargs):
+            nonlocal cleanup_failed
+            try:
+                operation(**kwargs)
+            except Exception:
+                # Keep ownership for retry, but never abandon later resources
+                # or retain potentially private native exception diagnostics.
+                cleanup_failed = True
+
         if self.thread:
-            self.thread.join(timeout=2)
+            attempt(self.thread.join, timeout=2)
         for task in self.maintenance:
-            task.join(timeout=4)
+            attempt(task.join, timeout=4)
         for source in self.telemetry.values():
-            source.close()
+            attempt(source.close)
         with self.lock:
             for pipeline in self.pipelines.values():
-                pipeline.close()
-            if self.config is None:
-                return
-            result = self.status(time.monotonic_ns())
-            result["state"] = "stopped"
-            try:
-                publish_status(Path(self.config.status_file), result)
-            except OSError:
-                pass
+                attempt(pipeline.close)
+            if cleanup_failed:
+                self.faults.add("shutdown_cleanup")
+            if self.config is not None:
+                result = self.status(time.monotonic_ns())
+                result["state"] = "fault" if cleanup_failed else "stopped"
+                try:
+                    publish_status(Path(self.config.status_file), result)
+                except OSError:
+                    pass
+        if cleanup_failed:
+            raise RuntimeError("appliance_cleanup_failed") from None
