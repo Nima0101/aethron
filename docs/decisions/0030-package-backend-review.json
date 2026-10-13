@@ -1,0 +1,43 @@
+{
+  "id": "0030-package-backend-review",
+  "review_order_version": 3,
+  "component": "P1.1 core/edge Python wheel backend with small opt-in Cython extensions; not runtime-language selection",
+  "source_revision": "6cd2ed1c8fc181831647e0f9c292fa5114ae3521",
+  "source_sha256": "02983462e01d72ed1c82c34a6ce1216236119714b79863998cf1ce005f805bbb",
+  "decision": "KEEP",
+  "constraints": [
+    "Default portable installation without a compiler; optional Cython3.3.0 extension build; Python metadata, package data and console entry points; offline consumers. Core supports Python>=3.9 with conditional Setuptools82.0.1/84.0.0 build pins; edge requires>=3.11. No build-latency or memory ceiling is specified."
+  ],
+  "comparison": [
+    "Setuptools84.0.0, Hatchling1.32.4, Flit Core4.1.0 and Rust-based uv_build0.13.0 all passed the prior same-host pure-Python wheel/metadata/resource/console fixture. uv_build documents pure-Python-only support; that experiment does not establish native compatibility for Flit or Hatch hooks/plugins.",
+    "Setuptools84.0.0, Meson1.12.1/meson-python0.22.1 and CMake3.31.6/scikit-build-core1.1.1 all rebuilt portable and Cython-compiled synthetic wheels from source archives. Meson DSL and CMake were executable alternatives, not excluded by prior installed tooling. All preserved large integers and imported the requested compiled or portable module.",
+    "Meson requires a committed source snapshot for its sdist path and additional Meson/Ninja configuration. The CMake candidate needs explicit portable-mode selection; its initial default produced a platform-tagged portable wheel. Configuring wheel.cmake=false fixed that fixture, so this is not a backend incompatibility."
+  ],
+  "rationale": [
+    "KEEP Setuptools for the two small optional-extension build configurations: its direct Cython Extension/cythonize API expresses the required opt-in compilation and source inclusion without another build DSL, CMake/Meson discovery layer or generated-C custom command. Portable and compiled contract checks passed. This reduces build integration and toolchain dependencies for this specific boundary; it is not a rewrite-cost or installed-tool preference.",
+    "No measured bottleneck, external native-library graph or cross-compilation requirement currently establishes a material benefit for Meson/CMake here. Retain these credible alternatives for such requirements; do not infer a global performance ranking from tiny synthetic builds."
+  ],
+  "evidence": [
+    "scripts/backend_parity_probe.py: four backend comparisons passed; two identical wheels per backend, exact synthetic resources/metadata/licence and installed console invocation.",
+    "scripts/native_backend_probe.py: six portable/native cases passed from source archives on Linux x86_64, CPython3.13.13, GCC14.2.0. Portable cases used nonexistent CC/CXX paths. Native cases imported an extension and preserved positive and negative 2**100 arithmetic under annotation_typing=False.",
+    "Seven focused unit methods passed, including negative controls for archive traversal/links/multiple roots, missing native module and misleading portable ABI tag. Initial scikit portable metadata failure and two probe negative controls retained. Hash-pinned comparison wheels installed in isolated scope; hosted workflow added but not claimed executed."
+  ],
+  "limits": [
+    "source_sha256 binds root pyproject.toml at source_revision. Both setup.py files and edge pyproject.toml were inspected at the same revision; experiment source hashes and raw results are retained in lane evidence. No real product runtime, complete consumer suite, hardware or classified protocol was exercised.",
+    "This KEEP covers backend selection, not installed product/source binding, core Python3.9 native support or cross-platform release qualification. Source archives were rebuilt, but native byte reproducibility, performance and ABI portability are not established. P1.1 overall and P1.2-P1.7 review remain open.",
+    "Probe subprocess timeouts and archive checks are test diagnostics, not hostile-code containment or aggregate memory/output guarantees. Assertions require non-optimized Python. Bandit retains LOW assertion/subprocess findings; no findings are suppressed."
+  ],
+  "revisit": [
+    "Reassess if native SDK/library integration, cross-compilation, free-threaded ABI, reproducibility or measured build resources create a decisive requirement; qualify the actual product/platform matrix before migration or release. Next earliest P1.1 review: installed CLI/source binding."
+  ],
+  "references": [
+    "https://setuptools.pypa.io/en/latest/userguide/ext_modules.html",
+    "https://docs.astral.sh/uv/concepts/build-backend/",
+    "https://hatch.pypa.io/latest/config/build/",
+    "https://flit.pypa.io/en/stable/pyproject_toml.html",
+    "https://mesonbuild.com/meson-python/tutorials/introduction.html",
+    "https://mesonbuild.com/Python-module.html",
+    "https://scikit-build-core.readthedocs.io/en/latest/guide/getting_started.html",
+    "https://scikit-build-core.readthedocs.io/en/latest/reference/configs.html"
+  ]
+}
