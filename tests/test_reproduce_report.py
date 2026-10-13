@@ -67,7 +67,18 @@ class ReproductionReport(unittest.TestCase):
                     reproduce.validate_source(clone, revision)
 
     def test_source_validation_with_real_git_changes(self):
-        for mutation in (None, "ignored", "modified", "deleted", "staged", "untracked", "revision"):
+        for mutation in (
+            None,
+            "ignored",
+            "modified",
+            "deleted",
+            "staged",
+            "untracked",
+            "revision",
+            "assume-unchanged",
+            "skip-worktree",
+            "both-flags",
+        ):
             with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as directory:
                 clone = Path(directory)
 
@@ -114,11 +125,25 @@ class ReproductionReport(unittest.TestCase):
                 elif mutation == "ignored":
                     (clone / "build").mkdir()
                     (clone / "build" / "output.txt").write_bytes(b"ignored output\n")
+                elif mutation in ("assume-unchanged", "skip-worktree", "both-flags"):
+                    flags = (
+                        ("assume-unchanged", "skip-worktree")
+                        if mutation == "both-flags"
+                        else (mutation,)
+                    )
+                    for flag in flags:
+                        git("update-index", "--" + flag, "source.txt")
+                    source.write_bytes(b"hidden changed source\n")
+                    self.assertEqual(git("status", "--porcelain"), "")
                 if mutation in (None, "ignored"):
                     reproduce.validate_source(clone, revision)
                 else:
+                    original_index = (clone / ".git" / "index").read_bytes()
                     with self.assertRaisesRegex(ValueError, "^reproduction_source_changed$"):
                         reproduce.validate_source(clone, revision)
+                    if mutation in ("assume-unchanged", "skip-worktree", "both-flags"):
+                        self.assertEqual((clone / ".git" / "index").read_bytes(), original_index)
+                        self.assertEqual(source.read_bytes(), b"hidden changed source\n")
 
     def test_optimized_execution_is_rejected_before_cloning(self):
         for flag in ("-O", "-OO"):
@@ -193,10 +218,11 @@ class ReproductionReport(unittest.TestCase):
         revision = "a" * 40
         clone_revision = revision
         source_status = b""
+        index_entries = b"H examples/person-blackout.json\0"
         real_process = subprocess.run
 
         def fake_process(args, **kwargs):
-            nonlocal clone_revision, source_status
+            nonlocal clone_revision, source_status, index_entries
             stage = None
             if args[1:2] == ["scripts/verify.py"]:
                 stage = "verify"
@@ -207,6 +233,13 @@ class ReproductionReport(unittest.TestCase):
             if source_mutation and stage == source_mutate_at:
                 if source_mutation == "revision":
                     clone_revision = "b" * 40
+                elif source_mutation in ("assume-unchanged", "skip-worktree", "both-flags"):
+                    tag = {
+                        "assume-unchanged": b"h",
+                        "skip-worktree": b"S",
+                        "both-flags": b"s",
+                    }[source_mutation]
+                    index_entries = tag + b" examples/person-blackout.json\0"
                 else:
                     source_status = b" M changed-source.py\n"
             if args[:2] == ["git", "clone"]:
@@ -265,6 +298,8 @@ class ReproductionReport(unittest.TestCase):
             return subprocess.CompletedProcess(args, 0)
 
         def git_output(args, **kwargs):
+            if args == ["git", "--no-replace-objects", "ls-files", "-v", "-z"]:
+                return index_entries
             if args == ["git", "--no-replace-objects", "rev-parse", "HEAD"]:
                 return clone_revision + "\n"
             if args == [
@@ -384,7 +419,13 @@ with module.reproduction_workspace() as temporary:
 
     def test_source_changes_cannot_be_reported_as_clean_or_relabel_revision(self):
         for stage, consumed in (("verify", 0), ("build", 0), ("consumer1", 1), ("consumer2", 2)):
-            for mutation in ("dirty", "revision"):
+            for mutation in (
+                "dirty",
+                "revision",
+                "assume-unchanged",
+                "skip-worktree",
+                "both-flags",
+            ):
                 with self.subTest(stage=stage, mutation=mutation):
                     output, error, consumers, _, _ = self.invoke(
                         source_mutation=mutation, source_mutate_at=stage

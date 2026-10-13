@@ -35,6 +35,13 @@ def validate_artifacts(directory, manifest):
 
 def validate_source(clone, revision):
     """Bind sequential checks to one clean revision, excluding ignored build outputs."""
+    # These index flags suppress working-tree checks even when status is clean.
+    # A complete reproduction clone must keep every tracked file observable.
+    entries = subprocess.check_output(
+        ["git", "--no-replace-objects", "ls-files", "-v", "-z"], cwd=clone
+    )
+    if any(entry and not entry.startswith(b"H ") for entry in entries.split(b"\0")):
+        raise ValueError("reproduction_source_changed")
     current = subprocess.check_output(
         ["git", "--no-replace-objects", "rev-parse", "HEAD"], cwd=clone, text=True
     ).strip()
