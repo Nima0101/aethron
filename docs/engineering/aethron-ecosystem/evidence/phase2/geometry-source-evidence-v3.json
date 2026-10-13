@@ -1,0 +1,35 @@
+{
+  "review_order_version": 3,
+  "component": "C03_comparison_source_fingerprints",
+  "decision": "FIX",
+  "full_component_review_complete": false,
+  "reviewed_head": "75e9827ec52f3590274d2416aba29a3a41fbe818",
+  "production_changed": false,
+  "checks": {
+    "red_assertion_failures": 2,
+    "red_execution_errors": 0,
+    "new_methods": 2,
+    "green_methods": 9,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "Two LOW findings identical to baseline by rule/severity/message",
+    "existing_functions_classes_and_main_except_report_assignment": "UNCHANGED"
+  },
+  "limitations": [
+    "Inert cameras and substituted clocks/tracing in new report tests; no geometry benchmark.",
+    "On-disk hashes do not attest loaded code or authenticate reports.",
+    "No atomic snapshot, complete dependency closure or separate serialized fixture digest.",
+    "Historical evidence unchanged; warm-up-only parity limit retained.",
+    "Full production reassessment remains incomplete at C01."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/hashlib.html",
+    "https://nodejs.org/api/crypto.html"
+  ],
+  "sha256": {
+    "scripts/probes/sensor_geometry_audit/compare.py": "ff0b79adf2853797ebd91df380f9f8b600c26654895e0412ac159c9b77d1fe6a",
+    "scripts/probes/sensor_geometry_audit/README.md": "f9cc659b4b425c347bc722ca3ba739d5865fe544805536e5e527d9573bce2616",
+    "tests/integration/test_sensor_geometry_audit_modes.py": "773b9da895b00a5878877aa01067046c88ca446134bfbca7ced52601430ff094",
+    "docs/engineering/aethron-ecosystem/P21-GEOMETRY-SOURCE-EVIDENCE-V3.md": "044fe1e0b6ed12365c615db0cf71fe50d11aced3a71ba7cbe44776a1ced7b86b"
+  }
+}

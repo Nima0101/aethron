@@ -1,0 +1,34 @@
+{
+  "review_order_version": 3,
+  "component": "C03_source_fingerprint_consistency",
+  "decision": "FIX",
+  "full_component_review_complete": false,
+  "reviewed_head": "c7466c98825bc1251bacf8803ce6bcc817ef1489",
+  "production_sensor_behavior_changed": false,
+  "checks": {
+    "red_assertion_failures": 7,
+    "red_errors": 0,
+    "new_methods": 3,
+    "green_methods": 12,
+    "ruff": "PASS",
+    "format": "PASS after blank-line correction",
+    "bandit": "4 unchanged LOW findings across harness and tests",
+    "ast": "Non-main code and full measurement batch loop unchanged"
+  },
+  "limitations": [
+    "New controls use temporary files and inert cameras; no operational benchmark or accuracy qualification.",
+    "Before/after observations do not attest loaded code or immutable execution.",
+    "Full technology reassessment incomplete at C01; no runtime decision.",
+    "Historical reports unchanged and not requalified.",
+    "Measured-call parity limitation retained."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/hashlib.html"
+  ],
+  "sha256": {
+    "scripts/probes/sensor_geometry_audit/compare.py": "7fc2d84bc7a2c7d84007cc5c8813de02688d77003605cae17df175111d6d03cc",
+    "tests/integration/test_sensor_geometry_audit_modes.py": "2be5745380810cd7a45bfeb09f6edc136a7df18949f11a6cda6bddfa047406f4",
+    "scripts/probes/sensor_geometry_audit/README.md": "97392c8df22d2d66b532cee232ae661d9a54299402a3bab16e9f34a5e2c66566",
+    "docs/engineering/aethron-ecosystem/P21-GEOMETRY-SOURCE-CONSISTENCY-V3.md": "90613868b6888a984bcfc9139f08527404f4544282f4a3fe22777ed837999f10"
+  }
+}
