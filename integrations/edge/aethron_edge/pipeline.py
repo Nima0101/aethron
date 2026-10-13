@@ -113,6 +113,7 @@ class _InferenceStop:
         self.done = Event()
         self.lock = Lock()
         self.active = None
+        self.failed = False
         self.thread = Thread(target=self._watch, daemon=True)
         self.thread.start()
 
@@ -121,7 +122,13 @@ class _InferenceStop:
             if self.stop.is_set():
                 with self.lock:
                     if self.active is not None:
-                        self.active.cancel()
+                        try:
+                            self.active.cancel()
+                        except Exception:
+                            # Thread exceptions bypass the worker's handler.
+                            # Retain only a fault bit, never native diagnostics;
+                            # parent process termination remains the fallback.
+                            self.failed = True
                 return
 
     def call(self, operation, *args, **kwargs):
@@ -129,15 +136,22 @@ class _InferenceStop:
 
         cancellation = InferenceCancellation()
         with self.lock:
+            if self.failed:
+                raise RuntimeError("model_error")
             self.active = cancellation
             # Also covers stop before registration or after the watcher exits.
             if self.stop.is_set():
                 cancellation.cancel()
         try:
-            return operation(*args, **kwargs, cancellation=cancellation)
+            result = operation(*args, **kwargs, cancellation=cancellation)
         finally:
             with self.lock:
                 self.active = None
+        # Detaching under the same lock waits for any cancellation attempt.
+        # A failed attempt cannot turn late native success into an observation.
+        if self.failed:
+            raise RuntimeError("model_error")
+        return result
 
     def close(self):
         self.done.set()

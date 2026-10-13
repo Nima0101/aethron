@@ -32,6 +32,84 @@ class WorkerCancellation(unittest.TestCase):
         )
         self.detector = Mock()
 
+    def test_watcher_cancellation_failure_rejects_late_success_and_reuse(self):
+        attempted = threading.Event()
+
+        def fail_cancel(token):
+            attempted.set()
+            raise RuntimeError("private native cancellation details")
+
+        def late_success(*, cancellation):
+            self.stop.set()
+            self.assertTrue(attempted.wait(2), "watcher did not request cancellation")
+            return object()
+
+        with (
+            patch.object(InferenceCancellation, "cancel", fail_cancel),
+            patch.object(threading, "excepthook") as uncaught,
+        ):
+            watcher = pipeline._InferenceStop(self.stop)
+            try:
+                with self.assertRaisesRegex(RuntimeError, "^model_error$"):
+                    watcher.call(late_success)
+                operation = Mock()
+                with self.assertRaisesRegex(RuntimeError, "^model_error$"):
+                    watcher.call(operation)
+                operation.assert_not_called()
+            finally:
+                watcher.close()
+            uncaught.assert_not_called()
+            self.assertIsNone(watcher.active)
+            self.assertFalse(watcher.thread.is_alive())
+
+    @unittest.skipUnless(importlib.util.find_spec("onnxruntime"), "optional ORT provider required")
+    def test_native_cancellation_setter_failures_stay_inside_worker_boundary(self):
+        for loading in (True, False):
+            with self.subTest(loading=loading):
+                self._native_cancellation_setter_failure(loading)
+
+    def _native_cancellation_setter_failure(self, loading):
+        self.setUp()
+        attempted = threading.Event()
+
+        class BrokenOptions:
+            def set_load_cancellation_flag(options, value):
+                attempted.set()
+                raise RuntimeError("private native load cancellation details")
+
+            @property
+            def terminate(options):
+                return False
+
+            @terminate.setter
+            def terminate(options, value):
+                attempted.set()
+                raise RuntimeError("private native run cancellation details")
+
+        def operation(*args, cancellation=None, **kwargs):
+            with cancellation._call(load=loading):
+                self.stop.set()
+                self.assertTrue(attempted.wait(2), "native cancellation not requested")
+                return self.detector if loading else [object()]
+
+        with (
+            patch(
+                "onnxruntime.SessionOptions" if loading else "onnxruntime.RunOptions",
+                BrokenOptions,
+            ),
+            patch.object(threading, "excepthook") as uncaught,
+        ):
+            if not loading:
+                self.detector.infer.side_effect = operation
+            messages = self.run_worker(loader=operation if loading else None)
+            uncaught.assert_not_called()
+        self.assertEqual(messages, [{"data": None, "reason": "model_error", "latency_ms": 0}])
+        if loading:
+            self.source.open.assert_not_called()
+            self.detector.infer.assert_not_called()
+        else:
+            self.detector.infer.assert_called_once()
+
     def test_isolation_failure_stops_before_dispatch_and_sanitizes_fault(self):
         class UnreadProfile:
             def __init__(self):
