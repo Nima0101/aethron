@@ -1,5 +1,7 @@
 """Archive format evidence from tiny synthetic files, never a product build."""
 
+import hashlib
+import json
 import os
 import tarfile
 import tempfile
@@ -100,3 +102,72 @@ class ReleaseArchive(unittest.TestCase):
                 self.build_fixture(source, blobs, destination)
             self.assertFalse((destination / "aethron-0.2.0-source.tar.gz").exists())
             self.assertEqual({n: (source / n).read_bytes() for n in blobs}, blobs)
+
+    def test_zip_creator_default_cannot_change_artifacts(self):
+        initialize = zipfile.ZipInfo.__init__
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source, blobs = self.fixture(root)
+            builds = []
+            for creator in (0, 3):
+
+                def host_initialize(info, *args, creator=creator, **kwargs):
+                    initialize(info, *args, **kwargs)
+                    info.create_system = creator
+
+                destination = root / str(creator)
+                with patch.object(zipfile.ZipInfo, "__init__", host_initialize):
+                    self.build_fixture(source, blobs, destination)
+                builds.append({p.name: p.read_bytes() for p in destination.iterdir()})
+                with zipfile.ZipFile(destination / "aethron.pyz") as archive:
+                    self.assertIsNone(archive.testzip())
+                    for member in archive.infolist():
+                        self.assertEqual(member.create_system, 3)
+                        self.assertEqual(member.external_attr >> 16, 0o644)
+            self.assertEqual(builds[0], builds[1])
+
+    def test_text_newline_default_cannot_change_artifacts(self):
+        open_path = Path.open
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source, blobs = self.fixture(root)
+            builds = []
+            for index, line_ending in enumerate(("\n", "\r\n")):
+
+                def host_open(
+                    path,
+                    mode="r",
+                    buffering=-1,
+                    encoding=None,
+                    errors=None,
+                    newline=None,
+                    *,
+                    line_ending=line_ending,
+                ):
+                    if "b" not in mode and "w" in mode and newline is None:
+                        newline = line_ending
+                    return open_path(path, mode, buffering, encoding, errors, newline)
+
+                destination = root / str(index)
+                with patch.object(Path, "open", host_open):
+                    self.build_fixture(source, blobs, destination)
+                artifacts = {p.name: p.read_bytes() for p in destination.iterdir()}
+                builds.append(artifacts)
+                for name in (
+                    "source-manifest.json",
+                    "sbom.cdx.json",
+                    "provenance.json",
+                    "SHA256SUMS",
+                ):
+                    with self.subTest(line_ending=line_ending, artifact=name):
+                        self.assertNotIn(b"\r", artifacts[name])
+                        self.assertTrue(artifacts[name].endswith(b"\n"))
+                provenance = json.loads(artifacts["provenance.json"])
+                self.assertEqual(
+                    provenance["source_manifest_sha256"],
+                    hashlib.sha256(artifacts["source-manifest.json"]).hexdigest(),
+                )
+                for row in artifacts["SHA256SUMS"].decode("utf-8").splitlines():
+                    digest, name = row.split("  ")
+                    self.assertEqual(digest, hashlib.sha256(artifacts[name]).hexdigest())
+            self.assertEqual(builds[0], builds[1])

@@ -92,10 +92,13 @@ def build(destination):
         app["NOTICE"] = blobs["NOTICE"]
         for name, data in sorted(app.items()):
             info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
+            # The normalized Unix permission field needs the same creator on every host.
+            info.create_system = 3
             info.external_attr = 0o644 << 16
             archive.writestr(info, data)
-    (out / "source-manifest.json").write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    # Encode explicitly so host text newline translation cannot change artifact hashes.
+    (out / "source-manifest.json").write_bytes(
+        (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode("utf-8")
     )
     sbom = {
         "bomFormat": "CycloneDX",
@@ -147,8 +150,8 @@ def build(destination):
             },
         ],
     }
-    (out / "sbom.cdx.json").write_text(
-        json.dumps(sbom, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    (out / "sbom.cdx.json").write_bytes(
+        (json.dumps(sbom, indent=2, sort_keys=True) + "\n").encode("utf-8")
     )
     provenance = {
         "source_revision": revision,
@@ -161,15 +164,15 @@ def build(destination):
         "model_sha256": manifest["aethron/models/rules.json"],
         "data_manifests": {n: h for n, h in manifest.items() if n.endswith("freeze.json")},
     }
-    (out / "provenance.json").write_text(
-        json.dumps(provenance, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    (out / "provenance.json").write_bytes(
+        (json.dumps(provenance, indent=2, sort_keys=True) + "\n").encode("utf-8")
     )
     checksums = "".join(
         hashlib.sha256(p.read_bytes()).hexdigest() + "  " + p.name + "\n"
         for p in sorted(out.iterdir())
         if p.is_file() and p.name != "SHA256SUMS"
     )
-    (out / "SHA256SUMS").write_text(checksums, encoding="utf-8")
+    (out / "SHA256SUMS").write_bytes(checksums.encode("utf-8"))
     return revision
 
 
