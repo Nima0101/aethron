@@ -350,10 +350,12 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
             raise ValueError("package_input_changed")
         try:
             for lane in ("a", "b"):
-                final_wheels = {
-                    wheel.name: hashlib.sha256(wheel.read_bytes()).hexdigest()
-                    for wheel in (output / lane).glob("*.whl")
-                }
+                final_wheels = {}
+                for wheel in (output / lane).glob("*.whl"):
+                    # Matching bytes must still belong to regular local artifacts.
+                    if wheel.is_symlink() or not wheel.is_file():
+                        raise ValueError("package_artifact_changed")
+                    final_wheels[wheel.name] = hashlib.sha256(wheel.read_bytes()).hexdigest()
                 if final_wheels != hashes:
                     raise ValueError("package_artifact_changed")
         except OSError:

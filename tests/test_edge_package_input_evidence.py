@@ -163,6 +163,10 @@ class PackageInputEvidence(unittest.TestCase):
                         target.write_bytes(b"changed after consumer")
                     elif change_kind == "missing":
                         target.unlink()
+                    elif change_kind == "symlink":
+                        relocated = root / "relocated-wheel"
+                        target.rename(relocated)
+                        target.symlink_to(relocated)
                     else:
                         (output / lane / "unexpected.whl").write_bytes(b"extra")
                 return subprocess.CompletedProcess(
@@ -318,6 +322,11 @@ class PackageInputEvidence(unittest.TestCase):
             for change in ("changed", "missing", "extra"):
                 with self.subTest(lane=lane, change=change):
                     self.probe(artifact_change=(lane, change))
+
+    def test_linked_artifacts_after_consumers_prevent_success_report(self):
+        for lane in ("a", "b"):
+            with self.subTest(lane=lane):
+                self.probe(artifact_change=(lane, "symlink"))
 
     def test_console_failure_prevents_consumer_and_report(self):
         for error in (
