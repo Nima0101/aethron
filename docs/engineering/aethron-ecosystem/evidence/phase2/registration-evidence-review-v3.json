@@ -1,0 +1,34 @@
+{
+  "review_order_version": 3,
+  "component": "C04_comparison_evidence_integrity",
+  "decision": "FIX",
+  "full_component_review_complete": false,
+  "reviewed_head": "8f7141fb5043c35c93c0bd3ed1cf45a9b381d958",
+  "runtime_sensor_processing_changed": false,
+  "checks": {
+    "red_assertion_failures": 6,
+    "red_execution_errors": 0,
+    "green_methods": 4,
+    "optimized_subcases": 4,
+    "normal_early_late_mismatch_cases": 4,
+    "normal_positive_cases": 1,
+    "candidate_and_fixture_ast_unchanged": true,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "two existing LOW B101 findings; zero added",
+    "production_benchmarks": false,
+    "hardware_checks": false
+  },
+  "limitations": [
+    "Tests substitute inert Registration results.",
+    "Iteration checks can affect subsequent host/cache state despite being outside timed regions.",
+    "No new runtime KEEP/MIGRATE decision.",
+    "Historical reports and hashes are not requalified."
+  ],
+  "sha256": {
+    "docs/engineering/aethron-ecosystem/P21-REGISTRATION-EVIDENCE-REVIEW-V3.md": "0aece8237e70e7743d52f9915348180f49f863732bd3304bc3113f5126b1ee23",
+    "scripts/probes/sensor_registration_audit/compare.py": "510c2732b22f4bcd2f4db4c31a8735e155f971cfd53e4eacecb7e41fe8094ca5",
+    "scripts/probes/sensor_registration_audit/README.md": "a2f1276002d714b1bb1181a7eabf60573bf7c5bed2eaaee97a6dcb6d2138cbea",
+    "tests/integration/test_sensor_registration_audit_modes.py": "d8e27ebc821ad3e7d448a3b1fc6999971b3e67e12cbf573c3eaff08ae9e24845"
+  }
+}

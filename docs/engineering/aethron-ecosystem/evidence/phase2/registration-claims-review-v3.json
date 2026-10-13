@@ -1,0 +1,34 @@
+{
+  "review_order_version": 3,
+  "component": "C04_rig_registration",
+  "decision": "CLARIFY",
+  "scope": "Qualification, provenance and lifecycle claims; existing-behavior test correction only",
+  "full_component_review_complete": false,
+  "reviewed_head": "eb5447222329a4bc12d0dcc2b2e24e0e21121696",
+  "production_behavior_changed": false,
+  "checks": {
+    "historical_source_bindings_against_reviewed_head": 3,
+    "production_source_byte_identical": true,
+    "focused_test_methods_passed": 4,
+    "updated_existing_test_methods": 1,
+    "new_benchmarks": false,
+    "hardware_checks": false
+  },
+  "limitations": [
+    "No new runtime ranking or complete V3 technology decision.",
+    "Calibration declaration hash does not authenticate measurement bytes or physical calibration.",
+    "Caller-retained results are not erased by closing their originating binding."
+  ],
+  "sha256": {
+    "integrations/edge/aethron_edge/sensors/registration.py": "6ec929ab4c081e10fbc258e59667aa8387603811d8f2fa4d285840fa9d60f22b",
+    "tests/integration/test_sensor_registration.py": "883cce5827147f091b1a4672bb775eb77f656ead03223d34af49ea7603d894e8",
+    "scripts/probes/sensor_registration_audit/compare.py": "e2bd04e03e04ab67d1053f30005d13be2fe62f2cfb94f8dc4913632d9d713fce",
+    "docs/engineering/aethron-ecosystem/evidence/phase2/technology-v2-registration.json": "9899f84339b083d191f251f3e681a1c991dd88fab5d1c61516df186c32b93dcf",
+    "docs/engineering/aethron-ecosystem/P21-REGISTRATION-TECHNOLOGY-AUDIT-V2.md": "e445d824f324f78ef35b94b0d2e40286c58d0d40c6c5ba93c7ed5e0d79052b4c",
+    "docs/engineering/aethron-ecosystem/P21-REGISTRATION-CLAIMS-REVIEW-V3.md": "2a0ccb93849ddca707f45b926f24f8759934901f5155d41ccc4075a00c5c99dc"
+  },
+  "primary_sources": [
+    "https://docs.pydantic.dev/latest/concepts/models/#faux-immutability",
+    "https://docs.python.org/3.13/library/hashlib.html"
+  ]
+}
