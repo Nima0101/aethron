@@ -1,0 +1,35 @@
+{
+  "review_order_version": 3,
+  "component": "C02_comparison_tracing_ownership",
+  "decision": "FIX",
+  "full_component_review_complete": false,
+  "reviewed_head": "7e5776bc63232e9b45b2ff1817af5cd494a76a4a",
+  "production_replay_changed": false,
+  "checks": {
+    "red_assertion_failures": 4,
+    "red_execution_errors": 0,
+    "green_methods": 5,
+    "new_methods_rechecked_after_lint_fix": 3,
+    "optimization_subcases": 4,
+    "ruff": "PASS after binding loop variable",
+    "format": "PASS after formatting",
+    "bandit": "Two unchanged LOW B101 findings",
+    "candidate_and_stream_ast": "UNCHANGED"
+  },
+  "limitations": [
+    "Tests use inert byte readers and fail before completion of the first candidate pair.",
+    "No performance matrix, Node, VM or hardware execution.",
+    "Exclusive process tracing ownership assumed; no thread synchronization.",
+    "Traced memory is not total process or native memory.",
+    "Historical reports unchanged; no runtime KEEP/MIGRATE decision."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3/library/tracemalloc.html"
+  ],
+  "sha256": {
+    "scripts/probes/sensor_replay_audit/compare.py": "4005400bc0d81b6798ccd966392c668f8cfac54d40203f7e200325ce25739d33",
+    "scripts/probes/sensor_replay_audit/README.md": "6a952c002d6973be057be4b306987645ccc345899cb303cfd1da5fe3c916abf1",
+    "tests/integration/test_sensor_replay_audit_modes.py": "08c7ccb5a555a92c9f4a3132f5c8da2d33e8780c7527838edef28bd1713b3e47",
+    "docs/engineering/aethron-ecosystem/P21-REPLAY-TRACING-EVIDENCE-V3.md": "16324cf3546e2657d7b283f0c9cb8aa32f92567dd705ee812f67fe66888c4b17"
+  }
+}
