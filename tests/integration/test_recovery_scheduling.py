@@ -296,3 +296,33 @@ class RecoveryScheduling(unittest.TestCase):
             # resources. No failed handle is discarded by production code.
             failed.process = None
             runtime.shutdown()
+
+    def test_status_write_failure_is_visible_in_the_same_tick(self):
+        runtime, first, healthy = self.make_runtime()
+        first.process.is_alive.return_value = True
+        first.last_message_ns = self.now_ns
+        destination = Path(runtime.config.status_file)
+        # A real failed atomic replacement, without mocking the publisher.
+        destination.mkdir()
+        try:
+            for offset in (0, 1_000_000_000):
+                status = runtime.tick(self.now_ns + offset)
+                self.assertEqual(status["state"], "fault")
+                self.assertEqual(status["fault_count"], 1)
+                self.assertEqual(runtime.faults, {"status_storage"})
+                self.assertTrue(destination.is_dir())
+                self.assertFalse(destination.with_suffix(".pending").exists())
+            # Repairing storage permits publication, retaining the latched
+            # fault once while the other profiles remain supervised.
+            destination.rmdir()
+            status = runtime.tick(self.now_ns + 2_000_000_000)
+            self.assertEqual(status["state"], "fault")
+            self.assertEqual(status["fault_count"], 1)
+            self.assertEqual(json.loads(destination.read_text()), status)
+            self.assertEqual(first.tick.call_count, 3)
+            self.assertEqual(healthy.tick.call_count, 3)
+            self.assertEqual(runtime.maintenance, [])
+        finally:
+            if destination.is_dir():
+                destination.rmdir()
+            runtime.shutdown()

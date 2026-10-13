@@ -128,7 +128,13 @@ class ApplianceSupervisor:
                 try:
                     publish_status(Path(self.config.status_file), result)
                 except OSError:
+                    # This snapshot predates the write attempt. Reflect its
+                    # failure before returning, without recounting a latched
+                    # fault or sampling telemetry a second time.
+                    if "status_storage" not in self.faults:
+                        result["fault_count"] += 1
                     self.faults.add("status_storage")
+                    result["state"] = "fault"
                 self.last_status = now_ns
             return result
 
