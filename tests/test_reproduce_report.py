@@ -33,10 +33,24 @@ SOURCE_FILES = {
     "aethron/__main__.py": b"def main():\n    return 0\n",
     "aethron/data.bin": b"\x00\xff",
     "aethron/empty.txt": b"",
+    "aethron/models/rules.json": b'{"fixture": "rules"}\n',
+    "data/first/freeze.json": b'{"fixture": "first"}\n',
+    "data/second/freeze.json": b'{"fixture": "second"}\n',
 }
 SOURCE_MANIFEST = json.dumps(
     {name: hashlib.sha256(data).hexdigest() for name, data in SOURCE_FILES.items()}
 ).encode()
+
+
+def provenance_sources(files):
+    return {
+        "model_sha256": hashlib.sha256(files["aethron/models/rules.json"]).hexdigest(),
+        "data_manifests": {
+            name: hashlib.sha256(data).hexdigest()
+            for name, data in files.items()
+            if name.endswith("freeze.json")
+        },
+    }
 
 
 def executable_archive(defect=None, *, files=None):
@@ -450,6 +464,7 @@ class ReproductionReport(unittest.TestCase):
                     json.dumps(
                         {
                             "source_revision": revision,
+                            **provenance_sources(artifact_files),
                             "source_manifest_sha256": hashlib.sha256(
                                 real_read(destination / "source-manifest.json")
                             ).hexdigest(),
@@ -737,6 +752,7 @@ with module.reproduction_workspace() as temporary:
                 json.dumps(
                     {
                         "source_revision": revision,
+                        **provenance_sources(SOURCE_FILES),
                         "source_manifest_sha256": hashlib.sha256(SOURCE_MANIFEST).hexdigest(),
                     }
                 ).encode()
@@ -952,6 +968,73 @@ with module.reproduction_workspace() as temporary:
         self.assertEqual(str(error), "release_provenance_invalid")
         self.assertEqual(output, "")
         self.assertEqual(consumers, [])
+
+    def test_provenance_source_digests_reject_before_real_consumers(self):
+        valid = {
+            "source_revision": "a" * 40,
+            "source_manifest_sha256": hashlib.sha256(SOURCE_MANIFEST).hexdigest(),
+            **provenance_sources(SOURCE_FILES),
+        }
+        cases = []
+        for field in ("model_sha256", "data_manifests"):
+            missing = dict(valid)
+            del missing[field]
+            cases.append((field + " missing", missing))
+            for value in (None, True, 1, [], {}, "", "0" * 64):
+                cases.append((field + " invalid", {**valid, field: value}))
+        freezes = valid["data_manifests"]
+        cases.extend(
+            (name, {**valid, "data_manifests": value})
+            for name, value in (
+                ("missing freeze", {"data/first/freeze.json": freezes["data/first/freeze.json"]}),
+                ("extra freeze", {**freezes, "data/extra/freeze.json": "0" * 64}),
+                ("wrong freeze digest", {**freezes, "data/first/freeze.json": "0" * 64}),
+                ("non-string digest", {**freezes, "data/first/freeze.json": True}),
+                (
+                    "renamed freeze",
+                    {name.replace("first", "other"): digest for name, digest in freezes.items()},
+                ),
+                ("swapped digests", dict(zip(freezes, reversed(list(freezes.values()))))),
+            )
+        )
+        for name, provenance in cases:
+            with self.subTest(case=name, provenance=provenance):
+                output, error, consumers, _, _ = self.invoke(
+                    provenance_bytes=json.dumps(provenance).encode(),
+                    real_consumers=True,
+                    check_workspace=True,
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_provenance_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_provenance_source_digest_mapping_order_is_irrelevant(self):
+        sources = provenance_sources(SOURCE_FILES)
+        sources["data_manifests"] = dict(reversed(list(sources["data_manifests"].items())))
+        output, error, consumers, _, _ = self.invoke(
+            provenance_bytes=json.dumps(
+                {
+                    **sources,
+                    "source_revision": "a" * 40,
+                    "source_manifest_sha256": hashlib.sha256(SOURCE_MANIFEST).hexdigest(),
+                }
+            ).encode(),
+            real_consumers=True,
+            check_workspace=True,
+        )
+        self.assertIsNone(error)
+        self.assertTrue(json.loads(output)["byte_identical_builds"])
+        self.assertEqual(len(consumers), 2)
+
+    def test_provenance_sources_require_model_but_allow_no_frozen_datasets(self):
+        digest = hashlib.sha256(b"model fixture").hexdigest()
+        provenance = {"model_sha256": digest, "data_manifests": {}}
+        reproduce.validate_provenance_sources(provenance, {"aethron/models/rules.json": digest})
+        for invalid in (provenance, {"model_sha256": None, "data_manifests": {}}):
+            with self.subTest(provenance=invalid):
+                with self.assertRaisesRegex(ValueError, "^release_provenance_invalid$"):
+                    reproduce.validate_provenance_sources(invalid, {})
 
     def test_failed_or_terminated_evaluation_cannot_report_overall_success(self):
         for returncode in (1, -15):

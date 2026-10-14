@@ -78,6 +78,21 @@ def validate_provenance(payload, revision, manifest_sha256):
         or provenance.get("source_manifest_sha256") != manifest_sha256
     ):
         raise ValueError("release_provenance_invalid")
+    return provenance
+
+
+def validate_provenance_sources(provenance, manifest):
+    """Bind model and dataset claims to the independently verified source inventory."""
+    model = "aethron/models/rules.json"
+    data_manifests = {
+        name: digest for name, digest in manifest.items() if name.endswith("freeze.json")
+    }
+    if (
+        model not in manifest
+        or provenance.get("model_sha256") != manifest[model]
+        or provenance.get("data_manifests") != data_manifests
+    ):
+        raise ValueError("release_provenance_invalid")
 
 
 def validate_checksums(payload, manifest):
@@ -313,10 +328,13 @@ def run():
             if p.name == "aethron.pyz":
                 zipapp = compared
             artifact_manifest[p.name] = hashlib.sha256(compared).hexdigest()
-        validate_provenance(provenance, revision, artifact_manifest["source-manifest.json"])
+        provenance = validate_provenance(
+            provenance, revision, artifact_manifest["source-manifest.json"]
+        )
         validate_checksums(checksums, artifact_manifest)
         manifest = validate_source_archive(source_archive, source_manifest)
         validate_source_manifest(clone, revision, manifest)
+        validate_provenance_sources(provenance, manifest)
         validate_zipapp(zipapp, manifest)
         call(
             [
