@@ -307,8 +307,10 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
             # inventory. A wheel must not claim files outside its admitted ZIP
             # members, even if its own source bytes match perfectly. Check exact
             # archive names (before spreading), not normalized installed names.
-            # Present integrity declarations are verified too; inventory
-            # completeness remains a separate qualification boundary.
+            # A present inventory must also cover every archive file except
+            # its adjacent wheel signatures, which are added after RECORD.
+            # Explicit ZIP directories and nested signature examples are not
+            # signature files. Preserve exact archive names for this check.
             files = {item.filename: item for item in wheel.infolist() if not item.is_dir()}
             seen = set()
             try:
@@ -322,6 +324,9 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
                     validate_record_integrity(wheel, files[row[0]], row[1], row[2])
             except (UnicodeError, csv.Error):
                 raise ValueError("wheel_source_payload_mismatch") from None
+            signatures = {member.filename + ".jws", member.filename + ".p7s"}
+            if files.keys() - signatures - seen:
+                raise ValueError("wheel_source_payload_mismatch")
         for member in distribution_metadata:
             # Reuse the inventory tool's email-header interpretation. A matching
             # dist-info directory alone cannot establish distribution identity.

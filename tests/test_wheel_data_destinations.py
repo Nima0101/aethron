@@ -1,5 +1,6 @@
 """Data-scheme records must not bypass import-destination admission."""
 
+import csv
 import io
 import os
 import subprocess
@@ -28,7 +29,12 @@ def wheel_bytes(package, extras):
             metadata + "WHEEL",
             "Wheel-Version: 1.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n",
         )
-        wheel.writestr(metadata + "RECORD", "")
+        record = io.StringIO(newline="")
+        csv.writer(record).writerows(
+            (member.filename, "", "") for member in wheel.infolist() if not member.is_dir()
+        )
+        csv.writer(record).writerow((metadata + "RECORD", "", ""))
+        wheel.writestr(metadata + "RECORD", record.getvalue())
     return archive.getvalue(), payload
 
 

@@ -1,6 +1,7 @@
 """Package reports must not infer dependency counts from mocked consumer success."""
 
 import contextlib
+import csv
 import hashlib
 import io
 import json
@@ -46,7 +47,10 @@ class CorePackageReport(unittest.TestCase):
                 "aethron-0.2.0.dist-info/entry_points.txt",
                 "[console_scripts]\naethron = aethron.__main__:main\n",
             )
-            wheel.writestr("aethron-0.2.0.dist-info/RECORD", "")
+            record = io.StringIO(newline="")
+            csv.writer(record).writerows((name, "", "") for name in wheel.namelist())
+            csv.writer(record).writerow(("aethron-0.2.0.dist-info/RECORD", "", ""))
+            wheel.writestr("aethron-0.2.0.dist-info/RECORD", record.getvalue())
         with zipfile.ZipFile(archive) as wheel:
             source_payload = {
                 name: wheel.read(name) for name in wheel.namelist() if name.startswith("aethron/")

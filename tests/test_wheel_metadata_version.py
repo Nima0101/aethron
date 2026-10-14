@@ -39,7 +39,13 @@ class WheelMetadataVersion(unittest.TestCase):
                         name = member.filename.replace(
                             "aethron-0.2.0.dist-info", f"aethron-{directory_version}.dist-info"
                         )
-                        wheel.writestr(name, source.read(member))
+                        data = source.read(member)
+                        if member.filename.endswith(".dist-info/RECORD"):
+                            data = data.replace(
+                                b"aethron-0.2.0.dist-info",
+                                f"aethron-{directory_version}.dist-info".encode(),
+                            )
+                        wheel.writestr(name, data)
                 if accepted:
                     package_check.validate_source_payload(output.getvalue(), payload)
                 else:

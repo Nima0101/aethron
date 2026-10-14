@@ -42,6 +42,7 @@ class WheelRecordIntegrity(unittest.TestCase):
                                 ),
                                 layout,
                                 extras={path: data},
+                                complete=True,
                             )
                             package_check.validate_source_payload(raw, payload, package)
 
@@ -61,7 +62,11 @@ class WheelRecordIntegrity(unittest.TestCase):
                         with self.subTest(package=package, layout=layout, path=path, size=size):
                             extras = {} if path.endswith(".py") else {path: data}
                             raw, payload = record_wheel(
-                                package, declared_record(path, digest, size), layout, extras
+                                package,
+                                declared_record(path, digest, size),
+                                layout,
+                                extras,
+                                complete=True,
                             )
                             with self.assertRaisesRegex(
                                 ValueError, "^wheel_source_payload_mismatch$"
@@ -88,7 +93,7 @@ class WheelRecordIntegrity(unittest.TestCase):
         ):
             with self.subTest(digest=digest, size_length=len(size)):
                 raw, payload = record_wheel(
-                    "aethron", declared_record("aethron/module.py", digest, size)
+                    "aethron", declared_record("aethron/module.py", digest, size), complete=True
                 )
                 with self.assertRaisesRegex(ValueError, "^wheel_source_payload_mismatch$"):
                     package_check.validate_source_payload(raw, payload)
@@ -96,17 +101,21 @@ class WheelRecordIntegrity(unittest.TestCase):
     def test_self_record_cannot_declare_hash_or_size(self):
         for digest, size in ((encoded_digest(b""), ""), ("", "0")):
             raw, payload = record_wheel(
-                "aethron", declared_record("aethron-0.2.0.dist-info/RECORD", digest, size)
+                "aethron",
+                declared_record("aethron-0.2.0.dist-info/RECORD", digest, size),
+                complete=True,
             )
             with self.assertRaisesRegex(ValueError, "^wheel_source_payload_mismatch$"):
                 package_check.validate_source_payload(raw, payload)
 
     def test_unspecified_fields_and_leading_zero_size_remain_accepted(self):
-        # Inventory completeness is separate from verifying present declarations.
+        # Optional fields remain independent of inventory coverage.
         for digest, size in (("", ""), ("", "00010"), (encoded_digest(b"VALUE = 1\n"), "")):
             raw, payload = record_wheel(
-                "aethron", declared_record("aethron/module.py", digest, size)
+                "aethron", declared_record("aethron/module.py", digest, size), complete=True
             )
             package_check.validate_source_payload(raw, payload)
-        raw, payload = record_wheel("aethron", declared_record("aethron-0.2.0.dist-info/RECORD"))
+        raw, payload = record_wheel(
+            "aethron", declared_record("aethron-0.2.0.dist-info/RECORD"), complete=True
+        )
         package_check.validate_source_payload(raw, payload)

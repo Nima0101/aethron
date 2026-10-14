@@ -1,5 +1,6 @@
 """Installed distribution identity must agree with the verified package owner."""
 
+import csv
 import importlib.metadata
 import io
 import os
@@ -23,6 +24,14 @@ def metadata_wheel(package, contents, layout="", extras=None):
         for member in source.infolist():
             if member.filename.endswith(".dist-info/METADATA"):
                 wheel.writestr(layout + member.filename, contents)
+            elif member.filename == f"{package}-0.2.0.dist-info/RECORD":
+                record = io.StringIO(newline="")
+                rows = csv.reader(io.StringIO(source.read(member).decode()))
+                csv.writer(record).writerows(
+                    (layout + name if name.endswith(".dist-info/METADATA") else name, digest, size)
+                    for name, digest, size in rows
+                )
+                wheel.writestr(member, record.getvalue())
             else:
                 wheel.writestr(member, source.read(member))
     return output.getvalue(), payload

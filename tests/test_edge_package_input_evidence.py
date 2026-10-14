@@ -1,5 +1,6 @@
 """Exercise report publication with synthetic packages and optional real venv creation."""
 
+import csv
 import hashlib
 import importlib.util
 import io
@@ -217,9 +218,12 @@ class PackageInputEvidence(unittest.TestCase):
                                             info + "WHEEL",
                                             b"Wheel-Version: 1.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n",
                                         ),
-                                        (info + "RECORD", b""),
                                     )
                                 )
+                                record = io.StringIO(newline="")
+                                csv.writer(record).writerows((name, "", "") for name, _ in records)
+                                csv.writer(record).writerow((info + "RECORD", "", ""))
+                                records.append((info + "RECORD", record.getvalue().encode()))
                                 for name, data in records:
                                     # Mock builds must differ only by the requested defect.
                                     member = zipfile.ZipInfo(name, (2026, 1, 1, 0, 0, 0))

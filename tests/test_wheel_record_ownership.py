@@ -16,12 +16,26 @@ from test_wheel_data_destinations import wheel_bytes
 from scripts import package_check
 
 
-def record_wheel(package, record, layout="", extras=None):
+def record_wheel(package, record, layout="", extras=None, complete=False):
     raw, payload = wheel_bytes(package, extras or {})
     output = io.BytesIO()
     with zipfile.ZipFile(io.BytesIO(raw)) as source, zipfile.ZipFile(output, "w") as wheel:
+        record_path = f"{package}-0.2.0.dist-info/RECORD"
+        if complete:
+            # Positive fixtures need a complete inventory while retaining the
+            # exact declarations under test. Negative fixtures remain literal.
+            seen = {row[0] for row in csv.reader(io.StringIO(record))}
+            missing = io.StringIO(newline="")
+            writer = csv.writer(missing)
+            for member in source.infolist():
+                name = (
+                    layout + member.filename if member.filename == record_path else member.filename
+                )
+                if not member.is_dir() and name not in seen:
+                    writer.writerow((name, "", ""))
+            record += missing.getvalue()
         for member in source.infolist():
-            if member.filename.endswith(".dist-info/RECORD"):
+            if member.filename == record_path:
                 wheel.writestr(layout + member.filename, record)
             else:
                 wheel.writestr(member, source.read(member))
@@ -73,7 +87,10 @@ class WheelRecordOwnership(unittest.TestCase):
                 ((f"{package}/module.py", "", ""), (resource, "", ""), (nested, "", ""))
             )
             raw, payload = record_wheel(
-                package, record.getvalue(), extras={resource: b"data", nested: b"example,,\n"}
+                package,
+                record.getvalue(),
+                extras={resource: b"data", nested: b"example,,\n"},
+                complete=True,
             )
             package_check.validate_source_payload(raw, payload, package)
 
