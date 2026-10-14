@@ -5,6 +5,7 @@ import gzip
 import hashlib
 import io
 import json
+import math
 import os
 import shutil
 import stat
@@ -105,6 +106,15 @@ def validate_artifacts(directory, manifest):
         raise ValueError("release_artifacts_changed")
 
 
+def _finite_json_float(token):
+    # parse_constant handles literal Infinity/NaN only. Valid JSON numeric
+    # tokens can also overflow Python floats, including in extension fields.
+    value = float(token)
+    if not math.isfinite(value):
+        raise ValueError("nonfinite JSON number")
+    return value
+
+
 def validate_provenance(payload, revision, manifest_sha256):
     """Bind local build declarations, revision and compared source manifest."""
 
@@ -124,6 +134,7 @@ def validate_provenance(payload, revision, manifest_sha256):
             payload.decode("utf-8"),
             object_pairs_hook=unique_object,
             parse_constant=reject_constant,
+            parse_float=_finite_json_float,
         )
     except (ValueError, RecursionError):
         raise ValueError("release_provenance_invalid") from None
@@ -172,6 +183,7 @@ def validate_sbom(payload):
             payload.decode("utf-8"),
             object_pairs_hook=unique_object,
             parse_constant=reject_constant,
+            parse_float=_finite_json_float,
         )
     except (ValueError, RecursionError):
         raise ValueError("release_sbom_invalid") from None
