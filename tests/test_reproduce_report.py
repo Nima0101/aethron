@@ -121,7 +121,7 @@ def executable_archive(defect=None, *, files=None):
     return b"not ZIP" if defect == "malformed" else payload
 
 
-def source_archive(defect=None, *, files=None):
+def source_archive(defect=None, *, files=None, metadata=None):
     """Real compressed TAR bytes, with optional independently checksummed defects."""
     files = SOURCE_FILES if files is None else files
     buffer = io.BytesIO()
@@ -138,6 +138,8 @@ def source_archive(defect=None, *, files=None):
         for name, data in entries:
             member = tarfile.TarInfo("aethron-0.2.0/" + name)
             if name == "source.txt":
+                for key, value in (metadata or {}).items():
+                    setattr(member, key, value)
                 if defect == "content":
                     data = b"wrong source bytes"
                 elif defect == "prefix":
@@ -380,6 +382,7 @@ class ReproductionReport(unittest.TestCase):
         manifest_bytes=None,
         artifact_files=None,
         archive_defect=None,
+        archive_metadata=None,
         zip_defect=None,
         python_probes=None,
     ):
@@ -509,7 +512,7 @@ class ReproductionReport(unittest.TestCase):
                 (destination / "sbom.cdx.json").write_bytes(sbom_bytes)
                 (destination / "source-manifest.json").write_bytes(manifest_bytes)
                 (destination / "aethron-0.2.0-source.tar.gz").write_bytes(
-                    source_archive(archive_defect, files=artifact_files)
+                    source_archive(archive_defect, files=artifact_files, metadata=archive_metadata)
                 )
                 (destination / "provenance.json").write_bytes(
                     json.dumps(
@@ -919,6 +922,27 @@ with module.reproduction_workspace() as temporary:
             with self.subTest(defect=defect):
                 output, error, consumers, _, _ = self.invoke(
                     archive_defect=defect, check_workspace=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_source_archive_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_source_archive_metadata_rejects_before_consumers(self):
+        for field, value in (
+            ("mode", 0o4755),
+            ("mode", 0o2755),
+            ("mode", 0o666),
+            ("mode", 0o755),
+            ("uid", 1234),
+            ("gid", 1234),
+            ("uname", "unverified-owner"),
+            ("gname", "unverified-group"),
+            ("mtime", 1234),
+        ):
+            with self.subTest(field=field, value=value):
+                output, error, consumers, _, _ = self.invoke(
+                    archive_metadata={field: value}, check_workspace=True, real_consumers=True
                 )
                 self.assertIsInstance(error, ValueError)
                 self.assertEqual(str(error), "release_source_archive_invalid")

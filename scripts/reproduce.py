@@ -193,6 +193,17 @@ def validate_source_archive(payload, manifest_payload):
                 for member in archive:
                     if not member.isfile() or member.name not in expected or member.name in seen:
                         raise ValueError("invalid archive member")
+                    # Content hashes do not cover extraction permissions/ownership.
+                    # Enforce the existing release writer's normalized metadata.
+                    if (
+                        member.mode,
+                        member.uid,
+                        member.gid,
+                        member.uname,
+                        member.gname,
+                        member.mtime,
+                    ) != (0o644, 0, 0, "", "", 0):
+                        raise ValueError("invalid archive metadata")
                     seen.add(member.name)
                     digest = hashlib.sha256()
                     with archive.extractfile(member) as stream:
