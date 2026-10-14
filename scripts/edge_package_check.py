@@ -28,9 +28,15 @@ _INSTALLED_TEST_RUNNER = """
 import sys
 import unittest
 
-suite = unittest.defaultTestLoader.discover(sys.argv[1], pattern=sys.argv[2])
-result = unittest.TextTestRunner(verbosity=2).run(suite)
-complete = (result.testsRun > 0 and result.wasSuccessful()
+try:
+    suite = unittest.defaultTestLoader.discover(sys.argv[1], pattern=sys.argv[2])
+    discovered = suite.countTestCases()
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+except SystemExit:
+    # Import/load_tests/custom suite exits have not completed qualification.
+    print("installed_suite_incomplete", file=sys.stderr)
+    sys.exit(1)
+complete = (discovered > 0 and result.testsRun == discovered and result.wasSuccessful()
             and not result.skipped and not result.expectedFailures)
 if not complete:
     print("installed_suite_incomplete", file=sys.stderr)
