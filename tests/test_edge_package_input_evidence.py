@@ -40,6 +40,7 @@ class PackageInputEvidence(unittest.TestCase):
         on_process=None,
         on_exit=None,
         real_venv=False,
+        real_install=False,
         server=None,
         health_errors=None,
         health_clock=None,
@@ -65,10 +66,19 @@ class PackageInputEvidence(unittest.TestCase):
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(name.encode())
                 expected[name] = hashlib.sha256(name.encode()).hexdigest()
+            if real_install:
+                probe = root / "scripts/package_check.py"
+                probe.write_bytes(Path(checker.package_check.__file__).read_bytes())
+                expected["scripts/package_check.py"] = hashlib.sha256(
+                    probe.read_bytes()
+                ).hexdigest()
             payloads = {
                 "aethron": {"aethron/__init__.py": b"# core source\n"},
                 "aethron_edge": {"aethron_edge/__init__.py": b"# edge source\n"},
             }
+            if real_install:
+                for name, payload in payloads.items():
+                    payload[name + "/module.py"] = b"# installed source\n"
             for package_name, payload in payloads.items():
                 project = root if package_name == "aethron" else root / "integrations/edge"
                 for name, data in payload.items():
@@ -112,7 +122,7 @@ class PackageInputEvidence(unittest.TestCase):
                     on_process(args, kwargs)
                 if on_run is not None:
                     on_run(args)
-                if real_venv and args[1:3] == ["-m", "venv"]:
+                if (real_venv or real_install) and args[1:3] == ["-m", "venv"]:
                     # Run the actual child so inherited interpreter settings matter.
                     with patch.object(checker.subprocess, "Popen", spawn):
                         try:
@@ -123,6 +133,12 @@ class PackageInputEvidence(unittest.TestCase):
                             self.fail(exc.stderr)
                     self.assertTrue((Path(args[-1]) / "pyvenv.cfg").is_file())
                     return result
+                if real_install and (
+                    "--no-deps" in args
+                    or args[-1] in ("--installed-payload", "--installed-edge-payload")
+                ):
+                    with patch.object(checker.subprocess, "Popen", spawn):
+                        return execute(args, **kwargs)
                 if args[1:] == ["--help"]:
                     self.assertEqual(Path(args[0]).stem, "aethron-edge")
                     self.assertNotIn("PYTHONPATH", kwargs["env"])
@@ -176,6 +192,20 @@ class PackageInputEvidence(unittest.TestCase):
                         with warnings.catch_warnings():
                             warnings.simplefilter("ignore", UserWarning)
                             with zipfile.ZipFile(wheel, "w") as archive:
+                                info = selected + "-" + version + ".dist-info/"
+                                records.extend(
+                                    (
+                                        (
+                                            info + "METADATA",
+                                            f"Metadata-Version: 2.1\nName: {selected.replace('_', '-')}\nVersion: {version}\n".encode(),
+                                        ),
+                                        (
+                                            info + "WHEEL",
+                                            b"Wheel-Version: 1.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n",
+                                        ),
+                                        (info + "RECORD", b""),
+                                    )
+                                )
                                 for name, data in records:
                                     # Mock builds must differ only by the requested defect.
                                     member = zipfile.ZipInfo(name, (2026, 1, 1, 0, 0, 0))
@@ -290,7 +320,10 @@ class PackageInputEvidence(unittest.TestCase):
                 self.assertIs(record.get("source_tree_bound"), False)
                 self.assertIs(record["installed_source_payload"], True)
                 self.assertIs(record["console_wrapper"], True)
-                self.assertEqual(record["source_payload_files"], {"aethron": 1, "aethron-edge": 1})
+                self.assertEqual(
+                    record["source_payload_files"],
+                    {name.replace("_", "-"): len(payload) for name, payload in payloads.items()},
+                )
                 for selected, payload in payloads.items():
                     manifest = {
                         name: hashlib.sha256(data).hexdigest() for name, data in payload.items()
@@ -308,6 +341,108 @@ class PackageInputEvidence(unittest.TestCase):
 
     def test_report_identifies_checker_and_manifests(self):
         self.probe()
+
+    def test_installed_payloads_checked_after_all_consumers(self):
+        for vision in (False, True):
+            with self.subTest(vision=vision):
+                calls = []
+                self.probe(vision=vision, on_run=calls.append)
+                for flag in ("--installed-payload", "--installed-edge-payload"):
+                    probes = [i for i, args in enumerate(calls) if args[-1] == flag]
+                    self.assertEqual(len(probes), 2)
+                    consumers = [
+                        i
+                        for i, args in enumerate(calls)
+                        if "--help" in args
+                        or "-c" in args
+                        or any(str(arg).endswith("observe.py") for arg in args)
+                    ]
+                    self.assertLess(probes[0], min(consumers))
+                    self.assertGreater(probes[1], max(consumers))
+
+    def test_final_installed_probe_failure_retains_evidence(self):
+        for flag in ("--installed-payload", "--installed-edge-payload"):
+            for kind in (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+                with self.subTest(flag=flag, kind=kind.__name__):
+                    seen = []
+                    error = (
+                        kind(7, [flag])
+                        if kind is subprocess.CalledProcessError
+                        else kind([flag], 30)
+                    )
+                    diagnostics = io.StringIO()
+
+                    def on_process(args, kwargs, flag=flag, seen=seen, error=error):
+                        if args[-1] == flag:
+                            seen.append(args)
+                            self.assertEqual(kwargs["timeout"], 30)
+                            self.assertTrue(kwargs["check"])
+                            self.assertEqual(args[1], "-I")
+                            if len(seen) == 2:
+                                raise error
+
+                    def on_exit(output, printed, diagnostics=diagnostics):
+                        self.assertFalse((output / "result.json").exists())
+                        self.assertEqual(printed.getvalue(), "")
+                        self.assertEqual(len(list(output.glob("*/*.whl"))), 4)
+                        workspace = next(output.glob("aethron-installed-*"))
+                        self.assertIn(str(workspace), diagnostics.getvalue())
+
+                    with redirect_stderr(diagnostics), self.assertRaises(kind) as raised:
+                        self.probe(on_process=on_process, on_exit=on_exit)
+                    self.assertIs(raised.exception, error)
+
+    def test_real_installed_source_mutations_after_consumers_block_report(self):
+        execute, spawn = subprocess.run, subprocess.Popen
+        for package in ("aethron", "aethron_edge"):
+            for defect in ("changed", "missing", "extra"):
+                with self.subTest(package=package, defect=defect):
+                    diagnostics = io.StringIO()
+
+                    def on_process(args, kwargs, package=package, defect=defect):
+                        # Last optional consumer: use real installed bytes and real
+                        # isolated manifest processes; consumer output is synthetic.
+                        if args[-1] != "test*rectification.py":
+                            return
+                        with patch.object(checker.subprocess, "Popen", spawn):
+                            execute(
+                                [
+                                    args[0],
+                                    "-I",
+                                    "-c",
+                                    "import importlib.metadata, pathlib, sys; "
+                                    "p = pathlib.Path(importlib.metadata.distribution(sys.argv[1]).locate_file(sys.argv[2])); "
+                                    "kind = sys.argv[3]; "
+                                    "(p / '__init__.py').write_bytes(b'# changed') if kind == 'changed' else "
+                                    "(p / '__init__.py').unlink() if kind == 'missing' else "
+                                    "(p / 'extra.py').write_bytes(b'# extra')",
+                                    package.replace("_", "-"),
+                                    package,
+                                    defect,
+                                ],
+                                check=True,
+                                capture_output=True,
+                                timeout=30,
+                            )
+
+                    def on_exit(output, printed, diagnostics=diagnostics):
+                        self.assertFalse((output / "result.json").exists())
+                        self.assertEqual(printed.getvalue(), "")
+                        self.assertTrue((output / "server.log").is_file())
+                        self.assertEqual(len(list(output.glob("*/*.whl"))), 4)
+                        workspace = next(output.glob("aethron-installed-*"))
+                        self.assertIn(str(workspace), diagnostics.getvalue())
+
+                    with (
+                        redirect_stderr(diagnostics),
+                        self.assertRaisesRegex(ValueError, "installed_source_payload_mismatch"),
+                    ):
+                        self.probe(
+                            vision=True, real_install=True, on_process=on_process, on_exit=on_exit
+                        )
+
+    def test_real_unchanged_installed_sources_qualify(self):
+        self.probe(real_install=True)
 
     def test_dependency_failure_stops_consumers_and_preserves_evidence(self):
         for failing_check in (1, 2):

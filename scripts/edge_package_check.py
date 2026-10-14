@@ -77,6 +77,24 @@ def verify_installed_dependencies(python: Path, work: Path, env):
     )
 
 
+def verify_installed_source_payloads(python: Path, work: Path, env, source_manifests):
+    for distribution, flag in (
+        ("aethron", "--installed-payload"),
+        ("aethron-edge", "--installed-edge-payload"),
+    ):
+        installed = subprocess.run(
+            [str(python), "-I", str(ROOT / "scripts/package_check.py"), flag],
+            cwd=work,
+            env=env,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if json.loads(installed.stdout) != source_manifests[distribution]:
+            raise ValueError("installed_source_payload_mismatch")
+
+
 def wheel_inventory(directory: Path):
     try:
         return {wheel.name: wheel for wheel in package_check.wheel_paths(directory)}
@@ -216,21 +234,7 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
             timeout=180,
         )
         verify_installed_dependencies(python, work, env)
-        for distribution, flag in (
-            ("aethron", "--installed-payload"),
-            ("aethron-edge", "--installed-edge-payload"),
-        ):
-            installed = subprocess.run(
-                [str(python), "-I", str(ROOT / "scripts/package_check.py"), flag],
-                cwd=work,
-                env=env,
-                check=True,
-                capture_output=True,
-                text=True,
-                timeout=30,
-            )
-            if json.loads(installed.stdout) != source_manifests[distribution]:
-                raise ValueError("installed_source_payload_mismatch")
+        verify_installed_source_payloads(python, work, env, source_manifests)
         verify_installed_console(python, work, env)
         # Exercise new raw sensor contracts from installed wheels, outside checkout.
         for test_name in (
@@ -404,6 +408,10 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                 check=True,
                 timeout=60,
             )
+        # Match core packaging: successful consumers or optional installs must
+        # not qualify source bytes they changed. Recheck both distributions
+        # against the original snapshots before publishing success.
+        verify_installed_source_payloads(python, work, env, source_manifests)
         try:
             final_input_hashes = {
                 name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in input_names
