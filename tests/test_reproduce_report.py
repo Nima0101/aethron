@@ -116,6 +116,24 @@ def executable_archive(defect=None, *, files=None, metadata=None):
             elif defect == "compressed" and name == "aethron/data.bin":
                 info.compress_type = zipfile.ZIP_DEFLATED
             archive.writestr(info, data)
+            if (
+                (name == "__main__.py" and defect in ("unlisted-middle", "gap-middle"))
+                or (name == entries[-1][0] and defect in ("unlisted-tail", "gap-tail"))
+                or (name == "aethron/data.bin" and defect == "gap-in-compressed-size")
+            ):
+                if defect.startswith("unlisted"):
+                    # Keep a real local record, but omit its central-directory entry.
+                    archive.writestr("unlisted.txt", b"unverified local payload")
+                    archive.filelist.pop()
+                    del archive.NameToInfo["unlisted.txt"]
+                else:
+                    gap = b"\x00unverified gap\x00"
+                    buffer.write(gap)
+                    archive.start_dir = buffer.tell()
+                    if defect == "gap-in-compressed-size":
+                        archive.filelist[-1].compress_size += len(gap)
+        if defect == "reordered-directory":
+            archive.filelist.reverse()
     payload = buffer.getvalue()
     if defect == "prefix-script":
         return b"#!/bin/sh\nexit 0\n" + payload
@@ -1073,6 +1091,31 @@ with module.reproduction_workspace() as temporary:
         }
         with patch.dict(SOURCE_FILES, files):
             output, error, consumers, _, _ = self.invoke(real_consumers=True)
+        self.assertIsNone(error)
+        self.assertEqual(len(consumers), 2)
+        self.assertTrue(json.loads(output)["byte_identical_builds"])
+
+    def test_unlisted_local_zip_content_rejects_before_consumers(self):
+        for defect in (
+            "unlisted-middle",
+            "unlisted-tail",
+            "gap-middle",
+            "gap-tail",
+            "gap-in-compressed-size",
+        ):
+            with self.subTest(defect=defect):
+                output, error, consumers, _, _ = self.invoke(
+                    zip_defect=defect, check_workspace=True, real_consumers=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_zipapp_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_zip_local_record_order_is_independent_of_directory_order(self):
+        output, error, consumers, _, _ = self.invoke(
+            zip_defect="reordered-directory", real_consumers=True
+        )
         self.assertIsNone(error)
         self.assertEqual(len(consumers), 2)
         self.assertTrue(json.loads(output)["byte_identical_builds"])

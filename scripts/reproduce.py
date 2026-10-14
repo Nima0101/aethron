@@ -248,16 +248,27 @@ def validate_zipapp(payload, manifest):
                 or payload[-2:] != b"\x00\x00"
             ):
                 raise ValueError("invalid ZIP envelope")
-            for member in members:
+            offset = 0
+            for member in sorted(members, key=lambda item: item.header_offset):
                 if (
                     member.filename not in expected
                     or member.filename in seen
                     or member.orig_filename != member.filename
                     or member.is_dir()
                     or member.compress_type != zipfile.ZIP_STORED
-                    or member.flag_bits & 1
+                    or member.compress_size != member.file_size
+                    or member.flag_bits & 9
                 ):
                     raise ValueError("invalid ZIP member")
+                # The seekable release writer emits contiguous local records,
+                # without data descriptors. A central-directory inventory alone
+                # can hide unlisted records or bytes between declared members.
+                header = payload[offset : offset + 30]
+                if member.header_offset != offset or len(header) != 30:
+                    raise ValueError("unlisted ZIP content")
+                name_size = int.from_bytes(header[26:28], "little")
+                extra_size = int.from_bytes(header[28:30], "little")
+                offset += 30 + name_size + extra_size + member.compress_size
                 # Match the release writer's portable metadata as well as contents;
                 # equal builds can share incorrect permissions or host defaults.
                 if (member.create_system, member.external_attr, member.date_time) != (
@@ -273,6 +284,8 @@ def validate_zipapp(payload, manifest):
                         digest.update(chunk)
                 if digest.hexdigest() != expected[member.filename]:
                     raise ValueError("ZIP content mismatch")
+            if offset != archive.start_dir:
+                raise ValueError("unlisted ZIP content")
         if seen != expected.keys():
             raise ValueError("incomplete ZIP")
     except (ValueError, KeyError, zipfile.BadZipFile, OSError, EOFError, RuntimeError):
