@@ -7,11 +7,21 @@ import sys
 from pathlib import Path
 
 if __package__:
-    from .git_context import require_default_git_context
-    from .reproduce import reproduction_workspace, validate_source
+    from .git_context import GIT_COMMAND_TIMEOUT_SECONDS, require_default_git_context
+    from .reproduce import (
+        GIT_CLONE_TIMEOUT_SECONDS,
+        VERIFICATION_TIMEOUT_SECONDS,
+        reproduction_workspace,
+        validate_source,
+    )
 else:
-    from git_context import require_default_git_context
-    from reproduce import reproduction_workspace, validate_source
+    from git_context import GIT_COMMAND_TIMEOUT_SECONDS, require_default_git_context
+    from reproduce import (
+        GIT_CLONE_TIMEOUT_SECONDS,
+        VERIFICATION_TIMEOUT_SECONDS,
+        reproduction_workspace,
+        validate_source,
+    )
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -23,22 +33,37 @@ def run(wheelhouse):
     with reproduction_workspace(prefix="clean-edge-", dir=area) as temporary:
         clone = Path(temporary) / "source"
         subprocess.run(
-            ["git", "clone", "--no-local", str(ROOT), str(clone)], check=True, capture_output=True
+            ["git", "clone", "--no-local", str(ROOT), str(clone)],
+            check=True,
+            capture_output=True,
+            timeout=GIT_CLONE_TIMEOUT_SECONDS,
         )
         revision = subprocess.check_output(
-            ["git", "--no-replace-objects", "rev-parse", "HEAD"], cwd=clone, text=True
+            ["git", "--no-replace-objects", "rev-parse", "HEAD"],
+            cwd=clone,
+            text=True,
+            timeout=GIT_COMMAND_TIMEOUT_SECONDS,
         ).strip()
         validate_source(clone, revision)
         env = dict(os.environ)
         env.pop("PYTHONPATH", None)
         env.pop("PYTHONHOME", None)
-        subprocess.run([sys.executable, "scripts/verify.py"], cwd=clone, env=env, check=True)
+        # Same per-child tooling budgets as core reproduction, not a whole-run
+        # deadline or a guarantee of descendant-process cleanup.
+        subprocess.run(
+            [sys.executable, "scripts/verify.py"],
+            cwd=clone,
+            env=env,
+            check=True,
+            timeout=VERIFICATION_TIMEOUT_SECONDS,
+        )
         validate_source(clone, revision)
         subprocess.run(
             [sys.executable, "scripts/check_ecosystem_plan.py", "--self-test"],
             cwd=clone,
             env=env,
             check=True,
+            timeout=VERIFICATION_TIMEOUT_SECONDS,
         )
         validate_source(clone, revision)
         # Each attempt owns separate persistent evidence, outside clone cleanup.
@@ -57,6 +82,7 @@ def run(wheelhouse):
             cwd=clone,
             env=env,
             check=True,
+            timeout=VERIFICATION_TIMEOUT_SECONDS,
         )
         validate_source(clone, revision)
         print("PASS: committed clean clone and installed consumer; local artifacts only")
