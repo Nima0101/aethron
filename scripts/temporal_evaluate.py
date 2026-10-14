@@ -280,18 +280,21 @@ def run(outdir, include_recorded=True):
     reports = {}
     report = {
         "protocol": "matrix-v3.md frozen T09/T10/T13",
-        "runtime_sha256": {
-            str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in (ROOT / "aethron").rglob("*.py")
-        },
-        "evaluation_script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-        "python": platform.python_version(),
-        "platform": platform.system() + " " + platform.machine(),
         "synthetic": reports,
         "passed": False,
-        "failure_stage": "synthetic",
+        "failure_stage": "provenance",
     }
     try:
+        # Hashing and environment discovery can fail before evaluation starts.
+        # Keep them inside the same failure-report boundary as the measurements.
+        report["runtime_sha256"] = {
+            str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in (ROOT / "aethron").rglob("*.py")
+        }
+        report["evaluation_script_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+        report["python"] = platform.python_version()
+        report["platform"] = platform.system() + " " + platform.machine()
+        report["failure_stage"] = "synthetic"
         for path in synthetic_fixture_paths():
             payload = path.read_bytes()
             entries = json.loads(payload.decode("utf-8"))
