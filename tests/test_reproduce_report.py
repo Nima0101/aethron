@@ -5,6 +5,7 @@ import hashlib
 import io
 import json
 import os
+import stat
 import subprocess
 import sys
 import tempfile
@@ -463,6 +464,49 @@ class ReproductionReport(unittest.TestCase):
     def test_success_removes_temporary_workspace(self):
         _, error, _, _, _ = self.invoke(check_workspace=True, real_consumers=True)
         self.assertIsNone(error)
+
+    def test_workspace_cleanup_handles_readonly_files_without_hiding_other_errors(self):
+        unlink = os.unlink
+
+        def check(case):
+            with self.subTest(case=case), tempfile.TemporaryDirectory() as area:
+                denied = PermissionError("synthetic Windows read-only file")
+                failure = OSError("synthetic I/O failure") if case == "other-error" else denied
+                attempts = []
+
+                def windows_unlink(path, *, dir_fd=None):
+                    if Path(path).name == "pack.idx":
+                        attempts.append(path)
+                        if case != "readonly" or not target.stat().st_mode & stat.S_IWUSR:
+                            raise failure
+                    if dir_fd is None:
+                        return unlink(path)
+                    return unlink(path, dir_fd=dir_fd)
+
+                def run():
+                    nonlocal target
+                    with reproduce.reproduction_workspace(dir=area) as workspace:
+                        target = Path(workspace) / "pack.idx"
+                        target.write_bytes(b"synthetic Git pack index")
+                        target.chmod(0o600 if case == "writable-denied" else 0o400)
+                    return Path(workspace)
+
+                target = None
+                with patch.object(os, "unlink", side_effect=windows_unlink):
+                    if case == "readonly":
+                        self.assertFalse(run().exists())
+                        self.assertEqual(len(attempts), 2)
+                    else:
+                        with self.assertRaises(type(failure)) as raised:
+                            run()
+                        self.assertIs(raised.exception, failure)
+                        self.assertEqual(target.read_bytes(), b"synthetic Git pack index")
+                        self.assertEqual(len(attempts), 2 if case == "retry-denied" else 1)
+                if target.exists():
+                    target.chmod(0o600)
+
+        for case in ("readonly", "writable-denied", "other-error", "retry-denied"):
+            check(case)
 
     def test_workspace_lifetime_survives_real_process_exit(self):
         code = """

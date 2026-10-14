@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -106,6 +107,18 @@ def validate_source(clone, revision):
         raise ValueError("reproduction_source_changed")
 
 
+def _remove_readonly_file(function, path, exc_info):
+    """Retry Windows read-only file removal; propagate all other cleanup failures."""
+    error = exc_info[1]
+    if function not in (os.unlink, os.remove) or not isinstance(error, PermissionError):
+        raise error
+    mode = os.lstat(path).st_mode
+    if not stat.S_ISREG(mode) or mode & stat.S_IWUSR:
+        raise error
+    os.chmod(path, mode | stat.S_IWUSR)
+    function(path)
+
+
 @contextlib.contextmanager
 def reproduction_workspace(*, prefix="aethron-clean-", dir=None):
     """Retain failed runs for diagnosis; only successful runs own automatic cleanup."""
@@ -117,7 +130,8 @@ def reproduction_workspace(*, prefix="aethron-clean-", dir=None):
         print(f"reproduction evidence retained at: {temporary}", file=sys.stderr)
         raise
     else:
-        shutil.rmtree(temporary)
+        # onerror keeps the callback compatible with the supported Python 3.9.
+        shutil.rmtree(temporary, onerror=_remove_readonly_file)
 
 
 def run():
