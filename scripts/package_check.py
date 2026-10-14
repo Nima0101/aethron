@@ -126,6 +126,21 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
             ):
                 raise ValueError("wheel_source_payload_mismatch")
             parts = name.split("/", 2)
+            # The data scheme installs relative to the environment prefix, so
+            # it can write into site-packages too (including via Lib/lib64).
+            # These source-wheel checks must not treat such writes as opaque
+            # resources and bypass source parity or startup-hook admission.
+            # Reserve these directory components across hosts; import payloads
+            # belong in the root, purelib or platlib layouts checked below.
+            # This is not a resolver for arbitrary custom installation schemes.
+            if (
+                len(parts) == 3
+                and parts[0].endswith(".data")
+                and parts[1] == "data"
+                and {part.casefold() for part in parts[2].split("/")[:-1]}
+                & {"site-packages", "dist-packages"}
+            ):
+                raise ValueError("wheel_source_payload_mismatch")
             # Installers spread these records into the same import directories
             # as root members. Compare destination names and reject collisions
             # before installation, regardless of ZIP record order or contents.
