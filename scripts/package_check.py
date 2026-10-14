@@ -76,7 +76,7 @@ def snapshot_source_payload(root, package_name="aethron"):
 def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
     with zipfile.ZipFile(io.BytesIO(wheel_bytes)) as wheel:
         sources = {}
-        folded_sources = set()
+        file_destinations = set()
         for member in wheel.infolist():
             # ZipInfo truncates filename at NUL; inspecting only that normalized
             # spelling would silently admit a different original archive name.
@@ -115,6 +115,14 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
                 and parts[1] in ("purelib", "platlib")
             ):
                 name = parts[2]
+            # Resource and metadata collisions are just as installation-dependent
+            # as source collisions. Admit every file destination after spreading,
+            # before reading any payload. Directory records do not write a file.
+            folded_name = name.casefold()
+            if not member.is_dir():
+                if folded_name in file_destinations:
+                    raise ValueError("wheel_source_payload_mismatch")
+                file_destinations.add(folded_name)
             # These distributions do not declare site-level path configuration.
             # A .pth file here can execute at interpreter startup (even with -I),
             # before the installed-source probe gets control. Reject both code
@@ -145,13 +153,9 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
             # uppercase package/suffix bypass admission and overwrite a checked
             # file on a case-insensitive install. Keep exact spelling for parity;
             # case folding only broadens admission and rejects portable collisions.
-            folded_name = name.casefold()
             if folded_name.startswith(package_name.casefold() + "/") and folded_name.endswith(
                 SOURCE_SUFFIXES
             ):
-                if folded_name in folded_sources:
-                    raise ValueError("wheel_source_payload_mismatch")
-                folded_sources.add(folded_name)
                 sources[name] = member
         if sources.keys() != payload.keys():
             raise ValueError("wheel_source_payload_mismatch")

@@ -50,6 +50,10 @@ class CorePackagePayload(unittest.TestCase):
                 records.append(("aethron/NUL.txt", b"not an ordinary file on Windows\n"))
             elif defect == "reserved-character":
                 records.append(("aethron/notes?.txt", b"not a portable filename\n"))
+            elif defect == "resource-collision":
+                records.extend(
+                    (("aethron/notes.txt", b"first\n"), ("aethron/NOTES.txt", b"second\n"))
+                )
             elif defect == "startup-path":
                 records.append(("unexpected.pth", b"import sys\n"))
             elif defect == "bytecode":
@@ -112,6 +116,66 @@ class CorePackagePayload(unittest.TestCase):
 
     def test_matching_payload_reaches_consumer(self):
         self.check_payload()
+
+    def test_resource_collision_is_rejected_before_installation(self):
+        self.check_payload("resource-collision")
+
+    def test_all_file_destinations_reject_collisions_before_source_reads(self):
+        for package in ("aethron", "aethron_edge"):
+            payload = {f"{package}/__init__.py": b""}
+            for name in (f"{package}/notes.txt", f"{package}-0.2.0.dist-info/METADATA"):
+                paths = (
+                    name,
+                    name.upper(),
+                    f"{package}-0.2.0.data/purelib/{name}",
+                    f"{package}-0.2.0.data/platlib/{name}",
+                )
+                for first in paths:
+                    for second in paths:
+                        for content in (b"first", b"different"):
+                            with self.subTest(
+                                package=package, first=first, second=second, content=content
+                            ):
+                                archive = io.BytesIO()
+                                with warnings.catch_warnings():
+                                    warnings.simplefilter("ignore", UserWarning)
+                                    with zipfile.ZipFile(archive, "w") as wheel:
+                                        wheel.writestr(f"{package}/__init__.py", b"")
+                                        wheel.writestr(first, b"first")
+                                        wheel.writestr(second, content)
+                                with (
+                                    patch.object(
+                                        zipfile.ZipFile,
+                                        "read",
+                                        side_effect=AssertionError("premature read"),
+                                    ),
+                                    self.assertRaisesRegex(
+                                        ValueError, "wheel_source_payload_mismatch"
+                                    ),
+                                ):
+                                    package_check.validate_source_payload(
+                                        archive.getvalue(), payload, package
+                                    )
+
+    def test_distinct_resources_and_explicit_directories_remain_allowed(self):
+        for package in ("aethron", "aethron_edge"):
+            payload = {f"{package}/__init__.py": b""}
+            archive = io.BytesIO()
+            with zipfile.ZipFile(archive, "w") as wheel:
+                for name, content in payload.items():
+                    wheel.writestr(name, content)
+                for name in (
+                    f"{package}/",
+                    f"{package}/assets/",
+                    f"{package}/assets/a.txt",
+                    f"{package}/other/a.txt",
+                    f"{package}-0.2.0.dist-info/METADATA",
+                    f"{package}-0.2.0.data/purelib/{package}/assets/b.txt",
+                    f"{package}-0.2.0.data/platlib/{package}/assets/c.txt",
+                    f"{package}-0.2.0.data/data/{package}/assets/a.txt",
+                ):
+                    wheel.writestr(name, b"")
+            package_check.validate_source_payload(archive.getvalue(), payload, package)
 
     def test_device_name_is_rejected_before_installation(self):
         self.check_payload("device-name")
