@@ -35,6 +35,8 @@ class PackageFinalIntegrityTests(unittest.TestCase):
                 pass
             elif args[1:4] == ["-m", "pip", "install"]:
                 pass
+            elif args[1:] == ["-I", "-m", "pip", "check"]:
+                pass
             elif args[1] == "-I" and args[-1] == "--installed-payload":
                 with zipfile.ZipFile(io.BytesIO(wheel_bytes)) as wheel:
                     manifest = {

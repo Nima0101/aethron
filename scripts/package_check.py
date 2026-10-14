@@ -248,6 +248,18 @@ def run():
             stdout=subprocess.DEVNULL,
             timeout=180,
         )
+        # Match edge packaging: --no-deps does not establish compatible installed
+        # requirements. Let pip check active markers/versions offline before any
+        # consumer runs; this is not an extras-completeness or security audit.
+        subprocess.run(
+            [str(python), "-I", "-m", "pip", "check"],
+            cwd=temp,
+            env=env,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
         installed = subprocess.run(
             [str(python), "-I", str(Path(__file__).resolve()), "--installed-payload"],
             cwd=temp,

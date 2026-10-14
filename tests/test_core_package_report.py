@@ -92,6 +92,16 @@ class CorePackageReport(unittest.TestCase):
                         elif installed_defect == "extra":
                             (package / "unexpected.py").write_bytes(b"# untracked source\n")
                     return result
+            elif args[1:] == ["-I", "-m", "pip", "check"]:
+                self.assertTrue(kwargs["check"])
+                self.assertEqual(kwargs["timeout"], 30)
+                self.assertEqual(Path(args[0]).parent.parent.name, "consumer")
+                self.assertEqual(Path(kwargs["cwd"]), Path(args[0]).parent.parent.parent)
+                self.assertNotIn("PYTHONPATH", kwargs["env"])
+                self.assertNotIn("PYTHONHOME", kwargs["env"])
+                self.assertEqual(kwargs["env"]["PYTHONNOUSERSITE"], "1")
+                if real_install:
+                    return real_process(args, **kwargs)
             elif args[1] == "-I" and args[-1] == "--installed-payload":
                 if real_install:
                     return real_process(args, **kwargs)
@@ -163,6 +173,70 @@ class CorePackageReport(unittest.TestCase):
         ):
             yield output, installed, calls
 
+    def test_dependency_check_precedes_installed_consumers(self):
+        with self.fixture() as (output, _, calls):
+            package_check.run()
+            checks = [i for i, args in enumerate(calls) if args[1:] == ["-I", "-m", "pip", "check"]]
+            self.assertEqual(checks, [4])
+            self.assertEqual(calls[3][1:4], ["-m", "pip", "install"])
+            self.assertEqual(calls[5][-1], "--installed-payload")
+            self.assertTrue(json.loads(output.getvalue())["isolated_install"])
+
+    def test_dependency_failure_and_timeout_retain_evidence(self):
+        for failure in (
+            subprocess.CalledProcessError(1, ["pip", "check"], output="missing dependency"),
+            subprocess.TimeoutExpired(["pip", "check"], 30, output="partial diagnostic"),
+        ):
+            with self.subTest(failure=type(failure).__name__):
+
+                def fail_check(args, failure=failure):
+                    if args[1:] == ["-I", "-m", "pip", "check"]:
+                        raise failure
+
+                with self.fixture(on_call=fail_check) as (output, _, calls):
+                    diagnostics = io.StringIO()
+                    with (
+                        contextlib.redirect_stderr(diagnostics),
+                        self.assertRaises(type(failure)) as raised,
+                    ):
+                        package_check.run()
+                    self.assertIs(raised.exception, failure)
+                    self.assertEqual(len(calls), 5)
+                    self.assertEqual(output.getvalue(), "")
+                    work = Path(calls[0][-1]).parent
+                    self.assertTrue(work.is_dir())
+                    self.assertIn(str(work), diagnostics.getvalue())
+                    self.assertEqual(len(list(work.glob("*/*.whl"))), 2)
+
+    def test_real_install_rejects_missing_or_incompatible_requirements(self):
+        for requirements, diagnostic in (
+            ("Requires-Dist: absent-packaging-probe>=1\n", "not installed"),
+            ("Requires-Dist: aethron>=999\n", "aethron>=999"),
+        ):
+            with (
+                self.subTest(requirements=requirements),
+                self.fixture(requirements=requirements, real_install=True) as (output, _, calls),
+            ):
+                diagnostics = io.StringIO()
+                with (
+                    contextlib.redirect_stderr(diagnostics),
+                    self.assertRaises(subprocess.CalledProcessError) as raised,
+                ):
+                    package_check.run()
+                self.assertIn(diagnostic, raised.exception.stdout)
+                self.assertEqual(calls[-1][1:], ["-I", "-m", "pip", "check"])
+                self.assertEqual(output.getvalue(), "")
+                self.assertTrue(Path(calls[0][-1]).parent.is_dir())
+
+    def test_real_install_accepts_satisfied_and_inactive_requirements(self):
+        with self.fixture(
+            requirements="Requires-Dist: aethron==0.2.0\nRequires-Dist: absent-probe; python_version < '2'\n",
+            real_install=True,
+        ) as (output, _, calls):
+            package_check.run()
+            self.assertTrue(json.loads(output.getvalue())["isolated_install"])
+            self.assertIn(["-I", "-m", "pip", "check"], [args[1:] for args in calls])
+
     def test_uninspected_metadata_cannot_establish_zero_dependencies(self):
         for requirements in ("", "Requires-Dist: example-dependency>=1\n"):
             with self.subTest(requirements=requirements), self.fixture(requirements) as fixture:
@@ -176,8 +250,8 @@ class CorePackageReport(unittest.TestCase):
                 self.assertIs(report["installed_source_payload"], True)
 
     def test_child_failure_never_emits_success_report(self):
-        # Two builds, environment, install, payload probe, console and two consumers.
-        for fail_at in range(1, 9):
+        # Two builds, environment, install, dependencies, payload, console and two consumers.
+        for fail_at in range(1, 10):
             with self.subTest(fail_at=fail_at), self.fixture(fail_at=fail_at) as fixture:
                 output, _, calls = fixture
                 with self.assertRaises(subprocess.CalledProcessError) as raised:
@@ -188,7 +262,7 @@ class CorePackageReport(unittest.TestCase):
 
     def test_stalled_children_are_bounded_and_retain_failure_evidence(self):
         # Each stage must supply a finite timeout before starting its child.
-        for fail_at in range(1, 9):
+        for fail_at in range(1, 10):
             with self.subTest(fail_at=fail_at), self.fixture() as fixture:
                 output, _, calls = fixture
                 process = package_check.subprocess.run.side_effect
@@ -231,7 +305,7 @@ class CorePackageReport(unittest.TestCase):
                 self.assertIn(str(workspace), diagnostics.getvalue())
 
     def test_failed_children_retain_package_evidence(self):
-        for fail_at in range(1, 9):
+        for fail_at in range(1, 10):
             with self.subTest(fail_at=fail_at), self.fixture(fail_at=fail_at) as fixture:
                 output, _, calls = fixture
                 diagnostics = io.StringIO()
@@ -352,7 +426,7 @@ class CorePackageReport(unittest.TestCase):
                     package_check.run()
                     self.assertEqual(package_check.os.environ[variable], value)
                     self.assertEqual(len(installed), 1)
-                    self.assertEqual(len(calls), 8)
+                    self.assertEqual(len(calls), 9)
                     self.assertIs(json.loads(output.getvalue())["isolated_install"], True)
 
     def test_real_pip_rejects_changed_wheel_before_consumers(self):
