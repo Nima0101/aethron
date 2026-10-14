@@ -68,6 +68,10 @@ class Greedy:
 
 
 def metrics(entries, results):
+    # zip silently truncates unequal sequences, hiding missed frames or extra output.
+    # Keep this gate explicit under -O and compatible with the Python 3.9 floor.
+    if len(entries) != len(results):
+        raise ValueError("evaluation_frame_count_mismatch")
     tp = fp = fn = switches = fragments = predictions = 0
     squared = 0.0
     last_ids, last_frames = {}, {}
