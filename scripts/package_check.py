@@ -181,6 +181,20 @@ def installed_source_manifest(package_name="aethron", distribution="aethron"):
     }
 
 
+def verify_installed_source_payload(python, directory, env, source_manifest):
+    installed = subprocess.run(
+        [str(python), "-I", str(Path(__file__).resolve()), "--installed-payload"],
+        cwd=directory,
+        env=env,
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if json.loads(installed.stdout) != source_manifest:
+        raise ValueError("installed_source_payload_mismatch")
+
+
 def run():
     with reproduction_workspace(prefix="aethron-wheel-") as directory:
         temp = Path(directory)
@@ -260,17 +274,7 @@ def run():
             text=True,
             timeout=30,
         )
-        installed = subprocess.run(
-            [str(python), "-I", str(Path(__file__).resolve()), "--installed-payload"],
-            cwd=temp,
-            env=env,
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
-        if json.loads(installed.stdout) != source_manifest:
-            raise ValueError("installed_source_payload_mismatch")
+        verify_installed_source_payload(python, temp, env, source_manifest)
         console = python.with_name("aethron.exe" if os.name == "nt" else "aethron")
         help_result = subprocess.run(
             [str(console), "--help"],
@@ -318,6 +322,9 @@ def run():
         assert len(tracked) == 24
         assert len({r["tracks"][0]["id"] for r in tracked}) == 1
         assert tracked[-1]["tracks"][0]["sources"] == ["depth", "lwir", "radar"]
+        # Consumer success cannot qualify an installation it changed. Compare
+        # against the original source snapshot again, in a fresh interpreter.
+        verify_installed_source_payload(python, temp, env, source_manifest)
         # Consumers must not invalidate the artifacts qualified by the comparison.
         # Keep the original digest; never re-label replacement bytes as verified.
         for wheel in (a, b):
