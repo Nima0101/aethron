@@ -118,6 +118,20 @@ def committed_blobs(revision, *, root=None):
         data = payload.read(size)
         if len(data) != size or payload.read(1) != b"\n":
             raise ValueError("release_blob_response_invalid")
+        # cat-file can return a corrupt loose object's bytes under its requested
+        # ID. Bind the actual payload to the tree entry before either a release
+        # or its manifest verifier can certify it. SHA-1 here is the legacy Git
+        # object format, not a choice of signature or security algorithm.
+        if len(oid) == 40:
+            digest = hashlib.sha1(usedforsecurity=False)
+        elif len(oid) == 64:
+            digest = hashlib.sha256()
+        else:
+            raise ValueError("release_blob_response_invalid")
+        digest.update(b"blob " + str(size).encode("ascii") + b"\0")
+        digest.update(data)
+        if digest.hexdigest().encode("ascii") != oid:
+            raise ValueError("release_blob_hash_mismatch")
         blobs[name] = data
     if payload.read(1):
         raise ValueError("release_blob_response_invalid")
