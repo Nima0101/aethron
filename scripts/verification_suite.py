@@ -14,9 +14,14 @@ def main():
     # Relative discovery and checkout imports must refer to this runner's tree.
     # Refuse another cwd before importing any tests, including direct invocations
     # that do not pass through verify.py's explicit child working directory.
-    if Path.cwd().resolve() != Path(__file__).resolve().parents[1]:
+    root = Path(__file__).resolve().parents[1]
+    if Path.cwd().resolve() != root:
         print("verification_suite_wrong_root", file=sys.stderr)
         return 1
+    # Script entry starts with scripts/ on sys.path, unlike module entry. Put
+    # checkout packages before foreign PYTHONPATH/installed copies in both modes.
+    # This is import precedence for trusted tests, not interpreter isolation.
+    sys.path.insert(0, str(root))
     loader = unittest.TestLoader()
     try:
         suite = loader.discover("tests")
