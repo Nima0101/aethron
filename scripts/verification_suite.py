@@ -13,7 +13,9 @@ if sys.flags.optimize:
 
 def _cases(suite):
     for test in suite:
-        if isinstance(test, unittest.TestSuite):
+        # TestSuite adds shared-fixture handling to BaseTestSuite. Both are
+        # containers: counting either as a leaf misbinds completion callbacks.
+        if isinstance(test, unittest.BaseTestSuite):
             yield from _cases(test)
         else:
             yield test
