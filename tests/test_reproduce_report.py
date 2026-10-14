@@ -1,4 +1,4 @@
-"""Synthetic process results test reporting only; no build or product is executed."""
+"""Synthetic reporting fixtures and real Python startup probes; no product build."""
 
 import contextlib
 import hashlib
@@ -206,6 +206,7 @@ class ReproductionReport(unittest.TestCase):
         provenance_bytes=None,
         checksum_defect=None,
         manifest_bytes=b"synthetic sidecar",
+        python_probes=None,
     ):
         output = io.StringIO()
         diagnostics = io.StringIO()
@@ -268,6 +269,28 @@ class ReproductionReport(unittest.TestCase):
 
         def fake_process(args, **kwargs):
             nonlocal clone_revision, source_status, index_entries
+            if python_probes is not None and args[0] == sys.executable:
+                # Exercise real interpreter startup with the stage's environment.
+                # Build/evaluation bodies below remain synthetic fixtures.
+                isolated = ["-I"] if args[1:2] == ["-I"] else []
+                real_process(
+                    [
+                        sys.executable,
+                        *isolated,
+                        "-c",
+                        "import importlib.util, os; "
+                        "assert 'PYTHONHOME' not in os.environ; "
+                        "assert 'PYTHONPATH' not in os.environ; "
+                        "assert importlib.util.find_spec('caller_shadow') is None; "
+                        "assert os.environ['AETHRON_REPRODUCTION_TEST'] == 'preserved'",
+                    ],
+                    cwd=kwargs["cwd"],
+                    env=kwargs.get("env"),
+                    capture_output=True,
+                    check=True,
+                    timeout=5,
+                )
+                python_probes.append(args[1:])
             stage = None
             if args[1:2] == ["scripts/verify.py"]:
                 stage = "verify"
@@ -805,3 +828,33 @@ with module.reproduction_workspace() as temporary:
                     self.assertIsNone(error)
                     self.assertEqual(len(consumers), 2)
                     self.assertIs(json.loads(output)["isolated_zipapp_consumer"], True)
+
+    def test_all_python_stages_ignore_inherited_home_and_path(self):
+        for home in ("missing", "existing", None):
+            with self.subTest(home=home), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                foreign_home = root / "foreign-home"
+                if home == "existing":
+                    foreign_home.mkdir()
+                foreign_path = root / "foreign-path"
+                foreign_path.mkdir()
+                (foreign_path / "sitecustomize.py").write_text(
+                    "raise SystemExit('foreign sitecustomize executed')\n", encoding="utf-8"
+                )
+                (foreign_path / "caller_shadow.py").write_text("", encoding="utf-8")
+                inherited = dict(os.environ)
+                inherited.pop("PYTHONHOME", None)
+                if home is not None:
+                    inherited["PYTHONHOME"] = str(foreign_home)
+                inherited["PYTHONPATH"] = str(foreign_path)
+                inherited["AETHRON_REPRODUCTION_TEST"] = "preserved"
+                probes = []
+                with patch.dict(os.environ, inherited, clear=True):
+                    output, error, consumers, _, _ = self.invoke(
+                        python_probes=probes, real_consumers=True
+                    )
+                    self.assertEqual(dict(os.environ), inherited)
+                self.assertIsNone(error)
+                self.assertEqual(len(probes), 10)
+                self.assertEqual(len(consumers), 2)
+                self.assertIs(json.loads(output)["quickstart"], True)

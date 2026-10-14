@@ -135,6 +135,10 @@ def reproduction_workspace(*, prefix="aethron-clean-", dir=None):
 
 
 def run():
+    # Exercise the clone with the selected interpreter, not caller import overrides.
+    env = dict(os.environ)
+    env.pop("PYTHONHOME", None)
+    env.pop("PYTHONPATH", None)
     with reproduction_workspace() as temporary:
         root = Path(temporary)
         clone = root / "source"
@@ -144,19 +148,21 @@ def run():
         ).strip()
         validate_source(clone, revision)
         # Quickstart commands as documented, with the active Python interpreter.
-        call([sys.executable, "scripts/verify.py"], clone)
+        call([sys.executable, "scripts/verify.py"], clone, env=env)
         evaluation = subprocess.run(
             [sys.executable, "scripts/temporal_evaluate.py", "--out", str(root / "evaluation")],
             cwd=clone,
             check=False,
+            env=env,
         )
         with (root / "demo.jsonl").open("w") as stream:
-            call([sys.executable, "-m", "aethron", "demo"], clone, stdout=stream)
+            call([sys.executable, "-m", "aethron", "demo"], clone, stdout=stream, env=env)
         with (root / "result.json").open("w") as stream:
             call(
                 [sys.executable, "-m", "aethron", "evaluate", "examples/person-blackout.json"],
                 clone,
                 stdout=stream,
+                env=env,
             )
         with (root / "view.svg").open("w") as stream:
             call(
@@ -171,6 +177,7 @@ def run():
                 ],
                 clone,
                 stdout=stream,
+                env=env,
             )
         validate_source(clone, revision)
         probe = clone / "aethron" / "untracked_release_probe.py"
@@ -180,11 +187,12 @@ def run():
             cwd=clone,
             capture_output=True,
             check=False,
+            env=env,
         )
         assert refused.returncode != 0 and b"clean committed source" in refused.stderr
         probe.unlink()
-        call([sys.executable, "scripts/release.py", str(root / "a")], clone)
-        call([sys.executable, "scripts/release.py", str(root / "b")], clone)
+        call([sys.executable, "scripts/release.py", str(root / "a")], clone, env=env)
+        call([sys.executable, "scripts/release.py", str(root / "b")], clone, env=env)
         validate_source(clone, revision)
         a, b = root / "a", root / "b"
         paths_a, paths_b = artifact_paths(a), artifact_paths(b)
@@ -210,13 +218,12 @@ def run():
             ],
             root,
             stdout=subprocess.DEVNULL,
+            env=env,
         )
         for directory in (a, b):
             validate_artifacts(directory, artifact_manifest)
         validate_source(clone, revision)
         # zipimport consumer from outside the checkout, no PYTHONPATH dependency.
-        env = dict(os.environ)
-        env.pop("PYTHONPATH", None)
         code = 'import sys;sys.path.insert(0,sys.argv[1]);from aethron import evaluate;from pathlib import Path;r=evaluate(Path(sys.argv[2]).read_bytes());assert r["recommendation"]["action"]=="STOP"'
         call(
             [
