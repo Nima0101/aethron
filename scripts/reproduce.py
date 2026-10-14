@@ -81,8 +81,15 @@ def validate_provenance(payload, revision, manifest_sha256):
             result[key] = value
         return result
 
+    def reject_constant(value):
+        raise ValueError("release_provenance_invalid")
+
     try:
-        provenance = json.loads(payload.decode("utf-8"), object_pairs_hook=unique_object)
+        provenance = json.loads(
+            payload.decode("utf-8"),
+            object_pairs_hook=unique_object,
+            parse_constant=reject_constant,
+        )
     except (ValueError, RecursionError):
         raise ValueError("release_provenance_invalid") from None
     if (

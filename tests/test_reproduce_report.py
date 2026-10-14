@@ -1820,6 +1820,44 @@ with module.reproduction_workspace() as temporary:
                 self.assertEqual(output, "")
                 self.assertEqual(consumers, [])
 
+    def test_non_json_provenance_numbers_reject_before_consumers(self):
+        valid = {
+            **PROVENANCE_DECLARATIONS,
+            **provenance_sources(SOURCE_FILES),
+            "source_revision": "a" * 40,
+            "source_manifest_sha256": hashlib.sha256(SOURCE_MANIFEST).hexdigest(),
+        }
+        for token in ("NaN", "Infinity", "-Infinity"):
+            for value in (token, '[{"value":' + token + "}]"):
+                with self.subTest(value=value):
+                    payload = json.dumps(valid)[:-1] + ',"diagnostic":' + value + "}"
+                    output, error, consumers, _, _ = self.invoke(
+                        provenance_bytes=payload.encode(),
+                        real_consumers=True,
+                        check_workspace=True,
+                    )
+                    self.assertIsInstance(error, ValueError)
+                    self.assertEqual(str(error), "release_provenance_invalid")
+                    self.assertEqual(output, "")
+                    self.assertEqual(consumers, [])
+
+    def test_valid_provenance_extensions_preserve_acceptance(self):
+        provenance = {
+            **PROVENANCE_DECLARATIONS,
+            **provenance_sources(SOURCE_FILES),
+            "source_revision": "a" * 40,
+            "source_manifest_sha256": hashlib.sha256(SOURCE_MANIFEST).hexdigest(),
+            "diagnostic": [None, True, 0, -1, 1.25, {"text": "NaN Infinity -Infinity"}],
+        }
+        output, error, consumers, _, _ = self.invoke(
+            provenance_bytes=json.dumps(provenance, allow_nan=False).encode(),
+            real_consumers=True,
+            check_workspace=True,
+        )
+        self.assertIsNone(error)
+        self.assertTrue(json.loads(output)["byte_identical_builds"])
+        self.assertEqual(len(consumers), 2)
+
     def test_provenance_manifest_digest_must_match_compared_bytes(self):
         digest = hashlib.sha256(SOURCE_MANIFEST).hexdigest()
         for value in (None, True, 1, [], {}, "", "0" * 64, digest.upper(), digest + "\n"):
