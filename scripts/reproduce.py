@@ -53,6 +53,25 @@ def validate_artifacts(directory, manifest):
         raise ValueError("release_artifacts_changed")
 
 
+def validate_provenance(payload, revision):
+    """Bind the compared provenance bytes to the revision actually verified."""
+
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("release_provenance_invalid")
+            result[key] = value
+        return result
+
+    try:
+        provenance = json.loads(payload.decode("utf-8"), object_pairs_hook=unique_object)
+    except (ValueError, RecursionError):
+        raise ValueError("release_provenance_invalid") from None
+    if not isinstance(provenance, dict) or provenance.get("source_revision") != revision:
+        raise ValueError("release_provenance_invalid")
+
+
 def validate_source(clone, revision):
     """Bind sequential checks to one clean revision, excluding ignored build outputs."""
     # These index flags suppress working-tree checks even when status is clean.
@@ -147,6 +166,8 @@ def run():
         for p in paths_a:
             compared = p.read_bytes()
             assert compared == (b / p.name).read_bytes(), p.name
+            if p.name == "provenance.json":
+                validate_provenance(compared, revision)
             artifact_manifest[p.name] = hashlib.sha256(compared).hexdigest()
         call(
             [

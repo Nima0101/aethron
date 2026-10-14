@@ -198,6 +198,7 @@ class ReproductionReport(unittest.TestCase):
         guard_artifact_reads=False,
         inventory_defect=None,
         inventory_lanes=("a", "b"),
+        provenance_bytes=None,
     ):
         output = io.StringIO()
         diagnostics = io.StringIO()
@@ -309,6 +310,11 @@ class ReproductionReport(unittest.TestCase):
                     "SHA256SUMS",
                 ):
                     (destination / sidecar).write_bytes(b"synthetic sidecar")
+                (destination / "provenance.json").write_bytes(
+                    json.dumps({"source_revision": revision}).encode()
+                    if provenance_bytes is None
+                    else provenance_bytes
+                )
                 if inventory_defect is not None and destination.name in inventory_lanes:
                     if inventory_defect == "empty":
                         for path in destination.iterdir():
@@ -486,12 +492,14 @@ with module.reproduction_workspace() as temporary:
             report["artifact_sha256"],
             {
                 "aethron.pyz": hashlib.sha256(payload).hexdigest(),
+                "provenance.json": hashlib.sha256(
+                    json.dumps({"source_revision": revision}).encode()
+                ).hexdigest(),
                 **dict.fromkeys(
                     (
                         "aethron-0.2.0-source.tar.gz",
                         "source-manifest.json",
                         "sbom.cdx.json",
-                        "provenance.json",
                         "SHA256SUMS",
                     ),
                     hashlib.sha256(b"synthetic sidecar").hexdigest(),
@@ -506,6 +514,29 @@ with module.reproduction_workspace() as temporary:
             "byte_identical_builds",
         ):
             self.assertIs(report[field], True)
+
+    def test_identical_wrong_or_invalid_provenance_rejects_before_consumers(self):
+        revision = "a" * 40
+        for payload in (
+            json.dumps({"source_revision": "b" * 40}).encode(),
+            b"{}",
+            b"null",
+            b"[]",
+            b'{"source_revision": null}',
+            b'{"source_revision": 1}',
+            b"not JSON",
+            b"\xff",
+            ('{"source_revision":"wrong","source_revision":"' + revision + '"}').encode(),
+            ('{"source_revision":"' + revision + '","source_revision":"wrong"}').encode(),
+        ):
+            with self.subTest(payload=payload):
+                output, error, consumers, _, _ = self.invoke(
+                    provenance_bytes=payload, check_workspace=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_provenance_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
 
     def test_failed_or_terminated_evaluation_cannot_report_overall_success(self):
         for returncode in (1, -15):
