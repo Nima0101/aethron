@@ -19,7 +19,7 @@ class ReleaseOutputAdmission(unittest.TestCase):
             if args == ["git", "--no-replace-objects", "ls-files", "-v", "-f", "-z"]:
                 return b"H fixture.txt\0"
             if args == ["git", "--no-replace-objects", "rev-parse", "HEAD"]:
-                return "1" * 40 + "\n"
+                return b"1" * 40 + b"\n"
             if args == [
                 "git",
                 "--no-replace-objects",
@@ -42,7 +42,7 @@ class ReleaseOutputAdmission(unittest.TestCase):
                     "aethron/models/rules.json": b"{}",
                 },
             ),
-            patch.object(release.subprocess, "check_output", side_effect=git_output),
+            patch.object(release, "git_output", side_effect=git_output),
             patch.object(release.io, "BytesIO", side_effect=RuntimeError("archive_boundary")),
         ):
             try:

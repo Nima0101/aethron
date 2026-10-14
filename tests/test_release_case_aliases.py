@@ -81,7 +81,7 @@ class ReleaseCaseAliases(unittest.TestCase):
                     if "ls-files" in args:
                         return b"\0".join(b"H " + name.encode() for name in names) + b"\0"
                     if "rev-parse" in args:
-                        return "a" * 40 + "\n"
+                        return b"a" * 40 + b"\n"
                     if "status" in args:
                         return b""
                     self.fail(f"unexpected command: {args}")
@@ -89,7 +89,7 @@ class ReleaseCaseAliases(unittest.TestCase):
                 destination = self.root / "release"
                 with (
                     patch.object(release, "ROOT", self.root),
-                    patch.object(release.subprocess, "check_output", side_effect=git),
+                    patch.object(release, "git_output", side_effect=git),
                     patch.object(Path, "lstat", source_stat),
                     patch.object(release, "committed_blobs") as blobs,
                 ):

@@ -18,7 +18,7 @@ import zlib
 from pathlib import Path
 from unittest.mock import patch
 
-from scripts import git_context, reproduce
+from scripts import git_context, release, reproduce
 
 ZIP_MAIN = b"from aethron.__main__ import main\nraise SystemExit(main())\n"
 PROVENANCE_DECLARATIONS = {
@@ -962,6 +962,7 @@ class ReproductionReport(unittest.TestCase):
             patch.object(reproduce.subprocess, "run", side_effect=fake_process),
             patch.object(reproduce.subprocess, "check_output", side_effect=git_output),
             patch.object(git_context, "git_output", side_effect=git_output),
+            patch.object(release, "git_output", side_effect=git_output),
             patch.object(Path, "read_bytes", checked_read),
             contextlib.redirect_stdout(output),
             contextlib.redirect_stderr(diagnostics),

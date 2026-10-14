@@ -12,9 +12,9 @@ import zipfile
 from pathlib import Path
 
 if __package__:
-    from .git_context import GIT_COMMAND_TIMEOUT_SECONDS, require_default_git_context
+    from .git_context import GIT_COMMAND_TIMEOUT_SECONDS, git_output, require_default_git_context
 else:
-    from git_context import GIT_COMMAND_TIMEOUT_SECONDS, require_default_git_context
+    from git_context import GIT_COMMAND_TIMEOUT_SECONDS, git_output, require_default_git_context
 
 ROOT = Path(__file__).resolve().parents[1]
 WINDOWS_DEVICE_NAMES = frozenset(
@@ -72,7 +72,9 @@ def committed_blobs(revision, *, root=None):
     """Read one immutable Git tree, never the mutable checkout behind provenance."""
     require_default_git_context(os.environ)
     root = ROOT if root is None else root
-    tree = subprocess.check_output(
+    # Bound metadata capture with the same reader used by verification. Blob
+    # payloads have a separate batch path; this is not a release-size limit.
+    tree = git_output(
         ["git", "--no-replace-objects", "ls-tree", "-r", "-t", "-z", "--full-tree", revision],
         cwd=root,
         timeout=GIT_COMMAND_TIMEOUT_SECONDS,
@@ -163,7 +165,7 @@ def build(destination):
     if not stat.S_ISDIR(info.st_mode) or redirected:
         raise SystemExit("release requires regular source root")
     # Local refs/replace must not redefine the revision named by provenance.
-    names = subprocess.check_output(
+    names = git_output(
         ["git", "--no-replace-objects", "ls-files", "-v", "-f", "-z"],
         cwd=ROOT,
         timeout=GIT_COMMAND_TIMEOUT_SECONDS,
@@ -177,13 +179,16 @@ def build(destination):
         raise SystemExit("release requires observable source index")
     names = sorted(_source_name(entry[2:]) for entry in entries)
     _reject_source_case_aliases(names)
-    revision = subprocess.check_output(
-        ["git", "--no-replace-objects", "rev-parse", "HEAD"],
-        cwd=ROOT,
-        text=True,
-        timeout=GIT_COMMAND_TIMEOUT_SECONDS,
-    ).strip()
-    dirty = subprocess.check_output(
+    revision = (
+        git_output(
+            ["git", "--no-replace-objects", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            timeout=GIT_COMMAND_TIMEOUT_SECONDS,
+        )
+        .decode("ascii")
+        .strip()
+    )
+    dirty = git_output(
         ["git", "--no-replace-objects", "status", "--porcelain", "--untracked-files=normal"],
         cwd=ROOT,
         timeout=GIT_COMMAND_TIMEOUT_SECONDS,

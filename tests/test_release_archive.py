@@ -37,7 +37,7 @@ class ReleaseArchive(unittest.TestCase):
             if args[2:] == ["ls-files", "-v", "-f", "-z"]:
                 return ("\0".join("H " + name for name in reversed(list(blobs))) + "\0").encode()
             if args[2:] == ["rev-parse", "HEAD"]:
-                return "a" * 40 + "\n"
+                return b"a" * 40 + b"\n"
             if args[2:] == ["status", "--porcelain", "--untracked-files=normal"]:
                 return b""
             self.fail(f"unexpected Git request: {args}")
@@ -45,7 +45,7 @@ class ReleaseArchive(unittest.TestCase):
         with (
             patch.object(release, "ROOT", source),
             patch.object(release, "committed_blobs", return_value=dict(sorted(blobs.items()))),
-            patch.object(release.subprocess, "check_output", side_effect=git_output),
+            patch.object(release, "git_output", side_effect=git_output),
         ):
             release.build(destination)
 

@@ -27,7 +27,7 @@ class ReleaseSourceAdmission(unittest.TestCase):
             if args == ["git", "--no-replace-objects", "ls-files", "-v", "-f", "-z"]:
                 return ("\0".join("H " + name for name in names) + "\0").encode()
             if args == ["git", "--no-replace-objects", "rev-parse", "HEAD"]:
-                return "1" * 40 + "\n"
+                return b"1" * 40 + b"\n"
             if args == [
                 "git",
                 "--no-replace-objects",
@@ -51,7 +51,7 @@ class ReleaseSourceAdmission(unittest.TestCase):
                 },
                 side_effect=blob_error,
             ),
-            patch.object(release.subprocess, "check_output", side_effect=git_output),
+            patch.object(release, "git_output", side_effect=git_output),
             patch.object(Path, "read_bytes", record_read),
             patch.object(release.io, "BytesIO", side_effect=RuntimeError("archive_boundary")),
         ):

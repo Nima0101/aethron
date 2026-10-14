@@ -7,7 +7,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from scripts import release
 
@@ -22,7 +22,7 @@ class ReleaseTimeouts(unittest.TestCase):
             oid = b"a" * 40
             responses = [
                 b"H LICENSE\0",
-                "b" * 40 + "\n",
+                b"b" * 40 + b"\n",
                 b"",
                 b"100644 blob " + oid + b"\tLICENSE\0",
             ]
@@ -31,13 +31,11 @@ class ReleaseTimeouts(unittest.TestCase):
                 with self.subTest(stage=command):
                     destination = root / ("release-" + command)
                     error = subprocess.TimeoutExpired(["git", command], 30, output=b"partial")
+                    read = Mock(side_effect=responses[:stage] + [error])
                     with (
                         patch.object(release, "ROOT", source),
-                        patch.object(
-                            release.subprocess,
-                            "check_output",
-                            side_effect=responses[:stage] + [error],
-                        ) as read,
+                        patch.object(release.subprocess, "check_output", read),
+                        patch.object(release, "git_output", read),
                         contextlib.redirect_stdout(io.StringIO()) as output,
                     ):
                         with self.assertRaises(subprocess.TimeoutExpired) as caught:
@@ -55,29 +53,20 @@ class ReleaseTimeouts(unittest.TestCase):
                     self.assertEqual((source / "LICENSE").read_bytes(), b"fixture\n")
 
     def test_real_stalled_child_is_reaped_without_artifacts(self):
-        capture = subprocess.check_output
         popen = subprocess.Popen
         children = []
 
-        def spawn(*args, **kwargs):
-            child = popen(*args, **kwargs)
+        def spawn(args, **kwargs):
+            self.assertEqual(args[:3], ["git", "--no-replace-objects", "ls-files"])
+            child = popen([sys.executable, "-c", "import time; time.sleep(1)"], **kwargs)
             children.append(child)
             return child
-
-        def substitute(args, **kwargs):
-            self.assertEqual(args[:3], ["git", "--no-replace-objects", "ls-files"])
-            return capture(
-                [sys.executable, "-c", "import time; time.sleep(1)"],
-                cwd=kwargs["cwd"],
-                timeout=kwargs.get("timeout", 2),
-            )
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             with (
                 patch.object(release, "ROOT", root),
                 patch.object(release, "GIT_COMMAND_TIMEOUT_SECONDS", 0.1, create=True),
-                patch.object(subprocess, "check_output", side_effect=substitute),
                 patch.object(subprocess, "Popen", side_effect=spawn),
             ):
                 with self.assertRaises(subprocess.TimeoutExpired):

@@ -36,6 +36,7 @@ class ReleaseGitContext(unittest.TestCase):
                             patch.object(edge_reproduce, "ROOT", root),
                             patch.object(subprocess, "run") as run,
                             patch.object(subprocess, "check_output") as read,
+                            patch.object(subprocess, "Popen") as spawn,
                             patch.object(Path, "mkdir") as mkdir,
                             patch.object(tempfile, "mkdtemp") as workspace,
                             contextlib.redirect_stdout(io.StringIO()) as output,
@@ -45,6 +46,7 @@ class ReleaseGitContext(unittest.TestCase):
                                 operation()
                             run.assert_not_called()
                             read.assert_not_called()
+                            spawn.assert_not_called()
                             mkdir.assert_not_called()
                             workspace.assert_not_called()
                             self.assertEqual(output.getvalue(), "")

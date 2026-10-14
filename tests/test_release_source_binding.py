@@ -45,6 +45,7 @@ class ReleaseSourceBinding(unittest.TestCase):
         for patcher in (
             patch.object(release, "ROOT", self.root),
             patch.object(release.subprocess, "check_output", side_effect=self.git),
+            patch.object(release, "git_output", side_effect=self.git),
         ):
             patcher.start()
             self.addCleanup(patcher.stop)
@@ -57,7 +58,7 @@ class ReleaseSourceBinding(unittest.TestCase):
         if command == ["ls-files", "-v", "-f", "-z"]:
             return b"\0".join(b"H " + name.encode() for name in sorted(self.committed)) + b"\0"
         if command == ["rev-parse", "HEAD"]:
-            return self.revision + "\n"
+            return (self.revision + "\n").encode("ascii")
         if command == ["status", "--porcelain", "--untracked-files=normal"]:
             return self.dirty
         if command == ["ls-tree", "-r", "-t", "-z", "--full-tree", self.revision]:
@@ -139,6 +140,7 @@ class ReleaseSourceBinding(unittest.TestCase):
         with (
             patch.object(release, "ROOT", REPOSITORY),
             patch.object(release.subprocess, "check_output", side_effect=only_license),
+            patch.object(release, "git_output", side_effect=only_license),
         ):
             self.assertEqual(release.committed_blobs(revision), {"LICENSE": expected})
 
@@ -150,7 +152,7 @@ class ReleaseSourceBinding(unittest.TestCase):
             return output
 
         destination = Path(self.temporary.name) / "release"
-        with patch.object(release.subprocess, "check_output", side_effect=duplicate):
+        with patch.object(release, "git_output", side_effect=duplicate):
             with self.assertRaisesRegex(ValueError, "release_duplicate_tree_path"):
                 release.build(destination)
         self.assertFalse(destination.exists())

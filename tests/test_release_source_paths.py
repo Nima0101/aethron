@@ -133,14 +133,14 @@ class ReleaseSourcePaths(unittest.TestCase):
                     if "ls-files" in args:
                         return b"H " + name + b"\0"
                     if "rev-parse" in args:
-                        return "a" * 40 + "\n"
+                        return b"a" * 40 + b"\n"
                     if "status" in args:
                         return b""
                     self.fail(f"unexpected Git command: {args}")
 
                 with (
                     patch.object(release, "ROOT", self.root),
-                    patch.object(release.subprocess, "check_output", side_effect=git),
+                    patch.object(release, "git_output", side_effect=git),
                     patch.object(Path, "lstat", source_stat),
                     patch.object(
                         release, "committed_blobs", side_effect=AssertionError("payload read")

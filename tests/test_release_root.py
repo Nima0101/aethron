@@ -99,8 +99,8 @@ class ReleaseRoot(unittest.TestCase):
                     stack.enter_context(patch.object(release, "ROOT", source))
                     read = stack.enter_context(
                         patch.object(
-                            release.subprocess,
-                            "check_output",
+                            release,
+                            "git_output",
                             side_effect=AssertionError("unadmitted Git child"),
                         )
                     )
