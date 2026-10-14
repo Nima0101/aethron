@@ -142,6 +142,13 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
             # nested documentation/resources named bin or scripts.
             if len(parts) == 3 and parts[0].endswith(".data"):
                 data_parts = parts[2].split("/")
+                # The data scheme is relative to the environment prefix.
+                # pyvenv.cfg belongs to the environment creator: replacing it
+                # can change interpreter isolation before source probes run.
+                # Reserve the destination across hosts, including directory
+                # aliases, while permitting nested documentation examples.
+                if parts[1] == "data" and data_parts[0].casefold() == "pyvenv.cfg":
+                    raise ValueError("wheel_source_payload_mismatch")
                 if parts[1] == "scripts" or (
                     parts[1] == "data"
                     and len(data_parts) > 1
