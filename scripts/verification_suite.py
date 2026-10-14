@@ -23,10 +23,15 @@ class _CompletionResult(unittest.TextTestResult):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.started = Counter()
+        self.stopped = Counter()
 
     def startTest(self, test):
         self.started[id(test)] += 1
         super().startTest(test)
+
+    def stopTest(self, test):
+        self.stopped[id(test)] += 1
+        super().stopTest(test)
 
 
 def _completed(cases, discovered, result):
@@ -34,6 +39,9 @@ def _completed(cases, discovered, result):
     if (
         discovered != len(cases)
         or result.testsRun != sum(result.started.values())
+        # Custom run hooks can return after startTest without completing the
+        # lifecycle. Aggregate totals alone also miss stops for another case.
+        or result.started != result.stopped
         or result.started - expected
     ):
         return False
