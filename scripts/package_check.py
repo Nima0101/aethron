@@ -1,11 +1,14 @@
 """Build wheels twice and install into a fresh environment outside the source tree."""
 
 import configparser
+import email.parser
+import email.policy
 import hashlib
 import importlib.metadata
 import io
 import json
 import os
+import re
 import stat
 import subprocess
 import sys
@@ -105,6 +108,7 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
         file_destinations = set()
         directory_destinations = set()
         entry_points = []
+        distribution_metadata = []
         for member in wheel.infolist():
             # ZipInfo truncates filename at NUL; inspecting only that normalized
             # spelling would silently admit a different original archive name.
@@ -211,6 +215,16 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
                 if member.is_dir() or member.file_size > 65536:
                     raise ValueError("wheel_source_payload_mismatch")
                 entry_points.append(member)
+            if (
+                len(components) == 2
+                and components[0].endswith(".dist-info")
+                and components[1] == "metadata"
+            ):
+                # Bound parsing for these source wheels (including their README
+                # descriptions); this is not a general metadata format limit.
+                if member.is_dir() or member.file_size > 1048576:
+                    raise ValueError("wheel_source_payload_mismatch")
+                distribution_metadata.append(member)
             # These distributions do not declare site-level path configuration.
             # A .pth file here can execute at interpreter startup (even with -I),
             # before the installed-source probe gets control. Reject both code
@@ -225,7 +239,7 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
             # a second dist-info directory at the wheel root. Each source wheel
             # owns only its matching dist-info namespace and emits no legacy
             # egg-info. Nested examples are not discovery roots. This checks
-            # destination ownership, not the contents of package metadata.
+            # destination ownership; present METADATA identities are checked below.
             if top.endswith(".egg-info") or (
                 top.endswith(".dist-info") and top.split("-", 1)[0] != package_name.casefold()
             ):
@@ -272,8 +286,27 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
                 SOURCE_SUFFIXES
             ):
                 sources[name] = member
-        if len(entry_points) > 1:
+        if len(entry_points) > 1 or len(distribution_metadata) > 1:
             raise ValueError("wheel_source_payload_mismatch")
+        for member in distribution_metadata:
+            # Reuse the inventory tool's email-header interpretation. A matching
+            # dist-info directory alone cannot establish distribution identity.
+            # Multiple Name headers are ambiguous; normalize valid project names
+            # per PyPA, without decoding email encoded words as package names.
+            try:
+                metadata = email.parser.Parser(policy=email.policy.compat32).parsestr(
+                    wheel.read(member).decode("utf-8"), headersonly=True
+                )
+            except UnicodeError:
+                raise ValueError("wheel_source_payload_mismatch") from None
+            names = metadata.get_all("Name", [])
+            if (
+                metadata.defects
+                or len(names) != 1
+                or not re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?", names[0])
+                or re.sub(r"[-_.]+", "_", names[0].lower()) != package_name.casefold()
+            ):
+                raise ValueError("wheel_source_payload_mismatch")
         for member in entry_points:
             parser = configparser.ConfigParser(interpolation=None, delimiters=("=",))
             parser.optionxform = str
