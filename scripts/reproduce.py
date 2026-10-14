@@ -272,7 +272,10 @@ def validate_zipapp(payload, manifest):
                     or member.is_dir()
                     or member.compress_type != zipfile.ZIP_STORED
                     or member.compress_size != member.file_size
-                    or member.flag_bits & 9
+                    # Stored members may use UTF-8 names, but no other ZIP
+                    # features or disk references outside this standalone file.
+                    or member.flag_bits & ~0x800
+                    or member.volume != 0
                     or member.extra
                     or member.comment
                 ):

@@ -76,7 +76,13 @@ def provenance_sources(files):
 
 
 def executable_archive(
-    defect=None, *, files=None, metadata=None, local_header=None, end_record=None
+    defect=None,
+    *,
+    files=None,
+    metadata=None,
+    local_header=None,
+    end_record=None,
+    central_header=None,
 ):
     files = SOURCE_FILES if files is None else files
     entries = [("__main__.py", ZIP_MAIN)] + [
@@ -148,6 +154,21 @@ def executable_archive(
         if defect == "reordered-directory":
             archive.filelist.reverse()
     payload = buffer.getvalue()
+    if central_header is not None:
+        # Walk record lengths rather than searching for signatures in file data.
+        with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+            start = archive.start_dir
+            for member in archive.infolist():
+                if member.filename == "aethron/data.bin":
+                    break
+                lengths = [
+                    int.from_bytes(payload[start + i : start + i + 2], "little")
+                    for i in (28, 30, 32)
+                ]
+                start += 46 + sum(lengths)
+        offset, width, value = central_header
+        start += offset
+        payload = payload[:start] + value.to_bytes(width, "little") + payload[start + width :]
     if end_record is not None:
         # Alter the directory summary without changing any member or directory entry.
         offset, width, value = end_record
@@ -450,6 +471,7 @@ class ReproductionReport(unittest.TestCase):
         zip_metadata=None,
         zip_local_header=None,
         zip_end_record=None,
+        zip_central_header=None,
         python_probes=None,
     ):
         output = io.StringIO()
@@ -467,6 +489,7 @@ class ReproductionReport(unittest.TestCase):
             metadata=zip_metadata,
             local_header=zip_local_header,
             end_record=zip_end_record,
+            central_header=zip_central_header,
         )
         revision = "a" * 40
         clone_revision = revision
@@ -1200,6 +1223,34 @@ with module.reproduction_workspace() as temporary:
             with self.subTest(field=field):
                 output, error, consumers, _, _ = self.invoke(
                     zip_local_header=(offset, width, value),
+                    check_workspace=True,
+                    real_consumers=True,
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_zipapp_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_zip_member_disks_reject_before_consumers(self):
+        for disk in (1, 65535):
+            with self.subTest(disk=disk):
+                output, error, consumers, _, _ = self.invoke(
+                    zip_central_header=(34, 2, disk),
+                    check_workspace=True,
+                    real_consumers=True,
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_zipapp_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_unsupported_zip_features_reject_even_when_headers_agree(self):
+        # The stored single-disk writer only needs the UTF-8 filename flag.
+        for bit in (1, 2, 4, 7, 8, 9, 10, 12, 13, 14, 15):
+            with self.subTest(bit=bit):
+                output, error, consumers, _, _ = self.invoke(
+                    zip_local_header=(6, 2, 1 << bit),
+                    zip_central_header=(8, 2, 1 << bit),
                     check_workspace=True,
                     real_consumers=True,
                 )
