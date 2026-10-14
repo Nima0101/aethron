@@ -305,6 +305,8 @@ def validate_source_archive(payload, manifest_payload):
                 any(part in ("", ".", "..") for part in name.split("/"))
                 or "\\" in name
                 or "\x00" in name
+                # Match release-source admission for Windows drives/streams.
+                or ":" in name
                 or not isinstance(digest, str)
                 or len(digest) != 64
                 or any(char not in "0123456789abcdef" for char in digest)

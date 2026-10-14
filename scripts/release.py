@@ -25,7 +25,15 @@ def _source_name(raw):
         name = raw.decode("utf-8")
     except UnicodeDecodeError:
         raise ValueError("release_source_path_invalid") from None
-    if any(part in ("", ".", "..") for part in name.split("/")) or "\\" in name or "\x00" in name:
+    # Match wheel admission for drive/stream syntax on every host. A drive
+    # component can reset Path joining during the checkout walk on Windows;
+    # a colon can also address an alternate stream instead of an ordinary file.
+    if (
+        any(part in ("", ".", "..") for part in name.split("/"))
+        or "\\" in name
+        or "\x00" in name
+        or ":" in name
+    ):
         raise ValueError("release_source_path_invalid")
     return name
 

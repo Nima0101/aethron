@@ -1,12 +1,26 @@
 """Reject source names that the release archive verifier cannot admit."""
 
+import gzip
+import hashlib
+import io
+import json
 import subprocess
+import tarfile
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from scripts import release
+from scripts import release, reproduce
+
+WINDOWS_COLON_NAMES = (
+    b"C:",
+    b"C:outside",
+    b"C:/outside",
+    b"source/D:/outside",
+    b"file:stream",
+    b"file::$DATA",
+)
 
 INVALID_NAMES = (
     b".",
@@ -19,7 +33,7 @@ INVALID_NAMES = (
     b"a\\file",
     b"..\\outside",
     b"bad-\xff",
-)
+) + WINDOWS_COLON_NAMES
 
 
 class ReleaseSourcePaths(unittest.TestCase):
@@ -104,6 +118,28 @@ class ReleaseSourcePaths(unittest.TestCase):
                     release.committed_blobs(tree.decode(), root=self.root),
                     {"source/" + name.decode(): b"synthetic payload\n"},
                 )
+
+    def test_archive_rejects_windows_drive_and_stream_names(self):
+        # Real, otherwise canonical archives must not qualify names rejected
+        # before checkout inspection. No Windows filesystem access is needed.
+        data = b"synthetic payload\n"
+        for raw in WINDOWS_COLON_NAMES:
+            with self.subTest(name=raw):
+                name = raw.decode()
+                manifest = json.dumps({name: hashlib.sha256(data).hexdigest()}).encode()
+                buffer = io.BytesIO()
+                with tarfile.open(fileobj=buffer, mode="w", format=tarfile.USTAR_FORMAT) as archive:
+                    member = tarfile.TarInfo("aethron-0.2.0/" + name)
+                    member.mode = 0o644
+                    member.size = len(data)
+                    archive.addfile(member, io.BytesIO(data))
+                compressed = io.BytesIO()
+                with gzip.GzipFile(
+                    fileobj=compressed, mode="wb", mtime=0, compresslevel=9
+                ) as stream:
+                    stream.write(buffer.getvalue())
+                with self.assertRaisesRegex(ValueError, "^release_source_archive_invalid$"):
+                    reproduce.validate_source_archive(compressed.getvalue(), manifest)
 
 
 if __name__ == "__main__":
