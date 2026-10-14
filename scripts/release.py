@@ -78,6 +78,7 @@ def committed_blobs(revision, *, root=None):
         timeout=GIT_COMMAND_TIMEOUT_SECONDS,
     )
     entries = []
+    trees = set()
     paths = set()
     for record in tree.split(b"\0"):
         if not record:
@@ -92,6 +93,7 @@ def committed_blobs(revision, *, root=None):
             raise ValueError("release_duplicate_tree_path")
         paths.add(name)
         if (mode, kind) == (b"040000", b"tree"):
+            trees.add(oid)
             continue
         if mode not in (b"100644", b"100755") or kind != b"blob":
             raise ValueError("release_requires_regular_blobs")
@@ -101,23 +103,30 @@ def committed_blobs(revision, *, root=None):
     # full-file-path comparisons alone miss directories with distinct children.
     _reject_source_case_aliases(paths)
     entries.sort()
+    # Recursive ls-tree validates its starting object, but may traverse corrupt
+    # nested trees without checking their hashes. Verify those raw objects too;
+    # valid blob hashes alone cannot bind paths/modes to the named revision.
+    # Shared and empty subtrees are included, with each tree read only once.
+    objects = [(name, oid, b"blob") for name, oid in entries]
+    objects.extend((None, oid, b"tree") for oid in sorted(trees))
     payload = io.BytesIO(
         subprocess.check_output(
             ["git", "--no-replace-objects", "cat-file", "--batch"],
             cwd=root,
-            input=b"".join(oid + b"\n" for _, oid in entries),
+            input=b"".join(oid + b"\n" for _, oid, _ in objects),
             timeout=GIT_COMMAND_TIMEOUT_SECONDS,
         )
     )
     blobs = {}
-    for name, oid in entries:
+    for name, oid, kind in objects:
+        error = "release_" + kind.decode("ascii")
         header = payload.readline().split()
-        if len(header) != 3 or header[:2] != [oid, b"blob"] or not header[2].isdigit():
-            raise ValueError("release_blob_response_invalid")
+        if len(header) != 3 or header[:2] != [oid, kind] or not header[2].isdigit():
+            raise ValueError(error + "_response_invalid")
         size = int(header[2])
         data = payload.read(size)
         if len(data) != size or payload.read(1) != b"\n":
-            raise ValueError("release_blob_response_invalid")
+            raise ValueError(error + "_response_invalid")
         # cat-file can return a corrupt loose object's bytes under its requested
         # ID. Bind the actual payload to the tree entry before either a release
         # or its manifest verifier can certify it. SHA-1 here is the legacy Git
@@ -127,12 +136,13 @@ def committed_blobs(revision, *, root=None):
         elif len(oid) == 64:
             digest = hashlib.sha256()
         else:
-            raise ValueError("release_blob_response_invalid")
-        digest.update(b"blob " + str(size).encode("ascii") + b"\0")
+            raise ValueError(error + "_response_invalid")
+        digest.update(kind + b" " + str(size).encode("ascii") + b"\0")
         digest.update(data)
         if digest.hexdigest().encode("ascii") != oid:
-            raise ValueError("release_blob_hash_mismatch")
-        blobs[name] = data
+            raise ValueError(error + "_hash_mismatch")
+        if kind == b"blob":
+            blobs[name] = data
     if payload.read(1):
         raise ValueError("release_blob_response_invalid")
     return blobs
