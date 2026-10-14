@@ -256,27 +256,6 @@ def retain_metric_failure(outdir, fixture, payload, gate, metrics):
 def run(outdir, include_recorded=True):
     outdir.mkdir(parents=True, exist_ok=True)
     reports = {}
-    for path in sorted((ROOT / "data/temporal").glob("*.json")):
-        payload = path.read_bytes()
-        entries = json.loads(payload.decode("utf-8"))
-        actual, baseline = outputs(entries)
-        reports[path.stem] = {
-            "temporal": metrics(entries, actual),
-            "greedy_iou": metrics(entries, baseline),
-        }
-        if path.stem in ("fast_uav", "occlusion"):
-            if not (
-                reports[path.stem]["temporal"]["id_switches"]
-                <= reports[path.stem]["greedy_iou"]["id_switches"]
-            ):
-                retain_metric_failure(outdir, path.stem, payload, "id_switches", reports[path.stem])
-                raise AssertionError
-        if path.stem == "clean":
-            if not reports[path.stem]["temporal"]["recall"] >= 0.9:
-                retain_metric_failure(
-                    outdir, path.stem, payload, "clean_recall", reports[path.stem]
-                )
-                raise AssertionError
     report = {
         "protocol": "matrix-v3.md frozen T09/T10/T13",
         "runtime_sha256": {
@@ -288,9 +267,33 @@ def run(outdir, include_recorded=True):
         "platform": platform.system() + " " + platform.machine(),
         "synthetic": reports,
         "passed": False,
-        "failure_stage": "benchmark",
+        "failure_stage": "synthetic",
     }
     try:
+        for path in sorted((ROOT / "data/temporal").glob("*.json")):
+            payload = path.read_bytes()
+            entries = json.loads(payload.decode("utf-8"))
+            actual, baseline = outputs(entries)
+            reports[path.stem] = {
+                "temporal": metrics(entries, actual),
+                "greedy_iou": metrics(entries, baseline),
+            }
+            if path.stem in ("fast_uav", "occlusion"):
+                if not (
+                    reports[path.stem]["temporal"]["id_switches"]
+                    <= reports[path.stem]["greedy_iou"]["id_switches"]
+                ):
+                    retain_metric_failure(
+                        outdir, path.stem, payload, "id_switches", reports[path.stem]
+                    )
+                    raise AssertionError
+            if path.stem == "clean":
+                if not reports[path.stem]["temporal"]["recall"] >= 0.9:
+                    retain_metric_failure(
+                        outdir, path.stem, payload, "clean_recall", reports[path.stem]
+                    )
+                    raise AssertionError
+        report["failure_stage"] = "benchmark"
         report["benchmark"] = benchmark()
         if include_recorded:
             report["failure_stage"] = "recorded"
