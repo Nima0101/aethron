@@ -283,6 +283,9 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                         break
                     except OSError:
                         time.sleep(0.05)
+                else:
+                    # Expiry is failed readiness, not permission to run consumers.
+                    raise TimeoutError("installed_server_not_ready")
                 client = subprocess.run(
                     [
                         str(python),

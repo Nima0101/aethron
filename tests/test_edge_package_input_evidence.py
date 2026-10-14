@@ -41,6 +41,8 @@ class PackageInputEvidence(unittest.TestCase):
         on_exit=None,
         real_venv=False,
         server=None,
+        health_errors=None,
+        health_clock=None,
     ):
         execute = subprocess.run
         spawn = subprocess.Popen
@@ -229,6 +231,12 @@ class PackageInputEvidence(unittest.TestCase):
                 )
                 response = stack.enter_context(patch.object(checker.urllib.request, "urlopen"))
                 response.return_value.__enter__.return_value.status = 200
+                if health_errors is not None:
+                    response.side_effect = health_errors
+                if health_clock is not None:
+                    stack.enter_context(
+                        patch.object(checker.time, "monotonic", side_effect=health_clock)
+                    )
                 stack.enter_context(patch.object(Path, "read_text", read_text))
                 printed = stack.enter_context(redirect_stdout(io.StringIO()))
                 if on_exit is not None:
@@ -293,6 +301,55 @@ class PackageInputEvidence(unittest.TestCase):
 
     def test_report_identifies_checker_and_manifests(self):
         self.probe()
+
+    def test_server_readiness_expiry_stops_consumers_and_retains_evidence(self):
+        for clock in ([0, 20], [0, 0, 10, 20]):
+            with self.subTest(attempts=len(clock) - 2):
+                server = Mock()
+                calls = []
+                diagnostics = io.StringIO()
+
+                def on_run(args, calls=calls):
+                    calls.append(args)
+                    if any(str(arg).endswith("observe.py") for arg in args):
+                        self.fail("consumer started after readiness expired")
+
+                def on_exit(output, printed, diagnostics=diagnostics):
+                    self.assertFalse((output / "result.json").exists())
+                    self.assertEqual(printed.getvalue(), "")
+                    self.assertTrue((output / "server.log").is_file())
+                    self.assertEqual(len(list(output.glob("*/*.whl"))), 4)
+                    workspace = next(output.glob("aethron-installed-*"))
+                    self.assertTrue(workspace.is_dir())
+                    self.assertIn(str(workspace), diagnostics.getvalue())
+
+                with (
+                    redirect_stderr(diagnostics),
+                    self.assertRaisesRegex(TimeoutError, "^installed_server_not_ready$"),
+                ):
+                    self.probe(
+                        server=server,
+                        on_run=on_run,
+                        on_exit=on_exit,
+                        vision=True,
+                        health_errors=ConnectionRefusedError("synthetic unavailable server"),
+                        health_clock=clock,
+                    )
+                self.assertEqual(server.mock_calls, [call.terminate(), call.wait(timeout=10)])
+                self.assertFalse(any(str(arg).endswith("observe.py") for arg in calls[-1]))
+                self.assertFalse(
+                    any("requirements-vision.lock" in str(arg) for args in calls for arg in args)
+                )
+
+    def test_server_readiness_recovers_before_deadline(self):
+        from unittest.mock import DEFAULT
+
+        # Two failed probes, then success at 19s; later times drive the existing
+        # viewer-independent processing check, without sleeping in this test.
+        self.probe(
+            health_errors=[ConnectionRefusedError(), TimeoutError(), DEFAULT],
+            health_clock=[0, 0, 10, 19, 21, 21],
+        )
 
     def test_server_graceful_shutdown_does_not_force_kill(self):
         server = Mock()
