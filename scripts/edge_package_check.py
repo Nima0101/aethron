@@ -317,7 +317,14 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                 assert after > before, "viewer must not own processing"
             finally:
                 server.terminate()
-                server.wait(timeout=10)
+                try:
+                    server.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    # wait() does not stop a child on expiry. Reap this direct
+                    # child, but retain shutdown failure and its workspace.
+                    server.kill()
+                    server.wait(timeout=10)
+                    raise
         if vision:
             subprocess.run(
                 [

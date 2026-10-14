@@ -4,15 +4,18 @@ import hashlib
 import importlib.util
 import io
 import json
+import os
+import signal
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 import warnings
 import zipfile
 from contextlib import ExitStack, redirect_stderr, redirect_stdout
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, call, patch
 
 from scripts import edge_package_check as checker
 
@@ -37,6 +40,7 @@ class PackageInputEvidence(unittest.TestCase):
         on_process=None,
         on_exit=None,
         real_venv=False,
+        server=None,
     ):
         execute = subprocess.run
         spawn = subprocess.Popen
@@ -207,7 +211,9 @@ class PackageInputEvidence(unittest.TestCase):
             with ExitStack() as stack:
                 stack.enter_context(patch.object(checker, "ROOT", root))
                 stack.enter_context(patch.object(checker.subprocess, "run", side_effect=run))
-                stack.enter_context(patch.object(checker.subprocess, "Popen"))
+                process = stack.enter_context(patch.object(checker.subprocess, "Popen"))
+                if server is not None:
+                    process.return_value = server
                 stack.enter_context(
                     patch.object(
                         checker.shutil,
@@ -287,6 +293,82 @@ class PackageInputEvidence(unittest.TestCase):
 
     def test_report_identifies_checker_and_manifests(self):
         self.probe()
+
+    def test_server_graceful_shutdown_does_not_force_kill(self):
+        server = Mock()
+        self.probe(server=server)
+        self.assertEqual(server.mock_calls, [call.terminate(), call.wait(timeout=10)])
+
+    def test_server_shutdown_timeout_reaps_without_publishing_success(self):
+        for failure in (None, subprocess.CalledProcessError(7, ["observer"]), KeyboardInterrupt()):
+            with self.subTest(failure=type(failure).__name__):
+                server = Mock()
+                expired = subprocess.TimeoutExpired(["server"], 10)
+                server.wait.side_effect = [expired, -9]
+                self.check_server_shutdown_timeout(server, failure, expired)
+                self.assertEqual(
+                    server.mock_calls,
+                    [call.terminate(), call.wait(timeout=10), call.kill(), call.wait(timeout=10)],
+                )
+
+    def check_server_shutdown_timeout(self, server, failure=None, expired=None):
+        diagnostics = io.StringIO()
+        calls = []
+
+        def on_run(args):
+            calls.append(args)
+            if failure is not None and any(str(arg).endswith("observe.py") for arg in args):
+                raise failure
+
+        def on_exit(output, printed):
+            self.assertFalse((output / "result.json").exists())
+            self.assertEqual(printed.getvalue(), "")
+            self.assertTrue((output / "server.log").is_file())
+            self.assertEqual(len(list(output.glob("*/*.whl"))), 4)
+            workspace = next(output.glob("aethron-installed-*"))
+            self.assertTrue(workspace.is_dir())
+            self.assertIn(str(workspace), diagnostics.getvalue())
+
+        with redirect_stderr(diagnostics), self.assertRaises(subprocess.TimeoutExpired) as raised:
+            self.probe(server=server, on_run=on_run, on_exit=on_exit, vision=True)
+        if expired is not None:
+            self.assertIs(raised.exception, expired)
+        if failure is not None:
+            self.assertIs(raised.exception.__context__, failure)
+        self.assertTrue(any(str(arg).endswith("observe.py") for arg in calls[-1]))
+
+    @unittest.skipUnless(os.name == "posix", "SIGTERM-ignore behavior requires POSIX")
+    def test_real_unresponsive_server_is_reaped(self):
+        with tempfile.TemporaryDirectory() as directory:
+            ready = Path(directory) / "ready"
+            server = subprocess.Popen(
+                [
+                    sys.executable,
+                    "-I",
+                    "-c",
+                    "import signal, sys, time; from pathlib import Path; "
+                    "signal.signal(signal.SIGTERM, signal.SIG_IGN); "
+                    "Path(sys.argv[1]).touch(); time.sleep(60)",
+                    str(ready),
+                ],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            try:
+                deadline = time.monotonic() + 5
+                while not ready.exists() and time.monotonic() < deadline:
+                    time.sleep(0.01)
+                self.assertTrue(ready.exists(), "child did not install its signal handler")
+                wait = server.wait
+                # Exercise real terminate/kill/wait with a short regression budget.
+                with patch.object(server, "wait", side_effect=lambda timeout: wait(timeout=0.2)):
+                    self.check_server_shutdown_timeout(server)
+                self.assertEqual(server.returncode, -signal.SIGKILL, "server was not reaped")
+            finally:
+                # A failing regression must not itself leave a child behind.
+                if server.poll() is None:
+                    server.kill()
+                server.wait(timeout=5)
 
     def test_package_timeouts_stop_pipeline_and_retain_evidence(self):
         # Four builds, environment creation, dependency install, wheel install.
