@@ -202,8 +202,11 @@ def validate_source_archive(payload, manifest_payload):
                         raise ValueError("archive content mismatch")
             # TAR iteration stops at its end marker, before gzip necessarily checks
             # the CRC/size trailer. Drain through EOF, including subsequent members.
-            while compressed.read(1024 * 1024):
-                pass
+            # Only zero padding may follow: a later TAR or arbitrary payload must
+            # not escape the manifest inventory checked above.
+            for chunk in iter(lambda: compressed.read(1024 * 1024), b""):
+                if chunk.strip(b"\x00"):
+                    raise ValueError("trailing archive content")
         if seen != expected.keys():
             raise ValueError("incomplete archive")
         return manifest

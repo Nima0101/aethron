@@ -158,6 +158,21 @@ def source_archive(defect=None, *, files=None):
     raw = buffer.getvalue()
     if defect == "truncated":
         raw = raw[:520]
+    if defect in ("tar-trailing-file", "gzip-trailing-file", "tar-trailing-duplicate"):
+        tail = io.BytesIO()
+        with tarfile.open(fileobj=tail, mode="w", format=tarfile.USTAR_FORMAT) as archive:
+            name = "source.txt" if defect == "tar-trailing-duplicate" else "unlisted.txt"
+            member = tarfile.TarInfo("aethron-0.2.0/" + name)
+            data = b"unverified trailing source\n"
+            member.size = len(data)
+            archive.addfile(member, io.BytesIO(data))
+        if defect == "gzip-trailing-file":
+            return gzip.compress(raw, mtime=0) + gzip.compress(tail.getvalue(), mtime=0)
+        raw += tail.getvalue()
+    elif defect == "tar-trailing-bytes":
+        raw += b"unverified trailing bytes"
+    elif defect == "tar-distant-trailing-byte":
+        raw += b"\x00" * (2 * 1024 * 1024) + b"x"
     compressed = gzip.compress(raw, mtime=0)
     if defect == "gzip-footer":
         return compressed[:-8]
@@ -926,6 +941,37 @@ with module.reproduction_workspace() as temporary:
                 self.assertEqual(str(error), "release_source_archive_invalid")
                 self.assertEqual(output, "")
                 self.assertEqual(consumers, [])
+
+    def test_trailing_source_content_rejects_before_consumers(self):
+        for defect in (
+            "tar-trailing-file",
+            "gzip-trailing-file",
+            "tar-trailing-duplicate",
+            "tar-trailing-bytes",
+            "tar-distant-trailing-byte",
+        ):
+            with self.subTest(defect=defect):
+                output, error, consumers, _, _ = self.invoke(
+                    archive_defect=defect, check_workspace=True, real_consumers=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_source_archive_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_zero_padding_after_source_archive_remains_valid(self):
+        payload = source_archive()
+        padding = b"\x00" * (2 * 1024 * 1024)
+        for padded in (
+            payload,
+            gzip.compress(gzip.decompress(payload) + padding, mtime=0),
+            payload + gzip.compress(padding, mtime=0),
+        ):
+            with self.subTest(size=len(padded)):
+                self.assertEqual(
+                    reproduce.validate_source_archive(padded, SOURCE_MANIFEST),
+                    json.loads(SOURCE_MANIFEST),
+                )
 
     def test_identical_zip_defects_reject_before_consumers(self):
         for defect in (
