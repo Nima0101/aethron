@@ -89,11 +89,12 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
             # directory records, without guessing the installer's normalization.
             # Trailing dots/spaces in any component are not portable Windows
             # names and can alias a verified destination after installation.
+            # Reserved punctuation and ASCII controls are also invalid ordinary
+            # Windows filenames. Reject on every host, including resources and
+            # directories, rather than certify a Linux-only install as portable.
             path = name[:-1] if member.is_dir() else name
-            if (
-                "\\" in path
-                or ":" in path
-                or any(not part or part.endswith((".", " ")) for part in path.split("/"))
+            if any(ord(character) < 32 or character in '<>:"\\|?*' for character in path) or any(
+                not part or part.endswith((".", " ")) for part in path.split("/")
             ):
                 raise ValueError("wheel_source_payload_mismatch")
             # Windows reserves device names in every directory, even with an

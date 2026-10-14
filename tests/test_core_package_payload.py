@@ -48,6 +48,8 @@ class CorePackagePayload(unittest.TestCase):
                 records.append(("aethron/notes.txt@ignored", b"resource\n"))
             elif defect == "device-name":
                 records.append(("aethron/NUL.txt", b"not an ordinary file on Windows\n"))
+            elif defect == "reserved-character":
+                records.append(("aethron/notes?.txt", b"not a portable filename\n"))
             elif defect == "startup-path":
                 records.append(("unexpected.pth", b"import sys\n"))
             elif defect == "bytecode":
@@ -113,6 +115,70 @@ class CorePackagePayload(unittest.TestCase):
 
     def test_device_name_is_rejected_before_installation(self):
         self.check_payload("device-name")
+
+    def test_reserved_character_is_rejected_before_installation(self):
+        self.check_payload("reserved-character")
+
+    def test_reserved_characters_reject_before_reads_for_core_and_edge(self):
+        # Independent Windows filename rules: slash is the ZIP separator;
+        # backslash/colon and NUL already have separate regression coverage.
+        characters = '<>"|?*' + "".join(chr(value) for value in range(1, 32))
+        for package in ("aethron", "aethron_edge"):
+            payload = {f"{package}/__init__.py": b""}
+            for prefix in ("", f"{package}-0.2.0.data/purelib/", f"{package}-0.2.0.data/platlib/"):
+                for character in characters:
+                    for ending in (".txt", "/data.txt", "/"):
+                        with self.subTest(
+                            package=package, prefix=prefix, char=character, end=ending
+                        ):
+                            archive = io.BytesIO()
+                            with zipfile.ZipFile(archive, "w") as wheel:
+                                wheel.writestr(f"{package}/__init__.py", b"")
+                                wheel.writestr(
+                                    prefix + package + "/notes" + character + ending, b""
+                                )
+                            with (
+                                patch.object(
+                                    zipfile.ZipFile,
+                                    "read",
+                                    side_effect=AssertionError("source read before path rejection"),
+                                ),
+                                self.assertRaisesRegex(ValueError, "wheel_source_payload_mismatch"),
+                            ):
+                                package_check.validate_source_payload(
+                                    archive.getvalue(), payload, package
+                                )
+
+    def test_reserved_characters_reject_matching_source_and_metadata(self):
+        for name in ("aethron/module?.py", "aethron-0.2.0.dist-info/notes\n.txt", "extra*.txt"):
+            with self.subTest(name=name):
+                payload = {"aethron/__init__.py": b""}
+                if name.endswith(".py"):
+                    payload[name] = b""
+                archive = io.BytesIO()
+                with zipfile.ZipFile(archive, "w") as wheel:
+                    wheel.writestr("aethron/__init__.py", b"")
+                    wheel.writestr(name, b"")
+                with self.assertRaisesRegex(ValueError, "wheel_source_payload_mismatch"):
+                    package_check.validate_source_payload(archive.getvalue(), payload)
+
+    def test_valid_punctuation_and_unicode_filenames_remain_allowed(self):
+        names = (
+            "notes !#$%&'()+,-;=@[]^_`{}~",
+            "r\u00e9sum\u00e9",
+            "\u8cc7\u6599",
+            "a\u00a0b",
+            "a\x7fb",
+        )
+        for package in ("aethron", "aethron_edge"):
+            payload = {f"{package}/{name}.py": b"# ordinary source\n" for name in names}
+            for prefix in ("", f"{package}-0.2.0.data/purelib/", f"{package}-0.2.0.data/platlib/"):
+                with self.subTest(package=package, prefix=prefix):
+                    archive = io.BytesIO()
+                    with zipfile.ZipFile(archive, "w") as wheel:
+                        for name, data in payload.items():
+                            wheel.writestr(prefix + name, data)
+                    package_check.validate_source_payload(archive.getvalue(), payload, package)
 
     def test_reserved_devices_reject_before_reads_for_core_and_edge(self):
         devices = ("CON", "PRN", "AUX", "NUL") + tuple(
