@@ -13,6 +13,16 @@ from scripts import temporal_evaluate as temporal
 
 
 class TemporalEvaluationGates(unittest.TestCase):
+    def setUp(self):
+        # These isolated gate tests supply partial inert datasets deliberately.
+        inventory = patch.object(
+            temporal,
+            "synthetic_fixture_paths",
+            side_effect=lambda: sorted((temporal.ROOT / "data/temporal").glob("*.json")),
+        )
+        inventory.start()
+        self.addCleanup(inventory.stop)
+
     def test_replay_mismatch_is_rejected(self):
         with patch.object(temporal, "replay", side_effect=([{"a": 1}], [{"a": 2}])):
             with self.assertRaisesRegex(AssertionError, "nondeterministic replay"):

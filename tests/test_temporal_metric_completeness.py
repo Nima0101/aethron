@@ -13,6 +13,14 @@ from scripts import temporal_evaluate as temporal
 
 class TemporalMetricCompleteness(unittest.TestCase):
     def setUp(self):
+        # Exercise frame completeness with a small dataset, not the frozen corpus.
+        inventory = patch.object(
+            temporal,
+            "synthetic_fixture_paths",
+            side_effect=lambda: sorted((temporal.ROOT / "data/temporal").glob("*.json")),
+        )
+        inventory.start()
+        self.addCleanup(inventory.stop)
         self.truth = {"id": "fixture", "class": "obstacle", "box": [0.1, 0.1, 0.1, 0.1]}
         self.entry = {"truth": [self.truth]}
         self.result = {"tracks": [dict(self.truth, status="PRESENT")]}

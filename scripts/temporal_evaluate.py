@@ -257,6 +257,24 @@ def retain_metric_failure(outdir, fixture, payload, gate, metrics):
         stream.write(json.dumps(report, sort_keys=True, indent=2) + "\n")
 
 
+def synthetic_fixture_paths():
+    """Require the complete synthetic inventory frozen in data-v3-freeze.json."""
+    expected = (
+        "all_loss.json",
+        "blackout.json",
+        "camera_pan.json",
+        "classes.json",
+        "clean.json",
+        "crossing.json",
+        "fast_uav.json",
+        "occlusion.json",
+    )
+    paths = sorted((ROOT / "data/temporal").glob("*.json"))
+    if tuple(path.name for path in paths) != expected or any(not p.is_file() for p in paths):
+        raise ValueError("synthetic_fixture_inventory")
+    return paths
+
+
 def run(outdir, include_recorded=True):
     outdir.mkdir(parents=True, exist_ok=True)
     reports = {}
@@ -274,7 +292,7 @@ def run(outdir, include_recorded=True):
         "failure_stage": "synthetic",
     }
     try:
-        for path in sorted((ROOT / "data/temporal").glob("*.json")):
+        for path in synthetic_fixture_paths():
             payload = path.read_bytes()
             entries = json.loads(payload.decode("utf-8"))
             actual, baseline = outputs(entries)

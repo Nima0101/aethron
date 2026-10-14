@@ -13,6 +13,16 @@ from scripts import temporal_evaluate as temporal
 
 
 class TemporalFailureRetention(unittest.TestCase):
+    def setUp(self):
+        # Exercise report retention independently of the frozen inventory gate.
+        inventory = patch.object(
+            temporal,
+            "synthetic_fixture_paths",
+            side_effect=lambda: sorted((temporal.ROOT / "data/temporal").glob("*.json")),
+        )
+        inventory.start()
+        self.addCleanup(inventory.stop)
+
     def invoke(self, root, name, *, passed=False):
         fixtures = root / "data/temporal"
         fixtures.mkdir(parents=True, exist_ok=True)
