@@ -54,8 +54,8 @@ class ReleaseSourceBinding(unittest.TestCase):
         command = args[2:]
         # Both the old working-tree reader and the corrected object reader use
         # this same committed fixture. No repository or real release is created.
-        if command == ["ls-files", "-z"]:
-            return b"\0".join(name.encode() for name in sorted(self.committed)) + b"\0"
+        if command == ["ls-files", "-v", "-z"]:
+            return b"\0".join(b"H " + name.encode() for name in sorted(self.committed)) + b"\0"
         if command == ["rev-parse", "HEAD"]:
             return self.revision + "\n"
         if command == ["status", "--porcelain", "--untracked-files=normal"]:

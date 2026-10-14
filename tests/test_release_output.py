@@ -16,8 +16,8 @@ class ReleaseOutputAdmission(unittest.TestCase):
 
         def git_output(args, **kwargs):
             self.assertEqual(kwargs["cwd"], source)
-            if args == ["git", "--no-replace-objects", "ls-files", "-z"]:
-                return b"fixture.txt\0"
+            if args == ["git", "--no-replace-objects", "ls-files", "-v", "-z"]:
+                return b"H fixture.txt\0"
             if args == ["git", "--no-replace-objects", "rev-parse", "HEAD"]:
                 return "1" * 40 + "\n"
             if args == [

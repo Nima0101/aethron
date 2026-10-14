@@ -125,7 +125,7 @@ class ReleaseSourcePaths(unittest.TestCase):
 
                 def git(args, name=name, **kwargs):
                     if "ls-files" in args:
-                        return name + b"\0"
+                        return b"H " + name + b"\0"
                     if "rev-parse" in args:
                         return "a" * 40 + "\n"
                     if "status" in args:

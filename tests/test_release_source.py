@@ -24,8 +24,8 @@ class ReleaseSourceAdmission(unittest.TestCase):
 
         def git_output(args, **kwargs):
             self.assertEqual(kwargs["cwd"], source)
-            if args == ["git", "--no-replace-objects", "ls-files", "-z"]:
-                return ("\0".join(names) + "\0").encode()
+            if args == ["git", "--no-replace-objects", "ls-files", "-v", "-z"]:
+                return ("\0".join("H " + name for name in names) + "\0").encode()
             if args == ["git", "--no-replace-objects", "rev-parse", "HEAD"]:
                 return "1" * 40 + "\n"
             if args == [

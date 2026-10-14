@@ -21,7 +21,7 @@ class ReleaseTimeouts(unittest.TestCase):
             (source / "LICENSE").write_bytes(b"fixture\n")
             oid = b"a" * 40
             responses = [
-                b"LICENSE\0",
+                b"H LICENSE\0",
                 "b" * 40 + "\n",
                 b"",
                 b"100644 blob " + oid + b"\tLICENSE\0",

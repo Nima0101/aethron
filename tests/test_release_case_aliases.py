@@ -73,7 +73,7 @@ class ReleaseCaseAliases(unittest.TestCase):
 
                 def git(args, names=names, **kwargs):
                     if "ls-files" in args:
-                        return b"\0".join(name.encode() for name in names) + b"\0"
+                        return b"\0".join(b"H " + name.encode() for name in names) + b"\0"
                     if "rev-parse" in args:
                         return "a" * 40 + "\n"
                     if "status" in args:

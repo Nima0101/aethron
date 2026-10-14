@@ -34,8 +34,8 @@ class ReleaseArchive(unittest.TestCase):
     def build_fixture(self, source, blobs, destination):
         def git_output(args, **kwargs):
             self.assertEqual(args[:2], ["git", "--no-replace-objects"])
-            if args[2:] == ["ls-files", "-z"]:
-                return ("\0".join(reversed(list(blobs))) + "\0").encode()
+            if args[2:] == ["ls-files", "-v", "-z"]:
+                return ("\0".join("H " + name for name in reversed(list(blobs))) + "\0").encode()
             if args[2:] == ["rev-parse", "HEAD"]:
                 return "a" * 40 + "\n"
             if args[2:] == ["status", "--porcelain", "--untracked-files=normal"]:
