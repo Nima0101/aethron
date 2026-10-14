@@ -1,11 +1,14 @@
 """Synthetic source admission probes; stop before creating an archive."""
 
+import stat
 import tempfile
 import traceback
 import unittest
 from contextlib import nullcontext
 from pathlib import Path
 from unittest.mock import patch
+
+from test_package_source_links import windows_attributes
 
 from scripts import release
 
@@ -93,6 +96,42 @@ class ReleaseSourceAdmission(unittest.TestCase):
             (source / "a.txt").write_bytes(b"ordinary")
             (source / "z-directory").mkdir()
             self.assert_rejected(source, ["a.txt", "z-directory"], root / "output")
+
+    def test_reparse_sources_reject_before_archive_creation(self):
+        # Model Windows metadata on Linux; this is not native junction evidence.
+        for location in ("package", "package/nested", "package/nested/source.py"):
+            for attributes in (
+                stat.FILE_ATTRIBUTE_REPARSE_POINT,
+                stat.FILE_ATTRIBUTE_REPARSE_POINT | stat.FILE_ATTRIBUTE_ARCHIVE,
+            ):
+                with self.subTest(location=location, attributes=attributes):
+                    with tempfile.TemporaryDirectory() as directory:
+                        root = Path(directory)
+                        source = root / "source"
+                        name = "package/nested/source.py"
+                        path = source / name
+                        path.parent.mkdir(parents=True)
+                        path.write_bytes(b"# ordinary source\n")
+                        with windows_attributes(source / location, attributes):
+                            self.assert_rejected(source, [name], root / "output")
+
+    def test_ordinary_windows_attributes_reach_archive_boundary(self):
+        for location in ("package", "package/nested", "package/nested/source.py"):
+            with self.subTest(location=location), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                source = root / "source"
+                name = "package/nested/source.py"
+                path = source / name
+                path.parent.mkdir(parents=True)
+                path.write_bytes(b"# ordinary source\n")
+                with windows_attributes(
+                    source / location, stat.FILE_ATTRIBUTE_READONLY | stat.FILE_ATTRIBUTE_ARCHIVE
+                ):
+                    error, reads = self.attempt(source, [name], root / "output")
+                self.assertIsInstance(error, RuntimeError)
+                self.assertEqual(str(error), "archive_boundary")
+                self.assertEqual(reads, [])
+                self.assertEqual(list((root / "output").iterdir()), [])
 
     def test_regular_nested_sources_reach_archive_boundary(self):
         with tempfile.TemporaryDirectory() as directory:

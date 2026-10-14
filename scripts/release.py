@@ -94,9 +94,17 @@ def build(destination):
             parts = Path(name).parts
             for index, part in enumerate(parts):
                 path = path / part
-                mode = path.lstat().st_mode
+                info = path.lstat()
+                mode = info.st_mode
                 valid = stat.S_ISREG(mode) if index == len(parts) - 1 else stat.S_ISDIR(mode)
-                if not valid:
+                # Match verifier/package admission: Windows junctions can have
+                # ordinary directory mode bits. Reject reparse attributes too,
+                # before inspecting descendants or creating release artifacts.
+                # Stable-tree admission only, not concurrent-replacement safety.
+                redirected = getattr(info, "st_file_attributes", 0) & getattr(
+                    stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0
+                )
+                if not valid or redirected:
                     raise SystemExit("release requires regular source files without symlinks")
         blobs = committed_blobs(revision)
     except OSError:
