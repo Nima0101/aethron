@@ -188,6 +188,13 @@ class PackageInputEvidence(unittest.TestCase):
                                 records.append(records[0])
                             elif wheel_defect == "nul-name":
                                 records.append((selected + "/notes.txt@ignored", b"resource\n"))
+                            elif wheel_defect == "script-destination":
+                                records.append(
+                                    (
+                                        selected + "-" + version + ".data/scripts/fixture-tool",
+                                        b"# inert\n",
+                                    )
+                                )
                         wheel = destination / (selected + "-" + version + "-py3-none-any.whl")
                         with warnings.catch_warnings():
                             warnings.simplefilter("ignore", UserWarning)
@@ -891,6 +898,11 @@ class PackageInputEvidence(unittest.TestCase):
         for package in ("aethron", "aethron_edge"):
             with self.subTest(package=package):
                 self.probe(wheel_defect="nul-name", package=package)
+
+    def test_script_destination_rejects_before_consumers_or_report(self):
+        for package in ("aethron", "aethron_edge"):
+            with self.subTest(package=package):
+                self.probe(wheel_defect="script-destination", package=package)
 
     def test_installed_source_mismatch_rejects_before_consumers(self):
         for package in ("aethron", "aethron_edge"):

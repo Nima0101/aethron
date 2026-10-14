@@ -126,6 +126,20 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
             ):
                 raise ValueError("wheel_source_payload_mismatch")
             parts = name.split("/", 2)
+            # These distributions declare entry-point wrappers, not bundled
+            # scripts. Script payloads bypass package-source parity and can
+            # overwrite environment tools before an installed probe runs.
+            # The data scheme can also reach the standard script directories.
+            # Reserve those prefix destinations across hosts, while allowing
+            # nested documentation/resources named bin or scripts.
+            if len(parts) == 3 and parts[0].endswith(".data"):
+                data_parts = parts[2].split("/")
+                if parts[1] == "scripts" or (
+                    parts[1] == "data"
+                    and len(data_parts) > 1
+                    and data_parts[0].casefold() in ("bin", "scripts")
+                ):
+                    raise ValueError("wheel_source_payload_mismatch")
             # The data scheme installs relative to the environment prefix, so
             # it can write into site-packages too (including via Lib/lib64).
             # These source-wheel checks must not treat such writes as opaque
