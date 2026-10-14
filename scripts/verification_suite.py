@@ -24,20 +24,54 @@ class _CompletionResult(unittest.TextTestResult):
         super().__init__(*args, **kwargs)
         self.started = Counter()
         self.stopped = Counter()
+        self.pending = {}
+        self.incomplete = False
 
     def startTest(self, test):
+        if id(test) in self.pending:
+            self.incomplete = True
+        self.pending[id(test)] = False
         self.started[id(test)] += 1
         super().startTest(test)
 
     def stopTest(self, test):
+        if not self.pending.pop(id(test), False):
+            self.incomplete = True
         self.stopped[id(test)] += 1
         super().stopTest(test)
+
+    def _outcome(self, test):
+        if id(test) not in self.pending:
+            self.incomplete = True
+        else:
+            self.pending[id(test)] = True
+
+    def addSuccess(self, test):
+        self._outcome(test)
+        super().addSuccess(test)
+
+    def addExpectedFailure(self, test, err):
+        self._outcome(test)
+        super().addExpectedFailure(test, err)
+
+    def addSkip(self, test, reason):
+        if isinstance(test, unittest.TestCase):
+            # unittest reports skipped subtests using a child TestCase whose
+            # test_case points to the running parent, with no parent success
+            # callback. Multiple subtest skips still cover only this execution.
+            parent = test if id(test) in self.pending else getattr(test, "test_case", test)
+            self._outcome(parent)
+        # Shared-fixture holders have no start/stop pair; _completed accounts
+        # for their setup skips. Failures/errors already reject via wasSuccessful.
+        super().addSkip(test, reason)
 
 
 def _completed(cases, discovered, result):
     expected = Counter(id(test) for test in cases)
     if (
-        discovered != len(cases)
+        result.incomplete
+        or result.pending
+        or discovered != len(cases)
         or result.testsRun != sum(result.started.values())
         # Custom run hooks can return after startTest without completing the
         # lifecycle. Aggregate totals alone also miss stops for another case.
