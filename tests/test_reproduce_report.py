@@ -39,10 +39,11 @@ SOURCE_MANIFEST = json.dumps(
 ).encode()
 
 
-def executable_archive(defect=None):
+def executable_archive(defect=None, *, files=None):
+    files = SOURCE_FILES if files is None else files
     entries = [("__main__.py", ZIP_MAIN)] + [
         (name, data)
-        for name, data in SOURCE_FILES.items()
+        for name, data in files.items()
         if name.startswith("aethron/") or name in ("LICENSE", "NOTICE")
     ]
     if defect == "missing":
@@ -84,11 +85,12 @@ def executable_archive(defect=None):
     return b"not ZIP" if defect == "malformed" else payload
 
 
-def source_archive(defect=None):
+def source_archive(defect=None, *, files=None):
     """Real compressed TAR bytes, with optional independently checksummed defects."""
+    files = SOURCE_FILES if files is None else files
     buffer = io.BytesIO()
     with tarfile.open(fileobj=buffer, mode="w", format=tarfile.USTAR_FORMAT) as archive:
-        entries = list(SOURCE_FILES.items())
+        entries = list(files.items())
         if defect == "missing":
             entries.pop()
         elif defect == "extra":
@@ -311,7 +313,8 @@ class ReproductionReport(unittest.TestCase):
         inventory_lanes=("a", "b"),
         provenance_bytes=None,
         checksum_defect=None,
-        manifest_bytes=SOURCE_MANIFEST,
+        manifest_bytes=None,
+        artifact_files=None,
         archive_defect=None,
         zip_defect=None,
         python_probes=None,
@@ -320,7 +323,12 @@ class ReproductionReport(unittest.TestCase):
         diagnostics = io.StringIO()
         consumers = []
         workspaces = []
-        payload = executable_archive(zip_defect)
+        artifact_files = SOURCE_FILES if artifact_files is None else artifact_files
+        if manifest_bytes is None:
+            manifest_bytes = json.dumps(
+                {name: hashlib.sha256(data).hexdigest() for name, data in artifact_files.items()}
+            ).encode()
+        payload = executable_archive(zip_defect, files=artifact_files)
         revision = "a" * 40
         clone_revision = revision
         source_status = b""
@@ -436,7 +444,7 @@ class ReproductionReport(unittest.TestCase):
                     (destination / sidecar).write_bytes(b"synthetic sidecar")
                 (destination / "source-manifest.json").write_bytes(manifest_bytes)
                 (destination / "aethron-0.2.0-source.tar.gz").write_bytes(
-                    source_archive(archive_defect)
+                    source_archive(archive_defect, files=artifact_files)
                 )
                 (destination / "provenance.json").write_bytes(
                     json.dumps(
@@ -509,6 +517,33 @@ class ReproductionReport(unittest.TestCase):
             return subprocess.CompletedProcess(args, 0)
 
         def git_output(args, **kwargs):
+            objects = {
+                name: hashlib.sha1(
+                    b"blob " + str(len(data)).encode() + b"\0" + data, usedforsecurity=False
+                ).hexdigest()
+                for name, data in SOURCE_FILES.items()
+            }
+            if args == [
+                "git",
+                "--no-replace-objects",
+                "ls-tree",
+                "-r",
+                "-z",
+                "--full-tree",
+                revision,
+            ]:
+                self.assertEqual(Path(kwargs["cwd"]), workspaces[0] / "source")
+                return b"".join(
+                    b"100644 blob " + objects[name].encode() + b"\t" + name.encode() + b"\0"
+                    for name in sorted(SOURCE_FILES)
+                )
+            if args == ["git", "--no-replace-objects", "cat-file", "--batch"]:
+                self.assertEqual(Path(kwargs["cwd"]), workspaces[0] / "source")
+                by_oid = {objects[name].encode(): data for name, data in SOURCE_FILES.items()}
+                return b"".join(
+                    oid + b" blob " + str(len(by_oid[oid])).encode() + b"\n" + by_oid[oid] + b"\n"
+                    for oid in kwargs["input"].splitlines()
+                )
             if args == ["git", "--no-replace-objects", "ls-files", "-v", "-z"]:
                 return index_entries
             if args == ["git", "--no-replace-objects", "rev-parse", "HEAD"]:
@@ -805,6 +840,26 @@ with module.reproduction_workspace() as temporary:
                 )
                 self.assertIsInstance(error, ValueError)
                 self.assertEqual(str(error), "release_zipapp_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_self_consistent_changed_source_rejects_before_real_consumers(self):
+        for defect in ("content", "missing", "extra", "renamed"):
+            with self.subTest(defect=defect):
+                files = dict(SOURCE_FILES)
+                if defect == "content":
+                    files["aethron/data.bin"] = b"different source bytes"
+                elif defect == "missing":
+                    del files["aethron/data.bin"]
+                elif defect == "extra":
+                    files["aethron/extra.bin"] = b"uncommitted file"
+                else:
+                    files["aethron/renamed.bin"] = files.pop("aethron/data.bin")
+                output, error, consumers, _, _ = self.invoke(
+                    artifact_files=files, real_consumers=True, check_workspace=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_source_manifest_invalid")
                 self.assertEqual(output, "")
                 self.assertEqual(consumers, [])
 

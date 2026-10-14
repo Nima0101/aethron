@@ -172,6 +172,21 @@ def validate_zipapp(payload, manifest):
         raise ValueError("release_zipapp_invalid") from None
 
 
+def validate_source_manifest(clone, revision, manifest):
+    """Compare the build's inventory and hashes with the original committed blobs."""
+    if __package__:
+        from .release import committed_blobs
+    else:
+        from release import committed_blobs
+
+    expected = {
+        name: hashlib.sha256(data).hexdigest()
+        for name, data in committed_blobs(revision, root=clone).items()
+    }
+    if manifest != expected:
+        raise ValueError("release_source_manifest_invalid")
+
+
 def validate_source(clone, revision):
     """Bind sequential checks to one clean revision, excluding ignored build outputs."""
     # These index flags suppress working-tree checks even when status is clean.
@@ -301,6 +316,7 @@ def run():
         validate_provenance(provenance, revision, artifact_manifest["source-manifest.json"])
         validate_checksums(checksums, artifact_manifest)
         manifest = validate_source_archive(source_archive, source_manifest)
+        validate_source_manifest(clone, revision, manifest)
         validate_zipapp(zipapp, manifest)
         call(
             [

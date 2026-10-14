@@ -13,11 +13,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def committed_blobs(revision):
+def committed_blobs(revision, *, root=None):
     """Read one immutable Git tree, never the mutable checkout behind provenance."""
+    root = ROOT if root is None else root
     tree = subprocess.check_output(
         ["git", "--no-replace-objects", "ls-tree", "-r", "-z", "--full-tree", revision],
-        cwd=ROOT,
+        cwd=root,
     )
     entries = []
     for record in tree.split(b"\0"):
@@ -32,7 +33,7 @@ def committed_blobs(revision):
     payload = io.BytesIO(
         subprocess.check_output(
             ["git", "--no-replace-objects", "cat-file", "--batch"],
-            cwd=ROOT,
+            cwd=root,
             input=b"".join(oid + b"\n" for _, oid in entries),
         )
     )
