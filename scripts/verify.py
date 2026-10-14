@@ -237,7 +237,10 @@ def run():
     require_worktree_root()
     # ORT's 1DS telemetry initializes at import, before API-level opt-out.
     # Disable it in each child before native imports without changing the parent.
-    env = dict(os.environ, ORT_DISABLE_TELEMETRY="1")
+    # Match reproduction/package checks: user-site hooks can exit successfully
+    # before a check runs. Keep interpreter tooling and checkout imports while
+    # disabling user-site startup in children, without changing the parent.
+    env = dict(os.environ, ORT_DISABLE_TELEMETRY="1", PYTHONNOUSERSITE="1")
     # Match clean reproduction: check this checkout with the selected interpreter,
     # without a caller's alternate home or startup/import modules taking over.
     env.pop("PYTHONHOME", None)
