@@ -231,6 +231,50 @@ class CorePackagePayload(unittest.TestCase):
     def test_comparison_uses_prebuild_snapshot(self):
         self.check_payload(mutate_source=True)
 
+    def test_source_snapshot_and_wheel_agree_on_mixed_case_suffixes(self):
+        for package in ("aethron", "aethron_edge"):
+            with self.subTest(package=package), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                payload = {
+                    f"{package}/__init__.py": b"# source\n",
+                    f"{package}/module.PY": b"VALUE = 1\n",
+                    f"{package}/models/Caf\u00e9.JsOn": b"{}\n",
+                    f"{package}/bounds.PxD": b"# declaration\n",
+                }
+                archive = io.BytesIO()
+                with zipfile.ZipFile(archive, "w") as wheel:
+                    for name, data in payload.items():
+                        path = root / name
+                        path.parent.mkdir(parents=True, exist_ok=True)
+                        path.write_bytes(data)
+                        wheel.writestr(name, data)
+                (root / package / "notes.TXT").write_bytes(b"outside source parity\n")
+                snapshot = package_check.snapshot_source_payload(root, package)
+                self.assertEqual(snapshot, payload)
+                package_check.validate_source_payload(archive.getvalue(), snapshot, package)
+
+    def test_mixed_case_source_directories_and_symlinks_are_rejected(self):
+        for package in ("aethron", "aethron_edge"):
+            for suffix in (".PY", ".JsOn", ".PxD"):
+                for kind in ("directory", "symlink", "dangling-symlink"):
+                    with (
+                        self.subTest(package=package, suffix=suffix, kind=kind),
+                        tempfile.TemporaryDirectory() as directory,
+                    ):
+                        root = Path(directory)
+                        (root / package).mkdir()
+                        (root / package / "__init__.py").write_bytes(b"# source\n")
+                        path = root / package / ("invalid" + suffix)
+                        if kind == "directory":
+                            path.mkdir()
+                        else:
+                            target = root / "external"
+                            if kind == "symlink":
+                                target.write_bytes(b"# outside package\n")
+                            path.symlink_to(target)
+                        with self.assertRaisesRegex(ValueError, "invalid_source_payload_file"):
+                            package_check.snapshot_source_payload(root, package)
+
     def test_empty_or_nonfile_source_payload_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

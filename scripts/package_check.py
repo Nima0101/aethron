@@ -54,11 +54,13 @@ def snapshot_source_payload(root, package_name="aethron"):
     for directory, directories, files in os.walk(package, onerror=unreadable):
         for name in directories:
             path = Path(directory) / name
-            if path.is_symlink() or path.suffix in SOURCE_SUFFIXES:
+            if path.is_symlink() or path.suffix.casefold() in SOURCE_SUFFIXES:
                 raise ValueError("invalid_source_payload_file")
         for name in files:
             path = Path(directory) / name
-            if path.suffix in SOURCE_SUFFIXES:
+            # Match wheel admission on every host, preserving the actual name
+            # and bytes for both prebuild and installed-payload comparisons.
+            if path.suffix.casefold() in SOURCE_SUFFIXES:
                 if path.is_symlink() or not path.is_file():
                     raise ValueError("invalid_source_payload_file")
                 payload[path.relative_to(root).as_posix()] = path.read_bytes()
