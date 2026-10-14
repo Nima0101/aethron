@@ -102,6 +102,13 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
                 and parts[1] in ("purelib", "platlib")
             ):
                 name = parts[2]
+            # These distributions do not declare site-level path configuration.
+            # A .pth file here can execute at interpreter startup (even with -I),
+            # before the installed-source probe gets control. Reject both code
+            # and path-only files without interpreting their contents. Nested
+            # package resources and directory records are not startup hooks.
+            if not member.is_dir() and "/" not in name and name.casefold().endswith(".pth"):
+                raise ValueError("wheel_source_payload_mismatch")
             # Wheels are checked on case-sensitive hosts too. Do not let an
             # uppercase package/suffix bypass admission and overwrite a checked
             # file on a case-insensitive install. Keep exact spelling for parity;

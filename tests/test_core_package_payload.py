@@ -46,6 +46,8 @@ class CorePackagePayload(unittest.TestCase):
                 records.append((records[0][0] + " ", b"# replaced source\n"))
             elif defect == "nul-name":
                 records.append(("aethron/notes.txt@ignored", b"resource\n"))
+            elif defect == "startup-path":
+                records.append(("unexpected.pth", b"import sys\n"))
             elif defect and defect.startswith("spread-"):
                 _, scheme, kind = defect.split("-")
                 name = "aethron/retired.py" if kind == "extra" else records[0][0]
@@ -100,6 +102,50 @@ class CorePackagePayload(unittest.TestCase):
 
     def test_matching_payload_reaches_consumer(self):
         self.check_payload()
+
+    def test_startup_path_is_rejected_before_installation(self):
+        self.check_payload("startup-path")
+
+    def test_site_path_files_reject_before_source_reads_for_core_and_edge(self):
+        for package in ("aethron", "aethron_edge"):
+            name = f"{package}/module.py"
+            payload = {name: b"VALUE = 1\n"}
+            for prefix in ("", f"{package}-0.2.0.data/purelib/", f"{package}-0.2.0.data/platlib/"):
+                for suffix in (".pth", ".PTH"):
+                    for content in (b"import sys\n", b"extra-import-directory\n", b"# empty\n"):
+                        with self.subTest(
+                            package=package, prefix=prefix, suffix=suffix, content=content
+                        ):
+                            archive = io.BytesIO()
+                            with zipfile.ZipFile(archive, "w") as wheel:
+                                wheel.writestr(name, payload[name])
+                                wheel.writestr(prefix + "unexpected" + suffix, content)
+                            with (
+                                patch.object(
+                                    zipfile.ZipFile,
+                                    "read",
+                                    side_effect=AssertionError(
+                                        "source read before startup path rejection"
+                                    ),
+                                ),
+                                self.assertRaisesRegex(ValueError, "wheel_source_payload_mismatch"),
+                            ):
+                                package_check.validate_source_payload(
+                                    archive.getvalue(), payload, package
+                                )
+
+    def test_nested_path_resources_remain_allowed(self):
+        for package in ("aethron", "aethron_edge"):
+            name = f"{package}/module.py"
+            payload = {name: b"VALUE = 1\n"}
+            for prefix in ("", f"{package}-0.2.0.data/purelib/", f"{package}-0.2.0.data/platlib/"):
+                with self.subTest(package=package, prefix=prefix):
+                    archive = io.BytesIO()
+                    with zipfile.ZipFile(archive, "w") as wheel:
+                        wheel.writestr(name, payload[name])
+                        wheel.writestr(prefix + f"{package}/resources/model.pth", b"resource")
+                        wheel.writestr(prefix + "directory.pth/", b"")
+                    package_check.validate_source_payload(archive.getvalue(), payload, package)
 
     def test_path_alias_is_rejected_before_installation(self):
         self.check_payload("path-alias")
