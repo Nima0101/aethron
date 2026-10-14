@@ -99,6 +99,43 @@ class TemporalEvaluationGates(unittest.TestCase):
                     # Failure evidence must still be written before raising.
                     report = json.loads((root / "output/temporal-evaluation.json").read_text())
                     self.assertIs(report["benchmark"]["passed"], False)
+                    self.assertIs(report["passed"], False)
+                    self.assertEqual(report["failure_stage"], "benchmark_gate")
+
+    def test_interrupted_execution_retains_partial_report_and_original_error(self):
+        for stage in ("benchmark", "recorded"):
+            for error_type in (RuntimeError, KeyboardInterrupt):
+                with self.subTest(stage=stage, error=error_type.__name__):
+                    with tempfile.TemporaryDirectory() as directory:
+                        root = Path(directory)
+                        fixtures = root / "data/temporal"
+                        fixtures.mkdir(parents=True)
+                        (fixtures / "clean.json").write_text("[]")
+                        outdir = root / "output"
+                        outdir.mkdir()
+                        report_path = outdir / "temporal-evaluation.json"
+                        report_path.write_text('{"passed": true, "stale": true}')
+                        error = error_type("private_error_payload")
+                        with (
+                            patch.object(temporal, "ROOT", root),
+                            patch.object(temporal, "outputs", return_value=([], [])),
+                            patch.object(temporal, "metrics", return_value={"recall": 1.0}),
+                            patch.object(temporal, "benchmark", return_value={"passed": True}),
+                            patch.object(temporal, "recorded"),
+                            patch.object(temporal, stage, side_effect=error),
+                            contextlib.redirect_stdout(io.StringIO()),
+                        ):
+                            with self.assertRaises(error_type) as caught:
+                                temporal.run(outdir)
+                        self.assertIs(caught.exception, error)
+                        report = json.loads(report_path.read_text())
+                        self.assertIs(report["passed"], False)
+                        self.assertEqual(report["failure_stage"], stage)
+                        self.assertEqual(report["synthetic"]["clean"]["temporal"]["recall"], 1.0)
+                        self.assertEqual("benchmark" in report, stage == "recorded")
+                        self.assertNotIn("recorded", report)
+                        self.assertNotIn("stale", report)
+                        self.assertNotIn("private_error_payload", report_path.read_text())
 
     def test_successful_inert_gate_values_are_not_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -116,6 +153,8 @@ class TemporalEvaluationGates(unittest.TestCase):
             ):
                 report = temporal.run(root / "output", include_recorded=False)
             self.assertIs(report["benchmark"]["passed"], True)
+            self.assertIs(report["passed"], True)
+            self.assertNotIn("failure_stage", report)
 
 
 if __name__ == "__main__":

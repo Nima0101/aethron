@@ -287,16 +287,25 @@ def run(outdir, include_recorded=True):
         "python": platform.python_version(),
         "platform": platform.system() + " " + platform.machine(),
         "synthetic": reports,
-        "benchmark": benchmark(),
+        "passed": False,
+        "failure_stage": "benchmark",
     }
-    if include_recorded:
-        report["recorded"] = recorded(outdir)
-    (outdir / "temporal-evaluation.json").write_text(
-        json.dumps(report, sort_keys=True, indent=2) + "\n"
-    )
+    try:
+        report["benchmark"] = benchmark()
+        if include_recorded:
+            report["failure_stage"] = "recorded"
+            report["recorded"] = recorded(outdir)
+        report["failure_stage"] = "benchmark_gate"
+        if not report["benchmark"]["passed"]:
+            raise AssertionError(report["benchmark"])
+        report["passed"] = True
+        del report["failure_stage"]
+    finally:
+        # Keep completed measurements even when a gate or execution is interrupted.
+        (outdir / "temporal-evaluation.json").write_text(
+            json.dumps(report, sort_keys=True, indent=2) + "\n"
+        )
     print(json.dumps(report, sort_keys=True))
-    if not report["benchmark"]["passed"]:
-        raise AssertionError(report["benchmark"])
     return report
 
 
