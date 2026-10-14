@@ -43,9 +43,13 @@ class ReproductionReport(unittest.TestCase):
                     ).strip()
 
                 git("init", "--quiet")
+                # Exercise the Windows checkout default on every test host.
+                git("config", "core.autocrlf", "true")
+                # This fixture compares immutable bytes, not normalized text.
+                (clone / ".gitattributes").write_bytes(b"source.txt -text\n")
                 source = clone / "source.txt"
                 source.write_bytes(b"original source\n")
-                git("add", "source.txt")
+                git("add", "source.txt", ".gitattributes")
                 git("commit", "--quiet", "-m", "original source")
                 revision = git("rev-parse", "HEAD")
                 original = git("rev-parse", "HEAD^{tree}") if kind == "tree" else revision
