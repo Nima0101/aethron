@@ -12,16 +12,76 @@ import sys
 import tarfile
 import tempfile
 import unittest
+import warnings
 import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
 from scripts import reproduce
 
-SOURCE_FILES = {"source.txt": b"synthetic source\x00\xff\n", "empty.txt": b""}
+ZIP_MAIN = b"from aethron.__main__ import main\nraise SystemExit(main())\n"
+SOURCE_FILES = {
+    "source.txt": b"synthetic source\x00\xff\n",
+    "empty.txt": b"",
+    "LICENSE": b"synthetic license\n",
+    "NOTICE": b"synthetic notice\n",
+    "aethron/__init__.py": (
+        b"import importlib.util\n"
+        b"assert importlib.util.find_spec('zip_shadow') is None\n"
+        b"def evaluate(data):\n    return {'recommendation': {'action': 'STOP'}}\n"
+    ),
+    "aethron/__main__.py": b"def main():\n    return 0\n",
+    "aethron/data.bin": b"\x00\xff",
+    "aethron/empty.txt": b"",
+}
 SOURCE_MANIFEST = json.dumps(
     {name: hashlib.sha256(data).hexdigest() for name, data in SOURCE_FILES.items()}
 ).encode()
+
+
+def executable_archive(defect=None):
+    entries = [("__main__.py", ZIP_MAIN)] + [
+        (name, data)
+        for name, data in SOURCE_FILES.items()
+        if name.startswith("aethron/") or name in ("LICENSE", "NOTICE")
+    ]
+    if defect == "missing":
+        entries.pop()
+    elif defect == "extra":
+        entries.append(("extra.txt", b"unexpected"))
+    elif defect == "duplicate":
+        entries.append(entries[-1])
+    elif defect == "empty":
+        entries = []
+    buffer = io.BytesIO()
+    with warnings.catch_warnings(), zipfile.ZipFile(buffer, "w") as archive:
+        warnings.simplefilter("ignore", UserWarning)
+        for name, data in entries:
+            if defect == "launcher" and name == "__main__.py":
+                data = b"raise SystemExit(0)\n"
+            if name == "aethron/data.bin":
+                if defect == "content":
+                    data = b"wrong bytes"
+                elif defect == "traversal":
+                    name = "aethron/../data.bin"
+                elif defect == "directory":
+                    name += "/"
+            info = zipfile.ZipInfo(name)
+            info.create_system = 3
+            info.external_attr = 0o644 << 16
+            if defect == "symlink" and name == "aethron/data.bin":
+                info.external_attr = (stat.S_IFLNK | 0o644) << 16
+            elif defect == "special" and name == "aethron/data.bin":
+                info.external_attr = (stat.S_IFIFO | 0o644) << 16
+            elif defect == "compressed" and name == "aethron/data.bin":
+                info.compress_type = zipfile.ZIP_DEFLATED
+            archive.writestr(info, data)
+    payload = buffer.getvalue()
+    if defect == "crc":
+        payload = payload.replace(b"synthetic notice\n", b"different notice\n")
+    if defect == "truncated":
+        return payload[:60]
+    return b"not ZIP" if defect == "malformed" else payload
 
 
 def source_archive(defect=None):
@@ -253,27 +313,14 @@ class ReproductionReport(unittest.TestCase):
         checksum_defect=None,
         manifest_bytes=SOURCE_MANIFEST,
         archive_defect=None,
+        zip_defect=None,
         python_probes=None,
     ):
         output = io.StringIO()
         diagnostics = io.StringIO()
         consumers = []
         workspaces = []
-        payload = b"synthetic archive placeholder, never executed"
-        if real_consumers:
-            archive = io.BytesIO()
-            with zipfile.ZipFile(archive, "w") as bundle:
-                bundle.writestr(
-                    "__main__.py",
-                    "import importlib.util\n"
-                    "assert importlib.util.find_spec('zip_shadow') is None\n"
-                    "from aethron import evaluate; evaluate(b'{}')\n",
-                )
-                bundle.writestr(
-                    "aethron/__init__.py",
-                    "def evaluate(data):\n    return {'recommendation': {'action': 'STOP'}}\n",
-                )
-            payload = archive.getvalue()
+        payload = executable_archive(zip_defect)
         revision = "a" * 40
         clone_revision = revision
         source_status = b""
@@ -719,6 +766,45 @@ with module.reproduction_workspace() as temporary:
                 )
                 self.assertIsInstance(error, ValueError)
                 self.assertEqual(str(error), "release_source_archive_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_identical_zip_defects_reject_before_consumers(self):
+        for defect in (
+            "content",
+            "missing",
+            "extra",
+            "duplicate",
+            "empty",
+            "launcher",
+            "traversal",
+            "directory",
+            "symlink",
+            "special",
+            "compressed",
+            "crc",
+            "truncated",
+            "malformed",
+        ):
+            with self.subTest(defect=defect):
+                output, error, consumers, _, _ = self.invoke(
+                    zip_defect=defect, check_workspace=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_zipapp_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_zip_manifest_binding_protects_files_outside_the_smoke_path(self):
+        # Each of these ZIPs still passes both real Python smoke consumers.
+        # Inventory/content admission must stop them before those executions.
+        for defect in ("content", "missing", "extra", "duplicate"):
+            with self.subTest(defect=defect):
+                output, error, consumers, _, _ = self.invoke(
+                    zip_defect=defect, real_consumers=True, check_workspace=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_zipapp_invalid")
                 self.assertEqual(output, "")
                 self.assertEqual(consumers, [])
 

@@ -11,6 +11,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import zipfile
 from pathlib import Path
 
 # Optimized execution removes assertions used to establish this evidence.
@@ -128,8 +129,47 @@ def validate_source_archive(payload, manifest_payload):
                     raise ValueError("archive content mismatch")
         if seen != expected.keys():
             raise ValueError("incomplete archive")
+        return manifest
     except (ValueError, RecursionError, tarfile.TarError, OSError, EOFError):
         raise ValueError("release_source_archive_invalid") from None
+
+
+def validate_zipapp(payload, manifest):
+    """Bind every executable ZIP member to the already validated source manifest."""
+    expected = {name: digest for name, digest in manifest.items() if name.startswith("aethron/")}
+    try:
+        for name in ("LICENSE", "NOTICE"):
+            expected[name] = manifest[name]
+        expected["__main__.py"] = hashlib.sha256(
+            b"from aethron.__main__ import main\nraise SystemExit(main())\n"
+        ).hexdigest()
+        seen = set()
+        with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+            for member in archive.infolist():
+                if (
+                    member.filename not in expected
+                    or member.filename in seen
+                    or member.orig_filename != member.filename
+                    or member.is_dir()
+                    or member.compress_type != zipfile.ZIP_STORED
+                    or member.flag_bits & 1
+                    or (
+                        member.create_system == 3
+                        and stat.S_IFMT(member.external_attr >> 16) not in (0, stat.S_IFREG)
+                    )
+                ):
+                    raise ValueError("invalid ZIP member")
+                seen.add(member.filename)
+                digest = hashlib.sha256()
+                with archive.open(member) as stream:
+                    for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                        digest.update(chunk)
+                if digest.hexdigest() != expected[member.filename]:
+                    raise ValueError("ZIP content mismatch")
+        if seen != expected.keys():
+            raise ValueError("incomplete ZIP")
+    except (ValueError, KeyError, zipfile.BadZipFile, OSError, EOFError, RuntimeError):
+        raise ValueError("release_zipapp_invalid") from None
 
 
 def validate_source(clone, revision):
@@ -255,10 +295,13 @@ def run():
                 source_manifest = compared
             if p.name == "aethron-0.2.0-source.tar.gz":
                 source_archive = compared
+            if p.name == "aethron.pyz":
+                zipapp = compared
             artifact_manifest[p.name] = hashlib.sha256(compared).hexdigest()
         validate_provenance(provenance, revision, artifact_manifest["source-manifest.json"])
         validate_checksums(checksums, artifact_manifest)
-        validate_source_archive(source_archive, source_manifest)
+        manifest = validate_source_archive(source_archive, source_manifest)
+        validate_zipapp(zipapp, manifest)
         call(
             [
                 sys.executable,
