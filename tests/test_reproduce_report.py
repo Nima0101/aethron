@@ -117,6 +117,23 @@ def executable_archive(defect=None, *, files=None, metadata=None):
                 info.compress_type = zipfile.ZIP_DEFLATED
             archive.writestr(info, data)
     payload = buffer.getvalue()
+    if defect == "prefix-script":
+        return b"#!/bin/sh\nexit 0\n" + payload
+    if defect == "prefix-zero":
+        return b"\x00" + payload
+    if defect == "prefix-archive":
+        prefix = io.BytesIO()
+        with zipfile.ZipFile(prefix, "w") as archive:
+            archive.writestr("unlisted.txt", b"unverified prefix")
+        return prefix.getvalue() + payload
+    if defect == "suffix-bytes":
+        return payload + b"unverified suffix"
+    if defect == "suffix-zero":
+        return payload + b"\x00"
+    if defect == "suffix-end-record":
+        return payload + payload[-22:]
+    if defect == "archive-comment":
+        return payload[:-2] + b"\x07\x00" + b"comment"
     if defect == "crc":
         payload = payload.replace(b"synthetic notice\n", b"different notice\n")
     if defect == "truncated":
@@ -1026,6 +1043,39 @@ with module.reproduction_workspace() as temporary:
                 self.assertEqual(str(error), "release_zipapp_invalid")
                 self.assertEqual(output, "")
                 self.assertEqual(consumers, [])
+
+    def test_zip_envelope_rejects_before_consumers(self):
+        # These extra bytes are absent from the source manifest, while both
+        # synthetic builds and their checksums still agree.
+        for defect in (
+            "prefix-script",
+            "prefix-zero",
+            "prefix-archive",
+            "suffix-bytes",
+            "suffix-zero",
+            "suffix-end-record",
+            "archive-comment",
+        ):
+            with self.subTest(defect=defect):
+                output, error, consumers, _, _ = self.invoke(
+                    zip_defect=defect, check_workspace=True, real_consumers=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_zipapp_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_zip_envelope_preserves_binary_members_and_unicode_names(self):
+        files = {
+            **SOURCE_FILES,
+            "aethron/data.bin": b"PK\x05\x06" + b"\x00" * 18 + b"PK\x03\x04",
+            "aethron/café.txt": b"binary\x00\xff",
+        }
+        with patch.dict(SOURCE_FILES, files):
+            output, error, consumers, _, _ = self.invoke(real_consumers=True)
+        self.assertIsNone(error)
+        self.assertEqual(len(consumers), 2)
+        self.assertTrue(json.loads(output)["byte_identical_builds"])
 
     def test_zip_metadata_rejects_before_consumers(self):
         # Equal builds and content hashes cannot validate extraction metadata.

@@ -236,7 +236,19 @@ def validate_zipapp(payload, manifest):
         ).hexdigest()
         seen = set()
         with zipfile.ZipFile(io.BytesIO(payload)) as archive:
-            for member in archive.infolist():
+            members = archive.infolist()
+            # ZipFile also accepts a ZIP appended to another file and ignores
+            # trailing bytes. Our writer emits a standalone, comment-free ZIP:
+            # first local header at zero, fixed 22-byte end record at EOF.
+            if (
+                not members
+                or min(member.header_offset for member in members) != 0
+                or archive.comment
+                or payload[-22:-18] != b"PK\x05\x06"
+                or payload[-2:] != b"\x00\x00"
+            ):
+                raise ValueError("invalid ZIP envelope")
+            for member in members:
                 if (
                     member.filename not in expected
                     or member.filename in seen
