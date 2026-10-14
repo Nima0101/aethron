@@ -68,6 +68,12 @@ class ReleaseCaseAliases(unittest.TestCase):
         self.assert_tree_rejected(self.git("mktree", "-z", data=b"\0".join(records) + b"\0"))
 
     def test_checkout_case_aliases_reject_before_filesystem_access(self):
+        root_info = self.root.lstat()
+
+        def source_stat(path):
+            self.assertEqual(path, self.root, "unadmitted source entry inspected")
+            return root_info
+
         for names in ALIASES:
             with self.subTest(names=names):
 
@@ -84,7 +90,7 @@ class ReleaseCaseAliases(unittest.TestCase):
                 with (
                     patch.object(release, "ROOT", self.root),
                     patch.object(release.subprocess, "check_output", side_effect=git),
-                    patch.object(Path, "lstat", side_effect=AssertionError("source inspected")),
+                    patch.object(Path, "lstat", source_stat),
                     patch.object(release, "committed_blobs") as blobs,
                 ):
                     with self.assertRaisesRegex(ValueError, "^release_source_path_alias$"):

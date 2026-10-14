@@ -154,6 +154,7 @@ class ReleaseSourceAdmission(unittest.TestCase):
             self.assertFalse((root / "output").exists())
 
     def test_source_io_errors_have_fixed_diagnostics(self):
+        original_lstat = Path.lstat
         for operation in ("missing", "lstat", "committed_blobs"):
             with self.subTest(operation=operation), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
@@ -163,13 +164,19 @@ class ReleaseSourceAdmission(unittest.TestCase):
                 path = source / name
                 if operation != "missing":
                     path.write_bytes(b"synthetic private bytes")
+
+                def source_stat(candidate, path=path):
+                    if candidate == path:
+                        raise PermissionError(13, "private detail", str(path))
+                    return original_lstat(candidate)
+
                 fault = (
                     nullcontext()
                     if operation in ("missing", "committed_blobs")
                     else patch.object(
                         Path,
                         operation,
-                        side_effect=PermissionError(13, "private detail", str(path)),
+                        source_stat,
                     )
                 )
                 with fault:

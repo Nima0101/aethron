@@ -119,6 +119,12 @@ class ReleaseSourcePaths(unittest.TestCase):
 
     def test_checkout_names_reject_before_filesystem_access(self):
         # Reject before platform Path normalization erases dot components.
+        root_info = self.root.lstat()
+
+        def source_stat(path):
+            self.assertEqual(path, self.root, "unadmitted source entry inspected")
+            return root_info
+
         for name in INVALID_NAMES:
             with self.subTest(name=name):
                 destination = self.root / "release"
@@ -135,7 +141,7 @@ class ReleaseSourcePaths(unittest.TestCase):
                 with (
                     patch.object(release, "ROOT", self.root),
                     patch.object(release.subprocess, "check_output", side_effect=git),
-                    patch.object(Path, "lstat", side_effect=AssertionError("source inspected")),
+                    patch.object(Path, "lstat", source_stat),
                     patch.object(
                         release, "committed_blobs", side_effect=AssertionError("payload read")
                     ) as blobs,

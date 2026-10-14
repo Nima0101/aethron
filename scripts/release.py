@@ -150,6 +150,18 @@ def committed_blobs(revision, *, root=None):
 
 def build(destination):
     require_default_git_context(os.environ)
+    # Match reproduction admission before Git follows a replaced checkout root.
+    # Descendant lstat checks cannot detect a symlink/junction at ROOT itself.
+    # This checks stable substitutions, not concurrent swaps or ancestor links.
+    try:
+        info = ROOT.lstat()
+    except OSError:
+        raise SystemExit("release requires regular source root") from None
+    redirected = getattr(info, "st_file_attributes", 0) & getattr(
+        stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0
+    )
+    if not stat.S_ISDIR(info.st_mode) or redirected:
+        raise SystemExit("release requires regular source root")
     # Local refs/replace must not redefine the revision named by provenance.
     names = subprocess.check_output(
         ["git", "--no-replace-objects", "ls-files", "-v", "-f", "-z"],
