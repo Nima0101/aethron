@@ -2,6 +2,7 @@
 
 import contextlib
 import io
+import os
 import subprocess
 import tempfile
 import unittest
@@ -12,6 +13,90 @@ from scripts import edge_reproduce
 
 
 class EdgeReproductionSource(unittest.TestCase):
+    def test_python_children_ignore_inherited_python_home_and_path(self):
+        for existing_home in (False, True):
+            with self.subTest(existing_home=existing_home):
+                with tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    source = root / "source"
+                    source.mkdir()
+                    foreign_home = root / "foreign-home"
+                    if existing_home:
+                        foreign_home.mkdir()
+                    foreign_path = root / "foreign-path"
+                    foreign_path.mkdir()
+                    (foreign_path / "sitecustomize.py").write_text(
+                        "raise SystemExit('foreign sitecustomize executed')\n", encoding="utf-8"
+                    )
+                    scripts = source / "scripts"
+                    scripts.mkdir()
+                    probe = (
+                        "import json, os, sys\n"
+                        "from pathlib import Path\n"
+                        "assert 'PYTHONHOME' not in os.environ\n"
+                        "assert 'PYTHONPATH' not in os.environ\n"
+                        "assert os.environ['AETHRON_REPRODUCTION_TEST'] == 'preserved'\n"
+                        "out = Path('build/probes')\n"
+                        "out.mkdir(parents=True, exist_ok=True)\n"
+                        "(out / Path(__file__).name).write_text('passed', encoding='utf-8')\n"
+                    )
+                    for name in ("verify.py", "check_ecosystem_plan.py", "edge_package_check.py"):
+                        (scripts / name).write_text(probe, encoding="utf-8")
+                    # The last real child exports proof of all three stages before cleanup.
+                    with (scripts / "edge_package_check.py").open("a", encoding="utf-8") as stream:
+                        stream.write(
+                            "package = Path(sys.argv[sys.argv.index('--out') + 1])\n"
+                            "package.mkdir()\n"
+                            "(package / 'probes.json').write_text(\n"
+                            "    json.dumps(sorted(p.name for p in out.iterdir())),\n"
+                            "    encoding='utf-8')\n"
+                        )
+                    (source / ".gitignore").write_text("build/\n", encoding="utf-8")
+                    for args in (
+                        ["init", "--quiet"],
+                        ["add", "."],
+                        [
+                            "-c",
+                            "user.name=Reproduction Fixture",
+                            "-c",
+                            "user.email=fixture@example.invalid",
+                            "-c",
+                            "commit.gpgsign=false",
+                            "-c",
+                            "core.hooksPath=" + str(root / "no-hooks"),
+                            "commit",
+                            "--quiet",
+                            "-m",
+                            "synthetic Python probes",
+                        ],
+                    ):
+                        subprocess.run(
+                            ["git", *args], cwd=source, check=True, capture_output=True, timeout=5
+                        )
+                    inherited = {
+                        "PYTHONHOME": str(foreign_home),
+                        "PYTHONPATH": str(foreign_path),
+                        "AETHRON_REPRODUCTION_TEST": "preserved",
+                    }
+                    with (
+                        patch.object(edge_reproduce, "ROOT", source),
+                        patch.dict(os.environ, inherited),
+                        contextlib.redirect_stdout(io.StringIO()) as output,
+                        contextlib.redirect_stderr(io.StringIO()),
+                    ):
+                        edge_reproduce.run(root / "wheelhouse")
+                        for name, value in inherited.items():
+                            self.assertEqual(os.environ[name], value)
+                    self.assertIn("PASS:", output.getvalue())
+                    area = source / "build/ecosystem-phase1"
+                    packages = list(area.glob("*-package"))
+                    self.assertEqual(len(packages), 1)
+                    self.assertEqual(
+                        (packages[0] / "probes.json").read_text(encoding="utf-8"),
+                        '["check_ecosystem_plan.py", "edge_package_check.py", "verify.py"]',
+                    )
+                    self.assertEqual(list(area.iterdir()), packages)
+
     def test_child_source_changes_reject_before_the_next_stage(self):
         mutations = ("modified", "untracked", "assume-unchanged", "skip-worktree", "revision")
         cases = [

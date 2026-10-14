@@ -28,6 +28,7 @@ def run(wheelhouse):
         validate_source(clone, revision)
         env = dict(os.environ)
         env.pop("PYTHONPATH", None)
+        env.pop("PYTHONHOME", None)
         subprocess.run([sys.executable, "scripts/verify.py"], cwd=clone, env=env, check=True)
         validate_source(clone, revision)
         subprocess.run(
