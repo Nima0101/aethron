@@ -108,6 +108,48 @@ def validate_provenance_sources(provenance, manifest):
         raise ValueError("release_provenance_invalid")
 
 
+def validate_sbom(payload):
+    """Check local release declarations, not full CycloneDX conformance or rights."""
+
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("release_sbom_invalid")
+            result[key] = value
+        return result
+
+    def reject_constant(value):
+        raise ValueError("release_sbom_invalid")
+
+    try:
+        bom = json.loads(
+            payload.decode("utf-8"),
+            object_pairs_hook=unique_object,
+            parse_constant=reject_constant,
+        )
+    except (ValueError, RecursionError):
+        raise ValueError("release_sbom_invalid") from None
+    if (
+        not isinstance(bom, dict)
+        or bom.get("bomFormat") != "CycloneDX"
+        or bom.get("specVersion") != "1.6"
+        or type(bom.get("version")) is not int
+        or bom["version"] != 1
+        or not isinstance(bom.get("metadata"), dict)
+        or not isinstance(bom["metadata"].get("component"), dict)
+    ):
+        raise ValueError("release_sbom_invalid")
+    component = bom["metadata"]["component"]
+    if (
+        component.get("type") != "application"
+        or component.get("name") != "aethron"
+        or component.get("version") != "0.2.0"
+        or component.get("licenses") != [{"license": {"id": "GPL-3.0-only"}}]
+    ):
+        raise ValueError("release_sbom_invalid")
+
+
 def validate_checksums(payload, manifest):
     """Require the builder's canonical checksum inventory for the compared bytes."""
     expected = "".join(
@@ -342,6 +384,8 @@ def run():
                 source_archive = compared
             if p.name == "aethron.pyz":
                 zipapp = compared
+            if p.name == "sbom.cdx.json":
+                sbom = compared
             artifact_manifest[p.name] = hashlib.sha256(compared).hexdigest()
         provenance = validate_provenance(
             provenance, revision, artifact_manifest["source-manifest.json"]
@@ -351,6 +395,7 @@ def run():
         validate_source_manifest(clone, revision, manifest)
         validate_provenance_sources(provenance, manifest)
         validate_zipapp(zipapp, manifest)
+        validate_sbom(sbom)
         call(
             [
                 sys.executable,

@@ -25,6 +25,23 @@ PROVENANCE_DECLARATIONS = {
     "evidence": "local unsigned candidate; not hosted attestation",
     "runtime_dependencies": "Python 3.9+ standard library",
 }
+SBOM = {
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.6",
+    "version": 1,
+    "metadata": {
+        "component": {
+            "type": "application",
+            "name": "aethron",
+            "version": "0.2.0",
+            "licenses": [{"license": {"id": "GPL-3.0-only"}}],
+        }
+    },
+    "components": [],
+    "dependencies": [],
+    "properties": [],
+}
+SBOM_BYTES = json.dumps(SBOM).encode()
 SOURCE_FILES = {
     "source.txt": b"synthetic source\x00\xff\n",
     "empty.txt": b"",
@@ -331,6 +348,7 @@ class ReproductionReport(unittest.TestCase):
         inventory_defect=None,
         inventory_lanes=("a", "b"),
         provenance_bytes=None,
+        sbom_bytes=SBOM_BYTES,
         checksum_defect=None,
         manifest_bytes=None,
         artifact_files=None,
@@ -461,6 +479,7 @@ class ReproductionReport(unittest.TestCase):
                     "SHA256SUMS",
                 ):
                     (destination / sidecar).write_bytes(b"synthetic sidecar")
+                (destination / "sbom.cdx.json").write_bytes(sbom_bytes)
                 (destination / "source-manifest.json").write_bytes(manifest_bytes)
                 (destination / "aethron-0.2.0-source.tar.gz").write_bytes(
                     source_archive(archive_defect, files=artifact_files)
@@ -766,7 +785,7 @@ with module.reproduction_workspace() as temporary:
             ).hexdigest(),
             "aethron-0.2.0-source.tar.gz": hashlib.sha256(source_archive()).hexdigest(),
             "source-manifest.json": hashlib.sha256(SOURCE_MANIFEST).hexdigest(),
-            "sbom.cdx.json": hashlib.sha256(b"synthetic sidecar").hexdigest(),
+            "sbom.cdx.json": hashlib.sha256(SBOM_BYTES).hexdigest(),
         }
         checksums = "".join(f"{expected[name]}  {name}\n" for name in sorted(expected)).encode()
         expected["SHA256SUMS"] = hashlib.sha256(checksums).hexdigest()
@@ -779,6 +798,58 @@ with module.reproduction_workspace() as temporary:
             "byte_identical_builds",
         ):
             self.assertIs(report[field], True)
+
+    def test_identical_invalid_sbom_rejects_before_consumers(self):
+        cases = [b"synthetic sidecar", b"\xff", b"[]", b"null", b"{}"]
+        for path, values in (
+            (("bomFormat",), (None, "SPDX", 1)),
+            (("specVersion",), (None, "1.5", 1.6)),
+            (("version",), (None, 0, True, 1.0, "1", 2)),
+            (("metadata",), (None, [], "metadata")),
+            (("metadata", "component"), (None, [], "component")),
+            (("metadata", "component", "type"), (None, "library")),
+            (("metadata", "component", "name"), (None, "other")),
+            (("metadata", "component", "version"), (None, "0.1.0")),
+            (("metadata", "component", "licenses"), (None, [], [{"license": {"id": "MIT"}}])),
+        ):
+            for value in values:
+                bom = json.loads(SBOM_BYTES)
+                parent = bom
+                for key in path[:-1]:
+                    parent = parent[key]
+                parent[path[-1]] = value
+                cases.append(json.dumps(bom).encode())
+            del parent[path[-1]]
+            cases.append(json.dumps(bom).encode())
+        cases.extend(
+            (
+                SBOM_BYTES.replace(b'"version": 1,', b'"version": 0, "version": 1,', 1),
+                SBOM_BYTES.replace(b'"name": "aethron"', b'"name": "other", "name": "aethron"'),
+                SBOM_BYTES[:-1] + b', "extra": NaN}',
+                SBOM_BYTES[:-1] + b', "extra": Infinity}',
+            )
+        )
+        for index, payload in enumerate(cases):
+            with self.subTest(case=index, payload=payload):
+                output, error, consumers, _, _ = self.invoke(
+                    sbom_bytes=payload, real_consumers=True, check_workspace=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_sbom_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_sbom_formatting_and_additional_metadata_preserve_acceptance(self):
+        bom = json.loads(SBOM_BYTES)
+        bom["metadata"]["component"]["description"] = "Synthetic release fixture"
+        payload = json.dumps(bom, indent=2, sort_keys=True).encode()
+        output, error, consumers, _, _ = self.invoke(sbom_bytes=payload, real_consumers=True)
+        self.assertIsNone(error)
+        self.assertEqual(len(consumers), 2)
+        self.assertEqual(
+            json.loads(output)["artifact_sha256"]["sbom.cdx.json"],
+            hashlib.sha256(payload).hexdigest(),
+        )
 
     def test_identical_invalid_checksums_reject_before_consumers(self):
         for defect in (
