@@ -63,6 +63,15 @@ def wheel_inventory(directory: Path):
         raise ValueError("package_artifact_changed") from None
 
 
+def processed_count(status: Path) -> int:
+    record = json.loads(status.read_text())
+    count = record.get("processed") if isinstance(record, dict) else None
+    # JSON booleans, strings and fractional values are not processing counts.
+    if type(count) is not int or count < 0:
+        raise ValueError("installed_processed_invalid")
+    return count
+
+
 def run(wheelhouse: Path, output: Path, vision: bool = False):
     # Preserve earlier evidence and prevent a failed attempt from reusing its report.
     output.mkdir(parents=True, exist_ok=False)
@@ -310,10 +319,12 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                 rows = [json.loads(line) for line in client.stdout.splitlines()]
                 assert len(rows) == 3 and all(row["current_state"] == "UNKNOWN" for row in rows)
                 time.sleep(1.1)
-                before = json.loads((work / "status.json").read_text())["processed"]
+                before = processed_count(work / "status.json")
                 continued_deadline = time.monotonic() + 10
                 while time.monotonic() < continued_deadline:
-                    after = json.loads((work / "status.json").read_text())["processed"]
+                    after = processed_count(work / "status.json")
+                    if after < before:
+                        raise ValueError("installed_processed_regressed")
                     if after > before:
                         break
                     time.sleep(0.1)

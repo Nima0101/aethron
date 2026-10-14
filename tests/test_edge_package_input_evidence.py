@@ -43,6 +43,7 @@ class PackageInputEvidence(unittest.TestCase):
         server=None,
         health_errors=None,
         health_clock=None,
+        status_counts=None,
     ):
         execute = subprocess.run
         spawn = subprocess.Popen
@@ -95,7 +96,13 @@ class PackageInputEvidence(unittest.TestCase):
                 nonlocal status_reads
                 if path.name == "status.json":
                     status_reads += 1
-                    return json.dumps({"processed": status_reads})
+                    return json.dumps(
+                        {
+                            "processed": status_reads
+                            if status_counts is None
+                            else next(status_counts)
+                        }
+                    )
                 return original_read(path, *args, **kwargs)
 
             consumers = []
@@ -301,6 +308,53 @@ class PackageInputEvidence(unittest.TestCase):
 
     def test_report_identifies_checker_and_manifests(self):
         self.probe()
+
+    def test_invalid_processing_counts_do_not_qualify_viewer_independence(self):
+        for counts in (
+            [False, True],
+            ["10", "2"],
+            [-2, -1],
+            [1.0, 2.0],
+            [[1], [2]],
+            [0, True],
+            [0, 1.5],
+        ):
+            with self.subTest(counts=counts):
+                self.assert_processing_rejected(counts, "installed_processed_invalid")
+
+    def test_processing_counter_regression_does_not_qualify_recovery(self):
+        self.assert_processing_rejected([10, 9, 11], "installed_processed_regressed")
+
+    def assert_processing_rejected(self, counts, reason):
+        server = Mock()
+        diagnostics = io.StringIO()
+        calls = []
+
+        def on_exit(output, printed):
+            self.assertFalse((output / "result.json").exists())
+            self.assertEqual(printed.getvalue(), "")
+            self.assertTrue((output / "server.log").is_file())
+            self.assertEqual(len(list(output.glob("*/*.whl"))), 4)
+            workspace = next(output.glob("aethron-installed-*"))
+            self.assertTrue(workspace.is_dir())
+            self.assertIn(str(workspace), diagnostics.getvalue())
+
+        with redirect_stderr(diagnostics), self.assertRaisesRegex(ValueError, "^" + reason + "$"):
+            self.probe(
+                status_counts=iter(counts),
+                server=server,
+                vision=True,
+                on_run=calls.append,
+                on_exit=on_exit,
+            )
+        self.assertEqual(server.mock_calls, [call.terminate(), call.wait(timeout=10)])
+        self.assertFalse(
+            any("requirements-vision.lock" in str(arg) for args in calls for arg in args)
+        )
+
+    def test_processing_counter_may_stall_then_increase(self):
+        self.probe(status_counts=iter([0, 0, 0, 1]))
+        self.probe(status_counts=iter([10, 10, 11]))
 
     def test_server_readiness_expiry_stops_consumers_and_retains_evidence(self):
         for clock in ([0, 20], [0, 0, 10, 20]):
