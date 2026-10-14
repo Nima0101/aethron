@@ -219,14 +219,18 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
                 and top.endswith((".py", ".pyc", ".so", ".pyd"))
             ):
                 raise ValueError("wheel_source_payload_mismatch")
-            # These distributions each own one import package. A foreign .py
-            # can overwrite another installed distribution while leaving this
-            # package's manifest unchanged. Check root and spread destinations
+            # These distributions each own one import package. Foreign source
+            # or extension modules can overwrite or shadow another distribution
+            # while leaving this package's manifest unchanged. Reserve .so/.pyd
+            # across hosts, including ABI-tagged names; host EXTENSION_SUFFIXES
+            # alone would miss other supported platforms. This is ownership
+            # admission, not binary parity for the package's own native modules.
+            # Check root and spread destinations
             # before any payload reads; metadata and non-import data schemes
             # may still contain ordinary Python examples/resources.
             if (
                 not member.is_dir()
-                and folded_name.endswith(".py")
+                and folded_name.endswith((".py", ".so", ".pyd"))
                 and not folded_name.startswith(package_name.casefold() + "/")
                 and not top.endswith((".dist-info", ".data"))
             ):
