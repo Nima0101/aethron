@@ -20,6 +20,11 @@ from unittest.mock import patch
 from scripts import reproduce
 
 ZIP_MAIN = b"from aethron.__main__ import main\nraise SystemExit(main())\n"
+PROVENANCE_DECLARATIONS = {
+    "builder": "scripts/release.py",
+    "evidence": "local unsigned candidate; not hosted attestation",
+    "runtime_dependencies": "Python 3.9+ standard library",
+}
 SOURCE_FILES = {
     "source.txt": b"synthetic source\x00\xff\n",
     "empty.txt": b"",
@@ -463,6 +468,7 @@ class ReproductionReport(unittest.TestCase):
                 (destination / "provenance.json").write_bytes(
                     json.dumps(
                         {
+                            **PROVENANCE_DECLARATIONS,
                             "source_revision": revision,
                             **provenance_sources(artifact_files),
                             "source_manifest_sha256": hashlib.sha256(
@@ -751,6 +757,7 @@ with module.reproduction_workspace() as temporary:
             "provenance.json": hashlib.sha256(
                 json.dumps(
                     {
+                        **PROVENANCE_DECLARATIONS,
                         "source_revision": revision,
                         **provenance_sources(SOURCE_FILES),
                         "source_manifest_sha256": hashlib.sha256(SOURCE_MANIFEST).hexdigest(),
@@ -943,7 +950,7 @@ with module.reproduction_workspace() as temporary:
         digest = hashlib.sha256(SOURCE_MANIFEST).hexdigest()
         for value in (None, True, 1, [], {}, "", "0" * 64, digest.upper(), digest + "\n"):
             with self.subTest(value=value):
-                provenance = {"source_revision": "a" * 40}
+                provenance = {**PROVENANCE_DECLARATIONS, "source_revision": "a" * 40}
                 if value is not None:
                     provenance["source_manifest_sha256"] = value
                 output, error, consumers, _, _ = self.invoke(
@@ -956,6 +963,7 @@ with module.reproduction_workspace() as temporary:
 
     def test_changed_manifest_with_consistent_checksums_rejects_stale_provenance(self):
         provenance = {
+            **PROVENANCE_DECLARATIONS,
             "source_revision": "a" * 40,
             "source_manifest_sha256": hashlib.sha256(SOURCE_MANIFEST).hexdigest(),
         }
@@ -971,6 +979,7 @@ with module.reproduction_workspace() as temporary:
 
     def test_provenance_source_digests_reject_before_real_consumers(self):
         valid = {
+            **PROVENANCE_DECLARATIONS,
             "source_revision": "a" * 40,
             "source_manifest_sha256": hashlib.sha256(SOURCE_MANIFEST).hexdigest(),
             **provenance_sources(SOURCE_FILES),
@@ -1015,6 +1024,7 @@ with module.reproduction_workspace() as temporary:
         output, error, consumers, _, _ = self.invoke(
             provenance_bytes=json.dumps(
                 {
+                    **PROVENANCE_DECLARATIONS,
                     **sources,
                     "source_revision": "a" * 40,
                     "source_manifest_sha256": hashlib.sha256(SOURCE_MANIFEST).hexdigest(),
@@ -1026,6 +1036,44 @@ with module.reproduction_workspace() as temporary:
         self.assertIsNone(error)
         self.assertTrue(json.loads(output)["byte_identical_builds"])
         self.assertEqual(len(consumers), 2)
+
+    def test_provenance_declarations_reject_before_real_consumers(self):
+        valid = {
+            **PROVENANCE_DECLARATIONS,
+            **provenance_sources(SOURCE_FILES),
+            "source_revision": "a" * 40,
+            "source_manifest_sha256": hashlib.sha256(SOURCE_MANIFEST).hexdigest(),
+        }
+        false_claims = {
+            "builder": "different/builder.py",
+            "evidence": "signed hosted attestation",
+            "runtime_dependencies": "no runtime required",
+        }
+        for field, expected in PROVENANCE_DECLARATIONS.items():
+            for defect in (
+                "missing",
+                None,
+                True,
+                1,
+                [],
+                {},
+                "",
+                false_claims[field],
+                expected + "\n",
+            ):
+                with self.subTest(field=field, defect=defect):
+                    provenance = {**valid, field: defect}
+                    if defect == "missing":
+                        del provenance[field]
+                    output, error, consumers, _, _ = self.invoke(
+                        provenance_bytes=json.dumps(provenance).encode(),
+                        real_consumers=True,
+                        check_workspace=True,
+                    )
+                    self.assertIsInstance(error, ValueError)
+                    self.assertEqual(str(error), "release_provenance_invalid")
+                    self.assertEqual(output, "")
+                    self.assertEqual(consumers, [])
 
     def test_provenance_sources_require_model_but_allow_no_frozen_datasets(self):
         digest = hashlib.sha256(b"model fixture").hexdigest()

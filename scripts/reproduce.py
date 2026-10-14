@@ -68,7 +68,7 @@ def validate_artifacts(directory, manifest):
 
 
 def validate_provenance(payload, revision, manifest_sha256):
-    """Bind provenance to the verified revision and compared source manifest."""
+    """Bind local build declarations, revision and compared source manifest."""
 
     def unique_object(pairs):
         result = {}
@@ -86,6 +86,9 @@ def validate_provenance(payload, revision, manifest_sha256):
         not isinstance(provenance, dict)
         or provenance.get("source_revision") != revision
         or provenance.get("source_manifest_sha256") != manifest_sha256
+        or provenance.get("builder") != "scripts/release.py"
+        or provenance.get("evidence") != "local unsigned candidate; not hosted attestation"
+        or provenance.get("runtime_dependencies") != "Python 3.9+ standard library"
     ):
         raise ValueError("release_provenance_invalid")
     return provenance
