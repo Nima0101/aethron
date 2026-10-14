@@ -307,6 +307,25 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
                 or re.sub(r"[-_.]+", "_", names[0].lower()) != package_name.casefold()
             ):
                 raise ValueError("wheel_source_payload_mismatch")
+            # Version discovery trusts METADATA, not the directory's version.
+            # Bind the two before installation, including spread metadata. Use
+            # the existing build-tool dependency for PEP 440 equivalence rather
+            # than maintaining a second version parser. This lazy import keeps
+            # installed-source probes usable in dependency-free core venvs.
+            from packaging.version import Version
+
+            versions = metadata.get_all("Version", [])
+            if len(versions) != 1:
+                raise ValueError("wheel_source_payload_mismatch")
+            directory = member.filename.rsplit("/", 2)[-2]
+            directory_version = directory[: -len(".dist-info")].partition("-")[2]
+            try:
+                same_version = Version(versions[0]) == Version(directory_version)
+            except ValueError:
+                # Includes Python's integer digit limit for oversized segments.
+                raise ValueError("wheel_source_payload_mismatch") from None
+            if not same_version:
+                raise ValueError("wheel_source_payload_mismatch")
         for member in entry_points:
             parser = configparser.ConfigParser(interpolation=None, delimiters=("=",))
             parser.optionxform = str
