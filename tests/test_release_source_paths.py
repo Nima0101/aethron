@@ -31,6 +31,12 @@ WINDOWS_DEVICE_PATHS = tuple(
     for name in (device, device.lower() + ".txt", device + "/file.txt")
 )
 
+WINDOWS_PATH_ENDINGS = tuple(
+    name
+    for component in (b"file.", b"file ", b"file. ", b"file..", b"...", b" ", b".. ")
+    for name in (component, b"source/" + component, component + b"/file.txt")
+)
+
 INVALID_NAMES = (
     (
         b".",
@@ -46,6 +52,7 @@ INVALID_NAMES = (
     )
     + WINDOWS_COLON_NAMES
     + WINDOWS_DEVICE_PATHS
+    + WINDOWS_PATH_ENDINGS
 )
 
 
@@ -139,6 +146,11 @@ class ReleaseSourcePaths(unittest.TestCase):
             "COM⁴".encode(),
             b"_NUL",
             b"x.CON",
+            b"file.name",
+            b" leading",
+            b"file .txt",
+            "file\u00a0".encode(),
+            "file\uff0e".encode(),
         ):
             with self.subTest(name=name):
                 tree = self.tree(b"source", child=self.tree(name))
@@ -147,11 +159,11 @@ class ReleaseSourcePaths(unittest.TestCase):
                     {"source/" + name.decode(): b"synthetic payload\n"},
                 )
 
-    def test_archive_rejects_windows_drive_stream_and_device_names(self):
+    def test_archive_rejects_nonportable_windows_names(self):
         # Real, otherwise canonical archives must not qualify names rejected
         # before checkout inspection. No Windows filesystem access is needed.
         data = b"synthetic payload\n"
-        for raw in WINDOWS_COLON_NAMES + WINDOWS_DEVICE_PATHS:
+        for raw in WINDOWS_COLON_NAMES + WINDOWS_DEVICE_PATHS + WINDOWS_PATH_ENDINGS:
             with self.subTest(name=raw):
                 name = raw.decode()
                 manifest = json.dumps({name: hashlib.sha256(data).hexdigest()}).encode()

@@ -39,6 +39,11 @@ def _source_name(raw):
         or ":" in name
     ):
         raise ValueError("release_source_path_invalid")
+    # Match wheel admission for names that Windows can normalize to a
+    # different destination. Check directories too, without trimming names
+    # and silently changing the committed source inventory.
+    if any(part.endswith((".", " ")) for part in name.split("/")):
+        raise ValueError("release_source_path_invalid")
     # Apply the wheel validator's device-name rule to source archives too.
     # Windows reserves these in every directory, including with extensions;
     # reject before checkout access can resolve a name to a device.
