@@ -1,5 +1,6 @@
 """Build wheels twice and install into a fresh environment outside the source tree."""
 
+import base64
 import configparser
 import csv
 import email.parser
@@ -306,8 +307,9 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
             # inventory. A wheel must not claim files outside its admitted ZIP
             # members, even if its own source bytes match perfectly. Check exact
             # archive names (before spreading), not normalized installed names.
-            # This bounds ownership, not RECORD hash or completeness validation.
-            files = {item.filename for item in wheel.infolist() if not item.is_dir()}
+            # Present integrity declarations are verified too; inventory
+            # completeness remains a separate qualification boundary.
+            files = {item.filename: item for item in wheel.infolist() if not item.is_dir()}
             seen = set()
             try:
                 contents = wheel.read(member).decode("utf-8")
@@ -315,6 +317,9 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
                     if len(row) != 3 or row[0] not in files or row[0] in seen:
                         raise ValueError("wheel_source_payload_mismatch")
                     seen.add(row[0])
+                    if row[0] == member.filename and (row[1] or row[2]):
+                        raise ValueError("wheel_source_payload_mismatch")
+                    validate_record_integrity(wheel, files[row[0]], row[1], row[2])
             except (UnicodeError, csv.Error):
                 raise ValueError("wheel_source_payload_mismatch") from None
         for member in distribution_metadata:
@@ -372,6 +377,40 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
             raise ValueError("wheel_source_payload_mismatch")
         if any(wheel.read(member) != payload[name] for name, member in sources.items()):
             raise ValueError("wheel_source_payload_mismatch")
+
+
+def validate_record_integrity(wheel, member, declared_hash, declared_size):
+    """Check supplied RECORD fields against uncompressed archive contents."""
+    if declared_size and (
+        not re.fullmatch(r"[0-9]+", declared_size)
+        or (declared_size.lstrip("0") or "0") != str(member.file_size)
+    ):
+        raise ValueError("wheel_source_payload_mismatch")
+    if not declared_hash:
+        return
+    algorithm, separator, expected = declared_hash.partition("=")
+    # Portable fixed-length stdlib digests of at least 256 bits. Do not let
+    # platform OpenSSL aliases or variable-length SHAKE change admission.
+    if not separator or algorithm not in (
+        "sha256",
+        "sha384",
+        "sha512",
+        "sha3_256",
+        "sha3_384",
+        "sha3_512",
+        "blake2b",
+        "blake2s",
+    ):
+        raise ValueError("wheel_source_payload_mismatch")
+    digest = hashlib.new(algorithm)
+    # Hash resources as well as package sources, without another full payload
+    # allocation. ZIP reads also check the member's CRC at end-of-stream.
+    with wheel.open(member) as stream:
+        for chunk in iter(lambda: stream.read(65536), b""):
+            digest.update(chunk)
+    actual = base64.urlsafe_b64encode(digest.digest()).rstrip(b"=").decode("ascii")
+    if expected != actual:
+        raise ValueError("wheel_source_payload_mismatch")
 
 
 def installed_source_manifest(package_name="aethron", distribution="aethron"):
