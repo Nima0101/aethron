@@ -34,6 +34,7 @@ class PackageInputEvidence(unittest.TestCase):
         console_error=None,
         console_output="usage: aethron-edge\n",
         on_run=None,
+        on_process=None,
         on_exit=None,
         real_venv=False,
     ):
@@ -94,6 +95,8 @@ class PackageInputEvidence(unittest.TestCase):
             consumers = []
 
             def run(args, **kwargs):
+                if on_process is not None:
+                    on_process(args, kwargs)
                 if on_run is not None:
                     on_run(args)
                 if real_venv and args[1:3] == ["-m", "venv"]:
@@ -284,6 +287,77 @@ class PackageInputEvidence(unittest.TestCase):
 
     def test_report_identifies_checker_and_manifests(self):
         self.probe()
+
+    def test_package_timeouts_stop_pipeline_and_retain_evidence(self):
+        # Four builds, environment creation, dependency install, wheel install.
+        for fail_at in range(1, 8):
+            with self.subTest(stage=fail_at):
+                self.check_package_timeout(fail_at)
+
+    def test_real_stalled_package_children_are_reaped(self):
+        for fail_at in (1, 5, 6, 7):
+            with self.subTest(stage=fail_at):
+                self.check_package_timeout(fail_at, real_child=True)
+
+    def check_package_timeout(self, fail_at, real_child=False):
+        execute, spawn = subprocess.run, subprocess.Popen
+        calls, children, failures = [], [], []
+        diagnostics = io.StringIO()
+
+        def record_child(*args, **kwargs):
+            child = spawn(*args, **kwargs)
+            children.append(child)
+            return child
+
+        def on_process(args, kwargs):
+            calls.append(args)
+            if len(calls) != fail_at:
+                return
+            timeout = kwargs.get("timeout")
+            self.assertIsInstance(timeout, (int, float))
+            self.assertGreater(timeout, 0)
+            self.assertLessEqual(timeout, 180)
+            if real_child:
+                # Keep the real run/kill/wait behavior, with a short test budget.
+                with patch.object(checker.subprocess, "Popen", record_child):
+                    try:
+                        execute(
+                            [sys.executable, "-I", "-c", "import time; time.sleep(60)"],
+                            **dict(kwargs, timeout=0.2),
+                        )
+                    except subprocess.TimeoutExpired as error:
+                        failures.append(error)
+                        raise
+                self.fail("stalled child returned without a timeout")
+            failure = subprocess.TimeoutExpired(
+                args, timeout, output=b"partial output", stderr=b"diagnostic"
+            )
+            failures.append(failure)
+            raise failure
+
+        def on_exit(output, printed):
+            self.assertTrue(output.is_dir())
+            self.assertFalse((output / "result.json").exists())
+            self.assertEqual(printed.getvalue(), "")
+            if fail_at > 1:
+                self.assertTrue(list(output.glob("*/*.whl")), "earlier wheels were deleted")
+            if fail_at >= 5:
+                workspace = Path(calls[4][-1]).parent
+                self.assertTrue(workspace.is_dir(), "failed install workspace was deleted")
+                self.assertEqual(workspace.parent, output)
+                self.assertIn(str(workspace), diagnostics.getvalue())
+
+        with redirect_stderr(diagnostics), self.assertRaises(subprocess.TimeoutExpired) as raised:
+            self.probe(on_process=on_process, on_exit=on_exit)
+        self.assertEqual(len(calls), fail_at, "no retry or later consumer after expiry")
+        self.assertEqual(len(failures), 1)
+        self.assertIs(raised.exception, failures[0])
+        if real_child:
+            self.assertEqual(len(children), 1)
+            self.assertIsNotNone(children[0].poll(), "timed-out direct child was not reaped")
+        else:
+            self.assertEqual(raised.exception.output, b"partial output")
+            self.assertEqual(raised.exception.stderr, b"diagnostic")
 
     def test_parent_python_settings_do_not_redirect_venv_creation(self):
         with tempfile.TemporaryDirectory() as directory:

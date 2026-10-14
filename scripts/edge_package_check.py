@@ -93,6 +93,8 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
     for variable in ("PYTHONPATH", "PYTHONHOME"):
         env.pop(variable, None)
     hashes = {}
+    # Match core packaging's per-child build/install budget. This is not a
+    # whole-run deadline or a guarantee of descendant-process cleanup.
     for lane in ("a", "b"):
         for project in (ROOT, ROOT / "integrations/edge"):
             subprocess.run(
@@ -109,6 +111,7 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                 check=True,
                 env=env,
                 stdout=subprocess.DEVNULL,
+                timeout=180,
             )
     # Admit both inventories before reading bytes or starting installed consumers.
     first = wheel_inventory(output / "a")
@@ -137,7 +140,12 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
         prefix="aethron-installed-", dir=output.resolve()
     ) as temporary:
         work = Path(temporary)
-        subprocess.run([sys.executable, "-m", "venv", str(work / "venv")], env=env, check=True)
+        subprocess.run(
+            [sys.executable, "-m", "venv", str(work / "venv")],
+            env=env,
+            check=True,
+            timeout=180,
+        )
         python = work / "venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
         subprocess.run(
             [
@@ -155,6 +163,7 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
             check=True,
             env=env,
             stdout=subprocess.DEVNULL,
+            timeout=180,
         )
         subprocess.run(
             [
@@ -174,6 +183,7 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
             check=True,
             env=env,
             stdout=subprocess.DEVNULL,
+            timeout=180,
         )
         for distribution, flag in (
             ("aethron", "--installed-payload"),
