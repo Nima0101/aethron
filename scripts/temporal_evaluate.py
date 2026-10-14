@@ -115,7 +115,8 @@ def outputs(entries):
     raw = b"\n".join(encode(e["frame"]) for e in entries) + b"\n"
     a = list(replay(io.BytesIO(raw)))
     b = list(replay(io.BytesIO(raw)))
-    assert a == b, "nondeterministic replay"
+    if a != b:
+        raise AssertionError("nondeterministic replay")
     baseline = Greedy()
     return a, [baseline.step(e["frame"]) for e in entries]
 
@@ -128,7 +129,8 @@ def recorded(outdir):
     registered = 0
     for item in manifest["frames"]:
         data = (ROOT / "data/aot" / item["file"]).read_bytes()
-        assert hashlib.sha256(data).hexdigest() == item["sha256"]
+        if hashlib.sha256(data).hexdigest() != item["sha256"]:
+            raise AssertionError
         start = time.perf_counter()
         ds = detect_pgm(data)  # Truth is deliberately never an argument to the detector.
         elapsed.append((time.perf_counter() - start) * 1000)
@@ -171,6 +173,8 @@ def recorded(outdir):
 
 
 def benchmark():
+    if tracemalloc.is_tracing():
+        raise ValueError("tracing_already_active")
     inputs = []
     for i in range(100):
         ds = [
@@ -181,21 +185,34 @@ def benchmark():
     s = Session()
     timings = []
     cpu_timings = []
-    for i, data in enumerate(inputs):
-        start = time.perf_counter()
-        cpu_start = time.process_time()
-        r = s.step(data, now_ms=i * 100)
-        timings.append((time.perf_counter() - start) * 1000)
-        cpu_timings.append((time.process_time() - cpu_start) * 1000)
-        assert len(r["tracks"]) == 32
-    s.close()
-    tracemalloc.start()
-    s = Session()
-    for i, data in enumerate(inputs):
-        s.step(data, now_ms=i * 100)
-    _, peak = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
-    s.close()
+    try:
+        for i, data in enumerate(inputs):
+            start = time.perf_counter()
+            cpu_start = time.process_time()
+            r = s.step(data, now_ms=i * 100)
+            timings.append((time.perf_counter() - start) * 1000)
+            cpu_timings.append((time.process_time() - cpu_start) * 1000)
+            if len(r["tracks"]) != 32:
+                raise AssertionError
+    finally:
+        s.close()
+    s = None
+    tracing_started = False
+    try:
+        tracemalloc.start()
+        tracing_started = True
+        # Keep construction inside the original traced measurement scope.
+        s = Session()
+        for i, data in enumerate(inputs):
+            s.step(data, now_ms=i * 100)
+        _, peak = tracemalloc.get_traced_memory()
+    finally:
+        try:
+            if tracing_started:
+                tracemalloc.stop()
+        finally:
+            if s is not None:
+                s.close()
     p95 = sorted(timings)[94]
     report = {
         "frames": 100,
@@ -223,12 +240,14 @@ def run(outdir, include_recorded=True):
             "greedy_iou": metrics(entries, baseline),
         }
         if path.stem in ("fast_uav", "occlusion"):
-            assert (
+            if not (
                 reports[path.stem]["temporal"]["id_switches"]
                 <= reports[path.stem]["greedy_iou"]["id_switches"]
-            )
+            ):
+                raise AssertionError
         if path.stem == "clean":
-            assert reports[path.stem]["temporal"]["recall"] >= 0.9
+            if not reports[path.stem]["temporal"]["recall"] >= 0.9:
+                raise AssertionError
     report = {
         "protocol": "matrix-v3.md frozen T09/T10/T13",
         "runtime_sha256": {
@@ -247,7 +266,8 @@ def run(outdir, include_recorded=True):
         json.dumps(report, sort_keys=True, indent=2) + "\n"
     )
     print(json.dumps(report, sort_keys=True))
-    assert report["benchmark"]["passed"], report["benchmark"]
+    if not report["benchmark"]["passed"]:
+        raise AssertionError(report["benchmark"])
     return report
 
 
