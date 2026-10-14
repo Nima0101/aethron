@@ -50,6 +50,10 @@ class CorePackagePayload(unittest.TestCase):
                 records.append(("unexpected.pth", b"import sys\n"))
             elif defect == "bytecode":
                 records.append(("aethron/retired.pyc", b"unchecked bytecode\n"))
+            elif defect == "startup-module":
+                records.append(("sitecustomize.py", b"import sys\n"))
+            elif defect == "startup-package":
+                records.append(("sitecustomize/__init__.py", b"import sys\n"))
             elif defect and defect.startswith("spread-"):
                 _, scheme, kind = defect.split("-")
                 name = "aethron/retired.py" if kind == "extra" else records[0][0]
@@ -110,6 +114,59 @@ class CorePackagePayload(unittest.TestCase):
 
     def test_bytecode_is_rejected_before_installation(self):
         self.check_payload("bytecode")
+
+    def test_startup_modules_are_rejected_before_installation(self):
+        for defect in ("startup-module", "startup-package"):
+            with self.subTest(defect=defect):
+                self.check_payload(defect)
+
+    def test_startup_modules_reject_before_source_reads_for_core_and_edge(self):
+        for package in ("aethron", "aethron_edge"):
+            name = f"{package}/module.py"
+            payload = {name: b"VALUE = 1\n"}
+            for prefix in ("", f"{package}-0.2.0.data/purelib/", f"{package}-0.2.0.data/platlib/"):
+                for module in ("sitecustomize", "usercustomize", "SiteCustomize", "USERCUSTOMIZE"):
+                    for suffix in (".py", "/__init__.py", ".abi3.so", ".cp313-win_amd64.pyd"):
+                        with self.subTest(
+                            package=package, prefix=prefix, module=module, suffix=suffix
+                        ):
+                            archive = io.BytesIO()
+                            with zipfile.ZipFile(archive, "w") as wheel:
+                                wheel.writestr(name, payload[name])
+                                wheel.writestr(
+                                    prefix + module + suffix, b"unchecked startup module"
+                                )
+                            with (
+                                patch.object(
+                                    zipfile.ZipFile,
+                                    "read",
+                                    side_effect=AssertionError(
+                                        "source read before startup rejection"
+                                    ),
+                                ),
+                                self.assertRaisesRegex(ValueError, "wheel_source_payload_mismatch"),
+                            ):
+                                package_check.validate_source_payload(
+                                    archive.getvalue(), payload, package
+                                )
+
+    def test_nested_customization_sources_and_unrelated_resources_remain_allowed(self):
+        for package in ("aethron", "aethron_edge"):
+            payload = {
+                f"{package}/__init__.py": b"",
+                f"{package}/sitecustomize.py": b"# ordinary nested module\n",
+                f"{package}/usercustomize/__init__.py": b"# ordinary nested package\n",
+            }
+            for prefix in ("", f"{package}-0.2.0.data/purelib/", f"{package}-0.2.0.data/platlib/"):
+                with self.subTest(package=package, prefix=prefix):
+                    archive = io.BytesIO()
+                    with zipfile.ZipFile(archive, "w") as wheel:
+                        for name, data in payload.items():
+                            wheel.writestr(prefix + name, data)
+                        wheel.writestr(prefix + "sitecustomize.txt", b"documentation")
+                        wheel.writestr(prefix + "usercustomize_example.py", b"# unrelated module\n")
+                        wheel.writestr(f"{package}-0.2.0.dist-info/sitecustomize.py", b"resource")
+                    package_check.validate_source_payload(archive.getvalue(), payload, package)
 
     def test_bytecode_rejects_before_source_reads_for_core_and_edge(self):
         for package in ("aethron", "aethron_edge"):

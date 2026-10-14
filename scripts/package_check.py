@@ -109,6 +109,19 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
             # package resources and directory records are not startup hooks.
             if not member.is_dir() and "/" not in name and name.casefold().endswith(".pth"):
                 raise ValueError("wheel_source_payload_mismatch")
+            # Python also imports sitecustomize (even with -I) and, when user
+            # sites are enabled, usercustomize before the consumer can inspect
+            # installed sources. Neither distribution declares these hooks.
+            # Reserve their top-level package names and source/native modules
+            # across supported platforms; nested package modules are ordinary
+            # sources and still participate in payload parity below.
+            top = name.split("/", 1)[0].casefold()
+            startup_modules = ("sitecustomize", "usercustomize")
+            if top in startup_modules or (
+                top.split(".", 1)[0] in startup_modules
+                and top.endswith((".py", ".pyc", ".so", ".pyd"))
+            ):
+                raise ValueError("wheel_source_payload_mismatch")
             # These portable source wheels must not supply executable bytecode
             # outside source parity. In particular, a sourceless .pyc module can
             # be imported without appearing in either source manifest. Installers
