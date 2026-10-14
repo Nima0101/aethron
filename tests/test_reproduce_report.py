@@ -2247,3 +2247,91 @@ with module.reproduction_workspace() as temporary:
                 self.assertEqual(len(probes), 10)
                 self.assertEqual(len(consumers), 2)
                 self.assertIs(json.loads(output)["quickstart"], True)
+
+    def test_user_site_hooks_cannot_skip_checks_or_hide_child_failures(self):
+        python = getattr(sys, "_base_executable", sys.executable)
+        real_run = subprocess.run
+        for hook in ("sitecustomize.py", "usercustomize.py", "probe.pth"):
+            for status in (0, 7):
+                with (
+                    self.subTest(hook=hook, status=status),
+                    tempfile.TemporaryDirectory() as directory,
+                ):
+                    root = Path(directory)
+                    env = dict(os.environ, PYTHONUSERBASE=str(root / "user-base"))
+                    for name in ("PYTHONHOME", "PYTHONPATH", "PYTHONNOUSERSITE"):
+                        env.pop(name, None)
+                    site = Path(
+                        subprocess.check_output(
+                            [python, "-S", "-c", "import site; print(site.getusersitepackages())"],
+                            env=env,
+                            text=True,
+                            timeout=10,
+                        ).strip()
+                    )
+                    site.relative_to(root)
+                    site.mkdir(parents=True)
+                    (site / hook).write_text("import os; os._exit(0)\n", encoding="utf-8")
+                    control = real_run(
+                        [python, "-c", "print('executed')"],
+                        env=env,
+                        capture_output=True,
+                        text=True,
+                        check=True,
+                        timeout=10,
+                    )
+                    self.assertEqual(control.stdout, "", "negative control must run the hook")
+                    observations = []
+                    attempts = []
+
+                    def child(
+                        args,
+                        kwargs,
+                        workspace,
+                        status=status,
+                        observations=observations,
+                        attempts=attempts,
+                    ):
+                        # Exercise each actual stage's startup environment with a
+                        # real child; product builds remain the existing fixture.
+                        attempts.append(args)
+                        isolated = ["-I"] if args[1:2] == ["-I"] else []
+                        result = real_run(
+                            [
+                                python,
+                                *isolated,
+                                "-c",
+                                "import site, sys; assert not site.ENABLE_USER_SITE; "
+                                "print('executed', flush=True); sys.exit(int(sys.argv[1]))",
+                                str(status),
+                            ],
+                            cwd=kwargs["cwd"],
+                            env=kwargs["env"],
+                            capture_output=True,
+                            text=True,
+                            check=kwargs.get("check", False),
+                            timeout=10,
+                        )
+                        observations.append(result.stdout)
+
+                    def inspect(workspace, diagnostics, status=status):
+                        self.assertEqual(workspace.exists(), bool(status))
+                        if status:
+                            self.assertIn(str(workspace), diagnostics)
+
+                    with patch.dict(os.environ, env, clear=True):
+                        output, error, consumers, _, _ = self.invoke(
+                            python_child=child, inspect_workspace=inspect
+                        )
+                        self.assertEqual(dict(os.environ), env)
+                    if status:
+                        self.assertIsInstance(error, subprocess.CalledProcessError)
+                        self.assertEqual(error.returncode, status)
+                        self.assertEqual(error.stdout, "executed\n")
+                        self.assertEqual(output, "")
+                        self.assertEqual(consumers, [])
+                        self.assertEqual(len(attempts), 1, "failed verification must stop here")
+                    else:
+                        self.assertIsNone(error)
+                        self.assertIs(json.loads(output)["quickstart"], True)
+                        self.assertEqual(observations, ["executed\n"] * 10)

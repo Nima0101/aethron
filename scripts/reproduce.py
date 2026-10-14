@@ -551,8 +551,10 @@ def reproduction_workspace(*, prefix="aethron-clean-", dir=None):
 
 def run():
     _require_git_context()
-    # Exercise the clone with the selected interpreter, not caller import overrides.
-    env = dict(os.environ)
+    # Match edge reproduction: user-site startup hooks can exit successfully
+    # before verification runs. Retain the selected interpreter's tooling while
+    # disabling user-site hooks and caller import overrides in child processes.
+    env = dict(os.environ, PYTHONNOUSERSITE="1")
     env.pop("PYTHONHOME", None)
     env.pop("PYTHONPATH", None)
     with reproduction_workspace() as temporary:
