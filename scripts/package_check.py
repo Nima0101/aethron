@@ -21,6 +21,16 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE_SUFFIXES = (".py", ".pxd", ".json")
 
 
+def wheel_paths(directory):
+    """Admit wheel inventories before payload reads or installed consumers."""
+    if directory.is_symlink() or not directory.is_dir():
+        raise ValueError("wheel_artifacts_changed")
+    paths = sorted(directory.glob("*.whl"))
+    if any(path.is_symlink() or not path.is_file() for path in paths):
+        raise ValueError("wheel_artifacts_changed")
+    return paths
+
+
 def snapshot_source_payload(root, package_name="aethron"):
     payload = {}
     package = root / package_name
@@ -91,8 +101,8 @@ def run():
                 check=True,
                 stdout=subprocess.DEVNULL,
             )
-        first = sorted((temp / "a").glob("*.whl"))
-        second = sorted((temp / "b").glob("*.whl"))
+        first = wheel_paths(temp / "a")
+        second = wheel_paths(temp / "b")
         if len(first) != 1 or len(second) != 1 or first[0].name != second[0].name:
             raise ValueError("wheel_inventory_mismatch")
         a, b = first[0], second[0]
@@ -184,9 +194,7 @@ def run():
         # Consumers must not invalidate the artifacts qualified by the comparison.
         # Keep the original digest; never re-label replacement bytes as verified.
         for wheel in (a, b):
-            if sorted(wheel.parent.glob("*.whl")) != [wheel]:
-                raise ValueError("wheel_artifacts_changed")
-            if wheel.is_symlink() or not wheel.is_file():
+            if wheel_paths(wheel.parent) != [wheel]:
                 raise ValueError("wheel_artifacts_changed")
             if wheel.read_bytes() != compared_bytes:
                 raise ValueError("wheel_artifacts_changed")

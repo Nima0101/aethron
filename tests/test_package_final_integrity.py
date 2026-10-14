@@ -65,6 +65,14 @@ class PackageFinalIntegrityTests(unittest.TestCase):
                         (builds[lane] / "extra.whl").write_bytes(wheel_bytes)
                     elif mutation == "renamed":
                         wheel.rename(builds[lane] / "renamed.whl")
+                    elif mutation == "linked_wheel":
+                        target = builds[lane].parent / "external-wheel"
+                        wheel.rename(target)
+                        wheel.symlink_to(target)
+                    elif mutation == "linked_directory":
+                        target = builds[lane].parent / "external-build"
+                        builds[lane].rename(target)
+                        builds[lane].symlink_to(target, target_is_directory=True)
                 row = {"tracks": [{"id": "fixture", "sources": ["depth", "lwir", "radar"]}]}
                 return subprocess.CompletedProcess(
                     args, 0, stdout="\n".join([json.dumps(row)] * 24)
@@ -92,6 +100,13 @@ class PackageFinalIntegrityTests(unittest.TestCase):
 
     def test_consumer_time_artifact_changes_prevent_success(self):
         for lane in ("a", "b"):
-            for mutation in ("changed", "missing", "extra", "renamed"):
+            for mutation in (
+                "changed",
+                "missing",
+                "extra",
+                "renamed",
+                "linked_wheel",
+                "linked_directory",
+            ):
                 with self.subTest(lane=lane, mutation=mutation):
                     self.run_checker(lane, mutation)
