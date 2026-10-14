@@ -206,6 +206,19 @@ def validate_source_archive(payload, manifest_payload):
                         member.mtime,
                     ) != (0o644, 0, 0, "", "", 0):
                         raise ValueError("invalid archive metadata")
+                    # tarfile silently consumes PAX/GNU extension records and
+                    # ignores unused header fields. Admit exactly one normalized
+                    # USTAR header per member, as emitted by the release writer.
+                    # Build it from admitted fields, not parsed auxiliary data.
+                    header = tarfile.TarInfo(member.name)
+                    header.size = member.size
+                    header.mode = 0o644
+                    header.mtime = 0
+                    compressed.seek(end_offset)
+                    if member.offset_data != end_offset + tarfile.BLOCKSIZE or compressed.read(
+                        tarfile.BLOCKSIZE
+                    ) != header.tobuf(tarfile.USTAR_FORMAT):
+                        raise ValueError("invalid archive header")
                     seen.add(member.name)
                     digest = hashlib.sha256()
                     with archive.extractfile(member) as stream:

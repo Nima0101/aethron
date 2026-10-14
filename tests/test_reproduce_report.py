@@ -242,6 +242,43 @@ def source_archive(defect=None, *, files=None, metadata=None):
             member.size = len(data)
             archive.addfile(member, io.BytesIO(data))
     raw = buffer.getvalue()
+    if defect in ("tar-pax-local", "tar-pax-global", "tar-gnu-name", "tar-gnu-link"):
+        # These records are consumed by tarfile without appearing as members.
+        # Their payload is therefore absent from the source-manifest hashes.
+        if defect.startswith("tar-pax"):
+            extension = tarfile.TarInfo.create_pax_global_header(
+                {"comment": "unverified extension payload"}
+            )
+            if defect == "tar-pax-local":
+                header = tarfile.TarInfo.frombuf(extension[:512], "utf-8", "strict")
+                header.type = tarfile.XHDTYPE
+                extension = header.tobuf(tarfile.USTAR_FORMAT) + extension[512:]
+        else:
+            data = (
+                b"aethron-0.2.0/source.txt\x00"
+                if defect == "tar-gnu-name"
+                else b"unverified-link\x00"
+            )
+            header = tarfile.TarInfo("././@LongLink")
+            header.type = (
+                tarfile.GNUTYPE_LONGNAME if defect == "tar-gnu-name" else tarfile.GNUTYPE_LONGLINK
+            )
+            header.size = len(data)
+            extension = header.tobuf(tarfile.GNU_FORMAT) + data + b"\x00" * (-len(data) % 512)
+        raw = extension + raw
+    if defect in ("tar-header-tail", "tar-name-tail", "tar-link-field", "tar-gnu-header"):
+        header = bytearray(raw[:512])
+        if defect == "tar-header-tail":
+            header[500:504] = b"data"
+        elif defect == "tar-name-tail":
+            header[90:94] = b"data"
+        elif defect == "tar-link-field":
+            header[157:161] = b"data"
+        else:
+            header[257:265] = b"ustar  \x00"
+        header[148:156] = b"        "
+        header[148:156] = f"{sum(header):06o}\x00 ".encode()
+        raw = bytes(header) + raw[512:]
     if defect in (
         "tar-padding-first",
         "tar-padding-last",
@@ -1155,6 +1192,40 @@ with module.reproduction_workspace() as temporary:
                     reproduce.validate_source_archive(gzip.compress(payload, mtime=0), manifest),
                     json.loads(manifest),
                 )
+
+    def test_source_tar_unmanifested_headers_reject_before_consumers(self):
+        for defect in (
+            "tar-pax-local",
+            "tar-pax-global",
+            "tar-gnu-name",
+            "tar-gnu-link",
+            "tar-header-tail",
+            "tar-name-tail",
+            "tar-link-field",
+            "tar-gnu-header",
+        ):
+            with self.subTest(defect=defect):
+                output, error, consumers, _, _ = self.invoke(
+                    archive_defect=defect, check_workspace=True, real_consumers=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_source_archive_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_source_ustar_long_prefix_and_unicode_remain_valid(self):
+        files = {
+            "directory/" * 12 + "long-file.bin": b"\x00\xffbinary",
+            "caf\u00e9.txt": b"utf-8 name",
+            "empty": b"",
+        }
+        manifest = json.dumps(
+            {name: hashlib.sha256(data).hexdigest() for name, data in files.items()}
+        ).encode()
+        self.assertEqual(
+            reproduce.validate_source_archive(source_archive(files=files), manifest),
+            json.loads(manifest),
+        )
 
     def test_identical_zip_defects_reject_before_consumers(self):
         for defect in (
