@@ -5,6 +5,7 @@ import importlib.metadata
 import io
 import json
 import os
+import stat
 import subprocess
 import sys
 import zipfile
@@ -44,11 +45,24 @@ def wheel_paths(directory):
     return paths
 
 
+def reject_source_redirect(path):
+    # is_symlink alone misses Windows junctions. Match the verifier's reparse
+    # admission using lstat, available at the supported Python 3.9 floor.
+    # This assumes a stable tree, not protection from concurrent replacement.
+    try:
+        info = path.lstat()
+    except FileNotFoundError:
+        return  # The caller retains its existing missing/empty-source error.
+    if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & getattr(
+        stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0
+    ):
+        raise ValueError("invalid_source_payload_file")
+
+
 def snapshot_source_payload(root, package_name="aethron"):
     payload = {}
     package = root / package_name
-    if package.is_symlink():
-        raise ValueError("invalid_source_payload_file")
+    reject_source_redirect(package)
     if not package.exists():
         raise ValueError("empty_source_payload")
 
@@ -58,14 +72,16 @@ def snapshot_source_payload(root, package_name="aethron"):
     for directory, directories, files in os.walk(package, onerror=unreadable):
         for name in directories:
             path = Path(directory) / name
-            if path.is_symlink() or path.suffix.casefold() in SOURCE_SUFFIXES:
+            reject_source_redirect(path)
+            if path.suffix.casefold() in SOURCE_SUFFIXES:
                 raise ValueError("invalid_source_payload_file")
         for name in files:
             path = Path(directory) / name
             # Match wheel admission on every host, preserving the actual name
             # and bytes for both prebuild and installed-payload comparisons.
             if path.suffix.casefold() in SOURCE_SUFFIXES:
-                if path.is_symlink() or not path.is_file():
+                reject_source_redirect(path)
+                if not path.is_file():
                     raise ValueError("invalid_source_payload_file")
                 payload[path.relative_to(root).as_posix()] = path.read_bytes()
     if not payload:
