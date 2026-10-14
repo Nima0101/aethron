@@ -178,7 +178,10 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
         assert compared_bytes == second[name].read_bytes(), "nonreproducible wheel"
         distribution = parse_wheel_filename(name)[0]
         package_check.validate_source_payload(
-            compared_bytes, payloads[distribution], distribution.replace("-", "_")
+            compared_bytes,
+            payloads[distribution],
+            distribution.replace("-", "_"),
+            wheel_filename=name,
         )
         hashes[wheel.name] = hashlib.sha256(compared_bytes).hexdigest()
     # Keep failed installed-consumer evidence with this attempt's persistent wheels.

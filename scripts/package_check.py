@@ -124,7 +124,20 @@ def snapshot_source_payload(root, package_name="aethron"):
     return payload
 
 
-def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
+def validate_source_payload(wheel_bytes, payload, package_name="aethron", *, wheel_filename=None):
+    expected_version = None
+    if wheel_filename is not None:
+        # The installer can accept a filename version different from METADATA
+        # and its dist-info directory. Bind present metadata to the artifact
+        # actually selected for installation, using the build tools' parser.
+        from packaging.utils import canonicalize_name, parse_wheel_filename
+
+        try:
+            distribution, expected_version, _, _ = parse_wheel_filename(wheel_filename)
+        except ValueError:
+            raise ValueError("wheel_source_payload_mismatch") from None
+        if distribution != canonicalize_name(package_name):
+            raise ValueError("wheel_source_payload_mismatch")
     with zipfile.ZipFile(io.BytesIO(wheel_bytes)) as wheel:
         sources = {}
         file_destinations = set()
@@ -379,7 +392,10 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
             directory = member.filename.rsplit("/", 2)[-2]
             directory_version = directory[: -len(".dist-info")].partition("-")[2]
             try:
-                same_version = Version(versions[0]) == Version(directory_version)
+                version = Version(versions[0])
+                same_version = version == Version(directory_version) and (
+                    expected_version is None or version == expected_version
+                )
             except ValueError:
                 # Includes Python's integer digit limit for oversized segments.
                 raise ValueError("wheel_source_payload_mismatch") from None
@@ -490,7 +506,7 @@ def run():
         a, b = first[0], second[0]
         compared_bytes = a.read_bytes()
         assert compared_bytes == b.read_bytes(), "wheel builds differ"
-        validate_source_payload(compared_bytes, source_payload)
+        validate_source_payload(compared_bytes, source_payload, wheel_filename=a.name)
         source_manifest = {
             name: hashlib.sha256(data).hexdigest() for name, data in source_payload.items()
         }
