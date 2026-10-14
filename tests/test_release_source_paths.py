@@ -22,18 +22,31 @@ WINDOWS_COLON_NAMES = (
     b"file::$DATA",
 )
 
+WINDOWS_DEVICE_NAMES = ("CON", "PRN", "AUX", "NUL") + tuple(
+    prefix + digit for prefix in ("COM", "LPT") for digit in "123456789¹²³"
+)
+WINDOWS_DEVICE_PATHS = tuple(
+    name.encode("utf-8")
+    for device in WINDOWS_DEVICE_NAMES
+    for name in (device, device.lower() + ".txt", device + "/file.txt")
+)
+
 INVALID_NAMES = (
-    b".",
-    b"..",
-    b"/outside",
-    b"a/../outside",
-    b"a/./file",
-    b"a//file",
-    b"a/",
-    b"a\\file",
-    b"..\\outside",
-    b"bad-\xff",
-) + WINDOWS_COLON_NAMES
+    (
+        b".",
+        b"..",
+        b"/outside",
+        b"a/../outside",
+        b"a/./file",
+        b"a//file",
+        b"a/",
+        b"a\\file",
+        b"..\\outside",
+        b"bad-\xff",
+    )
+    + WINDOWS_COLON_NAMES
+    + WINDOWS_DEVICE_PATHS
+)
 
 
 class ReleaseSourcePaths(unittest.TestCase):
@@ -111,7 +124,22 @@ class ReleaseSourcePaths(unittest.TestCase):
                 self.assertFalse(destination.exists())
 
     def test_valid_names_preserve_exact_bytes(self):
-        for name in (b".hidden", b"two words", b"tab\tline\n", "café.txt".encode()):
+        for name in (
+            b".hidden",
+            b"two words",
+            b"tab\tline\n",
+            "café.txt".encode(),
+            b"console",
+            b"auxiliary",
+            b"null",
+            b"COM0",
+            b"COM10",
+            b"LPT0",
+            b"LPT10",
+            "COM⁴".encode(),
+            b"_NUL",
+            b"x.CON",
+        ):
             with self.subTest(name=name):
                 tree = self.tree(b"source", child=self.tree(name))
                 self.assertEqual(
@@ -119,11 +147,11 @@ class ReleaseSourcePaths(unittest.TestCase):
                     {"source/" + name.decode(): b"synthetic payload\n"},
                 )
 
-    def test_archive_rejects_windows_drive_and_stream_names(self):
+    def test_archive_rejects_windows_drive_stream_and_device_names(self):
         # Real, otherwise canonical archives must not qualify names rejected
         # before checkout inspection. No Windows filesystem access is needed.
         data = b"synthetic payload\n"
-        for raw in WINDOWS_COLON_NAMES:
+        for raw in WINDOWS_COLON_NAMES + WINDOWS_DEVICE_PATHS:
             with self.subTest(name=raw):
                 name = raw.decode()
                 manifest = json.dumps({name: hashlib.sha256(data).hexdigest()}).encode()

@@ -17,6 +17,10 @@ else:
     from git_context import GIT_COMMAND_TIMEOUT_SECONDS, require_default_git_context
 
 ROOT = Path(__file__).resolve().parents[1]
+WINDOWS_DEVICE_NAMES = frozenset(
+    ("CON", "PRN", "AUX", "NUL")
+    + tuple(prefix + digit for prefix in ("COM", "LPT") for digit in "123456789¹²³")
+)
 
 
 def _source_name(raw):
@@ -34,6 +38,11 @@ def _source_name(raw):
         or "\x00" in name
         or ":" in name
     ):
+        raise ValueError("release_source_path_invalid")
+    # Apply the wheel validator's device-name rule to source archives too.
+    # Windows reserves these in every directory, including with extensions;
+    # reject before checkout access can resolve a name to a device.
+    if any(part.split(".", 1)[0].upper() in WINDOWS_DEVICE_NAMES for part in name.split("/")):
         raise ValueError("release_source_path_invalid")
     return name
 

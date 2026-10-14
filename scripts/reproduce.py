@@ -287,6 +287,10 @@ def _validate_gzip_metadata(payload):
 
 def validate_source_archive(payload, manifest_payload):
     """Inspect the compared TAR bytes without extracting files or following links."""
+    if __package__:
+        from .release import _source_name
+    else:
+        from release import _source_name
 
     def unique_object(pairs):
         result = {}
@@ -301,13 +305,10 @@ def validate_source_archive(payload, manifest_payload):
         if not isinstance(manifest, dict) or not manifest:
             raise ValueError("invalid manifest")
         for name, digest in manifest.items():
+            # Use the builder's path admission on every validation host too.
+            _source_name(name.encode("utf-8"))
             if (
-                any(part in ("", ".", "..") for part in name.split("/"))
-                or "\\" in name
-                or "\x00" in name
-                # Match release-source admission for Windows drives/streams.
-                or ":" in name
-                or not isinstance(digest, str)
+                not isinstance(digest, str)
                 or len(digest) != 64
                 or any(char not in "0123456789abcdef" for char in digest)
             ):
