@@ -137,9 +137,7 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
         distribution: {name: hashlib.sha256(data).hexdigest() for name, data in payload.items()}
         for distribution, payload in payloads.items()
     }
-    env = dict(os.environ, SOURCE_DATE_EPOCH="1767225600", PIP_DISABLE_PIP_VERSION_CHECK="1")
-    for variable in ("PYTHONPATH", "PYTHONHOME"):
-        env.pop(variable, None)
+    env = package_check.packaging_environment()
     hashes = {}
     # Match core packaging's per-child build/install budget. This is not a
     # whole-run deadline or a guarantee of descendant-process cleanup.

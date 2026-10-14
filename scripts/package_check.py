@@ -47,6 +47,26 @@ def reproduction_workspace(**kwargs):
     return workspace(**kwargs)
 
 
+def packaging_environment():
+    """Use only the verifier's explicit pip inputs in child processes."""
+    env = {
+        name: value
+        for name, value in os.environ.items()
+        if not name.upper().startswith("PIP_") and name.upper() not in ("PYTHONPATH", "PYTHONHOME")
+    }
+    # --no-index alone does not disable extra find-links/requirements or install
+    # destinations. --isolated still reads site/global configuration. Disable
+    # all config files using pip's documented null-device setting, and remove
+    # inherited option variables without mutating the caller's environment.
+    env.update(
+        SOURCE_DATE_EPOCH="1767225600",
+        PYTHONNOUSERSITE="1",
+        PIP_CONFIG_FILE=os.devnull,
+        PIP_DISABLE_PIP_VERSION_CHECK="1",
+    )
+    return env
+
+
 def wheel_paths(directory):
     """Admit wheel inventories before payload reads or installed consumers."""
     reject_path_redirect(directory, "wheel_artifacts_changed")
@@ -445,11 +465,7 @@ def run():
     with reproduction_workspace(prefix="aethron-wheel-") as directory:
         temp = Path(directory)
         source_payload = snapshot_source_payload(ROOT)
-        env = dict(os.environ, SOURCE_DATE_EPOCH="1767225600", PYTHONNOUSERSITE="1")
-        # Apply the same import environment to builds, installation and consumers.
-        # Inherited interpreter paths must not redirect venv or pip execution.
-        for variable in ("PYTHONPATH", "PYTHONHOME"):
-            env.pop(variable, None)
+        env = packaging_environment()
         for name in ("a", "b"):
             subprocess.run(
                 [
