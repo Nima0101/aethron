@@ -288,9 +288,9 @@ def _validate_gzip_metadata(payload):
 def validate_source_archive(payload, manifest_payload):
     """Inspect the compared TAR bytes without extracting files or following links."""
     if __package__:
-        from .release import _source_name
+        from .release import _reject_source_case_aliases, _source_name
     else:
-        from release import _source_name
+        from release import _reject_source_case_aliases, _source_name
 
     def unique_object(pairs):
         result = {}
@@ -313,6 +313,7 @@ def validate_source_archive(payload, manifest_payload):
                 or any(char not in "0123456789abcdef" for char in digest)
             ):
                 raise ValueError("invalid manifest entry")
+        _reject_source_case_aliases(manifest)
         expected = {"aethron-0.2.0/" + name: digest for name, digest in manifest.items()}
         seen = set()
         end_offset = 0

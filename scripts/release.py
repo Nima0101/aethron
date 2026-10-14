@@ -51,6 +51,18 @@ def _source_name(raw):
     return name
 
 
+def _reject_source_case_aliases(names):
+    """Keep one spelling per folded path, including implicit directories."""
+    spellings = {}
+    for name in names:
+        parts = name.split("/")
+        for end in range(1, len(parts) + 1):
+            prefix = "/".join(parts[:end])
+            folded = prefix.casefold()
+            if spellings.setdefault(folded, prefix) != prefix:
+                raise ValueError("release_source_path_alias")
+
+
 def committed_blobs(revision, *, root=None):
     """Read one immutable Git tree, never the mutable checkout behind provenance."""
     require_default_git_context(os.environ)
@@ -79,6 +91,10 @@ def committed_blobs(revision, *, root=None):
         if mode not in (b"100644", b"100755") or kind != b"blob":
             raise ValueError("release_requires_regular_blobs")
         entries.append((name, oid))
+    # Reuse wheel admission's case folding without rewriting source names.
+    # Include empty directories and differently spelled parent components;
+    # full-file-path comparisons alone miss directories with distinct children.
+    _reject_source_case_aliases(paths)
     entries.sort()
     payload = io.BytesIO(
         subprocess.check_output(
@@ -112,6 +128,7 @@ def build(destination):
         timeout=GIT_COMMAND_TIMEOUT_SECONDS,
     )
     names = sorted(_source_name(n) for n in names.split(b"\0") if n)
+    _reject_source_case_aliases(names)
     revision = subprocess.check_output(
         ["git", "--no-replace-objects", "rev-parse", "HEAD"],
         cwd=ROOT,
