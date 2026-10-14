@@ -152,14 +152,15 @@ def build(destination):
     require_default_git_context(os.environ)
     # Local refs/replace must not redefine the revision named by provenance.
     names = subprocess.check_output(
-        ["git", "--no-replace-objects", "ls-files", "-v", "-z"],
+        ["git", "--no-replace-objects", "ls-files", "-v", "-f", "-z"],
         cwd=ROOT,
         timeout=GIT_COMMAND_TIMEOUT_SECONDS,
     )
     entries = [entry for entry in names.split(b"\0") if entry]
     # Match reproduction admission: status can hide modified files marked
-    # assume-unchanged or skip-worktree. Do not certify that checkout as clean,
-    # or clear the caller's flags. Only ordinary cached (H) entries are admitted.
+    # assume-unchanged, skip-worktree or fsmonitor-valid. The -f flag exposes
+    # monitor-cached entries even when -v alone still reports H. Do not certify
+    # that checkout as clean or clear the caller's flags.
     if any(not entry.startswith(b"H ") for entry in entries):
         raise SystemExit("release requires observable source index")
     names = sorted(_source_name(entry[2:]) for entry in entries)

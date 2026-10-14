@@ -941,7 +941,7 @@ class ReproductionReport(unittest.TestCase):
                     oid + b" blob " + str(len(by_oid[oid])).encode() + b"\n" + by_oid[oid] + b"\n"
                     for oid in kwargs["input"].splitlines()
                 )
-            if args == ["git", "--no-replace-objects", "ls-files", "-v", "-z"]:
+            if args == ["git", "--no-replace-objects", "ls-files", "-v", "-f", "-z"]:
                 return index_entries
             if args == ["git", "--no-replace-objects", "rev-parse", "HEAD"]:
                 return clone_revision + "\n"
