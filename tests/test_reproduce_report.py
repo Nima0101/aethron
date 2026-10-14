@@ -158,7 +158,19 @@ def source_archive(defect=None, *, files=None):
     raw = buffer.getvalue()
     if defect == "truncated":
         raw = raw[:520]
-    return b"not gzip" if defect == "malformed" else gzip.compress(raw, mtime=0)
+    compressed = gzip.compress(raw, mtime=0)
+    if defect == "gzip-footer":
+        return compressed[:-8]
+    if defect == "gzip-crc":
+        return compressed[:-8] + bytes([compressed[-8] ^ 1]) + compressed[-7:]
+    if defect == "gzip-size":
+        return compressed[:-4] + bytes([compressed[-4] ^ 1]) + compressed[-3:]
+    if defect == "gzip-trailing-header":
+        return compressed + b"\x1f\x8b"
+    if defect == "gzip-trailing-deflate":
+        # Valid second gzip header followed by the reserved DEFLATE block type.
+        return compressed + b"\x1f\x8b\x08" + b"\x00" * 7 + b"\x07"
+    return b"not gzip" if defect == "malformed" else compressed
 
 
 class ReproductionReport(unittest.TestCase):
@@ -888,6 +900,23 @@ with module.reproduction_workspace() as temporary:
             "fifo",
             "truncated",
             "malformed",
+        ):
+            with self.subTest(defect=defect):
+                output, error, consumers, _, _ = self.invoke(
+                    archive_defect=defect, check_workspace=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_source_archive_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_gzip_integrity_defects_reject_before_consumers(self):
+        for defect in (
+            "gzip-footer",
+            "gzip-crc",
+            "gzip-size",
+            "gzip-trailing-header",
+            "gzip-trailing-deflate",
         ):
             with self.subTest(defect=defect):
                 output, error, consumers, _, _ = self.invoke(

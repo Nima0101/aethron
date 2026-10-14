@@ -1,6 +1,7 @@
 """Clean clone, exact README quickstart, isolated consumer and two release builds."""
 
 import contextlib
+import gzip
 import hashlib
 import io
 import json
@@ -12,6 +13,7 @@ import sys
 import tarfile
 import tempfile
 import zipfile
+import zlib
 from pathlib import Path
 
 # Optimized execution removes assertions used to establish this evidence.
@@ -186,21 +188,26 @@ def validate_source_archive(payload, manifest_payload):
                 raise ValueError("invalid manifest entry")
         expected = {"aethron-0.2.0/" + name: digest for name, digest in manifest.items()}
         seen = set()
-        with tarfile.open(fileobj=io.BytesIO(payload), mode="r:gz") as archive:
-            for member in archive:
-                if not member.isfile() or member.name not in expected or member.name in seen:
-                    raise ValueError("invalid archive member")
-                seen.add(member.name)
-                digest = hashlib.sha256()
-                with archive.extractfile(member) as stream:
-                    for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-                        digest.update(chunk)
-                if digest.hexdigest() != expected[member.name]:
-                    raise ValueError("archive content mismatch")
+        with gzip.GzipFile(fileobj=io.BytesIO(payload), mode="rb") as compressed:
+            with tarfile.open(fileobj=compressed, mode="r:") as archive:
+                for member in archive:
+                    if not member.isfile() or member.name not in expected or member.name in seen:
+                        raise ValueError("invalid archive member")
+                    seen.add(member.name)
+                    digest = hashlib.sha256()
+                    with archive.extractfile(member) as stream:
+                        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                            digest.update(chunk)
+                    if digest.hexdigest() != expected[member.name]:
+                        raise ValueError("archive content mismatch")
+            # TAR iteration stops at its end marker, before gzip necessarily checks
+            # the CRC/size trailer. Drain through EOF, including subsequent members.
+            while compressed.read(1024 * 1024):
+                pass
         if seen != expected.keys():
             raise ValueError("incomplete archive")
         return manifest
-    except (ValueError, RecursionError, tarfile.TarError, OSError, EOFError):
+    except (ValueError, RecursionError, tarfile.TarError, OSError, EOFError, zlib.error):
         raise ValueError("release_source_archive_invalid") from None
 
 
