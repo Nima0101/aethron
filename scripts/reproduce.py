@@ -315,7 +315,9 @@ def validate_source_archive(payload, manifest_payload):
         end_offset = 0
         _validate_gzip_metadata(payload)
         with gzip.GzipFile(fileobj=io.BytesIO(payload), mode="rb") as compressed:
-            with tarfile.open(fileobj=compressed, mode="r:") as archive:
+            with tarfile.open(
+                fileobj=compressed, mode="r:", encoding="utf-8", errors="strict"
+            ) as archive:
                 for member in archive:
                     if not member.isfile() or member.name not in expected or member.name in seen:
                         raise ValueError("invalid archive member")
@@ -341,7 +343,7 @@ def validate_source_archive(payload, manifest_payload):
                     compressed.seek(end_offset)
                     if member.offset_data != end_offset + tarfile.BLOCKSIZE or compressed.read(
                         tarfile.BLOCKSIZE
-                    ) != header.tobuf(tarfile.USTAR_FORMAT):
+                    ) != header.tobuf(tarfile.USTAR_FORMAT, encoding="utf-8", errors="strict"):
                         raise ValueError("invalid archive header")
                     seen.add(member.name)
                     digest = hashlib.sha256()

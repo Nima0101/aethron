@@ -130,7 +130,11 @@ def build(destination):
     out = Path(destination)
     out.mkdir(parents=True, exist_ok=False)
     buffer = io.BytesIO()
-    with tarfile.open(fileobj=buffer, mode="w", format=tarfile.USTAR_FORMAT) as archive:
+    # Git names are admitted as UTF-8; host filesystem encodings must not
+    # change their archive bytes or their USTAR representability.
+    with tarfile.open(
+        fileobj=buffer, mode="w", format=tarfile.USTAR_FORMAT, encoding="utf-8", errors="strict"
+    ) as archive:
         for name, data in blobs.items():
             info = tarfile.TarInfo("aethron-0.2.0/" + name)
             info.size = len(data)
