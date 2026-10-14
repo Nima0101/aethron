@@ -38,7 +38,28 @@ SBOM = {
             "licenses": [{"license": {"id": "GPL-3.0-only"}}],
         }
     },
-    "components": [],
+    "components": [
+        {
+            "type": "data",
+            "name": "Amazon AOT derived25-frame evaluation excerpt",
+            "version": "2026-10-08",
+            "licenses": [{"license": {"id": "CDLA-Permissive-1.0"}}],
+        },
+        {
+            "type": "data",
+            "name": "NASA public-domain and CC0 RGB smoke photographs",
+            "version": "scikit-image-v0.25.2",
+            "licenses": [
+                {"license": {"name": "Public domain / CC0-1.0; see data/rgb-smoke/README.md"}}
+            ],
+        },
+        {
+            "type": "library",
+            "name": "Python standard library",
+            "version": "runtime-provided",
+            "licenses": [{"license": {"id": "Python-2.0"}}],
+        },
+    ],
     "dependencies": [],
     "properties": [],
 }
@@ -1069,6 +1090,68 @@ with module.reproduction_workspace() as temporary:
                 self.assertEqual(str(error), "release_sbom_invalid")
                 self.assertEqual(output, "")
                 self.assertEqual(consumers, [])
+
+    def test_sbom_component_inventory_rejects_before_consumers(self):
+        cases = []
+        for value in (None, [], {}, "components", [None], ["component"]):
+            bom = json.loads(SBOM_BYTES)
+            bom["components"] = value
+            cases.append(bom)
+        bom = json.loads(SBOM_BYTES)
+        del bom["components"]
+        cases.append(bom)
+        for index in range(3):
+            bom = json.loads(SBOM_BYTES)
+            del bom["components"][index]
+            cases.append(bom)
+            bom = json.loads(SBOM_BYTES)
+            bom["components"].append(bom["components"][index])
+            cases.append(bom)
+            for value in (None, [], "component"):
+                bom = json.loads(SBOM_BYTES)
+                bom["components"][index] = value
+                cases.append(bom)
+            bom = json.loads(SBOM_BYTES)
+            bom["components"][index] = bom["components"][(index + 1) % 3]
+            cases.append(bom)
+            for field, value in (
+                ("name", "undeclared component"),
+                ("name", []),
+                ("type", "application"),
+                ("version", "incorrect"),
+                ("licenses", [{"license": {"id": "MIT"}}]),
+                ("licenses", []),
+            ):
+                bom = json.loads(SBOM_BYTES)
+                bom["components"][index][field] = value
+                cases.append(bom)
+                bom = json.loads(SBOM_BYTES)
+                del bom["components"][index][field]
+                cases.append(bom)
+        bom = json.loads(SBOM_BYTES)
+        bom["components"].append({"name": "undeclared component", "type": "library"})
+        cases.append(bom)
+        for index, bom in enumerate(cases):
+            with self.subTest(case=index):
+                output, error, consumers, _, _ = self.invoke(
+                    sbom_bytes=json.dumps(bom).encode(), real_consumers=True, check_workspace=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_sbom_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_sbom_component_order_and_descriptions_preserve_acceptance(self):
+        bom = json.loads(SBOM_BYTES)
+        bom["components"].reverse()
+        for component in bom["components"]:
+            component["description"] = "Additional component metadata"
+        output, error, consumers, _, _ = self.invoke(
+            sbom_bytes=json.dumps(bom, indent=2).encode(), real_consumers=True
+        )
+        self.assertIsNone(error)
+        self.assertEqual(len(consumers), 2)
+        self.assertTrue(json.loads(output)["byte_identical_builds"])
 
     def test_sbom_formatting_and_additional_metadata_preserve_acceptance(self):
         bom = json.loads(SBOM_BYTES)

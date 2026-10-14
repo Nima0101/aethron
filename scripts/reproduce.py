@@ -151,6 +151,42 @@ def validate_sbom(payload):
         or component.get("licenses") != [{"license": {"id": "GPL-3.0-only"}}]
     ):
         raise ValueError("release_sbom_invalid")
+    # Equal builds can both omit or mislabel third-party declarations. Check
+    # the release writer's inventory independently; this is not a full schema
+    # validator or an independent determination of redistribution rights.
+    expected = {
+        "Amazon AOT derived25-frame evaluation excerpt": (
+            "data",
+            "2026-10-08",
+            [{"license": {"id": "CDLA-Permissive-1.0"}}],
+        ),
+        "NASA public-domain and CC0 RGB smoke photographs": (
+            "data",
+            "scikit-image-v0.25.2",
+            [{"license": {"name": "Public domain / CC0-1.0; see data/rgb-smoke/README.md"}}],
+        ),
+        "Python standard library": (
+            "library",
+            "runtime-provided",
+            [{"license": {"id": "Python-2.0"}}],
+        ),
+    }
+    components = bom.get("components")
+    if not isinstance(components, list) or len(components) != len(expected):
+        raise ValueError("release_sbom_invalid")
+    seen = set()
+    for entry in components:
+        if not isinstance(entry, dict):
+            raise ValueError("release_sbom_invalid")
+        name = entry.get("name")
+        if (
+            not isinstance(name, str)
+            or name not in expected
+            or name in seen
+            or (entry.get("type"), entry.get("version"), entry.get("licenses")) != expected[name]
+        ):
+            raise ValueError("release_sbom_invalid")
+        seen.add(name)
 
 
 def validate_checksums(payload, manifest):
