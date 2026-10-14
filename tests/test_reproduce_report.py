@@ -75,7 +75,7 @@ def provenance_sources(files):
     }
 
 
-def executable_archive(defect=None, *, files=None, metadata=None):
+def executable_archive(defect=None, *, files=None, metadata=None, local_header=None):
     files = SOURCE_FILES if files is None else files
     entries = [("__main__.py", ZIP_MAIN)] + [
         (name, data)
@@ -135,6 +135,13 @@ def executable_archive(defect=None, *, files=None, metadata=None):
         if defect == "reordered-directory":
             archive.filelist.reverse()
     payload = buffer.getvalue()
+    if local_header is not None:
+        # Mutate only a local record, leaving central metadata and file bytes intact.
+        with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+            start = archive.getinfo("aethron/data.bin").header_offset
+        offset, width, value = local_header
+        start += offset
+        payload = payload[:start] + value.to_bytes(width, "little") + payload[start + width :]
     if defect == "prefix-script":
         return b"#!/bin/sh\nexit 0\n" + payload
     if defect == "prefix-zero":
@@ -423,6 +430,7 @@ class ReproductionReport(unittest.TestCase):
         archive_metadata=None,
         zip_defect=None,
         zip_metadata=None,
+        zip_local_header=None,
         python_probes=None,
     ):
         output = io.StringIO()
@@ -434,7 +442,12 @@ class ReproductionReport(unittest.TestCase):
             manifest_bytes = json.dumps(
                 {name: hashlib.sha256(data).hexdigest() for name, data in artifact_files.items()}
             ).encode()
-        payload = executable_archive(zip_defect, files=artifact_files, metadata=zip_metadata)
+        payload = executable_archive(
+            zip_defect,
+            files=artifact_files,
+            metadata=zip_metadata,
+            local_header=zip_local_header,
+        )
         revision = "a" * 40
         clone_revision = revision
         source_status = b""
@@ -1119,6 +1132,32 @@ with module.reproduction_workspace() as temporary:
         self.assertIsNone(error)
         self.assertEqual(len(consumers), 2)
         self.assertTrue(json.loads(output)["byte_identical_builds"])
+
+    def test_conflicting_zip_local_headers_reject_before_consumers(self):
+        # ZIP readers may trust the central directory and ignore conflicting
+        # local CRC, sizes, flags, method, version or timestamps.
+        for field, offset, width, value in (
+            ("version", 4, 2, 63),
+            ("encrypted", 6, 2, 1),
+            ("descriptor", 6, 2, 8),
+            ("encoding", 6, 2, 2048),
+            ("compression", 8, 2, 8),
+            ("time", 10, 2, 1),
+            ("date", 12, 2, 33),
+            ("crc", 14, 4, 0),
+            ("compressed-size", 18, 4, 0),
+            ("size", 22, 4, 0),
+        ):
+            with self.subTest(field=field):
+                output, error, consumers, _, _ = self.invoke(
+                    zip_local_header=(offset, width, value),
+                    check_workspace=True,
+                    real_consumers=True,
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_zipapp_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
 
     def test_zip_metadata_rejects_before_consumers(self):
         # Equal builds and content hashes cannot validate extraction metadata.

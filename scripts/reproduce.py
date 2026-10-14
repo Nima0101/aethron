@@ -8,6 +8,7 @@ import json
 import os
 import shutil
 import stat
+import struct
 import subprocess
 import sys
 import tarfile
@@ -266,6 +267,22 @@ def validate_zipapp(payload, manifest):
                 header = payload[offset : offset + 30]
                 if member.header_offset != offset or len(header) != 30:
                     raise ValueError("unlisted ZIP content")
+                # ZipFile reads several fields only from the central directory.
+                # Our stored, descriptor-free writer must give local readers the
+                # same CRC, sizes, flags, method, version and normalized timestamp.
+                local = struct.unpack("<4s5H3I2H", header)
+                if local[:9] != (
+                    b"PK\x03\x04",
+                    member.extract_version | (member.reserved << 8),
+                    member.flag_bits,
+                    member.compress_type,
+                    0,
+                    ((2026 - 1980) << 9) | (1 << 5) | 1,
+                    member.CRC,
+                    member.compress_size,
+                    member.file_size,
+                ):
+                    raise ValueError("conflicting ZIP headers")
                 name_size = int.from_bytes(header[26:28], "little")
                 extra_size = int.from_bytes(header[28:30], "little")
                 offset += 30 + name_size + extra_size + member.compress_size
