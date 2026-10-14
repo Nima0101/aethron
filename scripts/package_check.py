@@ -18,6 +18,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 SOURCE_SUFFIXES = (".py", ".pxd", ".json")
+WINDOWS_DEVICE_NAMES = frozenset(
+    ("CON", "PRN", "AUX", "NUL")
+    + tuple(prefix + digit for prefix in ("COM", "LPT") for digit in "123456789¹²³")
+)
 
 
 def reproduction_workspace(**kwargs):
@@ -90,6 +94,14 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
                 "\\" in path
                 or ":" in path
                 or any(not part or part.endswith((".", " ")) for part in path.split("/"))
+            ):
+                raise ValueError("wheel_source_payload_mismatch")
+            # Windows reserves device names in every directory, even with an
+            # extension. Check the archive on every build host before any reads
+            # or installation; a resource can resolve to a device instead of a
+            # regular file. Explicit directory records obey the same rule.
+            if any(
+                part.split(".", 1)[0].upper() in WINDOWS_DEVICE_NAMES for part in path.split("/")
             ):
                 raise ValueError("wheel_source_payload_mismatch")
             parts = name.split("/", 2)

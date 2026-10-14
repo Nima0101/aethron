@@ -46,6 +46,8 @@ class CorePackagePayload(unittest.TestCase):
                 records.append((records[0][0] + " ", b"# replaced source\n"))
             elif defect == "nul-name":
                 records.append(("aethron/notes.txt@ignored", b"resource\n"))
+            elif defect == "device-name":
+                records.append(("aethron/NUL.txt", b"not an ordinary file on Windows\n"))
             elif defect == "startup-path":
                 records.append(("unexpected.pth", b"import sys\n"))
             elif defect == "bytecode":
@@ -108,6 +110,71 @@ class CorePackagePayload(unittest.TestCase):
 
     def test_matching_payload_reaches_consumer(self):
         self.check_payload()
+
+    def test_device_name_is_rejected_before_installation(self):
+        self.check_payload("device-name")
+
+    def test_reserved_devices_reject_before_reads_for_core_and_edge(self):
+        devices = ("CON", "PRN", "AUX", "NUL") + tuple(
+            prefix + digit for prefix in ("COM", "LPT") for digit in "123456789¹²³"
+        )
+        for package in ("aethron", "aethron_edge"):
+            payload = {f"{package}/__init__.py": b""}
+            for prefix in ("", f"{package}-0.2.0.data/purelib/", f"{package}-0.2.0.data/platlib/"):
+                for device in devices:
+                    for path in (device, device.lower() + ".txt", device + "/data.txt"):
+                        with self.subTest(package=package, prefix=prefix, path=path):
+                            archive = io.BytesIO()
+                            with zipfile.ZipFile(archive, "w") as wheel:
+                                for name, data in payload.items():
+                                    wheel.writestr(name, data)
+                                wheel.writestr(prefix + package + "/" + path, b"resource")
+                            with (
+                                patch.object(
+                                    zipfile.ZipFile,
+                                    "read",
+                                    side_effect=AssertionError(
+                                        "source read before device rejection"
+                                    ),
+                                ),
+                                self.assertRaisesRegex(ValueError, "wheel_source_payload_mismatch"),
+                            ):
+                                package_check.validate_source_payload(
+                                    archive.getvalue(), payload, package
+                                )
+
+    def test_device_named_directories_and_metadata_are_rejected(self):
+        for name in ("CON/", "aux.txt/", "aethron-0.2.0.dist-info/NUL.txt", "COM1.data/file"):
+            with self.subTest(name=name):
+                archive = io.BytesIO()
+                with zipfile.ZipFile(archive, "w") as wheel:
+                    wheel.writestr("aethron/__init__.py", b"")
+                    wheel.writestr(name, b"")
+                with self.assertRaisesRegex(ValueError, "wheel_source_payload_mismatch"):
+                    package_check.validate_source_payload(
+                        archive.getvalue(), {"aethron/__init__.py": b""}
+                    )
+
+    def test_names_adjacent_to_devices_remain_allowed(self):
+        names = (
+            "console",
+            "auxiliary",
+            "null",
+            "COM0",
+            "COM10",
+            "LPT0",
+            "LPT10",
+            "COM⁴",
+            "_NUL",
+            "x.CON",
+        )
+        for package in ("aethron", "aethron_edge"):
+            payload = {f"{package}/{name}.py": b"# ordinary source\n" for name in names}
+            archive = io.BytesIO()
+            with zipfile.ZipFile(archive, "w") as wheel:
+                for name, data in payload.items():
+                    wheel.writestr(name, data)
+            package_check.validate_source_payload(archive.getvalue(), payload, package)
 
     def test_startup_path_is_rejected_before_installation(self):
         self.check_payload("startup-path")
