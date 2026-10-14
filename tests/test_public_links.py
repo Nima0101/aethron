@@ -92,6 +92,51 @@ class PublicLinks(unittest.TestCase):
                 tree = self.object_tree([b"100644 blob " + oid + b"\t" + name])
                 self.assert_invalid(tree)
 
+    def test_duplicate_markdown_paths_cannot_hide_content(self):
+        (self.root / "broken").write_text("[missing](absent.md)\n", encoding="utf-8")
+        (self.root / "clean").write_text("Synthetic document.\n", encoding="utf-8")
+        broken = self.git("hash-object", "-w", "broken").encode("ascii")
+        clean = self.git("hash-object", "-w", "clean").encode("ascii")
+        for objects in ((broken, clean), (clean, broken), (clean, clean)):
+            for nested in (False, True):
+                with self.subTest(objects=objects, nested=nested):
+                    tree = self.object_tree(
+                        [b"100644 blob " + oid + b"\tREADME.md" for oid in objects]
+                    )
+                    if nested:
+                        tree = self.object_tree([b"040000 tree " + tree.encode() + b"\tdocs"])
+                    self.assert_invalid(tree)
+
+    def test_duplicate_directories_are_rejected_even_with_distinct_children(self):
+        (self.root / "clean").write_text("Synthetic document.\n", encoding="utf-8")
+        oid = self.git("hash-object", "-w", "clean").encode("ascii")
+        children = [
+            self.object_tree([b"100644 blob " + oid + b"\t" + name]).encode("ascii")
+            for name in (b"first.md", b"second.md")
+        ]
+        tree = self.object_tree([b"040000 tree " + child + b"\tdocs" for child in children])
+        self.assert_invalid(tree)
+
+    def test_file_directory_path_collision_is_rejected(self):
+        (self.root / "clean").write_text("Synthetic document.\n", encoding="utf-8")
+        oid = self.git("hash-object", "-w", "clean").encode("ascii")
+        child = self.object_tree([b"100644 blob " + oid + b"\tguide.md"]).encode("ascii")
+        tree = self.object_tree(
+            [b"100644 blob " + oid + b"\tdocs", b"040000 tree " + child + b"\tdocs"]
+        )
+        self.assert_invalid(tree)
+
+    def test_distinct_paths_may_share_blob_and_subtree_objects(self):
+        (self.root / "clean").write_text("[guide](guide.md)\n", encoding="utf-8")
+        oid = self.git("hash-object", "-w", "clean").encode("ascii")
+        child = self.object_tree(
+            [b"100644 blob " + oid + b"\t" + name for name in (b"README.md", b"guide.md")]
+        ).encode("ascii")
+        tree = self.object_tree(
+            [b"040000 tree " + child + b"\t" + name for name in (b"first", b"second")]
+        )
+        self.assertEqual(self.check(tree), (0, {"tree": tree, "missing": []}))
+
     def test_nul_inventory_preserves_unicode_tabs_and_newlines(self):
         (self.root / "README.md").write_text(
             "[tab](a%09b.txt) [line](a%0Ab.txt) [unicode](r%C3%A4ksm%C3%B6rg%C3%A5s.txt)\n",

@@ -53,7 +53,12 @@ def check(repo, revision):
         if entry:
             metadata, name = entry.split(b"\t", 1)
             mode, kind, oid = metadata.decode().split()
-            entries[name.decode("utf-8")] = (mode, kind, oid)
+            path = name.decode("utf-8")
+            # ls-tree can emit duplicate paths from malformed Git trees. Never
+            # let a later entry replace unchecked content or a different type.
+            if path in entries:
+                raise ValueError("invalid_public_inventory")
+            entries[path] = (mode, kind, oid)
     missing = []
     documents = total_bytes = destinations = missing_bytes = 0
     for name, (mode, kind, oid) in sorted(entries.items()):
