@@ -40,10 +40,19 @@ class TemporalEvaluationGates(unittest.TestCase):
             root = Path(directory)
             data = root / "data/aot"
             data.mkdir(parents=True)
+            freeze = root / "docs/verification/data-v3-freeze.json"
+            freeze.parent.mkdir(parents=True)
+
+            def pin_manifest():
+                # This isolated image-digest test supplies its own trusted manifest.
+                digest = hashlib.sha256((data / "manifest.json").read_bytes()).hexdigest()
+                freeze.write_text(json.dumps({"files": {"data/aot/manifest.json": digest}}))
+
             (data / "sample.pgm").write_bytes(b"synthetic-invalid-digest")
             (data / "manifest.json").write_text(
                 json.dumps({"frames": [{"file": "sample.pgm", "sha256": "0" * 64}]})
             )
+            pin_manifest()
             with (
                 patch.object(temporal, "ROOT", root),
                 patch.object(
@@ -71,6 +80,7 @@ class TemporalEvaluationGates(unittest.TestCase):
                         }
                     )
                 )
+                pin_manifest()
                 with self.assertRaisesRegex(RuntimeError, "detector_called"):
                     temporal.recorded(root)
                 detector.assert_called_once_with(b"synthetic-invalid-digest")

@@ -127,7 +127,11 @@ def outputs(entries):
 
 
 def recorded(outdir):
-    manifest = json.loads((ROOT / "data/aot/manifest.json").read_text())
+    payload = (ROOT / "data/aot/manifest.json").read_bytes()
+    freeze = json.loads((ROOT / "docs/verification/data-v3-freeze.json").read_bytes())
+    if hashlib.sha256(payload).hexdigest() != freeze["files"].get("data/aot/manifest.json"):
+        raise ValueError("recorded_manifest_digest")
+    manifest = json.loads(payload)
     entries, records, elapsed = [], [], []
     starts = {}
     previous = None
