@@ -37,6 +37,13 @@ WINDOWS_PATH_ENDINGS = tuple(
     for name in (component, b"source/" + component, component + b"/file.txt")
 )
 
+WINDOWS_RESERVED_PATHS = tuple(
+    name
+    for character in '<>"|?*' + "".join(chr(value) for value in range(1, 32))
+    for component in [("file" + character + "name").encode()]
+    for name in (component, b"source/" + component, component + b"/file.txt")
+)
+
 INVALID_NAMES = (
     (
         b".",
@@ -53,6 +60,7 @@ INVALID_NAMES = (
     + WINDOWS_COLON_NAMES
     + WINDOWS_DEVICE_PATHS
     + WINDOWS_PATH_ENDINGS
+    + WINDOWS_RESERVED_PATHS
 )
 
 
@@ -134,7 +142,8 @@ class ReleaseSourcePaths(unittest.TestCase):
         for name in (
             b".hidden",
             b"two words",
-            b"tab\tline\n",
+            b"file!#$%&'()+,-;=@[]^_`{}~.txt",
+            "file\u0085\u2028\uff1f.txt".encode(),
             "café.txt".encode(),
             b"console",
             b"auxiliary",
@@ -163,7 +172,12 @@ class ReleaseSourcePaths(unittest.TestCase):
         # Real, otherwise canonical archives must not qualify names rejected
         # before checkout inspection. No Windows filesystem access is needed.
         data = b"synthetic payload\n"
-        for raw in WINDOWS_COLON_NAMES + WINDOWS_DEVICE_PATHS + WINDOWS_PATH_ENDINGS:
+        for raw in (
+            WINDOWS_COLON_NAMES
+            + WINDOWS_DEVICE_PATHS
+            + WINDOWS_PATH_ENDINGS
+            + WINDOWS_RESERVED_PATHS
+        ):
             with self.subTest(name=raw):
                 name = raw.decode()
                 manifest = json.dumps({name: hashlib.sha256(data).hexdigest()}).encode()

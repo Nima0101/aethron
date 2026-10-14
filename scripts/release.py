@@ -32,11 +32,10 @@ def _source_name(raw):
     # Match wheel admission for drive/stream syntax on every host. A drive
     # component can reset Path joining during the checkout walk on Windows;
     # a colon can also address an alternate stream instead of an ordinary file.
-    if (
-        any(part in ("", ".", "..") for part in name.split("/"))
-        or "\\" in name
-        or "\x00" in name
-        or ":" in name
+    # Match wheel admission for reserved punctuation and ASCII controls too,
+    # including directory components, before certifying portable artifacts.
+    if any(part in ("", ".", "..") for part in name.split("/")) or any(
+        ord(character) < 32 or character in '<>:"\\|?*' for character in name
     ):
         raise ValueError("release_source_path_invalid")
     # Match wheel admission for names that Windows can normalize to a
