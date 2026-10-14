@@ -219,6 +219,18 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
                 and top.endswith((".py", ".pyc", ".so", ".pyd"))
             ):
                 raise ValueError("wheel_source_payload_mismatch")
+            # These distributions each own one import package. A foreign .py
+            # can overwrite another installed distribution while leaving this
+            # package's manifest unchanged. Check root and spread destinations
+            # before any payload reads; metadata and non-import data schemes
+            # may still contain ordinary Python examples/resources.
+            if (
+                not member.is_dir()
+                and folded_name.endswith(".py")
+                and not folded_name.startswith(package_name.casefold() + "/")
+                and not top.endswith((".dist-info", ".data"))
+            ):
+                raise ValueError("wheel_source_payload_mismatch")
             # These portable source wheels must not supply executable bytecode
             # outside source parity. In particular, a sourceless .pyc module can
             # be imported without appearing in either source manifest. Installers

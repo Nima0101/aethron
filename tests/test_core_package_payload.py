@@ -438,6 +438,7 @@ class CorePackagePayload(unittest.TestCase):
                 f"{package}/__init__.py": b"",
                 f"{package}/sitecustomize.py": b"# ordinary nested module\n",
                 f"{package}/usercustomize/__init__.py": b"# ordinary nested package\n",
+                f"{package}/usercustomize_example.py": b"# ordinary nested module\n",
             }
             for prefix in ("", f"{package}-0.2.0.data/purelib/", f"{package}-0.2.0.data/platlib/"):
                 with self.subTest(package=package, prefix=prefix):
@@ -446,7 +447,6 @@ class CorePackagePayload(unittest.TestCase):
                         for name, data in payload.items():
                             wheel.writestr(prefix + name, data)
                         wheel.writestr(prefix + "sitecustomize.txt", b"documentation")
-                        wheel.writestr(prefix + "usercustomize_example.py", b"# unrelated module\n")
                         wheel.writestr(f"{package}-0.2.0.dist-info/sitecustomize.py", b"resource")
                     package_check.validate_source_payload(archive.getvalue(), payload, package)
 
