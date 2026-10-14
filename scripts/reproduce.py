@@ -65,15 +65,28 @@ def _git_output(args, **kwargs):
     return subprocess.check_output(args, timeout=GIT_COMMAND_TIMEOUT_SECONDS, **kwargs)
 
 
+def artifact_mode(path):
+    # Match wheel/source admission on Python 3.9, where is_symlink does not
+    # reject Windows junctions. lstat also avoids following ordinary links.
+    # Stable-tree checks only; concurrent replacement is outside this boundary.
+    try:
+        info = path.lstat()
+    except FileNotFoundError:
+        return 0
+    if getattr(info, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0):
+        return 0
+    return info.st_mode
+
+
 def artifact_paths(directory):
     """Admit the complete inventory before reading any artifact payload."""
-    if directory.is_symlink() or not directory.is_dir():
+    if not stat.S_ISDIR(artifact_mode(directory)):
         raise ValueError("release_artifacts_changed")
     paths = sorted(directory.iterdir())
     if {path.name for path in paths} != RELEASE_ARTIFACTS:
         raise ValueError("release_artifacts_changed")
     for path in paths:
-        if path.is_symlink() or not path.is_file():
+        if not stat.S_ISREG(artifact_mode(path)):
             raise ValueError("release_artifacts_changed")
     return paths
 
