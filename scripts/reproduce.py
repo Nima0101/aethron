@@ -532,6 +532,12 @@ def validate_source_manifest(clone, revision, manifest):
 def validate_source(clone, revision):
     """Bind sequential checks to one clean revision, excluding ignored build outputs."""
     _require_git_context()
+    # Git follows a replaced checkout root and can still report a clean tree.
+    # Admit the clone itself before any Git child or later verification stage.
+    # Reuse artifact lstat/reparse checks; this is a stage-boundary check, not
+    # protection against concurrent replacement or links above the workspace.
+    if not stat.S_ISDIR(artifact_mode(clone)):
+        raise ValueError("reproduction_source_changed")
     # These index flags suppress working-tree checks even when status is clean.
     # Include fsmonitor-valid (-f), which -v alone does not expose.
     # A complete reproduction clone must keep every tracked file observable.
