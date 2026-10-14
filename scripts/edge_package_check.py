@@ -57,6 +57,13 @@ def verify_installed_console(python: Path, work: Path, env):
         raise ValueError("installed_console_help_empty")
 
 
+def wheel_inventory(directory: Path):
+    try:
+        return {wheel.name: wheel for wheel in package_check.wheel_paths(directory)}
+    except (OSError, ValueError):
+        raise ValueError("package_artifact_changed") from None
+
+
 def run(wheelhouse: Path, output: Path, vision: bool = False):
     # Preserve earlier evidence and prevent a failed attempt from reusing its report.
     output.mkdir(parents=True, exist_ok=False)
@@ -104,8 +111,9 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                 env=env,
                 stdout=subprocess.DEVNULL,
             )
-    first = {wheel.name: wheel for wheel in (output / "a").glob("*.whl")}
-    second = {wheel.name: wheel for wheel in (output / "b").glob("*.whl")}
+    # Admit both inventories before reading bytes or starting installed consumers.
+    first = wheel_inventory(output / "a")
+    second = wheel_inventory(output / "b")
     if not first or first.keys() != second.keys():
         raise ValueError("wheel_inventory_mismatch")
     # Filename identity is necessary evidence, not authentication of wheel contents.
@@ -349,13 +357,12 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
         if final_input_hashes != input_hashes:
             raise ValueError("package_input_changed")
         try:
-            for lane in ("a", "b"):
-                final_wheels = {}
-                for wheel in (output / lane).glob("*.whl"):
-                    # Matching bytes must still belong to regular local artifacts.
-                    if wheel.is_symlink() or not wheel.is_file():
-                        raise ValueError("package_artifact_changed")
-                    final_wheels[wheel.name] = hashlib.sha256(wheel.read_bytes()).hexdigest()
+            final_inventories = [wheel_inventory(output / lane) for lane in ("a", "b")]
+            for inventory in final_inventories:
+                final_wheels = {
+                    name: hashlib.sha256(wheel.read_bytes()).hexdigest()
+                    for name, wheel in inventory.items()
+                }
                 if final_wheels != hashes:
                     raise ValueError("package_artifact_changed")
         except OSError:

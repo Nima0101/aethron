@@ -167,6 +167,10 @@ class PackageInputEvidence(unittest.TestCase):
                         relocated = root / "relocated-wheel"
                         target.rename(relocated)
                         target.symlink_to(relocated)
+                    elif change_kind == "linked_directory":
+                        relocated = root / "relocated-build"
+                        (output / lane).rename(relocated)
+                        (output / lane).symlink_to(relocated, target_is_directory=True)
                     else:
                         (output / lane / "unexpected.whl").write_bytes(b"extra")
                 return subprocess.CompletedProcess(
@@ -327,6 +331,11 @@ class PackageInputEvidence(unittest.TestCase):
         for lane in ("a", "b"):
             with self.subTest(lane=lane):
                 self.probe(artifact_change=(lane, "symlink"))
+
+    def test_linked_build_directories_after_consumers_prevent_success_report(self):
+        for lane in ("a", "b"):
+            with self.subTest(lane=lane):
+                self.probe(artifact_change=(lane, "linked_directory"))
 
     def test_console_failure_prevents_consumer_and_report(self):
         for error in (
