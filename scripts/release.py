@@ -12,9 +12,9 @@ import zipfile
 from pathlib import Path
 
 if __package__:
-    from .git_context import require_default_git_context
+    from .git_context import GIT_COMMAND_TIMEOUT_SECONDS, require_default_git_context
 else:
-    from git_context import require_default_git_context
+    from git_context import GIT_COMMAND_TIMEOUT_SECONDS, require_default_git_context
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -26,6 +26,7 @@ def committed_blobs(revision, *, root=None):
     tree = subprocess.check_output(
         ["git", "--no-replace-objects", "ls-tree", "-r", "-z", "--full-tree", revision],
         cwd=root,
+        timeout=GIT_COMMAND_TIMEOUT_SECONDS,
     )
     entries = []
     for record in tree.split(b"\0"):
@@ -42,6 +43,7 @@ def committed_blobs(revision, *, root=None):
             ["git", "--no-replace-objects", "cat-file", "--batch"],
             cwd=root,
             input=b"".join(oid + b"\n" for _, oid in entries),
+            timeout=GIT_COMMAND_TIMEOUT_SECONDS,
         )
     )
     blobs = {}
@@ -63,17 +65,25 @@ def build(destination):
     require_default_git_context(os.environ)
     # Local refs/replace must not redefine the revision named by provenance.
     names = (
-        subprocess.check_output(["git", "--no-replace-objects", "ls-files", "-z"], cwd=ROOT)
+        subprocess.check_output(
+            ["git", "--no-replace-objects", "ls-files", "-z"],
+            cwd=ROOT,
+            timeout=GIT_COMMAND_TIMEOUT_SECONDS,
+        )
         .decode()
         .split("\0")
     )
     names = sorted(n for n in names if n)
     revision = subprocess.check_output(
-        ["git", "--no-replace-objects", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ["git", "--no-replace-objects", "rev-parse", "HEAD"],
+        cwd=ROOT,
+        text=True,
+        timeout=GIT_COMMAND_TIMEOUT_SECONDS,
     ).strip()
     dirty = subprocess.check_output(
         ["git", "--no-replace-objects", "status", "--porcelain", "--untracked-files=normal"],
         cwd=ROOT,
+        timeout=GIT_COMMAND_TIMEOUT_SECONDS,
     )
     if dirty:
         raise SystemExit("release requires clean committed source")
