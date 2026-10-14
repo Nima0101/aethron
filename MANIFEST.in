@@ -5,4 +5,5 @@ recursive-include examples *.json *.jsonl
 recursive-include tests *.py
 recursive-include .github *.yml *.md
 include requirements-native.lock
+include _build.py
 recursive-include aethron *.pxd
