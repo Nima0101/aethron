@@ -199,6 +199,7 @@ class ReproductionReport(unittest.TestCase):
         inventory_defect=None,
         inventory_lanes=("a", "b"),
         provenance_bytes=None,
+        checksum_defect=None,
     ):
         output = io.StringIO()
         diagnostics = io.StringIO()
@@ -315,6 +316,36 @@ class ReproductionReport(unittest.TestCase):
                     if provenance_bytes is None
                     else provenance_bytes
                 )
+                checksums = b"".join(
+                    hashlib.sha256(real_read(path)).hexdigest().encode()
+                    + b"  "
+                    + path.name.encode()
+                    + b"\n"
+                    for path in sorted(destination.iterdir())
+                    if path.name != "SHA256SUMS"
+                )
+                lines = checksums.splitlines(keepends=True)
+                if checksum_defect == "empty":
+                    checksums = b""
+                elif checksum_defect == "malformed":
+                    checksums = b"not checksums\n"
+                elif checksum_defect == "encoding":
+                    checksums = b"\xff"
+                elif checksum_defect == "missing":
+                    checksums = b"".join(lines[1:])
+                elif checksum_defect == "duplicate":
+                    checksums += lines[0]
+                elif checksum_defect == "wrong-digest":
+                    checksums = b"0" * 64 + checksums[64:]
+                elif checksum_defect == "extra":
+                    checksums += b"0" * 64 + b"  extra.txt\n"
+                elif checksum_defect == "self":
+                    checksums += b"0" * 64 + b"  SHA256SUMS\n"
+                elif checksum_defect == "path":
+                    checksums = checksums.replace(b"  aethron.pyz", b"  ../aethron.pyz")
+                elif checksum_defect == "nul":
+                    checksums += b"\0"
+                (destination / "SHA256SUMS").write_bytes(checksums)
                 if inventory_defect is not None and destination.name in inventory_lanes:
                     if inventory_defect == "empty":
                         for path in destination.iterdir():
@@ -488,24 +519,19 @@ with module.reproduction_workspace() as temporary:
         self.assertEqual(len(consumers), 2)
         report = json.loads(output)
         self.assertEqual(report["source_revision"], revision)
-        self.assertEqual(
-            report["artifact_sha256"],
-            {
-                "aethron.pyz": hashlib.sha256(payload).hexdigest(),
-                "provenance.json": hashlib.sha256(
-                    json.dumps({"source_revision": revision}).encode()
-                ).hexdigest(),
-                **dict.fromkeys(
-                    (
-                        "aethron-0.2.0-source.tar.gz",
-                        "source-manifest.json",
-                        "sbom.cdx.json",
-                        "SHA256SUMS",
-                    ),
-                    hashlib.sha256(b"synthetic sidecar").hexdigest(),
-                ),
-            },
-        )
+        expected = {
+            "aethron.pyz": hashlib.sha256(payload).hexdigest(),
+            "provenance.json": hashlib.sha256(
+                json.dumps({"source_revision": revision}).encode()
+            ).hexdigest(),
+            **dict.fromkeys(
+                ("aethron-0.2.0-source.tar.gz", "source-manifest.json", "sbom.cdx.json"),
+                hashlib.sha256(b"synthetic sidecar").hexdigest(),
+            ),
+        }
+        checksums = "".join(f"{expected[name]}  {name}\n" for name in sorted(expected)).encode()
+        expected["SHA256SUMS"] = hashlib.sha256(checksums).hexdigest()
+        self.assertEqual(report["artifact_sha256"], expected)
         for field in (
             "clean_clone",
             "evaluation_gate_passed",
@@ -514,6 +540,28 @@ with module.reproduction_workspace() as temporary:
             "byte_identical_builds",
         ):
             self.assertIs(report[field], True)
+
+    def test_identical_invalid_checksums_reject_before_consumers(self):
+        for defect in (
+            "empty",
+            "malformed",
+            "encoding",
+            "missing",
+            "duplicate",
+            "wrong-digest",
+            "extra",
+            "self",
+            "path",
+            "nul",
+        ):
+            with self.subTest(defect=defect):
+                output, error, consumers, _, _ = self.invoke(
+                    checksum_defect=defect, check_workspace=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_checksums_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
 
     def test_identical_wrong_or_invalid_provenance_rejects_before_consumers(self):
         revision = "a" * 40

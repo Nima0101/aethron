@@ -72,6 +72,15 @@ def validate_provenance(payload, revision):
         raise ValueError("release_provenance_invalid")
 
 
+def validate_checksums(payload, manifest):
+    """Require the builder's canonical checksum inventory for the compared bytes."""
+    expected = "".join(
+        f"{manifest[name]}  {name}\n" for name in sorted(RELEASE_ARTIFACTS - {"SHA256SUMS"})
+    ).encode("utf-8")
+    if payload != expected:
+        raise ValueError("release_checksums_invalid")
+
+
 def validate_source(clone, revision):
     """Bind sequential checks to one clean revision, excluding ignored build outputs."""
     # These index flags suppress working-tree checks even when status is clean.
@@ -168,7 +177,10 @@ def run():
             assert compared == (b / p.name).read_bytes(), p.name
             if p.name == "provenance.json":
                 validate_provenance(compared, revision)
+            if p.name == "SHA256SUMS":
+                checksums = compared
             artifact_manifest[p.name] = hashlib.sha256(compared).hexdigest()
+        validate_checksums(checksums, artifact_manifest)
         call(
             [
                 sys.executable,
