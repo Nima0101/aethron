@@ -309,6 +309,71 @@ class PackageInputEvidence(unittest.TestCase):
     def test_report_identifies_checker_and_manifests(self):
         self.probe()
 
+    def test_dependency_failure_stops_consumers_and_preserves_evidence(self):
+        for failing_check in (1, 2):
+            for failure_type in (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+                with self.subTest(stage=failing_check, failure=failure_type.__name__):
+                    calls = []
+                    diagnostics = io.StringIO()
+                    error = (
+                        failure_type(1, ["pip", "check"])
+                        if failure_type is subprocess.CalledProcessError
+                        else failure_type(["pip", "check"], 30)
+                    )
+
+                    def on_process(
+                        args, kwargs, calls=calls, failing_check=failing_check, error=error
+                    ):
+                        calls.append(args)
+                        if args[1:] == ["-I", "-m", "pip", "check"]:
+                            checks = sum(c[1:] == args[1:] for c in calls)
+                            if checks == failing_check:
+                                raise error
+
+                    def on_exit(output, printed, diagnostics=diagnostics):
+                        self.assertFalse((output / "result.json").exists())
+                        self.assertEqual(printed.getvalue(), "")
+                        self.assertEqual(len(list(output.glob("*/*.whl"))), 4)
+                        workspace = next(output.glob("aethron-installed-*"))
+                        self.assertTrue(workspace.is_dir())
+                        self.assertIn(str(workspace), diagnostics.getvalue())
+
+                    with redirect_stderr(diagnostics), self.assertRaises(failure_type) as caught:
+                        self.probe(vision=True, on_process=on_process, on_exit=on_exit)
+                    self.assertIs(caught.exception, error)
+                    self.assertEqual(calls[-1][1:], ["-I", "-m", "pip", "check"])
+                    suites = [c[-1] for c in calls if "-c" in c]
+                    self.assertEqual(suites, [] if failing_check == 1 else ["test_sensor*.py"])
+
+    def test_dependency_compatibility_precedes_each_consumer_stage(self):
+        for vision in (False, True):
+            with self.subTest(vision=vision):
+                calls = []
+
+                def on_process(args, kwargs, calls=calls):
+                    calls.append(args)
+                    if args[1:] == ["-I", "-m", "pip", "check"]:
+                        self.assertTrue(kwargs["check"])
+                        self.assertEqual(kwargs["timeout"], 30)
+                        self.assertEqual(Path(args[0]).parent.parent.parent, kwargs["cwd"])
+                        self.assertNotIn("PYTHONPATH", kwargs["env"])
+                        self.assertNotIn("PYTHONHOME", kwargs["env"])
+
+                self.probe(vision=vision, on_process=on_process)
+                checks = [i for i, c in enumerate(calls) if c[1:] == ["-I", "-m", "pip", "check"]]
+                self.assertEqual(len(checks), 2 if vision else 1)
+                payload = next(i for i, c in enumerate(calls) if c[-1] == "--installed-payload")
+                self.assertLess(checks[0], payload)
+                if vision:
+                    install = next(
+                        i
+                        for i, c in enumerate(calls)
+                        if any(str(a).endswith("requirements-vision.lock") for a in c)
+                    )
+                    suite = next(i for i, c in enumerate(calls) if c[-1] == "test*rectification.py")
+                    self.assertLess(install, checks[1])
+                    self.assertLess(checks[1], suite)
+
     def test_invalid_processing_counts_do_not_qualify_viewer_independence(self):
         for counts in (
             [False, True],

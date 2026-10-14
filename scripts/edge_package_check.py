@@ -62,6 +62,21 @@ def verify_installed_console(python: Path, work: Path, env):
         raise ValueError("installed_console_help_empty")
 
 
+def verify_installed_dependencies(python: Path, work: Path, env):
+    # --no-deps binds our wheels without resolving their requirements. Verify
+    # the resulting installed environment offline before running consumers.
+    # pip owns marker/version semantics; this is not an extras or security audit.
+    subprocess.run(
+        [str(python), "-I", "-m", "pip", "check"],
+        cwd=work,
+        env=env,
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+
+
 def wheel_inventory(directory: Path):
     try:
         return {wheel.name: wheel for wheel in package_check.wheel_paths(directory)}
@@ -200,6 +215,7 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
             stdout=subprocess.DEVNULL,
             timeout=180,
         )
+        verify_installed_dependencies(python, work, env)
         for distribution, flag in (
             ("aethron", "--installed-payload"),
             ("aethron-edge", "--installed-edge-payload"),
@@ -365,6 +381,7 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                 timeout=180,
                 stdout=subprocess.DEVNULL,
             )
+            verify_installed_dependencies(python, work, env)
             for name in (
                 "test_rectification.py",
                 "test_fisheye_rectification.py",
