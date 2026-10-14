@@ -72,6 +72,17 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
         sources = {}
         for member in wheel.infolist():
             name = member.filename
+            # Check every record before filtering package sources: an alias can
+            # fall outside that prefix yet normalize into it during installation.
+            # Accept canonical relative ZIP paths on every host, including explicit
+            # directory records, without guessing the installer's normalization.
+            path = name[:-1] if member.is_dir() else name
+            if (
+                "\\" in path
+                or ":" in path
+                or any(part in ("", ".", "..") for part in path.split("/"))
+            ):
+                raise ValueError("wheel_source_payload_mismatch")
             parts = name.split("/", 2)
             # Installers spread these records into the same import directories
             # as root members. Compare destination names and reject collisions

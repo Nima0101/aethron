@@ -36,6 +36,8 @@ class CorePackagePayload(unittest.TestCase):
                 records.append(("aethron/retired.py", b"# stale extra file\n"))
             elif defect == "duplicate":
                 records.append(records[0])
+            elif defect == "path-alias":
+                records.append(("./" + records[0][0], b"# replaced source\n"))
             elif defect and defect.startswith("spread-"):
                 _, scheme, kind = defect.split("-")
                 name = "aethron/retired.py" if kind == "extra" else records[0][0]
@@ -87,6 +89,43 @@ class CorePackagePayload(unittest.TestCase):
 
     def test_matching_payload_reaches_consumer(self):
         self.check_payload()
+
+    def test_path_alias_is_rejected_before_installation(self):
+        self.check_payload("path-alias")
+
+    def test_noncanonical_member_paths_are_rejected_for_core_and_edge(self):
+        for package in ("aethron", "aethron_edge"):
+            name = f"{package}/module.py"
+            payload = {name: b"VALUE = 1\n"}
+            aliases = (
+                "./" + name,
+                "unused/../" + name,
+                "/" + name,
+                "C:/" + name,
+                name.replace("/", "\\"),
+                f"{package}-0.2.0.data//purelib/{name}",
+                f"{package}-0.2.0.data/./platlib/{name}",
+                f"{package}-0.2.0.data/purelib/unused/../{name}",
+                f"{package}-0.2.0.data/platlib//{name}",
+            )
+            for alias in aliases:
+                with self.subTest(package=package, alias=alias):
+                    archive = io.BytesIO()
+                    with zipfile.ZipFile(archive, "w") as wheel:
+                        wheel.writestr(name, payload[name])
+                        wheel.writestr(alias, b"VALUE = 2\n")
+                    with self.assertRaisesRegex(ValueError, "wheel_source_payload_mismatch"):
+                        package_check.validate_source_payload(archive.getvalue(), payload, package)
+
+    def test_canonical_directory_records_and_unicode_resources_are_allowed(self):
+        payload = {"aethron/module.py": b"VALUE = 1\n"}
+        archive = io.BytesIO()
+        with zipfile.ZipFile(archive, "w") as wheel:
+            wheel.writestr("aethron/", b"")
+            wheel.writestr("aethron/module.py", payload["aethron/module.py"])
+            wheel.writestr("aethron-0.2.0.dist-info/licenses/", b"")
+            wheel.writestr("aethron-0.2.0.dist-info/licenses/caf\u00e9.txt", b"license\n")
+        package_check.validate_source_payload(archive.getvalue(), payload)
 
     def test_spread_payload_cannot_override_or_extend_verified_sources(self):
         for scheme in ("purelib", "platlib"):
