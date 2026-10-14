@@ -44,6 +44,12 @@ WINDOWS_RESERVED_PATHS = tuple(
     for name in (component, b"source/" + component, component + b"/file.txt")
 )
 
+GIT_METADATA_PATHS = tuple(
+    name
+    for component in (b".git", b".GIT", b".Git", b".gIt")
+    for name in (component, b"source/" + component, component + b"/config")
+)
+
 INVALID_NAMES = (
     (
         b".",
@@ -61,6 +67,7 @@ INVALID_NAMES = (
     + WINDOWS_DEVICE_PATHS
     + WINDOWS_PATH_ENDINGS
     + WINDOWS_RESERVED_PATHS
+    + GIT_METADATA_PATHS
 )
 
 
@@ -141,6 +148,12 @@ class ReleaseSourcePaths(unittest.TestCase):
     def test_valid_names_preserve_exact_bytes(self):
         for name in (
             b".hidden",
+            b".github",
+            b".gitignore",
+            b".gitattributes",
+            b".gitmodules",
+            b"git",
+            b"file.git",
             b"two words",
             b"file!#$%&'()+,-;=@[]^_`{}~.txt",
             "file\u0085\u2028\uff1f.txt".encode(),
@@ -168,7 +181,7 @@ class ReleaseSourcePaths(unittest.TestCase):
                     {"source/" + name.decode(): b"synthetic payload\n"},
                 )
 
-    def test_archive_rejects_nonportable_windows_names(self):
+    def test_archive_rejects_reserved_source_names(self):
         # Real, otherwise canonical archives must not qualify names rejected
         # before checkout inspection. No Windows filesystem access is needed.
         data = b"synthetic payload\n"
@@ -177,6 +190,7 @@ class ReleaseSourcePaths(unittest.TestCase):
             + WINDOWS_DEVICE_PATHS
             + WINDOWS_PATH_ENDINGS
             + WINDOWS_RESERVED_PATHS
+            + GIT_METADATA_PATHS
         ):
             with self.subTest(name=raw):
                 name = raw.decode()
