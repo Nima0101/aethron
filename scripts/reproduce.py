@@ -590,6 +590,10 @@ def run():
             env=env,
             timeout=VERIFICATION_TIMEOUT_SECONDS,
         )
+        # Match edge reproduction: do not let a later child run against changed
+        # source or restore it before a batched check. These are stage boundaries,
+        # not protection against changes made and restored inside one child.
+        validate_source(clone, revision)
         evaluation = subprocess.run(
             [sys.executable, "scripts/temporal_evaluate.py", "--out", str(root / "evaluation")],
             cwd=clone,
@@ -597,6 +601,7 @@ def run():
             env=env,
             timeout=VERIFICATION_TIMEOUT_SECONDS,
         )
+        validate_source(clone, revision)
         with (root / "demo.jsonl").open("w") as stream:
             call(
                 [sys.executable, "-m", "aethron", "demo"],
@@ -605,6 +610,7 @@ def run():
                 env=env,
                 timeout=CONSUMER_TIMEOUT_SECONDS,
             )
+        validate_source(clone, revision)
         with (root / "result.json").open("w") as stream:
             call(
                 [sys.executable, "-m", "aethron", "evaluate", "examples/person-blackout.json"],
@@ -613,6 +619,7 @@ def run():
                 env=env,
                 timeout=CONSUMER_TIMEOUT_SECONDS,
             )
+        validate_source(clone, revision)
         with (root / "view.svg").open("w") as stream:
             call(
                 [
@@ -642,12 +649,14 @@ def run():
         )
         assert refused.returncode != 0 and b"clean committed source" in refused.stderr
         probe.unlink()
+        validate_source(clone, revision)
         call(
             [sys.executable, "scripts/release.py", str(root / "a")],
             clone,
             env=env,
             timeout=RELEASE_TIMEOUT_SECONDS,
         )
+        validate_source(clone, revision)
         call(
             [sys.executable, "scripts/release.py", str(root / "b")],
             clone,
