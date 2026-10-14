@@ -205,6 +205,7 @@ def run():
                 env=env,
                 check=True,
                 stdout=subprocess.DEVNULL,
+                timeout=180,
             )
         first = wheel_paths(temp / "a")
         second = wheel_paths(temp / "b")
@@ -222,7 +223,12 @@ def run():
         ).hexdigest()
         wheel_sha256 = hashlib.sha256(compared_bytes).hexdigest()
 
-        subprocess.run([sys.executable, "-m", "venv", str(temp / "consumer")], env=env, check=True)
+        subprocess.run(
+            [sys.executable, "-m", "venv", str(temp / "consumer")],
+            env=env,
+            check=True,
+            timeout=180,
+        )
         python = temp / "consumer" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
         subprocess.run(
             [
@@ -240,6 +246,7 @@ def run():
             env=env,
             check=True,
             stdout=subprocess.DEVNULL,
+            timeout=180,
         )
         installed = subprocess.run(
             [str(python), "-I", str(Path(__file__).resolve()), "--installed-payload"],
@@ -270,6 +277,7 @@ def run():
             check=True,
             capture_output=True,
             text=True,
+            timeout=30,
         )
         rows = [json.loads(line) for line in result.stdout.splitlines()]
         assert len(rows) == 22
@@ -292,6 +300,7 @@ def run():
             check=True,
             capture_output=True,
             text=True,
+            timeout=30,
         )
         tracked = [json.loads(line) for line in temporal.stdout.splitlines()]
         assert len(tracked) == 24

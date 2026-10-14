@@ -186,6 +186,50 @@ class CorePackageReport(unittest.TestCase):
                 self.assertEqual(len(calls), fail_at)
                 self.assertEqual(output.getvalue(), "")
 
+    def test_stalled_children_are_bounded_and_retain_failure_evidence(self):
+        # Each stage must supply a finite timeout before starting its child.
+        for fail_at in range(1, 9):
+            with self.subTest(fail_at=fail_at), self.fixture() as fixture:
+                output, _, calls = fixture
+                process = package_check.subprocess.run.side_effect
+                failure = subprocess.TimeoutExpired(
+                    ["stalled-package-child"], 1, output=b"partial output", stderr=b"diagnostic"
+                )
+
+                def stall(
+                    args,
+                    *,
+                    calls=calls,
+                    fail_at=fail_at,
+                    failure=failure,
+                    process=process,
+                    **kwargs,
+                ):
+                    if len(calls) + 1 == fail_at:
+                        timeout = kwargs.get("timeout")
+                        self.assertIsInstance(timeout, (int, float))
+                        self.assertGreater(timeout, 0)
+                        self.assertLessEqual(timeout, 180)
+                        calls.append(args)
+                        raise failure
+                    return process(args, **kwargs)
+
+                diagnostics = io.StringIO()
+                with (
+                    patch.object(package_check.subprocess, "run", side_effect=stall),
+                    contextlib.redirect_stderr(diagnostics),
+                    self.assertRaises(subprocess.TimeoutExpired) as raised,
+                ):
+                    package_check.run()
+                workspace = Path(calls[0][-1]).parent
+                self.assertIs(raised.exception, failure)
+                self.assertEqual(raised.exception.output, b"partial output")
+                self.assertEqual(raised.exception.stderr, b"diagnostic")
+                self.assertEqual(len(calls), fail_at, "no retry or later consumer after timeout")
+                self.assertEqual(output.getvalue(), "")
+                self.assertTrue(workspace.is_dir(), "timeout evidence was deleted")
+                self.assertIn(str(workspace), diagnostics.getvalue())
+
     def test_failed_children_retain_package_evidence(self):
         for fail_at in range(1, 9):
             with self.subTest(fail_at=fail_at), self.fixture(fail_at=fail_at) as fixture:
