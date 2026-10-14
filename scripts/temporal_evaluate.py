@@ -344,9 +344,20 @@ def run(outdir, include_recorded=True):
         del report["failure_stage"]
     finally:
         # Keep completed measurements even when a gate or execution is interrupted.
-        (outdir / "temporal-evaluation.json").write_text(
-            json.dumps(report, sort_keys=True, indent=2) + "\n"
-        )
+        payload = json.dumps(report, sort_keys=True, indent=2) + "\n"
+        (outdir / "temporal-evaluation.json").write_text(payload, encoding="utf-8")
+        if not report["passed"]:
+            # The latest report is replaced on retry. Retain every failed run,
+            # including provenance, input and execution failures, independently.
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                dir=outdir,
+                prefix="temporal-run-failure-",
+                suffix=".json",
+                delete=False,
+            ) as stream:
+                stream.write(payload)
     print(json.dumps(report, sort_keys=True))
     return report
 
