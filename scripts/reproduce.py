@@ -188,6 +188,32 @@ def validate_sbom(payload):
             raise ValueError("release_sbom_invalid")
         seen.add(name)
 
+    # These declarations distinguish separately installed extras from the
+    # stdlib-only zipapp. Reproducible bytes alone cannot establish them.
+    if bom.get("dependencies") != []:
+        raise ValueError("release_sbom_invalid")
+    expected_properties = {
+        "aethron:optional-vision": "numpy2.3.5;opencv-python-headless4.13.0.92; separately installed, not in zipapp",
+        "aethron:optional-coreml": "onnxruntime1.30.0;flatbuffers25.12.19;protobuf7.36.2; separate macOS Apple Silicon opt-in, not bundled",
+        "aethron:optional-model-sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+    }
+    properties = bom.get("properties")
+    if not isinstance(properties, list) or len(properties) != len(expected_properties):
+        raise ValueError("release_sbom_invalid")
+    seen = set()
+    for entry in properties:
+        if not isinstance(entry, dict):
+            raise ValueError("release_sbom_invalid")
+        name = entry.get("name")
+        if (
+            not isinstance(name, str)
+            or name not in expected_properties
+            or name in seen
+            or entry != {"name": name, "value": expected_properties[name]}
+        ):
+            raise ValueError("release_sbom_invalid")
+        seen.add(name)
+
 
 def validate_checksums(payload, manifest):
     """Require the builder's canonical checksum inventory for the compared bytes."""

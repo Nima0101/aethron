@@ -61,7 +61,20 @@ SBOM = {
         },
     ],
     "dependencies": [],
-    "properties": [],
+    "properties": [
+        {
+            "name": "aethron:optional-vision",
+            "value": "numpy2.3.5;opencv-python-headless4.13.0.92; separately installed, not in zipapp",
+        },
+        {
+            "name": "aethron:optional-coreml",
+            "value": "onnxruntime1.30.0;flatbuffers25.12.19;protobuf7.36.2; separate macOS Apple Silicon opt-in, not bundled",
+        },
+        {
+            "name": "aethron:optional-model-sha256",
+            "value": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+        },
+    ],
 }
 SBOM_BYTES = json.dumps(SBOM).encode()
 SOURCE_FILES = {
@@ -1140,6 +1153,75 @@ with module.reproduction_workspace() as temporary:
                 self.assertEqual(str(error), "release_sbom_invalid")
                 self.assertEqual(output, "")
                 self.assertEqual(consumers, [])
+
+    def test_sbom_dependency_declarations_reject_before_consumers(self):
+        cases = []
+        for field, values in (
+            (
+                "dependencies",
+                (
+                    None,
+                    {},
+                    "dependencies",
+                    False,
+                    0,
+                    [None],
+                    [{"ref": "aethron", "dependsOn": ["undeclared"]}],
+                ),
+            ),
+            ("properties", (None, [], {}, "properties", False, [None])),
+        ):
+            bom = json.loads(SBOM_BYTES)
+            del bom[field]
+            cases.append(bom)
+            for value in values:
+                bom = json.loads(SBOM_BYTES)
+                bom[field] = value
+                cases.append(bom)
+        for index in range(3):
+            bom = json.loads(SBOM_BYTES)
+            del bom["properties"][index]
+            cases.append(bom)
+            bom = json.loads(SBOM_BYTES)
+            bom["properties"].append(bom["properties"][index])
+            cases.append(bom)
+            bom = json.loads(SBOM_BYTES)
+            bom["properties"][index] = bom["properties"][(index + 1) % 3]
+            cases.append(bom)
+            for value in (None, [], "property"):
+                bom = json.loads(SBOM_BYTES)
+                bom["properties"][index] = value
+                cases.append(bom)
+            for field in ("name", "value"):
+                bom = json.loads(SBOM_BYTES)
+                del bom["properties"][index][field]
+                cases.append(bom)
+                for value in (None, [], {}, False, 0, "", "incorrect"):
+                    bom = json.loads(SBOM_BYTES)
+                    bom["properties"][index][field] = value
+                    cases.append(bom)
+        bom = json.loads(SBOM_BYTES)
+        bom["properties"].append({"name": "undeclared", "value": "dependency"})
+        cases.append(bom)
+        for index, bom in enumerate(cases):
+            with self.subTest(case=index):
+                output, error, consumers, _, _ = self.invoke(
+                    sbom_bytes=json.dumps(bom).encode(), real_consumers=True, check_workspace=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_sbom_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_sbom_property_order_preserves_acceptance(self):
+        bom = json.loads(SBOM_BYTES)
+        bom["properties"].reverse()
+        output, error, consumers, _, _ = self.invoke(
+            sbom_bytes=json.dumps(bom, indent=2).encode(), real_consumers=True
+        )
+        self.assertIsNone(error)
+        self.assertEqual(len(consumers), 2)
+        self.assertTrue(json.loads(output)["byte_identical_builds"])
 
     def test_sbom_component_order_and_descriptions_preserve_acceptance(self):
         bom = json.loads(SBOM_BYTES)
