@@ -79,11 +79,13 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
             # fall outside that prefix yet normalize into it during installation.
             # Accept canonical relative ZIP paths on every host, including explicit
             # directory records, without guessing the installer's normalization.
+            # Trailing dots/spaces in any component are not portable Windows
+            # names and can alias a verified destination after installation.
             path = name[:-1] if member.is_dir() else name
             if (
                 "\\" in path
                 or ":" in path
-                or any(part in ("", ".", "..") for part in path.split("/"))
+                or any(not part or part.endswith((".", " ")) for part in path.split("/"))
             ):
                 raise ValueError("wheel_source_payload_mismatch")
             parts = name.split("/", 2)

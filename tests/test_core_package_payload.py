@@ -40,6 +40,10 @@ class CorePackagePayload(unittest.TestCase):
                 records.append(("./" + records[0][0], b"# replaced source\n"))
             elif defect == "case-alias":
                 records.append((records[0][0].upper(), b"# replaced source\n"))
+            elif defect == "trailing-dot":
+                records.append((records[0][0] + ".", b"# replaced source\n"))
+            elif defect == "trailing-space":
+                records.append((records[0][0] + " ", b"# replaced source\n"))
             elif defect and defect.startswith("spread-"):
                 _, scheme, kind = defect.split("-")
                 name = "aethron/retired.py" if kind == "extra" else records[0][0]
@@ -97,6 +101,44 @@ class CorePackagePayload(unittest.TestCase):
 
     def test_case_alias_is_rejected_before_installation(self):
         self.check_payload("case-alias")
+
+    def test_trailing_dot_or_space_is_rejected_before_installation(self):
+        for defect in ("trailing-dot", "trailing-space"):
+            with self.subTest(defect=defect):
+                self.check_payload(defect)
+
+    def test_nonportable_component_endings_are_rejected_for_core_and_edge(self):
+        for package in ("aethron", "aethron_edge"):
+            name = f"{package}/module.py"
+            payload = {name: b"VALUE = 1\n"}
+            for prefix in ("", f"{package}-0.2.0.data/purelib/", f"{package}-0.2.0.data/platlib/"):
+                for ending in (".", " ", "..", ". "):
+                    for alias in (
+                        name + ending,
+                        f"{package}{ending}/module.py",
+                        f"{package}/resources{ending}/notes.txt",
+                        f"{package}/resources{ending}/",
+                    ):
+                        with self.subTest(package=package, prefix=prefix, alias=alias):
+                            archive = io.BytesIO()
+                            with zipfile.ZipFile(archive, "w") as wheel:
+                                wheel.writestr(name, payload[name])
+                                wheel.writestr(prefix + alias, b"replacement\n")
+                            with self.assertRaisesRegex(
+                                ValueError, "wheel_source_payload_mismatch"
+                            ):
+                                package_check.validate_source_payload(
+                                    archive.getvalue(), payload, package
+                                )
+
+    def test_internal_dots_spaces_and_leading_dots_are_allowed(self):
+        payload = {"aethron/module.py": b"VALUE = 1\n"}
+        archive = io.BytesIO()
+        with zipfile.ZipFile(archive, "w") as wheel:
+            wheel.writestr("aethron/module.py", payload["aethron/module.py"])
+            wheel.writestr("aethron/.resources/", b"")
+            wheel.writestr("aethron/.resources/caf\u00e9 notes.v1.txt", b"resource\n")
+        package_check.validate_source_payload(archive.getvalue(), payload)
 
     def test_case_aliases_cannot_override_or_extend_package_sources(self):
         for package in ("aethron", "aethron_edge"):
