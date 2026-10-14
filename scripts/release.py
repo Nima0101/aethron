@@ -19,6 +19,17 @@ else:
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _source_name(raw):
+    """Match archive admission before host paths can normalize source names."""
+    try:
+        name = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        raise ValueError("release_source_path_invalid") from None
+    if any(part in ("", ".", "..") for part in name.split("/")) or "\\" in name or "\x00" in name:
+        raise ValueError("release_source_path_invalid")
+    return name
+
+
 def committed_blobs(revision, *, root=None):
     """Read one immutable Git tree, never the mutable checkout behind provenance."""
     require_default_git_context(os.environ)
@@ -35,6 +46,7 @@ def committed_blobs(revision, *, root=None):
             continue
         metadata, name = record.split(b"\t", 1)
         mode, kind, oid = metadata.split()
+        name = _source_name(name)
         # Match public-tree admission before reducing the inventory to blobs.
         # Including directories exposes duplicate subtrees and file/directory
         # collisions even when their descendant file paths are all distinct.
@@ -45,7 +57,7 @@ def committed_blobs(revision, *, root=None):
             continue
         if mode not in (b"100644", b"100755") or kind != b"blob":
             raise ValueError("release_requires_regular_blobs")
-        entries.append((name.decode("utf-8"), oid))
+        entries.append((name, oid))
     entries.sort()
     payload = io.BytesIO(
         subprocess.check_output(
@@ -73,16 +85,12 @@ def committed_blobs(revision, *, root=None):
 def build(destination):
     require_default_git_context(os.environ)
     # Local refs/replace must not redefine the revision named by provenance.
-    names = (
-        subprocess.check_output(
-            ["git", "--no-replace-objects", "ls-files", "-z"],
-            cwd=ROOT,
-            timeout=GIT_COMMAND_TIMEOUT_SECONDS,
-        )
-        .decode()
-        .split("\0")
+    names = subprocess.check_output(
+        ["git", "--no-replace-objects", "ls-files", "-z"],
+        cwd=ROOT,
+        timeout=GIT_COMMAND_TIMEOUT_SECONDS,
     )
-    names = sorted(n for n in names if n)
+    names = sorted(_source_name(n) for n in names.split(b"\0") if n)
     revision = subprocess.check_output(
         ["git", "--no-replace-objects", "rev-parse", "HEAD"],
         cwd=ROOT,
