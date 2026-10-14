@@ -218,13 +218,24 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
             # package resources and directory records are not startup hooks.
             if not member.is_dir() and "/" not in name and name.casefold().endswith(".pth"):
                 raise ValueError("wheel_source_payload_mismatch")
+            top = name.split("/", 1)[0].casefold()
+            # Distribution metadata affects dependency/version discovery even
+            # when all verified Python sources remain unchanged. Spread layouts
+            # can overwrite another distribution's metadata without presenting
+            # a second dist-info directory at the wheel root. Each source wheel
+            # owns only its matching dist-info namespace and emits no legacy
+            # egg-info. Nested examples are not discovery roots. This checks
+            # destination ownership, not the contents of package metadata.
+            if top.endswith(".egg-info") or (
+                top.endswith(".dist-info") and top.split("-", 1)[0] != package_name.casefold()
+            ):
+                raise ValueError("wheel_source_payload_mismatch")
             # Python also imports sitecustomize (even with -I) and, when user
             # sites are enabled, usercustomize before the consumer can inspect
             # installed sources. Neither distribution declares these hooks.
             # Reserve their top-level package names and source/native modules
             # across supported platforms; nested package modules are ordinary
             # sources and still participate in payload parity below.
-            top = name.split("/", 1)[0].casefold()
             startup_modules = ("sitecustomize", "usercustomize")
             if top in startup_modules or (
                 top.split(".", 1)[0] in startup_modules
