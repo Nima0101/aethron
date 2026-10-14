@@ -8,6 +8,7 @@ import math
 import platform
 import statistics
 import sys
+import tempfile
 import time
 import tracemalloc
 from pathlib import Path
@@ -229,11 +230,35 @@ def benchmark():
     return report
 
 
+def retain_metric_failure(outdir, fixture, payload, gate, metrics):
+    """Preserve this failed attempt without replacing earlier evidence."""
+    report = {
+        "protocol": "matrix-v3.md frozen T09",
+        "passed": False,
+        "complete": False,
+        "fixture": fixture,
+        "fixture_sha256": hashlib.sha256(payload).hexdigest(),
+        "evaluation_script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "gate": gate,
+        "metrics": metrics,
+    }
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        dir=outdir,
+        prefix="temporal-evaluation-failure-",
+        suffix=".json",
+        delete=False,
+    ) as stream:
+        stream.write(json.dumps(report, sort_keys=True, indent=2) + "\n")
+
+
 def run(outdir, include_recorded=True):
     outdir.mkdir(parents=True, exist_ok=True)
     reports = {}
     for path in sorted((ROOT / "data/temporal").glob("*.json")):
-        entries = json.loads(path.read_text())
+        payload = path.read_bytes()
+        entries = json.loads(payload.decode("utf-8"))
         actual, baseline = outputs(entries)
         reports[path.stem] = {
             "temporal": metrics(entries, actual),
@@ -244,9 +269,13 @@ def run(outdir, include_recorded=True):
                 reports[path.stem]["temporal"]["id_switches"]
                 <= reports[path.stem]["greedy_iou"]["id_switches"]
             ):
+                retain_metric_failure(outdir, path.stem, payload, "id_switches", reports[path.stem])
                 raise AssertionError
         if path.stem == "clean":
             if not reports[path.stem]["temporal"]["recall"] >= 0.9:
+                retain_metric_failure(
+                    outdir, path.stem, payload, "clean_recall", reports[path.stem]
+                )
                 raise AssertionError
     report = {
         "protocol": "matrix-v3.md frozen T09/T10/T13",
