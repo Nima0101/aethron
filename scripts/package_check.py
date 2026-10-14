@@ -143,11 +143,16 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
             if len(parts) == 3 and parts[0].endswith(".data"):
                 data_parts = parts[2].split("/")
                 # The data scheme is relative to the environment prefix.
-                # pyvenv.cfg belongs to the environment creator: replacing it
-                # can change interpreter isolation before source probes run.
+                # Environment configuration belongs to the environment creator.
+                # pyvenv.cfg changes interpreter isolation; pip.conf/pip.ini
+                # change subsequent installer behavior even with --isolated.
                 # Reserve the destination across hosts, including directory
                 # aliases, while permitting nested documentation examples.
-                if parts[1] == "data" and data_parts[0].casefold() == "pyvenv.cfg":
+                if parts[1] == "data" and data_parts[0].casefold() in (
+                    "pyvenv.cfg",
+                    "pip.conf",
+                    "pip.ini",
+                ):
                     raise ValueError("wheel_source_payload_mismatch")
                 if parts[1] == "scripts" or (
                     parts[1] == "data"
