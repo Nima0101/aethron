@@ -242,6 +242,31 @@ def source_archive(defect=None, *, files=None, metadata=None):
             member.size = len(data)
             archive.addfile(member, io.BytesIO(data))
     raw = buffer.getvalue()
+    if defect in (
+        "tar-padding-first",
+        "tar-padding-last",
+        "tar-no-end",
+        "tar-one-end",
+        "tar-short-end",
+        "tar-short-second-end",
+    ):
+        with tarfile.open(fileobj=io.BytesIO(raw), mode="r:") as archive:
+            members = archive.getmembers()
+        if defect.startswith("tar-padding"):
+            member = members[0] if defect == "tar-padding-first" else members[-1]
+            offset = member.offset_data + member.size
+            assert offset % 512
+            raw = raw[:offset] + b"X" + raw[offset + 1 :]
+        else:
+            end = members[-1].offset_data + members[-1].size
+            end = (end + 511) // 512 * 512
+            retained = {
+                "tar-no-end": 0,
+                "tar-one-end": 512,
+                "tar-short-end": 100,
+                "tar-short-second-end": 612,
+            }[defect]
+            raw = raw[: end + retained]
     if defect == "truncated":
         raw = raw[:520]
     if defect in ("tar-trailing-file", "gzip-trailing-file", "tar-trailing-duplicate"):
@@ -1090,6 +1115,45 @@ with module.reproduction_workspace() as temporary:
                 self.assertEqual(
                     reproduce.validate_source_archive(padded, SOURCE_MANIFEST),
                     json.loads(SOURCE_MANIFEST),
+                )
+
+    def test_source_tar_framing_rejects_before_consumers(self):
+        for defect in (
+            "tar-padding-first",
+            "tar-padding-last",
+            "tar-no-end",
+            "tar-one-end",
+            "tar-short-end",
+            "tar-short-second-end",
+        ):
+            with self.subTest(defect=defect):
+                output, error, consumers, _, _ = self.invoke(
+                    archive_defect=defect, check_workspace=True, real_consumers=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_source_archive_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_source_tar_block_boundaries_remain_valid(self):
+        # Exercise no padding, one-byte padding, and nearly a whole padding block,
+        # including an empty final member and the minimal two-block end marker.
+        files = {
+            f"size-{size}.bin": bytes(range(256)) * (size // 256) + b"x" * (size % 256)
+            for size in (1, 511, 512, 513, 1024, 0)
+        }
+        manifest = json.dumps(
+            {name: hashlib.sha256(data).hexdigest() for name, data in files.items()}
+        ).encode()
+        raw = gzip.decompress(source_archive(files=files))
+        with tarfile.open(fileobj=io.BytesIO(raw), mode="r:") as archive:
+            last = archive.getmembers()[-1]
+        end = (last.offset_data + last.size + 511) // 512 * 512
+        for payload in (raw, raw[: end + 1024]):
+            with self.subTest(length=len(payload)):
+                self.assertEqual(
+                    reproduce.validate_source_archive(gzip.compress(payload, mtime=0), manifest),
+                    json.loads(manifest),
                 )
 
     def test_identical_zip_defects_reject_before_consumers(self):

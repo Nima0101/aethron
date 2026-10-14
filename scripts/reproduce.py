@@ -189,6 +189,7 @@ def validate_source_archive(payload, manifest_payload):
                 raise ValueError("invalid manifest entry")
         expected = {"aethron-0.2.0/" + name: digest for name, digest in manifest.items()}
         seen = set()
+        end_offset = 0
         with gzip.GzipFile(fileobj=io.BytesIO(payload), mode="rb") as compressed:
             with tarfile.open(fileobj=compressed, mode="r:") as archive:
                 for member in archive:
@@ -212,6 +213,20 @@ def validate_source_archive(payload, manifest_payload):
                             digest.update(chunk)
                     if digest.hexdigest() != expected[member.name]:
                         raise ValueError("archive content mismatch")
+                    # Member hashes exclude block padding, and tarfile skips it.
+                    # Require the zero fill emitted by the existing USTAR writer.
+                    data_end = member.offset_data + member.size
+                    padding_size = -member.size % tarfile.BLOCKSIZE
+                    compressed.seek(data_end)
+                    if compressed.read(padding_size) != b"\x00" * padding_size:
+                        raise ValueError("invalid archive padding")
+                    end_offset = data_end + padding_size
+            # tarfile tolerates EOF and some malformed headers after members.
+            # Recheck from the last data block, including the first end marker
+            # already consumed by iteration, and require both complete zero blocks.
+            compressed.seek(end_offset)
+            if compressed.read(2 * tarfile.BLOCKSIZE) != b"\x00" * (2 * tarfile.BLOCKSIZE):
+                raise ValueError("invalid archive end marker")
             # TAR iteration stops at its end marker, before gzip necessarily checks
             # the CRC/size trailer. Drain through EOF, including subsequent members.
             # Only zero padding may follow: a later TAR or arbitrary payload must
