@@ -74,6 +74,10 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
         sources = {}
         folded_sources = set()
         for member in wheel.infolist():
+            # ZipInfo truncates filename at NUL; inspecting only that normalized
+            # spelling would silently admit a different original archive name.
+            if "\x00" in member.orig_filename:
+                raise ValueError("wheel_source_payload_mismatch")
             name = member.filename
             # Check every record before filtering package sources: an alias can
             # fall outside that prefix yet normalize into it during installation.

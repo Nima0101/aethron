@@ -154,6 +154,8 @@ class PackageInputEvidence(unittest.TestCase):
                                 records.append((selected + "/retired.py", b"# stale extra\n"))
                             elif wheel_defect == "duplicate":
                                 records.append(records[0])
+                            elif wheel_defect == "nul-name":
+                                records.append((selected + "/notes.txt@ignored", b"resource\n"))
                         wheel = destination / (selected + "-" + version + "-py3-none-any.whl")
                         with warnings.catch_warnings():
                             warnings.simplefilter("ignore", UserWarning)
@@ -162,6 +164,12 @@ class PackageInputEvidence(unittest.TestCase):
                                     # Mock builds must differ only by the requested defect.
                                     member = zipfile.ZipInfo(name, (2026, 1, 1, 0, 0, 0))
                                     archive.writestr(member, data)
+                        if selected == package and wheel_defect == "nul-name":
+                            wheel.write_bytes(
+                                wheel.read_bytes().replace(
+                                    b"notes.txt@ignored", b"notes.txt\x00ignored"
+                                )
+                            )
                     if mutate_source:
                         (root / "integrations/edge/aethron_edge/__init__.py").write_bytes(
                             b"changed"
@@ -411,6 +419,11 @@ class PackageInputEvidence(unittest.TestCase):
             for defect in ("changed", "missing", "extra", "duplicate"):
                 with self.subTest(package=package, defect=defect):
                     self.probe(wheel_defect=defect, package=package)
+
+    def test_nul_wheel_member_rejects_before_consumers_or_report(self):
+        for package in ("aethron", "aethron_edge"):
+            with self.subTest(package=package):
+                self.probe(wheel_defect="nul-name", package=package)
 
     def test_installed_source_mismatch_rejects_before_consumers(self):
         for package in ("aethron", "aethron_edge"):

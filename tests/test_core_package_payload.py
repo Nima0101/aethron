@@ -44,6 +44,8 @@ class CorePackagePayload(unittest.TestCase):
                 records.append((records[0][0] + ".", b"# replaced source\n"))
             elif defect == "trailing-space":
                 records.append((records[0][0] + " ", b"# replaced source\n"))
+            elif defect == "nul-name":
+                records.append(("aethron/notes.txt@ignored", b"resource\n"))
             elif defect and defect.startswith("spread-"):
                 _, scheme, kind = defect.split("-")
                 name = "aethron/retired.py" if kind == "extra" else records[0][0]
@@ -56,6 +58,9 @@ class CorePackagePayload(unittest.TestCase):
                     archive.writestr(
                         "aethron/_bounds.synthetic.so", b"not covered by source parity"
                     )
+            wheel_bytes = wheel.getvalue()
+            if defect == "nul-name":
+                wheel_bytes = wheel_bytes.replace(b"notes.txt@ignored", b"notes.txt\x00ignored")
             calls = []
 
             def process(args, **kwargs):
@@ -63,7 +68,7 @@ class CorePackagePayload(unittest.TestCase):
                 if args[1:4] == ["-m", "build", "--no-isolation"]:
                     destination = Path(args[args.index("--outdir") + 1])
                     destination.mkdir()
-                    (destination / "aethron-0.2.0-py3-none-any.whl").write_bytes(wheel.getvalue())
+                    (destination / "aethron-0.2.0-py3-none-any.whl").write_bytes(wheel_bytes)
                     if mutate_source:
                         (root / "aethron/__init__.py").write_bytes(b"# replaced during build\n")
                     return subprocess.CompletedProcess(args, 0)
@@ -101,6 +106,42 @@ class CorePackagePayload(unittest.TestCase):
 
     def test_case_alias_is_rejected_before_installation(self):
         self.check_payload("case-alias")
+
+    def test_nul_member_is_rejected_before_installation(self):
+        self.check_payload("nul-name")
+
+    def test_nul_member_names_reject_before_source_reads_for_core_and_edge(self):
+        for package in ("aethron", "aethron_edge"):
+            name = f"{package}/module.py"
+            payload = {name: b"VALUE = 1\n"}
+            for prefix in ("", f"{package}-0.2.0.data/purelib/", f"{package}-0.2.0.data/platlib/"):
+                for member in (name, f"{package}/notes.txt", f"{package}/resources/"):
+                    with self.subTest(package=package, prefix=prefix, member=member):
+                        archive = io.BytesIO()
+                        encoded = (prefix + member + "@ignored").encode()
+                        with zipfile.ZipFile(archive, "w") as wheel:
+                            if member != name:
+                                wheel.writestr(name, payload[name])
+                            wheel.writestr(encoded.decode(), payload[name])
+                        # Patch both ZIP headers after writing: ZipInfo itself
+                        # truncates NUL names, so writestr cannot create this case.
+                        raw = archive.getvalue()
+                        self.assertEqual(raw.count(encoded), 2)
+                        raw = raw.replace(encoded, encoded.replace(b"@", b"\x00"))
+                        with zipfile.ZipFile(io.BytesIO(raw)) as wheel:
+                            self.assertIn("\x00", wheel.infolist()[-1].orig_filename)
+                            self.assertNotIn("\x00", wheel.infolist()[-1].filename)
+                        with (
+                            patch.object(
+                                zipfile.ZipFile,
+                                "read",
+                                side_effect=AssertionError(
+                                    "payload read before malformed name rejection"
+                                ),
+                            ),
+                            self.assertRaisesRegex(ValueError, "wheel_source_payload_mismatch"),
+                        ):
+                            package_check.validate_source_payload(raw, payload, package)
 
     def test_trailing_dot_or_space_is_rejected_before_installation(self):
         for defect in ("trailing-dot", "trailing-space"):
