@@ -17,7 +17,7 @@ class CorePackageInventory(unittest.TestCase):
     wheel = "aethron-0.2.0-py3-none-any.whl"
 
     def compare(self, first, second, *, mutate=None):
-        make_directory = tempfile.TemporaryDirectory
+        workspace = package_check.reproduction_workspace
         with tempfile.TemporaryDirectory() as directory:
             output = io.StringIO()
             read_bytes = Path.read_bytes
@@ -42,9 +42,9 @@ class CorePackageInventory(unittest.TestCase):
 
             with (
                 patch.object(
-                    package_check.tempfile,
-                    "TemporaryDirectory",
-                    side_effect=lambda **kwargs: make_directory(dir=directory, **kwargs),
+                    package_check,
+                    "reproduction_workspace",
+                    side_effect=lambda **kwargs: workspace(dir=directory, **kwargs),
                 ),
                 patch.object(package_check.subprocess, "run", side_effect=fake_process),
                 patch.object(Path, "read_bytes", checked_read),

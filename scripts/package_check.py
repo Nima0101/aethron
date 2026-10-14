@@ -7,7 +7,6 @@ import json
 import os
 import subprocess
 import sys
-import tempfile
 import zipfile
 from pathlib import Path
 
@@ -19,6 +18,16 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 SOURCE_SUFFIXES = (".py", ".pxd", ".json")
+
+
+def reproduction_workspace(**kwargs):
+    # Installed payload probes run this file with -I, without sibling imports.
+    # Only the build orchestrator needs the shared workspace lifecycle.
+    if __package__:
+        from .reproduce import reproduction_workspace as workspace
+    else:
+        from reproduce import reproduction_workspace as workspace
+    return workspace(**kwargs)
 
 
 def wheel_paths(directory):
@@ -81,7 +90,7 @@ def installed_source_manifest(package_name="aethron", distribution="aethron"):
 
 
 def run():
-    with tempfile.TemporaryDirectory(prefix="aethron-wheel-") as directory:
+    with reproduction_workspace(prefix="aethron-wheel-") as directory:
         temp = Path(directory)
         source_payload = snapshot_source_payload(ROOT)
         env = dict(os.environ, SOURCE_DATE_EPOCH="1767225600")

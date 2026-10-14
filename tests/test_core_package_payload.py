@@ -59,6 +59,7 @@ class CorePackagePayload(unittest.TestCase):
 
             output = io.StringIO()
             with (
+                patch.object(tempfile, "tempdir", directory),
                 patch.object(package_check, "ROOT", root),
                 patch.object(package_check.subprocess, "run", side_effect=process),
                 contextlib.redirect_stdout(output),

@@ -5,6 +5,7 @@ import hashlib
 import io
 import json
 import subprocess
+import tempfile
 import unittest
 import zipfile
 from pathlib import Path
@@ -82,6 +83,8 @@ class PackageFinalIntegrityTests(unittest.TestCase):
             return subprocess.CompletedProcess(args, 0)
 
         with (
+            tempfile.TemporaryDirectory() as sandbox,
+            patch.object(tempfile, "tempdir", sandbox),
             patch.object(package_check.subprocess, "run", side_effect=process),
             contextlib.redirect_stdout(output),
         ):

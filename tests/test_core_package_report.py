@@ -155,6 +155,8 @@ class CorePackageReport(unittest.TestCase):
             return result
 
         with (
+            tempfile.TemporaryDirectory() as sandbox,
+            patch.object(tempfile, "tempdir", sandbox),
             patch.object(package_check, "snapshot_source_payload", return_value=source_payload),
             patch.object(package_check.subprocess, "run", side_effect=process),
             contextlib.redirect_stdout(output),
@@ -184,9 +186,55 @@ class CorePackageReport(unittest.TestCase):
                 self.assertEqual(len(calls), fail_at)
                 self.assertEqual(output.getvalue(), "")
 
+    def test_failed_children_retain_package_evidence(self):
+        for fail_at in range(1, 9):
+            with self.subTest(fail_at=fail_at), self.fixture(fail_at=fail_at) as fixture:
+                output, _, calls = fixture
+                diagnostics = io.StringIO()
+                with contextlib.redirect_stderr(diagnostics):
+                    with self.assertRaises(subprocess.CalledProcessError) as raised:
+                        package_check.run()
+                workspace = Path(calls[0][-1]).parent
+                self.assertEqual(raised.exception.returncode, 7)
+                self.assertEqual(len(calls), fail_at)
+                self.assertEqual(output.getvalue(), "")
+                self.assertTrue(workspace.is_dir(), "failed package evidence was deleted")
+                self.assertIn(str(workspace), diagnostics.getvalue())
+                wheels = list((workspace / "a").glob("*.whl"))
+                self.assertEqual(len(wheels), 1)
+                with zipfile.ZipFile(wheels[0]) as wheel:
+                    self.assertIn("aethron/__init__.py", wheel.namelist())
+
+    def test_interrupted_package_run_retains_original_failure_and_evidence(self):
+        for failure in (SystemExit(9), KeyboardInterrupt()):
+            with self.subTest(failure=type(failure).__name__):
+
+                def interrupt(args, failure=failure):
+                    if args[1:3] == ["-m", "venv"]:
+                        raise failure
+
+                with self.fixture(on_call=interrupt) as (output, _, calls):
+                    diagnostics = io.StringIO()
+                    with contextlib.redirect_stderr(diagnostics):
+                        with self.assertRaises(type(failure)) as raised:
+                            package_check.run()
+                    workspace = Path(calls[0][-1]).parent
+                    self.assertIs(raised.exception, failure)
+                    self.assertEqual(output.getvalue(), "")
+                    self.assertEqual(len(calls), 3)
+                    self.assertTrue(workspace.is_dir(), "interrupted evidence was deleted")
+                    self.assertIn(str(workspace), diagnostics.getvalue())
+                    self.assertEqual(len(list(workspace.glob("*/*.whl"))), 2)
+
+    def test_successful_package_run_cleans_workspace(self):
+        with self.fixture() as (output, _, calls):
+            package_check.run()
+            self.assertFalse(Path(calls[0][-1]).parent.exists())
+            self.assertIs(json.loads(output.getvalue())["isolated_install"], True)
+
     def test_install_and_report_bind_the_compared_snapshot(self):
         read_bytes = Path.read_bytes
-        temporary_directory = package_check.tempfile.TemporaryDirectory
+        workspace = package_check.reproduction_workspace
         for mutation in ("after_read", "before_install", "after_install"):
             with self.subTest(mutation=mutation):
                 observed = []
@@ -211,9 +259,9 @@ class CorePackageReport(unittest.TestCase):
                     self.fixture(on_call=mutate) as fixture,
                     patch.object(Path, "read_bytes", read_snapshot),
                     patch.object(
-                        package_check.tempfile,
-                        "TemporaryDirectory",
-                        side_effect=lambda **kwargs: temporary_directory(prefix="wheel # space "),
+                        package_check,
+                        "reproduction_workspace",
+                        side_effect=lambda **kwargs: workspace(prefix="wheel # space "),
                     ),
                 ):
                     output, installed, calls = fixture
