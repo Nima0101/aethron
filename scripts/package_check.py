@@ -69,14 +69,26 @@ def snapshot_source_payload(root, package_name="aethron"):
 
 def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
     with zipfile.ZipFile(io.BytesIO(wheel_bytes)) as wheel:
-        names = [
-            name
-            for name in wheel.namelist()
-            if name.startswith(package_name + "/") and name.endswith(SOURCE_SUFFIXES)
-        ]
-        if len(names) != len(set(names)) or set(names) != set(payload):
+        sources = {}
+        for member in wheel.infolist():
+            name = member.filename
+            parts = name.split("/", 2)
+            # Installers spread these records into the same import directories
+            # as root members. Compare destination names and reject collisions
+            # before installation, regardless of ZIP record order or contents.
+            if (
+                len(parts) == 3
+                and parts[0].endswith(".data")
+                and parts[1] in ("purelib", "platlib")
+            ):
+                name = parts[2]
+            if name.startswith(package_name + "/") and name.endswith(SOURCE_SUFFIXES):
+                if name in sources:
+                    raise ValueError("wheel_source_payload_mismatch")
+                sources[name] = member
+        if sources.keys() != payload.keys():
             raise ValueError("wheel_source_payload_mismatch")
-        if any(wheel.read(name) != payload[name] for name in names):
+        if any(wheel.read(member) != payload[name] for name, member in sources.items()):
             raise ValueError("wheel_source_payload_mismatch")
 
 

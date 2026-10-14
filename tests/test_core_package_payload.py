@@ -36,6 +36,10 @@ class CorePackagePayload(unittest.TestCase):
                 records.append(("aethron/retired.py", b"# stale extra file\n"))
             elif defect == "duplicate":
                 records.append(records[0])
+            elif defect and defect.startswith("spread-"):
+                _, scheme, kind = defect.split("-")
+                name = "aethron/retired.py" if kind == "extra" else records[0][0]
+                records.append((f"aethron-0.2.0.data/{scheme}/{name}", b"# stale source\n"))
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", UserWarning)
                 with zipfile.ZipFile(wheel, "w") as archive:
@@ -83,6 +87,63 @@ class CorePackagePayload(unittest.TestCase):
 
     def test_matching_payload_reaches_consumer(self):
         self.check_payload()
+
+    def test_spread_payload_cannot_override_or_extend_verified_sources(self):
+        for scheme in ("purelib", "platlib"):
+            for kind in ("override", "extra"):
+                with self.subTest(scheme=scheme, kind=kind):
+                    self.check_payload(f"spread-{scheme}-{kind}")
+
+    def test_spread_payload_uses_installed_names_for_core_and_edge(self):
+        for package in ("aethron", "aethron_edge"):
+            for scheme in ("purelib", "platlib"):
+                for changed in (False, True):
+                    with self.subTest(package=package, scheme=scheme, changed=changed):
+                        payload = {f"{package}/module.py": b"VALUE = 1\n"}
+                        archive = io.BytesIO()
+                        with zipfile.ZipFile(archive, "w") as wheel:
+                            wheel.writestr(
+                                f"{package}-0.2.0.data/{scheme}/{package}/module.py",
+                                b"VALUE = 2\n" if changed else payload[f"{package}/module.py"],
+                            )
+                            # Data installed outside the import scheme is not package source.
+                            wheel.writestr(
+                                f"{package}-0.2.0.data/data/{package}/example.py", b"# example\n"
+                            )
+                        if changed:
+                            with self.assertRaisesRegex(
+                                ValueError, "wheel_source_payload_mismatch"
+                            ):
+                                package_check.validate_source_payload(
+                                    archive.getvalue(), payload, package
+                                )
+                        else:
+                            package_check.validate_source_payload(
+                                archive.getvalue(), payload, package
+                            )
+
+    def test_duplicate_install_destinations_reject_even_when_bytes_agree(self):
+        for package in ("aethron", "aethron_edge"):
+            name = f"{package}/module.py"
+            payload = {name: b"VALUE = 1\n"}
+            paths = (
+                name,
+                f"{package}-0.2.0.data/purelib/{name}",
+                f"{package}-0.2.0.data/platlib/{name}",
+            )
+            for first in paths:
+                for second in paths:
+                    if first == second:
+                        continue
+                    with self.subTest(package=package, first=first, second=second):
+                        archive = io.BytesIO()
+                        with zipfile.ZipFile(archive, "w") as wheel:
+                            for member in (first, second):
+                                wheel.writestr(member, payload[name])
+                        with self.assertRaisesRegex(ValueError, "wheel_source_payload_mismatch"):
+                            package_check.validate_source_payload(
+                                archive.getvalue(), payload, package
+                            )
 
     def test_comparison_uses_prebuild_snapshot(self):
         self.check_payload(mutate_source=True)
