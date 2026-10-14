@@ -15,6 +15,16 @@ if sys.flags.optimize:
     raise SystemExit("reproduce_requires_assertions")
 
 ROOT = Path(__file__).resolve().parents[1]
+RELEASE_ARTIFACTS = frozenset(
+    {
+        "aethron-0.2.0-source.tar.gz",
+        "aethron.pyz",
+        "source-manifest.json",
+        "sbom.cdx.json",
+        "provenance.json",
+        "SHA256SUMS",
+    }
+)
 
 
 def call(args, cwd, **kw):
@@ -26,6 +36,8 @@ def artifact_paths(directory):
     if directory.is_symlink() or not directory.is_dir():
         raise ValueError("release_artifacts_changed")
     paths = sorted(directory.iterdir())
+    if {path.name for path in paths} != RELEASE_ARTIFACTS:
+        raise ValueError("release_artifacts_changed")
     for path in paths:
         if path.is_symlink() or not path.is_file():
             raise ValueError("release_artifacts_changed")

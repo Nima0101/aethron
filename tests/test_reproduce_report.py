@@ -196,6 +196,8 @@ class ReproductionReport(unittest.TestCase):
         verification_error=None,
         check_workspace=False,
         guard_artifact_reads=False,
+        inventory_defect=None,
+        inventory_lanes=("a", "b"),
     ):
         output = io.StringIO()
         diagnostics = io.StringIO()
@@ -224,6 +226,8 @@ class ReproductionReport(unittest.TestCase):
         real_read = Path.read_bytes
 
         def checked_read(path):
+            if inventory_defect is not None and path.parent.name in ("a", "b"):
+                self.fail("artifact read before incomplete inventory rejection")
             if guard_artifact_reads and path.parent.name in ("a", "b"):
                 self.assertFalse(path.parent.is_symlink(), "read through linked directory")
                 self.assertFalse(path.is_symlink(), "read linked artifact")
@@ -297,6 +301,22 @@ class ReproductionReport(unittest.TestCase):
                 name = "unexpected.pyz" if changed and mismatch == "names" else "aethron.pyz"
                 data = b"different bytes" if changed and mismatch == "bytes" else payload
                 (destination / name).write_bytes(data)
+                for sidecar in (
+                    "aethron-0.2.0-source.tar.gz",
+                    "source-manifest.json",
+                    "sbom.cdx.json",
+                    "provenance.json",
+                    "SHA256SUMS",
+                ):
+                    (destination / sidecar).write_bytes(b"synthetic sidecar")
+                if inventory_defect is not None and destination.name in inventory_lanes:
+                    if inventory_defect == "empty":
+                        for path in destination.iterdir():
+                            path.unlink()
+                    elif inventory_defect == "extra":
+                        (destination / "unexpected.txt").write_bytes(b"unexpected")
+                    else:
+                        (destination / inventory_defect).unlink()
                 if destination.name == "b" and mutation is not None and mutate_at == 0:
                     mutate_artifact(destination.parent)
             elif args[1:2] == ["scripts/verify.py"] or args[1:3] == ["-m", "aethron"]:
@@ -463,7 +483,20 @@ with module.reproduction_workspace() as temporary:
         report = json.loads(output)
         self.assertEqual(report["source_revision"], revision)
         self.assertEqual(
-            report["artifact_sha256"], {"aethron.pyz": hashlib.sha256(payload).hexdigest()}
+            report["artifact_sha256"],
+            {
+                "aethron.pyz": hashlib.sha256(payload).hexdigest(),
+                **dict.fromkeys(
+                    (
+                        "aethron-0.2.0-source.tar.gz",
+                        "source-manifest.json",
+                        "sbom.cdx.json",
+                        "provenance.json",
+                        "SHA256SUMS",
+                    ),
+                    hashlib.sha256(b"synthetic sidecar").hexdigest(),
+                ),
+            },
         )
         for field in (
             "clean_clone",
@@ -491,9 +524,30 @@ with module.reproduction_workspace() as temporary:
         for mismatch in ("names", "bytes"):
             with self.subTest(mismatch=mismatch):
                 output, error, consumers, _, _ = self.invoke(mismatch=mismatch)
-                self.assertIsInstance(error, AssertionError)
+                self.assertIsInstance(error, ValueError if mismatch == "names" else AssertionError)
                 self.assertEqual(output, "")
                 self.assertEqual(consumers, [])
+
+    def test_incomplete_or_extra_inventory_rejects_before_reads_and_consumers(self):
+        for lanes in (("a",), ("b",), ("a", "b")):
+            for defect in (
+                "empty",
+                "extra",
+                "aethron.pyz",
+                "aethron-0.2.0-source.tar.gz",
+                "source-manifest.json",
+                "sbom.cdx.json",
+                "provenance.json",
+                "SHA256SUMS",
+            ):
+                with self.subTest(lanes=lanes, defect=defect):
+                    output, error, consumers, _, _ = self.invoke(
+                        inventory_defect=defect, inventory_lanes=lanes
+                    )
+                    self.assertIsInstance(error, ValueError)
+                    self.assertEqual(str(error), "release_artifacts_changed")
+                    self.assertEqual(output, "")
+                    self.assertEqual(consumers, [])
 
     def test_accepted_dirty_source_cannot_produce_report(self):
         output, error, consumers, _, _ = self.invoke(refusal=0)
