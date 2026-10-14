@@ -200,6 +200,7 @@ class ReproductionReport(unittest.TestCase):
         inventory_lanes=("a", "b"),
         provenance_bytes=None,
         checksum_defect=None,
+        manifest_bytes=b"synthetic sidecar",
     ):
         output = io.StringIO()
         diagnostics = io.StringIO()
@@ -311,8 +312,16 @@ class ReproductionReport(unittest.TestCase):
                     "SHA256SUMS",
                 ):
                     (destination / sidecar).write_bytes(b"synthetic sidecar")
+                (destination / "source-manifest.json").write_bytes(manifest_bytes)
                 (destination / "provenance.json").write_bytes(
-                    json.dumps({"source_revision": revision}).encode()
+                    json.dumps(
+                        {
+                            "source_revision": revision,
+                            "source_manifest_sha256": hashlib.sha256(
+                                real_read(destination / "source-manifest.json")
+                            ).hexdigest(),
+                        }
+                    ).encode()
                     if provenance_bytes is None
                     else provenance_bytes
                 )
@@ -522,7 +531,12 @@ with module.reproduction_workspace() as temporary:
         expected = {
             "aethron.pyz": hashlib.sha256(payload).hexdigest(),
             "provenance.json": hashlib.sha256(
-                json.dumps({"source_revision": revision}).encode()
+                json.dumps(
+                    {
+                        "source_revision": revision,
+                        "source_manifest_sha256": hashlib.sha256(b"synthetic sidecar").hexdigest(),
+                    }
+                ).encode()
             ).hexdigest(),
             **dict.fromkeys(
                 ("aethron-0.2.0-source.tar.gz", "source-manifest.json", "sbom.cdx.json"),
@@ -585,6 +599,36 @@ with module.reproduction_workspace() as temporary:
                 self.assertEqual(str(error), "release_provenance_invalid")
                 self.assertEqual(output, "")
                 self.assertEqual(consumers, [])
+
+    def test_provenance_manifest_digest_must_match_compared_bytes(self):
+        digest = hashlib.sha256(b"synthetic sidecar").hexdigest()
+        for value in (None, True, 1, [], {}, "", "0" * 64, digest.upper(), digest + "\n"):
+            with self.subTest(value=value):
+                provenance = {"source_revision": "a" * 40}
+                if value is not None:
+                    provenance["source_manifest_sha256"] = value
+                output, error, consumers, _, _ = self.invoke(
+                    provenance_bytes=json.dumps(provenance).encode(), check_workspace=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_provenance_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_changed_manifest_with_consistent_checksums_rejects_stale_provenance(self):
+        provenance = {
+            "source_revision": "a" * 40,
+            "source_manifest_sha256": hashlib.sha256(b"synthetic sidecar").hexdigest(),
+        }
+        output, error, consumers, _, _ = self.invoke(
+            provenance_bytes=json.dumps(provenance).encode(),
+            manifest_bytes=b"substituted manifest in both builds",
+            check_workspace=True,
+        )
+        self.assertIsInstance(error, ValueError)
+        self.assertEqual(str(error), "release_provenance_invalid")
+        self.assertEqual(output, "")
+        self.assertEqual(consumers, [])
 
     def test_failed_or_terminated_evaluation_cannot_report_overall_success(self):
         for returncode in (1, -15):

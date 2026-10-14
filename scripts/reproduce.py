@@ -53,8 +53,8 @@ def validate_artifacts(directory, manifest):
         raise ValueError("release_artifacts_changed")
 
 
-def validate_provenance(payload, revision):
-    """Bind the compared provenance bytes to the revision actually verified."""
+def validate_provenance(payload, revision, manifest_sha256):
+    """Bind provenance to the verified revision and compared source manifest."""
 
     def unique_object(pairs):
         result = {}
@@ -68,7 +68,11 @@ def validate_provenance(payload, revision):
         provenance = json.loads(payload.decode("utf-8"), object_pairs_hook=unique_object)
     except (ValueError, RecursionError):
         raise ValueError("release_provenance_invalid") from None
-    if not isinstance(provenance, dict) or provenance.get("source_revision") != revision:
+    if (
+        not isinstance(provenance, dict)
+        or provenance.get("source_revision") != revision
+        or provenance.get("source_manifest_sha256") != manifest_sha256
+    ):
         raise ValueError("release_provenance_invalid")
 
 
@@ -176,10 +180,11 @@ def run():
             compared = p.read_bytes()
             assert compared == (b / p.name).read_bytes(), p.name
             if p.name == "provenance.json":
-                validate_provenance(compared, revision)
+                provenance = compared
             if p.name == "SHA256SUMS":
                 checksums = compared
             artifact_manifest[p.name] = hashlib.sha256(compared).hexdigest()
+        validate_provenance(provenance, revision, artifact_manifest["source-manifest.json"])
         validate_checksums(checksums, artifact_manifest)
         call(
             [
