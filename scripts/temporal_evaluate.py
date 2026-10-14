@@ -302,7 +302,7 @@ def run(outdir, include_recorded=True):
         # Hashing and environment discovery can fail before evaluation starts.
         # Keep them inside the same failure-report boundary as the measurements.
         report["runtime_sha256"] = {
-            str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
+            p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
             for p in (ROOT / "aethron").rglob("*.py")
         }
         report["evaluation_script_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()

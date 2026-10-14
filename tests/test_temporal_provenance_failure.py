@@ -6,13 +6,58 @@ import io
 import json
 import tempfile
 import unittest
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from unittest.mock import patch
 
 from scripts import temporal_evaluate as temporal
 
 
 class TemporalProvenanceFailure(unittest.TestCase):
+    def test_windows_source_names_are_portable_in_success_and_failure_reports(self):
+        for passed in (True, False):
+            with self.subTest(passed=passed), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                sources = {
+                    "aethron/example.py": b"value = 1\n",
+                    "aethron/nested/example.py": b"value = 2\n",
+                }
+                for name, payload in sources.items():
+                    path = root / name
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_bytes(payload)
+                original_relative = Path.relative_to
+
+                def windows_relative(
+                    path, *args, original_relative=original_relative, root=root, sources=sources
+                ):
+                    relative = original_relative(path, *args)
+                    if args == (root,) and relative.as_posix() in sources:
+                        return PureWindowsPath(*relative.parts)
+                    return relative
+
+                outdir = root / "output"
+                with (
+                    patch.object(temporal, "ROOT", root),
+                    patch.object(Path, "relative_to", windows_relative),
+                    patch.object(temporal, "synthetic_fixture_paths", return_value=[]),
+                    patch.object(temporal, "benchmark", return_value={"passed": passed}),
+                    contextlib.redirect_stdout(io.StringIO()),
+                ):
+                    if passed:
+                        temporal.run(outdir, include_recorded=False)
+                    else:
+                        with self.assertRaises(AssertionError):
+                            temporal.run(outdir, include_recorded=False)
+                reports = list(outdir.glob("*.json"))
+                self.assertEqual(len(reports), 1 if passed else 2)
+                for report_path in reports:
+                    report = json.loads(report_path.read_bytes())
+                    self.assertIs(report["passed"], passed)
+                    self.assertEqual(
+                        report["runtime_sha256"],
+                        {name: hashlib.sha256(data).hexdigest() for name, data in sources.items()},
+                    )
+
     def test_metadata_failure_replaces_stale_success_and_propagates(self):
         for stage in ("runtime", "script", "python", "platform"):
             for error_type in (OSError, KeyboardInterrupt):
