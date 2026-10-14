@@ -22,6 +22,8 @@ if sys.flags.optimize:
     raise SystemExit("reproduce_requires_assertions")
 
 ROOT = Path(__file__).resolve().parents[1]
+# Local clone transfer gets a larger tooling budget than an individual Git read.
+GIT_CLONE_TIMEOUT_SECONDS = 180
 RELEASE_ARTIFACTS = frozenset(
     {
         "aethron-0.2.0-source.tar.gz",
@@ -46,6 +48,16 @@ def _require_git_context():
 
 def call(args, cwd, **kw):
     return subprocess.run(args, cwd=cwd, check=True, **kw)
+
+
+def _git_output(args, **kwargs):
+    # Lazy import preserves standalone use of the workspace cleanup helper.
+    if __package__:
+        from .git_context import GIT_COMMAND_TIMEOUT_SECONDS
+    else:
+        from git_context import GIT_COMMAND_TIMEOUT_SECONDS
+
+    return subprocess.check_output(args, timeout=GIT_COMMAND_TIMEOUT_SECONDS, **kwargs)
 
 
 def artifact_paths(directory):
@@ -490,16 +502,14 @@ def validate_source(clone, revision):
     _require_git_context()
     # These index flags suppress working-tree checks even when status is clean.
     # A complete reproduction clone must keep every tracked file observable.
-    entries = subprocess.check_output(
-        ["git", "--no-replace-objects", "ls-files", "-v", "-z"], cwd=clone
-    )
+    entries = _git_output(["git", "--no-replace-objects", "ls-files", "-v", "-z"], cwd=clone)
     if any(entry and not entry.startswith(b"H ") for entry in entries.split(b"\0")):
         raise ValueError("reproduction_source_changed")
-    current = subprocess.check_output(
+    current = _git_output(
         ["git", "--no-replace-objects", "rev-parse", "HEAD"], cwd=clone, text=True
     ).strip()
     # Compare the original tree named by evidence, as the release builder does.
-    dirty = subprocess.check_output(
+    dirty = _git_output(
         ["git", "--no-replace-objects", "status", "--porcelain", "--untracked-files=normal"],
         cwd=clone,
     )
@@ -543,8 +553,13 @@ def run():
     with reproduction_workspace() as temporary:
         root = Path(temporary)
         clone = root / "source"
-        call(["git", "clone", "--no-local", str(ROOT), str(clone)], ROOT, capture_output=True)
-        revision = subprocess.check_output(
+        call(
+            ["git", "clone", "--no-local", str(ROOT), str(clone)],
+            ROOT,
+            capture_output=True,
+            timeout=GIT_CLONE_TIMEOUT_SECONDS,
+        )
+        revision = _git_output(
             ["git", "--no-replace-objects", "rev-parse", "HEAD"], cwd=clone, text=True
         ).strip()
         validate_source(clone, revision)
