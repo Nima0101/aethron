@@ -1,6 +1,7 @@
 """Build wheels twice and install into a fresh environment outside the source tree."""
 
 import configparser
+import csv
 import email.parser
 import email.policy
 import hashlib
@@ -109,6 +110,7 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
         directory_destinations = set()
         entry_points = []
         distribution_metadata = []
+        distribution_records = []
         for member in wheel.infolist():
             # ZipInfo truncates filename at NUL; inspecting only that normalized
             # spelling would silently admit a different original archive name.
@@ -225,6 +227,14 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
                 if member.is_dir() or member.file_size > 1048576:
                     raise ValueError("wheel_source_payload_mismatch")
                 distribution_metadata.append(member)
+            if (
+                len(components) == 2
+                and components[0].endswith(".dist-info")
+                and components[1] == "record"
+            ):
+                if member.is_dir() or member.file_size > 1048576:
+                    raise ValueError("wheel_source_payload_mismatch")
+                distribution_records.append(member)
             # These distributions do not declare site-level path configuration.
             # A .pth file here can execute at interpreter startup (even with -I),
             # before the installed-source probe gets control. Reject both code
@@ -286,8 +296,27 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
                 SOURCE_SUFFIXES
             ):
                 sources[name] = member
-        if len(entry_points) > 1 or len(distribution_metadata) > 1:
+        if any(
+            len(records) > 1
+            for records in (entry_points, distribution_metadata, distribution_records)
+        ):
             raise ValueError("wheel_source_payload_mismatch")
+        for member in distribution_records:
+            # pip retains unrecognized RECORD paths in the installed removal
+            # inventory. A wheel must not claim files outside its admitted ZIP
+            # members, even if its own source bytes match perfectly. Check exact
+            # archive names (before spreading), not normalized installed names.
+            # This bounds ownership, not RECORD hash or completeness validation.
+            files = {item.filename for item in wheel.infolist() if not item.is_dir()}
+            seen = set()
+            try:
+                contents = wheel.read(member).decode("utf-8")
+                for row in csv.reader(io.StringIO(contents, newline=""), strict=True):
+                    if len(row) != 3 or row[0] not in files or row[0] in seen:
+                        raise ValueError("wheel_source_payload_mismatch")
+                    seen.add(row[0])
+            except (UnicodeError, csv.Error):
+                raise ValueError("wheel_source_payload_mismatch") from None
         for member in distribution_metadata:
             # Reuse the inventory tool's email-header interpretation. A matching
             # dist-info directory alone cannot establish distribution identity.
