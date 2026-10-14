@@ -287,6 +287,30 @@ class CorePackageReport(unittest.TestCase):
                 self.assertEqual(sum(call[1:] == ["--help"] for call in calls), 1)
                 self.assertIs(json.loads(output.getvalue())["console_wrapper"], True)
 
+    def test_parent_python_settings_do_not_redirect_environment_or_install(self):
+        with tempfile.TemporaryDirectory() as directory:
+            shadow = Path(directory)
+            (shadow / "venv.py").write_text(
+                'raise RuntimeError("inherited path redirected venv")\n', encoding="utf-8"
+            )
+            (shadow / "pip.py").write_text(
+                'raise RuntimeError("inherited path redirected pip")\n', encoding="utf-8"
+            )
+            for variable, value in (
+                ("PYTHONHOME", str(shadow / "missing-python-home")),
+                ("PYTHONPATH", str(shadow)),
+            ):
+                with (
+                    self.subTest(variable=variable),
+                    patch.dict(package_check.os.environ, {variable: value}),
+                    self.fixture(real_install=True) as (output, installed, calls),
+                ):
+                    package_check.run()
+                    self.assertEqual(package_check.os.environ[variable], value)
+                    self.assertEqual(len(installed), 1)
+                    self.assertEqual(len(calls), 8)
+                    self.assertIs(json.loads(output.getvalue())["isolated_install"], True)
+
     def test_real_pip_rejects_changed_wheel_before_consumers(self):
         wheels = []
 

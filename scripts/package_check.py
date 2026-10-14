@@ -93,7 +93,11 @@ def run():
     with reproduction_workspace(prefix="aethron-wheel-") as directory:
         temp = Path(directory)
         source_payload = snapshot_source_payload(ROOT)
-        env = dict(os.environ, SOURCE_DATE_EPOCH="1767225600")
+        env = dict(os.environ, SOURCE_DATE_EPOCH="1767225600", PYTHONNOUSERSITE="1")
+        # Apply the same import environment to builds, installation and consumers.
+        # Inherited interpreter paths must not redirect venv or pip execution.
+        for variable in ("PYTHONPATH", "PYTHONHOME"):
+            env.pop(variable, None)
         for name in ("a", "b"):
             subprocess.run(
                 [
@@ -126,7 +130,7 @@ def run():
         ).hexdigest()
         wheel_sha256 = hashlib.sha256(compared_bytes).hexdigest()
 
-        subprocess.run([sys.executable, "-m", "venv", str(temp / "consumer")], check=True)
+        subprocess.run([sys.executable, "-m", "venv", str(temp / "consumer")], env=env, check=True)
         python = temp / "consumer" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
         subprocess.run(
             [
@@ -141,12 +145,14 @@ def run():
                 a.resolve().as_uri() + "#sha256=" + wheel_sha256,
             ],
             cwd=temp,
+            env=env,
             check=True,
             stdout=subprocess.DEVNULL,
         )
         installed = subprocess.run(
             [str(python), "-I", str(Path(__file__).resolve()), "--installed-payload"],
             cwd=temp,
+            env=env,
             check=True,
             capture_output=True,
             text=True,
@@ -155,13 +161,10 @@ def run():
         if json.loads(installed.stdout) != source_manifest:
             raise ValueError("installed_source_payload_mismatch")
         console = python.with_name("aethron.exe" if os.name == "nt" else "aethron")
-        console_env = dict(os.environ, PYTHONNOUSERSITE="1")
-        for variable in ("PYTHONPATH", "PYTHONHOME"):
-            console_env.pop(variable, None)
         help_result = subprocess.run(
             [str(console), "--help"],
             cwd=temp,
-            env=console_env,
+            env=env,
             check=True,
             capture_output=True,
             text=True,
@@ -171,6 +174,7 @@ def run():
         result = subprocess.run(
             [str(python), "-I", "-m", "aethron", "demo"],
             cwd=temp,
+            env=env,
             check=True,
             capture_output=True,
             text=True,
@@ -192,6 +196,7 @@ def run():
                 str(ROOT / "examples/temporal-blackout.jsonl"),
             ],
             cwd=temp,
+            env=env,
             check=True,
             capture_output=True,
             text=True,
