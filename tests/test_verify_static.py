@@ -49,6 +49,9 @@ class StaticCheckClaims(unittest.TestCase):
                         "cwd": root,
                         "check": True,
                         "env": expected_env,
+                        "timeout": 30
+                        if args[1] in {"scripts/public_links.py", "scripts/consumer.py"}
+                        else 600,
                     },
                 )
                 calls.append(args)

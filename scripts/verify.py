@@ -20,6 +20,9 @@ else:
     from git_context import GIT_COMMAND_TIMEOUT_SECONDS, git_output, require_default_git_context
 
 ROOT = Path(__file__).resolve().parents[1]
+# Tooling budgets, matching reproduction; no whole-run or descendant guarantee.
+CHECK_TIMEOUT_SECONDS = 600
+CONSUMER_TIMEOUT_SECONDS = 30
 SCAN_FOLDERS = (
     "aethron",
     "integrations",
@@ -240,7 +243,11 @@ def run():
     env.pop("PYTHONHOME", None)
     env.pop("PYTHONPATH", None)
     subprocess.run(
-        [sys.executable, "scripts/public_links.py", "HEAD"], cwd=ROOT, check=True, env=env
+        [sys.executable, "scripts/public_links.py", "HEAD"],
+        cwd=ROOT,
+        check=True,
+        env=env,
+        timeout=CONSUMER_TIMEOUT_SECONDS,
     )
     for manifest in [
         "governance-freeze.json",
@@ -359,10 +366,29 @@ def run():
         cwd=ROOT,
         check=True,
         env=env,
+        timeout=CHECK_TIMEOUT_SECONDS,
     )
-    subprocess.run([sys.executable, "scripts/evaluate_dataset.py"], cwd=ROOT, check=True, env=env)
-    subprocess.run([sys.executable, "scripts/consumer.py"], cwd=ROOT, check=True, env=env)
-    subprocess.run([sys.executable, "scripts/temporal_e2e.py"], cwd=ROOT, check=True, env=env)
+    subprocess.run(
+        [sys.executable, "scripts/evaluate_dataset.py"],
+        cwd=ROOT,
+        check=True,
+        env=env,
+        timeout=CHECK_TIMEOUT_SECONDS,
+    )
+    subprocess.run(
+        [sys.executable, "scripts/consumer.py"],
+        cwd=ROOT,
+        check=True,
+        env=env,
+        timeout=CONSUMER_TIMEOUT_SECONDS,
+    )
+    subprocess.run(
+        [sys.executable, "scripts/temporal_e2e.py"],
+        cwd=ROOT,
+        check=True,
+        env=env,
+        timeout=CHECK_TIMEOUT_SECONDS,
+    )
     print(
         "PASS: freeze hashes, source syntax rules, public-content/links, "
         "tests, dataset, consumer, temporal E2E"
