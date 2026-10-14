@@ -109,6 +109,12 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
             # package resources and directory records are not startup hooks.
             if not member.is_dir() and "/" not in name and name.casefold().endswith(".pth"):
                 raise ValueError("wheel_source_payload_mismatch")
+            # These portable source wheels must not supply executable bytecode
+            # outside source parity. In particular, a sourceless .pyc module can
+            # be imported without appearing in either source manifest. Installers
+            # may generate their own caches from the verified sources afterward.
+            if not member.is_dir() and name.casefold().endswith(".pyc"):
+                raise ValueError("wheel_source_payload_mismatch")
             # Wheels are checked on case-sensitive hosts too. Do not let an
             # uppercase package/suffix bypass admission and overwrite a checked
             # file on a case-insensitive install. Keep exact spelling for parity;

@@ -48,6 +48,8 @@ class CorePackagePayload(unittest.TestCase):
                 records.append(("aethron/notes.txt@ignored", b"resource\n"))
             elif defect == "startup-path":
                 records.append(("unexpected.pth", b"import sys\n"))
+            elif defect == "bytecode":
+                records.append(("aethron/retired.pyc", b"unchecked bytecode\n"))
             elif defect and defect.startswith("spread-"):
                 _, scheme, kind = defect.split("-")
                 name = "aethron/retired.py" if kind == "extra" else records[0][0]
@@ -105,6 +107,49 @@ class CorePackagePayload(unittest.TestCase):
 
     def test_startup_path_is_rejected_before_installation(self):
         self.check_payload("startup-path")
+
+    def test_bytecode_is_rejected_before_installation(self):
+        self.check_payload("bytecode")
+
+    def test_bytecode_rejects_before_source_reads_for_core_and_edge(self):
+        for package in ("aethron", "aethron_edge"):
+            name = f"{package}/module.py"
+            payload = {name: b"VALUE = 1\n"}
+            for prefix in ("", f"{package}-0.2.0.data/purelib/", f"{package}-0.2.0.data/platlib/"):
+                for member in (
+                    f"{package}/retired.pyc",
+                    f"{package}/__pycache__/module.cpython-313.pyc",
+                    f"{package}/__pycache__/module.cpython-313.opt-1.PYC",
+                    "unexpected.pyc",
+                ):
+                    with self.subTest(package=package, prefix=prefix, member=member):
+                        archive = io.BytesIO()
+                        with zipfile.ZipFile(archive, "w") as wheel:
+                            wheel.writestr(name, payload[name])
+                            wheel.writestr(prefix + member, b"unchecked bytecode")
+                        with (
+                            patch.object(
+                                zipfile.ZipFile,
+                                "read",
+                                side_effect=AssertionError("source read before bytecode rejection"),
+                            ),
+                            self.assertRaisesRegex(ValueError, "wheel_source_payload_mismatch"),
+                        ):
+                            package_check.validate_source_payload(
+                                archive.getvalue(), payload, package
+                            )
+
+    def test_bytecode_named_directories_and_nonbytecode_resources_remain_allowed(self):
+        for package in ("aethron", "aethron_edge"):
+            name = f"{package}/module.py"
+            payload = {name: b"VALUE = 1\n"}
+            archive = io.BytesIO()
+            with zipfile.ZipFile(archive, "w") as wheel:
+                wheel.writestr(name, payload[name])
+                wheel.writestr(f"{package}/resources.pyc/", b"")
+                wheel.writestr(f"{package}/resources.pyc/notes.txt", b"resource")
+                wheel.writestr(f"{package}/example.pyc.txt", b"resource")
+            package_check.validate_source_payload(archive.getvalue(), payload, package)
 
     def test_site_path_files_reject_before_source_reads_for_core_and_edge(self):
         for package in ("aethron", "aethron_edge"):
