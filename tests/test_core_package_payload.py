@@ -38,6 +38,8 @@ class CorePackagePayload(unittest.TestCase):
                 records.append(records[0])
             elif defect == "path-alias":
                 records.append(("./" + records[0][0], b"# replaced source\n"))
+            elif defect == "case-alias":
+                records.append((records[0][0].upper(), b"# replaced source\n"))
             elif defect and defect.startswith("spread-"):
                 _, scheme, kind = defect.split("-")
                 name = "aethron/retired.py" if kind == "extra" else records[0][0]
@@ -92,6 +94,48 @@ class CorePackagePayload(unittest.TestCase):
 
     def test_path_alias_is_rejected_before_installation(self):
         self.check_payload("path-alias")
+
+    def test_case_alias_is_rejected_before_installation(self):
+        self.check_payload("case-alias")
+
+    def test_case_aliases_cannot_override_or_extend_package_sources(self):
+        for package in ("aethron", "aethron_edge"):
+            name = f"{package}/module.py"
+            payload = {name: b"VALUE = 1\n"}
+            for prefix in ("", f"{package}-0.2.0.data/purelib/", f"{package}-0.2.0.data/platlib/"):
+                for alias in (
+                    f"{package.upper()}/module.py",
+                    f"{package}/module.PY",
+                    f"{package.upper()}/extra.py",
+                    f"{package}/extra.JSON",
+                    f"{package}/extra.PXD",
+                ):
+                    with self.subTest(package=package, prefix=prefix, alias=alias):
+                        archive = io.BytesIO()
+                        with zipfile.ZipFile(archive, "w") as wheel:
+                            wheel.writestr(name, payload[name])
+                            wheel.writestr(prefix + alias, b"VALUE = 2\n")
+                        with self.assertRaisesRegex(ValueError, "wheel_source_payload_mismatch"):
+                            package_check.validate_source_payload(
+                                archive.getvalue(), payload, package
+                            )
+
+    def test_case_colliding_source_snapshot_is_not_portable(self):
+        payload = {"aethron/module.py": b"one\n", "aethron/Module.py": b"two\n"}
+        archive = io.BytesIO()
+        with zipfile.ZipFile(archive, "w") as wheel:
+            for name, data in payload.items():
+                wheel.writestr(name, data)
+        with self.assertRaisesRegex(ValueError, "wheel_source_payload_mismatch"):
+            package_check.validate_source_payload(archive.getvalue(), payload)
+
+    def test_unique_mixed_case_source_names_are_allowed(self):
+        payload = {"aethron/MixedCase.py": b"VALUE = 1\n", "aethron/models/Caf\u00e9.json": b"{}"}
+        archive = io.BytesIO()
+        with zipfile.ZipFile(archive, "w") as wheel:
+            for name, data in payload.items():
+                wheel.writestr(name, data)
+        package_check.validate_source_payload(archive.getvalue(), payload)
 
     def test_noncanonical_member_paths_are_rejected_for_core_and_edge(self):
         for package in ("aethron", "aethron_edge"):

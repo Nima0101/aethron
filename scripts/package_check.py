@@ -70,6 +70,7 @@ def snapshot_source_payload(root, package_name="aethron"):
 def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
     with zipfile.ZipFile(io.BytesIO(wheel_bytes)) as wheel:
         sources = {}
+        folded_sources = set()
         for member in wheel.infolist():
             name = member.filename
             # Check every record before filtering package sources: an alias can
@@ -93,9 +94,17 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
                 and parts[1] in ("purelib", "platlib")
             ):
                 name = parts[2]
-            if name.startswith(package_name + "/") and name.endswith(SOURCE_SUFFIXES):
-                if name in sources:
+            # Wheels are checked on case-sensitive hosts too. Do not let an
+            # uppercase package/suffix bypass admission and overwrite a checked
+            # file on a case-insensitive install. Keep exact spelling for parity;
+            # case folding only broadens admission and rejects portable collisions.
+            folded_name = name.casefold()
+            if folded_name.startswith(package_name.casefold() + "/") and folded_name.endswith(
+                SOURCE_SUFFIXES
+            ):
+                if folded_name in folded_sources:
                     raise ValueError("wheel_source_payload_mismatch")
+                folded_sources.add(folded_name)
                 sources[name] = member
         if sources.keys() != payload.keys():
             raise ValueError("wheel_source_payload_mismatch")
