@@ -70,6 +70,13 @@ class CorePackagePayload(unittest.TestCase):
                 )
             elif defect == "script-destination":
                 records.append(("aethron-0.2.0.data/scripts/fixture-tool", b"# inert\n"))
+            elif defect == "entry-points":
+                records.append(
+                    (
+                        "aethron-0.2.0.dist-info/entry_points.txt",
+                        b"[console_scripts]\nfixture-tool = fixture:main\n",
+                    )
+                )
             elif defect and defect.startswith("spread-"):
                 _, scheme, kind = defect.split("-")
                 name = "aethron/retired.py" if kind == "extra" else records[0][0]
@@ -133,6 +140,9 @@ class CorePackagePayload(unittest.TestCase):
 
     def test_script_destination_is_rejected_before_installation(self):
         self.check_payload("script-destination")
+
+    def test_undeclared_entry_points_reject_before_installation(self):
+        self.check_payload("entry-points")
 
     def test_all_file_destinations_reject_collisions_before_source_reads(self):
         for package in ("aethron", "aethron_edge"):

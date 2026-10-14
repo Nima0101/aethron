@@ -1,5 +1,6 @@
 """Build wheels twice and install into a fresh environment outside the source tree."""
 
+import configparser
 import hashlib
 import importlib.metadata
 import io
@@ -19,6 +20,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 SOURCE_SUFFIXES = (".py", ".pxd", ".json")
+# Release launcher contracts from the two projects' [project.scripts]. A
+# declaration change must update admission as well as installed-launcher tests.
+CONSOLE_SCRIPTS = {
+    "aethron": {"aethron": "aethron.__main__:main"},
+    "aethron_edge": {"aethron-edge": "aethron_edge.cli:main"},
+}
 WINDOWS_DEVICE_NAMES = frozenset(
     ("CON", "PRN", "AUX", "NUL")
     + tuple(prefix + digit for prefix in ("COM", "LPT") for digit in "123456789¹²³")
@@ -97,6 +104,7 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
         sources = {}
         file_destinations = set()
         directory_destinations = set()
+        entry_points = []
         for member in wheel.infolist():
             # ZipInfo truncates filename at NUL; inspecting only that normalized
             # spelling would silently admit a different original archive name.
@@ -180,6 +188,17 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
                     raise ValueError("wheel_source_payload_mismatch")
                 file_destinations.add(destination)
             directory_destinations.update(directories)
+            # Installers generate executable wrappers from this metadata even
+            # when no .data/scripts payload exists. Inspect the installed root,
+            # including spread layouts, but leave nested examples as resources.
+            if (
+                len(components) == 2
+                and components[0].endswith(".dist-info")
+                and components[1] == "entry_points.txt"
+            ):
+                if member.is_dir() or member.file_size > 65536:
+                    raise ValueError("wheel_source_payload_mismatch")
+                entry_points.append(member)
             # These distributions do not declare site-level path configuration.
             # A .pth file here can execute at interpreter startup (even with -I),
             # before the installed-source probe gets control. Reject both code
@@ -214,6 +233,21 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
                 SOURCE_SUFFIXES
             ):
                 sources[name] = member
+        if len(entry_points) > 1:
+            raise ValueError("wheel_source_payload_mismatch")
+        for member in entry_points:
+            parser = configparser.ConfigParser(interpolation=None, delimiters=("=",))
+            parser.optionxform = str
+            try:
+                parser.read_string(wheel.read(member).decode("utf-8"))
+            except (UnicodeError, configparser.Error):
+                raise ValueError("wheel_source_payload_mismatch") from None
+            if (
+                parser.defaults()
+                or parser.sections() != ["console_scripts"]
+                or dict(parser.items("console_scripts")) != CONSOLE_SCRIPTS.get(package_name)
+            ):
+                raise ValueError("wheel_source_payload_mismatch")
         if sources.keys() != payload.keys():
             raise ValueError("wheel_source_payload_mismatch")
         if any(wheel.read(member) != payload[name] for name, member in sources.items()):

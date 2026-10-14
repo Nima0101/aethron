@@ -195,6 +195,13 @@ class PackageInputEvidence(unittest.TestCase):
                                         b"# inert\n",
                                     )
                                 )
+                            elif wheel_defect == "entry-points":
+                                records.append(
+                                    (
+                                        selected + "-" + version + ".dist-info/entry_points.txt",
+                                        b"[console_scripts]\nfixture-tool = fixture:main\n",
+                                    )
+                                )
                         wheel = destination / (selected + "-" + version + "-py3-none-any.whl")
                         with warnings.catch_warnings():
                             warnings.simplefilter("ignore", UserWarning)
@@ -903,6 +910,11 @@ class PackageInputEvidence(unittest.TestCase):
         for package in ("aethron", "aethron_edge"):
             with self.subTest(package=package):
                 self.probe(wheel_defect="script-destination", package=package)
+
+    def test_undeclared_entry_points_reject_before_consumers_or_report(self):
+        for package in ("aethron", "aethron_edge"):
+            with self.subTest(package=package):
+                self.probe(wheel_defect="entry-points", package=package)
 
     def test_installed_source_mismatch_rejects_before_consumers(self):
         for package in ("aethron", "aethron_edge"):
