@@ -79,8 +79,8 @@ class ReleaseOutputAdmission(unittest.TestCase):
             error = self.attempt(root, destination)
             self.assertIsInstance(error, RuntimeError)
             self.assertEqual(str(error), "archive_boundary")
-            self.assertTrue(destination.is_dir())
-            self.assertEqual(list(destination.iterdir()), [])
+            self.assertFalse(destination.exists())
+            self.assertTrue(destination.parent.is_dir())
 
     def test_dirty_source_still_rejects_before_creating_destination(self):
         with tempfile.TemporaryDirectory() as directory:

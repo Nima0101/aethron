@@ -136,7 +136,7 @@ class ReleaseSourceAdmission(unittest.TestCase):
                 self.assertIsInstance(error, RuntimeError)
                 self.assertEqual(str(error), "archive_boundary")
                 self.assertEqual(reads, [])
-                self.assertEqual(list((root / "output").iterdir()), [])
+                self.assertFalse((root / "output").exists())
 
     def test_regular_nested_sources_reach_archive_boundary(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -151,7 +151,7 @@ class ReleaseSourceAdmission(unittest.TestCase):
             self.assertEqual(str(error), "archive_boundary")
             self.assertEqual(reads, [])
             self.assertEqual({name: (source / name).read_bytes() for name in contents}, contents)
-            self.assertEqual(list((root / "output").iterdir()), [])
+            self.assertFalse((root / "output").exists())
 
     def test_source_io_errors_have_fixed_diagnostics(self):
         for operation in ("missing", "lstat", "committed_blobs"):

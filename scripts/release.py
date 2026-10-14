@@ -212,6 +212,28 @@ def build(destination):
         members.append((name, info))
     out = Path(destination)
     out.mkdir(parents=True, exist_ok=False)
+    try:
+        _write_artifacts(out, blobs, members, manifest, revision)
+    except BaseException:
+        # We own this freshly created destination. Remove only our flat artifact
+        # names, never recursively delete unexpected content or parent folders.
+        # Cleanup errors remain visible (with the original exception chained).
+        # This handles caught failures, not process death or concurrent mutation.
+        for name in (
+            "aethron-0.2.0-source.tar.gz",
+            "aethron.pyz",
+            "source-manifest.json",
+            "sbom.cdx.json",
+            "provenance.json",
+            "SHA256SUMS",
+        ):
+            (out / name).unlink(missing_ok=True)
+        out.rmdir()
+        raise
+    return revision
+
+
+def _write_artifacts(out, blobs, members, manifest, revision):
     buffer = io.BytesIO()
     # Git names are admitted as UTF-8; host filesystem encodings must not
     # change their archive bytes or their USTAR representability.
@@ -316,7 +338,6 @@ def build(destination):
         if p.is_file() and p.name != "SHA256SUMS"
     )
     (out / "SHA256SUMS").write_bytes(checksums.encode("utf-8"))
-    return revision
 
 
 if __name__ == "__main__":
