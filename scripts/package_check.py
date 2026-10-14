@@ -37,32 +37,35 @@ def reproduction_workspace(**kwargs):
 
 def wheel_paths(directory):
     """Admit wheel inventories before payload reads or installed consumers."""
-    if directory.is_symlink() or not directory.is_dir():
+    reject_path_redirect(directory, "wheel_artifacts_changed")
+    if not directory.is_dir():
         raise ValueError("wheel_artifacts_changed")
     paths = sorted(directory.glob("*.whl"))
-    if any(path.is_symlink() or not path.is_file() for path in paths):
-        raise ValueError("wheel_artifacts_changed")
+    for path in paths:
+        reject_path_redirect(path, "wheel_artifacts_changed")
+        if not path.is_file():
+            raise ValueError("wheel_artifacts_changed")
     return paths
 
 
-def reject_source_redirect(path):
+def reject_path_redirect(path, reason):
     # is_symlink alone misses Windows junctions. Match the verifier's reparse
     # admission using lstat, available at the supported Python 3.9 floor.
     # This assumes a stable tree, not protection from concurrent replacement.
     try:
         info = path.lstat()
     except FileNotFoundError:
-        return  # The caller retains its existing missing/empty-source error.
+        return  # The caller retains its existing missing-path error.
     if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & getattr(
         stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0
     ):
-        raise ValueError("invalid_source_payload_file")
+        raise ValueError(reason)
 
 
 def snapshot_source_payload(root, package_name="aethron"):
     payload = {}
     package = root / package_name
-    reject_source_redirect(package)
+    reject_path_redirect(package, "invalid_source_payload_file")
     if not package.exists():
         raise ValueError("empty_source_payload")
 
@@ -72,7 +75,7 @@ def snapshot_source_payload(root, package_name="aethron"):
     for directory, directories, files in os.walk(package, onerror=unreadable):
         for name in directories:
             path = Path(directory) / name
-            reject_source_redirect(path)
+            reject_path_redirect(path, "invalid_source_payload_file")
             if path.suffix.casefold() in SOURCE_SUFFIXES:
                 raise ValueError("invalid_source_payload_file")
         for name in files:
@@ -80,7 +83,7 @@ def snapshot_source_payload(root, package_name="aethron"):
             # Match wheel admission on every host, preserving the actual name
             # and bytes for both prebuild and installed-payload comparisons.
             if path.suffix.casefold() in SOURCE_SUFFIXES:
-                reject_source_redirect(path)
+                reject_path_redirect(path, "invalid_source_payload_file")
                 if not path.is_file():
                     raise ValueError("invalid_source_payload_file")
                 payload[path.relative_to(root).as_posix()] = path.read_bytes()
