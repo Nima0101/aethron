@@ -24,6 +24,11 @@ if sys.flags.optimize:
 ROOT = Path(__file__).resolve().parents[1]
 # Local clone transfer gets a larger tooling budget than an individual Git read.
 GIT_CLONE_TIMEOUT_SECONDS = 180
+# Tooling budgets only: subprocess timeouts reap the direct child, not descendants.
+# Verification gets ten minutes; builds and short consumers match package_check.
+VERIFICATION_TIMEOUT_SECONDS = 600
+RELEASE_TIMEOUT_SECONDS = 180
+CONSUMER_TIMEOUT_SECONDS = 30
 RELEASE_ARTIFACTS = frozenset(
     {
         "aethron-0.2.0-source.tar.gz",
@@ -564,21 +569,34 @@ def run():
         ).strip()
         validate_source(clone, revision)
         # Quickstart commands as documented, with the active Python interpreter.
-        call([sys.executable, "scripts/verify.py"], clone, env=env)
+        call(
+            [sys.executable, "scripts/verify.py"],
+            clone,
+            env=env,
+            timeout=VERIFICATION_TIMEOUT_SECONDS,
+        )
         evaluation = subprocess.run(
             [sys.executable, "scripts/temporal_evaluate.py", "--out", str(root / "evaluation")],
             cwd=clone,
             check=False,
             env=env,
+            timeout=VERIFICATION_TIMEOUT_SECONDS,
         )
         with (root / "demo.jsonl").open("w") as stream:
-            call([sys.executable, "-m", "aethron", "demo"], clone, stdout=stream, env=env)
+            call(
+                [sys.executable, "-m", "aethron", "demo"],
+                clone,
+                stdout=stream,
+                env=env,
+                timeout=CONSUMER_TIMEOUT_SECONDS,
+            )
         with (root / "result.json").open("w") as stream:
             call(
                 [sys.executable, "-m", "aethron", "evaluate", "examples/person-blackout.json"],
                 clone,
                 stdout=stream,
                 env=env,
+                timeout=CONSUMER_TIMEOUT_SECONDS,
             )
         with (root / "view.svg").open("w") as stream:
             call(
@@ -594,6 +612,7 @@ def run():
                 clone,
                 stdout=stream,
                 env=env,
+                timeout=CONSUMER_TIMEOUT_SECONDS,
             )
         validate_source(clone, revision)
         probe = clone / "aethron" / "untracked_release_probe.py"
@@ -604,11 +623,22 @@ def run():
             capture_output=True,
             check=False,
             env=env,
+            timeout=RELEASE_TIMEOUT_SECONDS,
         )
         assert refused.returncode != 0 and b"clean committed source" in refused.stderr
         probe.unlink()
-        call([sys.executable, "scripts/release.py", str(root / "a")], clone, env=env)
-        call([sys.executable, "scripts/release.py", str(root / "b")], clone, env=env)
+        call(
+            [sys.executable, "scripts/release.py", str(root / "a")],
+            clone,
+            env=env,
+            timeout=RELEASE_TIMEOUT_SECONDS,
+        )
+        call(
+            [sys.executable, "scripts/release.py", str(root / "b")],
+            clone,
+            env=env,
+            timeout=RELEASE_TIMEOUT_SECONDS,
+        )
         validate_source(clone, revision)
         a, b = root / "a", root / "b"
         paths_a, paths_b = artifact_paths(a), artifact_paths(b)
@@ -650,6 +680,7 @@ def run():
             root,
             stdout=subprocess.DEVNULL,
             env=env,
+            timeout=CONSUMER_TIMEOUT_SECONDS,
         )
         for directory in (a, b):
             validate_artifacts(directory, artifact_manifest)
@@ -667,6 +698,7 @@ def run():
             ],
             root,
             env=env,
+            timeout=CONSUMER_TIMEOUT_SECONDS,
         )
         for directory in (a, b):
             validate_artifacts(directory, artifact_manifest)

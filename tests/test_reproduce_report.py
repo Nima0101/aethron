@@ -576,6 +576,93 @@ class ReproductionReport(unittest.TestCase):
                     self.assertEqual(result.stderr, b"")
             self.assertEqual(list(Path(directory).iterdir()), [])
 
+    def test_each_python_stage_timeout_retains_evidence_and_stops(self):
+        # Explicit stage order also detects accidental execution after expiry.
+        stages = [
+            ("verify", 600),
+            ("evaluation", 600),
+            ("demo", 30),
+            ("evaluate", 30),
+            ("render", 30),
+            ("refused", 180),
+            ("a", 180),
+            ("b", 180),
+            ("zip-cli", 30),
+            ("zip-library", 30),
+        ]
+        for stopped, (name, budget) in enumerate(stages):
+            with self.subTest(stage=name):
+                calls = []
+                expired = subprocess.TimeoutExpired(
+                    name, budget, output=b"partial stdout", stderr=b"partial stderr"
+                )
+
+                def child(args, kwargs, workspace, calls=calls, stopped=stopped, expired=expired):
+                    index = len(calls)
+                    calls.append((args, kwargs))
+                    if index == stopped:
+                        (workspace / "partial.bin").write_bytes(b"partial evidence")
+                        raise expired
+
+                def inspect(workspace, diagnostics):
+                    self.assertTrue(workspace.is_dir())
+                    self.assertIn(str(workspace), diagnostics)
+                    self.assertEqual((workspace / "partial.bin").read_bytes(), b"partial evidence")
+
+                output, error, _, _, _ = self.invoke(python_child=child, inspect_workspace=inspect)
+                self.assertIs(error, expired)
+                self.assertEqual(error.output, b"partial stdout")
+                self.assertEqual(error.stderr, b"partial stderr")
+                self.assertEqual(output, "")
+                self.assertEqual(len(calls), stopped + 1)
+                for index, (_, kwargs) in enumerate(calls):
+                    self.assertEqual(kwargs.get("timeout"), stages[index][1])
+
+    def test_real_stalled_python_children_are_reaped(self):
+        # Cover checked wrappers and both unchecked calls, plus a late consumer.
+        run, popen = subprocess.run, subprocess.Popen
+        for stopped in (0, 1, 5, 6, 9):
+            with self.subTest(stage=stopped):
+                calls, children = [], []
+
+                def spawn(*args, children=children, **kwargs):
+                    process = popen(*args, **kwargs)
+                    children.append(process)
+                    return process
+
+                def child(args, kwargs, workspace, calls=calls, stopped=stopped, spawn=spawn):
+                    calls.append(args)
+                    if len(calls) - 1 == stopped:
+                        (workspace / "partial.bin").write_bytes(b"partial evidence")
+                        with patch.object(subprocess, "Popen", side_effect=spawn):
+                            run(
+                                [sys.executable, "-c", "import time; time.sleep(1)"],
+                                cwd=kwargs["cwd"],
+                                capture_output=True,
+                                check=kwargs.get("check", False),
+                                timeout=kwargs.get("timeout", 2),
+                            )
+
+                def inspect(workspace, diagnostics):
+                    self.assertTrue(workspace.is_dir())
+                    self.assertIn(str(workspace), diagnostics)
+                    self.assertEqual((workspace / "partial.bin").read_bytes(), b"partial evidence")
+
+                with (
+                    patch.object(reproduce, "VERIFICATION_TIMEOUT_SECONDS", 0.1, create=True),
+                    patch.object(reproduce, "RELEASE_TIMEOUT_SECONDS", 0.1, create=True),
+                    patch.object(reproduce, "CONSUMER_TIMEOUT_SECONDS", 0.1, create=True),
+                ):
+                    output, error, _, _, _ = self.invoke(
+                        python_child=child, inspect_workspace=inspect
+                    )
+                self.assertIsInstance(error, subprocess.TimeoutExpired)
+                self.assertEqual(output, "")
+                self.assertEqual(len(calls), stopped + 1)
+                self.assertEqual(len(children), 1)
+                self.assertIsNotNone(children[0].returncode)
+                self.assertIsNotNone(children[0].poll())
+
     def invoke(
         self,
         *,
@@ -608,6 +695,8 @@ class ReproductionReport(unittest.TestCase):
         zip_end_record=None,
         zip_central_header=None,
         python_probes=None,
+        python_child=None,
+        inspect_workspace=None,
     ):
         output = io.StringIO()
         diagnostics = io.StringIO()
@@ -668,6 +757,8 @@ class ReproductionReport(unittest.TestCase):
 
         def fake_process(args, **kwargs):
             nonlocal clone_revision, source_status, index_entries
+            if python_child is not None and args[0] == sys.executable:
+                python_child(args, kwargs, workspaces[0])
             if python_probes is not None and args[0] == sys.executable:
                 # Exercise real interpreter startup with the stage's environment.
                 # Build/evaluation bodies below remain synthetic fixtures.
@@ -880,9 +971,12 @@ class ReproductionReport(unittest.TestCase):
                 AssertionError,
                 ValueError,
                 subprocess.CalledProcessError,
+                subprocess.TimeoutExpired,
                 KeyboardInterrupt,
             ) as caught:
                 error = caught
+            if inspect_workspace is not None:
+                inspect_workspace(workspaces[0], diagnostics.getvalue())
             if check_workspace:
                 self.assertEqual(len(workspaces), 1)
                 workspace = workspaces[0]
