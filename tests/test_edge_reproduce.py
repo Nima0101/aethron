@@ -4,6 +4,7 @@ import contextlib
 import io
 import os
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -13,6 +14,96 @@ from scripts import edge_reproduce
 
 
 class EdgeReproductionSource(unittest.TestCase):
+    def test_user_site_hooks_cannot_skip_clean_clone_checks(self):
+        # Use the base interpreter so this also exercises user-site startup when
+        # the test runner itself lives in a virtual environment.
+        python = getattr(sys, "_base_executable", sys.executable)
+        for hook in ("sitecustomize.py", "usercustomize.py", "probe.pth"):
+            with self.subTest(hook=hook), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                source = root / "source"
+                scripts = source / "scripts"
+                scripts.mkdir(parents=True)
+                env = dict(os.environ, PYTHONUSERBASE=str(root / "user-base"))
+                for name in ("PYTHONHOME", "PYTHONPATH", "PYTHONNOUSERSITE"):
+                    env.pop(name, None)
+                site = Path(
+                    subprocess.check_output(
+                        [python, "-S", "-c", "import site; print(site.getusersitepackages())"],
+                        env=env,
+                        text=True,
+                        timeout=10,
+                    ).strip()
+                )
+                site.relative_to(root)
+                site.mkdir(parents=True)
+                (site / hook).write_text("import os; os._exit(0)\n", encoding="utf-8")
+                control = subprocess.run(
+                    [python, "-c", "print('child executed')"],
+                    env=env,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                self.assertEqual(control.stdout, "", "negative control must execute the hook")
+                for name in ("verify.py", "check_ecosystem_plan.py", "edge_package_check.py"):
+                    (scripts / name).write_text(
+                        "import site, sys\nfrom pathlib import Path\n"
+                        "assert not site.ENABLE_USER_SITE\n"
+                        "out = Path('build/probes')\nout.mkdir(parents=True, exist_ok=True)\n"
+                        "(out / Path(__file__).name).write_text('executed')\n"
+                        "if '--out' in sys.argv:\n"
+                        " package = Path(sys.argv[sys.argv.index('--out') + 1])\n"
+                        " package.mkdir()\n"
+                        " (package / 'probes.txt').write_text(','.join("
+                        "sorted(p.name for p in out.iterdir())))\n",
+                        encoding="utf-8",
+                    )
+                (source / ".gitignore").write_text("build/\n", encoding="utf-8")
+                for args in (
+                    ["init", "--quiet"],
+                    ["add", "."],
+                    [
+                        "-c",
+                        "user.name=Reproduction Fixture",
+                        "-c",
+                        "user.email=fixture@example.invalid",
+                        "-c",
+                        "commit.gpgsign=false",
+                        "-c",
+                        "core.hooksPath=" + str(root / "no-hooks"),
+                        "commit",
+                        "--quiet",
+                        "-m",
+                        "synthetic Python probes",
+                    ],
+                ):
+                    subprocess.run(
+                        ["git", *args], cwd=source, check=True, capture_output=True, timeout=5
+                    )
+                with (
+                    patch.object(edge_reproduce, "ROOT", source),
+                    patch.object(sys, "executable", python),
+                    patch.dict(os.environ, env, clear=True),
+                    contextlib.redirect_stdout(io.StringIO()) as output,
+                    contextlib.redirect_stderr(io.StringIO()),
+                ):
+                    edge_reproduce.run(root / "wheelhouse")
+                    self.assertNotIn("PYTHONNOUSERSITE", os.environ)
+                    self.assertEqual(os.environ["PYTHONUSERBASE"], str(root / "user-base"))
+                self.assertIn("PASS:", output.getvalue())
+                packages = list((source / "build/ecosystem-phase1").glob("*-package"))
+                self.assertEqual(len(packages), 1, "success requires executed package checks")
+                self.assertEqual(
+                    (packages[0] / "probes.txt").read_text().split(","),
+                    [
+                        "check_ecosystem_plan.py",
+                        "edge_package_check.py",
+                        "verify.py",
+                    ],
+                )
+
     def test_python_children_ignore_inherited_python_home_and_path(self):
         for existing_home in (False, True):
             with self.subTest(existing_home=existing_home):

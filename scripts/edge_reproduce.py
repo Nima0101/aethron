@@ -45,7 +45,10 @@ def run(wheelhouse):
             timeout=GIT_COMMAND_TIMEOUT_SECONDS,
         ).strip()
         validate_source(clone, revision)
-        env = dict(os.environ)
+        # User-site .pth/customization hooks run before a script and can exit
+        # successfully without executing any verification. Keep tooling in the
+        # selected interpreter environment, with user-site startup disabled.
+        env = dict(os.environ, PYTHONNOUSERSITE="1")
         env.pop("PYTHONPATH", None)
         env.pop("PYTHONHOME", None)
         # Same per-child tooling budgets as core reproduction, not a whole-run
