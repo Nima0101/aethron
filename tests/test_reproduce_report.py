@@ -75,7 +75,9 @@ def provenance_sources(files):
     }
 
 
-def executable_archive(defect=None, *, files=None, metadata=None, local_header=None):
+def executable_archive(
+    defect=None, *, files=None, metadata=None, local_header=None, end_record=None
+):
     files = SOURCE_FILES if files is None else files
     entries = [("__main__.py", ZIP_MAIN)] + [
         (name, data)
@@ -135,6 +137,11 @@ def executable_archive(defect=None, *, files=None, metadata=None, local_header=N
         if defect == "reordered-directory":
             archive.filelist.reverse()
     payload = buffer.getvalue()
+    if end_record is not None:
+        # Alter the directory summary without changing any member or directory entry.
+        offset, width, value = end_record
+        start = len(payload) - 22 + offset
+        payload = payload[:start] + value.to_bytes(width, "little") + payload[start + width :]
     if local_header is not None:
         # Mutate only a local record, leaving central metadata and file bytes intact.
         with zipfile.ZipFile(io.BytesIO(payload)) as archive:
@@ -431,6 +438,7 @@ class ReproductionReport(unittest.TestCase):
         zip_defect=None,
         zip_metadata=None,
         zip_local_header=None,
+        zip_end_record=None,
         python_probes=None,
     ):
         output = io.StringIO()
@@ -447,6 +455,7 @@ class ReproductionReport(unittest.TestCase):
             files=artifact_files,
             metadata=zip_metadata,
             local_header=zip_local_header,
+            end_record=zip_end_record,
         )
         revision = "a" * 40
         clone_revision = revision
@@ -1107,6 +1116,35 @@ with module.reproduction_workspace() as temporary:
         self.assertIsNone(error)
         self.assertEqual(len(consumers), 2)
         self.assertTrue(json.loads(output)["byte_identical_builds"])
+
+    def test_zip_directory_summary_rejects_before_consumers(self):
+        # Matching builds/checksums and readable members cannot establish that
+        # the end record describes the actual single-disk directory.
+        payload = executable_archive()
+        directory_size = int.from_bytes(payload[-10:-6], "little")
+        directory_offset = int.from_bytes(payload[-6:-2], "little")
+        for field, offset, width, value in (
+            ("disk", 4, 2, 1),
+            ("directory-disk", 6, 2, 1),
+            ("disk-count-zero", 8, 2, 0),
+            ("disk-count-over", 8, 2, 65535),
+            ("total-count-zero", 10, 2, 0),
+            ("total-count-over", 10, 2, 65535),
+            ("directory-size-short", 12, 4, directory_size - 1),
+            ("directory-size-long", 12, 4, directory_size + 1),
+            ("directory-offset-before", 16, 4, directory_offset - 1),
+            ("directory-offset-after", 16, 4, directory_offset + 1),
+        ):
+            with self.subTest(field=field):
+                output, error, consumers, _, _ = self.invoke(
+                    zip_end_record=(offset, width, value),
+                    check_workspace=True,
+                    real_consumers=True,
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_zipapp_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
 
     def test_unlisted_local_zip_content_rejects_before_consumers(self):
         for defect in (

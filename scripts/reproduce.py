@@ -249,6 +249,20 @@ def validate_zipapp(payload, manifest):
                 or payload[-2:] != b"\x00\x00"
             ):
                 raise ValueError("invalid ZIP envelope")
+            # ZipFile can ignore disk/count fields in the end record. Bind the
+            # classic single-disk summary emitted by our writer to the directory
+            # actually read, including its byte extent and absolute offset.
+            if struct.unpack("<4s4H2IH", payload[-22:]) != (
+                b"PK\x05\x06",
+                0,
+                0,
+                len(members),
+                len(members),
+                len(payload) - 22 - archive.start_dir,
+                archive.start_dir,
+                0,
+            ):
+                raise ValueError("conflicting ZIP directory summary")
             offset = 0
             for member in sorted(members, key=lambda item: item.header_offset):
                 if (
