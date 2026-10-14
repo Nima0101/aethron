@@ -37,6 +37,10 @@ def run(wheelhouse):
             check=True,
         )
         validate_source(clone, revision)
+        # Each attempt owns separate persistent evidence, outside clone cleanup.
+        # The package checker still refuses to reuse any existing output directory.
+        package = area / (clone.parent.name + "-package")
+        print(f"package evidence directory: {package}", file=sys.stderr)
         subprocess.run(
             [
                 sys.executable,
@@ -44,7 +48,7 @@ def run(wheelhouse):
                 "--wheelhouse",
                 str(wheelhouse.resolve()),
                 "--out",
-                str(area / "clean-package"),
+                str(package),
             ],
             cwd=clone,
             env=env,

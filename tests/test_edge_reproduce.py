@@ -127,6 +127,88 @@ class EdgeReproductionSource(unittest.TestCase):
 
 
 class EdgeReproductionWorkspace(unittest.TestCase):
+    def test_repeated_attempts_preserve_separate_package_evidence(self):
+        for legacy_output in (False, True):
+            for first_failed in (False, True):
+                with self.subTest(legacy=legacy_output, first_failed=first_failed):
+                    with tempfile.TemporaryDirectory() as directory:
+                        root = Path(directory)
+                        area = root / "build/ecosystem-phase1"
+                        legacy = area / "clean-package"
+                        if legacy_output:
+                            legacy.mkdir(parents=True)
+                            (legacy / "result.json").write_bytes(b"prior evidence")
+                        packages, clones, messages = [], [], []
+                        failure = subprocess.CalledProcessError(7, ["synthetic-package"])
+
+                        def child(
+                            args,
+                            clones=clones,
+                            packages=packages,
+                            first_failed=first_failed,
+                            failure=failure,
+                            **kwargs,
+                        ):
+                            self.assertTrue(kwargs["check"])
+                            if args[0] == "git":
+                                clone = Path(args[-1])
+                                clone.mkdir()
+                                clones.append(clone)
+                            elif args[1] == "scripts/edge_package_check.py":
+                                package = Path(args[args.index("--out") + 1])
+                                # Same exclusive output admission as the package checker.
+                                package.mkdir(parents=True, exist_ok=False)
+                                packages.append(package)
+                                (package / "server.log").write_bytes(
+                                    b"first attempt" if len(packages) == 1 else b"second attempt"
+                                )
+                                if first_failed and len(packages) == 1:
+                                    raise failure
+                                (package / "result.json").write_bytes(b"synthetic success")
+                            return subprocess.CompletedProcess(args, 0)
+
+                        with (
+                            patch.object(edge_reproduce, "ROOT", root),
+                            patch.object(edge_reproduce.subprocess, "run", side_effect=child),
+                            patch.object(
+                                edge_reproduce.subprocess, "check_output", return_value="a" * 40
+                            ),
+                            patch.object(edge_reproduce, "validate_source"),
+                        ):
+                            for attempt in range(2):
+                                output, diagnostics = io.StringIO(), io.StringIO()
+                                error = None
+                                with (
+                                    contextlib.redirect_stdout(output),
+                                    contextlib.redirect_stderr(diagnostics),
+                                ):
+                                    try:
+                                        edge_reproduce.run(root / "wheelhouse")
+                                    except Exception as caught:
+                                        error = caught
+                                self.assertIs(
+                                    error, failure if first_failed and attempt == 0 else None
+                                )
+                                messages.append(diagnostics.getvalue())
+                                self.assertEqual("PASS:" in output.getvalue(), error is None)
+                                self.assertEqual(clones[attempt].exists(), error is not None)
+
+                        self.assertEqual(len(set(packages)), 2)
+                        for index, package in enumerate(packages):
+                            self.assertIn(str(package), messages[index])
+                            self.assertEqual(
+                                (package / "server.log").read_bytes(),
+                                b"first attempt" if index == 0 else b"second attempt",
+                            )
+                            self.assertEqual(
+                                (package / "result.json").exists(),
+                                not (first_failed and index == 0),
+                            )
+                        if legacy_output:
+                            self.assertEqual(
+                                (legacy / "result.json").read_bytes(), b"prior evidence"
+                            )
+
     def test_failure_retains_workspace_and_success_cleans_it(self):
         failures = (
             subprocess.CalledProcessError(7, ["synthetic-check"]),
@@ -188,7 +270,7 @@ class EdgeReproductionWorkspace(unittest.TestCase):
                         self.assertEqual(len(calls), 4)
                         self.assertFalse(workspace.exists())
                         self.assertIn("PASS:", output.getvalue())
-                        self.assertEqual(diagnostics.getvalue(), "")
+                        self.assertIn("package evidence directory:", diagnostics.getvalue())
                     else:
                         self.assertEqual(len(calls), failed_stage + 1)
                         self.assertTrue(workspace.is_dir(), "failed run erased its evidence")
