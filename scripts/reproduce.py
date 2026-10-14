@@ -244,12 +244,16 @@ def validate_zipapp(payload, manifest):
                     or member.is_dir()
                     or member.compress_type != zipfile.ZIP_STORED
                     or member.flag_bits & 1
-                    or (
-                        member.create_system == 3
-                        and stat.S_IFMT(member.external_attr >> 16) not in (0, stat.S_IFREG)
-                    )
                 ):
                     raise ValueError("invalid ZIP member")
+                # Match the release writer's portable metadata as well as contents;
+                # equal builds can share incorrect permissions or host defaults.
+                if (member.create_system, member.external_attr, member.date_time) != (
+                    3,
+                    0o644 << 16,
+                    (2026, 1, 1, 0, 0, 0),
+                ):
+                    raise ValueError("invalid ZIP metadata")
                 seen.add(member.filename)
                 digest = hashlib.sha256()
                 with archive.open(member) as stream:

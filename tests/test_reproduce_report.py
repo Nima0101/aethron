@@ -75,7 +75,7 @@ def provenance_sources(files):
     }
 
 
-def executable_archive(defect=None, *, files=None):
+def executable_archive(defect=None, *, files=None, metadata=None):
     files = SOURCE_FILES if files is None else files
     entries = [("__main__.py", ZIP_MAIN)] + [
         (name, data)
@@ -103,9 +103,12 @@ def executable_archive(defect=None, *, files=None):
                     name = "aethron/../data.bin"
                 elif defect == "directory":
                     name += "/"
-            info = zipfile.ZipInfo(name)
+            info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
             info.create_system = 3
             info.external_attr = 0o644 << 16
+            if name == "aethron/data.bin":
+                for key, value in (metadata or {}).items():
+                    setattr(info, key, value)
             if defect == "symlink" and name == "aethron/data.bin":
                 info.external_attr = (stat.S_IFLNK | 0o644) << 16
             elif defect == "special" and name == "aethron/data.bin":
@@ -384,6 +387,7 @@ class ReproductionReport(unittest.TestCase):
         archive_defect=None,
         archive_metadata=None,
         zip_defect=None,
+        zip_metadata=None,
         python_probes=None,
     ):
         output = io.StringIO()
@@ -395,7 +399,7 @@ class ReproductionReport(unittest.TestCase):
             manifest_bytes = json.dumps(
                 {name: hashlib.sha256(data).hexdigest() for name, data in artifact_files.items()}
             ).encode()
-        payload = executable_archive(zip_defect, files=artifact_files)
+        payload = executable_archive(zip_defect, files=artifact_files, metadata=zip_metadata)
         revision = "a" * 40
         clone_revision = revision
         source_status = b""
@@ -1017,6 +1021,29 @@ with module.reproduction_workspace() as temporary:
             with self.subTest(defect=defect):
                 output, error, consumers, _, _ = self.invoke(
                     zip_defect=defect, check_workspace=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_zipapp_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_zip_metadata_rejects_before_consumers(self):
+        # Equal builds and content hashes cannot validate extraction metadata.
+        # These otherwise valid ZIPs also pass the real Python smoke consumers.
+        for field, value in (
+            ("external_attr", 0o4755 << 16),
+            ("external_attr", 0o2755 << 16),
+            ("external_attr", 0o666 << 16),
+            ("external_attr", 0o755 << 16),
+            ("external_attr", (0o644 << 16) | 0x10),
+            ("create_system", 0),
+            ("create_system", 10),
+            ("date_time", (1980, 1, 1, 0, 0, 0)),
+            ("date_time", (2026, 1, 1, 0, 0, 2)),
+        ):
+            with self.subTest(field=field, value=value):
+                output, error, consumers, _, _ = self.invoke(
+                    zip_metadata={field: value}, check_workspace=True, real_consumers=True
                 )
                 self.assertIsInstance(error, ValueError)
                 self.assertEqual(str(error), "release_zipapp_invalid")
