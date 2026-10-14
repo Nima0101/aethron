@@ -2,6 +2,7 @@
 
 import sys
 import unittest
+from pathlib import Path
 
 # Test assertions are part of the evidence, even when the suite is invoked
 # directly instead of through verify.py's own interpreter-mode preflight.
@@ -10,6 +11,12 @@ if sys.flags.optimize:
 
 
 def main():
+    # Relative discovery and checkout imports must refer to this runner's tree.
+    # Refuse another cwd before importing any tests, including direct invocations
+    # that do not pass through verify.py's explicit child working directory.
+    if Path.cwd().resolve() != Path(__file__).resolve().parents[1]:
+        print("verification_suite_wrong_root", file=sys.stderr)
+        return 1
     loader = unittest.TestLoader()
     try:
         suite = loader.discover("tests")
