@@ -3,6 +3,11 @@
 import sys
 import unittest
 
+# Test assertions are part of the evidence, even when the suite is invoked
+# directly instead of through verify.py's own interpreter-mode preflight.
+if sys.flags.optimize:
+    raise SystemExit("verification_suite_requires_assertions")
+
 
 def main():
     loader = unittest.TestLoader()
