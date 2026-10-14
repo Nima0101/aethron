@@ -22,6 +22,11 @@ class TemporalFailureRetention(unittest.TestCase):
         )
         inventory.start()
         self.addCleanup(inventory.stop)
+        payload = patch.object(
+            temporal, "synthetic_fixture_payload", side_effect=lambda path: path.read_bytes()
+        )
+        payload.start()
+        self.addCleanup(payload.stop)
 
     def invoke(self, root, name, *, passed=False):
         fixtures = root / "data/temporal"

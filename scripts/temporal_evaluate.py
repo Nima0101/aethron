@@ -275,6 +275,16 @@ def synthetic_fixture_paths():
     return paths
 
 
+def synthetic_fixture_payload(path):
+    """Bind the bytes consumed below to the repository's trusted freeze manifest."""
+    freeze = json.loads((ROOT / "docs/verification/data-v3-freeze.json").read_bytes())
+    payload = path.read_bytes()
+    name = path.relative_to(ROOT).as_posix()
+    if hashlib.sha256(payload).hexdigest() != freeze["files"].get(name):
+        raise ValueError("synthetic_fixture_digest")
+    return payload
+
+
 def run(outdir, include_recorded=True):
     outdir.mkdir(parents=True, exist_ok=True)
     reports = {}
@@ -296,7 +306,7 @@ def run(outdir, include_recorded=True):
         report["platform"] = platform.system() + " " + platform.machine()
         report["failure_stage"] = "synthetic"
         for path in synthetic_fixture_paths():
-            payload = path.read_bytes()
+            payload = synthetic_fixture_payload(path)
             entries = json.loads(payload.decode("utf-8"))
             actual, baseline = outputs(entries)
             reports[path.stem] = {

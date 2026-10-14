@@ -22,6 +22,11 @@ class TemporalEvaluationGates(unittest.TestCase):
         )
         inventory.start()
         self.addCleanup(inventory.stop)
+        payload = patch.object(
+            temporal, "synthetic_fixture_payload", side_effect=lambda path: path.read_bytes()
+        )
+        payload.start()
+        self.addCleanup(payload.stop)
 
     def test_replay_mismatch_is_rejected(self):
         with patch.object(temporal, "replay", side_effect=([{"a": 1}], [{"a": 2}])):

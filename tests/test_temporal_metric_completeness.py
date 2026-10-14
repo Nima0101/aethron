@@ -21,6 +21,11 @@ class TemporalMetricCompleteness(unittest.TestCase):
         )
         inventory.start()
         self.addCleanup(inventory.stop)
+        payload = patch.object(
+            temporal, "synthetic_fixture_payload", side_effect=lambda path: path.read_bytes()
+        )
+        payload.start()
+        self.addCleanup(payload.stop)
         self.truth = {"id": "fixture", "class": "obstacle", "box": [0.1, 0.1, 0.1, 0.1]}
         self.entry = {"truth": [self.truth]}
         self.result = {"tracks": [dict(self.truth, status="PRESENT")]}
