@@ -314,6 +314,14 @@ def validate_source_archive(payload, manifest_payload):
             ):
                 raise ValueError("invalid manifest entry")
         _reject_source_case_aliases(manifest)
+        # As with wheel destinations, each file's ancestors must be directories.
+        # Hash agreement alone admits e.g. both "source" and "source/file.py",
+        # which cannot coexist after extraction. Check the complete inventory
+        # before decompressing, independent of manifest or TAR member order.
+        for name in manifest:
+            parts = name.split("/")
+            if any("/".join(parts[:end]) in manifest for end in range(1, len(parts))):
+                raise ValueError("conflicting source paths")
         expected = {"aethron-0.2.0/" + name: digest for name, digest in manifest.items()}
         seen = set()
         end_offset = 0
