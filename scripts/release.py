@@ -193,6 +193,11 @@ def build(destination):
         blobs = committed_blobs(revision)
     except OSError:
         raise SystemExit("release source unavailable") from None
+    # The ZIP and provenance writers require these exact committed entries.
+    # Admit them before creating any output; ignored checkout copies or
+    # similarly named files cannot repair an incomplete committed source tree.
+    if not {"LICENSE", "NOTICE", "aethron/models/rules.json"}.issubset(blobs):
+        raise SystemExit("release requires committed release inputs")
     manifest = {n: hashlib.sha256(data).hexdigest() for n, data in blobs.items()}
     # Git admits names (including UTF-8 names) that USTAR cannot represent.
     # Validate the exact headers before reserving the output directory, so a

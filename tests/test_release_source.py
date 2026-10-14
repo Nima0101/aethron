@@ -43,7 +43,12 @@ class ReleaseSourceAdmission(unittest.TestCase):
             patch.object(
                 release,
                 "committed_blobs",
-                return_value={"fixture.txt": b"synthetic"},
+                return_value={
+                    "fixture.txt": b"synthetic",
+                    "LICENSE": b"synthetic license",
+                    "NOTICE": b"synthetic notice",
+                    "aethron/models/rules.json": b"{}",
+                },
                 side_effect=blob_error,
             ),
             patch.object(release.subprocess, "check_output", side_effect=git_output),

@@ -33,7 +33,14 @@ class ReleaseOutputAdmission(unittest.TestCase):
         with (
             patch.object(release, "ROOT", source),
             patch.object(
-                release, "committed_blobs", return_value={"fixture.txt": b"synthetic source"}
+                release,
+                "committed_blobs",
+                return_value={
+                    "fixture.txt": b"synthetic source",
+                    "LICENSE": b"synthetic license",
+                    "NOTICE": b"synthetic notice",
+                    "aethron/models/rules.json": b"{}",
+                },
             ),
             patch.object(release.subprocess, "check_output", side_effect=git_output),
             patch.object(release.io, "BytesIO", side_effect=RuntimeError("archive_boundary")),
