@@ -365,7 +365,7 @@ def run():
             scanned.add(relative.as_posix())
     assert expected <= scanned, "missing tracked content"
     subprocess.run(
-        [sys.executable, "-m", "unittest", "discover", "-s", "tests"],
+        [sys.executable, "-m", "scripts.verification_suite"],
         cwd=ROOT,
         check=True,
         env=env,

@@ -145,7 +145,7 @@ class StaticCheckClaims(unittest.TestCase):
                 calls,
                 [
                     [interpreter, "scripts/public_links.py", "HEAD"],
-                    [interpreter, "-m", "unittest", "discover", "-s", "tests"],
+                    [interpreter, "-m", "scripts.verification_suite"],
                     [interpreter, "scripts/evaluate_dataset.py"],
                     [interpreter, "scripts/consumer.py"],
                     [interpreter, "scripts/temporal_e2e.py"],
