@@ -107,9 +107,9 @@ def validate_source(clone, revision):
 
 
 @contextlib.contextmanager
-def reproduction_workspace():
+def reproduction_workspace(*, prefix="aethron-clean-", dir=None):
     """Retain failed runs for diagnosis; only successful runs own automatic cleanup."""
-    temporary = tempfile.mkdtemp(prefix="aethron-clean-")
+    temporary = tempfile.mkdtemp(prefix=prefix, dir=dir)
     try:
         yield temporary
     except BaseException:

@@ -4,8 +4,12 @@ import argparse
 import os
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
+
+if __package__:
+    from .reproduce import reproduction_workspace
+else:
+    from reproduce import reproduction_workspace
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -13,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def run(wheelhouse):
     area = ROOT / "build/ecosystem-phase1"
     area.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="clean-edge-", dir=area) as temporary:
+    with reproduction_workspace(prefix="clean-edge-", dir=area) as temporary:
         clone = Path(temporary) / "source"
         subprocess.run(
             ["git", "clone", "--no-local", str(ROOT), str(clone)], check=True, capture_output=True
