@@ -273,6 +273,8 @@ def validate_zipapp(payload, manifest):
                     or member.compress_type != zipfile.ZIP_STORED
                     or member.compress_size != member.file_size
                     or member.flag_bits & 9
+                    or member.extra
+                    or member.comment
                 ):
                     raise ValueError("invalid ZIP member")
                 # The seekable release writer emits contiguous local records,
@@ -299,6 +301,11 @@ def validate_zipapp(payload, manifest):
                     raise ValueError("conflicting ZIP headers")
                 name_size = int.from_bytes(header[26:28], "little")
                 extra_size = int.from_bytes(header[28:30], "little")
+                # The release writer emits no extension fields or comments.
+                # Local extras are independent of central extras and are not
+                # included in the manifest-bound member content read below.
+                if extra_size:
+                    raise ValueError("unverified ZIP extension")
                 offset += 30 + name_size + extra_size + member.compress_size
                 # Match the release writer's portable metadata as well as contents;
                 # equal builds can share incorrect permissions or host defaults.

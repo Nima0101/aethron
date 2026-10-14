@@ -111,6 +111,10 @@ def executable_archive(
             if name == "aethron/data.bin":
                 for key, value in (metadata or {}).items():
                     setattr(info, key, value)
+                if defect in ("local-extra", "both-extra"):
+                    info.extra = b"\xfe\xca\x04\x00data"
+                if defect == "member-comment":
+                    info.comment = b"unverified comment\x00\xff"
             if defect == "symlink" and name == "aethron/data.bin":
                 info.external_attr = (stat.S_IFLNK | 0o644) << 16
             elif defect == "special" and name == "aethron/data.bin":
@@ -118,6 +122,13 @@ def executable_archive(
             elif defect == "compressed" and name == "aethron/data.bin":
                 info.compress_type = zipfile.ZIP_DEFLATED
             archive.writestr(info, data)
+            if name == "aethron/data.bin":
+                # The local header is already written; vary the directory's
+                # extension independently to cover both parsing boundaries.
+                if defect == "local-extra":
+                    info.extra = b""
+                elif defect == "central-extra":
+                    info.extra = b"\xfe\xca\x04\x00data"
             if (
                 (name == "__main__.py" and defect in ("unlisted-middle", "gap-middle"))
                 or (name == entries[-1][0] and defect in ("unlisted-tail", "gap-tail"))
@@ -1214,6 +1225,19 @@ with module.reproduction_workspace() as temporary:
             with self.subTest(field=field, value=value):
                 output, error, consumers, _, _ = self.invoke(
                     zip_metadata={field: value}, check_workspace=True, real_consumers=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_zipapp_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_zip_extension_payloads_reject_before_consumers(self):
+        # These ZIPs have correct inventories/content, matching builds/checksums
+        # and working Python consumers, but carry bytes absent from source.
+        for defect in ("local-extra", "central-extra", "both-extra", "member-comment"):
+            with self.subTest(defect=defect):
+                output, error, consumers, _, _ = self.invoke(
+                    zip_defect=defect, check_workspace=True, real_consumers=True
                 )
                 self.assertIsInstance(error, ValueError)
                 self.assertEqual(str(error), "release_zipapp_invalid")
