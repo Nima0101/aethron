@@ -1,4 +1,4 @@
-"""Exercise report publication using synthetic files and mocked package processes."""
+"""Exercise report publication with synthetic packages and optional real venv creation."""
 
 import hashlib
 import importlib.util
@@ -35,6 +35,7 @@ class PackageInputEvidence(unittest.TestCase):
         console_output="usage: aethron-edge\n",
         on_run=None,
         on_exit=None,
+        real_venv=False,
     ):
         execute = subprocess.run
         spawn = subprocess.Popen
@@ -95,6 +96,17 @@ class PackageInputEvidence(unittest.TestCase):
             def run(args, **kwargs):
                 if on_run is not None:
                     on_run(args)
+                if real_venv and args[1:3] == ["-m", "venv"]:
+                    # Run the actual child so inherited interpreter settings matter.
+                    with patch.object(checker.subprocess, "Popen", spawn):
+                        try:
+                            result = execute(
+                                args, **dict(kwargs, capture_output=True, text=True, timeout=30)
+                            )
+                        except subprocess.CalledProcessError as exc:
+                            self.fail(exc.stderr)
+                    self.assertTrue((Path(args[-1]) / "pyvenv.cfg").is_file())
+                    return result
                 if args[1:] == ["--help"]:
                     self.assertEqual(Path(args[0]).stem, "aethron-edge")
                     self.assertNotIn("PYTHONPATH", kwargs["env"])
@@ -264,6 +276,25 @@ class PackageInputEvidence(unittest.TestCase):
 
     def test_report_identifies_checker_and_manifests(self):
         self.probe()
+
+    def test_parent_python_settings_do_not_redirect_venv_creation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            shadow = Path(directory)
+            (shadow / "venv.py").write_text(
+                'raise RuntimeError("inherited path redirected venv")\n', encoding="utf-8"
+            )
+            for variable, value in (
+                ("PYTHONHOME", str(shadow / "missing-python-home")),
+                ("PYTHONPATH", str(shadow)),
+            ):
+                with (
+                    self.subTest(variable=variable),
+                    patch.dict(checker.os.environ, {variable: value}),
+                ):
+                    calls = []
+                    self.probe(real_venv=True, on_run=calls.append)
+                    self.assertEqual(checker.os.environ[variable], value)
+                    self.assertEqual(sum(call[1:3] == ["-m", "venv"] for call in calls), 1)
 
     def test_failed_installed_stages_retain_workspace(self):
         stages = {

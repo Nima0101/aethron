@@ -137,7 +137,7 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
         prefix="aethron-installed-", dir=output.resolve()
     ) as temporary:
         work = Path(temporary)
-        subprocess.run([sys.executable, "-m", "venv", str(work / "venv")], check=True)
+        subprocess.run([sys.executable, "-m", "venv", str(work / "venv")], env=env, check=True)
         python = work / "venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
         subprocess.run(
             [
