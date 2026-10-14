@@ -162,6 +162,30 @@ def validate_checksums(payload, manifest):
         raise ValueError("release_checksums_invalid")
 
 
+def _validate_gzip_metadata(payload):
+    """Check every member's normalized wrapper without retaining decoded bytes."""
+    offset = 0
+    while offset < len(payload):
+        # The writer pins DEFLATE, no optional fields/flags, mtime zero, maximum
+        # compression hint and OS=unknown. GzipFile ignores most of these fields,
+        # including filenames/comments that are outside the source manifest.
+        if payload[offset : offset + 10] != b"\x1f\x8b\x08\x00\x00\x00\x00\x00\x02\xff":
+            raise ValueError("invalid gzip metadata")
+        decoder = zlib.decompressobj(wbits=31)
+        while not decoder.eof:
+            chunk = payload[offset : offset + 65536]
+            decoded = decoder.decompress(chunk, max_length=1024 * 1024)
+            remaining = decoder.unused_data if decoder.eof else decoder.unconsumed_tail
+            consumed = len(chunk) - len(remaining)
+            offset += consumed
+            if not consumed and not decoded and not decoder.eof:
+                raise ValueError("incomplete gzip member")
+        # Preserve gzip's existing acceptance of zero padding between/after
+        # members. Find subsequent headers from DEFLATE EOF, never magic search.
+        while offset < len(payload) and payload[offset] == 0:
+            offset += 1
+
+
 def validate_source_archive(payload, manifest_payload):
     """Inspect the compared TAR bytes without extracting files or following links."""
 
@@ -190,6 +214,7 @@ def validate_source_archive(payload, manifest_payload):
         expected = {"aethron-0.2.0/" + name: digest for name, digest in manifest.items()}
         seen = set()
         end_offset = 0
+        _validate_gzip_metadata(payload)
         with gzip.GzipFile(fileobj=io.BytesIO(payload), mode="rb") as compressed:
             with tarfile.open(fileobj=compressed, mode="r:") as archive:
                 for member in archive:

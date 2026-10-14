@@ -14,6 +14,7 @@ import tempfile
 import unittest
 import warnings
 import zipfile
+import zlib
 from pathlib import Path
 from unittest.mock import patch
 
@@ -205,7 +206,39 @@ def executable_archive(
     return b"not ZIP" if defect == "malformed" else payload
 
 
-def source_archive(defect=None, *, files=None, metadata=None):
+def normalized_gzip(payload):
+    buffer = io.BytesIO()
+    with gzip.GzipFile(filename="", mode="wb", compresslevel=9, fileobj=buffer, mtime=0) as stream:
+        stream.write(payload)
+    return buffer.getvalue()
+
+
+def altered_gzip_header(payload, field):
+    header = bytearray(payload[:10])
+    extension = b""
+    if field in ("filename", "comment", "extra", "header-crc"):
+        header[3] = {"filename": 8, "comment": 16, "extra": 4, "header-crc": 2}[field]
+        extension = {
+            "filename": b"unverified-path.tar\x00",
+            "comment": b"unverified comment\x00",
+            "extra": b"\x08\x00unlisted",
+            "header-crc": (zlib.crc32(header) & 0xFFFF).to_bytes(2, "little"),
+        }[field]
+    else:
+        index, value = {
+            "text": (3, 1),
+            "reserved-5": (3, 32),
+            "reserved-6": (3, 64),
+            "reserved-7": (3, 128),
+            "mtime": (4, 1),
+            "compression-hint": (8, 4),
+            "host": (9, 3),
+        }[field]
+        header[index] = value
+    return bytes(header) + extension + payload[10:]
+
+
+def source_archive(defect=None, *, files=None, metadata=None, gzip_header=None):
     """Real compressed TAR bytes, with optional independently checksummed defects."""
     files = SOURCE_FILES if files is None else files
     buffer = io.BytesIO()
@@ -315,13 +348,18 @@ def source_archive(defect=None, *, files=None, metadata=None):
             member.size = len(data)
             archive.addfile(member, io.BytesIO(data))
         if defect == "gzip-trailing-file":
-            return gzip.compress(raw, mtime=0) + gzip.compress(tail.getvalue(), mtime=0)
+            return normalized_gzip(raw) + normalized_gzip(tail.getvalue())
         raw += tail.getvalue()
     elif defect == "tar-trailing-bytes":
         raw += b"unverified trailing bytes"
     elif defect == "tar-distant-trailing-byte":
         raw += b"\x00" * (2 * 1024 * 1024) + b"x"
-    compressed = gzip.compress(raw, mtime=0)
+    compressed = normalized_gzip(raw)
+    if gzip_header is not None:
+        field, later = gzip_header
+        if later:
+            return compressed + altered_gzip_header(normalized_gzip(b"\x00" * 1024), field)
+        return altered_gzip_header(compressed, field)
     if defect == "gzip-footer":
         return compressed[:-8]
     if defect == "gzip-crc":
@@ -529,6 +567,7 @@ class ReproductionReport(unittest.TestCase):
         artifact_files=None,
         archive_defect=None,
         archive_metadata=None,
+        archive_gzip_header=None,
         zip_defect=None,
         zip_metadata=None,
         zip_local_header=None,
@@ -669,7 +708,12 @@ class ReproductionReport(unittest.TestCase):
                 (destination / "sbom.cdx.json").write_bytes(sbom_bytes)
                 (destination / "source-manifest.json").write_bytes(manifest_bytes)
                 (destination / "aethron-0.2.0-source.tar.gz").write_bytes(
-                    source_archive(archive_defect, files=artifact_files, metadata=archive_metadata)
+                    source_archive(
+                        archive_defect,
+                        files=artifact_files,
+                        metadata=archive_metadata,
+                        gzip_header=archive_gzip_header,
+                    )
                 )
                 (destination / "provenance.json").write_bytes(
                     json.dumps(
@@ -1123,6 +1167,55 @@ with module.reproduction_workspace() as temporary:
                 self.assertEqual(output, "")
                 self.assertEqual(consumers, [])
 
+    def test_gzip_metadata_rejects_before_consumers(self):
+        for field in (
+            "filename",
+            "comment",
+            "extra",
+            "header-crc",
+            "text",
+            "reserved-5",
+            "reserved-6",
+            "reserved-7",
+            "mtime",
+            "compression-hint",
+            "host",
+        ):
+            for later in (False, True):
+                with self.subTest(field=field, later=later):
+                    output, error, consumers, _, _ = self.invoke(
+                        archive_gzip_header=(field, later),
+                        check_workspace=True,
+                        real_consumers=True,
+                    )
+                    self.assertIsInstance(error, ValueError)
+                    self.assertEqual(str(error), "release_source_archive_invalid")
+                    self.assertEqual(output, "")
+                    self.assertEqual(consumers, [])
+
+    def test_normalized_gzip_members_preserve_split_content_and_padding(self):
+        # Cross input and output chunk boundaries, with empty members and a split
+        # inside a TAR header. Header checks must follow stream boundaries, not
+        # search for magic bytes within compressed or decompressed content.
+        files = {"large.bin": hashlib.shake_256(b"gzip fixture").digest(2 * 1024 * 1024)}
+        manifest = json.dumps(
+            {name: hashlib.sha256(data).hexdigest() for name, data in files.items()}
+        ).encode()
+        raw = gzip.decompress(source_archive(files=files))
+        for payload in (
+            normalized_gzip(raw),
+            normalized_gzip(b"")
+            + normalized_gzip(raw[:100])
+            + b"\x00" * 17
+            + normalized_gzip(raw[100:])
+            + normalized_gzip(b"\x00" * (2 * 1024 * 1024))
+            + b"\x00" * 19,
+        ):
+            with self.subTest(size=len(payload)):
+                self.assertEqual(
+                    reproduce.validate_source_archive(payload, manifest), json.loads(manifest)
+                )
+
     def test_trailing_source_content_rejects_before_consumers(self):
         for defect in (
             "tar-trailing-file",
@@ -1145,8 +1238,8 @@ with module.reproduction_workspace() as temporary:
         padding = b"\x00" * (2 * 1024 * 1024)
         for padded in (
             payload,
-            gzip.compress(gzip.decompress(payload) + padding, mtime=0),
-            payload + gzip.compress(padding, mtime=0),
+            normalized_gzip(gzip.decompress(payload) + padding),
+            payload + normalized_gzip(padding),
         ):
             with self.subTest(size=len(padded)):
                 self.assertEqual(
@@ -1189,7 +1282,7 @@ with module.reproduction_workspace() as temporary:
         for payload in (raw, raw[: end + 1024]):
             with self.subTest(length=len(payload)):
                 self.assertEqual(
-                    reproduce.validate_source_archive(gzip.compress(payload, mtime=0), manifest),
+                    reproduce.validate_source_archive(normalized_gzip(payload), manifest),
                     json.loads(manifest),
                 )
 
