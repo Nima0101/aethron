@@ -2,12 +2,55 @@
 
 import sys
 import unittest
+from collections import Counter
 from pathlib import Path
 
 # Test assertions are part of the evidence, even when the suite is invoked
 # directly instead of through verify.py's own interpreter-mode preflight.
 if sys.flags.optimize:
     raise SystemExit("verification_suite_requires_assertions")
+
+
+def _cases(suite):
+    for test in suite:
+        if isinstance(test, unittest.TestSuite):
+            yield from _cases(test)
+        else:
+            yield test
+
+
+class _CompletionResult(unittest.TextTestResult):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.started = Counter()
+
+    def startTest(self, test):
+        self.started[id(test)] += 1
+        super().startTest(test)
+
+
+def _completed(cases, discovered, result):
+    expected = Counter(id(test) for test in cases)
+    if (
+        discovered != len(cases)
+        or result.testsRun != sum(result.started.values())
+        or result.started - expected
+    ):
+        return False
+    # unittest reports a shared-fixture skip through a synthetic result holder,
+    # without starting its test cases. Match only setup labels to the original
+    # discovered classes/modules; teardown skips cannot cover unfinished tests.
+    # Unknown fixture labels fail closed. This is trusted-suite accounting, not
+    # protection against tests deliberately forging their result callbacks.
+    skipped = {test.id() for test, _ in result.skipped if not isinstance(test, unittest.TestCase)}
+    remaining = expected - result.started
+    for test in cases:
+        cls = type(test)
+        if remaining[id(test)] and not skipped.intersection(
+            (f"setUpClass ({cls.__module__}.{cls.__qualname__})", f"setUpModule ({cls.__module__})")
+        ):
+            return False
+    return True
 
 
 def main():
@@ -26,7 +69,8 @@ def main():
     try:
         suite = loader.discover("tests")
         discovered = suite.countTestCases()
-        result = unittest.TextTestRunner().run(suite)
+        cases = list(_cases(suite))
+        result = unittest.TextTestRunner(resultclass=_CompletionResult).run(suite)
     except SystemExit:
         # A discovery/count/run hook exiting zero has not completed the gate.
         print("verification_suite_incomplete", file=sys.stderr)
@@ -35,7 +79,7 @@ def main():
     # Completion counts are evidence for trusted tests, not a test-code sandbox.
     accepted = (
         discovered > 0
-        and result.testsRun == discovered
+        and _completed(cases, discovered, result)
         and result.wasSuccessful()
         and not loader.errors
     )
