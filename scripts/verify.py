@@ -235,6 +235,10 @@ def run():
     # ORT's 1DS telemetry initializes at import, before API-level opt-out.
     # Disable it in each child before native imports without changing the parent.
     env = dict(os.environ, ORT_DISABLE_TELEMETRY="1")
+    # Match clean reproduction: check this checkout with the selected interpreter,
+    # without a caller's alternate home or startup/import modules taking over.
+    env.pop("PYTHONHOME", None)
+    env.pop("PYTHONPATH", None)
     subprocess.run(
         [sys.executable, "scripts/public_links.py", "HEAD"], cwd=ROOT, check=True, env=env
     )

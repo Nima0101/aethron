@@ -28,10 +28,11 @@ class VerificationTelemetry(unittest.TestCase):
                 with self.fixture("value = 1"), patch.object(verify.subprocess, "run") as child:
                     verify.run()
                 self.assertEqual(child.call_count, 5)
+                expected = dict(before, ORT_DISABLE_TELEMETRY="1")
+                expected.pop("PYTHONHOME", None)
+                expected.pop("PYTHONPATH", None)
                 for call in child.call_args_list:
-                    self.assertEqual(
-                        call.kwargs.get("env"), dict(before, ORT_DISABLE_TELEMETRY="1")
-                    )
+                    self.assertEqual(call.kwargs.get("env"), expected)
                     self.assertIsNot(call.kwargs["env"], os.environ)
                 self.assertEqual(dict(os.environ), before)
 

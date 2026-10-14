@@ -40,12 +40,15 @@ class StaticCheckClaims(unittest.TestCase):
             calls = []
 
             def child(args, **kwargs):
+                expected_env = dict(os.environ, ORT_DISABLE_TELEMETRY="1")
+                expected_env.pop("PYTHONHOME", None)
+                expected_env.pop("PYTHONPATH", None)
                 self.assertEqual(
                     kwargs,
                     {
                         "cwd": root,
                         "check": True,
-                        "env": dict(os.environ, ORT_DISABLE_TELEMETRY="1"),
+                        "env": expected_env,
                     },
                 )
                 calls.append(args)
