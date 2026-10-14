@@ -4,17 +4,24 @@ import gzip
 import hashlib
 import io
 import json
+import os
 import stat
 import subprocess
 import tarfile
 import zipfile
 from pathlib import Path
 
+if __package__:
+    from .git_context import require_default_git_context
+else:
+    from git_context import require_default_git_context
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def committed_blobs(revision, *, root=None):
     """Read one immutable Git tree, never the mutable checkout behind provenance."""
+    require_default_git_context(os.environ)
     root = ROOT if root is None else root
     tree = subprocess.check_output(
         ["git", "--no-replace-objects", "ls-tree", "-r", "-z", "--full-tree", revision],
@@ -53,6 +60,7 @@ def committed_blobs(revision, *, root=None):
 
 
 def build(destination):
+    require_default_git_context(os.environ)
     # Local refs/replace must not redefine the revision named by provenance.
     names = (
         subprocess.check_output(["git", "--no-replace-objects", "ls-files", "-z"], cwd=ROOT)

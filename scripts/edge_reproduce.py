@@ -7,14 +7,17 @@ import sys
 from pathlib import Path
 
 if __package__:
+    from .git_context import require_default_git_context
     from .reproduce import reproduction_workspace, validate_source
 else:
+    from git_context import require_default_git_context
     from reproduce import reproduction_workspace, validate_source
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def run(wheelhouse):
+    require_default_git_context(os.environ)
     area = ROOT / "build/ecosystem-phase1"
     area.mkdir(parents=True, exist_ok=True)
     with reproduction_workspace(prefix="clean-edge-", dir=area) as temporary:

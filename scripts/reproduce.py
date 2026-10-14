@@ -31,6 +31,16 @@ RELEASE_ARTIFACTS = frozenset(
 )
 
 
+def _require_git_context():
+    # Keep the standalone workspace helper usable without repository imports.
+    if __package__:
+        from .git_context import require_default_git_context
+    else:
+        from git_context import require_default_git_context
+
+    require_default_git_context(os.environ)
+
+
 def call(args, cwd, **kw):
     return subprocess.run(args, cwd=cwd, check=True, **kw)
 
@@ -204,6 +214,7 @@ def validate_source_manifest(clone, revision, manifest):
 
 def validate_source(clone, revision):
     """Bind sequential checks to one clean revision, excluding ignored build outputs."""
+    _require_git_context()
     # These index flags suppress working-tree checks even when status is clean.
     # A complete reproduction clone must keep every tracked file observable.
     entries = subprocess.check_output(
@@ -251,6 +262,7 @@ def reproduction_workspace(*, prefix="aethron-clean-", dir=None):
 
 
 def run():
+    _require_git_context()
     # Exercise the clone with the selected interpreter, not caller import overrides.
     env = dict(os.environ)
     env.pop("PYTHONHOME", None)
