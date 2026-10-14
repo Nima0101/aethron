@@ -2,12 +2,14 @@
 
 import contextlib
 import hashlib
+import io
 import json
 import os
 import shutil
 import stat
 import subprocess
 import sys
+import tarfile
 import tempfile
 from pathlib import Path
 
@@ -84,6 +86,50 @@ def validate_checksums(payload, manifest):
     ).encode("utf-8")
     if payload != expected:
         raise ValueError("release_checksums_invalid")
+
+
+def validate_source_archive(payload, manifest_payload):
+    """Inspect the compared TAR bytes without extracting files or following links."""
+
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("duplicate manifest entry")
+            result[key] = value
+        return result
+
+    try:
+        manifest = json.loads(manifest_payload.decode("utf-8"), object_pairs_hook=unique_object)
+        if not isinstance(manifest, dict) or not manifest:
+            raise ValueError("invalid manifest")
+        for name, digest in manifest.items():
+            if (
+                any(part in ("", ".", "..") for part in name.split("/"))
+                or "\\" in name
+                or "\x00" in name
+                or not isinstance(digest, str)
+                or len(digest) != 64
+                or any(char not in "0123456789abcdef" for char in digest)
+            ):
+                raise ValueError("invalid manifest entry")
+        expected = {"aethron-0.2.0/" + name: digest for name, digest in manifest.items()}
+        seen = set()
+        with tarfile.open(fileobj=io.BytesIO(payload), mode="r:gz") as archive:
+            for member in archive:
+                if not member.isfile() or member.name not in expected or member.name in seen:
+                    raise ValueError("invalid archive member")
+                seen.add(member.name)
+                digest = hashlib.sha256()
+                with archive.extractfile(member) as stream:
+                    for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                        digest.update(chunk)
+                if digest.hexdigest() != expected[member.name]:
+                    raise ValueError("archive content mismatch")
+        if seen != expected.keys():
+            raise ValueError("incomplete archive")
+    except (ValueError, RecursionError, tarfile.TarError, OSError, EOFError):
+        raise ValueError("release_source_archive_invalid") from None
 
 
 def validate_source(clone, revision):
@@ -205,9 +251,14 @@ def run():
                 provenance = compared
             if p.name == "SHA256SUMS":
                 checksums = compared
+            if p.name == "source-manifest.json":
+                source_manifest = compared
+            if p.name == "aethron-0.2.0-source.tar.gz":
+                source_archive = compared
             artifact_manifest[p.name] = hashlib.sha256(compared).hexdigest()
         validate_provenance(provenance, revision, artifact_manifest["source-manifest.json"])
         validate_checksums(checksums, artifact_manifest)
+        validate_source_archive(source_archive, source_manifest)
         call(
             [
                 sys.executable,

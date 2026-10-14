@@ -1,6 +1,7 @@
 """Synthetic reporting fixtures and real Python startup probes; no product build."""
 
 import contextlib
+import gzip
 import hashlib
 import io
 import json
@@ -8,6 +9,7 @@ import os
 import stat
 import subprocess
 import sys
+import tarfile
 import tempfile
 import unittest
 import zipfile
@@ -15,6 +17,50 @@ from pathlib import Path
 from unittest.mock import patch
 
 from scripts import reproduce
+
+SOURCE_FILES = {"source.txt": b"synthetic source\x00\xff\n", "empty.txt": b""}
+SOURCE_MANIFEST = json.dumps(
+    {name: hashlib.sha256(data).hexdigest() for name, data in SOURCE_FILES.items()}
+).encode()
+
+
+def source_archive(defect=None):
+    """Real compressed TAR bytes, with optional independently checksummed defects."""
+    buffer = io.BytesIO()
+    with tarfile.open(fileobj=buffer, mode="w", format=tarfile.USTAR_FORMAT) as archive:
+        entries = list(SOURCE_FILES.items())
+        if defect == "missing":
+            entries.pop()
+        elif defect == "extra":
+            entries.append(("extra.txt", b"extra"))
+        elif defect == "duplicate":
+            entries.append(entries[0])
+        elif defect == "empty":
+            entries = []
+        for name, data in entries:
+            member = tarfile.TarInfo("aethron-0.2.0/" + name)
+            if name == "source.txt":
+                if defect == "content":
+                    data = b"wrong source bytes"
+                elif defect == "prefix":
+                    member.name = "other-project/" + name
+                elif defect == "traversal":
+                    member.name = "aethron-0.2.0/../" + name
+                elif defect in ("symlink", "hardlink", "directory", "fifo"):
+                    member.type = {
+                        "symlink": tarfile.SYMTYPE,
+                        "hardlink": tarfile.LNKTYPE,
+                        "directory": tarfile.DIRTYPE,
+                        "fifo": tarfile.FIFOTYPE,
+                    }[defect]
+                    member.linkname = "aethron-0.2.0/empty.txt"
+                    data = b""
+            member.size = len(data)
+            archive.addfile(member, io.BytesIO(data))
+    raw = buffer.getvalue()
+    if defect == "truncated":
+        raw = raw[:520]
+    return b"not gzip" if defect == "malformed" else gzip.compress(raw, mtime=0)
 
 
 class ReproductionReport(unittest.TestCase):
@@ -205,7 +251,8 @@ class ReproductionReport(unittest.TestCase):
         inventory_lanes=("a", "b"),
         provenance_bytes=None,
         checksum_defect=None,
-        manifest_bytes=b"synthetic sidecar",
+        manifest_bytes=SOURCE_MANIFEST,
+        archive_defect=None,
         python_probes=None,
     ):
         output = io.StringIO()
@@ -341,6 +388,9 @@ class ReproductionReport(unittest.TestCase):
                 ):
                     (destination / sidecar).write_bytes(b"synthetic sidecar")
                 (destination / "source-manifest.json").write_bytes(manifest_bytes)
+                (destination / "aethron-0.2.0-source.tar.gz").write_bytes(
+                    source_archive(archive_defect)
+                )
                 (destination / "provenance.json").write_bytes(
                     json.dumps(
                         {
@@ -605,14 +655,13 @@ with module.reproduction_workspace() as temporary:
                 json.dumps(
                     {
                         "source_revision": revision,
-                        "source_manifest_sha256": hashlib.sha256(b"synthetic sidecar").hexdigest(),
+                        "source_manifest_sha256": hashlib.sha256(SOURCE_MANIFEST).hexdigest(),
                     }
                 ).encode()
             ).hexdigest(),
-            **dict.fromkeys(
-                ("aethron-0.2.0-source.tar.gz", "source-manifest.json", "sbom.cdx.json"),
-                hashlib.sha256(b"synthetic sidecar").hexdigest(),
-            ),
+            "aethron-0.2.0-source.tar.gz": hashlib.sha256(source_archive()).hexdigest(),
+            "source-manifest.json": hashlib.sha256(SOURCE_MANIFEST).hexdigest(),
+            "sbom.cdx.json": hashlib.sha256(b"synthetic sidecar").hexdigest(),
         }
         checksums = "".join(f"{expected[name]}  {name}\n" for name in sorted(expected)).encode()
         expected["SHA256SUMS"] = hashlib.sha256(checksums).hexdigest()
@@ -648,6 +697,68 @@ with module.reproduction_workspace() as temporary:
                 self.assertEqual(output, "")
                 self.assertEqual(consumers, [])
 
+    def test_identical_source_archive_defects_reject_before_consumers(self):
+        for defect in (
+            "content",
+            "missing",
+            "extra",
+            "duplicate",
+            "empty",
+            "prefix",
+            "traversal",
+            "symlink",
+            "hardlink",
+            "directory",
+            "fifo",
+            "truncated",
+            "malformed",
+        ):
+            with self.subTest(defect=defect):
+                output, error, consumers, _, _ = self.invoke(
+                    archive_defect=defect, check_workspace=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_source_archive_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_invalid_source_manifests_reject_before_consumers(self):
+        digest = hashlib.sha256(SOURCE_FILES["source.txt"]).hexdigest()
+        duplicate = ('{"source.txt": "' + digest + '", ' + SOURCE_MANIFEST.decode()[1:]).encode()
+        for manifest in (
+            b"not JSON",
+            b"\xff",
+            b"null",
+            b"[]",
+            b"{}",
+            b'{"source.txt": null}',
+            b'{"source.txt": true}',
+            b'{"source.txt": "wrong digest"}',
+            duplicate,
+            json.dumps({"source.txt": digest.upper()}).encode(),
+            *(
+                json.dumps({name: digest}).encode()
+                for name in (
+                    "",
+                    "/source.txt",
+                    "../source.txt",
+                    "dir/../source.txt",
+                    "./source.txt",
+                    "dir//source.txt",
+                    "dir\\source.txt",
+                    "source\x00.txt",
+                )
+            ),
+        ):
+            with self.subTest(manifest=manifest):
+                output, error, consumers, _, _ = self.invoke(
+                    manifest_bytes=manifest, check_workspace=True
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_source_archive_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
     def test_identical_wrong_or_invalid_provenance_rejects_before_consumers(self):
         revision = "a" * 40
         for payload in (
@@ -672,7 +783,7 @@ with module.reproduction_workspace() as temporary:
                 self.assertEqual(consumers, [])
 
     def test_provenance_manifest_digest_must_match_compared_bytes(self):
-        digest = hashlib.sha256(b"synthetic sidecar").hexdigest()
+        digest = hashlib.sha256(SOURCE_MANIFEST).hexdigest()
         for value in (None, True, 1, [], {}, "", "0" * 64, digest.upper(), digest + "\n"):
             with self.subTest(value=value):
                 provenance = {"source_revision": "a" * 40}
@@ -689,7 +800,7 @@ with module.reproduction_workspace() as temporary:
     def test_changed_manifest_with_consistent_checksums_rejects_stale_provenance(self):
         provenance = {
             "source_revision": "a" * 40,
-            "source_manifest_sha256": hashlib.sha256(b"synthetic sidecar").hexdigest(),
+            "source_manifest_sha256": hashlib.sha256(SOURCE_MANIFEST).hexdigest(),
         }
         output, error, consumers, _, _ = self.invoke(
             provenance_bytes=json.dumps(provenance).encode(),
