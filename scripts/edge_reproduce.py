@@ -7,9 +7,9 @@ import sys
 from pathlib import Path
 
 if __package__:
-    from .reproduce import reproduction_workspace
+    from .reproduce import reproduction_workspace, validate_source
 else:
-    from reproduce import reproduction_workspace
+    from reproduce import reproduction_workspace, validate_source
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -22,15 +22,21 @@ def run(wheelhouse):
         subprocess.run(
             ["git", "clone", "--no-local", str(ROOT), str(clone)], check=True, capture_output=True
         )
+        revision = subprocess.check_output(
+            ["git", "--no-replace-objects", "rev-parse", "HEAD"], cwd=clone, text=True
+        ).strip()
+        validate_source(clone, revision)
         env = dict(os.environ)
         env.pop("PYTHONPATH", None)
         subprocess.run([sys.executable, "scripts/verify.py"], cwd=clone, env=env, check=True)
+        validate_source(clone, revision)
         subprocess.run(
             [sys.executable, "scripts/check_ecosystem_plan.py", "--self-test"],
             cwd=clone,
             env=env,
             check=True,
         )
+        validate_source(clone, revision)
         subprocess.run(
             [
                 sys.executable,
@@ -44,6 +50,7 @@ def run(wheelhouse):
             env=env,
             check=True,
         )
+        validate_source(clone, revision)
         print("PASS: committed clean clone and installed consumer; local artifacts only")
 
 
