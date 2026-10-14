@@ -89,6 +89,15 @@ class ReleaseArchive(unittest.TestCase):
                     self.assertEqual(member.date_time, (2026, 1, 1, 0, 0, 0))
                     self.assertEqual(member.external_attr >> 16, 0o644)
                     self.assertEqual(member.compress_type, zipfile.ZIP_STORED)
+                    self.assertEqual(
+                        (
+                            member.create_version,
+                            member.extract_version,
+                            member.reserved,
+                            member.internal_attr,
+                        ),
+                        (20, 20, 0, 0),
+                    )
                     if member.filename != "__main__.py":
                         self.assertEqual(archive.read(member), blobs[member.filename])
             self.assertEqual({n: (source / n).read_bytes() for n in blobs}, blobs)

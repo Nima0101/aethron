@@ -365,8 +365,23 @@ def validate_zipapp(payload, manifest):
                 offset += 30 + name_size + extra_size + member.compress_size
                 # Match the release writer's portable metadata as well as contents;
                 # equal builds can share incorrect permissions or host defaults.
-                if (member.create_system, member.external_attr, member.date_time) != (
+                # Agreement alone does not establish the writer's format: both
+                # headers can claim another extraction version/reserved byte.
+                # Internal attributes also carry text/record flags outside hashes.
+                if (
+                    member.create_system,
+                    member.create_version,
+                    member.extract_version,
+                    member.reserved,
+                    member.internal_attr,
+                    member.external_attr,
+                    member.date_time,
+                ) != (
                     3,
+                    20,
+                    20,
+                    0,
+                    0,
                     0o644 << 16,
                     (2026, 1, 1, 0, 0, 0),
                 ):

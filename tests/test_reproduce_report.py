@@ -1487,6 +1487,45 @@ with module.reproduction_workspace() as temporary:
                 self.assertEqual(output, "")
                 self.assertEqual(consumers, [])
 
+    def test_zip_versions_reject_even_when_headers_agree(self):
+        # Matching declarations can still differ from our stored ZIP writer.
+        # Raw edits preserve deliberately low versions that ZipFile upgrades.
+        for version in (0, 10, 45, 63, 20 | (1 << 8), 20 | (255 << 8)):
+            with self.subTest(version=version):
+                output, error, consumers, _, _ = self.invoke(
+                    zip_local_header=(4, 2, version),
+                    zip_central_header=(6, 2, version),
+                    check_workspace=True,
+                    real_consumers=True,
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_zipapp_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
+    def test_zip_creator_version_and_internal_attributes_reject_before_consumers(self):
+        # These declarations are not content-hashed and do not affect the smoke
+        # path. Text/record flags and reserved bits must not escape admission.
+        for field, offset, width, value in (
+            ("create_version", 4, 1, 0),
+            ("create_version", 4, 1, 63),
+            ("create_version", 4, 1, 255),
+            ("internal_attr", 36, 2, 1),
+            ("internal_attr", 36, 2, 2),
+            ("internal_attr", 36, 2, 4),
+            ("internal_attr", 36, 2, 65535),
+        ):
+            with self.subTest(field=field, value=value):
+                output, error, consumers, _, _ = self.invoke(
+                    zip_central_header=(offset, width, value),
+                    check_workspace=True,
+                    real_consumers=True,
+                )
+                self.assertIsInstance(error, ValueError)
+                self.assertEqual(str(error), "release_zipapp_invalid")
+                self.assertEqual(output, "")
+                self.assertEqual(consumers, [])
+
     def test_zip_metadata_rejects_before_consumers(self):
         # Equal builds and content hashes cannot validate extraction metadata.
         # These otherwise valid ZIPs also pass the real Python smoke consumers.
