@@ -115,6 +115,51 @@ class ReleaseArchive(unittest.TestCase):
             self.assertFalse((destination / "aethron-0.2.0-source.tar.gz").exists())
             self.assertEqual({n: (source / n).read_bytes() for n in blobs}, blobs)
 
+    def test_unrepresentable_names_leave_destination_available_for_corrected_retry(self):
+        for name in ("x" * 101, "é" * 51, "a" * 80 + "/" + "b" * 80 + "/" + "c" * 100):
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                source, blobs = self.fixture(root)
+                original = dict(blobs)
+                blobs[name] = b"unrepresentable source name"
+                path = source / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(blobs[name])
+                destination = root / "new-parent" / "output"
+                with self.assertRaises(ValueError):
+                    self.build_fixture(source, blobs, destination)
+                self.assertEqual({n: (source / n).read_bytes() for n in blobs}, blobs)
+                self.assertFalse(destination.parent.exists())
+                path.unlink()
+                self.build_fixture(source, original, destination)
+                with tarfile.open(destination / "aethron-0.2.0-source.tar.gz") as archive:
+                    self.assertEqual(
+                        archive.getnames(), ["aethron-0.2.0/" + n for n in sorted(original)]
+                    )
+
+    def test_ustar_boundary_names_preserve_exact_utf8_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source, blobs = self.fixture(root)
+            # The archive's 14-byte root prefix plus this directory occupies
+            # the full 155-byte USTAR prefix; each basename uses 100 bytes.
+            for name in ("x" * 100, "é" * 50, "a" * 141 + "/" + "b" * 100):
+                blobs[name] = b"representable boundary"
+                path = source / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(blobs[name])
+            destination = root / "output"
+            self.build_fixture(source, blobs, destination)
+            with tarfile.open(
+                destination / "aethron-0.2.0-source.tar.gz", encoding="utf-8"
+            ) as archive:
+                self.assertEqual(archive.getnames(), ["aethron-0.2.0/" + n for n in sorted(blobs)])
+                for member in archive:
+                    with archive.extractfile(member) as stream:
+                        self.assertEqual(
+                            stream.read(), blobs[member.name.removeprefix("aethron-0.2.0/")]
+                        )
+
     def test_zip_creator_default_cannot_change_artifacts(self):
         initialize = zipfile.ZipInfo.__init__
         with tempfile.TemporaryDirectory() as directory:

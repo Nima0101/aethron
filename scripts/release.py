@@ -194,6 +194,17 @@ def build(destination):
     except OSError:
         raise SystemExit("release source unavailable") from None
     manifest = {n: hashlib.sha256(data).hexdigest() for n, data in blobs.items()}
+    # Git admits names (including UTF-8 names) that USTAR cannot represent.
+    # Validate the exact headers before reserving the output directory, so a
+    # rejected source can be corrected and rebuilt at the same destination.
+    members = []
+    for name, data in blobs.items():
+        info = tarfile.TarInfo("aethron-0.2.0/" + name)
+        info.size = len(data)
+        info.mode = 0o644
+        info.mtime = 0
+        info.tobuf(tarfile.USTAR_FORMAT, encoding="utf-8", errors="strict")
+        members.append((name, info))
     out = Path(destination)
     out.mkdir(parents=True, exist_ok=False)
     buffer = io.BytesIO()
@@ -202,12 +213,8 @@ def build(destination):
     with tarfile.open(
         fileobj=buffer, mode="w", format=tarfile.USTAR_FORMAT, encoding="utf-8", errors="strict"
     ) as archive:
-        for name, data in blobs.items():
-            info = tarfile.TarInfo("aethron-0.2.0/" + name)
-            info.size = len(data)
-            info.mode = 0o644
-            info.mtime = 0
-            archive.addfile(info, io.BytesIO(data))
+        for name, info in members:
+            archive.addfile(info, io.BytesIO(blobs[name]))
     # GzipFile keeps the OS header stable on Python 3.11/3.12 too; pin all defaults
     # that affect bytes, including the compression level changed in Python 3.15.
     compressed = io.BytesIO()
