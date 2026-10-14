@@ -9,13 +9,13 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from scripts import reproduce
+from scripts import git_context, reproduce
 
 
 class ReproductionTimeouts(unittest.TestCase):
     def test_each_git_stage_stops_and_retains_the_failed_workspace(self):
         commands = ["clone", "rev-parse", "ls-files", "rev-parse", "status"]
-        responses = [None, "a" * 40 + "\n", b"H source.txt\0", "a" * 40 + "\n"]
+        responses = [None, b"a" * 40 + b"\n", b"H source.txt\0", b"a" * 40 + b"\n"]
         for stage, command in enumerate(commands):
             with self.subTest(stage=stage, command=command):
                 with tempfile.TemporaryDirectory() as directory:
@@ -40,7 +40,7 @@ class ReproductionTimeouts(unittest.TestCase):
                     with (
                         patch.object(tempfile, "tempdir", str(root)),
                         patch.object(reproduce.subprocess, "run", side_effect=child),
-                        patch.object(reproduce.subprocess, "check_output", side_effect=child),
+                        patch.object(git_context, "git_output", side_effect=child),
                         contextlib.redirect_stdout(io.StringIO()) as output,
                         contextlib.redirect_stderr(io.StringIO()) as diagnostics,
                     ):

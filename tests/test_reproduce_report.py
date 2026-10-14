@@ -18,7 +18,7 @@ import zlib
 from pathlib import Path
 from unittest.mock import patch
 
-from scripts import reproduce
+from scripts import git_context, reproduce
 
 ZIP_MAIN = b"from aethron.__main__ import main\nraise SystemExit(main())\n"
 PROVENANCE_DECLARATIONS = {
@@ -944,7 +944,7 @@ class ReproductionReport(unittest.TestCase):
             if args == ["git", "--no-replace-objects", "ls-files", "-v", "-f", "-z"]:
                 return index_entries
             if args == ["git", "--no-replace-objects", "rev-parse", "HEAD"]:
-                return clone_revision + "\n"
+                return (clone_revision + "\n").encode("ascii")
             if args == [
                 "git",
                 "--no-replace-objects",
@@ -961,6 +961,7 @@ class ReproductionReport(unittest.TestCase):
             patch.object(tempfile, "tempdir", sandbox),
             patch.object(reproduce.subprocess, "run", side_effect=fake_process),
             patch.object(reproduce.subprocess, "check_output", side_effect=git_output),
+            patch.object(git_context, "git_output", side_effect=git_output),
             patch.object(Path, "read_bytes", checked_read),
             contextlib.redirect_stdout(output),
             contextlib.redirect_stderr(diagnostics),

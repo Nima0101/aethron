@@ -55,14 +55,19 @@ def call(args, cwd, **kw):
     return subprocess.run(args, cwd=cwd, check=True, **kw)
 
 
-def _git_output(args, **kwargs):
+def _git_output(args, *, cwd, text=False):
     # Lazy import preserves standalone use of the workspace cleanup helper.
     if __package__:
-        from .git_context import GIT_COMMAND_TIMEOUT_SECONDS
+        from .git_context import GIT_COMMAND_TIMEOUT_SECONDS, git_output
     else:
-        from git_context import GIT_COMMAND_TIMEOUT_SECONDS
+        from git_context import GIT_COMMAND_TIMEOUT_SECONDS, git_output
 
-    return subprocess.check_output(args, timeout=GIT_COMMAND_TIMEOUT_SECONDS, **kwargs)
+    # Reuse verifier admission: a time limit alone does not bound captured
+    # metadata. Reject oversized/incomplete output before parsing or advancing
+    # to verification, while the workspace context retains failure evidence.
+    data = git_output(args, cwd=cwd, timeout=GIT_COMMAND_TIMEOUT_SECONDS)
+    # Only rev-parse HEAD requests text; object IDs are ASCII in both Git formats.
+    return data.decode("ascii") if text else data
 
 
 def artifact_mode(path):
