@@ -10,7 +10,7 @@ import tempfile
 import unittest
 import warnings
 import zipfile
-from contextlib import ExitStack, redirect_stdout
+from contextlib import ExitStack, redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
@@ -33,6 +33,8 @@ class PackageInputEvidence(unittest.TestCase):
         artifact_change=None,
         console_error=None,
         console_output="usage: aethron-edge\n",
+        on_run=None,
+        on_exit=None,
     ):
         execute = subprocess.run
         spawn = subprocess.Popen
@@ -91,6 +93,8 @@ class PackageInputEvidence(unittest.TestCase):
             consumers = []
 
             def run(args, **kwargs):
+                if on_run is not None:
+                    on_run(args)
                 if args[1:] == ["--help"]:
                     self.assertEqual(Path(args[0]).stem, "aethron-edge")
                     self.assertNotIn("PYTHONPATH", kwargs["env"])
@@ -198,6 +202,8 @@ class PackageInputEvidence(unittest.TestCase):
                 response.return_value.__enter__.return_value.status = 200
                 stack.enter_context(patch.object(Path, "read_text", read_text))
                 printed = stack.enter_context(redirect_stdout(io.StringIO()))
+                if on_exit is not None:
+                    stack.callback(on_exit, output, printed)
                 if console_error is not None or not console_output.strip():
                     expected_error = (
                         type(console_error) if console_error is not None else ValueError
@@ -258,6 +264,69 @@ class PackageInputEvidence(unittest.TestCase):
 
     def test_report_identifies_checker_and_manifests(self):
         self.probe()
+
+    def test_failed_installed_stages_retain_workspace(self):
+        stages = {
+            "venv": lambda args: args[1:3] == ["-m", "venv"],
+            "dependencies": lambda args: "install" in args and "-r" in args,
+            "wheels": lambda args: "install" in args and "--no-deps" in args,
+            "payload": lambda args: args[-1] == "--installed-edge-payload",
+            "console": lambda args: args[1:] == ["--help"],
+            "sensor_suite": lambda args: args[-1] == "test_sensor*.py",
+            "observer": lambda args: any(str(arg).endswith("observe.py") for arg in args),
+            "vision_suite": lambda args: args[-1] == "test*rectification.py",
+        }
+        for name, matches in stages.items():
+            with self.subTest(stage=name):
+                self.check_workspace_failure(matches, subprocess.CalledProcessError(7, [name]))
+
+    def test_interrupted_install_retains_workspace(self):
+        for failure in (SystemExit(9), KeyboardInterrupt()):
+            with self.subTest(failure=type(failure).__name__):
+                self.check_workspace_failure(lambda args: "install" in args, failure)
+
+    def check_workspace_failure(self, matches, failure):
+        workspaces = []
+        diagnostics = io.StringIO()
+
+        def on_run(args):
+            if args[1:3] == ["-m", "venv"]:
+                work = Path(args[-1]).parent
+                workspaces.append(work)
+                (work / "partial-evidence").write_bytes(b"retained synthetic evidence")
+            if matches(args):
+                raise failure
+
+        def on_exit(output, printed):
+            self.assertEqual(len(workspaces), 1)
+            work = workspaces[0]
+            self.assertTrue(work.is_dir(), "failed installed workspace was deleted")
+            self.assertEqual(work.parent, output)
+            self.assertEqual(
+                (work / "partial-evidence").read_bytes(), b"retained synthetic evidence"
+            )
+            self.assertIn(str(work), diagnostics.getvalue())
+            self.assertFalse((output / "result.json").exists())
+            self.assertEqual(printed.getvalue(), "")
+
+        with redirect_stderr(diagnostics), self.assertRaises(type(failure)) as raised:
+            self.probe(vision=True, on_run=on_run, on_exit=on_exit)
+        self.assertIs(raised.exception, failure)
+
+    def test_successful_installed_run_cleans_workspace(self):
+        workspaces = []
+
+        def on_run(args):
+            if args[1:3] == ["-m", "venv"]:
+                workspaces.append(Path(args[-1]).parent)
+
+        def on_exit(output, printed):
+            self.assertEqual(len(workspaces), 1)
+            self.assertFalse(workspaces[0].exists())
+            self.assertTrue((output / "result.json").is_file())
+            self.assertIs(json.loads(printed.getvalue())["installed_consumer"], True)
+
+        self.probe(vision=True, on_run=on_run, on_exit=on_exit)
 
     def test_vision_report_also_identifies_vision_lock(self):
         self.probe(vision=True)

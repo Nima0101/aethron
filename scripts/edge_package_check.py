@@ -7,7 +7,6 @@ import shutil
 import socket
 import subprocess
 import sys
-import tempfile
 import time
 import urllib.request
 from pathlib import Path
@@ -133,7 +132,10 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
             compared_bytes, payloads[distribution], distribution.replace("-", "_")
         )
         hashes[wheel.name] = hashlib.sha256(compared_bytes).hexdigest()
-    with tempfile.TemporaryDirectory(prefix="aethron-installed-") as temporary:
+    # Keep failed installed-consumer evidence with this attempt's persistent wheels.
+    with package_check.reproduction_workspace(
+        prefix="aethron-installed-", dir=output.resolve()
+    ) as temporary:
         work = Path(temporary)
         subprocess.run([sys.executable, "-m", "venv", str(work / "venv")], check=True)
         python = work / "venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
