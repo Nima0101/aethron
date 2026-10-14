@@ -77,6 +77,7 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
     with zipfile.ZipFile(io.BytesIO(wheel_bytes)) as wheel:
         sources = {}
         file_destinations = set()
+        directory_destinations = set()
         for member in wheel.infolist():
             # ZipInfo truncates filename at NUL; inspecting only that normalized
             # spelling would silently admit a different original archive name.
@@ -115,14 +116,22 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron"):
                 and parts[1] in ("purelib", "platlib")
             ):
                 name = parts[2]
-            # Resource and metadata collisions are just as installation-dependent
-            # as source collisions. Admit every file destination after spreading,
-            # before reading any payload. Directory records do not write a file.
+            # Every ancestor is an implicit directory, even without a ZIP
+            # directory record. A destination cannot be both a file and a
+            # directory, in either record order or across spread layouts.
             folded_name = name.casefold()
+            destination = folded_name.rstrip("/")
+            components = destination.split("/")
+            directories = {"/".join(components[:i]) for i in range(1, len(components))}
+            if member.is_dir() and destination:
+                directories.add(destination)
+            if directories & file_destinations:
+                raise ValueError("wheel_source_payload_mismatch")
             if not member.is_dir():
-                if folded_name in file_destinations:
+                if destination in file_destinations or destination in directory_destinations:
                     raise ValueError("wheel_source_payload_mismatch")
-                file_destinations.add(folded_name)
+                file_destinations.add(destination)
+            directory_destinations.update(directories)
             # These distributions do not declare site-level path configuration.
             # A .pth file here can execute at interpreter startup (even with -I),
             # before the installed-source probe gets control. Reject both code

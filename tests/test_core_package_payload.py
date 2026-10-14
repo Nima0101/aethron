@@ -54,6 +54,8 @@ class CorePackagePayload(unittest.TestCase):
                 records.extend(
                     (("aethron/notes.txt", b"first\n"), ("aethron/NOTES.txt", b"second\n"))
                 )
+            elif defect == "directory-conflict":
+                records.extend((("aethron/assets", b"file"), ("aethron/assets/a.txt", b"")))
             elif defect == "startup-path":
                 records.append(("unexpected.pth", b"import sys\n"))
             elif defect == "bytecode":
@@ -156,6 +158,67 @@ class CorePackagePayload(unittest.TestCase):
                                     package_check.validate_source_payload(
                                         archive.getvalue(), payload, package
                                     )
+
+    def test_directory_conflict_is_rejected_before_installation(self):
+        self.check_payload("directory-conflict")
+
+    def test_file_directory_conflicts_reject_before_reads(self):
+        for package in ("aethron", "aethron_edge"):
+            payload = {f"{package}/__init__.py": b""}
+            prefixes = ("", f"{package}-0.2.0.data/purelib/", f"{package}-0.2.0.data/platlib/")
+            for file_name, directory_name in (
+                (f"{package}/assets", f"{package}/assets/"),
+                (f"{package}/assets", f"{package}/assets/deep/readme.txt"),
+                (f"{package}/assets", f"{package}/ASSETS/deep/"),
+                (f"{package}-0.2.0.dist-info", f"{package}-0.2.0.dist-info/METADATA"),
+            ):
+                for file_prefix in prefixes:
+                    for directory_prefix in prefixes:
+                        for reverse in (False, True):
+                            entries = [file_prefix + file_name, directory_prefix + directory_name]
+                            if reverse:
+                                entries.reverse()
+                            with self.subTest(package=package, entries=entries):
+                                archive = io.BytesIO()
+                                with zipfile.ZipFile(archive, "w") as wheel:
+                                    wheel.writestr(f"{package}/__init__.py", b"")
+                                    for name in entries:
+                                        wheel.writestr(name, b"")
+                                with (
+                                    patch.object(
+                                        zipfile.ZipFile,
+                                        "read",
+                                        side_effect=AssertionError("premature read"),
+                                    ),
+                                    self.assertRaisesRegex(
+                                        ValueError, "wheel_source_payload_mismatch"
+                                    ),
+                                ):
+                                    package_check.validate_source_payload(
+                                        archive.getvalue(), payload, package
+                                    )
+
+    def test_shared_directories_and_nonancestor_files_remain_allowed(self):
+        for package in ("aethron", "aethron_edge"):
+            payload = {f"{package}/__init__.py": b""}
+            entries = [
+                f"{package}/assets/one.txt",
+                f"{package}/assets/two.txt",
+                f"{package}/assets/",
+                f"{package}/ASSETS/",
+                f"{package}/asset",
+                f"{package}/asset-other/three.txt",
+                f"{package}-0.2.0.data/purelib/{package}/assets/",
+                f"{package}-0.2.0.data/platlib/{package}/assets/four.txt",
+            ]
+            for order in (entries, list(reversed(entries))):
+                with self.subTest(package=package, order=order):
+                    archive = io.BytesIO()
+                    with zipfile.ZipFile(archive, "w") as wheel:
+                        wheel.writestr(f"{package}/__init__.py", b"")
+                        for name in order:
+                            wheel.writestr(name, b"")
+                    package_check.validate_source_payload(archive.getvalue(), payload, package)
 
     def test_distinct_resources_and_explicit_directories_remain_allowed(self):
         for package in ("aethron", "aethron_edge"):
