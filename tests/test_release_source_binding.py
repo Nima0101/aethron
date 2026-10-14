@@ -60,7 +60,7 @@ class ReleaseSourceBinding(unittest.TestCase):
             return self.revision + "\n"
         if command == ["status", "--porcelain", "--untracked-files=normal"]:
             return self.dirty
-        if command == ["ls-tree", "-r", "-z", "--full-tree", self.revision]:
+        if command == ["ls-tree", "-r", "-t", "-z", "--full-tree", self.revision]:
             return b"".join(
                 self.mode + b" blob " + self.objects[name].encode() + b"\t" + name.encode() + b"\0"
                 for name in sorted(self.committed)
@@ -141,6 +141,20 @@ class ReleaseSourceBinding(unittest.TestCase):
             patch.object(release.subprocess, "check_output", side_effect=only_license),
         ):
             self.assertEqual(release.committed_blobs(revision), {"LICENSE": expected})
+
+    def test_duplicate_inventory_blocks_artifact_creation(self):
+        def duplicate(args, **kwargs):
+            output = self.git(args, **kwargs)
+            if args[2] == "ls-tree":
+                output += output.split(b"\0", 1)[0] + b"\0"
+            return output
+
+        destination = Path(self.temporary.name) / "release"
+        with patch.object(release.subprocess, "check_output", side_effect=duplicate):
+            with self.assertRaisesRegex(ValueError, "release_duplicate_tree_path"):
+                release.build(destination)
+        self.assertFalse(destination.exists())
+        self.assertEqual(self.batch_requests, 0)
 
 
 if __name__ == "__main__":

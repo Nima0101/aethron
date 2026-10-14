@@ -924,6 +924,7 @@ class ReproductionReport(unittest.TestCase):
                 "--no-replace-objects",
                 "ls-tree",
                 "-r",
+                "-t",
                 "-z",
                 "--full-tree",
                 revision,

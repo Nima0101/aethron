@@ -24,16 +24,25 @@ def committed_blobs(revision, *, root=None):
     require_default_git_context(os.environ)
     root = ROOT if root is None else root
     tree = subprocess.check_output(
-        ["git", "--no-replace-objects", "ls-tree", "-r", "-z", "--full-tree", revision],
+        ["git", "--no-replace-objects", "ls-tree", "-r", "-t", "-z", "--full-tree", revision],
         cwd=root,
         timeout=GIT_COMMAND_TIMEOUT_SECONDS,
     )
     entries = []
+    paths = set()
     for record in tree.split(b"\0"):
         if not record:
             continue
         metadata, name = record.split(b"\t", 1)
         mode, kind, oid = metadata.split()
+        # Match public-tree admission before reducing the inventory to blobs.
+        # Including directories exposes duplicate subtrees and file/directory
+        # collisions even when their descendant file paths are all distinct.
+        if name in paths:
+            raise ValueError("release_duplicate_tree_path")
+        paths.add(name)
+        if (mode, kind) == (b"040000", b"tree"):
+            continue
         if mode not in (b"100644", b"100755") or kind != b"blob":
             raise ValueError("release_requires_regular_blobs")
         entries.append((name.decode("utf-8"), oid))
