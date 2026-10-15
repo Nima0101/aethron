@@ -1,0 +1,6 @@
+# Minimal dependencies for scripts/verify.py, including wheel metadata tests.
+# Keep runtime installations independent of these verification-only tools.
+-r requirements-links.lock
+packaging==26.3 --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+# project_metadata uses stdlib tomllib on Python >=3.11.
+tomli==2.5.0 ; python_version < "3.11" --hash=sha256:32a7b79ac57a2e83670ce329ccf675798bc5a2094783a63676866b70503f2e2b
