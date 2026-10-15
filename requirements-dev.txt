@@ -20,7 +20,7 @@ pillow==12.3.0
 pip-requirements-parser==32.0.1
 pip_api==0.0.35
 pip_audit==2.10.1
-platformdirs==4.12.3
+platformdirs==4.12.4
 playwright==1.63.0
 py-serializable==2.1.0
 pyee==13.0.1
