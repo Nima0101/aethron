@@ -71,6 +71,7 @@ class PackageInputEvidence(unittest.TestCase):
                     python_floor = "3.11" if name.startswith("integrations/") else "3.9"
                     path.write_text(
                         f'[project]\nversion = "{version}"\nrequires-python = ">={python_floor}"\n'
+                        'license = "GPL-3.0-only"\n'
                     )
                 expected[name] = hashlib.sha256(path.read_bytes()).hexdigest()
             if real_install:
@@ -221,6 +222,7 @@ class PackageInputEvidence(unittest.TestCase):
                                             (
                                                 f"Metadata-Version: 2.1\nName: {selected.replace('_', '-')}\nVersion: {version}\n"
                                                 f"Requires-Python: >={'3.9' if selected == 'aethron' else '3.11'}\n"
+                                                "License-Expression: GPL-3.0-only\n"
                                             ).encode(),
                                         ),
                                         (

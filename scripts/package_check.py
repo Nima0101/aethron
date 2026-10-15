@@ -172,6 +172,16 @@ def project_requires_python(root):
         raise ValueError("invalid_project_requires_python") from None
 
 
+def project_license(root):
+    """Snapshot the static SPDX expression declared by these source projects."""
+    from packaging.licenses import canonicalize_license_expression
+
+    try:
+        return canonicalize_license_expression(project_string(root, "license"))
+    except ValueError:
+        raise ValueError("invalid_project_license") from None
+
+
 def dependency_contract(requirements, extras):
     """Compare declarations without evaluating markers on the build host."""
     from packaging.requirements import Requirement
@@ -240,6 +250,7 @@ def validate_source_payload(
     expected_project_version=None,
     expected_requires_python=None,
     expected_dependencies=None,
+    expected_license=None,
 ):
     expected_version = None
     expected_tags = None
@@ -469,7 +480,9 @@ def validate_source_payload(
         ):
             raise ValueError("wheel_source_payload_mismatch")
         if (
-            expected_requires_python is not None or expected_dependencies is not None
+            expected_requires_python is not None
+            or expected_dependencies is not None
+            or expected_license is not None
         ) and not distribution_metadata:
             raise ValueError("wheel_source_payload_mismatch")
         if expected_tags is not None:
@@ -592,6 +605,21 @@ def validate_source_payload(
                     raise ValueError("wheel_source_payload_mismatch") from None
                 if actual_dependencies != expected_dependencies:
                     raise ValueError("wheel_source_payload_mismatch")
+            if expected_license is not None:
+                # Installation and pip check do not bind license declarations.
+                # Compare canonical SPDX syntax with the prebuild source value;
+                # this does not assess rights or arbitrary logical equivalence.
+                from packaging.licenses import canonicalize_license_expression
+
+                licenses = metadata.get_all("License-Expression", [])
+                if len(licenses) != 1:
+                    raise ValueError("wheel_source_payload_mismatch")
+                try:
+                    actual_license = canonicalize_license_expression(licenses[0])
+                except ValueError:
+                    raise ValueError("wheel_source_payload_mismatch") from None
+                if actual_license != expected_license:
+                    raise ValueError("wheel_source_payload_mismatch")
         for member in entry_points:
             parser = configparser.ConfigParser(interpolation=None, delimiters=("=",))
             parser.optionxform = str
@@ -675,6 +703,7 @@ def run():
         version = project_version(ROOT)
         requires_python = project_requires_python(ROOT)
         dependencies = project_dependencies(ROOT)
+        license_expression = project_license(ROOT)
         env = packaging_environment()
         for name in ("a", "b"):
             subprocess.run(
@@ -707,6 +736,7 @@ def run():
             expected_project_version=version,
             expected_requires_python=requires_python,
             expected_dependencies=dependencies,
+            expected_license=license_expression,
         )
         source_manifest = {
             name: hashlib.sha256(data).hexdigest() for name, data in source_payload.items()

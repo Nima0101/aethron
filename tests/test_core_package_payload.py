@@ -24,6 +24,7 @@ class CorePackagePayload(unittest.TestCase):
             root = Path(directory)
             (root / "pyproject.toml").write_text(
                 '[project]\nversion = "0.2.0"\nrequires-python = ">=3.9"\n'
+                'license = "GPL-3.0-only"\n'
             )
             for name, data in payload.items():
                 path = root / name
@@ -94,7 +95,8 @@ class CorePackagePayload(unittest.TestCase):
                     )
                     archive.writestr(
                         "aethron-0.2.0.dist-info/METADATA",
-                        "Metadata-Version: 2.1\nName: aethron\nVersion: 0.2.0\nRequires-Python: >=3.9\n",
+                        "Metadata-Version: 2.1\nName: aethron\nVersion: 0.2.0\nRequires-Python: >=3.9\n"
+                        "License-Expression: GPL-3.0-only\n",
                     )
             wheel_bytes = wheel.getvalue()
             if defect == "nul-name":

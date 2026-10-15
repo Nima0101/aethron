@@ -34,7 +34,7 @@ class CorePackageReport(unittest.TestCase):
             wheel.writestr(
                 "aethron-0.2.0.dist-info/METADATA",
                 "Metadata-Version: 2.1\nName: aethron\nVersion: 0.2.0\nRequires-Python: >=3.9\n"
-                + requirements,
+                "License-Expression: GPL-3.0-only\n" + requirements,
             )
             wheel.writestr("aethron/__init__.py", "")
             wheel.writestr(
