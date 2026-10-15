@@ -448,6 +448,18 @@ def validate_source_payload(
             # Check root and spread destinations
             # before any payload reads; metadata and non-import data schemes
             # may still contain ordinary Python examples/resources.
+            # An owned extension still escapes Python-source parity. Do not
+            # certify it under a platform-independent filename: import loaders
+            # can select it ahead of the checked .py file on some hosts. Native
+            # wheels retain their separate platform-specific qualification.
+            if (
+                not member.is_dir()
+                and folded_name.endswith((".so", ".pyd"))
+                and folded_name.startswith(package_name.casefold() + "/")
+                and expected_tags is not None
+                and any(tag.platform == "any" for tag in expected_tags)
+            ):
+                raise ValueError("wheel_source_payload_mismatch")
             if (
                 not member.is_dir()
                 and folded_name.endswith((".py", ".so", ".pyd"))
