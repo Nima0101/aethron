@@ -15,6 +15,7 @@ import stat
 import subprocess
 import sys
 import zipfile
+from collections import Counter
 from pathlib import Path
 
 # Optimized execution removes the assertions that establish this evidence.
@@ -124,18 +125,24 @@ def snapshot_source_payload(root, package_name="aethron"):
     return payload
 
 
-def project_string(root, field):
-    """Read a static string declaration from these two source projects."""
+def project_metadata(root):
+    """Read these static projects without importing build dependencies in probes."""
     # Keep build-only dependencies out of isolated installed-source probes.
     try:
         import tomllib
     except ModuleNotFoundError:  # Python 3.9/3.10 build tools already pin tomli.
         import tomli as tomllib
+    project = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+    if not isinstance(project, dict) or not isinstance(project.get("dynamic", []), list):
+        raise ValueError("invalid_project_metadata")
+    return project
+
+
+def project_string(root, field):
+    """Read a static string declaration from these two source projects."""
     reason = "invalid_project_" + field.replace("-", "_")
     try:
-        project = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))["project"]
-        if not isinstance(project, dict):
-            raise ValueError(reason)
+        project = project_metadata(root)
         value = project[field]
         dynamic = project.get("dynamic", [])
         if not isinstance(value, str) or not isinstance(dynamic, list) or field in dynamic:
@@ -165,6 +172,65 @@ def project_requires_python(root):
         raise ValueError("invalid_project_requires_python") from None
 
 
+def dependency_contract(requirements, extras):
+    """Compare declarations without evaluating markers on the build host."""
+    from packaging.requirements import Requirement
+    from packaging.utils import canonicalize_name
+
+    parsed = []
+    for value in requirements:
+        if not isinstance(value, str):
+            raise ValueError("invalid_dependency")
+        requirement = Requirement(value)
+        requirement.extras = {canonicalize_name(extra) for extra in requirement.extras}
+        parsed.append(requirement)
+    normalized_extras = []
+    for extra in extras:
+        if not isinstance(extra, str):
+            raise ValueError("invalid_extra")
+        normalized_extras.append(canonicalize_name(extra, validate=True))
+    # Reordering is harmless; dropped, injected or duplicated entries are not.
+    return Counter(parsed), Counter(normalized_extras)
+
+
+def project_dependencies(root):
+    """Snapshot base and optional requirements before invoking the build backend."""
+    from packaging.markers import Marker
+    from packaging.requirements import Requirement
+    from packaging.utils import canonicalize_name
+
+    try:
+        project = project_metadata(root)
+        if any(
+            field in project.get("dynamic", [])
+            for field in ("dependencies", "optional-dependencies")
+        ):
+            raise ValueError("dynamic_dependencies")
+        dependencies = project.get("dependencies", [])
+        optional = project.get("optional-dependencies", {})
+        if not isinstance(dependencies, list) or not isinstance(optional, dict):
+            raise ValueError("invalid_dependencies")
+        requirements = list(dependencies)
+        extras = []
+        for extra, values in optional.items():
+            normalized = canonicalize_name(extra, validate=True)
+            if normalized in extras or not isinstance(values, list):
+                raise ValueError("invalid_optional_dependencies")
+            extras.append(normalized)
+            for value in values:
+                if not isinstance(value, str):
+                    raise ValueError("invalid_dependency")
+                requirement = Requirement(value)
+                marker = f"extra == '{normalized}'"
+                if requirement.marker is not None:
+                    marker = f"({requirement.marker}) and {marker}"
+                requirement.marker = Marker(marker)
+                requirements.append(str(requirement))
+        return dependency_contract(requirements, extras)
+    except (KeyError, TypeError, ValueError):
+        raise ValueError("invalid_project_dependencies") from None
+
+
 def validate_source_payload(
     wheel_bytes,
     payload,
@@ -173,6 +239,7 @@ def validate_source_payload(
     wheel_filename=None,
     expected_project_version=None,
     expected_requires_python=None,
+    expected_dependencies=None,
 ):
     expected_version = None
     if wheel_filename is not None:
@@ -386,7 +453,9 @@ def validate_source_payload(
             for records in (entry_points, distribution_metadata, distribution_records)
         ):
             raise ValueError("wheel_source_payload_mismatch")
-        if expected_requires_python is not None and not distribution_metadata:
+        if (
+            expected_requires_python is not None or expected_dependencies is not None
+        ) and not distribution_metadata:
             raise ValueError("wheel_source_payload_mismatch")
         for member in distribution_records:
             # pip retains unrecognized RECORD paths in the installed removal
@@ -470,6 +539,16 @@ def validate_source_payload(
                     raise ValueError("wheel_source_payload_mismatch") from None
                 if not same_requirement:
                     raise ValueError("wheel_source_payload_mismatch")
+            if expected_dependencies is not None:
+                try:
+                    actual_dependencies = dependency_contract(
+                        metadata.get_all("Requires-Dist", []),
+                        metadata.get_all("Provides-Extra", []),
+                    )
+                except ValueError:
+                    raise ValueError("wheel_source_payload_mismatch") from None
+                if actual_dependencies != expected_dependencies:
+                    raise ValueError("wheel_source_payload_mismatch")
         for member in entry_points:
             parser = configparser.ConfigParser(interpolation=None, delimiters=("=",))
             parser.optionxform = str
@@ -552,6 +631,7 @@ def run():
         source_payload = snapshot_source_payload(ROOT)
         version = project_version(ROOT)
         requires_python = project_requires_python(ROOT)
+        dependencies = project_dependencies(ROOT)
         env = packaging_environment()
         for name in ("a", "b"):
             subprocess.run(
@@ -583,6 +663,7 @@ def run():
             wheel_filename=a.name,
             expected_project_version=version,
             expected_requires_python=requires_python,
+            expected_dependencies=dependencies,
         )
         source_manifest = {
             name: hashlib.sha256(data).hexdigest() for name, data in source_payload.items()

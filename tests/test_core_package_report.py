@@ -2,6 +2,7 @@
 
 import contextlib
 import csv
+import email.parser
 import hashlib
 import io
 import json
@@ -173,6 +174,13 @@ class CorePackageReport(unittest.TestCase):
             tempfile.TemporaryDirectory() as sandbox,
             patch.object(tempfile, "tempdir", sandbox),
             patch.object(package_check, "snapshot_source_payload", return_value=source_payload),
+            patch.object(
+                package_check,
+                "project_dependencies",
+                return_value=package_check.dependency_contract(
+                    email.parser.Parser().parsestr(requirements).get_all("Requires-Dist", []), []
+                ),
+            ),
             patch.object(package_check.subprocess, "run", side_effect=process),
             contextlib.redirect_stdout(output),
         ):

@@ -90,7 +90,9 @@ class CorePackageInventory(unittest.TestCase):
         with zipfile.ZipFile(archive, "w") as wheel:
             wheel.writestr(
                 "aethron-0.2.0.dist-info/METADATA",
-                "Metadata-Version: 2.1\nName: aethron\nVersion: 0.2.0\nRequires-Python: >=3.9\n",
+                "Metadata-Version: 2.1\nName: aethron\nVersion: 0.2.0\nRequires-Python: >=3.9\n"
+                "Provides-Extra: vision\nRequires-Dist: numpy==2.3.5; extra == 'vision'\n"
+                "Requires-Dist: opencv-python-headless==4.13.0.92; extra == 'vision'\n",
             )
             for name, data in package_check.snapshot_source_payload(package_check.ROOT).items():
                 wheel.writestr(name, data)
