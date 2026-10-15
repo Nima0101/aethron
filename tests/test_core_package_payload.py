@@ -22,7 +22,9 @@ class CorePackagePayload(unittest.TestCase):
         }
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / "pyproject.toml").write_text('[project]\nversion = "0.2.0"\n')
+            (root / "pyproject.toml").write_text(
+                '[project]\nversion = "0.2.0"\nrequires-python = ">=3.9"\n'
+            )
             for name, data in payload.items():
                 path = root / name
                 path.parent.mkdir(parents=True, exist_ok=True)
@@ -89,6 +91,10 @@ class CorePackagePayload(unittest.TestCase):
                         archive.writestr(name, data)
                     archive.writestr(
                         "aethron/_bounds.synthetic.so", b"not covered by source parity"
+                    )
+                    archive.writestr(
+                        "aethron-0.2.0.dist-info/METADATA",
+                        "Metadata-Version: 2.1\nName: aethron\nVersion: 0.2.0\nRequires-Python: >=3.9\n",
                     )
             wheel_bytes = wheel.getvalue()
             if defect == "nul-name":

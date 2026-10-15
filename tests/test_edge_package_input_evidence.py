@@ -68,7 +68,10 @@ class PackageInputEvidence(unittest.TestCase):
                 path.write_bytes(name.encode())
                 if name.endswith("pyproject.toml"):
                     version = "0.1.0" if name.startswith("integrations/") else "0.2.0"
-                    path.write_text(f'[project]\nversion = "{version}"\n')
+                    python_floor = "3.11" if name.startswith("integrations/") else "3.9"
+                    path.write_text(
+                        f'[project]\nversion = "{version}"\nrequires-python = ">={python_floor}"\n'
+                    )
                 expected[name] = hashlib.sha256(path.read_bytes()).hexdigest()
             if real_install:
                 probe = root / "scripts/package_check.py"
@@ -215,7 +218,10 @@ class PackageInputEvidence(unittest.TestCase):
                                     (
                                         (
                                             info + "METADATA",
-                                            f"Metadata-Version: 2.1\nName: {selected.replace('_', '-')}\nVersion: {version}\n".encode(),
+                                            (
+                                                f"Metadata-Version: 2.1\nName: {selected.replace('_', '-')}\nVersion: {version}\n"
+                                                f"Requires-Python: >={'3.9' if selected == 'aethron' else '3.11'}\n"
+                                            ).encode(),
                                         ),
                                         (
                                             info + "WHEEL",

@@ -124,26 +124,45 @@ def snapshot_source_payload(root, package_name="aethron"):
     return payload
 
 
-def project_version(root):
-    """Snapshot the static version declared by these two source projects."""
+def project_string(root, field):
+    """Read a static string declaration from these two source projects."""
     # Keep build-only dependencies out of isolated installed-source probes.
     try:
         import tomllib
     except ModuleNotFoundError:  # Python 3.9/3.10 build tools already pin tomli.
         import tomli as tomllib
-    from packaging.version import Version
-
+    reason = "invalid_project_" + field.replace("-", "_")
     try:
         project = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))["project"]
         if not isinstance(project, dict):
-            raise ValueError("invalid_project_version")
-        version = project["version"]
+            raise ValueError(reason)
+        value = project[field]
         dynamic = project.get("dynamic", [])
-        if not isinstance(version, str) or not isinstance(dynamic, list) or "version" in dynamic:
-            raise ValueError("invalid_project_version")
-        return Version(version)
+        if not isinstance(value, str) or not isinstance(dynamic, list) or field in dynamic:
+            raise ValueError(reason)
+        return value
     except (KeyError, TypeError, ValueError):
+        raise ValueError(reason) from None
+
+
+def project_version(root):
+    """Snapshot the static version declared by these two source projects."""
+    from packaging.version import Version
+
+    try:
+        return Version(project_string(root, "version"))
+    except ValueError:
         raise ValueError("invalid_project_version") from None
+
+
+def project_requires_python(root):
+    """Snapshot Python compatibility, without using the build host's version."""
+    from packaging.specifiers import SpecifierSet
+
+    try:
+        return SpecifierSet(project_string(root, "requires-python"))
+    except ValueError:
+        raise ValueError("invalid_project_requires_python") from None
 
 
 def validate_source_payload(
@@ -153,6 +172,7 @@ def validate_source_payload(
     *,
     wheel_filename=None,
     expected_project_version=None,
+    expected_requires_python=None,
 ):
     expected_version = None
     if wheel_filename is not None:
@@ -366,6 +386,8 @@ def validate_source_payload(
             for records in (entry_points, distribution_metadata, distribution_records)
         ):
             raise ValueError("wheel_source_payload_mismatch")
+        if expected_requires_python is not None and not distribution_metadata:
+            raise ValueError("wheel_source_payload_mismatch")
         for member in distribution_records:
             # pip retains unrecognized RECORD paths in the installed removal
             # inventory. A wheel must not claim files outside its admitted ZIP
@@ -432,6 +454,22 @@ def validate_source_payload(
                 raise ValueError("wheel_source_payload_mismatch") from None
             if not same_version:
                 raise ValueError("wheel_source_payload_mismatch")
+            if expected_requires_python is not None:
+                # Testing only the current interpreter misses changed support
+                # ranges. Bind the declaration itself before installation,
+                # allowing normalized specifier spelling/order, not arbitrary
+                # logical rewrites. Build tools already supply this parser.
+                from packaging.specifiers import SpecifierSet
+
+                requirements = metadata.get_all("Requires-Python", [])
+                if len(requirements) != 1:
+                    raise ValueError("wheel_source_payload_mismatch")
+                try:
+                    same_requirement = SpecifierSet(requirements[0]) == expected_requires_python
+                except ValueError:
+                    raise ValueError("wheel_source_payload_mismatch") from None
+                if not same_requirement:
+                    raise ValueError("wheel_source_payload_mismatch")
         for member in entry_points:
             parser = configparser.ConfigParser(interpolation=None, delimiters=("=",))
             parser.optionxform = str
@@ -513,6 +551,7 @@ def run():
         temp = Path(directory)
         source_payload = snapshot_source_payload(ROOT)
         version = project_version(ROOT)
+        requires_python = project_requires_python(ROOT)
         env = packaging_environment()
         for name in ("a", "b"):
             subprocess.run(
@@ -539,7 +578,11 @@ def run():
         compared_bytes = a.read_bytes()
         assert compared_bytes == b.read_bytes(), "wheel builds differ"
         validate_source_payload(
-            compared_bytes, source_payload, wheel_filename=a.name, expected_project_version=version
+            compared_bytes,
+            source_payload,
+            wheel_filename=a.name,
+            expected_project_version=version,
+            expected_requires_python=requires_python,
         )
         source_manifest = {
             name: hashlib.sha256(data).hexdigest() for name, data in source_payload.items()

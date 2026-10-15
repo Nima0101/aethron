@@ -88,6 +88,10 @@ class CorePackageInventory(unittest.TestCase):
     def test_equal_single_wheels_reach_consumer_boundary(self):
         archive = io.BytesIO()
         with zipfile.ZipFile(archive, "w") as wheel:
+            wheel.writestr(
+                "aethron-0.2.0.dist-info/METADATA",
+                "Metadata-Version: 2.1\nName: aethron\nVersion: 0.2.0\nRequires-Python: >=3.9\n",
+            )
             for name, data in package_check.snapshot_source_payload(package_check.ROOT).items():
                 wheel.writestr(name, data)
         inventory = {self.wheel: archive.getvalue()}

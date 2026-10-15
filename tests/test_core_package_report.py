@@ -32,7 +32,8 @@ class CorePackageReport(unittest.TestCase):
         with zipfile.ZipFile(archive, "w") as wheel:
             wheel.writestr(
                 "aethron-0.2.0.dist-info/METADATA",
-                "Metadata-Version: 2.1\nName: aethron\nVersion: 0.2.0\n" + requirements,
+                "Metadata-Version: 2.1\nName: aethron\nVersion: 0.2.0\nRequires-Python: >=3.9\n"
+                + requirements,
             )
             wheel.writestr("aethron/__init__.py", "")
             wheel.writestr(

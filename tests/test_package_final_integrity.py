@@ -23,6 +23,10 @@ class PackageFinalIntegrityTests(unittest.TestCase):
         with zipfile.ZipFile(archive, "w") as wheel:
             for name, data in package_check.snapshot_source_payload(package_check.ROOT).items():
                 wheel.writestr(name, data)
+            wheel.writestr(
+                "aethron-0.2.0.dist-info/METADATA",
+                "Metadata-Version: 2.1\nName: aethron\nVersion: 0.2.0\nRequires-Python: >=3.9\n",
+            )
         wheel_bytes = archive.getvalue()
 
         def process(args, **kwargs):
@@ -42,6 +46,7 @@ class PackageFinalIntegrityTests(unittest.TestCase):
                     manifest = {
                         name: hashlib.sha256(wheel.read(name)).hexdigest()
                         for name in wheel.namelist()
+                        if name.startswith("aethron/")
                     }
                 return subprocess.CompletedProcess(args, 0, stdout=json.dumps(manifest))
             elif args[1:] == ["--help"]:

@@ -137,6 +137,10 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
         "aethron": package_check.project_version(ROOT),
         "aethron-edge": package_check.project_version(ROOT / "integrations/edge"),
     }
+    python_requirements = {
+        "aethron": package_check.project_requires_python(ROOT),
+        "aethron-edge": package_check.project_requires_python(ROOT / "integrations/edge"),
+    }
     source_manifests = {
         distribution: {name: hashlib.sha256(data).hexdigest() for name, data in payload.items()}
         for distribution, payload in payloads.items()
@@ -187,6 +191,7 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
             distribution.replace("-", "_"),
             wheel_filename=name,
             expected_project_version=versions[distribution],
+            expected_requires_python=python_requirements[distribution],
         )
         hashes[wheel.name] = hashlib.sha256(compared_bytes).hexdigest()
     # Keep failed installed-consumer evidence with this attempt's persistent wheels.
