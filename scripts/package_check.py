@@ -553,6 +553,12 @@ def validate_source_payload(
                     seen.add(row[0])
                     if row[0] == member.filename and (row[1] or row[2]):
                         raise ValueError("wheel_source_payload_mismatch")
+                    # Unlike an installed RECORD, the archive inventory must
+                    # hash every listed file except itself. Blank digests must
+                    # not disable integrity checks for metadata or resources.
+                    # Wheel signatures remain outside the inventory below.
+                    if row[0] != member.filename and not row[1]:
+                        raise ValueError("wheel_source_payload_mismatch")
                     validate_record_integrity(wheel, files[row[0]], row[1], row[2])
             except (UnicodeError, csv.Error):
                 raise ValueError("wheel_source_payload_mismatch") from None

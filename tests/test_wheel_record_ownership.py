@@ -12,6 +12,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from test_wheel_data_destinations import wheel_bytes
+from wheel_fixtures import record_row
 
 from scripts import package_check
 
@@ -32,7 +33,11 @@ def record_wheel(package, record, layout="", extras=None, complete=False):
                     layout + member.filename if member.filename == record_path else member.filename
                 )
                 if not member.is_dir() and name not in seen:
-                    writer.writerow((name, "", ""))
+                    writer.writerow(
+                        (name, "", "")
+                        if member.filename == record_path
+                        else record_row(name, source.read(member))
+                    )
             record += missing.getvalue()
         for member in source.infolist():
             if member.filename == record_path:
@@ -84,7 +89,11 @@ class WheelRecordOwnership(unittest.TestCase):
             nested = f"{package}/examples/foreign.dist-info/RECORD"
             record = io.StringIO(newline="")
             csv.writer(record).writerows(
-                ((f"{package}/module.py", "", ""), (resource, "", ""), (nested, "", ""))
+                (
+                    record_row(f"{package}/module.py", b"VALUE = 1\n"),
+                    record_row(resource, b"data"),
+                    record_row(nested, b"example,,\n"),
+                )
             )
             raw, payload = record_wheel(
                 package,

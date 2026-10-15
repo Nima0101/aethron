@@ -14,6 +14,8 @@ import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
+from wheel_fixtures import record_row
+
 from scripts import package_check
 
 
@@ -50,7 +52,9 @@ class CorePackageReport(unittest.TestCase):
                 "[console_scripts]\naethron = aethron.__main__:main\n",
             )
             record = io.StringIO(newline="")
-            csv.writer(record).writerows((name, "", "") for name in wheel.namelist())
+            csv.writer(record).writerows(
+                record_row(name, wheel.read(name)) for name in wheel.namelist()
+            )
             csv.writer(record).writerow(("aethron-0.2.0.dist-info/RECORD", "", ""))
             wheel.writestr("aethron-0.2.0.dist-info/RECORD", record.getvalue())
         with zipfile.ZipFile(archive) as wheel:

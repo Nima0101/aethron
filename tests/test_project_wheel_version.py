@@ -10,6 +10,7 @@ from unittest.mock import patch
 import test_core_package_report as core_tests
 import test_edge_package_input_evidence as edge_tests
 from test_wheel_data_destinations import wheel_bytes
+from wheel_fixtures import refresh_record
 
 from scripts import package_check
 
@@ -68,7 +69,7 @@ class ProjectWheelVersion(unittest.TestCase):
                         after.writestr(member.filename.replace(version, "9.0"), data)
                 wheel.unlink()
                 wheel.with_name(wheel.name.replace("-" + version + "-", "-9.0-", 1)).write_bytes(
-                    buffer.getvalue()
+                    refresh_record(buffer.getvalue())
                 )
             return original(directory)
 

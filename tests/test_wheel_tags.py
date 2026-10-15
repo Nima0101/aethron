@@ -8,6 +8,7 @@ from unittest.mock import patch
 import test_core_package_report as core_tests
 import test_edge_package_input_evidence as edge_tests
 from test_wheel_data_destinations import wheel_bytes
+from wheel_fixtures import refresh_record
 
 from scripts import package_check
 
@@ -20,9 +21,8 @@ def replace_tags(raw, headers):
             if member.filename.count("/") == 1 and member.filename.endswith(".dist-info/WHEEL"):
                 data = b"Wheel-Version: 1.0\nRoot-Is-Purelib: true\n" + headers
             after.writestr(member, data)
-    # These fixtures use blank RECORD hash/size fields. No unrelated integrity
-    # failure can mask the tag discrepancy.
-    return output.getvalue()
+    # Keep RECORD valid so integrity failures cannot mask tag discrepancies.
+    return refresh_record(output.getvalue())
 
 
 class WheelTags(unittest.TestCase):

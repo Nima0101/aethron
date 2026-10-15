@@ -9,6 +9,7 @@ from unittest.mock import patch
 import test_core_package_report as core_tests
 import test_edge_package_input_evidence as edge_tests
 from test_wheel_data_destinations import wheel_bytes
+from wheel_fixtures import record_row
 
 from scripts import package_check
 
@@ -33,7 +34,9 @@ def declare_license(raw, declaration="LICENSE", version="2.4", metadata_layout="
         if record_name is not None:
             record = io.StringIO(newline="")
             csv.writer(record).writerows(
-                (item.filename, "", "") for item in after.infolist() if not item.is_dir()
+                record_row(item.filename, after.read(item))
+                for item in after.infolist()
+                if not item.is_dir()
             )
             csv.writer(record).writerow((record_name, "", ""))
             after.writestr(record_name, record.getvalue())

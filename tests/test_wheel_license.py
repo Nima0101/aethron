@@ -10,6 +10,7 @@ from unittest.mock import patch
 import test_core_package_report as core_tests
 import test_edge_package_input_evidence as edge_tests
 import test_wheel_python_requirement as python_tests
+from wheel_fixtures import refresh_record
 
 from scripts import package_check
 
@@ -37,7 +38,7 @@ class WheelLicense(unittest.TestCase):
                                 + "License-Expression: MIT\n"
                             ).encode()
                         after.writestr(member, data)
-                wheel.write_bytes(output.getvalue())
+                wheel.write_bytes(refresh_record(output.getvalue()))
             return original(directory)
 
         return patch.object(package_check, "wheel_paths", side_effect=inventory)

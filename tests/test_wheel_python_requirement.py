@@ -11,6 +11,7 @@ import test_core_package_report as core_tests
 import test_edge_package_input_evidence as edge_tests
 from packaging.specifiers import SpecifierSet
 from test_wheel_data_destinations import wheel_bytes
+from wheel_fixtures import refresh_record
 
 from scripts import package_check
 
@@ -126,7 +127,7 @@ class WheelPythonRequirement(unittest.TestCase):
                                 + headers.encode()
                             )
                         after.writestr(member, data)
-                wheel.write_bytes(buffer.getvalue())
+                wheel.write_bytes(refresh_record(buffer.getvalue()))
             return original(directory)
 
         return patch.object(package_check, "wheel_paths", side_effect=inventory)

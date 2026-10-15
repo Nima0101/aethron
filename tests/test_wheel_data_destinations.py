@@ -11,6 +11,8 @@ import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
+from wheel_fixtures import record_row
+
 from scripts import package_check
 
 
@@ -31,7 +33,9 @@ def wheel_bytes(package, extras):
         )
         record = io.StringIO(newline="")
         csv.writer(record).writerows(
-            (member.filename, "", "") for member in wheel.infolist() if not member.is_dir()
+            record_row(member.filename, wheel.read(member))
+            for member in wheel.infolist()
+            if not member.is_dir()
         )
         csv.writer(record).writerow((metadata + "RECORD", "", ""))
         wheel.writestr(metadata + "RECORD", record.getvalue())

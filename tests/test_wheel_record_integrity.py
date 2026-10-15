@@ -92,6 +92,8 @@ class WheelRecordIntegrity(unittest.TestCase):
             ("", "9" * 5000),
         ):
             with self.subTest(digest=digest, size_length=len(size)):
+                if not digest:
+                    digest = encoded_digest(data)
                 raw, payload = record_wheel(
                     "aethron", declared_record("aethron/module.py", digest, size), complete=True
                 )
@@ -108,9 +110,12 @@ class WheelRecordIntegrity(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "^wheel_source_payload_mismatch$"):
                 package_check.validate_source_payload(raw, payload)
 
-    def test_unspecified_fields_and_leading_zero_size_remain_accepted(self):
-        # Optional fields remain independent of inventory coverage.
-        for digest, size in (("", ""), ("", "00010"), (encoded_digest(b"VALUE = 1\n"), "")):
+    def test_optional_size_and_leading_zero_size_remain_accepted(self):
+        # Wheel hashes are required; size remains independently checked when supplied.
+        for digest, size in (
+            (encoded_digest(b"VALUE = 1\n"), "00010"),
+            (encoded_digest(b"VALUE = 1\n"), ""),
+        ):
             raw, payload = record_wheel(
                 "aethron", declared_record("aethron/module.py", digest, size), complete=True
             )

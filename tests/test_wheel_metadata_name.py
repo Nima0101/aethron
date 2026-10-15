@@ -13,6 +13,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from test_wheel_data_destinations import wheel_bytes
+from wheel_fixtures import refresh_record
 
 from scripts import package_check
 
@@ -34,7 +35,7 @@ def metadata_wheel(package, contents, layout="", extras=None):
                 wheel.writestr(member, record.getvalue())
             else:
                 wheel.writestr(member, source.read(member))
-    return output.getvalue(), payload
+    return refresh_record(output.getvalue()), payload
 
 
 class WheelMetadataName(unittest.TestCase):

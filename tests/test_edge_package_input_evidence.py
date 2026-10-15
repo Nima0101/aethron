@@ -18,6 +18,8 @@ from contextlib import ExitStack, redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest.mock import Mock, call, patch
 
+from wheel_fixtures import record_row
+
 from scripts import edge_package_check as checker
 
 
@@ -232,7 +234,9 @@ class PackageInputEvidence(unittest.TestCase):
                                     )
                                 )
                                 record = io.StringIO(newline="")
-                                csv.writer(record).writerows((name, "", "") for name, _ in records)
+                                csv.writer(record).writerows(
+                                    record_row(name, data) for name, data in records
+                                )
                                 csv.writer(record).writerow((info + "RECORD", "", ""))
                                 records.append((info + "RECORD", record.getvalue().encode()))
                                 for name, data in records:
