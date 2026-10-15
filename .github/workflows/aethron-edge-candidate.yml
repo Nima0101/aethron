@@ -57,7 +57,7 @@ jobs:
           python -m pip download --require-hashes -r integrations/edge/requirements-server.lock -r integrations/edge/requirements-vision.lock -d build/ecosystem-phase1/wheelhouse
           python -m pip install --no-index --find-links build/ecosystem-phase1/wheelhouse --require-hashes -r integrations/edge/requirements-server.lock -r integrations/edge/requirements-vision.lock
           python -m pip install --no-build-isolation -e . -e integrations/edge
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: "22"
       - name: Typed client contracts
