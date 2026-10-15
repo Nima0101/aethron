@@ -70,9 +70,10 @@ class PackageInputEvidence(unittest.TestCase):
                 path.write_bytes(name.encode())
                 if name.endswith("pyproject.toml"):
                     version = "0.1.0" if name.startswith("integrations/") else "0.2.0"
-                    python_floor = "3.11" if name.startswith("integrations/") else "3.9"
+                    # Both inert packages run in the core verifier's Python matrix.
+                    # This fixture does not import or qualify the real edge runtime.
                     path.write_text(
-                        f'[project]\nversion = "{version}"\nrequires-python = ">={python_floor}"\n'
+                        f'[project]\nversion = "{version}"\nrequires-python = ">=3.9"\n'
                         'license = "GPL-3.0-only"\n'
                     )
                 expected[name] = hashlib.sha256(path.read_bytes()).hexdigest()
@@ -223,7 +224,7 @@ class PackageInputEvidence(unittest.TestCase):
                                             info + "METADATA",
                                             (
                                                 f"Metadata-Version: 2.1\nName: {selected.replace('_', '-')}\nVersion: {version}\n"
-                                                f"Requires-Python: >={'3.9' if selected == 'aethron' else '3.11'}\n"
+                                                "Requires-Python: >=3.9\n"
                                                 "License-Expression: GPL-3.0-only\n"
                                             ).encode(),
                                         ),
@@ -374,6 +375,39 @@ class PackageInputEvidence(unittest.TestCase):
 
     def test_report_identifies_checker_and_manifests(self):
         self.probe()
+
+    def test_synthetic_wheels_admit_core_python_matrix(self):
+        execute, spawn = subprocess.run, subprocess.Popen
+        checked = []
+
+        def on_process(args, kwargs):
+            if "--no-deps" not in args:
+                return
+            for version in ("3.9", "3.13"):
+                with self.subTest(version=version):
+                    with patch.object(checker.subprocess, "Popen", spawn):
+                        result = execute(
+                            [
+                                sys.executable,
+                                *args[1:],
+                                "--dry-run",
+                                "--ignore-installed",
+                                "--python-version",
+                                version,
+                            ],
+                            **dict(
+                                kwargs,
+                                check=False,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                text=True,
+                            ),
+                        )
+                    checked.append(version)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+        self.probe(on_process=on_process)
+        self.assertEqual(checked, ["3.9", "3.13"])
 
     def test_installed_payloads_checked_after_all_consumers(self):
         for vision in (False, True):
