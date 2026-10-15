@@ -242,6 +242,7 @@ def validate_source_payload(
     expected_dependencies=None,
 ):
     expected_version = None
+    expected_tags = None
     if wheel_filename is not None:
         # The installer can accept a filename version different from METADATA
         # and its dist-info directory. Bind present metadata to the artifact
@@ -249,7 +250,7 @@ def validate_source_payload(
         from packaging.utils import canonicalize_name, parse_wheel_filename
 
         try:
-            distribution, expected_version, _, _ = parse_wheel_filename(wheel_filename)
+            distribution, expected_version, _, expected_tags = parse_wheel_filename(wheel_filename)
         except ValueError:
             raise ValueError("wheel_source_payload_mismatch") from None
         if distribution != canonicalize_name(package_name):
@@ -263,6 +264,7 @@ def validate_source_payload(
         entry_points = []
         distribution_metadata = []
         distribution_records = []
+        wheel_metadata = []
         for member in wheel.infolist():
             # ZipInfo truncates filename at NUL; inspecting only that normalized
             # spelling would silently admit a different original archive name.
@@ -382,6 +384,14 @@ def validate_source_payload(
             if (
                 len(components) == 2
                 and components[0].endswith(".dist-info")
+                and components[1] == "wheel"
+            ):
+                if member.is_dir() or member.file_size > 65536:
+                    raise ValueError("wheel_source_payload_mismatch")
+                wheel_metadata.append(member)
+            if (
+                len(components) == 2
+                and components[0].endswith(".dist-info")
                 and components[1] == "record"
             ):
                 if member.is_dir() or member.file_size > 1048576:
@@ -450,13 +460,46 @@ def validate_source_payload(
                 sources[name] = member
         if any(
             len(records) > 1
-            for records in (entry_points, distribution_metadata, distribution_records)
+            for records in (
+                entry_points,
+                distribution_metadata,
+                distribution_records,
+                wheel_metadata,
+            )
         ):
             raise ValueError("wheel_source_payload_mismatch")
         if (
             expected_requires_python is not None or expected_dependencies is not None
         ) and not distribution_metadata:
             raise ValueError("wheel_source_payload_mismatch")
+        if expected_tags is not None:
+            for member in wheel_metadata:
+                # WHEEL lists the expanded tags represented by the selected
+                # filename. A successful install on one host cannot establish
+                # agreement: pip may accept extra declarations on other hosts.
+                # Use the existing build dependency, not host sys_tags(), so
+                # this comparison is identical on every build platform.
+                from packaging.tags import parse_tag
+
+                try:
+                    metadata = email.parser.Parser(policy=email.policy.compat32).parsestr(
+                        wheel.read(member).decode("utf-8"), headersonly=True
+                    )
+                    tags = metadata.get_all("Tag", [])
+                    if (
+                        metadata.defects
+                        or not tags
+                        or any(
+                            not re.fullmatch(r"[A-Za-z0-9_]+-[A-Za-z0-9_]+-[A-Za-z0-9_]+", tag)
+                            for tag in tags
+                        )
+                    ):
+                        raise ValueError("wheel_source_payload_mismatch")
+                    actual_tags = Counter(tag for value in tags for tag in parse_tag(value))
+                    if actual_tags != Counter(expected_tags):
+                        raise ValueError("wheel_source_payload_mismatch")
+                except (UnicodeError, ValueError):
+                    raise ValueError("wheel_source_payload_mismatch") from None
         for member in distribution_records:
             # pip retains unrecognized RECORD paths in the installed removal
             # inventory. A wheel must not claim files outside its admitted ZIP
