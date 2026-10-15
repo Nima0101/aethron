@@ -56,6 +56,37 @@ class _CompletionResult(unittest.TextTestResult):
         self._outcome(test)
         super().addExpectedFailure(test, err)
 
+    def _report_problem(self, label, records):
+        # The parent may terminate this process before unittest prints its
+        # final report. Flush each observed problem now, including fixture and
+        # subtest failures. Keep the ordinary final report and result lists:
+        # early diagnostics must not change acceptance or completion accounting.
+        self.stream.writeln()
+        self.printErrorList(label, records[-1:])
+        self.stream.flush()
+
+    def addError(self, test, err):
+        super().addError(test, err)
+        self._report_problem("ERROR", self.errors)
+
+    def addFailure(self, test, err):
+        super().addFailure(test, err)
+        self._report_problem("FAIL", self.failures)
+
+    def addSubTest(self, test, subtest, err):
+        super().addSubTest(test, subtest, err)
+        if err is not None:
+            if issubclass(err[0], test.failureException):
+                self._report_problem("FAIL", self.failures)
+            else:
+                self._report_problem("ERROR", self.errors)
+
+    def addUnexpectedSuccess(self, test):
+        super().addUnexpectedSuccess(test)
+        self.stream.writeln()
+        self.stream.writeln("UNEXPECTED SUCCESS: " + self.getDescription(test))
+        self.stream.flush()
+
     def addSkip(self, test, reason):
         if isinstance(test, unittest.TestCase):
             # unittest reports skipped subtests using a child TestCase whose
