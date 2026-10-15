@@ -22,6 +22,7 @@ class CorePackagePayload(unittest.TestCase):
         }
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
+            (root / "pyproject.toml").write_text('[project]\nversion = "0.2.0"\n')
             for name, data in payload.items():
                 path = root / name
                 path.parent.mkdir(parents=True, exist_ok=True)

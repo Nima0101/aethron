@@ -124,7 +124,36 @@ def snapshot_source_payload(root, package_name="aethron"):
     return payload
 
 
-def validate_source_payload(wheel_bytes, payload, package_name="aethron", *, wheel_filename=None):
+def project_version(root):
+    """Snapshot the static version declared by these two source projects."""
+    # Keep build-only dependencies out of isolated installed-source probes.
+    try:
+        import tomllib
+    except ModuleNotFoundError:  # Python 3.9/3.10 build tools already pin tomli.
+        import tomli as tomllib
+    from packaging.version import Version
+
+    try:
+        project = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+        if not isinstance(project, dict):
+            raise ValueError("invalid_project_version")
+        version = project["version"]
+        dynamic = project.get("dynamic", [])
+        if not isinstance(version, str) or not isinstance(dynamic, list) or "version" in dynamic:
+            raise ValueError("invalid_project_version")
+        return Version(version)
+    except (KeyError, TypeError, ValueError):
+        raise ValueError("invalid_project_version") from None
+
+
+def validate_source_payload(
+    wheel_bytes,
+    payload,
+    package_name="aethron",
+    *,
+    wheel_filename=None,
+    expected_project_version=None,
+):
     expected_version = None
     if wheel_filename is not None:
         # The installer can accept a filename version different from METADATA
@@ -138,6 +167,8 @@ def validate_source_payload(wheel_bytes, payload, package_name="aethron", *, whe
             raise ValueError("wheel_source_payload_mismatch") from None
         if distribution != canonicalize_name(package_name):
             raise ValueError("wheel_source_payload_mismatch")
+    if expected_project_version is not None and expected_version != expected_project_version:
+        raise ValueError("wheel_source_payload_mismatch")
     with zipfile.ZipFile(io.BytesIO(wheel_bytes)) as wheel:
         sources = {}
         file_destinations = set()
@@ -481,6 +512,7 @@ def run():
     with reproduction_workspace(prefix="aethron-wheel-") as directory:
         temp = Path(directory)
         source_payload = snapshot_source_payload(ROOT)
+        version = project_version(ROOT)
         env = packaging_environment()
         for name in ("a", "b"):
             subprocess.run(
@@ -506,7 +538,9 @@ def run():
         a, b = first[0], second[0]
         compared_bytes = a.read_bytes()
         assert compared_bytes == b.read_bytes(), "wheel builds differ"
-        validate_source_payload(compared_bytes, source_payload, wheel_filename=a.name)
+        validate_source_payload(
+            compared_bytes, source_payload, wheel_filename=a.name, expected_project_version=version
+        )
         source_manifest = {
             name: hashlib.sha256(data).hexdigest() for name, data in source_payload.items()
         }

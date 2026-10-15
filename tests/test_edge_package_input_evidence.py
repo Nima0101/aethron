@@ -66,7 +66,10 @@ class PackageInputEvidence(unittest.TestCase):
                 path = root / name
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(name.encode())
-                expected[name] = hashlib.sha256(name.encode()).hexdigest()
+                if name.endswith("pyproject.toml"):
+                    version = "0.1.0" if name.startswith("integrations/") else "0.2.0"
+                    path.write_text(f'[project]\nversion = "{version}"\n')
+                expected[name] = hashlib.sha256(path.read_bytes()).hexdigest()
             if real_install:
                 probe = root / "scripts/package_check.py"
                 probe.write_bytes(Path(checker.package_check.__file__).read_bytes())
