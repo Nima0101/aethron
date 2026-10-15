@@ -108,7 +108,11 @@ class CorePackagePayload(unittest.TestCase):
                 if args[1:4] == ["-m", "build", "--no-isolation"]:
                     destination = Path(args[args.index("--outdir") + 1])
                     destination.mkdir()
-                    (destination / "aethron-0.2.0-py3-none-any.whl").write_bytes(wheel_bytes)
+                    # This fixture deliberately includes an owned native file;
+                    # portable wheels reject it independently of source parity.
+                    (destination / "aethron-0.2.0-py3-none-linux_x86_64.whl").write_bytes(
+                        wheel_bytes
+                    )
                     if mutate_source:
                         (root / "aethron/__init__.py").write_bytes(b"# replaced during build\n")
                     return subprocess.CompletedProcess(args, 0)

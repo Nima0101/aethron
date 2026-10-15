@@ -480,6 +480,13 @@ def validate_source_payload(
             if folded_name.startswith(package_name.casefold() + "/") and folded_name.endswith(
                 SOURCE_SUFFIXES
             ):
+                # Source parity already fixes the exact uncompressed length.
+                # Reject impossible matches before metadata/RECORD processing
+                # or reads can decompress an arbitrarily expanded replacement.
+                # Keep the later byte comparison: equal sizes prove no content
+                # integrity. This adds no fixed source-size threshold.
+                if name not in payload or member.file_size != len(payload[name]):
+                    raise ValueError("wheel_source_payload_mismatch")
                 sources[name] = member
         if any(
             len(records) > 1
