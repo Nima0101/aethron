@@ -271,6 +271,7 @@ def validate_source_payload(
     with zipfile.ZipFile(io.BytesIO(wheel_bytes)) as wheel:
         sources = {}
         file_destinations = set()
+        exact_file_destinations = set()
         directory_destinations = set()
         entry_points = []
         distribution_metadata = []
@@ -370,6 +371,7 @@ def validate_source_payload(
                 if destination in file_destinations or destination in directory_destinations:
                     raise ValueError("wheel_source_payload_mismatch")
                 file_destinations.add(destination)
+                exact_file_destinations.add(name)
             directory_destinations.update(directories)
             # Installers generate executable wrappers from this metadata even
             # when no .data/scripts payload exists. Inspect the installed root,
@@ -598,6 +600,32 @@ def validate_source_payload(
                 raise ValueError("wheel_source_payload_mismatch") from None
             if not same_version:
                 raise ValueError("wheel_source_payload_mismatch")
+            license_files = metadata.get_all("License-File", [])
+            if license_files:
+                metadata_versions = metadata.get_all("Metadata-Version", [])
+                if len(metadata_versions) != 1 or not re.fullmatch(
+                    r"[0-9]+\.[0-9]+", metadata_versions[0]
+                ):
+                    raise ValueError("wheel_source_payload_mismatch")
+                try:
+                    modern_licenses = Version(metadata_versions[0]) >= Version("2.4")
+                except ValueError:
+                    raise ValueError("wheel_source_payload_mismatch") from None
+                # PEP 639 places declared notices below dist-info/licenses.
+                # Use exact installed destinations, including spread members,
+                # so a directory or case alias cannot stand in for the file.
+                # Legacy metadata used different license layouts; leave it
+                # unchanged. Inclusion alone does not prove notice authenticity.
+                if modern_licenses:
+                    if len(set(license_files)) != len(license_files):
+                        raise ValueError("wheel_source_payload_mismatch")
+                    for path in license_files:
+                        if (
+                            any(part in ("", ".", "..") for part in path.split("/"))
+                            or "\\" in path
+                            or directory + "/licenses/" + path not in exact_file_destinations
+                        ):
+                            raise ValueError("wheel_source_payload_mismatch")
             if expected_requires_python is not None:
                 # Testing only the current interpreter misses changed support
                 # ranges. Bind the declaration itself before installation,
