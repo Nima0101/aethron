@@ -22,12 +22,23 @@ class ReproductionOutputLimit(unittest.TestCase):
                 ),
                 bytes(range(32)),
             )
-            self.assertEqual(
-                reproduce._git_output(
-                    [sys.executable, "-c", "print('a' * 31)"], cwd=Path.cwd(), text=True
-                ),
-                "a" * 31 + "\n",
-            )
+            for newline in (None, "\n", "\r\n"):
+                with self.subTest(newline=newline):
+                    # Model Git's exact bytes even when the child's text stdout
+                    # would expand LF to CRLF (33 bytes, beyond this 32-byte cap).
+                    command = [
+                        sys.executable,
+                        "-c",
+                        f"import sys; sys.stdout.reconfigure(newline={newline!r}); "
+                        "sys.stdout.buffer.write(b'a' * 31 + b'\\n')",
+                    ]
+                    self.assertEqual(
+                        reproduce._git_output(command, cwd=Path.cwd(), text=True),
+                        "a" * 31 + "\n",
+                    )
+                    with patch.object(git_context, "GIT_OUTPUT_MAX_BYTES", 31):
+                        with self.assertRaisesRegex(ValueError, "^git_output_limit$"):
+                            reproduce._git_output(command, cwd=Path.cwd(), text=True)
 
     def test_oversized_read_rejects_without_prefix_and_reaps_child(self):
         popen = subprocess.Popen
