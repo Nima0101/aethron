@@ -8,6 +8,7 @@ import math
 import platform
 import statistics
 import sys
+import tempfile
 import time
 import tracemalloc
 from pathlib import Path
@@ -67,6 +68,10 @@ class Greedy:
 
 
 def metrics(entries, results):
+    # zip silently truncates unequal sequences, hiding missed frames or extra output.
+    # Keep this gate explicit under -O and compatible with the Python 3.9 floor.
+    if len(entries) != len(results):
+        raise ValueError("evaluation_frame_count_mismatch")
     tp = fp = fn = switches = fragments = predictions = 0
     squared = 0.0
     last_ids, last_frames = {}, {}
@@ -115,20 +120,26 @@ def outputs(entries):
     raw = b"\n".join(encode(e["frame"]) for e in entries) + b"\n"
     a = list(replay(io.BytesIO(raw)))
     b = list(replay(io.BytesIO(raw)))
-    assert a == b, "nondeterministic replay"
+    if a != b:
+        raise AssertionError("nondeterministic replay")
     baseline = Greedy()
     return a, [baseline.step(e["frame"]) for e in entries]
 
 
 def recorded(outdir):
-    manifest = json.loads((ROOT / "data/aot/manifest.json").read_text())
+    payload = (ROOT / "data/aot/manifest.json").read_bytes()
+    freeze = json.loads((ROOT / "docs/verification/data-v3-freeze.json").read_bytes())
+    if hashlib.sha256(payload).hexdigest() != freeze["files"].get("data/aot/manifest.json"):
+        raise ValueError("recorded_manifest_digest")
+    manifest = json.loads(payload)
     entries, records, elapsed = [], [], []
     starts = {}
     previous = None
     registered = 0
     for item in manifest["frames"]:
         data = (ROOT / "data/aot" / item["file"]).read_bytes()
-        assert hashlib.sha256(data).hexdigest() == item["sha256"]
+        if hashlib.sha256(data).hexdigest() != item["sha256"]:
+            raise AssertionError
         start = time.perf_counter()
         ds = detect_pgm(data)  # Truth is deliberately never an argument to the detector.
         elapsed.append((time.perf_counter() - start) * 1000)
@@ -171,6 +182,8 @@ def recorded(outdir):
 
 
 def benchmark():
+    if tracemalloc.is_tracing():
+        raise ValueError("tracing_already_active")
     inputs = []
     for i in range(100):
         ds = [
@@ -181,21 +194,34 @@ def benchmark():
     s = Session()
     timings = []
     cpu_timings = []
-    for i, data in enumerate(inputs):
-        start = time.perf_counter()
-        cpu_start = time.process_time()
-        r = s.step(data, now_ms=i * 100)
-        timings.append((time.perf_counter() - start) * 1000)
-        cpu_timings.append((time.process_time() - cpu_start) * 1000)
-        assert len(r["tracks"]) == 32
-    s.close()
-    tracemalloc.start()
-    s = Session()
-    for i, data in enumerate(inputs):
-        s.step(data, now_ms=i * 100)
-    _, peak = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
-    s.close()
+    try:
+        for i, data in enumerate(inputs):
+            start = time.perf_counter()
+            cpu_start = time.process_time()
+            r = s.step(data, now_ms=i * 100)
+            timings.append((time.perf_counter() - start) * 1000)
+            cpu_timings.append((time.process_time() - cpu_start) * 1000)
+            if len(r["tracks"]) != 32:
+                raise AssertionError
+    finally:
+        s.close()
+    s = None
+    tracing_started = False
+    try:
+        tracemalloc.start()
+        tracing_started = True
+        # Keep construction inside the original traced measurement scope.
+        s = Session()
+        for i, data in enumerate(inputs):
+            s.step(data, now_ms=i * 100)
+        _, peak = tracemalloc.get_traced_memory()
+    finally:
+        try:
+            if tracing_started:
+                tracemalloc.stop()
+        finally:
+            if s is not None:
+                s.close()
     p95 = sorted(timings)[94]
     report = {
         "frames": 100,
@@ -212,42 +238,127 @@ def benchmark():
     return report
 
 
+def retain_metric_failure(outdir, fixture, payload, gate, metrics):
+    """Preserve this failed attempt without replacing earlier evidence."""
+    report = {
+        "protocol": "matrix-v3.md frozen T09",
+        "passed": False,
+        "complete": False,
+        "fixture": fixture,
+        "fixture_sha256": hashlib.sha256(payload).hexdigest(),
+        "evaluation_script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "gate": gate,
+        "metrics": metrics,
+    }
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        dir=outdir,
+        prefix="temporal-evaluation-failure-",
+        suffix=".json",
+        delete=False,
+    ) as stream:
+        stream.write(json.dumps(report, sort_keys=True, indent=2) + "\n")
+
+
+def synthetic_fixture_paths():
+    """Require the complete synthetic inventory frozen in data-v3-freeze.json."""
+    expected = (
+        "all_loss.json",
+        "blackout.json",
+        "camera_pan.json",
+        "classes.json",
+        "clean.json",
+        "crossing.json",
+        "fast_uav.json",
+        "occlusion.json",
+    )
+    paths = sorted((ROOT / "data/temporal").glob("*.json"))
+    if tuple(path.name for path in paths) != expected or any(not p.is_file() for p in paths):
+        raise ValueError("synthetic_fixture_inventory")
+    return paths
+
+
+def synthetic_fixture_payload(path):
+    """Bind the bytes consumed below to the repository's trusted freeze manifest."""
+    freeze = json.loads((ROOT / "docs/verification/data-v3-freeze.json").read_bytes())
+    payload = path.read_bytes()
+    name = path.relative_to(ROOT).as_posix()
+    if hashlib.sha256(payload).hexdigest() != freeze["files"].get(name):
+        raise ValueError("synthetic_fixture_digest")
+    return payload
+
+
 def run(outdir, include_recorded=True):
     outdir.mkdir(parents=True, exist_ok=True)
     reports = {}
-    for path in sorted((ROOT / "data/temporal").glob("*.json")):
-        entries = json.loads(path.read_text())
-        actual, baseline = outputs(entries)
-        reports[path.stem] = {
-            "temporal": metrics(entries, actual),
-            "greedy_iou": metrics(entries, baseline),
-        }
-        if path.stem in ("fast_uav", "occlusion"):
-            assert (
-                reports[path.stem]["temporal"]["id_switches"]
-                <= reports[path.stem]["greedy_iou"]["id_switches"]
-            )
-        if path.stem == "clean":
-            assert reports[path.stem]["temporal"]["recall"] >= 0.9
     report = {
         "protocol": "matrix-v3.md frozen T09/T10/T13",
-        "runtime_sha256": {
-            str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in (ROOT / "aethron").rglob("*.py")
-        },
-        "evaluation_script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-        "python": platform.python_version(),
-        "platform": platform.system() + " " + platform.machine(),
         "synthetic": reports,
-        "benchmark": benchmark(),
+        "passed": False,
+        "failure_stage": "provenance",
     }
-    if include_recorded:
-        report["recorded"] = recorded(outdir)
-    (outdir / "temporal-evaluation.json").write_text(
-        json.dumps(report, sort_keys=True, indent=2) + "\n"
-    )
+    try:
+        # Hashing and environment discovery can fail before evaluation starts.
+        # Keep them inside the same failure-report boundary as the measurements.
+        report["runtime_sha256"] = {
+            p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in (ROOT / "aethron").rglob("*.py")
+        }
+        report["evaluation_script_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+        report["python"] = platform.python_version()
+        report["platform"] = platform.system() + " " + platform.machine()
+        report["failure_stage"] = "synthetic"
+        for path in synthetic_fixture_paths():
+            payload = synthetic_fixture_payload(path)
+            entries = json.loads(payload.decode("utf-8"))
+            actual, baseline = outputs(entries)
+            reports[path.stem] = {
+                "temporal": metrics(entries, actual),
+                "greedy_iou": metrics(entries, baseline),
+            }
+            if path.stem in ("fast_uav", "occlusion"):
+                if not (
+                    reports[path.stem]["temporal"]["id_switches"]
+                    <= reports[path.stem]["greedy_iou"]["id_switches"]
+                ):
+                    retain_metric_failure(
+                        outdir, path.stem, payload, "id_switches", reports[path.stem]
+                    )
+                    raise AssertionError
+            if path.stem == "clean":
+                if not reports[path.stem]["temporal"]["recall"] >= 0.9:
+                    retain_metric_failure(
+                        outdir, path.stem, payload, "clean_recall", reports[path.stem]
+                    )
+                    raise AssertionError
+        report["failure_stage"] = "benchmark"
+        report["benchmark"] = benchmark()
+        if include_recorded:
+            report["failure_stage"] = "recorded"
+            report["recorded"] = recorded(outdir)
+        report["failure_stage"] = "benchmark_gate"
+        if not report["benchmark"]["passed"]:
+            raise AssertionError(report["benchmark"])
+        report["passed"] = True
+        del report["failure_stage"]
+    finally:
+        # Keep completed measurements even when a gate or execution is interrupted.
+        payload = json.dumps(report, sort_keys=True, indent=2) + "\n"
+        (outdir / "temporal-evaluation.json").write_text(payload, encoding="utf-8")
+        if not report["passed"]:
+            # The latest report is replaced on retry. Retain every failed run,
+            # including provenance, input and execution failures, independently.
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                dir=outdir,
+                prefix="temporal-run-failure-",
+                suffix=".json",
+                delete=False,
+            ) as stream:
+                stream.write(payload)
     print(json.dumps(report, sort_keys=True))
-    assert report["benchmark"]["passed"], report["benchmark"]
     return report
 
 

@@ -1,0 +1,40 @@
+{
+  "id": "0026-freeze-streaming",
+  "review_order_version": 3,
+  "component": "P1.1 freeze payload hashing",
+  "source_revision": "287e54de0f640077c504f3099e93fda571472d8b",
+  "source_sha256": "77a63dfe522e2132545c437a2985cffb5409fffd87224e2d236e4580ad37a877",
+  "decision": "KEEP",
+  "constraints": [
+    "Offline developer verification on Linux/macOS/Windows with Python3.9 compatibility tests and current Python. Preserve nine manifest inventories, exact SHA-256 bytes, both historical AGENTS mappings, empty inventory semantics and failure before later children/final PASS. No frozen product threshold changes.",
+    "Remove payload-size-dependent Python allocation. Stable trusted checkout is required. Manifest admission and whole-run bounds remain separate unfinished review tasks."
+  ],
+  "comparison": [
+    "Python hashlib.update incrementally hashes exact byte sequences without a second-process content transfer. The portable loop works on the compatibility baseline; hashlib.file_digest is not used because it was introduced after Python3.9.",
+    "GNU coreutils sha256sum and OpenSSL dgst are credible native command alternatives. Local versions9.7/3.5.6 matched all four synthetic vectors, including empty and binary8MiB inputs. Adopting either requires a subprocess failure/output/packaging boundary in addition to existing checkout validation; no observed requirement demands it.",
+    "Java DigestInputStream with MessageDigest is a credible different-language implementation with incremental digest updates. Official API assessed; no JVM parity or performance run is claimed. It would require implementing and distributing the manifest/path/error interface, without evidence of a decisive resource advantage over the bounded loop."
+  ],
+  "rationale": [
+    "KEEP Python orchestration with native hashlib for this boundary; replace whole-payload reads with a64KiB streaming loop. The decisive allocation defect is corrected in-process while preserving the versioned manifest contract. This is not a speed ranking or preference for installed tooling.",
+    "For8MiB synthetic input, one tracemalloc run measured8393838 peak bytes for the old whole read and135942 for streaming. Small inputs cost more with the fixed read buffer: empty13357 versus70345 and65792-byte payload70990 versus135914. The choice favors size-independent payload allocation, not lowest allocation for every file."
+  ],
+  "evidence": [
+    "RED:8 methods,8 assertion failures,0errors; unbounded read(-1) observed. GREEN integration:60 methods PASS in3.997s; child product commands intercepted.",
+    "Three in-memory variants (unbounded read, short-read-as-EOF, first-chunk-only) all rejected:29 assertion failures,0errors across24 method executions. No product fixtures or frozen manifests modified.",
+    "Four vectors of0,3,65792,8388608 bytes matched old/streaming hashlib, GNU sha256sum and OpenSSL. Raw comparison and negative logs retained in lane runtime. Python3.13.13/Linux only; tracemalloc excludes total RSS/native allocation.",
+    "Ruff lint/format PASS after import/format correction. Bandit exit1:18LOW,0MEDIUM,0HIGH,0errors; assertions and subprocess patterns retained without suppressions. Existing six-job Markdown workflow already runs test_verify_freeze when scripts/verify.py changes."
+  ],
+  "limits": [
+    "No bound on total hashed bytes, manifest memory/entries, whole-verifier memory or elapsed time. No concurrent filesystem snapshot, authenticated manifests, MLS/CNSA/defense compliance, hard-real-time, hardware or release qualification.",
+    "No actual Python3.9/macOS/Windows validation locally. Hosted exact-head checks remain gates. P1.1-P1.7 reassessment remains incomplete."
+  ],
+  "revisit": [
+    "Next earliest unfinished boundary: freeze-manifest JSON admission and entry-shape/resource validation, preserving frozen bytes and explicitly documenting any new developer admission contract."
+  ],
+  "references": [
+    "https://docs.python.org/3.9/library/hashlib.html",
+    "https://www.gnu.org/software/coreutils/manual/coreutils.html",
+    "https://docs.openssl.org/3.5/man1/openssl-dgst/",
+    "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/security/DigestInputStream.html"
+  ]
+}

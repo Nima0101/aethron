@@ -1,11 +1,14 @@
 """Synthetic source admission probes; stop before creating an archive."""
 
+import stat
 import tempfile
 import traceback
 import unittest
 from contextlib import nullcontext
 from pathlib import Path
 from unittest.mock import patch
+
+from test_package_source_links import windows_attributes
 
 from scripts import release
 
@@ -21,11 +24,17 @@ class ReleaseSourceAdmission(unittest.TestCase):
 
         def git_output(args, **kwargs):
             self.assertEqual(kwargs["cwd"], source)
-            if args == ["git", "ls-files", "-z"]:
-                return ("\0".join(names) + "\0").encode()
-            if args == ["git", "rev-parse", "HEAD"]:
-                return "1" * 40 + "\n"
-            if args == ["git", "status", "--porcelain", "--untracked-files=normal"]:
+            if args == ["git", "--no-replace-objects", "ls-files", "-v", "-f", "-z"]:
+                return ("\0".join("H " + name for name in names) + "\0").encode()
+            if args == ["git", "--no-replace-objects", "rev-parse", "HEAD"]:
+                return b"1" * 40 + b"\n"
+            if args == [
+                "git",
+                "--no-replace-objects",
+                "status",
+                "--porcelain",
+                "--untracked-files=normal",
+            ]:
                 return b""
             self.fail(f"unexpected Git request: {args}")
 
@@ -34,10 +43,15 @@ class ReleaseSourceAdmission(unittest.TestCase):
             patch.object(
                 release,
                 "committed_blobs",
-                return_value={"fixture.txt": b"synthetic"},
+                return_value={
+                    "fixture.txt": b"synthetic",
+                    "LICENSE": b"synthetic license",
+                    "NOTICE": b"synthetic notice",
+                    "aethron/models/rules.json": b"{}",
+                },
                 side_effect=blob_error,
             ),
-            patch.object(release.subprocess, "check_output", side_effect=git_output),
+            patch.object(release, "git_output", side_effect=git_output),
             patch.object(Path, "read_bytes", record_read),
             patch.object(release.io, "BytesIO", side_effect=RuntimeError("archive_boundary")),
         ):
@@ -88,6 +102,42 @@ class ReleaseSourceAdmission(unittest.TestCase):
             (source / "z-directory").mkdir()
             self.assert_rejected(source, ["a.txt", "z-directory"], root / "output")
 
+    def test_reparse_sources_reject_before_archive_creation(self):
+        # Model Windows metadata on Linux; this is not native junction evidence.
+        for location in ("package", "package/nested", "package/nested/source.py"):
+            for attributes in (
+                stat.FILE_ATTRIBUTE_REPARSE_POINT,
+                stat.FILE_ATTRIBUTE_REPARSE_POINT | stat.FILE_ATTRIBUTE_ARCHIVE,
+            ):
+                with self.subTest(location=location, attributes=attributes):
+                    with tempfile.TemporaryDirectory() as directory:
+                        root = Path(directory)
+                        source = root / "source"
+                        name = "package/nested/source.py"
+                        path = source / name
+                        path.parent.mkdir(parents=True)
+                        path.write_bytes(b"# ordinary source\n")
+                        with windows_attributes(source / location, attributes):
+                            self.assert_rejected(source, [name], root / "output")
+
+    def test_ordinary_windows_attributes_reach_archive_boundary(self):
+        for location in ("package", "package/nested", "package/nested/source.py"):
+            with self.subTest(location=location), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                source = root / "source"
+                name = "package/nested/source.py"
+                path = source / name
+                path.parent.mkdir(parents=True)
+                path.write_bytes(b"# ordinary source\n")
+                with windows_attributes(
+                    source / location, stat.FILE_ATTRIBUTE_READONLY | stat.FILE_ATTRIBUTE_ARCHIVE
+                ):
+                    error, reads = self.attempt(source, [name], root / "output")
+                self.assertIsInstance(error, RuntimeError)
+                self.assertEqual(str(error), "archive_boundary")
+                self.assertEqual(reads, [])
+                self.assertFalse((root / "output").exists())
+
     def test_regular_nested_sources_reach_archive_boundary(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -101,9 +151,10 @@ class ReleaseSourceAdmission(unittest.TestCase):
             self.assertEqual(str(error), "archive_boundary")
             self.assertEqual(reads, [])
             self.assertEqual({name: (source / name).read_bytes() for name in contents}, contents)
-            self.assertEqual(list((root / "output").iterdir()), [])
+            self.assertFalse((root / "output").exists())
 
     def test_source_io_errors_have_fixed_diagnostics(self):
+        original_lstat = Path.lstat
         for operation in ("missing", "lstat", "committed_blobs"):
             with self.subTest(operation=operation), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
@@ -113,13 +164,19 @@ class ReleaseSourceAdmission(unittest.TestCase):
                 path = source / name
                 if operation != "missing":
                     path.write_bytes(b"synthetic private bytes")
+
+                def source_stat(candidate, path=path):
+                    if candidate == path:
+                        raise PermissionError(13, "private detail", str(path))
+                    return original_lstat(candidate)
+
                 fault = (
                     nullcontext()
                     if operation in ("missing", "committed_blobs")
                     else patch.object(
                         Path,
                         operation,
-                        side_effect=PermissionError(13, "private detail", str(path)),
+                        source_stat,
                     )
                 )
                 with fault:

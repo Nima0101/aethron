@@ -452,12 +452,14 @@ class InstalledRosAppliance(unittest.TestCase):
 
         context = Context()
         context.init(args=[], domain_id=73)
+        self.addCleanup(context.shutdown)
         publisher = Node(
             "aethron_appliance_fixture",
             context=context,
             enable_rosout=False,
             start_parameter_services=False,
         )
+        self.addCleanup(publisher.destroy_node)
         qos = QoSProfile(
             history=HistoryPolicy.KEEP_LAST,
             depth=1,
@@ -480,7 +482,11 @@ class InstalledRosAppliance(unittest.TestCase):
         message.encoding = "16UC1"
         message.step = 6
         message.data = array("B", struct.pack("<9H", *([5000] * 9)))
+        # LIFO cleanup keeps configuration/status storage alive until shutdown,
+        # and still destroys ROS resources if appliance cleanup raises.
+        tmp = self.enterContext(tempfile.TemporaryDirectory())
         supervisor = ApplianceSupervisor()
+        self.addCleanup(supervisor.shutdown)
 
         def publish_until(predicate, timeout=10):
             deadline = time.monotonic() + timeout
@@ -496,54 +502,42 @@ class InstalledRosAppliance(unittest.TestCase):
                 time.sleep(0.01)
             self.fail("supervised ROS did not satisfy condition within deadline")
 
-        try:
-            with tempfile.TemporaryDirectory() as tmp:
-                path, manifest = fixture(Path(tmp))
-                supervisor.boot(load_config(path))
-                publish_until(
-                    lambda: (
-                        supervisor.status(time.monotonic_ns())["sensors"]["depth"]["batches"] >= 3
-                    )
-                )
-                pipeline = supervisor.pipelines["depth"]
-                grant = pipeline.ros_grant
-                self.assertEqual(pipeline.inferences, 0)
-                self.assertEqual(pipeline.snapshot(time.monotonic_ns())["state"], "UNKNOWN")
-                self.assertFalse(supervisor.status(time.monotonic_ns())["qualified"])
-                before = pipeline.sensor_batches
-                time.sleep(0.15)  # No publisher or API viewer; independent parent expiry.
-                self.assertFalse(
-                    supervisor.status(time.monotonic_ns())["sensors"]["depth"]["available"]
-                )
-                publish_until(lambda: supervisor.pipelines["depth"].sensor_batches > before)
-                pipeline.process.terminate()  # Only this test's child, never another session.
-                publish_until(
-                    lambda: (
-                        supervisor.pipelines["depth"] is not pipeline
-                        and supervisor.pipelines["depth"].sensor_batches > before + 1
-                    )
-                )
-                self.assertEqual(supervisor.pipelines["depth"].ros_grant, grant)
-                self.assertEqual(
-                    supervisor.status(time.monotonic_ns())["sensors"]["depth"]["source_evidence"],
-                    "external_unverified",
-                )
-                # Signed/static manifest identity is pinned by boot grant; mutation
-                # on worker replacement cannot mint a new authority.
-                changed = manifest.model_dump(mode="json")
-                changed["timestamp_error_ns"] += 1
-                (Path(tmp) / "sensor.json").write_text(json.dumps(changed))
-                current = supervisor.pipelines["depth"]
-                current.process.terminate()
-                deadline = time.monotonic() + 5
-                while supervisor.pipelines["depth"] is current and time.monotonic() < deadline:
-                    time.sleep(0.01)
-                self.assertIsNot(supervisor.pipelines["depth"], current)
-                time.sleep(0.2)
-                self.assertFalse(
-                    supervisor.status(time.monotonic_ns())["sensors"]["depth"]["available"]
-                )
-        finally:
-            supervisor.shutdown()
-            publisher.destroy_node()
-            context.shutdown()
+        path, manifest = fixture(Path(tmp))
+        supervisor.boot(load_config(path))
+        publish_until(
+            lambda: supervisor.status(time.monotonic_ns())["sensors"]["depth"]["batches"] >= 3
+        )
+        pipeline = supervisor.pipelines["depth"]
+        grant = pipeline.ros_grant
+        self.assertEqual(pipeline.inferences, 0)
+        self.assertEqual(pipeline.snapshot(time.monotonic_ns())["state"], "UNKNOWN")
+        self.assertFalse(supervisor.status(time.monotonic_ns())["qualified"])
+        before = pipeline.sensor_batches
+        time.sleep(0.15)  # No publisher or API viewer; independent parent expiry.
+        self.assertFalse(supervisor.status(time.monotonic_ns())["sensors"]["depth"]["available"])
+        publish_until(lambda: supervisor.pipelines["depth"].sensor_batches > before)
+        pipeline.process.terminate()  # Only this test's child, never another session.
+        publish_until(
+            lambda: (
+                supervisor.pipelines["depth"] is not pipeline
+                and supervisor.pipelines["depth"].sensor_batches > before + 1
+            )
+        )
+        self.assertEqual(supervisor.pipelines["depth"].ros_grant, grant)
+        self.assertEqual(
+            supervisor.status(time.monotonic_ns())["sensors"]["depth"]["source_evidence"],
+            "external_unverified",
+        )
+        # Signed/static manifest identity is pinned by boot grant; mutation
+        # on worker replacement cannot mint a new authority.
+        changed = manifest.model_dump(mode="json")
+        changed["timestamp_error_ns"] += 1
+        (Path(tmp) / "sensor.json").write_text(json.dumps(changed))
+        current = supervisor.pipelines["depth"]
+        current.process.terminate()
+        deadline = time.monotonic() + 5
+        while supervisor.pipelines["depth"] is current and time.monotonic() < deadline:
+            time.sleep(0.01)
+        self.assertIsNot(supervisor.pipelines["depth"], current)
+        time.sleep(0.2)
+        self.assertFalse(supervisor.status(time.monotonic_ns())["sensors"]["depth"]["available"])

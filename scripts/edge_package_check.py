@@ -7,7 +7,6 @@ import shutil
 import socket
 import subprocess
 import sys
-import tempfile
 import time
 import urllib.request
 from pathlib import Path
@@ -29,9 +28,15 @@ _INSTALLED_TEST_RUNNER = """
 import sys
 import unittest
 
-suite = unittest.defaultTestLoader.discover(sys.argv[1], pattern=sys.argv[2])
-result = unittest.TextTestRunner(verbosity=2).run(suite)
-complete = (result.testsRun > 0 and result.wasSuccessful()
+try:
+    suite = unittest.defaultTestLoader.discover(sys.argv[1], pattern=sys.argv[2])
+    discovered = suite.countTestCases()
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
+except SystemExit:
+    # Import/load_tests/custom suite exits have not completed qualification.
+    print("installed_suite_incomplete", file=sys.stderr)
+    sys.exit(1)
+complete = (discovered > 0 and result.testsRun == discovered and result.wasSuccessful()
             and not result.skipped and not result.expectedFailures)
 if not complete:
     print("installed_suite_incomplete", file=sys.stderr)
@@ -57,6 +62,55 @@ def verify_installed_console(python: Path, work: Path, env):
         raise ValueError("installed_console_help_empty")
 
 
+def verify_installed_dependencies(python: Path, work: Path, env):
+    # --no-deps binds our wheels without resolving their requirements. Verify
+    # the resulting installed environment offline before running consumers.
+    # pip owns marker/version semantics; this is not an extras or security audit.
+    subprocess.run(
+        [str(python), "-I", "-m", "pip", "check"],
+        cwd=work,
+        env=env,
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+
+
+def verify_installed_source_payloads(python: Path, work: Path, env, source_manifests):
+    for distribution, flag in (
+        ("aethron", "--installed-payload"),
+        ("aethron-edge", "--installed-edge-payload"),
+    ):
+        installed = subprocess.run(
+            [str(python), "-I", str(ROOT / "scripts/package_check.py"), flag],
+            cwd=work,
+            env=env,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if json.loads(installed.stdout) != source_manifests[distribution]:
+            raise ValueError("installed_source_payload_mismatch")
+
+
+def wheel_inventory(directory: Path):
+    try:
+        return {wheel.name: wheel for wheel in package_check.wheel_paths(directory)}
+    except (OSError, ValueError):
+        raise ValueError("package_artifact_changed") from None
+
+
+def processed_count(status: Path) -> int:
+    record = json.loads(status.read_text())
+    count = record.get("processed") if isinstance(record, dict) else None
+    # JSON booleans, strings and fractional values are not processing counts.
+    if type(count) is not int or count < 0:
+        raise ValueError("installed_processed_invalid")
+    return count
+
+
 def run(wheelhouse: Path, output: Path, vision: bool = False):
     # Preserve earlier evidence and prevent a failed attempt from reusing its report.
     output.mkdir(parents=True, exist_ok=False)
@@ -79,14 +133,30 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
             ROOT / "integrations/edge", "aethron_edge"
         ),
     }
+    versions = {
+        "aethron": package_check.project_version(ROOT),
+        "aethron-edge": package_check.project_version(ROOT / "integrations/edge"),
+    }
+    python_requirements = {
+        "aethron": package_check.project_requires_python(ROOT),
+        "aethron-edge": package_check.project_requires_python(ROOT / "integrations/edge"),
+    }
+    dependencies = {
+        "aethron": package_check.project_dependencies(ROOT),
+        "aethron-edge": package_check.project_dependencies(ROOT / "integrations/edge"),
+    }
+    licenses = {
+        "aethron": package_check.project_license(ROOT),
+        "aethron-edge": package_check.project_license(ROOT / "integrations/edge"),
+    }
     source_manifests = {
         distribution: {name: hashlib.sha256(data).hexdigest() for name, data in payload.items()}
         for distribution, payload in payloads.items()
     }
-    env = dict(os.environ, SOURCE_DATE_EPOCH="1767225600", PIP_DISABLE_PIP_VERSION_CHECK="1")
-    for variable in ("PYTHONPATH", "PYTHONHOME"):
-        env.pop(variable, None)
+    env = package_check.packaging_environment()
     hashes = {}
+    # Match core packaging's per-child build/install budget. This is not a
+    # whole-run deadline or a guarantee of descendant-process cleanup.
     for lane in ("a", "b"):
         for project in (ROOT, ROOT / "integrations/edge"):
             subprocess.run(
@@ -103,9 +173,11 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                 check=True,
                 env=env,
                 stdout=subprocess.DEVNULL,
+                timeout=180,
             )
-    first = {wheel.name: wheel for wheel in (output / "a").glob("*.whl")}
-    second = {wheel.name: wheel for wheel in (output / "b").glob("*.whl")}
+    # Admit both inventories before reading bytes or starting installed consumers.
+    first = wheel_inventory(output / "a")
+    second = wheel_inventory(output / "b")
     if not first or first.keys() != second.keys():
         raise ValueError("wheel_inventory_mismatch")
     # Filename identity is necessary evidence, not authentication of wheel contents.
@@ -122,12 +194,27 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
         assert compared_bytes == second[name].read_bytes(), "nonreproducible wheel"
         distribution = parse_wheel_filename(name)[0]
         package_check.validate_source_payload(
-            compared_bytes, payloads[distribution], distribution.replace("-", "_")
+            compared_bytes,
+            payloads[distribution],
+            distribution.replace("-", "_"),
+            wheel_filename=name,
+            expected_project_version=versions[distribution],
+            expected_requires_python=python_requirements[distribution],
+            expected_dependencies=dependencies[distribution],
+            expected_license=licenses[distribution],
         )
         hashes[wheel.name] = hashlib.sha256(compared_bytes).hexdigest()
-    with tempfile.TemporaryDirectory(prefix="aethron-installed-") as temporary:
+    # Keep failed installed-consumer evidence with this attempt's persistent wheels.
+    with package_check.reproduction_workspace(
+        prefix="aethron-installed-", dir=output.resolve()
+    ) as temporary:
         work = Path(temporary)
-        subprocess.run([sys.executable, "-m", "venv", str(work / "venv")], check=True)
+        subprocess.run(
+            [sys.executable, "-m", "venv", str(work / "venv")],
+            env=env,
+            check=True,
+            timeout=180,
+        )
         python = work / "venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
         subprocess.run(
             [
@@ -145,6 +232,7 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
             check=True,
             env=env,
             stdout=subprocess.DEVNULL,
+            timeout=180,
         )
         subprocess.run(
             [
@@ -164,22 +252,10 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
             check=True,
             env=env,
             stdout=subprocess.DEVNULL,
+            timeout=180,
         )
-        for distribution, flag in (
-            ("aethron", "--installed-payload"),
-            ("aethron-edge", "--installed-edge-payload"),
-        ):
-            installed = subprocess.run(
-                [str(python), "-I", str(ROOT / "scripts/package_check.py"), flag],
-                cwd=work,
-                env=env,
-                check=True,
-                capture_output=True,
-                text=True,
-                timeout=30,
-            )
-            if json.loads(installed.stdout) != source_manifests[distribution]:
-                raise ValueError("installed_source_payload_mismatch")
+        verify_installed_dependencies(python, work, env)
+        verify_installed_source_payloads(python, work, env, source_manifests)
         verify_installed_console(python, work, env)
         # Exercise new raw sensor contracts from installed wheels, outside checkout.
         for test_name in (
@@ -263,6 +339,9 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                         break
                     except OSError:
                         time.sleep(0.05)
+                else:
+                    # Expiry is failed readiness, not permission to run consumers.
+                    raise TimeoutError("installed_server_not_ready")
                 client = subprocess.run(
                     [
                         str(python),
@@ -287,17 +366,26 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                 rows = [json.loads(line) for line in client.stdout.splitlines()]
                 assert len(rows) == 3 and all(row["current_state"] == "UNKNOWN" for row in rows)
                 time.sleep(1.1)
-                before = json.loads((work / "status.json").read_text())["processed"]
+                before = processed_count(work / "status.json")
                 continued_deadline = time.monotonic() + 10
                 while time.monotonic() < continued_deadline:
-                    after = json.loads((work / "status.json").read_text())["processed"]
+                    after = processed_count(work / "status.json")
+                    if after < before:
+                        raise ValueError("installed_processed_regressed")
                     if after > before:
                         break
                     time.sleep(0.1)
                 assert after > before, "viewer must not own processing"
             finally:
                 server.terminate()
-                server.wait(timeout=10)
+                try:
+                    server.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    # wait() does not stop a child on expiry. Reap this direct
+                    # child, but retain shutdown failure and its workspace.
+                    server.kill()
+                    server.wait(timeout=10)
+                    raise
         if vision:
             subprocess.run(
                 [
@@ -318,6 +406,7 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                 timeout=180,
                 stdout=subprocess.DEVNULL,
             )
+            verify_installed_dependencies(python, work, env)
             for name in (
                 "test_rectification.py",
                 "test_fisheye_rectification.py",
@@ -340,6 +429,10 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
                 check=True,
                 timeout=60,
             )
+        # Match core packaging: successful consumers or optional installs must
+        # not qualify source bytes they changed. Recheck both distributions
+        # against the original snapshots before publishing success.
+        verify_installed_source_payloads(python, work, env, source_manifests)
         try:
             final_input_hashes = {
                 name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in input_names
@@ -349,10 +442,11 @@ def run(wheelhouse: Path, output: Path, vision: bool = False):
         if final_input_hashes != input_hashes:
             raise ValueError("package_input_changed")
         try:
-            for lane in ("a", "b"):
+            final_inventories = [wheel_inventory(output / lane) for lane in ("a", "b")]
+            for inventory in final_inventories:
                 final_wheels = {
-                    wheel.name: hashlib.sha256(wheel.read_bytes()).hexdigest()
-                    for wheel in (output / lane).glob("*.whl")
+                    name: hashlib.sha256(wheel.read_bytes()).hexdigest()
+                    for name, wheel in inventory.items()
                 }
                 if final_wheels != hashes:
                     raise ValueError("package_artifact_changed")

@@ -16,20 +16,33 @@ class ReleaseOutputAdmission(unittest.TestCase):
 
         def git_output(args, **kwargs):
             self.assertEqual(kwargs["cwd"], source)
-            if args == ["git", "ls-files", "-z"]:
-                return b"fixture.txt\0"
-            if args == ["git", "rev-parse", "HEAD"]:
-                return "1" * 40 + "\n"
-            if args == ["git", "status", "--porcelain", "--untracked-files=normal"]:
+            if args == ["git", "--no-replace-objects", "ls-files", "-v", "-f", "-z"]:
+                return b"H fixture.txt\0"
+            if args == ["git", "--no-replace-objects", "rev-parse", "HEAD"]:
+                return b"1" * 40 + b"\n"
+            if args == [
+                "git",
+                "--no-replace-objects",
+                "status",
+                "--porcelain",
+                "--untracked-files=normal",
+            ]:
                 return dirty
             self.fail(f"unexpected Git request: {args}")
 
         with (
             patch.object(release, "ROOT", source),
             patch.object(
-                release, "committed_blobs", return_value={"fixture.txt": b"synthetic source"}
+                release,
+                "committed_blobs",
+                return_value={
+                    "fixture.txt": b"synthetic source",
+                    "LICENSE": b"synthetic license",
+                    "NOTICE": b"synthetic notice",
+                    "aethron/models/rules.json": b"{}",
+                },
             ),
-            patch.object(release.subprocess, "check_output", side_effect=git_output),
+            patch.object(release, "git_output", side_effect=git_output),
             patch.object(release.io, "BytesIO", side_effect=RuntimeError("archive_boundary")),
         ):
             try:
@@ -66,8 +79,8 @@ class ReleaseOutputAdmission(unittest.TestCase):
             error = self.attempt(root, destination)
             self.assertIsInstance(error, RuntimeError)
             self.assertEqual(str(error), "archive_boundary")
-            self.assertTrue(destination.is_dir())
-            self.assertEqual(list(destination.iterdir()), [])
+            self.assertFalse(destination.exists())
+            self.assertTrue(destination.parent.is_dir())
 
     def test_dirty_source_still_rejects_before_creating_destination(self):
         with tempfile.TemporaryDirectory() as directory:

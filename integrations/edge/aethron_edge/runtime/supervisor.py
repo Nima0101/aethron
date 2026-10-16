@@ -62,7 +62,14 @@ class ApplianceSupervisor:
         for pipeline in self.pipelines.values():
             pipeline.start()
         self.thread = threading.Thread(target=self._loop, name="aethron-watchdog", daemon=True)
-        self.thread.start()
+        try:
+            self.thread.start()
+        except Exception:
+            # A thread that never started cannot be joined. Preserve ownership
+            # if it did start, including a thread that has already finished.
+            if self.thread.ident is None:
+                self.thread = None
+            raise
         return self.status(time.monotonic_ns())
 
     def _loop(self):
@@ -74,22 +81,36 @@ class ApplianceSupervisor:
             for name, p in list(self.pipelines.items()):
                 if name in self.recovering or name in self.faults:
                     continue
-                p.tick(now_ns)
-                if p.ros_guard is not None and p.ros_guard.closed:
+                try:
+                    p.tick(now_ns)
+                    revoked = p.ros_guard is not None and p.ros_guard.closed
+                    failed = (
+                        not revoked
+                        and p.process is not None
+                        and (
+                            not p.process.is_alive()
+                            or now_ns - p.last_message_ns
+                            > (
+                                10_000_000_000
+                                if p.profile.driver in {"replay", "sensor-replay", "sensor-ros"}
+                                else 60_000_000_000
+                            )
+                        )
+                    )
+                except Exception:
+                    # Failed message or worker-health checks must not stop
+                    # supervision of other profiles. Retire this scene
+                    # immediately, then reap outside the watchdog without retry
+                    # or publication of potentially private exception details.
+                    self.faults.add(name)
+                    self._recover(name, p, restart=False)
+                    continue
+                if revoked:
                     # A revoked boot authority cannot recover through a worker
                     # restart. Withdraw immediately and reap outside the watchdog.
                     self.faults.add(name)
                     self._recover(name, p, restart=False)
                     continue
-                failed = p.process is not None and (
-                    not p.process.is_alive()
-                    or now_ns - p.last_message_ns
-                    > (
-                        10_000_000_000
-                        if p.profile.driver in {"replay", "sensor-replay", "sensor-ros"}
-                        else 60_000_000_000
-                    )
-                )
                 if failed and name not in self.faults and now_ns >= self.next_restart[name]:
                     attempts = self.restarts[name]
                     while attempts and now_ns - attempts[0] > 60_000_000_000:
@@ -107,7 +128,13 @@ class ApplianceSupervisor:
                 try:
                     publish_status(Path(self.config.status_file), result)
                 except OSError:
+                    # This snapshot predates the write attempt. Reflect its
+                    # failure before returning, without recounting a latched
+                    # fault or sampling telemetry a second time.
+                    if "status_storage" not in self.faults:
+                        result["fault_count"] += 1
                     self.faults.add("status_storage")
+                    result["state"] = "fault"
                 self.last_status = now_ns
             return result
 
@@ -118,26 +145,63 @@ class ApplianceSupervisor:
         pipeline.core.close()
 
         def work():
-            pipeline.stop_worker()
             replacement = None
-            if restart and not self.stop.is_set():
-                replacement = RuntimePipeline(
-                    pipeline.profile, ros_grant=pipeline.ros_grant, ros_guard=pipeline.ros_guard
-                )
-                replacement.processed = pipeline.processed
-                replacement.inferences = pipeline.inferences
-                replacement.sensor_batches = pipeline.sensor_batches
-                replacement.prior_drops = pipeline.drop_counts()
-                replacement.start()
-            with self.lock:
+            try:
+                pipeline.stop_worker()
+                if restart and not self.stop.is_set():
+                    replacement = RuntimePipeline(
+                        pipeline.profile, ros_grant=pipeline.ros_grant, ros_guard=pipeline.ros_guard
+                    )
+                    replacement.processed = pipeline.processed
+                    replacement.inferences = pipeline.inferences
+                    replacement.sensor_batches = pipeline.sensor_batches
+                    replacement.prior_drops = pipeline.drop_counts()
+                    replacement.start()
+                with self.lock:
+                    if (
+                        replacement is not None
+                        and not self.stop.is_set()
+                        and name not in self.faults
+                    ):
+                        self.pipelines[name] = replacement
+                        return
+                # Startup can outlive shutdown's bounded join or a scheduling
+                # fault. Recovery still owns the unpublished worker and reaps it.
                 if replacement is not None:
-                    self.pipelines[name] = replacement
-                self.recovering.discard(name)
+                    replacement.close()
+            except Exception:
+                # A failed recovery is terminal, not an indefinitely recovering
+                # service. Never expose exception text from worker startup.
+                with self.lock:
+                    self.faults.add(name)
+                if replacement is not None:
+                    try:
+                        replacement.close()
+                    except Exception:
+                        # Retain ownership so shutdown can retry cleanup.
+                        with self.lock:
+                            self.pipelines[name] = replacement
+            finally:
+                with self.lock:
+                    self.recovering.discard(name)
 
-        task = threading.Thread(target=work, name="aethron-recovery", daemon=True)
-        self.maintenance = [t for t in self.maintenance if t.is_alive()]
-        self.maintenance.append(task)
-        task.start()
+        task = None
+        try:
+            task = threading.Thread(target=work, name="aethron-recovery", daemon=True)
+            self.maintenance = [t for t in self.maintenance if t.is_alive()]
+            task.start()
+        except Exception:
+            # A start error does not prove that work() never started. Retain
+            # started tasks for shutdown; only their finally retires recovery.
+            # Unstarted tasks cannot be joined and leave the original owner.
+            self.faults.add(name)
+            if task is not None and task.ident is not None:
+                self.maintenance.append(task)
+            else:
+                self.recovering.discard(name)
+        else:
+            # The caller holds self.lock, so shutdown cannot miss a started task.
+            self.maintenance.append(task)
 
     def status(self, now_ns):
         telemetry = {name: source.snapshot() for name, source in self.telemetry.items()}
@@ -175,21 +239,53 @@ class ApplianceSupervisor:
             return self.pipelines[profile].snapshot(time.monotonic_ns())
 
     def shutdown(self, reason="maintenance"):
-        self.stop.set()
+        cleanup_failed = False
+
+        def attempt(operation, **kwargs):
+            nonlocal cleanup_failed
+            try:
+                operation(**kwargs)
+            except Exception:
+                # Keep ownership for retry, but never abandon later resources
+                # or retain potentially private native exception diagnostics.
+                cleanup_failed = True
+
+        def join(task, timeout):
+            nonlocal cleanup_failed
+            task.join(timeout=timeout)
+            # A timed join returns None even when the thread still owns work.
+            # Keep its handle for retry and never publish a completed stop.
+            if task.is_alive():
+                cleanup_failed = True
+
+        with self.lock:
+            self.stop.set()
+            # Withdraw every public scene before any thread join or telemetry
+            # cleanup can wait. Keep worker ownership for the cleanup below;
+            # queued observations must not revive a scene during that wait.
+            for pipeline in self.pipelines.values():
+                attempt(pipeline.withdraw_scene)
         if self.thread:
-            self.thread.join(timeout=2)
+            attempt(join, task=self.thread, timeout=2)
         for task in self.maintenance:
-            task.join(timeout=4)
+            attempt(join, task=task, timeout=4)
         for source in self.telemetry.values():
-            source.close()
+            attempt(source.close)
         with self.lock:
             for pipeline in self.pipelines.values():
-                pipeline.close()
-            if self.config is None:
-                return
-            result = self.status(time.monotonic_ns())
-            result["state"] = "stopped"
-            try:
-                publish_status(Path(self.config.status_file), result)
-            except OSError:
-                pass
+                attempt(pipeline.close)
+            if cleanup_failed:
+                self.faults.add("shutdown_cleanup")
+            if self.config is not None:
+                try:
+                    result = self.status(time.monotonic_ns())
+                    result["state"] = "fault" if cleanup_failed else "stopped"
+                    publish_status(Path(self.config.status_file), result)
+                except Exception:
+                    # Diagnostics can fail after resource cleanup. Preserve the
+                    # fixed failure boundary and allow an explicit retry; never
+                    # invent a successful status or expose the reporting error.
+                    cleanup_failed = True
+                    self.faults.add("shutdown_cleanup")
+        if cleanup_failed:
+            raise RuntimeError("appliance_cleanup_failed") from None

@@ -21,6 +21,9 @@ aethron = "aethron.__main__:main"
 [tool.setuptools.packages.find]
 include = ["aethron*"]
 
+[tool.setuptools.cmdclass]
+bdist_wheel = "_build.ReproducibleWheel"
+
 [tool.setuptools.package-data]
 "aethron" = ["_json_bounds.pxd"]
 "aethron.models" = ["*.json"]

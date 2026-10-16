@@ -1,11 +1,21 @@
 """Clean clone, exact README quickstart, isolated consumer and two release builds."""
 
+import contextlib
+import gzip
 import hashlib
+import io
 import json
+import math
 import os
+import shutil
+import stat
+import struct
 import subprocess
 import sys
+import tarfile
 import tempfile
+import zipfile
+import zlib
 from pathlib import Path
 
 # Optimized execution removes assertions used to establish this evidence.
@@ -13,40 +23,641 @@ if sys.flags.optimize:
     raise SystemExit("reproduce_requires_assertions")
 
 ROOT = Path(__file__).resolve().parents[1]
+# Local clone transfer gets a larger tooling budget than an individual Git read.
+GIT_CLONE_TIMEOUT_SECONDS = 180
+# Tooling budgets only: subprocess timeouts reap the direct child, not descendants.
+# Verification gets ten minutes; builds and short consumers match package_check.
+VERIFICATION_TIMEOUT_SECONDS = 600
+RELEASE_TIMEOUT_SECONDS = 180
+CONSUMER_TIMEOUT_SECONDS = 30
+RELEASE_ARTIFACTS = frozenset(
+    {
+        "aethron-0.2.0-source.tar.gz",
+        "aethron.pyz",
+        "source-manifest.json",
+        "sbom.cdx.json",
+        "provenance.json",
+        "SHA256SUMS",
+    }
+)
+
+
+def _require_git_context():
+    # Keep the standalone workspace helper usable without repository imports.
+    if __package__:
+        from .git_context import require_default_git_context
+    else:
+        from git_context import require_default_git_context
+
+    require_default_git_context(os.environ)
 
 
 def call(args, cwd, **kw):
     return subprocess.run(args, cwd=cwd, check=True, **kw)
 
 
+def _git_output(args, *, cwd, text=False):
+    # Lazy import preserves standalone use of the workspace cleanup helper.
+    if __package__:
+        from .git_context import GIT_COMMAND_TIMEOUT_SECONDS, git_output
+    else:
+        from git_context import GIT_COMMAND_TIMEOUT_SECONDS, git_output
+
+    # Reuse verifier admission: a time limit alone does not bound captured
+    # metadata. Reject oversized/incomplete output before parsing or advancing
+    # to verification, while the workspace context retains failure evidence.
+    data = git_output(args, cwd=cwd, timeout=GIT_COMMAND_TIMEOUT_SECONDS)
+    # Only rev-parse HEAD requests text; object IDs are ASCII in both Git formats.
+    return data.decode("ascii") if text else data
+
+
+def artifact_mode(path):
+    # Match wheel/source admission on Python 3.9, where is_symlink does not
+    # reject Windows junctions. lstat also avoids following ordinary links.
+    # Stable-tree checks only; concurrent replacement is outside this boundary.
+    try:
+        info = path.lstat()
+    except FileNotFoundError:
+        return 0
+    if getattr(info, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0):
+        return 0
+    return info.st_mode
+
+
+def artifact_paths(directory):
+    """Admit the complete inventory before reading any artifact payload."""
+    if not stat.S_ISDIR(artifact_mode(directory)):
+        raise ValueError("release_artifacts_changed")
+    paths = sorted(directory.iterdir())
+    if {path.name for path in paths} != RELEASE_ARTIFACTS:
+        raise ValueError("release_artifacts_changed")
+    for path in paths:
+        if not stat.S_ISREG(artifact_mode(path)):
+            raise ValueError("release_artifacts_changed")
+    return paths
+
+
 def validate_artifacts(directory, manifest):
     observed = {
-        path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in directory.iterdir()
+        path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in artifact_paths(directory)
     }
     if observed != manifest:
         raise ValueError("release_artifacts_changed")
 
 
+def _finite_json_float(token):
+    # parse_constant handles literal Infinity/NaN only. Valid JSON numeric
+    # tokens can also overflow Python floats, including in extension fields.
+    value = float(token)
+    if not math.isfinite(value):
+        raise ValueError("nonfinite JSON number")
+    return value
+
+
+def validate_provenance(payload, revision, manifest_sha256):
+    """Bind local build declarations, revision and compared source manifest."""
+
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("release_provenance_invalid")
+            result[key] = value
+        return result
+
+    def reject_constant(value):
+        raise ValueError("release_provenance_invalid")
+
+    try:
+        provenance = json.loads(
+            payload.decode("utf-8"),
+            object_pairs_hook=unique_object,
+            parse_constant=reject_constant,
+            parse_float=_finite_json_float,
+        )
+    except (ValueError, RecursionError):
+        raise ValueError("release_provenance_invalid") from None
+    if (
+        not isinstance(provenance, dict)
+        or provenance.get("source_revision") != revision
+        or provenance.get("source_manifest_sha256") != manifest_sha256
+        or provenance.get("builder") != "scripts/release.py"
+        or provenance.get("evidence") != "local unsigned candidate; not hosted attestation"
+        or provenance.get("runtime_dependencies") != "Python 3.9+ standard library"
+    ):
+        raise ValueError("release_provenance_invalid")
+    return provenance
+
+
+def validate_provenance_sources(provenance, manifest):
+    """Bind model and dataset claims to the independently verified source inventory."""
+    model = "aethron/models/rules.json"
+    data_manifests = {
+        name: digest for name, digest in manifest.items() if name.endswith("freeze.json")
+    }
+    if (
+        model not in manifest
+        or provenance.get("model_sha256") != manifest[model]
+        or provenance.get("data_manifests") != data_manifests
+    ):
+        raise ValueError("release_provenance_invalid")
+
+
+def validate_sbom(payload):
+    """Check local release declarations, not full CycloneDX conformance or rights."""
+
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("release_sbom_invalid")
+            result[key] = value
+        return result
+
+    def reject_constant(value):
+        raise ValueError("release_sbom_invalid")
+
+    try:
+        bom = json.loads(
+            payload.decode("utf-8"),
+            object_pairs_hook=unique_object,
+            parse_constant=reject_constant,
+            parse_float=_finite_json_float,
+        )
+    except (ValueError, RecursionError):
+        raise ValueError("release_sbom_invalid") from None
+    if (
+        not isinstance(bom, dict)
+        or bom.get("bomFormat") != "CycloneDX"
+        or bom.get("specVersion") != "1.6"
+        or type(bom.get("version")) is not int
+        or bom["version"] != 1
+        or not isinstance(bom.get("metadata"), dict)
+        or not isinstance(bom["metadata"].get("component"), dict)
+    ):
+        raise ValueError("release_sbom_invalid")
+    component = bom["metadata"]["component"]
+    if (
+        component.get("type") != "application"
+        or component.get("name") != "aethron"
+        or component.get("version") != "0.2.0"
+        or component.get("licenses") != [{"license": {"id": "GPL-3.0-only"}}]
+    ):
+        raise ValueError("release_sbom_invalid")
+    # Equal builds can both omit or mislabel third-party declarations. Check
+    # the release writer's inventory independently; this is not a full schema
+    # validator or an independent determination of redistribution rights.
+    expected = {
+        "Amazon AOT derived25-frame evaluation excerpt": (
+            "data",
+            "2026-10-08",
+            [{"license": {"id": "CDLA-Permissive-1.0"}}],
+        ),
+        "NASA public-domain and CC0 RGB smoke photographs": (
+            "data",
+            "scikit-image-v0.25.2",
+            [{"license": {"name": "Public domain / CC0-1.0; see data/rgb-smoke/README.md"}}],
+        ),
+        "Python standard library": (
+            "library",
+            "runtime-provided",
+            [{"license": {"id": "Python-2.0"}}],
+        ),
+    }
+    components = bom.get("components")
+    if not isinstance(components, list) or len(components) != len(expected):
+        raise ValueError("release_sbom_invalid")
+    seen = set()
+    for entry in components:
+        if not isinstance(entry, dict):
+            raise ValueError("release_sbom_invalid")
+        name = entry.get("name")
+        if (
+            not isinstance(name, str)
+            or name not in expected
+            or name in seen
+            or (entry.get("type"), entry.get("version"), entry.get("licenses")) != expected[name]
+        ):
+            raise ValueError("release_sbom_invalid")
+        seen.add(name)
+
+    # These declarations distinguish separately installed extras from the
+    # stdlib-only zipapp. Reproducible bytes alone cannot establish them.
+    if bom.get("dependencies") != []:
+        raise ValueError("release_sbom_invalid")
+    expected_properties = {
+        "aethron:optional-vision": "numpy2.3.5;opencv-python-headless4.13.0.92; separately installed, not in zipapp",
+        "aethron:optional-coreml": "onnxruntime1.30.0;flatbuffers25.12.19;protobuf7.36.2; separate macOS Apple Silicon opt-in, not bundled",
+        "aethron:optional-model-sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+    }
+    properties = bom.get("properties")
+    if not isinstance(properties, list) or len(properties) != len(expected_properties):
+        raise ValueError("release_sbom_invalid")
+    seen = set()
+    for entry in properties:
+        if not isinstance(entry, dict):
+            raise ValueError("release_sbom_invalid")
+        name = entry.get("name")
+        if (
+            not isinstance(name, str)
+            or name not in expected_properties
+            or name in seen
+            or entry != {"name": name, "value": expected_properties[name]}
+        ):
+            raise ValueError("release_sbom_invalid")
+        seen.add(name)
+
+
+def validate_checksums(payload, manifest):
+    """Require the builder's canonical checksum inventory for the compared bytes."""
+    expected = "".join(
+        f"{manifest[name]}  {name}\n" for name in sorted(RELEASE_ARTIFACTS - {"SHA256SUMS"})
+    ).encode("utf-8")
+    if payload != expected:
+        raise ValueError("release_checksums_invalid")
+
+
+def _validate_gzip_metadata(payload):
+    """Check every member's normalized wrapper without retaining decoded bytes."""
+    offset = 0
+    while offset < len(payload):
+        # The writer pins DEFLATE, no optional fields/flags, mtime zero, maximum
+        # compression hint and OS=unknown. GzipFile ignores most of these fields,
+        # including filenames/comments that are outside the source manifest.
+        if payload[offset : offset + 10] != b"\x1f\x8b\x08\x00\x00\x00\x00\x00\x02\xff":
+            raise ValueError("invalid gzip metadata")
+        decoder = zlib.decompressobj(wbits=31)
+        while not decoder.eof:
+            chunk = payload[offset : offset + 65536]
+            decoded = decoder.decompress(chunk, max_length=1024 * 1024)
+            remaining = decoder.unused_data if decoder.eof else decoder.unconsumed_tail
+            consumed = len(chunk) - len(remaining)
+            offset += consumed
+            if not consumed and not decoded and not decoder.eof:
+                raise ValueError("incomplete gzip member")
+        # Preserve gzip's existing acceptance of zero padding between/after
+        # members. Find subsequent headers from DEFLATE EOF, never magic search.
+        while offset < len(payload) and payload[offset] == 0:
+            offset += 1
+
+
+def validate_source_archive(payload, manifest_payload):
+    """Inspect the compared TAR bytes without extracting files or following links."""
+    if __package__:
+        from .release import _reject_source_case_aliases, _source_name
+    else:
+        from release import _reject_source_case_aliases, _source_name
+
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("duplicate manifest entry")
+            result[key] = value
+        return result
+
+    try:
+        manifest = json.loads(manifest_payload.decode("utf-8"), object_pairs_hook=unique_object)
+        if not isinstance(manifest, dict) or not manifest:
+            raise ValueError("invalid manifest")
+        for name, digest in manifest.items():
+            # Use the builder's path admission on every validation host too.
+            _source_name(name.encode("utf-8"))
+            if (
+                not isinstance(digest, str)
+                or len(digest) != 64
+                or any(char not in "0123456789abcdef" for char in digest)
+            ):
+                raise ValueError("invalid manifest entry")
+        _reject_source_case_aliases(manifest)
+        # As with wheel destinations, each file's ancestors must be directories.
+        # Hash agreement alone admits e.g. both "source" and "source/file.py",
+        # which cannot coexist after extraction. Check the complete inventory
+        # before decompressing, independent of manifest or TAR member order.
+        for name in manifest:
+            parts = name.split("/")
+            if any("/".join(parts[:end]) in manifest for end in range(1, len(parts))):
+                raise ValueError("conflicting source paths")
+        expected = {"aethron-0.2.0/" + name: digest for name, digest in manifest.items()}
+        seen = set()
+        end_offset = 0
+        _validate_gzip_metadata(payload)
+        with gzip.GzipFile(fileobj=io.BytesIO(payload), mode="rb") as compressed:
+            with tarfile.open(
+                fileobj=compressed, mode="r:", encoding="utf-8", errors="strict"
+            ) as archive:
+                for member in archive:
+                    if not member.isfile() or member.name not in expected or member.name in seen:
+                        raise ValueError("invalid archive member")
+                    # Content hashes do not cover extraction permissions/ownership.
+                    # Enforce the existing release writer's normalized metadata.
+                    if (
+                        member.mode,
+                        member.uid,
+                        member.gid,
+                        member.uname,
+                        member.gname,
+                        member.mtime,
+                    ) != (0o644, 0, 0, "", "", 0):
+                        raise ValueError("invalid archive metadata")
+                    # tarfile silently consumes PAX/GNU extension records and
+                    # ignores unused header fields. Admit exactly one normalized
+                    # USTAR header per member, as emitted by the release writer.
+                    # Build it from admitted fields, not parsed auxiliary data.
+                    header = tarfile.TarInfo(member.name)
+                    header.size = member.size
+                    header.mode = 0o644
+                    header.mtime = 0
+                    compressed.seek(end_offset)
+                    if member.offset_data != end_offset + tarfile.BLOCKSIZE or compressed.read(
+                        tarfile.BLOCKSIZE
+                    ) != header.tobuf(tarfile.USTAR_FORMAT, encoding="utf-8", errors="strict"):
+                        raise ValueError("invalid archive header")
+                    seen.add(member.name)
+                    digest = hashlib.sha256()
+                    with archive.extractfile(member) as stream:
+                        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                            digest.update(chunk)
+                    if digest.hexdigest() != expected[member.name]:
+                        raise ValueError("archive content mismatch")
+                    # Member hashes exclude block padding, and tarfile skips it.
+                    # Require the zero fill emitted by the existing USTAR writer.
+                    data_end = member.offset_data + member.size
+                    padding_size = -member.size % tarfile.BLOCKSIZE
+                    compressed.seek(data_end)
+                    if compressed.read(padding_size) != b"\x00" * padding_size:
+                        raise ValueError("invalid archive padding")
+                    end_offset = data_end + padding_size
+            # tarfile tolerates EOF and some malformed headers after members.
+            # Recheck from the last data block, including the first end marker
+            # already consumed by iteration, and require both complete zero blocks.
+            compressed.seek(end_offset)
+            if compressed.read(2 * tarfile.BLOCKSIZE) != b"\x00" * (2 * tarfile.BLOCKSIZE):
+                raise ValueError("invalid archive end marker")
+            # TAR iteration stops at its end marker, before gzip necessarily checks
+            # the CRC/size trailer. Drain through EOF, including subsequent members.
+            # Only zero padding may follow: a later TAR or arbitrary payload must
+            # not escape the manifest inventory checked above.
+            for chunk in iter(lambda: compressed.read(1024 * 1024), b""):
+                if chunk.strip(b"\x00"):
+                    raise ValueError("trailing archive content")
+        if seen != expected.keys():
+            raise ValueError("incomplete archive")
+        return manifest
+    except (ValueError, RecursionError, tarfile.TarError, OSError, EOFError, zlib.error):
+        raise ValueError("release_source_archive_invalid") from None
+
+
+def validate_zipapp(payload, manifest):
+    """Bind every executable ZIP member to the already validated source manifest."""
+    expected = {name: digest for name, digest in manifest.items() if name.startswith("aethron/")}
+    try:
+        for name in ("LICENSE", "NOTICE"):
+            expected[name] = manifest[name]
+        expected["__main__.py"] = hashlib.sha256(
+            b"from aethron.__main__ import main\nraise SystemExit(main())\n"
+        ).hexdigest()
+        seen = set()
+        with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+            members = archive.infolist()
+            # ZipFile also accepts a ZIP appended to another file and ignores
+            # trailing bytes. Our writer emits a standalone, comment-free ZIP:
+            # first local header at zero, fixed 22-byte end record at EOF.
+            if (
+                not members
+                or min(member.header_offset for member in members) != 0
+                or archive.comment
+                or payload[-22:-18] != b"PK\x05\x06"
+                or payload[-2:] != b"\x00\x00"
+            ):
+                raise ValueError("invalid ZIP envelope")
+            # ZipFile can ignore disk/count fields in the end record. Bind the
+            # classic single-disk summary emitted by our writer to the directory
+            # actually read, including its byte extent and absolute offset.
+            if struct.unpack("<4s4H2IH", payload[-22:]) != (
+                b"PK\x05\x06",
+                0,
+                0,
+                len(members),
+                len(members),
+                len(payload) - 22 - archive.start_dir,
+                archive.start_dir,
+                0,
+            ):
+                raise ValueError("conflicting ZIP directory summary")
+            offset = 0
+            for member in sorted(members, key=lambda item: item.header_offset):
+                if (
+                    member.filename not in expected
+                    or member.filename in seen
+                    or member.orig_filename != member.filename
+                    or member.is_dir()
+                    or member.compress_type != zipfile.ZIP_STORED
+                    or member.compress_size != member.file_size
+                    # Stored members may use UTF-8 names, but no other ZIP
+                    # features or disk references outside this standalone file.
+                    or member.flag_bits & ~0x800
+                    or member.volume != 0
+                    or member.extra
+                    or member.comment
+                ):
+                    raise ValueError("invalid ZIP member")
+                # The seekable release writer emits contiguous local records,
+                # without data descriptors. A central-directory inventory alone
+                # can hide unlisted records or bytes between declared members.
+                header = payload[offset : offset + 30]
+                if member.header_offset != offset or len(header) != 30:
+                    raise ValueError("unlisted ZIP content")
+                # ZipFile reads several fields only from the central directory.
+                # Our stored, descriptor-free writer must give local readers the
+                # same CRC, sizes, flags, method, version and normalized timestamp.
+                local = struct.unpack("<4s5H3I2H", header)
+                if local[:9] != (
+                    b"PK\x03\x04",
+                    member.extract_version | (member.reserved << 8),
+                    member.flag_bits,
+                    member.compress_type,
+                    0,
+                    ((2026 - 1980) << 9) | (1 << 5) | 1,
+                    member.CRC,
+                    member.compress_size,
+                    member.file_size,
+                ):
+                    raise ValueError("conflicting ZIP headers")
+                name_size = int.from_bytes(header[26:28], "little")
+                extra_size = int.from_bytes(header[28:30], "little")
+                # The release writer emits no extension fields or comments.
+                # Local extras are independent of central extras and are not
+                # included in the manifest-bound member content read below.
+                if extra_size:
+                    raise ValueError("unverified ZIP extension")
+                offset += 30 + name_size + extra_size + member.compress_size
+                # Match the release writer's portable metadata as well as contents;
+                # equal builds can share incorrect permissions or host defaults.
+                # Agreement alone does not establish the writer's format: both
+                # headers can claim another extraction version/reserved byte.
+                # Internal attributes also carry text/record flags outside hashes.
+                if (
+                    member.create_system,
+                    member.create_version,
+                    member.extract_version,
+                    member.reserved,
+                    member.internal_attr,
+                    member.external_attr,
+                    member.date_time,
+                ) != (
+                    3,
+                    20,
+                    20,
+                    0,
+                    0,
+                    0o644 << 16,
+                    (2026, 1, 1, 0, 0, 0),
+                ):
+                    raise ValueError("invalid ZIP metadata")
+                seen.add(member.filename)
+                digest = hashlib.sha256()
+                with archive.open(member) as stream:
+                    for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                        digest.update(chunk)
+                if digest.hexdigest() != expected[member.filename]:
+                    raise ValueError("ZIP content mismatch")
+            if offset != archive.start_dir:
+                raise ValueError("unlisted ZIP content")
+        if seen != expected.keys():
+            raise ValueError("incomplete ZIP")
+    except (ValueError, KeyError, zipfile.BadZipFile, OSError, EOFError, RuntimeError):
+        raise ValueError("release_zipapp_invalid") from None
+
+
+def validate_source_manifest(clone, revision, manifest):
+    """Compare the build's inventory and hashes with the original committed blobs."""
+    if __package__:
+        from .release import committed_blobs
+    else:
+        from release import committed_blobs
+
+    expected = {
+        name: hashlib.sha256(data).hexdigest()
+        for name, data in committed_blobs(revision, root=clone).items()
+    }
+    if manifest != expected:
+        raise ValueError("release_source_manifest_invalid")
+
+
+def validate_source(clone, revision):
+    """Bind sequential checks to one clean revision, excluding ignored build outputs."""
+    _require_git_context()
+    # Git follows a replaced checkout root and can still report a clean tree.
+    # Admit the clone itself before any Git child or later verification stage.
+    # Reuse artifact lstat/reparse checks; this is a stage-boundary check, not
+    # protection against concurrent replacement or links above the workspace.
+    if not stat.S_ISDIR(artifact_mode(clone)):
+        raise ValueError("reproduction_source_changed")
+    # These index flags suppress working-tree checks even when status is clean.
+    # Include fsmonitor-valid (-f), which -v alone does not expose.
+    # A complete reproduction clone must keep every tracked file observable.
+    entries = _git_output(["git", "--no-replace-objects", "ls-files", "-v", "-f", "-z"], cwd=clone)
+    if any(entry and not entry.startswith(b"H ") for entry in entries.split(b"\0")):
+        raise ValueError("reproduction_source_changed")
+    current = _git_output(
+        ["git", "--no-replace-objects", "rev-parse", "HEAD"], cwd=clone, text=True
+    ).strip()
+    # Compare the original tree named by evidence, as the release builder does.
+    dirty = _git_output(
+        ["git", "--no-replace-objects", "status", "--porcelain", "--untracked-files=normal"],
+        cwd=clone,
+    )
+    if current != revision or dirty:
+        raise ValueError("reproduction_source_changed")
+
+
+def _remove_readonly_file(function, path, exc_info):
+    """Retry Windows read-only file removal; propagate all other cleanup failures."""
+    error = exc_info[1]
+    if function not in (os.unlink, os.remove) or not isinstance(error, PermissionError):
+        raise error
+    mode = os.lstat(path).st_mode
+    if not stat.S_ISREG(mode) or mode & stat.S_IWUSR:
+        raise error
+    os.chmod(path, mode | stat.S_IWUSR)
+    function(path)
+
+
+@contextlib.contextmanager
+def reproduction_workspace(*, prefix="aethron-clean-", dir=None):
+    """Retain failed runs for diagnosis; only successful runs own automatic cleanup."""
+    temporary = tempfile.mkdtemp(prefix=prefix, dir=dir)
+    try:
+        yield temporary
+    except BaseException:
+        # Includes evaluation SystemExit and operator interruption.
+        print(f"reproduction evidence retained at: {temporary}", file=sys.stderr)
+        raise
+    else:
+        # onerror keeps the callback compatible with the supported Python 3.9.
+        shutil.rmtree(temporary, onerror=_remove_readonly_file)
+
+
 def run():
-    with tempfile.TemporaryDirectory(prefix="aethron-clean-") as temporary:
+    _require_git_context()
+    # Match edge reproduction: user-site startup hooks can exit successfully
+    # before verification runs. Retain the selected interpreter's tooling while
+    # disabling user-site hooks and caller import overrides in child processes.
+    env = dict(os.environ, PYTHONNOUSERSITE="1")
+    env.pop("PYTHONHOME", None)
+    env.pop("PYTHONPATH", None)
+    with reproduction_workspace() as temporary:
         root = Path(temporary)
         clone = root / "source"
-        call(["git", "clone", "--no-local", str(ROOT), str(clone)], ROOT, capture_output=True)
+        call(
+            ["git", "clone", "--no-local", str(ROOT), str(clone)],
+            ROOT,
+            capture_output=True,
+            timeout=GIT_CLONE_TIMEOUT_SECONDS,
+        )
+        revision = _git_output(
+            ["git", "--no-replace-objects", "rev-parse", "HEAD"], cwd=clone, text=True
+        ).strip()
+        validate_source(clone, revision)
         # Quickstart commands as documented, with the active Python interpreter.
-        call([sys.executable, "scripts/verify.py"], clone)
+        call(
+            [sys.executable, "scripts/verify.py"],
+            clone,
+            env=env,
+            timeout=VERIFICATION_TIMEOUT_SECONDS,
+        )
+        # Match edge reproduction: do not let a later child run against changed
+        # source or restore it before a batched check. These are stage boundaries,
+        # not protection against changes made and restored inside one child.
+        validate_source(clone, revision)
         evaluation = subprocess.run(
             [sys.executable, "scripts/temporal_evaluate.py", "--out", str(root / "evaluation")],
             cwd=clone,
             check=False,
+            env=env,
+            timeout=VERIFICATION_TIMEOUT_SECONDS,
         )
+        validate_source(clone, revision)
         with (root / "demo.jsonl").open("w") as stream:
-            call([sys.executable, "-m", "aethron", "demo"], clone, stdout=stream)
+            call(
+                [sys.executable, "-m", "aethron", "demo"],
+                clone,
+                stdout=stream,
+                env=env,
+                timeout=CONSUMER_TIMEOUT_SECONDS,
+            )
+        validate_source(clone, revision)
         with (root / "result.json").open("w") as stream:
             call(
                 [sys.executable, "-m", "aethron", "evaluate", "examples/person-blackout.json"],
                 clone,
                 stdout=stream,
+                env=env,
+                timeout=CONSUMER_TIMEOUT_SECONDS,
             )
+        validate_source(clone, revision)
         with (root / "view.svg").open("w") as stream:
             call(
                 [
@@ -60,7 +671,10 @@ def run():
                 ],
                 clone,
                 stdout=stream,
+                env=env,
+                timeout=CONSUMER_TIMEOUT_SECONDS,
             )
+        validate_source(clone, revision)
         probe = clone / "aethron" / "untracked_release_probe.py"
         probe.write_text("# An untracked runtime change must block release.\n", encoding="utf-8")
         refused = subprocess.run(
@@ -68,18 +682,55 @@ def run():
             cwd=clone,
             capture_output=True,
             check=False,
+            env=env,
+            timeout=RELEASE_TIMEOUT_SECONDS,
         )
         assert refused.returncode != 0 and b"clean committed source" in refused.stderr
         probe.unlink()
-        call([sys.executable, "scripts/release.py", str(root / "a")], clone)
-        call([sys.executable, "scripts/release.py", str(root / "b")], clone)
+        validate_source(clone, revision)
+        call(
+            [sys.executable, "scripts/release.py", str(root / "a")],
+            clone,
+            env=env,
+            timeout=RELEASE_TIMEOUT_SECONDS,
+        )
+        validate_source(clone, revision)
+        call(
+            [sys.executable, "scripts/release.py", str(root / "b")],
+            clone,
+            env=env,
+            timeout=RELEASE_TIMEOUT_SECONDS,
+        )
+        validate_source(clone, revision)
         a, b = root / "a", root / "b"
-        assert sorted(p.name for p in a.iterdir()) == sorted(p.name for p in b.iterdir())
+        paths_a, paths_b = artifact_paths(a), artifact_paths(b)
+        assert [p.name for p in paths_a] == [p.name for p in paths_b]
         artifact_manifest = {}
-        for p in a.iterdir():
+        for p in paths_a:
             compared = p.read_bytes()
             assert compared == (b / p.name).read_bytes(), p.name
+            if p.name == "provenance.json":
+                provenance = compared
+            if p.name == "SHA256SUMS":
+                checksums = compared
+            if p.name == "source-manifest.json":
+                source_manifest = compared
+            if p.name == "aethron-0.2.0-source.tar.gz":
+                source_archive = compared
+            if p.name == "aethron.pyz":
+                zipapp = compared
+            if p.name == "sbom.cdx.json":
+                sbom = compared
             artifact_manifest[p.name] = hashlib.sha256(compared).hexdigest()
+        provenance = validate_provenance(
+            provenance, revision, artifact_manifest["source-manifest.json"]
+        )
+        validate_checksums(checksums, artifact_manifest)
+        manifest = validate_source_archive(source_archive, source_manifest)
+        validate_source_manifest(clone, revision, manifest)
+        validate_provenance_sources(provenance, manifest)
+        validate_zipapp(zipapp, manifest)
+        validate_sbom(sbom)
         call(
             [
                 sys.executable,
@@ -90,12 +741,13 @@ def run():
             ],
             root,
             stdout=subprocess.DEVNULL,
+            env=env,
+            timeout=CONSUMER_TIMEOUT_SECONDS,
         )
         for directory in (a, b):
             validate_artifacts(directory, artifact_manifest)
+        validate_source(clone, revision)
         # zipimport consumer from outside the checkout, no PYTHONPATH dependency.
-        env = dict(os.environ)
-        env.pop("PYTHONPATH", None)
         code = 'import sys;sys.path.insert(0,sys.argv[1]);from aethron import evaluate;from pathlib import Path;r=evaluate(Path(sys.argv[2]).read_bytes());assert r["recommendation"]["action"]=="STOP"'
         call(
             [
@@ -108,13 +760,13 @@ def run():
             ],
             root,
             env=env,
+            timeout=CONSUMER_TIMEOUT_SECONDS,
         )
         for directory in (a, b):
             validate_artifacts(directory, artifact_manifest)
+        validate_source(clone, revision)
         result = {
-            "source_revision": subprocess.check_output(
-                ["git", "rev-parse", "HEAD"], cwd=clone, text=True
-            ).strip(),
+            "source_revision": revision,
             "clean_clone": True,
             "evaluation_gate_passed": evaluation.returncode == 0,
             "quickstart": evaluation.returncode == 0,

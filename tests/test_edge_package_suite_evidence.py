@@ -95,3 +95,41 @@ class PackageSuiteEvidence(unittest.TestCase):
         )
         self.assertIsInstance(error, RuntimeError)
         self.assertEqual(str(error), "installed_suite_accepted")
+
+    def test_discovery_and_suite_exit_cannot_qualify(self):
+        for code in (None, 0, 7):
+            exit_call = f"sys.exit({code!r})"
+            fixtures = {
+                "import": f"import sys\n{exit_call}\n",
+                "load_tests": "import sys\ndef load_tests(loader, tests, pattern):\n"
+                f" {exit_call}\n",
+                "count": "import sys, unittest\nclass Case(unittest.TestCase):\n"
+                " def test_one(self): pass\nclass Suite(unittest.TestSuite):\n"
+                f" def countTestCases(self): {exit_call}\n"
+                "def load_tests(loader, tests, pattern):\n"
+                " return Suite([Case('test_one')])\n",
+                "run": "import sys, unittest\nclass Suite(unittest.TestSuite):\n"
+                " def countTestCases(self): return 1\n"
+                f" def run(self, result, debug=False): {exit_call}\n"
+                "def load_tests(loader, tests, pattern): return Suite()\n",
+            }
+            for phase, source in fixtures.items():
+                with self.subTest(phase=phase, code=code):
+                    error = self.probe(source)
+                    self.assertIsInstance(error, subprocess.CalledProcessError)
+                    self.assertEqual(error.returncode, 1)
+                    self.assertIn("installed_suite_incomplete", error.stderr)
+
+    def test_partial_suite_execution_cannot_qualify(self):
+        error = self.probe(
+            "import unittest\nclass Case(unittest.TestCase):\n"
+            " def test_one(self): pass\n"
+            " def test_two(self): self.fail('must not be omitted')\n"
+            "class Suite(unittest.TestSuite):\n"
+            " def run(self, result, debug=False):\n"
+            "  self._tests[0](result)\n  return result\n"
+            "def load_tests(loader, tests, pattern):\n"
+            " return Suite([Case('test_one'), Case('test_two')])\n"
+        )
+        self.assertIsInstance(error, subprocess.CalledProcessError)
+        self.assertIn("installed_suite_incomplete", error.stderr)

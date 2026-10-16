@@ -15,6 +15,16 @@ bytes and eight nesting levels, with unique object keys and integer `version: 1`
 Replay requires a nonempty UTF-8 path without NUL; paths resolve relative to the
 configuration. Invalid configuration emits only `invalid_request` and no report.
 These are local configuration admission bounds, not new sensor thresholds.
+If `doctor` cannot find the core package's installation metadata, it exits with
+status 2 and `doctor_unavailable`, without a version report or traceback. This
+does not verify package integrity or hardware readiness.
+
+Invalid CLI arguments exit with status 2 and `invalid_request` on stderr without
+echoing rejected values; use `--help` for syntax. This diagnostic boundary does
+not hide arguments from shell history, process listings or caller-side logging.
+Filesystem errors during `export-openapi` exit with status 2 and `export_failed`
+without printing output paths. A failed write can leave a partial output file;
+only a successful exit indicates a completed export.
 
 The JSONL replay CLI consumes bounded lines instead of loading the entire recording.
 `aethron_edge.protocol.replay_stream(binary_stream)` returns a complete `ReplayReport`
@@ -44,6 +54,22 @@ loaded extension against its packaged Python reference. Clock integers remain
 arbitrary precision. Native compilation does not establish exposure trust, change
 expiry bounds or qualify live capture; the live source still fails closed when
 its clock is untrusted.
+
+Recorded `file` sources resolve their address as a filesystem path and permit
+only FFmpeg's `file` protocol, including when media references a nested resource.
+Inherited `OPENCV_FFMPEG_CAPTURE_OPTIONS` cannot enable network protocols for that
+isolated decoder. Network cameras use the explicit `rtsp` source. This is a
+protocol boundary, not an operating-system filesystem sandbox: a mounted network
+filesystem remains subject to appliance provisioning policy.
+
+A failed native read from a live source invalidates its unread frame and reports
+`source_lost` without waiting for a consumer. Recorded playback preserves its
+final unread frame before EOF. Neither behavior qualifies physical capture timing
+or makes an untrusted live clock fresh evidence.
+
+Observed live decoder process exit also invalidates its unread slot, including
+crashes that cannot publish a loss marker. Recorded playback can still drain its
+final owned frame after its worker exits.
 
 Fleet health has a local, bounded library interface:
 

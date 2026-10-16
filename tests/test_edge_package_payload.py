@@ -81,6 +81,22 @@ class InstalledEdgePayload(unittest.TestCase):
                     self.assertNotIn(package + "/module.py", manifest())
                     (site / package / "extra.py").write_bytes(b"# stale\n")
                     self.assertIn(package + "/extra.py", manifest())
+                    for suffix in (".PY", ".JsOn", ".PxD"):
+                        with self.subTest(suffix=suffix):
+                            name = package + "/unexpected" + suffix
+                            path = site / name
+                            path.write_bytes(b"# unexpected source\n")
+                            self.assertEqual(
+                                manifest().get(name),
+                                hashlib.sha256(b"# unexpected source\n").hexdigest(),
+                            )
+                            path.write_bytes(b"# changed source\n")
+                            self.assertEqual(
+                                manifest().get(name),
+                                hashlib.sha256(b"# changed source\n").hexdigest(),
+                            )
+                            path.unlink()
+                            self.assertNotIn(name, manifest())
 
     def test_real_installed_console_runs_outside_checkout_and_missing_launcher_fails(self):
         with tempfile.TemporaryDirectory() as directory:

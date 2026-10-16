@@ -1,6 +1,7 @@
 """Reproducibility evidence requires complete, nonempty wheel inventories."""
 
 import importlib.util
+import os
 import subprocess
 import tempfile
 import unittest
@@ -11,23 +12,35 @@ from scripts import edge_package_check, package_check
 
 
 class PackageEvidenceInventory(unittest.TestCase):
-    def compare(self, first, second):
+    def compare(self, first, second, *, mutate=None):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "attempt"
+            read_bytes = Path.read_bytes
+            builds = 0
+
+            def checked_read(path):
+                if mutate is not None and path.suffix == ".whl":
+                    self.fail("wheel payload read before malformed inventory rejection")
+                return read_bytes(path)
 
             def fake_build(args, **kwargs):
+                nonlocal builds
                 if "build" in args:
                     destination = Path(args[args.index("--outdir") + 1])
                     destination.mkdir(exist_ok=True)
                     inventory = first if destination.name == "a" else second
                     for name, data in inventory.items():
                         (destination / name).write_bytes(data)
+                    builds += 1
+                    if mutate is not None and builds == 4:
+                        mutate(output)
                     return subprocess.CompletedProcess(args, 0)
                 raise RuntimeError("inventory_accepted")
 
             with (
                 patch.object(edge_package_check.subprocess, "run", side_effect=fake_build),
                 patch.object(package_check, "validate_source_payload"),
+                patch.object(Path, "read_bytes", checked_read),
             ):
                 try:
                     edge_package_check.run(Path(directory) / "wheelhouse", output)
@@ -35,6 +48,41 @@ class PackageEvidenceInventory(unittest.TestCase):
                     self.assertFalse((output / "result.json").exists())
                     return error
             self.fail("probe unexpectedly completed the package workflow")
+
+    def test_invalid_artifacts_reject_before_any_wheel_is_read(self):
+        inventory = {
+            "aethron-0.2.0-py3-none-any.whl": b"core",
+            "aethron_edge-0.1.0-py3-none-any.whl": b"edge",
+        }
+        mutations = ["linked_wheel", "linked_directory", "directory"]
+        if hasattr(os, "mkfifo"):
+            mutations.append("fifo")
+        for lane in ("a", "b"):
+            for name in inventory:
+                for mutation in mutations:
+                    with self.subTest(lane=lane, name=name, mutation=mutation):
+
+                        def mutate(root, lane=lane, name=name, mutation=mutation):
+                            build = root / lane
+                            wheel = build / name
+                            if mutation == "linked_directory":
+                                target = root / "external-build"
+                                build.rename(target)
+                                build.symlink_to(target, target_is_directory=True)
+                            elif mutation == "linked_wheel":
+                                target = root / "external-wheel"
+                                wheel.rename(target)
+                                wheel.symlink_to(target)
+                            else:
+                                wheel.unlink()
+                                if mutation == "directory":
+                                    wheel.mkdir()
+                                else:
+                                    os.mkfifo(wheel)
+
+                        error = self.compare(inventory, inventory, mutate=mutate)
+                        self.assertIsInstance(error, ValueError)
+                        self.assertEqual(str(error), "package_artifact_changed")
 
     def assert_inventory_rejected(self, first, second):
         error = self.compare(first, second)
