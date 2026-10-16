@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from itertools import product
 from pathlib import Path
 from unittest.mock import patch
 
@@ -17,20 +18,31 @@ class VerificationTelemetry(unittest.TestCase):
     fixture = static_checks.StaticCheckClaims.fixture
 
     def test_every_child_overrides_opt_in_without_mutating_parent(self):
-        for inherited in (None, "0", "1"):
-            with self.subTest(inherited=inherited), patch.dict(os.environ):
-                os.environ["AETHRON_TEST_ENV_SENTINEL"] = "preserved"
-                if inherited is None:
-                    os.environ.pop("ORT_DISABLE_TELEMETRY", None)
-                else:
-                    os.environ["ORT_DISABLE_TELEMETRY"] = inherited
+        for inherited, user_site in product((None, "0", "1"), (None, "", "1")):
+            # Mocked children need no host environment. Explicit states prevent
+            # the caller's user-site opt-out from masking a missing child guard.
+            environment = {
+                "AETHRON_TEST_ENV_SENTINEL": "preserved",
+                "PYTHONHOME": "foreign interpreter",
+                "PYTHONPATH": "foreign modules",
+            }
+            if inherited is not None:
+                environment["ORT_DISABLE_TELEMETRY"] = inherited
+            if user_site is not None:
+                environment["PYTHONNOUSERSITE"] = user_site
+            with (
+                self.subTest(inherited=inherited, user_site=user_site),
+                patch.dict(os.environ, environment, clear=True),
+            ):
                 before = dict(os.environ)
                 with self.fixture("value = 1"), patch.object(verify.subprocess, "run") as child:
                     verify.run()
                 self.assertEqual(child.call_count, 5)
-                expected = dict(before, ORT_DISABLE_TELEMETRY="1")
-                expected.pop("PYTHONHOME", None)
-                expected.pop("PYTHONPATH", None)
+                expected = {
+                    "AETHRON_TEST_ENV_SENTINEL": "preserved",
+                    "ORT_DISABLE_TELEMETRY": "1",
+                    "PYTHONNOUSERSITE": "1",
+                }
                 for call in child.call_args_list:
                     self.assertEqual(call.kwargs.get("env"), expected)
                     self.assertIsNot(call.kwargs["env"], os.environ)
