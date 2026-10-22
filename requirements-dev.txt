@@ -2,7 +2,7 @@ bandit==1.9.4
 boolean.py==5.0
 build==1.6.1
 CacheControl==0.14.4
-certifi==2026.7.22
+certifi==2026.10.18
 charset-normalizer==3.5.2
 coverage==7.16.2
 cyclonedx-python-lib==11.12.0
