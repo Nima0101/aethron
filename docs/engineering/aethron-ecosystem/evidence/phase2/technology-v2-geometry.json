@@ -1,0 +1,89 @@
+{
+  "audit_policy_version": 2,
+  "component": "C03_pinhole_geometry",
+  "decision": "KEEP",
+  "production_change": null,
+  "rationale": "Minimal scalar arithmetic with stable native hypot satisfies strict admission and measured 1\u201364 selected-point workload; measured scalar NumPy adds conversion/allocation overhead. Julia StaticArrays, Eigen and OpenCV remain source-reviewed alternatives, not falsely benchmarked.",
+  "constraints": {
+    "width_max": 1920,
+    "height_max": 1080,
+    "focal_length_max": 100000,
+    "depth_and_range_m_max": 500,
+    "caller_selected_points_max": 64,
+    "admission": "exact numeric types excluding bool; finite input/results; positive Z and in-image projection; bounded deprojection/range",
+    "deployment": "Linux offline, shared 6.3 GiB; no required device SDK; scalar tuple results"
+  },
+  "environment": {
+    "python": "3.13.13",
+    "numpy_probe_only": "2.3.5",
+    "new_dependencies": false,
+    "production_geometry_git_blob": "be706bfb0c333c5f021779d8df28bec15e8be295"
+  },
+  "comparison": {
+    "numpy": "2.3.5",
+    "contract_cases": 22,
+    "parity": true,
+    "naive_norm_counterexample": {
+      "input": [
+        1e-300,
+        0,
+        0
+      ],
+      "hypot": 1e-300,
+      "numpy_norm": 0.0
+    },
+    "batches": {
+      "1": {
+        "production": {
+          "cpu_p50_ms": 0.00521675,
+          "wall_p50_ms": 0.00527975,
+          "traced_peak_bytes": 576
+        },
+        "numpy": {
+          "cpu_p50_ms": 0.04152625,
+          "wall_p50_ms": 0.0416953,
+          "traced_peak_bytes": 1088
+        }
+      },
+      "64": {
+        "production": {
+          "cpu_p50_ms": 0.3082509,
+          "wall_p50_ms": 0.32900075,
+          "traced_peak_bytes": 6368
+        },
+        "numpy": {
+          "cpu_p50_ms": 2.613053,
+          "wall_p50_ms": 9.20357545,
+          "traced_peak_bytes": 10320
+        }
+      }
+    }
+  },
+  "checks": {
+    "focused": "28 packet/geometry/registration tests passed, including five new numeric tests.",
+    "installed_wheel": "5 numeric tests passed with isolated Python and installed edge wheel; production geometry bytes unchanged.",
+    "candidate_red": "Naive sqrt(sum(x*x)) mutation fails two tiny-vector subcases. Existing production did not fail.",
+    "lint": "Ruff lint and final format check passed after fixing probe loop-variable binding warning.",
+    "security": "Bandit production geometry.py: zero findings."
+  },
+  "limits": [
+    "Scalar API comparison only, not vectorized NumPy or fused native geometry.",
+    "Julia StaticArrays, Eigen and OpenCV are source comparisons with no measured performance ranking.",
+    "Warm timing includes validation/result conversion, excludes imports and camera construction; tracing separate; not RSS or hard deadline qualification.",
+    "Counterexample candidate corrected to numpy.hypot.reduce before performance comparison.",
+    "Temporary host sandbox fork exhaustion prevented initial commands; recovered without changing permissions or other lanes.",
+    "Historic T10 latency and signed radar startup failures remain uncleared."
+  ],
+  "sha256": {
+    "integrations/edge/aethron_edge/sensors/geometry.py": "24dbd7e248990f426d985d05e9add08615621381f4391209a85682102f50d02b",
+    "tests/integration/test_sensor_geometry_numeric.py": "cf5e7cf076878f9207141d251e34c53bcdc85649cc772688e6acecd2f1c3dc2d",
+    "scripts/probes/sensor_geometry_audit/compare.py": "68c5d27f8e9688ec344a4d9c72b1936c76ca4944032414ebf151557ed3d90e57"
+  },
+  "primary_sources": [
+    "https://docs.python.org/3/library/math.html#math.hypot",
+    "https://numpy.org/doc/stable/reference/generated/numpy.matmul.html",
+    "https://juliaarrays.github.io/StaticArrays.jl/stable/",
+    "https://libeigen.gitlab.io/eigen/docs-nightly/group__TutorialMatrixClass.html",
+    "https://docs.opencv.org/4.13.0/d9/d0c/group__calib3d.html"
+  ]
+}

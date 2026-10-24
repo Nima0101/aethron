@@ -1,0 +1,35 @@
+{
+  "review_order_version": 3,
+  "component": "C03_comparison_tracing_ownership",
+  "decision": "FIX",
+  "full_component_review_complete": false,
+  "reviewed_head": "5039a44b2eb1f1bc71990204cb28da8640f4cffb",
+  "production_geometry_changed": false,
+  "checks": {
+    "red_assertion_failures": 4,
+    "red_execution_errors": 0,
+    "green_methods": 7,
+    "new_methods": 4,
+    "optimization_subcases": 4,
+    "ruff": "PASS",
+    "format": "PASS after formatting",
+    "bandit": "Two unchanged LOW B101 findings",
+    "candidate_outcome_and_run_ast": "UNCHANGED"
+  },
+  "limitations": [
+    "New measurement-path tests substitute inert cameras; no geometry performance matrix.",
+    "Admission and warm-up parity only; individual measured outputs are not compared.",
+    "Exclusive process tracing ownership assumed; no thread synchronization.",
+    "Traced memory is not total process or native memory.",
+    "Historical reports unchanged; no runtime KEEP/MIGRATE decision."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3/library/tracemalloc.html"
+  ],
+  "sha256": {
+    "scripts/probes/sensor_geometry_audit/compare.py": "96923046db86f1e99a586debbd06f7dab53d97dd918fbb8479b3b63f13f79dff",
+    "scripts/probes/sensor_geometry_audit/README.md": "27d30035215fdd7f66258a04d85e18b0d81e61e7e5bcfc0e8136c6bcae352815",
+    "tests/integration/test_sensor_geometry_audit_modes.py": "8ca369d7d569cf0550f44ff8d9cd58d0074e6045a64d51a95fba7f04b62b54e8",
+    "docs/engineering/aethron-ecosystem/P21-GEOMETRY-TRACING-EVIDENCE-V3.md": "dbaed8959e2619b0cbed0df1bf31ae1377cdb165b68dbf204708ff153719b205"
+  }
+}
