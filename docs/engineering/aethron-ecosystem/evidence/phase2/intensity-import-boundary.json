@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "scope": "P2.1 offline intensity import boundary",
+  "change": "Import recording helpers directly from the merged recording_io module rather than loading provider and provisioning modules. No provider/runtime implementation changes.",
+  "dependency": {
+    "protected_main_observed": "a35feafd0ec4c149fde7ae6ebd955f596bc10497",
+    "recording_io_git_blob": "42527db1aa7d4505b7404256345c9081f9124d97",
+    "verification": "Local helper blob matches the GitHub main content API."
+  },
+  "red": {
+    "tests": 1,
+    "failures": 1,
+    "unexpected_modules": [
+      "aethron_edge.sensors.provider",
+      "aethron_edge.sensors.provisioning"
+    ]
+  },
+  "source": {
+    "tests": 20,
+    "passed": true,
+    "seconds": 56.139
+  },
+  "installed": {
+    "tests": 3,
+    "passed": true,
+    "seconds": 21.795,
+    "isolated_python": true,
+    "wheels": {
+      "aethron_edge-0.1.0-py3-none-any.whl": "c9c811073d31943bf82ec18195c3ded253b61c23fccd674a63b5b737461c17e3"
+    }
+  },
+  "checks": {
+    "ruff": "passed",
+    "format": "passed",
+    "bandit": "passed",
+    "review": "Same bounded reader and replay helpers; no changed validation, output or evidence semantics. Fresh subprocess test avoids fixture import contamination."
+  },
+  "limits": [
+    "No latency or physical qualification claimed.",
+    "No new dependency, runtime or toolchain.",
+    "Full hosted qualification remains deferred; no local VM/Docker/full suite.",
+    "Earlier T10 and radar startup failures remain recorded; PR #18 Docker Hub failure was followed by a successful rerun at the same head."
+  ],
+  "logs": {
+    "red.log": "f16ae74b528c5474644786995525bb6d31d4eef4ff00f03a2d6544fa1064e875",
+    "green.log": "1ae7d870ffac509b9f5f1bd9419240a4db45ce93a0d0737a966d2d7686fbd00c",
+    "installed-tests.log": "b2316d8bfbe2f1149973450836a8315cc1e113c720facac5e4783b86ede72914"
+  }
+}
