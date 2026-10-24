@@ -1,0 +1,44 @@
+{
+  "scope": "P1.3 worker-death admission and stalled RTSP negotiation; live backend selection incomplete",
+  "decision": "Retain the existing controller for the tested worker-death fix; neither native backend has a complete live transport/queue/parity proof. Official GStreamer 1.28.7 was provisioned in isolation despite not being installed; no incumbent-winner claim.",
+  "official_sources": [
+    "https://gstreamer.freedesktop.org/download/",
+    "https://gstreamer.freedesktop.org/documentation/rtsp/rtspsrc.html",
+    "https://gstreamer.freedesktop.org/documentation/app/appsink.html",
+    "https://docs.opencv.org/4.13.0/d4/d15/group__videoio__flags__base.html"
+  ],
+  "source_sha256": {
+    "integrations/edge/aethron_edge/sources/base.py": "08e1c30744c10552e2a6a580cd5d9f9a5d6a4a4b4dc7606ad8f57b42a8898112",
+    "tests/integration/test_capture_worker_exit.py": "cde2aa59e03daa63d580ad716fa043d152e24ff474977d3995e6d0407e226a55",
+    "scripts/edge_rtsp_stall_profile.py": "67577525757bffee83b03dd0d7f724f03830e8e6119f1f388e7bb9b0ac4d4f5c",
+    "integrations/edge/requirements-rtsp-probe.lock": "54e347b6a99552e5905a6543d8fa5aead39002611b46590b0d26b41a312ba485"
+  },
+  "regression": {
+    "red": "dead spawned live decoder returned unread FrameEnvelope after termination; recorded control passed",
+    "green": "11 focused and 11 offline-installed checks passed; live worker death returns source_lost, recorded final-frame drain unchanged"
+  },
+  "opencv_stall": {
+    "backend": "opencv",
+    "cancel_ns": 244197875,
+    "connect_ns": 7471244666,
+    "published_frames": 0,
+    "qualified": false,
+    "scope": "stalled loopback RTSP negotiation",
+    "worker_reaped": true
+  },
+  "negative_results": [
+    "Initial OpenCV and GStreamer probes failed to connect within unchanged20-second probe limit.",
+    "Warm OpenCV retry connected and cancelled; this is not a worst-case latency guarantee.",
+    "GStreamer remained inside Gst.init at20 seconds both with full discovery and scoped headless plugins. Full SDK diagnostic also reported Metal/Vulkan unavailable and Python plugin missing libpython3.13.dylib; root cause of delay not established.",
+    "Unbounded diagnostic was interrupted and exited130; scanner and diagnostic processes had exited before cleanup signals. No shared VM service touched."
+  ],
+  "installed": {
+    "core_wheel_sha256": "daeacafc7e70f20bbd0b446f448203b67b0b12ee56e6b3afca6b248d031c9a93",
+    "edge_wheel_sha256": "947b0147c4b9925e022c9b3b0c4da67a1cd69bf80e3bfaa8f5db702ea8f57125",
+    "source_bytes_match": true,
+    "outside_checkout": true,
+    "offline_install": true,
+    "temporary_consumer_removed": true
+  },
+  "hosted": "Pinned Linux comparison added; pending, not claimed passing. No GStreamer runtime dependency or hardware/transport qualification."
+}
