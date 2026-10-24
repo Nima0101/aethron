@@ -1,0 +1,232 @@
+{
+  "audit_policy_version": 2,
+  "component": "C02_binary_replay",
+  "decision": "KEEP",
+  "change": "Return validated complete exact bytes reads directly; retain bounded accumulation for fragmented reads and bytes subclasses.",
+  "constraints": {
+    "header_bytes": 16384,
+    "payload_bytes_max": 8388608,
+    "cloud_points_max": 4096,
+    "integer_max": 9223372036854775807,
+    "interface": "read(n), including short reads; no seek/readinto required",
+    "source": "recorded only; one-source stream; per-record corruption checksum is not authentication",
+    "versions": "v1 fixed layout; v2 cloud format fixed, dimensions/padding variable",
+    "deployment": "Linux offline, 6.3 GiB shared RAM; no device SDK or network service"
+  },
+  "candidate_decisions": {
+    "python_native_io_json": "Selected: exact integer and decoded duplicate checks; direct immutable-read ownership removes two payload copies without a second stream protocol.",
+    "preallocated_readinto": "Measured fragmented CPU advantage retained; optional interface plus final immutable copy; not selected for file-oriented deployment.",
+    "node_buffer_json": "Viable bounded binary I/O. Stock JSON.parse fails four admission vectors; exact-number/token-level duplicate parser needed. No blanket JavaScript infeasibility claim.",
+    "csharp_pipelines_utf8jsonreader": "Credible segmented-buffer and exact Int64 candidate; source-only. Flow control/multiplexing not required; duplicate/closed schema and immutable result ownership remain explicit responsibilities.",
+    "java_datainput_jackson": "Credible exact-read plus duplicate-aware streaming parser; source-only, not benchmarked.",
+    "mcap": "Different robotics container; cannot directly replace frozen v1/v2 reader. No new recording conversion requirement."
+  },
+  "before": {
+    "payload_bytes": 1048576,
+    "samples": 15,
+    "cases": {
+      "memory": {
+        "baseline": {
+          "cpu_p50_ms": 2.326268,
+          "wall_p50_ms": 2.644135,
+          "traced_peak_bytes": 2097270
+        },
+        "direct": {
+          "cpu_p50_ms": 0.018791,
+          "wall_p50_ms": 0.020657,
+          "traced_peak_bytes": 144
+        },
+        "readinto": {
+          "cpu_p50_ms": 2.106571,
+          "wall_p50_ms": 2.268533,
+          "traced_peak_bytes": 2097330
+        },
+        "production": {
+          "cpu_p50_ms": 1.961532,
+          "wall_p50_ms": 2.107484,
+          "traced_peak_bytes": 2097270
+        }
+      },
+      "file": {
+        "baseline": {
+          "cpu_p50_ms": 3.561524,
+          "wall_p50_ms": 3.567275,
+          "traced_peak_bytes": 3145879
+        },
+        "direct": {
+          "cpu_p50_ms": 1.01284,
+          "wall_p50_ms": 1.09406,
+          "traced_peak_bytes": 1049065
+        },
+        "readinto": {
+          "cpu_p50_ms": 1.763283,
+          "wall_p50_ms": 1.848778,
+          "traced_peak_bytes": 2097330
+        },
+        "production": {
+          "cpu_p50_ms": 3.08365,
+          "wall_p50_ms": 3.53822,
+          "traced_peak_bytes": 3145879
+        }
+      },
+      "fragmented": {
+        "baseline": {
+          "cpu_p50_ms": 3.121424,
+          "wall_p50_ms": 3.890917,
+          "traced_peak_bytes": 2204828
+        },
+        "direct": {
+          "cpu_p50_ms": 3.064899,
+          "wall_p50_ms": 3.208367,
+          "traced_peak_bytes": 2204828
+        },
+        "readinto": {
+          "cpu_p50_ms": 2.52495,
+          "wall_p50_ms": 2.800968,
+          "traced_peak_bytes": 2097330
+        },
+        "production": {
+          "cpu_p50_ms": 3.0324,
+          "wall_p50_ms": 3.353754,
+          "traced_peak_bytes": 2204828
+        }
+      }
+    }
+  },
+  "after": {
+    "payload_bytes": 1048576,
+    "samples": 15,
+    "cases": {
+      "memory": {
+        "baseline": {
+          "cpu_p50_ms": 1.950154,
+          "wall_p50_ms": 1.979071,
+          "traced_peak_bytes": 2097270
+        },
+        "direct": {
+          "cpu_p50_ms": 0.014082,
+          "wall_p50_ms": 0.015504,
+          "traced_peak_bytes": 144
+        },
+        "readinto": {
+          "cpu_p50_ms": 1.791437,
+          "wall_p50_ms": 1.798953,
+          "traced_peak_bytes": 2097330
+        },
+        "production": {
+          "cpu_p50_ms": 0.014233,
+          "wall_p50_ms": 0.015925,
+          "traced_peak_bytes": 144
+        }
+      },
+      "file": {
+        "baseline": {
+          "cpu_p50_ms": 2.816216,
+          "wall_p50_ms": 2.832505,
+          "traced_peak_bytes": 3145879
+        },
+        "direct": {
+          "cpu_p50_ms": 0.915767,
+          "wall_p50_ms": 0.918927,
+          "traced_peak_bytes": 1049065
+        },
+        "readinto": {
+          "cpu_p50_ms": 1.351327,
+          "wall_p50_ms": 1.736149,
+          "traced_peak_bytes": 2097330
+        },
+        "production": {
+          "cpu_p50_ms": 0.982525,
+          "wall_p50_ms": 0.985363,
+          "traced_peak_bytes": 1049065
+        }
+      },
+      "fragmented": {
+        "baseline": {
+          "cpu_p50_ms": 2.898477,
+          "wall_p50_ms": 2.904869,
+          "traced_peak_bytes": 2204828
+        },
+        "direct": {
+          "cpu_p50_ms": 2.78277,
+          "wall_p50_ms": 2.822881,
+          "traced_peak_bytes": 2204828
+        },
+        "readinto": {
+          "cpu_p50_ms": 1.936292,
+          "wall_p50_ms": 2.083467,
+          "traced_peak_bytes": 2097330
+        },
+        "production": {
+          "cpu_p50_ms": 2.718119,
+          "wall_p50_ms": 2.724171,
+          "traced_peak_bytes": 2204828
+        }
+      }
+    }
+  },
+  "node_counterexamples": {
+    "node": "v22.23.2",
+    "cases": [
+      {
+        "name": "duplicate",
+        "accepted": true,
+        "serialized": "{\"sequence\":2}",
+        "exact_int64": null
+      },
+      {
+        "name": "escaped_duplicate",
+        "accepted": true,
+        "serialized": "{\"sequence\":2}",
+        "exact_int64": null
+      },
+      {
+        "name": "nested_duplicate",
+        "accepted": true,
+        "serialized": "{\"layout\":{\"width\":2}}",
+        "exact_int64": null
+      },
+      {
+        "name": "int64",
+        "accepted": true,
+        "serialized": "{\"acquisition_ns\":9223372036854776000}",
+        "exact_int64": false
+      }
+    ]
+  },
+  "measurement_limits": [
+    "1 MiB synthetic bytes; memory, temporary-file and 4096-byte-fragment sources; 15 rotated samples.",
+    "I/O ownership only, not complete replay latency. Tracing measured separately from timing; not RSS.",
+    "readinto outperformed production on fragmented input; all before/after observations retained.",
+    "Node candidate tests stock parser only; not a complete alternate replay implementation.",
+    "No new toolchain or dependency. Source-only candidates have no performance ranking."
+  ],
+  "checks": {
+    "red": "2097302 traced bytes exceeded 1048576 temporary-allocation budget before change.",
+    "source": "24 focused replay/v2/cloud-inspector/intensity-inspector tests passed; then 9 replay tests passed after adding exact-int64/decoded-duplicate conformance (25 distinct tests total).",
+    "installed_wheel": "9 replay tests passed with isolated Python outside source import path.",
+    "lint": "Ruff lint and final format check passed for production, tests and Python probe.",
+    "security": "Bandit replay.py zero findings; Node syntax passed."
+  },
+  "preserved_failures": [
+    "Historical frozen T10 p95 143.527 ms >100 ms and signed radar startup timeout not cleared.",
+    "Jackson javadoc mirror unavailable; official upstream source read instead."
+  ],
+  "sha256": {
+    "integrations/edge/aethron_edge/sensors/replay.py": "8375a3112d1144b401353b849f599854ada92c95e0ea15ceb02cfa352803787e",
+    "tests/integration/test_sensor_replay.py": "27d075cb482ed38161f69c8a0bc395caea9b0937275b1077c3e13d9d2bd205bb",
+    "scripts/probes/sensor_replay_audit/compare.py": "d5f26cc5136f0801c92171b32eaf35d1b20f84c10599e99932b1d2c6041453e4",
+    "scripts/probes/sensor_replay_audit/json_candidate.cjs": "05ff94ac56e06c1c460b6c45d6a526faaa926b3165f9650f968a802380b344ee"
+  },
+  "primary_sources": [
+    "https://docs.python.org/3/library/io.html",
+    "https://docs.python.org/3.13/library/json.html",
+    "https://nodejs.org/api/fs.html#fsreadsyncfd-buffer-offset-length-position",
+    "https://tc39.es/ecma262/multipage/structured-data.html#sec-json.parse",
+    "https://learn.microsoft.com/en-us/dotnet/standard/io/pipelines",
+    "https://learn.microsoft.com/en-us/dotnet/api/system.text.json.utf8jsonreader.getint64?view=net-9.0",
+    "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/DataInputStream.html",
+    "https://raw.githubusercontent.com/FasterXML/jackson-core/2.18/src/main/java/com/fasterxml/jackson/core/StreamReadFeature.java",
+    "https://mcap.dev/spec"
+  ]
+}
