@@ -1,0 +1,33 @@
+name: Markdown checker contracts
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/markdown-verification.yml'
+      - 'requirements-links.lock'
+      - 'scripts/markdown_links.py'
+      - 'scripts/public_links.py'
+      - 'scripts/git_context.py'
+      - 'scripts/verify.py'
+      - 'tests/test_markdown_resources.py'
+      - 'tests/test_verify_*.py'
+      - 'tests/test_public_link*.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  links:
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ['3.9', '3.13']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: ${{ matrix.python }}
+      - run: 'python -m pip install --only-binary=:all: --require-hashes -r requirements-links.lock'
+      - run: python -m unittest tests.test_markdown_resources tests.test_verify_links tests.test_verify_dependencies tests.test_public_links tests.test_public_link_limits
+      - run: python -m unittest tests.test_verify_markdown_limits tests.test_verify_scan_limits tests.test_verify_paths tests.test_verify_content tests.test_verify_inventory tests.test_verify_discovery tests.test_verify_static tests.test_verify_freeze

@@ -78,6 +78,7 @@ jobs:
           python scripts/edge_inventory.py
       - name: Frozen core and planning integrity
         run: |
+          python -m pip install --only-binary=:all: --require-hashes -r requirements-links.lock
           python scripts/verify.py
           python scripts/check_ecosystem_plan.py --self-test
       - name: Bounded replay input allocation and report parity
