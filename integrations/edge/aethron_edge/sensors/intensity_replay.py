@@ -47,6 +47,15 @@ class IntensityCalibration(Closed):
 
 @dataclass(frozen=True)
 class RecordedIntensity:
+    """Recorded-result storage, not an independently verified evidence envelope.
+
+    Direct construction performs no type or binding validation. Frozen fields
+    do not freeze mutable objects supplied by callers. Representation suppression
+    does not redact generic dataclass conversion, which omits the version,
+    source_evidence and live_evidence properties. Binding checks belong to
+    rectify_recorded_intensity; these properties do not attest that it ran.
+    """
+
     # The header describes the original raw recording, NOT the remapped raster.
     source_header: Header = field(repr=False)
     calibration: IntensityCalibration = field(repr=False)
@@ -71,6 +80,13 @@ def rectify_recorded_intensity(frame, calibration, *, expected_calibration_sha25
     The pin establishes equality only, not signature verification or physical
     calibration validity. No clock conversion, freshness renewal or history is
     introduced. Sequence/clock continuity remains the replay reader's contract.
+    Repeated calls do not establish freshness or reject duplicates. The returned
+    source header describes raw input bytes and layout, not the remapped output.
+    Source aliases and matching pins do not authenticate a physical device.
+    The fixed validation-error message suppresses context display, not retained
+    exception objects; nested remapping details remain introspectable. Unexpected
+    runtime and process-control exceptions propagate. This is not a sanitized
+    diagnostic serializer or a process recovery boundary.
     """
     try:
         if (

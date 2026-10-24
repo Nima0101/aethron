@@ -1,0 +1,33 @@
+{
+  "review_order_version": 3,
+  "component": "C07_recorded_intensity_diagnostics",
+  "decision": "CLARIFY",
+  "full_component_review_complete": false,
+  "reviewed_head": "cc0e36925cfcd124c727795bc56cd72ddbd2ea46",
+  "production_behavior_changed": false,
+  "checks": {
+    "new_methods": 2,
+    "injected_cases": 10,
+    "focused_methods": 4,
+    "before_documentation": "PASS (two new methods)",
+    "after_documentation": "PASS (four focused methods)",
+    "production_red_claimed": false,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "0 findings",
+    "ast": "Identical after removing docstrings"
+  },
+  "limitations": [
+    "Synthetic remapper faults; no pixel processing, real OOM or OS signal test.",
+    "Display suppression does not erase nested context or traceback state.",
+    "Full V3 technology reassessment remains incomplete at C01."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/exceptions.html#exception-context"
+  ],
+  "sha256": {
+    "integrations/edge/aethron_edge/sensors/intensity_replay.py": "8a2cdd5b83fdf70ad9b637b7edc0214dfc89970886db031404ef39dfcde38ff0",
+    "tests/integration/test_sensor_intensity_replay.py": "6033c94a3cc0f56a8f0b56da95c5cc4bc4c3659670e834c48bea4719d10f2f29",
+    "docs/engineering/aethron-ecosystem/P21-INTENSITY-DIAGNOSTICS-V3.md": "a8516f693b55091a7512cf9a591b88d1770785861bf876ee7ed0568c2b821384"
+  }
+}

@@ -5,8 +5,9 @@ import importlib
 import io
 import json
 import struct
+import traceback
 import unittest
-from dataclasses import replace
+from dataclasses import asdict, replace
 from unittest.mock import patch
 
 from aethron_edge.sensors.packets import Raster
@@ -67,6 +68,72 @@ class SensorIntensityReplay(unittest.TestCase):
             frame, calibration, expected_calibration_sha256=pin or calibration.digest
         )
 
+    def test_wrapped_remap_error_retains_nested_private_context(self):
+        for encoding in ("mono8", "mono16"):
+            with self.subTest(encoding=encoding):
+                api, calibration, frame = self.fixture(encoding=encoding)
+                sentinel = "private-remap-detail"
+                inner = ValueError(sentinel)
+
+                def fail_remap(*args, inner=inner):
+                    try:
+                        raise inner
+                    except ValueError:
+                        raise ValueError("invalid_raster_rectification") from None
+
+                with patch.object(api, f"rectify_{encoding}_recorded", side_effect=fail_remap):
+                    with self.assertRaises(ValueError) as raised:
+                        self.run_frame(api, calibration, frame)
+                error = raised.exception
+                self.assertEqual(str(error), "invalid_intensity_replay")
+                self.assertTrue(error.__suppress_context__)
+                self.assertIsNone(error.__cause__)
+                nested = error.__context__
+                self.assertEqual(str(nested), "invalid_raster_rectification")
+                self.assertTrue(nested.__suppress_context__)
+                self.assertIs(nested.__context__, inner)
+                self.assertIn(sentinel, str(nested.__context__))
+                self.assertNotIn(sentinel, "".join(traceback.format_exception(error)))
+
+    def test_remap_runtime_and_control_exceptions_propagate(self):
+        for encoding in ("mono8", "mono16"):
+            api, calibration, frame = self.fixture(encoding=encoding)
+            for error_type in (RuntimeError, MemoryError, KeyboardInterrupt, SystemExit):
+                with self.subTest(encoding=encoding, error=error_type.__name__):
+                    original = error_type("injected-remap-fault")
+                    with patch.object(api, f"rectify_{encoding}_recorded", side_effect=original):
+                        with self.assertRaises(error_type) as raised:
+                            self.run_frame(api, calibration, frame)
+                    self.assertIs(raised.exception, original)
+
+    def test_direct_result_construction_does_not_establish_binding(self):
+        api = self.api()
+        result = api.RecordedIntensity(None, None, None)
+        self.assertIsNone(result.source_header)
+        self.assertIsNone(result.calibration)
+        self.assertIsNone(result.raster)
+        # Properties are representation labels, not proof of successful binding.
+        self.assertEqual(result.version, 1)
+        self.assertEqual(result.source_evidence, "recorded")
+        self.assertFalse(result.live_evidence)
+
+    def test_generic_result_conversion_retains_contents_but_omits_evidence_labels(self):
+        api = self.api()
+        source = {"private_fixture_marker": "raw-metadata"}
+        calibration = {"private_fixture_marker": "calibration-declaration"}
+        raster_data = {"data": b"private-fixture-bytes"}
+        result = api.RecordedIntensity(source, calibration, raster_data)
+        self.assertNotIn("private", repr(result))
+        converted = asdict(result)
+        self.assertEqual(
+            converted,
+            {"source_header": source, "calibration": calibration, "raster": raster_data},
+        )
+        self.assertEqual(set(converted), {"source_header", "calibration", "raster"})
+        source["private_fixture_marker"] = "changed"
+        self.assertEqual(result.source_header["private_fixture_marker"], "changed")
+        self.assertEqual(converted["source_header"]["private_fixture_marker"], "raw-metadata")
+
     def test_binary_replay_preserves_counts_mask_and_original_metadata(self):
         for encoding in ("mono8", "mono16"):
             for modality in ("lwir", "nir"):
@@ -90,6 +157,27 @@ class SensorIntensityReplay(unittest.TestCase):
                         self.assertIsNone(result.raster.sample(3, 0))
                         self.assertNotIn("payload", vars(result))
                         self.assertNotIn("data=", repr(result))
+
+    def test_repeated_call_retains_raw_header_without_freshness_or_output_hash(self):
+        api, calibration, frame = self.fixture()
+        for _ in range(2):
+            result = self.run_frame(api, calibration, frame)
+            self.assertEqual(result.source_header, frame.header)
+            self.assertEqual(result.source_header.sequence, 19)
+            self.assertEqual(result.source_header.acquisition_ns, 123456)
+            self.assertEqual(result.source_header.uncertainty_ns, 900)
+            self.assertEqual(result.source_header.layout.width, 3)
+            self.assertEqual(result.raster.width, 4)
+            self.assertEqual(
+                result.source_header.payload_sha256,
+                hashlib.sha256(frame.payload.data).hexdigest(),
+            )
+            self.assertNotEqual(
+                result.source_header.payload_sha256,
+                hashlib.sha256(result.raster.data).hexdigest(),
+            )
+            self.assertEqual(result.source_evidence, "recorded")
+            self.assertFalse(result.live_evidence)
 
     def test_independent_pin_and_header_binding_checked_before_mapping(self):
         api, calibration, frame = self.fixture()
