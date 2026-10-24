@@ -1,0 +1,34 @@
+{
+  "review_order_version": 3,
+  "component": "C04_comparison_source_fingerprints",
+  "decision": "FIX",
+  "full_component_review_complete": false,
+  "reviewed_head": "2dcf147b0a00af6926c16bb3b7a2d20b38133f38",
+  "production_changed": false,
+  "checks": {
+    "red_assertion_failures": 2,
+    "red_execution_errors": 0,
+    "new_methods": 2,
+    "green_methods": 6,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "Two LOW findings identical to baseline by rule/severity/message",
+    "ast_except_imports_source_assignment_report_field": "UNCHANGED"
+  },
+  "limitations": [
+    "Inert registration outputs; no production registration benchmark.",
+    "On-disk hashes do not attest loaded code or authenticate reports.",
+    "No atomic snapshot, transitive dependency closure or separate calibration/point digest.",
+    "Historical evidence unchanged; full production reassessment incomplete at C01."
+  ],
+  "primary_sources": [
+    "https://docs.python.org/3.13/library/hashlib.html",
+    "https://nodejs.org/api/crypto.html"
+  ],
+  "sha256": {
+    "scripts/probes/sensor_registration_audit/compare.py": "e0da7b1085ba6c966128a1032953b536097e994d41218c9347e5c58348db23df",
+    "scripts/probes/sensor_registration_audit/README.md": "e174874a82a91541a8835813622c52cbcb031736992324ea2467f0ce6a2b52fd",
+    "tests/integration/test_sensor_registration_audit_modes.py": "5fbaf2e714e34132fecc73d0c29143b00685dd34d74cf4db0ee4fd5f8cb3784e",
+    "docs/engineering/aethron-ecosystem/P21-REGISTRATION-SOURCE-EVIDENCE-V3.md": "34a0c429ce012f7c53d58ca9b13f324503d1efc5c84179e153694af1b3369ae9"
+  }
+}
