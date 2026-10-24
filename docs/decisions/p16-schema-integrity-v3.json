@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "id": "p16-schema-integrity-v3",
+  "component": "Structural passport conformance and semantic reference integrity",
+  "decision": "KEEP",
+  "constraints": [
+    "Trusted local Draft 2020-12 schemas and finite developer/CI fixtures; external schema retrieval must fail closed.",
+    "Preserve the public wire profile and separately test actual runtime lexical, relationship and authentication rules. No service SLA, embedded target or hard deadline is specified."
+  ],
+  "alternatives": [
+    "Python jsonschema with explicit offline Registry and direct calls to runtime admission.",
+    "JavaScript/TypeScript Ajv with explicit Draft 2020-12 class.",
+    "C#/F# JsonSchema.Net with explicit Draft 2020-12 dialect and registry configuration.",
+    "CUE constraint unification and closed structs with separately verified standard-schema interchange."
+  ],
+  "rationale": [
+    "KEEP the standard schemas and Python comparison harness: retrieval denial and direct positive/negative runtime observations are decisive for this bounded assurance task. Neither alternate validator changes the semantics of uniqueItems or supplies signature authentication.",
+    "CUE is credible for richer configuration constraints, but those constraints would require independent equivalence checks against the published profile; replacing this harness does not establish stronger runtime-admission evidence.",
+    "The existing schema comments correctly reserve selected-field uniqueness and complete reference joins to runtime checks. Add paired checks for repeated capability names, repeated evidence digests, missing references and unreferenced evidence.",
+    "Three in-memory guard removals cause four expected assertion failures. Current production admission passes. No materially winning migration is established; this is not a language speed ranking or a decision based on familiarity."
+  ],
+  "limits": [
+    "Only the Python implementation was executed; alternate candidate properties are from current primary documentation.",
+    "Structural schema success does not authenticate, grant authority or prove current evidence. Input byte limits and duplicate JSON keys require wire validation.",
+    "This review does not establish hosted results, complete cross-runtime equivalence, physical qualification or full-lane completion. Insufficient information for tactical deployment."
+  ],
+  "evidence": [
+    "https://json-schema.org/understanding-json-schema/reference/array",
+    "https://python-jsonschema.readthedocs.io/en/stable/referencing/",
+    "https://ajv.js.org/json-schema.html",
+    "https://docs.json-everything.net/schema/basics/",
+    "https://cuelang.org/docs/concept/how-cue-enables-data-validation/"
+  ]
+}

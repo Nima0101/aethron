@@ -1,0 +1,51 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "payloadType",
+    "payload",
+    "signatures"
+  ],
+  "properties": {
+    "payloadType": {
+      "const": "application/vnd.aethron.capability-passport.v1+json"
+    },
+    "payload": {
+      "type": "string",
+      "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/][AQgw]==|[A-Za-z0-9+/]{2}[AEIMQUYcgkosw048]=)?(?![\\s\\S])",
+      "minLength": 4,
+      "maxLength": 65536
+    },
+    "signatures": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "keyid",
+          "sig"
+        ],
+        "properties": {
+          "keyid": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}(?![\\s\\S])",
+            "minLength": 64,
+            "maxLength": 64
+          },
+          "sig": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9+/]{85}[AQgw]==(?![\\s\\S])",
+            "minLength": 88,
+            "maxLength": 88
+          }
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AETHRON single-signer DSSE passport envelope v1",
+  "$comment": "Structural schema only. passport-v1.md requires strict UTF-8 byte/depth bounds, duplicate/float lexical rejection, canonical payload bytes, cross-field integrity, trusted time/revision floors, signature authentication and revocation/expiry checks. Schema validity never grants authority or qualifies evidence."
+}

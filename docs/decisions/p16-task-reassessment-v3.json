@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "id": "p16-task-reassessment-v3",
+  "component": "P16 pinned offline verification-request descriptions",
+  "decision": "KEEP",
+  "constraints": [
+    "Exact immutable UTF-8 input up to 65536 bytes and depth eight; closed ASCII fields, integer lexemes, canonical byte equality and externally authenticated SHA-256 pin.",
+    "Only passport.verify.v1 and evidence.bind.v1; at most 300-second lifetime, caller-trusted time, no executor, scheduler, network or filesystem access."
+  ],
+  "alternatives": [
+    "CPython JSON object-pair and numeric-token hooks plus native SHA-256.",
+    "Erlang/Elixir using OTP json decode callbacks for object construction and numeric binaries.",
+    "C#/F# using System.Text.Json Utf8JsonReader token kinds and raw value spans.",
+    "Rust Serde visitors with deliberate raw-number and canonical-byte handling."
+  ],
+  "rationale": [
+    "KEEP the bounded hook-based implementation: its documented parser callbacks preserve the duplicate-key and number-lexeme distinctions, while exact canonical bytes bind one description without a custom tokenizer.",
+    "OTP callbacks and native token readers are credible alternatives, not excluded by language familiarity or installed tooling. Their default decoding alone does not provide this complete canonical task contract.",
+    "Ten task methods pass; removing canonical-byte equality in a temporary module makes the existing exact-pin/canonical test fail. No production defect is demonstrated.",
+    "No supplied deployment constraint or comparative measurement establishes an alternative advantage; no runtime migration is justified by novelty, incumbency or rewrite cost."
+  ],
+  "limits": [
+    "Caller pins and time/revision floors must be authenticated externally; these APIs do not enroll callers, persist floors, discover revocations or prevent replay.",
+    "No comparative performance benchmark or full alternate-runtime implementation was executed; no winning migration is being deferred.",
+    "Saved results are ordinary metadata snapshots, not self-expiring authorization tokens. No motion, execution or evidence qualification follows.",
+    "No target hardware, deadline or RSS envelope is specified. Insufficient information for tactical deployment."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/json.html",
+    "https://www.erlang.org/doc/apps/stdlib/json.html",
+    "https://learn.microsoft.com/en-us/dotnet/api/system.text.json.utf8jsonreader?view=net-10.0",
+    "https://docs.rs/serde/latest/serde/de/trait.Visitor.html"
+  ]
+}

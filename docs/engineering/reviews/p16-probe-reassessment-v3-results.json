@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_commit": "ba7f2c754342893c2c80fe18c6de2bf07b81a8e7",
+  "scope": "Fresh comparison/capture/measurement and mutation tooling reassessment; documentation-only patch.",
+  "decisions": {
+    "comparison": "KEEP",
+    "mutation": "KEEP"
+  },
+  "checks": {
+    "focused_methods": 20,
+    "adr_methods": 4,
+    "skips": 0,
+    "production_red": false,
+    "sensitivity_methods": 2,
+    "sensitivity_assertion_failures": 10,
+    "sensitivity_errors": 0,
+    "live_comparison_cases": 6,
+    "live_lexical_rejections": 5,
+    "live_mutation_baseline_tests": 4,
+    "live_selected_mutations": 4,
+    "live_mutation_expected_assertion_failures": 8,
+    "live_report_source_bindings": 10,
+    "ruff": "PASS",
+    "format": "PASS",
+    "node_syntax": "PASS",
+    "bandit_unfiltered": {
+      "B101": 10,
+      "B102": 1
+    },
+    "bandit_excluding_B101_B102": "PASS"
+  },
+  "source_sha256": {
+    "scripts/passport_technology_probe.py": "2fe524081bb31f00b7d97975e8cc810c10db5d00e7902a02f3b92b3cd0d25a72",
+    "scripts/passport_trust_review.py": "118ce6a5232af5099294658c03326b01bd32107b08f16cb69eb4c241253dd195",
+    "tests/test_passport_probe.py": "78120a4a4ef90a8592a5547db121e5b05d7d7243a0ca563301e5d95a248bdedb",
+    "scripts/passport_technology_probe.mjs": "4ac119d787fde5c2b3ef0fbd5cc269436790e3d84c03ed1a0a1182b12d8a4f2b",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "tests/test_passports.py": "20bdc75b84aa566867197604e2462053e366016638828bb0ba59e990ffd56c3d",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "docs/decisions/p16-comparison-reassessment-v3.json": "84a95b9816552a56c90bc221ec724a0032972741d129e722ae250592ef084438",
+    "docs/decisions/p16-mutation-reassessment-v3.json": "c4c0ec3fdbcaabaea9d3275a2ab3f383baa07ad545f5c0d35a5f3b3a349f9949",
+    "docs/engineering/reviews/p16-probe-reassessment-v3.md": "038a00c4867b3d810ec1c0a198128993ec30d8b4268477e1aaca254d424ea85c"
+  },
+  "local_artifact_sha256": {
+    "probe-reassessment-adr.log": "2329eb39880ba93f8565918206be54dbdc31cd0ab6c975961b633d8c8c6f7dc9",
+    "probe-reassessment-bandit-unfiltered.json": "9ef8117b17b62086fa6bfcf4c84cdb932c49012289ccbc4edb0ad0d1de1ace59",
+    "probe-reassessment-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "probe-reassessment-focused.log": "ffaeef2fef605b9297e1e496efd8d79824b80982859db52c9fc831ee2c4b0b25",
+    "probe-reassessment-format.log": "eee76f865de5a9f2456950f710ae5d5f9b5bd0ea02aa54f614c5eed6642a0bfd",
+    "probe-reassessment-live-comparison.log": "95269fd07a7d86e853c0a53282fdfb263472a679361c74bcaffc081e8fb3f798",
+    "probe-reassessment-live-mutation.log": "9d69832211da3e534df5d654cf45be783bc094872f32f1a70235a4e196a1e4b0",
+    "probe-reassessment-negative.json": "c6429f9fde80bcba8b2b91490879789a09773e6d89566fd78543e20bf8296187",
+    "probe-reassessment-node-syntax.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "probe-reassessment-passport_technology_probe-negative.log": "91451b26eb06d80a407283d1ec280cff8e4af4192abd8c273b804141e00a0a1c",
+    "probe-reassessment-passport_trust_review-negative.log": "6c3417ab341afb6bbe08efe139a2aa705f020475d8b192366ca921153d544c02",
+    "probe-reassessment-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "probe_reassessment_controls.py": "cb0b0dad82bd35888ffbbe55a74c62179e10d596359cd1ff1ef9651f104dca7b"
+  },
+  "negative_controls": [
+    {
+      "script": "scripts/passport_technology_probe.py",
+      "source_sha256": "2fe524081bb31f00b7d97975e8cc810c10db5d00e7902a02f3b92b3cd0d25a72",
+      "test": "ProbeResponseTests.test_changed_project_source_emits_no_evidence",
+      "methods": 1,
+      "assertion_failures": 5,
+      "errors": 0,
+      "skips": 0,
+      "old": "if any((ROOT / path).read_bytes() != raw for path, raw in sources.items()):",
+      "new": "if False:",
+      "source_unchanged": true
+    },
+    {
+      "script": "scripts/passport_trust_review.py",
+      "source_sha256": "118ce6a5232af5099294658c03326b01bd32107b08f16cb69eb4c241253dd195",
+      "test": "MutationSourceTests.test_changed_mutation_source_emits_no_evidence",
+      "methods": 1,
+      "assertion_failures": 5,
+      "errors": 0,
+      "skips": 0,
+      "old": "if any((ROOT / path).read_bytes() != raw for path, raw in sources.items()):",
+      "new": "if False:",
+      "source_unchanged": true
+    }
+  ],
+  "reproduction": {
+    "focused": "PYTHONPATH=tests:. python -m unittest test_passport_lexical test_passport_probe -v",
+    "comparison": "python -I scripts/passport_technology_probe.py",
+    "mutation": "python -I scripts/passport_trust_review.py",
+    "negative": "Require each recorded old string occurs once, compile replacement in a temporary namespace with trusted script __file__ and non-main __name__. Instantiate the selected existing test and replace its main function after normal setUp. Require five assertion failures without errors/skips and verify tracked script bytes remain unchanged."
+  },
+  "limits": [
+    "Official-source property comparison, not full alternative implementation or performance ranking.",
+    "Expected sensitivity failures do not demonstrate a production defect.",
+    "Listed source/log hashes are not atomic snapshot, dependency closure or loaded-code attestation.",
+    "No hosted CI, full distribution, hardware, real-time, MLS/CNSA or availability qualification."
+  ],
+  "next_component": "Cross-phase conformance adapters and their evidence boundaries",
+  "audit_complete": false
+}

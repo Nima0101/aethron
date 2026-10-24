@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_head": "526e8549bb46ed2ffbd896d60b42c715d634438f",
+  "scope": "Independent pinned validation of existing software-artifact policy v1",
+  "decision": "KEEP bounded parser and native hashing; expose shared complete policy validation independently of passport success",
+  "runtime": "Linux CPython 3.13.5",
+  "red": {
+    "methods": 8,
+    "assertion_failures": 45,
+    "errors": 0,
+    "cause": "Missing public validate_pinned_policy entry point"
+  },
+  "green": {
+    "new_methods": 8,
+    "related_methods_including_new": 87,
+    "skips": 0,
+    "failures": 0,
+    "errors": 0
+  },
+  "adr": {
+    "initial_negative_check": "FAIL: format URI checker unavailable; invalid evidence reference accepted",
+    "initial_log_kind": "Retained diagnostic summary of tool output, not raw stdout",
+    "correction": "Explicit HTTPS-reference pattern independent of optional format checker",
+    "positive_records": 1,
+    "negative_records": 8,
+    "outcome": "PASS"
+  },
+  "checks": {
+    "related": {
+      "command": [
+        "python",
+        "-m",
+        "unittest",
+        "test_passport_policy",
+        "test_passports",
+        "test_passport_evidence",
+        "test_interop_tasks",
+        "test_interop_bundles",
+        "test_interop_federation",
+        "test_interop_inbox",
+        "-v"
+      ],
+      "exit_code": 0
+    },
+    "ruff": {
+      "command": [
+        "ruff",
+        "check",
+        "aethron/passports.py",
+        "tests/test_passport_policy.py"
+      ],
+      "exit_code": 0
+    },
+    "format": {
+      "command": [
+        "ruff",
+        "format",
+        "--check",
+        "aethron/passports.py",
+        "tests/test_passport_policy.py"
+      ],
+      "exit_code": 0
+    },
+    "bandit": {
+      "command": [
+        "bandit",
+        "-q",
+        "aethron/passports.py",
+        "tests/test_passport_policy.py"
+      ],
+      "exit_code": 0
+    },
+    "diff": {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0
+    }
+  },
+  "source_sha256": {
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "tests/test_passport_policy.py": "2ff348136a8b174c53d72e96318462c35d7c4163f3dcfc1f0836a138d6f55acd",
+    "tests/test_passports.py": "20bdc75b84aa566867197604e2462053e366016638828bb0ba59e990ffd56c3d",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "docs/architecture/interop/passport-v1.md": "eb2059302ccad44a8a600ac80422f4e870195598adc09c1efca5c72ee4d02930",
+    "docs/engineering/reviews/p16-policy-admission-v3.md": "261e8483a8624bb91f86f82b260c3170a09e02900899be37afb0e198f183aa7f",
+    "docs/decisions/p16-policy-admission-v1.json": "f3af2a019be401afb4cf8e0b91426df7149dc15eee756fe27de05bb1197f8cd4",
+    "contracts/interop/architecture-decision-v1.schema.json": "e9043056f57e8dfdecb81c5244a95c173b346ff372020a5c662edefa867dbe1a"
+  },
+  "runtime_log_sha256": {
+    "policy-admission-red.log": "4529eba5e5f99361f3b227f37e7788caf827e7d1a686dc3a5d3cbed4ceb7ac3f",
+    "policy-admission-green.log": "cbf2fb822b2dfb2ca50b035a53ee4c824a503704c83b01e70136304ef385c684",
+    "policy-admission-related.log": "094d53dcec7f68cb1d70b4811dda6fe0b0b77043fc7cb1cf9d58bc28b0d8910f",
+    "policy-admission-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "policy-admission-format.log": "3bc53bf3e981a98a34a852e175bf9b77af841edea74fca595d9aedcbaf9a4938",
+    "policy-admission-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "policy-admission-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "policy-admission-adr-red.log": "67015402a9bd3729fd58ce0dab22265ff8d28a121c201c470a0dd92659efad1b",
+    "policy-admission-adr-green.log": "f59650eb91510eda5db3cee22aa1ffb2ce2aa8b23c29f74be7e1e230ec1ef3f0"
+  },
+  "limits": [
+    "No persistent store, enrollment, authenticated transport, same-revision history or implicit trusted clock.",
+    "Local source tests only; no new installed distribution or hosted qualification run.",
+    "Listed source hashes are not dependency closure or loaded-code attestation.",
+    "The full retrospective review remains incomplete; no audit-complete marker.",
+    "No weapon control, targeting, actuation, sensor fusion or operational command implementation.",
+    "No MLS, CNSA, uptime, target hardware or real-time qualification."
+  ],
+  "publication_redaction": {
+    "baseline_commit": "ec55eb8bd3cdb25641b6ec761bbd200d90a5604b",
+    "original_record_sha256": "044fb7cd5754da9455bbf559d14e98404029b9659f67a7c6510d893fcd640d0c",
+    "executable_paths_replaced": 4,
+    "representation": "Command executable entries are public basenames with private local prefixes removed; not verbatim historical argv or a new execution.",
+    "preserved": "All historical command arguments, results, source hashes and runtime-log hashes remain unchanged.",
+    "cause": "The unchanged public-content gate rejected a local host path. This is a publication correction, not a passing full verification run."
+  }
+}

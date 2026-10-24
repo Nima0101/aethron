@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "id": "p16-lifecycle-current-v3",
+  "component": "Current stateless verifier caller-floor lifecycle evidence",
+  "decision": "KEEP",
+  "constraints": [
+    "Two fixed real-signature argument traces preserve unsafe caller rewind and stronger independently retained floor outcomes. Eight policy methods check the separate externally pinned policy API.",
+    "No persistent state, reboot, distributed configuration or clock authority is implemented or simulated by these traces."
+  ],
+  "alternatives": [
+    "Python unittest fixed traces calling the actual verifier.",
+    "TLA+ and TLC state-transition modeling.",
+    "Alloy relational and temporal counterexample models.",
+    "Erlang PropEr generated stateful model-based tests.",
+    "Java/Kotlin JUnit driving an explicit actual-library adapter."
+  ],
+  "rationale": [
+    "KEEP direct calls for the exact regression counterexamples and returned metadata being observed. Both lifecycle traces and eight policy methods pass on current source; no new production mismatch was demonstrated.",
+    "TLA+ and Alloy can explore a separately specified state system, while PropEr generates stateful sequences. These are credible complementary choices if persistent or concurrent state is implemented; models alone cannot establish behavior of the actual verifier calls.",
+    "JUnit could supervise an adapter but does not remove the need to execute the implementation. The decisive property here is direct observation of the existing public API, not interpreter convenience or an unmeasured speed advantage."
+  ],
+  "limits": [
+    "Scope is offline developer conformance, not selection of producer, transport or deployed runtime technology. No target timing or memory requirement was supplied.",
+    "Alternatives were compared from official sources, not executed or benchmarked. No runtime speed ranking, formal proof or superiority based on installed tooling, familiarity or rewrite cost.",
+    "No hardware, tactical, MLS/CNSA, availability, product acceptance or whole-lane qualification. Source hashes do not attest loaded code or dependency closure."
+  ],
+  "evidence": [
+    "https://lamport.azurewebsites.net/tla/tla.html",
+    "https://alloytools.org/about.html",
+    "https://proper-testing.github.io/",
+    "https://docs.junit.org/6.1.3/overview.html"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "id": "p16-installed-result-recheck-v3",
+  "component": "Fixed installed API behavior corpus and result metadata",
+  "decision": "KEEP",
+  "constraints": [
+    "Execute actual API objects on Python 3.9 and 3.13 hosted targets, eight pinned corpora and two real-file persistence scenarios; preserve negative outcomes and no-authority flags.",
+    "No source import in the configured installed CLI, no network or alternate verifier oracle. Source testing locally is not an installed-distribution acceptance result."
+  ],
+  "alternatives": [
+    "Direct Python assertions with optimized-mode rejection and unittest negative controls; inspect returned objects without a serialization adapter.",
+    "Pytest assertion tooling or Robot Framework keyword libraries can orchestrate the same Python APIs; Java/Kotlin or Node process harnesses require a bridge to those objects."
+  ],
+  "rationale": [
+    "KEEP direct Python but FIX incomplete result comparison. Three new regression methods exposed 48 assertion failures: 38 metadata/flag substitutions, six signed-reference substitutions and four inbox identity substitutions.",
+    "Runner now compares fixture-derived identities, revisions, effective expiries, complete signed evidence references, task evidence flag and fixed inbox peer/expiry expectations. No library verifier, wire format or fixture pin changed."
+  ],
+  "limits": [
+    "Official-source candidate comparison only; no alternative executable or speed benchmark.",
+    "Local focused source tests only; no new installed distribution, hosted matrix, P19 customer acceptance, physical, hard-real-time, MLS/CNSA or availability claim."
+  ],
+  "evidence": [
+    "https://docs.python.org/3/library/unittest.html",
+    "https://docs.pytest.org/en/stable/how-to/assert.html",
+    "https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html",
+    "https://nodejs.org/api/child_process.html"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "decision": "KEEP",
+  "id": "p16-inbox-reassessment-v3",
+  "component": "P16 inbox accounting and supervised concurrency assurance",
+  "constraints": [
+    "Local opaque immutable payloads: at most sixteen items, one MiB summed payload bytes, a per-peer quota and at most sixty seconds caller-time retention.",
+    "One lock protects purge, accounting, admission and removal. Invalid or regressing caller time clears and closes; rejection preserves live queued entries.",
+    "Assurance must exercise the actual Python queue with two producers while preventing a deadlocked test worker from trapping the test runner."
+  ],
+  "alternatives": [
+    "CPython deque plus lock with explicit compound quota and lifetime checks; subprocess supervision of the existing Python concurrency probe.",
+    "Rust crossbeam bounded channels plus explicit byte, peer and arbitrary-expiry accounting.",
+    "C#/F# System.Threading.Channels bounded channels with explicit compound quota/lifetime accounting.",
+    "Erlang/Elixir processes with explicitly bounded mailbox admission and quota accounting."
+  ],
+  "rationale": [
+    "KEEP the explicit atomic accounting boundary for this small synchronous queue: item count, summed bytes, peer quota and expiry behind a live head require a single consistent decision. A count-bounded channel alone does not provide these semantics.",
+    "BEAM isolation is relevant to service fault containment but ordinary message queues do not supply this compound admission contract. Native and managed channel alternatives still need the contract-specific accounting layer.",
+    "Fix assurance within Python: executor context shutdown waits for workers after a future timeout. A child process runs the real queue probe; subprocess.run kills and waits for that direct child on timeout.",
+    "A controlled lock-acquisition fault trapped the former test past its future timeout. The same injected fault now returns an assertion failure within the outer supervisor window; the normal two-producer case and dedicated timeout regression pass.",
+    "No target deadline or memory envelope supports a runtime migration or performance ranking. This decision does not rely on installation, familiarity or rewrite cost."
+  ],
+  "limits": [
+    "Payload-byte limits are not heap/RSS bounds; lock wait, fairness and idle expiry are not bounded by this API. Previously returned bytes remain reachable after close.",
+    "Subprocess supervision is test-only, not a runtime watchdog or sandbox. Process creation can delay timeout delivery; no exact hard wall-clock bound is claimed.",
+    "The trusted child has two threads, no descendant processes and fixed small output. This helper is not safe execution of arbitrary scripts or an output-quota mechanism.",
+    "One sampled two-producer schedule does not exhaust interleavings or prove scheduler fairness. No hardware latency, resource qualification or whole-lane completion."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/threading.html#lock-objects",
+    "https://docs.python.org/3.13/library/concurrent.futures.html",
+    "https://docs.python.org/3.13/library/subprocess.html",
+    "https://docs.rs/crossbeam-channel/latest/crossbeam_channel/fn.bounded.html",
+    "https://learn.microsoft.com/en-us/dotnet/core/extensions/channels",
+    "https://www.erlang.org/doc/system/eff_guide_processes.html"
+  ]
+}

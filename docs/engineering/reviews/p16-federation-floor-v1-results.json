@@ -1,0 +1,99 @@
+{
+  "baseline_commit": "cbb383b73c3dc505305b8c4716f7f407786cc16b",
+  "review_order_version": 3,
+  "date": "2026-10-10",
+  "reviewed": "P16 existing policy persistence runtime/tests, federation admission and installed assurance integration.",
+  "decision": "KEEP SQLite/Python transaction boundary after renewed candidate review; ADD disjoint federation floor profile and preserve policy v1 disk compatibility.",
+  "mismatch": "Federation admission returned metadata but did not persist revision/time floors. A deny-all update must persist independently of bundle success.",
+  "checks": {
+    "api_red": {
+      "methods": 12,
+      "errors": 12,
+      "cause": "Missing FederationFloorStore API"
+    },
+    "runner_red": {
+      "methods": 2,
+      "errors": 3,
+      "cause": "Missing federation persistence runner scenario; subtest errors included"
+    },
+    "focused_methods": 68,
+    "additional_optional_dependency_methods": 1,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "isolated_no_site_methods": 33,
+    "isolated_skips": 0,
+    "installed_runner_source_execution": {
+      "fixture_cases": 60,
+      "real_file_scenarios": 2,
+      "total": 62
+    },
+    "new_runner_negative_controls": {
+      "lost_writes": 2,
+      "wrong_metadata": 7,
+      "accepted_rollbacks": 2
+    },
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": {
+      "exit_code": 1,
+      "low": 46,
+      "medium": 0,
+      "high": 0,
+      "production_findings": 0,
+      "notes": "42 B101 runner assertions; 2 B404 and 2 B603 fixed trusted interpreter/code subprocess test warnings. No shell, no blanket exclusions. Optimized complete runner execution rejects."
+    }
+  },
+  "source_sha256": {
+    "aethron/passport_floor_store.py": "4c3bc0c73dea7a9a3bdba698953461b500fdf944492cb97d7ccd8d3d5edb5e3c",
+    "docs/architecture/interop/federation-floor-store-v1.md": "2a2a5f77c0392049dfd0a6066c0f8357f2f83ebbdcc6b47ffc748bfc159ea842",
+    "docs/architecture/interop/federation-policy-v1.md": "6c1bf724731255e82a7e1678a03296574e1f303bdd3376a472683cc7aa869a80",
+    "docs/architecture/interop/policy-floor-store-v1.md": "a90c9230842930eea64be59bdcb80ee2d67b96d460178edbcc5ad3d58952bea7",
+    "docs/architecture/interop/verification-evidence-v1.md": "7895e2d8433707460bcbafd8af53d87c1acf2c4ea678bf66b4f866b3d8c1401c",
+    "docs/decisions/p16-federation-floor-store-v1.json": "7c004d8569ab9441521f1550d52a5d653c0275effcd5f14385509bf6263d2b5e",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "31489cc6ed8921c8cfd87ac9f2d9fe4ca6d7c096d5c67ac3b7e5788b12e5349e",
+    "scripts/passport_installed_vectors.py": "ee4f4eb178e863efd239a394847b9d92df323118e89d2a64a10c822871245ba6",
+    "scripts/passport_sdist_check.py": "db701aca4c8547fa7baa318db348cbd6d44f23611ced1c8efe77433cb4b3c541",
+    "tests/test_interop_federation_floor_store.py": "a3cbce25577fa379ad49b76393a4292921930e489b6ab75716cb887c005928d1",
+    "tests/test_passport_floor_store.py": "341b5811a2e96841bbb2a791018fbcdd2f1b1b1bea8bf871a271eead27c74de1",
+    "tests/test_passport_installed_vectors.py": "3dc84d0e3a540a3fe73676cdc55895c7361d801de6e76471387a1eb25d9be538",
+    "aethron/interop_federation.py": "2ff7c09270d98a5b7a3aa0eea73981ea3a3f23f50381dc0b5f6b9ce04c4f7cd4",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "examples/interop/federation-policy-vectors-v1.json": "74cd12782e8e418e3e2270c4a0c578a75062e6863211da0311a7b9b34ac6087d",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    ".github/workflows/aethron-passports.yml": "f2e52752fcda9ff25b5792b2639d45704cb8568f8cdb8eee5fe0cb4cc2051e72",
+    "MANIFEST.in": "af220709a64d24ca1606a7b48abab7e7ef68d6976d237242715872f3fb9084f1",
+    "tests/test_interop_federation_policy.py": "452cc8feff782f8f3916b8c70a2cf3b82e9f386db63198aa86babb1ae865ce06",
+    "tests/test_passport_schemas.py": "0c423ffb3e53e8edc3f7a9bad16b460c1ca92b76ebeeb05f32492cda0d8f40b2",
+    "tests/test_passport_optional_backend.py": "40dea2bde03a7813dcc976920081593984212043a22da54ddc0c5a72348b35e5",
+    "tests/packaging/test_passport_manifest.py": "30d35a49196113c09cb1745a26a9201cc18e6270e6f7653c2c340029977f69cf",
+    "tests/packaging/test_passport_sdist.py": "5a41f7517791c9e6691a0a99004c2258b5b40901d51ff1cd7e82d04e5ee89819"
+  },
+  "runtime_artifacts_sha256": {
+    "federation-floor-bandit.json": "08de8b9da732b3f467baa38240328b231cce9f446532c92974884bd246d2efdb",
+    "federation-floor-final.log": "f00d38d22b174262b1df37e1e2d9f897ec0c4b0775de1983172459661df0fde5",
+    "federation-floor-green.log": "e9e97ca4403db93c43e68e1accdd2942482a7d87f9fd1b31eed5347c4668c5c3",
+    "federation-floor-installed-green.log": "a5b7b87626a7cfbbfb4f5f1478ee05ad7bf79a4cd81ecc96cfaa76f6615bfdc0",
+    "federation-floor-installed-red.log": "013fba3523a2cd793161f108802e5013d73240a7c89edf6e9876fa3e363dc8ec",
+    "federation-floor-no-site.log": "98bb3b30243b3c0062ddd5b5531624d0c2b308e327c3362a8e0351aea8a88c01",
+    "federation-floor-optional.log": "8613d07eaf77758e1be76c3a3bef2b750501929d7b2562ac12787c03ff8141d8",
+    "federation-floor-red.log": "22113e063b8f45e6b863bcfbc7ed94d0b4030abfb52a5f57de28310eb5fbc1a1",
+    "federation-floor-ruff-final.log": "899431ded41f52f0e596057b046dea82d3c0e3557b51b29f591e62f24ab0c713",
+    "federation-floor-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+  },
+  "reproduction": [
+    "PYTHONPATH=tests:tests/packaging:. python -m unittest test_interop_federation_floor_store test_passport_floor_store test_interop_federation_policy test_passport_installed_vectors test_passport_manifest test_passport_sdist test_passport_schemas.ArchitectureDecisionConformance -v",
+    "PYTHONPATH=tests:. python -m unittest test_passport_optional_backend.OptionalBackendTests.test_dependency_free_assurance_reports_only_explicit_crypto_skips -v",
+    "Run Python -I -S, assert cryptography is absent, explicitly insert checkout and tests paths; load test_interop_federation_floor_store, test_passport_floor_store and four InstalledVectorTests.test_federation_floor_* methods. Require zero failures and skips."
+  ],
+  "limits": [
+    "Local source execution only; no new installed distribution, hosted CI acceptance, whole repository matrix or physical qualification.",
+    "Commit-failure injection rolls back real SQL but is not power-loss testing. Whole database restore demonstrably restores older floors.",
+    "Authenticated pins, trusted clocks, protected directories and functioning SQLite locks/flushes are caller assumptions. Separate stores are not an atomic combined trust snapshot.",
+    "No alternative implementation was executed or benchmarked. LMDB documentation retrieval failed; no negative LMDB capability claim.",
+    "Listed file hashes identify current disk bytes, not loaded code, dependency closure, signed release provenance or atomic execution snapshots.",
+    "No P16-P19 completion, authority, MLS/CNSA, availability or target-latency qualification."
+  ],
+  "next": "Compose persisted floors with bundle verification and test freshness/rejection boundaries without granting authority."
+}

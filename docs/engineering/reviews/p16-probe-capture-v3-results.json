@@ -1,0 +1,88 @@
+{
+  "audit_policy_version": 3,
+  "audit_complete": false,
+  "baseline_head": "0d94c633b0aae5b9b595f01ac3320e5bfc3be708",
+  "decision": "KEEP driver; FIX capture accumulation and diagnostic handling",
+  "source_sha256": {
+    "scripts/passport_technology_probe.py": "5c0412ba6ab37a319ea0d67f2cc62f7f4c4ef51d3412942cebfc74a06011cc32",
+    "scripts/passport_technology_probe.mjs": "3ac4a2cd06479cf484310717ec8ac7b7d8afde167af047d8c3938f391ec2f83b",
+    "tests/test_passport_probe.py": "81fc47b597db571ab10245b0f15bf6cef07029e9dc8aef05b930092018352c93",
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "docs/engineering/reviews/p16-probe-capture-v3.md": "e4689b0768eb26b068e5dac0f2801ab88f84e13d44c8a7928dfb64e3f2c74400"
+  },
+  "red_initial": {
+    "assertion_failures": 3,
+    "errors": 2,
+    "note": "Initial test expectations treated existing subprocess exception classes as errors."
+  },
+  "red_corrected_controls": {
+    "assertion_failures": 5,
+    "errors": 0
+  },
+  "green": {
+    "passport_methods": 54,
+    "skips": 0,
+    "real_child_controls": [
+      "exact 4096-byte output and input round trip",
+      "stdout 4097-byte rejection",
+      "stderr 4097-byte rejection",
+      "nonzero exit rejection",
+      "timeout rejection with observed child reaping and closed transport"
+    ],
+    "input_control": "65537 bytes rejected before asyncio.run",
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS; B101 assertions excluded",
+    "diff": "PASS"
+  },
+  "normal_probe": {
+    "audit_policy_version": 2,
+    "python": "3.13.5",
+    "fixture_sha256": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "cases": 6,
+    "crypto_accepts": [
+      true,
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "admissions": [
+      "authenticated",
+      "rejected",
+      "rejected",
+      "rejected",
+      "rejected",
+      "rejected"
+    ],
+    "python_lexical_rejections": 5,
+    "python_hash_1mib_ms": 0.6064160261303186,
+    "python_verify_mean_ms_128": 1.4870641571178567,
+    "python_traced_peak_bytes": 412129,
+    "node_probe": {
+      "node": "v22.23.2",
+      "crypto_accepts": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "hash_digest": "bf718b6f653bebc184e1479f1935b8da974d701b893afcf49e701f3e2f9f9c5a",
+      "hash_1mib_ms": 1.6273390000000063,
+      "duplicate_keys_collapsed": true,
+      "float_lexemes_collapsed": true
+    },
+    "limits": "Single local sample; no hard real-time, RSS, platform or qualification claim. Node primitive probe is not a full verifier."
+  },
+  "limits": [
+    "Linux Python 3.13.5 local execution only; hosted macOS/Windows pending.",
+    "Output accumulation bound excludes kernel/transport buffers, RSS and descendants.",
+    "Timeout excludes OS process creation; scheduling and teardown are cooperative.",
+    "No runtime protocol change, migration performance ranking or qualification claim."
+  ]
+}

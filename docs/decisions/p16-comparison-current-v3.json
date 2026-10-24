@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "id": "p16-comparison-current-v3",
+  "component": "Current comparison capture and local measurement evidence",
+  "decision": "KEEP",
+  "constraints": [
+    "Inspect actual Python admission result objects and traced allocations alongside a separate Node primitive check on trusted local inputs; no service or physical transport.",
+    "Fixed six-case primitive corpus, five lexical checks, one 128-verification batch; input at most 64 KiB and retained stdout at most 4 KiB, with independently counted stderr."
+  ],
+  "alternatives": [
+    "Python asyncio subprocess callbacks and independent Node crypto probe.",
+    "Node child_process orchestration with timeout/maxBuffer controls.",
+    "Rust Tokio process and pipe orchestration with explicit cleanup.",
+    "Java/Kotlin Process orchestration with streams, timeout and destruction."
+  ],
+  "rationale": [
+    "KEEP direct Python observation for the interpreter-specific results and allocations. Other orchestrators can supervise the child but still need a Python observer and a typed report; no demonstrated correctness or deployment benefit warrants this boundary change.",
+    "Current Python subprocess transport documents pipe closure and direct child termination. Tokio documents explicit kill_on_drop and waiting requirements; Java warns that destruction need not complete immediately. These APIs all require cleanup reasoning; a language change alone supplies no hard deadline.",
+    "Fresh real-child tests verify byte-limit rejection, exit failure and timeout cleanup. A real Python/Node execution confirms six primitive results and five lexical rejections. Diagnostics explicitly deny runtime-ranking and target-hardware qualification. No implementation mismatch was found."
+  ],
+  "limits": [
+    "Current source-based comparison, not executable parity or throughput benchmarking of alternative implementations. No preference based on installed tooling, familiarity or rewrite cost.",
+    "Before/after listed-file comparisons are not atomic, do not attest loaded code or dependency closure, and cannot detect transient changes restored between reads.",
+    "No hosted run, physical qualification, hard-real-time, MLS/CNSA, availability or complete-phase claim.",
+    "Exchange timeout excludes process creation and has separate cooperative cleanup; descendants, kernel buffers and total RSS are outside the guarantee.",
+    "Node implements primitive checks, not passport admission. Single local batches are not latency distributions, worst-case measurements or controlled statistical benchmarks."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/asyncio-protocol.html",
+    "https://nodejs.org/api/child_process.html",
+    "https://docs.rs/tokio/latest/tokio/process/index.html",
+    "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/Process.html"
+  ]
+}

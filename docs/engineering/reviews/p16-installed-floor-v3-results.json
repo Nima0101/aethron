@@ -1,0 +1,72 @@
+{
+  "baseline_commit": "42259ba689e205a8c44375f19d2b4b5affe36c6e",
+  "review_order_version": 3,
+  "reviewed_at": "2026-10-10",
+  "decisions": {
+    "schemas": "KEEP",
+    "installed_package_assurance": "KEEP; FIX omitted persistence scenario"
+  },
+  "checks": {
+    "baseline_methods": 60,
+    "red_methods": 3,
+    "red_assertion_failures": 9,
+    "red_errors": 0,
+    "focused_methods": 67,
+    "focused_failures": 0,
+    "focused_errors": 0,
+    "focused_skips": 0,
+    "additional_adr_methods": 4,
+    "installed_runner_source_execution": {
+      "pinned_corpus_cases": 50,
+      "real_file_scenarios": 1
+    },
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": {
+      "exit_code": 1,
+      "low_B101": 32,
+      "medium": 0,
+      "high": 0,
+      "exclusions": [],
+      "mitigation": "run refuses optimized execution before fixture reads; both optimization levels tested. Findings retained."
+    }
+  },
+  "source_sha256": {
+    "scripts/passport_installed_vectors.py": "9fe74bb747236cc39e0588d97fb74fc8a620f981ebde12da09787ade2be303c8",
+    "scripts/passport_install_check.py": "841237a8123416f0645a9af8b6173d45a6fe6fbaf0b8da2e6a53ea5b4940b512",
+    "scripts/passport_sdist_check.py": "06d34901d68f475005ddcf93b0937549c087539f91cb46d3062b8b43343fdcaf",
+    "tests/test_passport_installed_vectors.py": "723a4ed7654885c8d662317486cf99b713847df198f13e87105b558d775d72b6",
+    "tests/test_passport_install_check.py": "1914ba8d17fc7b6b416e3b85416313b13f55e90b9c0fe7a8ac5240f2b0ffa1be",
+    "tests/test_passport_floor_store.py": "9c519a03e78c7a2ede461ef786dbe7dd1ffc43c3a02bba6d71204adf934c8026",
+    "tests/test_passport_schemas.py": "0c423ffb3e53e8edc3f7a9bad16b460c1ca92b76ebeeb05f32492cda0d8f40b2",
+    "aethron/passport_floor_store.py": "c9e0f4deb9589b3139296f9eb506113108168561e794cd4c45d3579ad75977e7",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    ".github/workflows/aethron-passports.yml": "f2e52752fcda9ff25b5792b2639d45704cb8568f8cdb8eee5fe0cb4cc2051e72",
+    "requirements-passport-conformance.txt": "1d137f508c86edba0b3bf6d5c5e9d6cf673b31c3e4cfed2d57a3122ccad73dd3",
+    "requirements-passports.txt": "f6a456c822fb9de2a51699bdbacf232070362b51371790526c4a33b2a09fd801",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "docs/decisions/p16-schema-current-v3.json": "511071d043cf4ff25cd172e26dbbc1058c99f4e10eb4dc000d609a9c54f62265",
+    "docs/decisions/p16-installed-floor-v3.json": "f3f1033a6b5c795508c649109eaf5638d15315ca3464db82e28829e5296f4e4e",
+    "contracts/interop/architecture-decision-v1.schema.json": "b61c4a23bf0784799681402ad893d1a5e4cfb493c432fa75a30e301ba681ebd7",
+    "contracts/interop/federation-v1.schema.json": "4ff8cd0e24028ec8ee4a99477c5a80ebb25c32e7b821a9a3ebc7d01c76ecdb13",
+    "contracts/interop/passport-envelope-v1.schema.json": "6e3872ba208a573aa792e321342eda6788518e2e3bf638ff833e4c60db984c38",
+    "contracts/interop/passport-policy-v1.schema.json": "b6172dac43bce1a5905cd6c91ef2b7b485d0e70a988593571f2529a2bfad23b0",
+    "contracts/interop/passport-v1.schema.json": "df89ef1e467821c429aaddcbd9b4e530e4f622cdbec64b85854ba578cc231d88",
+    "contracts/interop/task-v1.schema.json": "6e3ce2bbf2c6ad3022c45ea30c9fe5c8d00d25e1d47d71499ecdc0c37cf2eb6e"
+  },
+  "runtime_log_sha256": {
+    "schema-current-baseline.log": "c15c15bd3c95ac6429fae10bfad064384ffa2a2b981f9a10a4234669166370d2",
+    "installed-floor-red.log": "891c9451c4bb57e2a38eed6ed291bd7c27a1e1bcefc447aee0867f13971c3c3c",
+    "installed-floor-green.log": "a49851064301c0b60f82dbc4990cf2cce927123ec12ba3de17ac3c50b9695adf",
+    "installed-floor-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "installed-floor-format.log": "3bc53bf3e981a98a34a852e175bf9b77af841edea74fca595d9aedcbaf9a4938",
+    "installed-floor-bandit.json": "b8f3949db68cf412e0d9694fe90fc8d9c5848eb150ece138aa4bd2c1ef01f732",
+    "installed-floor-adrs.log": "3ad7a4ef53e23f60c85af2481cd041187104f79a8b5bc7f64321c1bff40c8a19"
+  },
+  "limits": [
+    "Selected working-copy files only; not dependency closure, atomic snapshot, loaded-code attestation or published raw logs.",
+    "Local checks use source imports; no isolated installed-distribution run or new hosted result observed.",
+    "No power-loss, whole-store rollback protection, hardware latency, MLS/CNSA or availability qualification.",
+    "P17/P18/P19 and remaining P16 tasks are unfinished; no audit completion marker."
+  ]
+}

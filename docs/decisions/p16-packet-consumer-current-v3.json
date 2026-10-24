@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "id": "p16-packet-consumer-current-v3",
+  "component": "Current published packet and encoding consumer conformance",
+  "decision": "KEEP",
+  "constraints": [
+    "Consume the published decoder and P16 verifier independently using small synthetic depth fixtures; retain malformed-but-authenticated content as distinct from successful decoding.",
+    "No live sensor, native decoder replacement, throughput SLA or device qualification. Producer implementation is peer owned."
+  ],
+  "alternatives": [
+    "Python unittest calls into actual public APIs with portable JSON vectors.",
+    "Robot Framework keyword libraries driving the actual APIs.",
+    "Java/Kotlin JUnit driving an explicit subprocess adapter.",
+    "Rust proptest generating and shrinking inputs through a language boundary."
+  ],
+  "rationale": [
+    "KEEP direct calls to the actual decoder and verifier, with language-neutral fixtures. Authentication and decoding are separately asserted; no competing parser or transport representation is introduced.",
+    "Robot Framework can expose these calls as keywords, and JUnit can supervise a Python adapter, but each adds a layer without extending the fixed conformance boundary. Proptest is useful for generated cases; replacing this harness would still require access to the actual producer API.",
+    "Seven packet/encoding methods pass. Add the omitted rejection policy_revision assertion. The controlled substitution survived the old method and now fails for changed layout and changed pixels; signed malformed and missing-depth outcomes remain tested separately."
+  ],
+  "limits": [
+    "Scope is offline developer conformance, not selection of producer, transport or deployed runtime technology. No target timing or memory requirement was supplied.",
+    "Alternatives were compared from official sources, not executed or benchmarked. No runtime speed ranking, formal proof or superiority based on installed tooling, familiarity or rewrite cost.",
+    "No hardware, tactical, MLS/CNSA, availability, product acceptance or whole-lane qualification. Source hashes do not attest loaded code or dependency closure."
+  ],
+  "evidence": [
+    "https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html",
+    "https://docs.junit.org/6.1.3/overview.html",
+    "https://docs.rs/proptest/latest/proptest/"
+  ]
+}

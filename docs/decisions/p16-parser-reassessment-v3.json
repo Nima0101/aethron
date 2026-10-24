@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "id": "p16-parser-reassessment-v3",
+  "component": "P16 offline UTF-8 parser and canonicalization",
+  "decision": "KEEP",
+  "constraints": [
+    "Immutable UTF-8 bytes, at most 65536 bytes and depth 8, duplicate decoded keys rejected.",
+    "Integer lexemes bounded before numeric conversion; floats, exponents and nonfinite tokens rejected.",
+    "Closed ASCII statement schema; deterministic application-subset canonicalization; no network or actuation.",
+    "Portable synchronous software API; no specified target hardware, hard deadline, throughput or RSS budget."
+  ],
+  "alternatives": [
+    "CPython JSON token and object-pair hooks.",
+    "Erlang/Elixir OTP JSON integer/float/object callbacks.",
+    "C#/F# System.Text.Json Utf8JsonReader token spans.",
+    "Java/Kotlin Jackson streaming API.",
+    "Rust Serde custom map visitor and numeric lexical adapter.",
+    "C++ simdjson with application validation.",
+    "JavaScript JSON.parse with additional lexical validation."
+  ],
+  "rationale": [
+    "Explicit UTF-8 decoding and raw integer/float/pair callbacks meet the lexical requirements without implementing a tokenizer.",
+    "Fourteen portable byte cases validate current behavior; removing duplicate rejection exposes two assertion failures. Default syntax parsers are not complete replacements.",
+    "Other documented APIs are credible alternatives, but no material improvement is established for this bounded offline contract. This is not a comparative performance ranking.",
+    "Installed tools, existing language, familiarity and rewrite cost are not selection criteria. No winning migration is deferred; no target-runtime decision is inferred."
+  ],
+  "limits": [
+    "Only CPython current implementation and default CPython/Node syntax behavior were executed; other candidates were reviewed from primary documentation.",
+    "No general JCS implementation, whole-lane completion, hard real-time, CNSA, MLS or physical qualification.",
+    "The fourteen-case corpus supplements existing bounds/schema tests and is not exhaustive language equivalence.",
+    "Insufficient information for tactical deployment."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/json.html",
+    "https://www.erlang.org/doc/apps/stdlib/json.html",
+    "https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/use-utf8jsonreader",
+    "https://github.com/FasterXML/jackson-core",
+    "https://serde.rs/deserialize-map.html",
+    "https://github.com/simdjson/simdjson"
+  ]
+}

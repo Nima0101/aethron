@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "decision": "KEEP",
+  "id": "p16-floor-cleanup-current-v3",
+  "component": "Local policy and federation floor stores and their shared transaction core",
+  "constraints": [
+    "One row per protected local file; current format/scope validation, monotonic time/revision, exact digest and same-revision equivocation rejection. Policy v1 and federation v1 remain disjoint.",
+    "Atomic cooperating-process read/check/write; fixed errors, no retries, exclusive initialization and no silent reset. Correct local locks/flushes and authenticated inputs are caller preconditions.",
+    "Offline Python 3.9+ API with optional SQLite >=3.31; no hard completion-time, target hardware or latency budget established."
+  ],
+  "alternatives": [
+    "Native SQLite with Python sqlite3, Rust rusqlite explicit Result-returning close, or C#/F# Microsoft.Data.Sqlite transactions.",
+    "Erlang/Elixir Mnesia transactions and managed processes for a different local/distributed storage deployment.",
+    "Atomic file replacement plus an explicit interprocess lock and journal/recovery protocol.",
+    "LMDB is a credible embedded transaction candidate; earlier source retrieval failed, so no unsupported API or performance comparison is credited."
+  ],
+  "rationale": [
+    "KEEP SQLite and its current binding for both profiles: database transactions provide the required local read/check/write serialization; direct bounded validator calls avoid a second parsing/serialization boundary. Another binding does not itself establish whole-store rollback detection or authenticated storage.",
+    "Mnesia is credible when managed/distributed state is required; that is not this single-row local profile. Atomic replacement still requires a separate cooperating-writer transaction protocol. No measured language or storage speed ranking is asserted.",
+    "FIX the shared cleanup boundary: injected SQLite/OS errors from close previously escaped as raw backend exceptions. Translate them to fixed store_unavailable, suppress backend context and return no success metadata.",
+    "Real-file tests prove that cleanup errors after commit can coexist with persisted time or deny-all federation updates; errors must not be interpreted as rollback. Existing wire formats and disk schemas remain unchanged."
+  ],
+  "limits": [
+    "Injection performs real close then raises; it is not an observed operating-system fault, power-loss test or demonstration that standard close normally fails.",
+    "A failing close does not guarantee resource release. Whole-file restoration can restore old floors; no coordinated two-file transaction, authentication or encryption is added.",
+    "Alternative candidates were source-compared, not executed or benchmarked. No hard-real-time, physical, MLS/CNSA or availability qualification."
+  ],
+  "evidence": [
+    "https://docs.python.org/3/library/sqlite3.html",
+    "https://www.sqlite.org/c3ref/close.html",
+    "https://www.sqlite.org/atomiccommit.html",
+    "https://docs.rs/rusqlite/latest/rusqlite/struct.Connection.html",
+    "https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/transactions",
+    "https://www.erlang.org/doc/apps/mnesia/mnesia_chap4.html"
+  ]
+}

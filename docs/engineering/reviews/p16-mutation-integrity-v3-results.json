@@ -1,0 +1,81 @@
+{
+  "audit_policy_version": 3,
+  "baseline_head": "eb324cb2ba0def30766c52c1b77d424dfcdf2759",
+  "component": "P16 mutation runner source consistency and baseline integrity",
+  "decision": "KEEP bounded in-process experiments; FIX source consistency and passing-baseline requirement",
+  "checks": {
+    "source_red_assertion_failures": 5,
+    "baseline_red_assertion_failures": 1,
+    "red_errors": 0,
+    "cleanup_control": "RuntimeError and KeyboardInterrupt restore verifier/module entry; zero JSON",
+    "related_methods": 68,
+    "skips": 0,
+    "live_baseline_methods": 4,
+    "live_mutations": 4,
+    "live_expected_assertion_failures": 8,
+    "ruff": "PASS",
+    "format": "PASS after test-only formatting correction",
+    "bandit": "PASS with B101/B102 excluded for guarded assertions and trusted-source exec",
+    "diff": "PASS"
+  },
+  "source_sha256": {
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "tests/test_passports.py": "ec0c935252333fb4ee522969a428851dd363fdb5ad5ae5c5b8f384d4780a62ff",
+    "scripts/passport_trust_review.py": "118ce6a5232af5099294658c03326b01bd32107b08f16cb69eb4c241253dd195",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "tests/test_passport_probe.py": "78120a4a4ef90a8592a5547db121e5b05d7d7243a0ca563301e5d95a248bdedb",
+    "tests/test_passport_evidence.py": "34dd2b858ae87f13008de87a54c82ac66ef9693f8c13ff162bc4a7c097f8086f",
+    "tests/test_passport_schemas.py": "037b5263fa3dcaeffe034a24d85c21cd6ff893f3dfd90f175f6148d68da0216f"
+  },
+  "log_sha256": {
+    "mutation-source-red.log": "58267c925fcb2cfdda4c1186066aa592c364be926b5987f6f24ef407de6a1ede",
+    "mutation-source-green.log": "dcc481c429c0f479998a8b95d85af126eb75d562c5cae6ed466c1c2ca73415de",
+    "mutation-baseline-red.log": "70b702194552cb8bff00e6f3d811b82b62077af48e80589d54d6115f41ebd1fe",
+    "mutation-baseline-green.log": "6c118b3bc802cab3d76d27453f9d0d35798345f4247a20b8678b56aa649bd9b3",
+    "mutation-final-tests.log": "4abe9dfdfb85d1d90fe10b63fa4d9d9cdca136f11917dbf2d2ef2a0a1daedcc1",
+    "mutation-live.json": "fcb3cd4a7672258bd558ce06cb7833659d4816ec1b5f1b65354b19b99f9d83b5"
+  },
+  "live_local_report": {
+    "review_order_version": 3,
+    "python": "3.13.5",
+    "baseline_tests": 4,
+    "source_sha256": {
+      "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+      "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+      "tests/test_passports.py": "ec0c935252333fb4ee522969a428851dd363fdb5ad5ae5c5b8f384d4780a62ff",
+      "scripts/passport_trust_review.py": "118ce6a5232af5099294658c03326b01bd32107b08f16cb69eb4c241253dd195",
+      "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6"
+    },
+    "source_scope": "Listed project files matched before/after execution; mutants compiled from captured passport source. Not an atomic snapshot, loaded-code attestation or dependency closure; transient changes restored between reads are not detected.",
+    "mutations": [
+      {
+        "guard": "unselected_metadata",
+        "expected_assertion_failures": 5
+      },
+      {
+        "guard": "effective_expiry",
+        "expected_assertion_failures": 1
+      },
+      {
+        "guard": "evidence_revocation",
+        "expected_assertion_failures": 1
+      },
+      {
+        "guard": "rejection_metadata",
+        "expected_assertion_failures": 1
+      }
+    ],
+    "limit": "In-memory guard-removal tests; not a cryptographic validation or hardware qualification."
+  },
+  "limits": [
+    "Trusted single-threaded local tooling only; no arbitrary-code isolation or complete mutation score.",
+    "Byte consistency is not atomic provenance, loaded-code attestation or dependency closure.",
+    "No physical, cryptographic certification, MLS, CNSA or availability qualification."
+  ],
+  "infrastructure_failures": [
+    "Initial policy read SIGTRAP; retry succeeded.",
+    "Namespace/fork failures delayed bridge verification; later verification passed.",
+    "Prior timing commit push failed twice when credential helper could not create a thread; publication remains unconfirmed."
+  ]
+}

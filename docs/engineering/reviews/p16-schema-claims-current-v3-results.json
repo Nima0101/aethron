@@ -1,0 +1,175 @@
+{
+  "review_order_version": 3,
+  "source_head": "7cc10877e431448d535dc45f62228c0245bda05e",
+  "date": "2026-10-10",
+  "scope": "Six P16 structural schemas and direct conformance test tooling; edge methods executed but full cross-phase consumer review remains pending.",
+  "decision": "KEEP six schemas and Python comparison checker; FIX claim-vocabulary sensitivity in conformance tests.",
+  "production_changed": false,
+  "schemas_changed": false,
+  "test_methods_added": 2,
+  "positive_combinations": 27,
+  "invalid_claim_cases": 12,
+  "focused": {
+    "methods": 22,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "adr_after_new_records": {
+    "methods": 4,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "controlled_variants_before": {
+    "baseline": {
+      "methods": 8,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "failed_checks": []
+    },
+    "variants": {
+      "authority": {
+        "methods": 8,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "failed_checks": []
+      },
+      "assurance": {
+        "methods": 8,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "failed_checks": []
+      },
+      "capability": {
+        "methods": 8,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "failed_checks": []
+      },
+      "kind": {
+        "methods": 8,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "failed_checks": []
+      },
+      "outcome": {
+        "methods": 8,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "failed_checks": []
+      }
+    }
+  },
+  "controlled_variants_after": {
+    "baseline": {
+      "methods": 10,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "failed_checks": []
+    },
+    "variants": {
+      "authority": {
+        "methods": 10,
+        "failures": 4,
+        "errors": 0,
+        "skips": 0,
+        "failed_checks": [
+          "test_payload_rejects_unsupported_claims_in_schema_and_runtime (test_passport_schemas.PassportSchemaConformance.test_payload_rejects_unsupported_claims_in_schema_and_runtime) (path=('motion_authority',), value=True)",
+          "test_payload_rejects_unsupported_claims_in_schema_and_runtime (test_passport_schemas.PassportSchemaConformance.test_payload_rejects_unsupported_claims_in_schema_and_runtime) (path=('motion_authority',), value=0)",
+          "test_payload_rejects_unsupported_claims_in_schema_and_runtime (test_passport_schemas.PassportSchemaConformance.test_payload_rejects_unsupported_claims_in_schema_and_runtime) (path=('motion_authority',), value=None)",
+          "test_payload_rejects_unsupported_claims_in_schema_and_runtime (test_passport_schemas.PassportSchemaConformance.test_payload_rejects_unsupported_claims_in_schema_and_runtime) (path=('motion_authority',), value='false')"
+        ]
+      },
+      "assurance": {
+        "methods": 10,
+        "failures": 2,
+        "errors": 0,
+        "skips": 0,
+        "failed_checks": [
+          "test_payload_rejects_unsupported_claims_in_schema_and_runtime (test_passport_schemas.PassportSchemaConformance.test_payload_rejects_unsupported_claims_in_schema_and_runtime) (path=('assurance',), value='qualified')",
+          "test_payload_rejects_unsupported_claims_in_schema_and_runtime (test_passport_schemas.PassportSchemaConformance.test_payload_rejects_unsupported_claims_in_schema_and_runtime) (path=('assurance',), value=False)"
+        ]
+      },
+      "capability": {
+        "methods": 10,
+        "failures": 2,
+        "errors": 0,
+        "skips": 0,
+        "failed_checks": [
+          "test_payload_rejects_unsupported_claims_in_schema_and_runtime (test_passport_schemas.PassportSchemaConformance.test_payload_rejects_unsupported_claims_in_schema_and_runtime) (path=('capabilities', 0, 'name'), value='unsupported.v1')",
+          "test_payload_rejects_unsupported_claims_in_schema_and_runtime (test_passport_schemas.PassportSchemaConformance.test_payload_rejects_unsupported_claims_in_schema_and_runtime) (path=('capabilities', 0, 'name'), value=False)"
+        ]
+      },
+      "kind": {
+        "methods": 10,
+        "failures": 2,
+        "errors": 0,
+        "skips": 0,
+        "failed_checks": [
+          "test_payload_rejects_unsupported_claims_in_schema_and_runtime (test_passport_schemas.PassportSchemaConformance.test_payload_rejects_unsupported_claims_in_schema_and_runtime) (path=('evidence', 0, 'kind'), value='qualified')",
+          "test_payload_rejects_unsupported_claims_in_schema_and_runtime (test_passport_schemas.PassportSchemaConformance.test_payload_rejects_unsupported_claims_in_schema_and_runtime) (path=('evidence', 0, 'kind'), value=False)"
+        ]
+      },
+      "outcome": {
+        "methods": 10,
+        "failures": 2,
+        "errors": 0,
+        "skips": 0,
+        "failed_checks": [
+          "test_payload_rejects_unsupported_claims_in_schema_and_runtime (test_passport_schemas.PassportSchemaConformance.test_payload_rejects_unsupported_claims_in_schema_and_runtime) (path=('evidence', 0, 'outcome'), value='verified')",
+          "test_payload_rejects_unsupported_claims_in_schema_and_runtime (test_passport_schemas.PassportSchemaConformance.test_payload_rejects_unsupported_claims_in_schema_and_runtime) (path=('evidence', 0, 'outcome'), value=False)"
+        ]
+      }
+    }
+  },
+  "ruff": "PASS check and format",
+  "bandit": {
+    "scope": "tests/test_passport_schemas.py with --ignore-nosec",
+    "findings": 0
+  },
+  "source_sha256": {
+    "contracts/interop/architecture-decision-v1.schema.json": "b61c4a23bf0784799681402ad893d1a5e4cfb493c432fa75a30e301ba681ebd7",
+    "contracts/interop/federation-v1.schema.json": "4ff8cd0e24028ec8ee4a99477c5a80ebb25c32e7b821a9a3ebc7d01c76ecdb13",
+    "contracts/interop/passport-envelope-v1.schema.json": "6e3872ba208a573aa792e321342eda6788518e2e3bf638ff833e4c60db984c38",
+    "contracts/interop/passport-policy-v1.schema.json": "b6172dac43bce1a5905cd6c91ef2b7b485d0e70a988593571f2529a2bfad23b0",
+    "contracts/interop/passport-v1.schema.json": "df89ef1e467821c429aaddcbd9b4e530e4f622cdbec64b85854ba578cc231d88",
+    "contracts/interop/task-v1.schema.json": "6e3ce2bbf2c6ad3022c45ea30c9fe5c8d00d25e1d47d71499ecdc0c37cf2eb6e",
+    "tests/test_passport_schemas.py": "54d42fc6a9848771b9bda77362ae56b15529489df7d153104bbcf866454255ee",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/interop_federation.py": "2ff7c09270d98a5b7a3aa0eea73981ea3a3f23f50381dc0b5f6b9ce04c4f7cd4",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "requirements-passport-conformance.txt": "1d137f508c86edba0b3bf6d5c5e9d6cf673b31c3e4cfed2d57a3122ccad73dd3",
+    "requirements-passports.txt": "f6a456c822fb9de2a51699bdbacf232070362b51371790526c4a33b2a09fd801",
+    ".github/workflows/aethron-passports.yml": "f2e52752fcda9ff25b5792b2639d45704cb8568f8cdb8eee5fe0cb4cc2051e72",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "examples/passports/evidence-vectors.json": "9ab7461a842ee783d4a1ddafa7e89fc40b7385e6f18b74b4bad7673ae7c91dfb",
+    "examples/interop/task-vectors-v1.json": "17510988868b8fb57f2af7b8375db21ebc980bd845450f6c9cd44bfc0fa4794c",
+    "examples/interop/federation-vectors-v1.json": "00c8ee5d07f2dfd976a2e3ec77f6bc7cd3acca8183f338900e99f3c70b9ab0ba",
+    "examples/interop/adr-reference-vectors-v1.json": "489b7871eeb1deec773af719fc4a6d3bf8957cd2bb2c5d6cf4db0131e2012138"
+  },
+  "runtime_evidence_sha256": {
+    "schema_claim_probe.py": "1012669a12189ff050b9bcc35d82d91e12a5144d13fba28fbcc401714a7ba5cf",
+    "schema-claims-before.json": "6bb7eb8a60933f65d37ff725833c467a0c63ce9b5d18a88663b5796467303647",
+    "schema-claims-after.json": "1523df7f02f7dde7efe8a8693c5faa22c5ba8e67b6ceb4725bd54bb7632d5fa9",
+    "schema-claims-focused.log": "597511948c630e6a8c5f2f647c075c16ba183b670996472350cea6b7955acceb",
+    "schema-claims-adr.log": "af5ea75e3df527efab7b8e8958a735056a11d848c59480e0ddc2c90757aa9ffe",
+    "schema-claims-bandit.json": "d30460c331fc25137d6dbd32670cf187788a65e96c94b8c09b1cf00c288ca0be"
+  },
+  "limits": [
+    "No alternative executable or benchmark; no language performance ranking.",
+    "Only five isolated schema weakenings tested, not exhaustive mutation coverage or complete cross-validator parity.",
+    "Selected file digests identify disk bytes only, not dependency closure, loaded-code identity, atomic snapshots or signed provenance.",
+    "No full repository, clean-clone, installed distribution, target hardware, real-time, MLS/CNSA, availability or tactical qualification.",
+    "Review cursor remains open at installed/package assurance tooling and subsequent probes/consumer lifecycle work."
+  ]
+}

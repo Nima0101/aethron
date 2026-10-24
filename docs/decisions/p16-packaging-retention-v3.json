@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "id": "p16-packaging-retention-v3",
+  "component": "Hosted P16 packaging diagnostic retention",
+  "decision": "KEEP",
+  "constraints": [
+    "Retain selected packaging outputs on job success or failure, identify checked-out revision and run attempt, and preserve failing shell exit codes.",
+    "Hosted Ubuntu GitHub job only; no release credentials, new service, signing authority or runtime change. Fourteen-day requested retention, with partial diagnostics permitted."
+  ],
+  "alternatives": [
+    "Pinned official JavaScript upload-artifact action plus explicit Bash pipefail and standard command outputs.",
+    "Go GitHub CLI API orchestration with custom artifact protocol integration.",
+    "Existing job logs alone without a downloadable selected diagnostic bundle."
+  ],
+  "rationale": [
+    "KEEP the platform artifact action: it handles the runner artifact service directly. A general API client would require additional service-specific upload handling, and logs alone do not supply the requested selected-file bundle. No performance ranking is claimed.",
+    "The missing retention step was identified by inspection. The workflow now captures checkout SHA, allowlisted run context, archive digest and five command logs, then attempts an allowlisted artifact upload even after failure.",
+    "Explicit shell bash selects GitHub documented pipefail behavior. A bounded local shell probe retains producer output and preserves exit 23; removing pipefail masks the failure and continues, demonstrating the relevant risk."
+  ],
+  "limits": [
+    "Hosted upload and archive installation remain unobserved. Artifact presence can represent a failed or partial run, never automatic PASS.",
+    "Metadata and digests are diagnostic claims from the workflow, not signatures or independently verified provenance. PR checkout may be a merge revision.",
+    "Retention is not permanent and artifacts may be deleted. No source archive or built wheel is retained by this diagnostic bundle.",
+    "No local build, physical qualification, MLS/CNSA, availability, real-time or full audit completion."
+  ],
+  "evidence": [
+    "https://github.com/actions/upload-artifact/tree/b7c566a772e6b6bfb58ed0dc250532a479d7789f",
+    "https://docs.github.com/en/actions/tutorials/store-and-share-data",
+    "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax",
+    "https://cli.github.com/manual/gh_api"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "review_order_version": 3,
+  "baseline_commit": "009eb01fe054db5d48cec2d5298fa71e4d85aa6c",
+  "decision": "KEEP separate primitives; ADD composition coverage",
+  "production_changed": false,
+  "production_red_claimed": false,
+  "verification": {
+    "related_methods": 96,
+    "new_methods": 4,
+    "skips": 0,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS"
+  },
+  "source_sha256": {
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "tests/test_interop_delivery.py": "d7142d775869f91a124ba81fc179c7b7b9912b6044c6188e98ca53a28b497fed",
+    "examples/interop/federation-vectors-v1.json": "00c8ee5d07f2dfd976a2e3ec77f6bc7cd3acca8183f338900e99f3c70b9ab0ba",
+    ".github/workflows/aethron-passports.yml": "0c14894bd1863d5c71705813be8d82c2242a4bc89e5b4aadb585b67ef7863dda"
+  },
+  "log_sha256": {
+    "delivery-review-tests.log": "71f71e71f50b91087f3ba46b5525be9e92151dc384fa4eb8d61d39b85144f1f7"
+  },
+  "limitations": [
+    "Local source execution only; not installed release or hosted CI.",
+    "Direct project-file hashes only, not dependency closure or loaded-bytecode attestation.",
+    "No clock provenance, trust refresh, transport, durable floors or in-flight consumer cancellation.",
+    "Cached main a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46; fetch failed read-only FETCH_HEAD.",
+    "No hardware, MLS, CNSA, uptime or lane-completion qualification."
+  ]
+}

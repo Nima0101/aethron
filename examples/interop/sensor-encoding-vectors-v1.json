@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "base_case": "synthetic-depth",
+  "base_corpus_sha256": "80fb60be05c18f87f8954332c2d4f8be28762c16d335d004527555fb3d3aa4fc",
+  "source_commit": "a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46",
+  "source_sha256": {
+    "integrations/edge/aethron_edge/sensors/packets.py": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192",
+    "integrations/edge/aethron_edge/__init__.py": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9",
+    "integrations/edge/aethron_edge/sensors/__init__.py": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a"
+  },
+  "limitations": [
+    "Analytical samples only; no physical qualification.",
+    "Reuses original authentication without resigning altered evidence.",
+    "Decoding does not grant trust or authority."
+  ],
+  "cases": [
+    {
+      "name": "equivalent-big-endian",
+      "evidence_hex": [
+        "7b22656e636f64696e67223a223136554331222c22686569676874223a312c2269735f626967656e6469616e223a747275652c226d65746572735f7065725f756e6974223a302e3030322c226d6f64616c697479223a226465707468222c2273746570223a342c227769647468223a327d",
+        "000009c4"
+      ],
+      "depth_m": 5.0,
+      "decode_error": null
+    },
+    {
+      "name": "changed-byte-order",
+      "evidence_hex": [
+        "7b22656e636f64696e67223a223136554331222c22686569676874223a312c2269735f626967656e6469616e223a747275652c226d65746572735f7065725f756e6974223a302e3030322c226d6f64616c697479223a226465707468222c2273746570223a342c227769647468223a327d",
+        "0000c409"
+      ],
+      "depth_m": 100.37,
+      "decode_error": null
+    },
+    {
+      "name": "equivalent-row-padding",
+      "evidence_hex": [
+        "7b22656e636f64696e67223a223136554331222c22686569676874223a312c2269735f626967656e6469616e223a66616c73652c226d65746572735f7065725f756e6974223a302e3030322c226d6f64616c697479223a226465707468222c2273746570223a362c227769647468223a327d",
+        "0000c409abcd"
+      ],
+      "depth_m": 5.0,
+      "decode_error": null
+    },
+    {
+      "name": "trailing-byte",
+      "evidence_hex": [
+        "7b22656e636f64696e67223a223136554331222c22686569676874223a312c2269735f626967656e6469616e223a66616c73652c226d65746572735f7065725f756e6974223a302e3030322c226d6f64616c697479223a226465707468222c2273746570223a342c227769647468223a327d",
+        "0000c409ab"
+      ],
+      "depth_m": null,
+      "decode_error": "invalid_image_bytes"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "id": "p16-adr-schema-recheck-v3",
+  "component": "ADR structural publication and offline checker",
+  "decision": "KEEP",
+  "constraints": [
+    "Bounded closed JSON records with explicit KEEP/MIGRATE decisions, constraints, alternatives, rationale, limits and HTTPS reference character profile.",
+    "Validate all P16 ADRs offline without optional format enforcement; structure never proves source accuracy, reachability, decision quality or authenticity."
+  ],
+  "alternatives": [
+    "Draft 2020-12 with python-jsonschema and an explicit offline referencing registry; direct calls into the current runtime expose semantic distinctions.",
+    "JavaScript/TypeScript Ajv 2020 validator; Java/Kotlin networknt validator as independent standard-schema consumers.",
+    "CUE declarations with JSON Schema interchange for constraint authoring; Pydantic strict models for application validation and schema generation."
+  ],
+  "rationale": [
+    "KEEP JSON Schema plus Python checker with explicit no-retrieval registry. Four current ADR methods cover discovery, closed fields, bounds and 22 reference cases; the test explicitly demonstrates the removed-pattern failure mode.",
+    "Workflow paths include ADR and schema changes and the job imports both conformance and crypto backends before comparisons. This is source configuration review, not a newly observed hosted success."
+  ],
+  "limits": [
+    "Alternative tools were researched from their official documentation, not executed or benchmarked. No speed, memory or universal language ranking is claimed.",
+    "The selected checker tests the published artifact directly and compares actual runtime behavior in process. Generated application models would require additional exact-wire checks and independent artifact validation.",
+    "No whole-lane completion, installed-distribution acceptance, physical, real-time, MLS/CNSA or availability qualification."
+  ],
+  "evidence": [
+    "https://json-schema.org/draft/2020-12/json-schema-validation",
+    "https://python-jsonschema.readthedocs.io/en/stable/referencing/",
+    "https://ajv.js.org/json-schema.html",
+    "https://cuelang.org/docs/concept/how-cue-works-with-json-schema/",
+    "https://github.com/networknt/json-schema-validator",
+    "https://docs.pydantic.dev/latest/concepts/strict_mode/"
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_commit": "53b1ba412794ba7efc3fbd1bc37b567f601fe551",
+  "scope": "Portable installed-source and fixed-corpus assurance; no production changes.",
+  "decision": "KEEP portable packaging and direct Python inspection; FIX missing installed-result assertions.",
+  "checks": {
+    "red_methods": 2,
+    "red_assertion_failures": 5,
+    "red_errors": 0,
+    "focused_methods": 15,
+    "adr_methods": 4,
+    "skips": 0,
+    "installed_source_matches": 7,
+    "installed_cases": 50,
+    "optimized_modes_rejected": [
+      "-I -O",
+      "-I -OO"
+    ],
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit_unfiltered": {
+      "B101": 27
+    },
+    "bandit_excluding_B101": "PASS"
+  },
+  "source_sha256": {
+    "scripts/passport_install_check.py": "3076a99f15db9b7d2065ef998c4bd09a553f2bda830c412ed96eb17075a03cc2",
+    "scripts/passport_installed_vectors.py": "4712d6acce39300be12e47f35cd79ac7a7583bbbf7dd2c5d4a6c2cbaa49533e3",
+    "tests/test_passport_install_check.py": "60f108baab71fd89bed62420abf7d3478de4cbe1006674b4970b086c1349e0fd",
+    "tests/test_passport_installed_vectors.py": "a5894d1b18f9d5f055d37705f78f662687d3bfdd4b47d6b4fce1de8aa60ac3ad",
+    ".github/workflows/aethron-passports.yml": "abd88979695dd2b169e4ac5ea38b7d4af2b7da360e2a636468cf42e6585fa680",
+    "pyproject.toml": "c5e3d4d7dd65acd3d3c04baf7f53b49b5ef99db6231fa610f1e144f17eec4b0e",
+    "setup.py": "3225e55c87758412823021749c2f4219103b77cf2de8ab7ee18199551bd02071",
+    "MANIFEST.in": "cced4a669505276d5959ceca2dd463c5df1ed63df8f04e594bd9ba6abcddc7fa",
+    "docs/decisions/p16-packaging-reassessment-v3.json": "a4278bc2fc64f17237b0808d4f1e684f316f0886b510fabcbb73e577b92e33e9",
+    "docs/engineering/reviews/p16-packaging-reassessment-v3.md": "8cef519bc9442438bfe37c730b6cfe0a3aa1286527a7648e13dc4c7e52d72905"
+  },
+  "installed_source_sha256": {
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb"
+  },
+  "local_artifact_sha256": {
+    "packaging-reassessment-O.log": "7d6d87f4ed35ebcde0c912cfd0ceeb59cd302c78940244b738be93e4c3a609c7",
+    "packaging-reassessment-OO.log": "7d6d87f4ed35ebcde0c912cfd0ceeb59cd302c78940244b738be93e4c3a609c7",
+    "packaging-reassessment-adr.log": "0a536b05b5fa1a63b0bb762fd6387e06b242e7346926dc9775c0e185b4086676",
+    "packaging-reassessment-bandit-unfiltered.json": "31d7aa66fdd90e2a7890ac7ac7a28db9dd51e859bbadd3ecf6b2d24c652c72b9",
+    "packaging-reassessment-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "packaging-reassessment-focused.log": "b4de25262ee28d8dcc3e2429cde479df5501a1f4a10a7134bfe830ecf28106d7",
+    "packaging-reassessment-format.log": "177f260a5645724013185e4b140c7045cc39e56c0c97b120f5cb23599f85f0de",
+    "packaging-reassessment-identity.log": "a5845b7f0947629a60415442c5b40644a94df0fafceaee76b2e105c888d3bddb",
+    "packaging-reassessment-installed.log": "e503b80eaf33004a70cdaa3ea788cffb330f6781c1bc9304af21bbe884c19857",
+    "packaging-reassessment-modes.json": "ada2f25145376813855a5b04777eceee67baa15f0c1fc99341b16bb15f652991",
+    "packaging-reassessment-red.log": "85b4e8c054451e950ed4b7eb1f6b688ee286319d630f9338daa40302f6f56286",
+    "packaging-reassessment-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+  },
+  "reproduction": {
+    "focused": "PYTHONPATH=tests:. python -m unittest test_passport_lexical test_passport_install_check test_passport_installed_vectors -v",
+    "identity": "python -I scripts/passport_install_check.py",
+    "corpus": "python -I scripts/passport_installed_vectors.py",
+    "faults": "Run the two new InstalledVectorTests methods against the baseline runner for five assertion failures; against the corrected runner both pass. Wrappers call the real API, copy fields shallowly, replace one flag with True and restore dependencies after each case."
+  },
+  "limits": [
+    "Source-based technology comparison, no alternate backend build or benchmark.",
+    "Existing Linux installation reused; no new build, clean install or hosted run.",
+    "Source/behavior checks are separate processes; no atomic loaded-code or complete dependency attestation.",
+    "No compiled-helper, physical, MLS/CNSA or availability qualification."
+  ],
+  "next_component": "Comparison and mutation assurance tooling",
+  "audit_complete": false
+}

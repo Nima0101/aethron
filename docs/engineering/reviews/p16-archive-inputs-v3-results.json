@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline": "a92a8293d46ede4bfea4e234f701733943713b4b",
+  "component": "source-archive input evidence",
+  "red": {
+    "methods": 6,
+    "errors": 6,
+    "assertion_failures": 0,
+    "reason": "checker module not yet implemented"
+  },
+  "green": {
+    "packaging_methods": 7,
+    "focused_methods_including_packaging": 13,
+    "adr_methods": 4,
+    "skips": 0,
+    "cli_cases": 2,
+    "cli_selected_inputs": 22
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format_initial": "FAIL one file; corrected",
+    "format_final": "PASS",
+    "bandit": "PASS without exclusions",
+    "actionlint": "PASS",
+    "diff": "PASS"
+  },
+  "source_sha256": {
+    "scripts/passport_sdist_check.py": "6550689de5eafb0ca35d4dc6399f16c73f9746e470d0844048c6773abeae8f3e",
+    "tests/packaging/test_passport_sdist.py": "5a41f7517791c9e6691a0a99004c2258b5b40901d51ff1cd7e82d04e5ee89819",
+    "tests/packaging/test_passport_manifest.py": "30d35a49196113c09cb1745a26a9201cc18e6270e6f7653c2c340029977f69cf",
+    ".github/workflows/aethron-passports.yml": "760ab5550c53b8ad3dcb4a571356aa8ca790176646dc97e0c0c805591970dc45",
+    "MANIFEST.in": "8978278e0a01128631396019eb953cf2998f8a503f91d3e8d1190733822ce0de",
+    "pyproject.toml": "c5e3d4d7dd65acd3d3c04baf7f53b49b5ef99db6231fa610f1e144f17eec4b0e",
+    "docs/decisions/p16-archive-inputs-v3.json": "ca1a4097cdc11753e5206515dead5aa82bf435358690daeb185b82b92193cc2c",
+    "docs/engineering/reviews/p16-archive-inputs-v3.md": "ad1d9f46d79b19c407b66875384e83ba7db56973043e52d3491ffe066fba38a2",
+    "examples/interop/edge-unknown-vectors-v1.json": "ee56de5eaa3b597aace551fc93f8faf6e1f3b9d72ceca9872ee6b0d2886144d7",
+    "examples/interop/sensor-packet-vectors-v1.json": "80fb60be05c18f87f8954332c2d4f8be28762c16d335d004527555fb3d3aa4fc",
+    "examples/interop/sensor-encoding-vectors-v1.json": "60ead91ad5b69d10edc7487028823d1acfab8c4259b9a41dae10c6fc922bd39e",
+    "examples/interop/ros-status-vectors-v1.json": "d9d64c2a2869c6dec3151c969dd343c475a3b610adfbbaf6b641a568be5d9738"
+  },
+  "runtime_log_sha256": {
+    "sdist-check-red.log": "21cdd03f65969d6e74af09ff83b6a02add87c9de1e35a1130f0fb3bd77d15484",
+    "sdist-check-green.log": "9b3f56d09346001086dbf55183b82f755028743a6507f7883c83f40570ff0560",
+    "sdist-check-focused.log": "449c89464a6a4ae4017beb2857f4e83619363e389064a69850836c52cbe09a29",
+    "sdist-check-adr.log": "4d6d480b1503fcf74d61408ede2f9fc3f766ab27e524acb49426f26ade2f2c76",
+    "sdist-check-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "sdist-check-format-initial.log": "5446ca0d180d59dbadeae8492dd121cdee62db636308a9c9956ef2fff529e70e",
+    "sdist-check-format.log": "eee76f865de5a9f2456950f710ae5d5f9b5bd0ea02aa54f614c5eed6642a0bfd",
+    "sdist-check-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdist-check-actionlint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdist-check-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdist-check-cli.json": "d8ea0f7bedc457a98e5537fea8e871fae583a2917a562210a68b61c41b3811e1"
+  },
+  "limits": [
+    "CLI probe used a small synthetic archive of selected checkout inputs, not a backend source distribution.",
+    "No hosted execution, complete archive validation, clean clone, install dry run, full suite or hardware qualification.",
+    "Archive comparison covers selected exact member names only; unselected entries, aliases, whole-archive authenticity and global resource bounds are outside this check.",
+    "Full phase re-audit and delivery remain incomplete."
+  ]
+}

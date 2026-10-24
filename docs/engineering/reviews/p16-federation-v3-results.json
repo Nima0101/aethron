@@ -1,0 +1,42 @@
+{
+  "review_order_version": 3,
+  "baseline_head": "73cf95b0b6df7e827531eb70bb74660f13314dd7",
+  "component": "P16 direct federation",
+  "decision": "KEEP bounded direct table; FIX coverage; CLARIFY caller trust and lifetime claims",
+  "production_changed": false,
+  "checks": {
+    "federation_before": 8,
+    "federation_after": 11,
+    "interop_family": 40,
+    "passport_family": 41,
+    "ruff": "PASS",
+    "format": "PASS after formatting new tuple",
+    "bandit_production": "PASS",
+    "diff": "PASS"
+  },
+  "retained_negative_evidence": [
+    "Two initial execution-host SIGTRAP failures prevented policy reads; same absolute-path read succeeded before substantive work.",
+    "First broader interop run: 40 tests, one ERROR in existing inbox concurrency test: RuntimeError cannot start new thread. Serial rerun: 40 PASS.",
+    "Initial lint host launch failed with namespace resource exhaustion; retry passed.",
+    "Initial format check requested tuple formatting; formatting corrected and rechecked.",
+    "New tests pass unchanged production; no production RED/fix claimed.",
+    "A later rejected result does not revoke a positive snapshot already returned."
+  ],
+  "qualification": {
+    "physical": false,
+    "real_time": false,
+    "mls": false,
+    "cnsa": false,
+    "availability": false
+  },
+  "source_sha256": {
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "tests/test_interop_federation.py": "377a0b31b252dfd9aca8983c65e5c718aff7b3d72164a25808f37f1cd23fd0c0",
+    "docs/architecture/interop/federation-v1.md": "91762aa7ae923dc6cbf5da8ed1663f96ef4a09c875550378df60ddce6274ab62",
+    "docs/engineering/reviews/p16-federation-v3.md": "c704976cf0137860574764df947a4d746bd24de283330ff0c0e4280905602a5c",
+    "examples/interop/federation-vectors-v1.json": "00c8ee5d07f2dfd976a2e3ec77f6bc7cd3acca8183f338900e99f3c70b9ab0ba"
+  },
+  "next_component": "P16 bounded inbox"
+}

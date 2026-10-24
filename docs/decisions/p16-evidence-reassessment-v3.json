@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "id": "p16-evidence-reassessment-v3",
+  "component": "P16 immutable evidence byte binding",
+  "constraints": [
+    "One to sixteen already-resident immutable blobs, each zero to 65536 bytes; no input streaming or joined aggregate copy.",
+    "Authenticate the immutable envelope/policy before evidence hashing; require complete digest-set equality and preserve every signed outcome.",
+    "Metadata-only return, no content interpretation, storage, transport, qualification or authority. No defined hardware, deadline, RSS or throughput target."
+  ],
+  "alternatives": [
+    "CPython exact bytes/tuple admission and native hashlib.",
+    "Rust owned or safely borrowed immutable input with sha2.",
+    "C#/F# SHA256.HashData over caller-owned stable buffers.",
+    "Erlang/Elixir immutable binaries and crypto:hash.",
+    "Node JavaScript/TypeScript crypto with explicit ownership for mutable buffers."
+  ],
+  "rationale": [
+    "KEEP the immutable snapshot plus native hash implementation: exact-type admission prevents mutable backing stores from changing between validation, authentication and hashing; bounded per-blob hashing avoids joining content.",
+    "Rust borrowing, .NET spans and BEAM binary handling are credible alternatives; an FFI boundary does not inherently require copying. No measured or specified deployment advantage establishes a winning migration.",
+    "Ten focused binding methods pass, including maximum input, empty content, all-before-hash rejection, signed negative outcomes and backend failure. Weakening exact set equality causes two expected assertion failures.",
+    "Candidate choice is based on data ownership, complete set semantics and documented hash APIs, not installed tools, incumbent language, familiarity or rewrite cost."
+  ],
+  "limits": [
+    "One MiB bounds evidence input content, not interpreter/native memory or RSS. Returned digests can correlate guessable content; they are not anonymization or encryption.",
+    "Frozen result metadata is not an unforgeable token; the caller must reverify at use and handle input/result privacy. No secure erasure is promised.",
+    "No alternative full evidence binder was executed or benchmarked in this slice.",
+    "No comparative performance ranking, whole-lane completion, MLS/CNSA qualification, availability or physical timing claim.",
+    "No migration winner is established under the specified bounded offline constraints; no winning migration is deferred.",
+    "Insufficient information for tactical deployment."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.13/library/hashlib.html",
+    "https://docs.rs/sha2/latest/sha2/",
+    "https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.sha256.hashdata?view=net-10.0",
+    "https://www.erlang.org/doc/system/binaryhandling.html",
+    "https://www.erlang.org/doc/apps/crypto/crypto.html",
+    "https://nodejs.org/api/crypto.html"
+  ],
+  "decision": "KEEP"
+}

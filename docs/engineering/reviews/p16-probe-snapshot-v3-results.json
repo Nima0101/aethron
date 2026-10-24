@@ -1,0 +1,96 @@
+{
+  "audit_policy_version": 3,
+  "audit_complete": false,
+  "baseline_head": "3fbb37727cfcb04ef8e762e2e80725949764c4ab",
+  "decision": "KEEP direct byte comparison and standard digests; FIX observable source drift",
+  "source_scope": "Listed local project files only; not atomic snapshot, loaded-code attestation or dependency closure.",
+  "source_sha256": {
+    "scripts/passport_technology_probe.py": "6491cf5f521909b3dd5d838e067071e466ad473a966e4456793f96e636e8e73f",
+    "scripts/passport_technology_probe.mjs": "3ac4a2cd06479cf484310717ec8ac7b7d8afde167af047d8c3938f391ec2f83b",
+    "tests/test_passport_probe.py": "de4c7823e815c1f1df3e85fc9cfc2fe15387d4bef032517d87d3a73b515444e2",
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "docs/engineering/reviews/p16-probe-snapshot-v3.md": "f5d0ddbcc757c3cab39335b29c1019466f0bb7a4f080389e1e976f0510776a32",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "b70929564c9ff7d41d838b6a512859b9bfc533ac49a1108dd9dbe38c864d661b"
+  },
+  "checks": {
+    "red_methods": 1,
+    "red_assertion_failures": 5,
+    "red_errors": 0,
+    "probe_methods": 15,
+    "final_passport_evidence_schema_probe_methods": 64,
+    "skips": 0,
+    "ruff": "PASS after binding per-case test state",
+    "format": "PASS",
+    "bandit": "PASS with B101 excluded for guarded evidence assertions"
+  },
+  "log_sha256": {
+    "snapshot-red.log": "f8cdb3e8a094df65ccc33009fbc1397779e3634b4363ab827f942e769ae39c3f",
+    "snapshot-green.log": "9064735383f40665e492b0fabe27c49b4d95bed894a75c5f935aed21e5afa183",
+    "snapshot-final-tests.log": "d0de41cc24e7c82a8a5fa8563134437ae597d41ae8dfd4d31d13a241a3a76c8b",
+    "snapshot-live.json": "cdca5c629bf0ae7ee7b4495b9e6a118c0a0e10c1c2b37316ee7fcb2040856a2f"
+  },
+  "live_comparison": {
+    "audit_policy_version": 3,
+    "python": "3.13.5",
+    "source_sha256": {
+      "scripts/passport_technology_probe.py": "6491cf5f521909b3dd5d838e067071e466ad473a966e4456793f96e636e8e73f",
+      "scripts/passport_technology_probe.mjs": "3ac4a2cd06479cf484310717ec8ac7b7d8afde167af047d8c3938f391ec2f83b",
+      "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+      "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+      "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6"
+    },
+    "source_scope": "Listed project files matched before/after execution; fixture parsed from captured bytes. Not an atomic snapshot, loaded-code attestation or dependency closure; transient changes restored between reads are not detected.",
+    "fixture_sha256": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "cases": 6,
+    "crypto_accepts": [
+      true,
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "admissions": [
+      "authenticated",
+      "rejected",
+      "rejected",
+      "rejected",
+      "rejected",
+      "rejected"
+    ],
+    "python_lexical_rejections": 5,
+    "python_hash_1mib_ms": 0.5654169999615988,
+    "python_verify_mean_ms_128": 1.3515246874931108,
+    "python_traced_peak_bytes": 412029,
+    "node_probe": {
+      "node": "v22.23.2",
+      "crypto_accepts": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "hash_digest": "bf718b6f653bebc184e1479f1935b8da974d701b893afcf49e701f3e2f9f9c5a",
+      "hash_1mib_ms": 1.1891900000000248,
+      "duplicate_keys_collapsed": true,
+      "float_lexemes_collapsed": true
+    },
+    "limits": "Single-threaded local sample; Python traced allocations only, including input construction; not all native allocations. No hard real-time, RSS, platform or qualification claim. Node primitive probe is not a full verifier."
+  },
+  "negative_evidence": [
+    "Initial bubblewrap namespace and fork attempts failed with resource unavailable; policy reread succeeded after bounded retry.",
+    "Initial lint flagged test closure B023; binding per-case state resolved it.",
+    "Five simulated persistent source changes each escaped rejection before the correction."
+  ],
+  "limits": [
+    "Local sample only; no hardware or hard real-time qualification.",
+    "Does not detect changes restored between reads, changes after final read or prior loaded-code divergence.",
+    "Source buffers allocated before tracing are outside the reported traced interval.",
+    "No new whole-lane or phase completion claim."
+  ]
+}

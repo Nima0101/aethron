@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "p16-consumer-refresh-v3",
+  "component": "P16 edge, packet, ROS-status and stateless lifecycle assurance refresh",
+  "decision": "KEEP",
+  "constraints": [
+    "Offline synthetic conformance must observe the actual published producer and verifier APIs, independently of structural acceptance or sensor-content validity.",
+    "Edge structure uses local references only; packet and ROS fixtures are source-pinned. Preserve distinct verifier UTC and scene/host clocks, UNKNOWN outcomes and absent rejection metadata.",
+    "Lifecycle observations must demonstrate caller rewind and protection from independently supplied floors without claiming persistence, restart or whole-store rollback protection.",
+    "No target hardware, memory budget, latency SLA or deployment runtime is selected by these small developer test drivers."
+  ],
+  "alternatives": [
+    "Python unittest direct actual-API calls and language-neutral JSON fixtures; local python-jsonschema registry for the edge structural observation.",
+    "Java/Kotlin JUnit orchestration through a separate implementation adapter.",
+    "Robot Framework keyword orchestration through the published Python APIs.",
+    "Rust proptest for generated and shrunk input cases through an implementation boundary.",
+    "TLA+ or Alloy models and Erlang PropEr stateful generated tests for lifecycle exploration."
+  ],
+  "rationale": [
+    "Edge consumer KEEP: three current methods independently validate the fixed UNKNOWN structure and authenticate bytes. Direct verifier observation is decisive; structural tools alone cannot authenticate. A foreign driver still requires an implementation adapter.",
+    "Packet/encoding consumer KEEP: seven methods call the published decoder and binding API separately, retaining authentic malformed content and missing depth. Proptest offers additional generated coverage, not a replacement decoder. No material native migration benefit is established for these fixed observations.",
+    "ROS consumer KEEP: three methods observe exact receipt/loss/fault statuses from the actual producer without copying its state machine. Keyword or JVM orchestration does not extend that fixed boundary. No live ROS/DDS deployment is inferred.",
+    "Lifecycle KEEP: two current traces call the real verifier with caller rewind and retained floors; both fail when the respective stronger floor is bypassed. Modeling tools complement actual-call observations but cannot establish them by themselves.",
+    "Fresh 24-method execution, four controlled substitutions with nine expected assertion failures, and seventeen producer-source comparisons supply bounded executable evidence. No new runtime or assertion mismatch was demonstrated.",
+    "Choices derive from actual API observability and explicit test scope, not installation, familiarity, incumbent language or rewrite cost. No alternative implementation was benchmarked or executed."
+  ],
+  "limits": [
+    "These four KEEP decisions apply only to developer assurance harnesses, not future deployed components. Current evidence does not complete the assigned P16-P19 scope.",
+    "No model checker, full matrix, clean clone, distribution installation, physical hardware, timing, MLS/CNSA, availability or customer acceptance qualification was performed.",
+    "Selected source hashes do not establish atomic snapshots, loaded-code attestation, complete dependencies or authentic provenance. Local raw logs are not published release artifacts.",
+    "CI snapshot showed queued checks and one skip; no relevant exact-head PASS or merge. Earlier negative evidence remains intact."
+  ],
+  "evidence": [
+    "https://docs.python.org/3/library/unittest.html",
+    "https://python-jsonschema.readthedocs.io/en/stable/referencing/",
+    "https://docs.junit.org/6.1.3/overview.html",
+    "https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html",
+    "https://docs.rs/proptest/latest/proptest/",
+    "https://lamport.azurewebsites.net/tla/tla.html",
+    "https://alloytools.org/about.html",
+    "https://proper-testing.github.io/"
+  ]
+}

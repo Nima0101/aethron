@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline_head": "97eaef42df8298e38359bf91287118ef7a659efd",
+  "scope": "Offline P16 ADR documentation/schema validation and workflow path coverage",
+  "decision": "KEEP JSON Schema and offline Python jsonschema; FIX continuous coverage",
+  "runtime": "Linux CPython 3.13.5; jsonschema 4.26.0",
+  "production_changed": false,
+  "production_red_claimed": false,
+  "checks": {
+    "related": {
+      "command": [
+        "python",
+        "-m",
+        "unittest",
+        "test_passport_schemas",
+        "test_passport_policy",
+        "-v"
+      ],
+      "exit_code": 0
+    },
+    "ruff": {
+      "command": [
+        "ruff",
+        "check",
+        "tests/test_passport_schemas.py"
+      ],
+      "exit_code": 0
+    },
+    "format": {
+      "command": [
+        "ruff",
+        "format",
+        "--check",
+        "tests/test_passport_schemas.py"
+      ],
+      "exit_code": 0
+    },
+    "bandit": {
+      "command": [
+        "bandit",
+        "-q",
+        "tests/test_passport_schemas.py"
+      ],
+      "exit_code": 0
+    },
+    "actionlint": {
+      "command": [
+        "actionlint",
+        ".github/workflows/aethron-passports.yml"
+      ],
+      "exit_code": 0
+    },
+    "diff": {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0
+    }
+  },
+  "results": {
+    "new_methods": 3,
+    "related_methods_including_new": 26,
+    "negative_document_variants": 25,
+    "skips": 0,
+    "errors": 0,
+    "failures": 0,
+    "negative_control": "Local schema copy without the HTTPS-reference pattern accepts invalid reference; actual schema rejects it.",
+    "workflow_execution": "NOT CLAIMED; source configuration and actionlint checked locally."
+  },
+  "source_sha256": {
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "tests/test_passport_schemas.py": "f437fddf0c820bdfc487daa90383ff78ffa001112dac5227bbda92c794ef4512",
+    "contracts/interop/architecture-decision-v1.schema.json": "e9043056f57e8dfdecb81c5244a95c173b346ff372020a5c662edefa867dbe1a",
+    "docs/decisions/p16-policy-admission-v1.json": "f3af2a019be401afb4cf8e0b91426df7149dc15eee756fe27de05bb1197f8cd4",
+    ".github/workflows/aethron-passports.yml": "abd88979695dd2b169e4ac5ea38b7d4af2b7da360e2a636468cf42e6585fa680",
+    "requirements-passport-conformance.txt": "1d137f508c86edba0b3bf6d5c5e9d6cf673b31c3e4cfed2d57a3122ccad73dd3",
+    "docs/engineering/reviews/p16-adr-publication-v3.md": "6d15be4341de7c28524a0f96c7310838e80a61536c4c4a05c842c35abcd03bb2"
+  },
+  "runtime_log_sha256": {
+    "adr-ci-focused.log": "4caccc210d4495563f97cc3bf57695b870a631606e80606eb613a6327ca50053",
+    "adr-ci-related.log": "d94b0f81182cf0807212e20c8c8f2e3bd0c3c4348fe2510c2edb7680205f798a",
+    "adr-ci-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "adr-ci-format.log": "fd2299c9f1c6dc869070883e281051bfe93aacf66c1a3b0069f45b4aa410ca50",
+    "adr-ci-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "adr-ci-actionlint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "adr-ci-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "limits": [
+    "Structural document checks do not verify evidence truth, reachability, authors or decision quality.",
+    "No runtime parser/policy change, target hardware measurement, installed-package or hosted run.",
+    "Direct file hashes are not full dependency provenance or loaded-code attestation.",
+    "Earlier phase/audit completion remains unestablished."
+  ],
+  "publication_redaction": {
+    "baseline_commit": "ec55eb8bd3cdb25641b6ec761bbd200d90a5604b",
+    "original_record_sha256": "853e08d996c6377f2de6e5631f725003e5a6b4bc1fcf6e4189bc9a1193f2be5a",
+    "executable_paths_replaced": 5,
+    "representation": "Command executable entries are public basenames with private local prefixes removed; not verbatim historical argv or a new execution.",
+    "preserved": "All historical command arguments, results, source hashes and runtime-log hashes remain unchanged.",
+    "cause": "The unchanged public-content gate rejected a local host path. This is a publication correction, not a passing full verification run."
+  }
+}

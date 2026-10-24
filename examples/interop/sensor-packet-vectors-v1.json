@@ -1,0 +1,125 @@
+{
+  "profile": "aethron.sensor-packet-evidence.v1",
+  "source_commit": "a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46",
+  "source_sha256": {
+    "integrations/edge/aethron_edge/sensors/packets.py": "56d66f258b24f8cf4d4af9a1b1328a1bbaf326b839e5edf08f3a5327ff281192",
+    "integrations/edge/aethron_edge/__init__.py": "fc3adf2bb0f73d7339bc54e6d0fb2f94c5dc53a2946bac32856cf5f01b61faa9",
+    "integrations/edge/aethron_edge/sensors/__init__.py": "98905b1b18d58ff7bcee36a3854f2022be6443c0b36c4217f4f5781197f8d92a"
+  },
+  "limitations": [
+    "Public RFC 8032 test key only; never deployment credentials.",
+    "Analytical depth samples; no physical or live sensor evidence.",
+    "Byte binding is independent of packet decoding and does not qualify either."
+  ],
+  "cases": [
+    {
+      "name": "synthetic-depth",
+      "task": "{\"evidence_sha256\":[\"364163e5553bfc43caad30f1d748c2a59f5b32a2cc17d279954192cab49d3f79\",\"82ead1baacb36f5536cfb4449bcf63b6b986592308118937e0ddfa1d99adb073\"],\"expires_at\":1700,\"issued_at\":1400,\"kind\":\"evidence.bind.v1\",\"max_evidence_bytes\":512,\"motion_authority\":false,\"passport_sha256\":\"8360e15a10bbbc471eebd52f22bedc6ca59ccaf2cd44e439990f3be4ee83ed6c\",\"policy_sha256\":\"bdd4a32d5c3e4d7ccb9fe6587de340a0d35622d6c1135544ef865ca79a2cfcf9\",\"subject_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"task_id\":\"fixture-sensor-packet\",\"version\":1}",
+      "envelope": "{\"payload\":\"eyJhc3N1cmFuY2UiOiJzZWxmX2RlY2xhcmVkIiwiY2FwYWJpbGl0aWVzIjpbeyJldmlkZW5jZV9zaGEyNTYiOlsiMzY0MTYzZTU1NTNiZmM0M2NhYWQzMGYxZDc0OGMyYTU5ZjViMzJhMmNjMTdkMjc5OTU0MTkyY2FiNDlkM2Y3OSIsIjgyZWFkMWJhYWNiMzZmNTUzNmNmYjQ0NDliY2Y2M2I2Yjk4NjU5MjMwODExODkzN2UwZGRmYTFkOTlhZGIwNzMiXSwibmFtZSI6ImV2aWRlbmNlLm9mZmxpbmUudjEifV0sImV2aWRlbmNlIjpbeyJraW5kIjoic3ludGhldGljIiwib3V0Y29tZSI6InVua25vd24iLCJzaGEyNTYiOiIzNjQxNjNlNTU1M2JmYzQzY2FhZDMwZjFkNzQ4YzJhNTlmNWIzMmEyY2MxN2QyNzk5NTQxOTJjYWI0OWQzZjc5In0seyJraW5kIjoic3ludGhldGljIiwib3V0Y29tZSI6InVua25vd24iLCJzaGEyNTYiOiI4MmVhZDFiYWFjYjM2ZjU1MzZjZmI0NDQ5YmNmNjNiNmI5ODY1OTIzMDgxMTg5MzdlMGRkZmExZDk5YWRiMDczIn1dLCJleHBpcmVzX2F0IjoyMDAwLCJpc3N1ZWRfYXQiOjEwMDAsImlzc3VlciI6ImZpeHR1cmUtcHVibGlzaGVyIiwibW90aW9uX2F1dGhvcml0eSI6ZmFsc2UsInBhc3Nwb3J0X2lkIjoiZml4dHVyZS1zdGF0ZW1lbnQtMSIsInN1YmplY3Rfc2hhMjU2IjoiYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsInZlcnNpb24iOjF9\",\"payloadType\":\"application/vnd.aethron.capability-passport.v1+json\",\"signatures\":[{\"keyid\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"sig\":\"5mcIIw3+E8tJqflMovV1c+hw3ax7ZAlkRI/uSEsS1XwgRk/5CJr+HYe7Ixsdb1OZttTtwBFChBoE32Txe4s6Cw==\"}]}",
+      "policy": "{\"expires_at\":2100,\"issued_at\":900,\"keys\":[{\"capabilities\":[\"evidence.offline.v1\"],\"expires_at\":3000,\"issuer\":\"fixture-publisher\",\"key_id\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"not_before\":800,\"public_key\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\"}],\"revision\":3,\"revoked_evidence\":[],\"revoked_keys\":[],\"revoked_passports\":[],\"version\":1}",
+      "evidence_hex": [
+        "7b22656e636f64696e67223a223136554331222c22686569676874223a312c2269735f626967656e6469616e223a66616c73652c226d65746572735f7065725f756e6974223a302e3030322c226d6f64616c697479223a226465707468222c2273746570223a342c227769647468223a327d",
+        "0000c409"
+      ],
+      "arguments": {
+        "expected_task_sha256": "df01d3faa9ccd4ecc6a34202d58956d8f294e8271b9f9c6f64179e7f894a122d",
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_policy_revision": 3
+      },
+      "status": "bound",
+      "reason": "evidence_bound",
+      "outcomes": [
+        "unknown",
+        "unknown"
+      ]
+    },
+    {
+      "name": "substituted-layout",
+      "task": "{\"evidence_sha256\":[\"364163e5553bfc43caad30f1d748c2a59f5b32a2cc17d279954192cab49d3f79\",\"82ead1baacb36f5536cfb4449bcf63b6b986592308118937e0ddfa1d99adb073\"],\"expires_at\":1700,\"issued_at\":1400,\"kind\":\"evidence.bind.v1\",\"max_evidence_bytes\":512,\"motion_authority\":false,\"passport_sha256\":\"8360e15a10bbbc471eebd52f22bedc6ca59ccaf2cd44e439990f3be4ee83ed6c\",\"policy_sha256\":\"bdd4a32d5c3e4d7ccb9fe6587de340a0d35622d6c1135544ef865ca79a2cfcf9\",\"subject_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"task_id\":\"fixture-sensor-packet\",\"version\":1}",
+      "envelope": "{\"payload\":\"eyJhc3N1cmFuY2UiOiJzZWxmX2RlY2xhcmVkIiwiY2FwYWJpbGl0aWVzIjpbeyJldmlkZW5jZV9zaGEyNTYiOlsiMzY0MTYzZTU1NTNiZmM0M2NhYWQzMGYxZDc0OGMyYTU5ZjViMzJhMmNjMTdkMjc5OTU0MTkyY2FiNDlkM2Y3OSIsIjgyZWFkMWJhYWNiMzZmNTUzNmNmYjQ0NDliY2Y2M2I2Yjk4NjU5MjMwODExODkzN2UwZGRmYTFkOTlhZGIwNzMiXSwibmFtZSI6ImV2aWRlbmNlLm9mZmxpbmUudjEifV0sImV2aWRlbmNlIjpbeyJraW5kIjoic3ludGhldGljIiwib3V0Y29tZSI6InVua25vd24iLCJzaGEyNTYiOiIzNjQxNjNlNTU1M2JmYzQzY2FhZDMwZjFkNzQ4YzJhNTlmNWIzMmEyY2MxN2QyNzk5NTQxOTJjYWI0OWQzZjc5In0seyJraW5kIjoic3ludGhldGljIiwib3V0Y29tZSI6InVua25vd24iLCJzaGEyNTYiOiI4MmVhZDFiYWFjYjM2ZjU1MzZjZmI0NDQ5YmNmNjNiNmI5ODY1OTIzMDgxMTg5MzdlMGRkZmExZDk5YWRiMDczIn1dLCJleHBpcmVzX2F0IjoyMDAwLCJpc3N1ZWRfYXQiOjEwMDAsImlzc3VlciI6ImZpeHR1cmUtcHVibGlzaGVyIiwibW90aW9uX2F1dGhvcml0eSI6ZmFsc2UsInBhc3Nwb3J0X2lkIjoiZml4dHVyZS1zdGF0ZW1lbnQtMSIsInN1YmplY3Rfc2hhMjU2IjoiYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsInZlcnNpb24iOjF9\",\"payloadType\":\"application/vnd.aethron.capability-passport.v1+json\",\"signatures\":[{\"keyid\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"sig\":\"5mcIIw3+E8tJqflMovV1c+hw3ax7ZAlkRI/uSEsS1XwgRk/5CJr+HYe7Ixsdb1OZttTtwBFChBoE32Txe4s6Cw==\"}]}",
+      "policy": "{\"expires_at\":2100,\"issued_at\":900,\"keys\":[{\"capabilities\":[\"evidence.offline.v1\"],\"expires_at\":3000,\"issuer\":\"fixture-publisher\",\"key_id\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"not_before\":800,\"public_key\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\"}],\"revision\":3,\"revoked_evidence\":[],\"revoked_keys\":[],\"revoked_passports\":[],\"version\":1}",
+      "evidence_hex": [
+        "7b22656e636f64696e67223a223136554331222c22686569676874223a312c2269735f626967656e6469616e223a66616c73652c226d65746572735f7065725f756e6974223a302e3030342c226d6f64616c697479223a226465707468222c2273746570223a342c227769647468223a327d",
+        "0000c409"
+      ],
+      "arguments": {
+        "expected_task_sha256": "df01d3faa9ccd4ecc6a34202d58956d8f294e8271b9f9c6f64179e7f894a122d",
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_policy_revision": 3
+      },
+      "status": "rejected",
+      "reason": "evidence_mismatch",
+      "outcomes": []
+    },
+    {
+      "name": "altered-pixels",
+      "task": "{\"evidence_sha256\":[\"364163e5553bfc43caad30f1d748c2a59f5b32a2cc17d279954192cab49d3f79\",\"82ead1baacb36f5536cfb4449bcf63b6b986592308118937e0ddfa1d99adb073\"],\"expires_at\":1700,\"issued_at\":1400,\"kind\":\"evidence.bind.v1\",\"max_evidence_bytes\":512,\"motion_authority\":false,\"passport_sha256\":\"8360e15a10bbbc471eebd52f22bedc6ca59ccaf2cd44e439990f3be4ee83ed6c\",\"policy_sha256\":\"bdd4a32d5c3e4d7ccb9fe6587de340a0d35622d6c1135544ef865ca79a2cfcf9\",\"subject_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"task_id\":\"fixture-sensor-packet\",\"version\":1}",
+      "envelope": "{\"payload\":\"eyJhc3N1cmFuY2UiOiJzZWxmX2RlY2xhcmVkIiwiY2FwYWJpbGl0aWVzIjpbeyJldmlkZW5jZV9zaGEyNTYiOlsiMzY0MTYzZTU1NTNiZmM0M2NhYWQzMGYxZDc0OGMyYTU5ZjViMzJhMmNjMTdkMjc5OTU0MTkyY2FiNDlkM2Y3OSIsIjgyZWFkMWJhYWNiMzZmNTUzNmNmYjQ0NDliY2Y2M2I2Yjk4NjU5MjMwODExODkzN2UwZGRmYTFkOTlhZGIwNzMiXSwibmFtZSI6ImV2aWRlbmNlLm9mZmxpbmUudjEifV0sImV2aWRlbmNlIjpbeyJraW5kIjoic3ludGhldGljIiwib3V0Y29tZSI6InVua25vd24iLCJzaGEyNTYiOiIzNjQxNjNlNTU1M2JmYzQzY2FhZDMwZjFkNzQ4YzJhNTlmNWIzMmEyY2MxN2QyNzk5NTQxOTJjYWI0OWQzZjc5In0seyJraW5kIjoic3ludGhldGljIiwib3V0Y29tZSI6InVua25vd24iLCJzaGEyNTYiOiI4MmVhZDFiYWFjYjM2ZjU1MzZjZmI0NDQ5YmNmNjNiNmI5ODY1OTIzMDgxMTg5MzdlMGRkZmExZDk5YWRiMDczIn1dLCJleHBpcmVzX2F0IjoyMDAwLCJpc3N1ZWRfYXQiOjEwMDAsImlzc3VlciI6ImZpeHR1cmUtcHVibGlzaGVyIiwibW90aW9uX2F1dGhvcml0eSI6ZmFsc2UsInBhc3Nwb3J0X2lkIjoiZml4dHVyZS1zdGF0ZW1lbnQtMSIsInN1YmplY3Rfc2hhMjU2IjoiYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsInZlcnNpb24iOjF9\",\"payloadType\":\"application/vnd.aethron.capability-passport.v1+json\",\"signatures\":[{\"keyid\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"sig\":\"5mcIIw3+E8tJqflMovV1c+hw3ax7ZAlkRI/uSEsS1XwgRk/5CJr+HYe7Ixsdb1OZttTtwBFChBoE32Txe4s6Cw==\"}]}",
+      "policy": "{\"expires_at\":2100,\"issued_at\":900,\"keys\":[{\"capabilities\":[\"evidence.offline.v1\"],\"expires_at\":3000,\"issuer\":\"fixture-publisher\",\"key_id\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"not_before\":800,\"public_key\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\"}],\"revision\":3,\"revoked_evidence\":[],\"revoked_keys\":[],\"revoked_passports\":[],\"version\":1}",
+      "evidence_hex": [
+        "7b22656e636f64696e67223a223136554331222c22686569676874223a312c2269735f626967656e6469616e223a66616c73652c226d65746572735f7065725f756e6974223a302e3030322c226d6f64616c697479223a226465707468222c2273746570223a342c227769647468223a327d",
+        "0000c509"
+      ],
+      "arguments": {
+        "expected_task_sha256": "df01d3faa9ccd4ecc6a34202d58956d8f294e8271b9f9c6f64179e7f894a122d",
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_policy_revision": 3
+      },
+      "status": "rejected",
+      "reason": "evidence_mismatch",
+      "outcomes": []
+    },
+    {
+      "name": "signed-truncated-pixels",
+      "task": "{\"evidence_sha256\":[\"364163e5553bfc43caad30f1d748c2a59f5b32a2cc17d279954192cab49d3f79\",\"356df870b4852dcaa180f2f8b83b1fadfdeb74205c90dca7a98d4240999b861d\"],\"expires_at\":1700,\"issued_at\":1400,\"kind\":\"evidence.bind.v1\",\"max_evidence_bytes\":512,\"motion_authority\":false,\"passport_sha256\":\"7c23a7a9b50ec34ef905e59909badf6d352a7b29a323cfbcee7702b55e052e4e\",\"policy_sha256\":\"bdd4a32d5c3e4d7ccb9fe6587de340a0d35622d6c1135544ef865ca79a2cfcf9\",\"subject_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"task_id\":\"fixture-sensor-packet\",\"version\":1}",
+      "envelope": "{\"payload\":\"eyJhc3N1cmFuY2UiOiJzZWxmX2RlY2xhcmVkIiwiY2FwYWJpbGl0aWVzIjpbeyJldmlkZW5jZV9zaGEyNTYiOlsiMzY0MTYzZTU1NTNiZmM0M2NhYWQzMGYxZDc0OGMyYTU5ZjViMzJhMmNjMTdkMjc5OTU0MTkyY2FiNDlkM2Y3OSIsIjM1NmRmODcwYjQ4NTJkY2FhMTgwZjJmOGI4M2IxZmFkZmRlYjc0MjA1YzkwZGNhN2E5OGQ0MjQwOTk5Yjg2MWQiXSwibmFtZSI6ImV2aWRlbmNlLm9mZmxpbmUudjEifV0sImV2aWRlbmNlIjpbeyJraW5kIjoic3ludGhldGljIiwib3V0Y29tZSI6ImZhaWxlZCIsInNoYTI1NiI6IjM2NDE2M2U1NTUzYmZjNDNjYWFkMzBmMWQ3NDhjMmE1OWY1YjMyYTJjYzE3ZDI3OTk1NDE5MmNhYjQ5ZDNmNzkifSx7ImtpbmQiOiJzeW50aGV0aWMiLCJvdXRjb21lIjoiZmFpbGVkIiwic2hhMjU2IjoiMzU2ZGY4NzBiNDg1MmRjYWExODBmMmY4YjgzYjFmYWRmZGViNzQyMDVjOTBkY2E3YTk4ZDQyNDA5OTliODYxZCJ9XSwiZXhwaXJlc19hdCI6MjAwMCwiaXNzdWVkX2F0IjoxMDAwLCJpc3N1ZXIiOiJmaXh0dXJlLXB1Ymxpc2hlciIsIm1vdGlvbl9hdXRob3JpdHkiOmZhbHNlLCJwYXNzcG9ydF9pZCI6ImZpeHR1cmUtc3RhdGVtZW50LTEiLCJzdWJqZWN0X3NoYTI1NiI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJ2ZXJzaW9uIjoxfQ==\",\"payloadType\":\"application/vnd.aethron.capability-passport.v1+json\",\"signatures\":[{\"keyid\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"sig\":\"5qMomVn4p72GG9p6KcCOgoxseLlCq60lxTc/FHZzBcGQB/YisQ9xOj4DPI8bQlIDZlQPt7kE+M4tOmQctiUrAw==\"}]}",
+      "policy": "{\"expires_at\":2100,\"issued_at\":900,\"keys\":[{\"capabilities\":[\"evidence.offline.v1\"],\"expires_at\":3000,\"issuer\":\"fixture-publisher\",\"key_id\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"not_before\":800,\"public_key\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\"}],\"revision\":3,\"revoked_evidence\":[],\"revoked_keys\":[],\"revoked_passports\":[],\"version\":1}",
+      "evidence_hex": [
+        "7b22656e636f64696e67223a223136554331222c22686569676874223a312c2269735f626967656e6469616e223a66616c73652c226d65746572735f7065725f756e6974223a302e3030322c226d6f64616c697479223a226465707468222c2273746570223a342c227769647468223a327d",
+        "0000c4"
+      ],
+      "arguments": {
+        "expected_task_sha256": "ec85fc03ee2a471fc3e1a6758573cce64ca6b66b09050f99a1a81bf1777fb133",
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_policy_revision": 3
+      },
+      "status": "bound",
+      "reason": "evidence_bound",
+      "outcomes": [
+        "failed",
+        "failed"
+      ]
+    },
+    {
+      "name": "signed-missing-depth",
+      "task": "{\"evidence_sha256\":[\"364163e5553bfc43caad30f1d748c2a59f5b32a2cc17d279954192cab49d3f79\",\"df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119\"],\"expires_at\":1700,\"issued_at\":1400,\"kind\":\"evidence.bind.v1\",\"max_evidence_bytes\":512,\"motion_authority\":false,\"passport_sha256\":\"8ea0ccaf9f03872f8f0e3fc782d38a41a60c7dda6102dd2d9bc67c4ee9bd13cc\",\"policy_sha256\":\"bdd4a32d5c3e4d7ccb9fe6587de340a0d35622d6c1135544ef865ca79a2cfcf9\",\"subject_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"task_id\":\"fixture-sensor-packet\",\"version\":1}",
+      "envelope": "{\"payload\":\"eyJhc3N1cmFuY2UiOiJzZWxmX2RlY2xhcmVkIiwiY2FwYWJpbGl0aWVzIjpbeyJldmlkZW5jZV9zaGEyNTYiOlsiMzY0MTYzZTU1NTNiZmM0M2NhYWQzMGYxZDc0OGMyYTU5ZjViMzJhMmNjMTdkMjc5OTU0MTkyY2FiNDlkM2Y3OSIsImRmM2Y2MTk4MDRhOTJmZGI0MDU3MTkyZGM0M2RkNzQ4ZWE3NzhhZGM1MmJjNDk4Y2U4MDUyNGMwMTRiODExMTkiXSwibmFtZSI6ImV2aWRlbmNlLm9mZmxpbmUudjEifV0sImV2aWRlbmNlIjpbeyJraW5kIjoic3ludGhldGljIiwib3V0Y29tZSI6InVua25vd24iLCJzaGEyNTYiOiIzNjQxNjNlNTU1M2JmYzQzY2FhZDMwZjFkNzQ4YzJhNTlmNWIzMmEyY2MxN2QyNzk5NTQxOTJjYWI0OWQzZjc5In0seyJraW5kIjoic3ludGhldGljIiwib3V0Y29tZSI6InVua25vd24iLCJzaGEyNTYiOiJkZjNmNjE5ODA0YTkyZmRiNDA1NzE5MmRjNDNkZDc0OGVhNzc4YWRjNTJiYzQ5OGNlODA1MjRjMDE0YjgxMTE5In1dLCJleHBpcmVzX2F0IjoyMDAwLCJpc3N1ZWRfYXQiOjEwMDAsImlzc3VlciI6ImZpeHR1cmUtcHVibGlzaGVyIiwibW90aW9uX2F1dGhvcml0eSI6ZmFsc2UsInBhc3Nwb3J0X2lkIjoiZml4dHVyZS1zdGF0ZW1lbnQtMSIsInN1YmplY3Rfc2hhMjU2IjoiYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYSIsInZlcnNpb24iOjF9\",\"payloadType\":\"application/vnd.aethron.capability-passport.v1+json\",\"signatures\":[{\"keyid\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"sig\":\"iYa4+73JGA4NQqS/e2sQFpijJe8prJTuPBCAAMUJqBQAvDv6CwwTd0QCj1bqmx2UoVLDObB1nMYEIeembxqHCg==\"}]}",
+      "policy": "{\"expires_at\":2100,\"issued_at\":900,\"keys\":[{\"capabilities\":[\"evidence.offline.v1\"],\"expires_at\":3000,\"issuer\":\"fixture-publisher\",\"key_id\":\"21fe31dfa154a261626bf854046fd2271b7bed4b6abe45aa58877ef47f9721b9\",\"not_before\":800,\"public_key\":\"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a\"}],\"revision\":3,\"revoked_evidence\":[],\"revoked_keys\":[],\"revoked_passports\":[],\"version\":1}",
+      "evidence_hex": [
+        "7b22656e636f64696e67223a223136554331222c22686569676874223a312c2269735f626967656e6469616e223a66616c73652c226d65746572735f7065725f756e6974223a302e3030322c226d6f64616c697479223a226465707468222c2273746570223a342c227769647468223a327d",
+        "00000000"
+      ],
+      "arguments": {
+        "expected_task_sha256": "d543c98dcdcd8dfe14f0a631296282f974eb537326f7c5213b57d5a3b093bb66",
+        "expected_subject_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "now_s": 1500,
+        "minimum_time_s": 1400,
+        "minimum_policy_revision": 3
+      },
+      "status": "bound",
+      "reason": "evidence_bound",
+      "outcomes": [
+        "unknown",
+        "unknown"
+      ]
+    }
+  ]
+}

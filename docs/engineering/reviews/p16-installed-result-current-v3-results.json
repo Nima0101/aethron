@@ -1,0 +1,92 @@
+{
+  "review_order_version": 3,
+  "date": "2026-10-10",
+  "source_head": "ea75e19c4e16486b7a91e83ca8db44de0eb9d6e2",
+  "decision": "KEEP direct Python developer inspection; FIX incomplete installed-vector result metadata and reference comparisons.",
+  "scope": "Installed source/RECORD identity, selected source archive and manifest, fixed API behavioral runner, workflow configuration. No artifact build or installation.",
+  "library_changed": false,
+  "fixture_or_wire_changed": false,
+  "tool_changed": "scripts/passport_installed_vectors.py",
+  "new_test_methods": 3,
+  "initial_invalid_experiment": {
+    "methods": 2,
+    "failures": 18,
+    "errors": 26,
+    "reason": "Recursive asdict converted nested evidence references; excluded. Fixed helper before decisive RED."
+  },
+  "red": {
+    "metadata_and_references": {
+      "methods": 2,
+      "failures": 44,
+      "errors": 0,
+      "skips": 0
+    },
+    "inbox_identity": {
+      "methods": 1,
+      "failures": 4,
+      "errors": 0,
+      "skips": 0
+    }
+  },
+  "green": {
+    "focused_methods": 47,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "runner_methods": 23,
+    "runner_cases_and_scenarios": 62
+  },
+  "adr_methods": 4,
+  "ruff": "PASS check seven files; format two changed files",
+  "bandit": {
+    "files": 7,
+    "low_B101": 46,
+    "medium": 0,
+    "high": 0,
+    "ignore_nosec": true,
+    "interpretation": "Deliberate developer assertions with optimized-mode rejection retained; not a zero-finding scan."
+  },
+  "source_sha256": {
+    "scripts/passport_install_check.py": "841237a8123416f0645a9af8b6173d45a6fe6fbaf0b8da2e6a53ea5b4940b512",
+    "scripts/passport_sdist_check.py": "db701aca4c8547fa7baa318db348cbd6d44f23611ced1c8efe77433cb4b3c541",
+    "scripts/passport_installed_vectors.py": "1ed2b5aabba2dcb9c4e3f234c5f32bd7e9778d92a8265328dfaff507061a1dc7",
+    "tests/test_passport_install_check.py": "1914ba8d17fc7b6b416e3b85416313b13f55e90b9c0fe7a8ac5240f2b0ffa1be",
+    "tests/test_passport_installed_vectors.py": "c66dd770178b892f5a8a87496b1147c0341990c1ffe87a9f9bca4d99dc0b7801",
+    "tests/packaging/test_passport_sdist.py": "5a41f7517791c9e6691a0a99004c2258b5b40901d51ff1cd7e82d04e5ee89819",
+    "tests/packaging/test_passport_manifest.py": "30d35a49196113c09cb1745a26a9201cc18e6270e6f7653c2c340029977f69cf",
+    "MANIFEST.in": "af220709a64d24ca1606a7b48abab7e7ef68d6976d237242715872f3fb9084f1",
+    "pyproject.toml": "c5e3d4d7dd65acd3d3c04baf7f53b49b5ef99db6231fa610f1e144f17eec4b0e",
+    ".github/workflows/aethron-passports.yml": "f2e52752fcda9ff25b5792b2639d45704cb8568f8cdb8eee5fe0cb4cc2051e72",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/passport_floor_store.py": "4ad9945f4afc2abaf4c4e15e62d588a841618f1d10d252dab949765f468bb420",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/interop_federation.py": "2ff7c09270d98a5b7a3aa0eea73981ea3a3f23f50381dc0b5f6b9ce04c4f7cd4",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "examples/passports/evidence-vectors.json": "9ab7461a842ee783d4a1ddafa7e89fc40b7385e6f18b74b4bad7673ae7c91dfb",
+    "examples/passports/policy-vectors-v1.json": "8014f8c76f795e15169c891a36c0b32f01f3de384d5ee6f9a9d7f1aae7b61afa",
+    "examples/interop/task-vectors-v1.json": "17510988868b8fb57f2af7b8375db21ebc980bd845450f6c9cd44bfc0fa4794c",
+    "examples/interop/bundle-vectors-v1.json": "9dc373820c2c278b18887dc35716d941ef2ab6d76b0afe119a34787a7436a460",
+    "examples/interop/federation-vectors-v1.json": "00c8ee5d07f2dfd976a2e3ec77f6bc7cd3acca8183f338900e99f3c70b9ab0ba",
+    "examples/interop/federation-policy-vectors-v1.json": "74cd12782e8e418e3e2270c4a0c578a75062e6863211da0311a7b9b34ac6087d",
+    "examples/interop/inbox-vectors-v1.json": "0c3cb8ce0c8c2ce10525a63158e2ca0b6970c3953b6a09c386b133b0dace5ec3"
+  },
+  "runtime_evidence_sha256": {
+    "installed-metadata-red.log": "6f4a14736328e74f24b075c4fff40aa719364db6fe972d1704042076d66edf9a",
+    "installed-metadata-red-corrected.log": "660747f423b94329b5bfed0cf4985071690673f494808a6ef0b3b06b866d2fdb",
+    "installed-inbox-red.log": "70ec0802ba3f74f32b12e6553ca8ee61f78e8f435d4730abb2619e5f65f13b01",
+    "installed-current-final.log": "14c071648b5b9dbb0bafd1467d12020a5e6f9b450950dec2f4cb4b19e54058c1",
+    "installed-current-bandit.json": "038873cf0a315e4a40995caeba98027d9c96f4f0439dc9b84b0ea6e916113670",
+    "installed-current-adr.log": "3bb9a5014d8fca051f8c3fc271e0008e87e0f9c892c58870e0a2bc60674a5a17"
+  },
+  "limits": [
+    "Fixed synthetic corpus only; full parity, exhaustive mutations and hostile archive handling are not established.",
+    "No alternative runtime executed or benchmarked.",
+    "No local distribution build/install, clean clone, full repository or hosted matrix executed.",
+    "Digests identify selected disk bytes, not dependency closure, loaded code, atomic snapshots or signed provenance.",
+    "No P16-P19 completion or tactical, physical, real-time, MLS/CNSA or availability qualification."
+  ]
+}

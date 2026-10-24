@@ -1,0 +1,179 @@
+{
+  "audit_policy_version": 3,
+  "audit_complete": false,
+  "baseline_head": "0a1a0ee64463bc168221fd082519e9cb14f1b357",
+  "decision": "KEEP digest APIs; FIX standalone manifest coverage and current policy label; CLARIFY evidence scope",
+  "source_sha256": {
+    "scripts/passport_technology_probe.py": "d652f585513995a32c1176f161ae4e98bd702b125a7a76680b1ad0729cc9bf0d",
+    "scripts/passport_technology_probe.mjs": "3ac4a2cd06479cf484310717ec8ac7b7d8afde167af047d8c3938f391ec2f83b",
+    "scripts/passport_trust_review.py": "b53144266b2f233a6f32fa50f2fb6f09aea7b02fd5fbcfd0643f364d97a0a78f",
+    "tests/test_passport_probe.py": "1e144eb84deea3ff09c66d884ce708e242942138a866cff008b695e5738cc458",
+    "tests/test_passports.py": "ec0c935252333fb4ee522969a428851dd363fdb5ad5ae5c5b8f384d4780a62ff",
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+    "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "docs/engineering/reviews/p16-p18-inventory-v3.md": "c9e9a7ef3f1fe2bb26c40b5cef92ba690493c98265be3210020dd773d3de831a"
+  },
+  "checks": {
+    "red_manifest_assertions": 2,
+    "red_policy_label_assertions": 2,
+    "red_errors": 0,
+    "green_passport_methods": 56,
+    "skips": 0,
+    "historical_records": 10,
+    "historical_source_matches": 77,
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS with B101/B102 exclusions for assertions and controlled in-memory mutations",
+    "diff": "PASS"
+  },
+  "historical_bindings": [
+    {
+      "record": "docs/engineering/reviews/p16-bundle-v3-results.json",
+      "commit": "73cf95b0b6df7e827531eb70bb74660f13314dd7",
+      "bindings": 10,
+      "mismatches": []
+    },
+    {
+      "record": "docs/engineering/reviews/p16-conformance-v3-results.json",
+      "commit": "0686debb698f84299b0fa4531448ca1b803e88a7",
+      "bindings": 9,
+      "mismatches": []
+    },
+    {
+      "record": "docs/engineering/reviews/p16-evidence-v3-results.json",
+      "commit": "2519b63ff4383f2c6a2d4820370cb6581b42b885",
+      "bindings": 5,
+      "mismatches": []
+    },
+    {
+      "record": "docs/engineering/reviews/p16-federation-v3-results.json",
+      "commit": "349781babb93685dfc281a5f45ea7aae87d15ea8",
+      "bindings": 7,
+      "mismatches": []
+    },
+    {
+      "record": "docs/engineering/reviews/p16-inbox-v3-results.json",
+      "commit": "74931e5a9dd58f6113a6dbe6f76aeab64ebab02d",
+      "bindings": 5,
+      "mismatches": []
+    },
+    {
+      "record": "docs/engineering/reviews/p16-packaging-v3-results.json",
+      "commit": "92293281386ebafa9895dda5863be179bc41525e",
+      "bindings": 12,
+      "mismatches": []
+    },
+    {
+      "record": "docs/engineering/reviews/p16-probe-capture-v3-results.json",
+      "commit": "0a1a0ee64463bc168221fd082519e9cb14f1b357",
+      "bindings": 7,
+      "mismatches": []
+    },
+    {
+      "record": "docs/engineering/reviews/p16-probe-response-v3-results.json",
+      "commit": "0d94c633b0aae5b9b595f01ac3320e5bfc3be708",
+      "bindings": 6,
+      "mismatches": []
+    },
+    {
+      "record": "docs/engineering/reviews/p16-probe-v3-results.json",
+      "commit": "337a2eaa3e5997c82f43fc03468deca713eb75bd",
+      "bindings": 10,
+      "mismatches": []
+    },
+    {
+      "record": "docs/engineering/reviews/p16-task-v3-results.json",
+      "commit": "3d30cad4d224251f71673e955828fe3fb9a08922",
+      "bindings": 6,
+      "mismatches": []
+    }
+  ],
+  "normal_probe": {
+    "audit_policy_version": 3,
+    "python": "3.13.5",
+    "source_sha256": {
+      "scripts/passport_technology_probe.py": "d652f585513995a32c1176f161ae4e98bd702b125a7a76680b1ad0729cc9bf0d",
+      "scripts/passport_technology_probe.mjs": "3ac4a2cd06479cf484310717ec8ac7b7d8afde167af047d8c3938f391ec2f83b",
+      "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+      "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+      "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6"
+    },
+    "source_scope": "Listed project files read after execution; not an atomic snapshot, loaded-code attestation or dependency closure.",
+    "fixture_sha256": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6",
+    "cases": 6,
+    "crypto_accepts": [
+      true,
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "admissions": [
+      "authenticated",
+      "rejected",
+      "rejected",
+      "rejected",
+      "rejected",
+      "rejected"
+    ],
+    "python_lexical_rejections": 5,
+    "python_hash_1mib_ms": 0.6237879861146212,
+    "python_verify_mean_ms_128": 2.3779830626153853,
+    "python_traced_peak_bytes": 412019,
+    "node_probe": {
+      "node": "v22.23.2",
+      "crypto_accepts": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "hash_digest": "bf718b6f653bebc184e1479f1935b8da974d701b893afcf49e701f3e2f9f9c5a",
+      "hash_1mib_ms": 11.533941000000027,
+      "duplicate_keys_collapsed": true,
+      "float_lexemes_collapsed": true
+    },
+    "limits": "Single local sample; no hard real-time, RSS, platform or qualification claim. Node primitive probe is not a full verifier."
+  },
+  "normal_mutations": {
+    "review_order_version": 3,
+    "python": "3.13.5",
+    "source_sha256": {
+      "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+      "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e",
+      "tests/test_passports.py": "ec0c935252333fb4ee522969a428851dd363fdb5ad5ae5c5b8f384d4780a62ff",
+      "scripts/passport_trust_review.py": "b53144266b2f233a6f32fa50f2fb6f09aea7b02fd5fbcfd0643f364d97a0a78f",
+      "examples/passports/vectors.json": "cf020ffd34e4ed7983f3b4eb625ab3dd1b764fa9bda017fa80c6d627edb8bff6"
+    },
+    "source_scope": "Listed project files read after execution; not an atomic snapshot, loaded-code attestation or dependency closure.",
+    "mutations": [
+      {
+        "guard": "unselected_metadata",
+        "expected_assertion_failures": 5
+      },
+      {
+        "guard": "effective_expiry",
+        "expected_assertion_failures": 1
+      },
+      {
+        "guard": "evidence_revocation",
+        "expected_assertion_failures": 1
+      },
+      {
+        "guard": "rejection_metadata",
+        "expected_assertion_failures": 1
+      }
+    ],
+    "limit": "In-memory guard-removal tests; not a cryptographic validation or hardware qualification."
+  },
+  "limits": [
+    "Project manifests identify listed bytes read after execution, not atomic or loaded-code snapshots.",
+    "Standard libraries, package initialization, installed dependencies and executables are outside these manifests.",
+    "Historical source matches are not fresh historical experiment executions.",
+    "P16-P18 lane incomplete; no hardware, performance or accreditation claim."
+  ]
+}

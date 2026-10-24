@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "review_order_version": 3,
+  "baseline": "82e044e8ef66558f8a8519964e6ad42968276fe8",
+  "component": "packaging diagnostic retention",
+  "finding": "No selected artifact retention in P16 archive-install job.",
+  "checks": {
+    "focused_methods_including_adr": 30,
+    "adr_methods": 4,
+    "skips": 0,
+    "actionlint": "PASS",
+    "hosted_upload": "UNOBSERVED",
+    "new_runtime_red_test": false
+  },
+  "shell_probe": {
+    "hosted_execution": false,
+    "observations": [
+      {
+        "continued": true,
+        "diagnostics_retained": true,
+        "pipefail": true,
+        "producer_exit": 0,
+        "shell_exit": 0
+      },
+      {
+        "continued": false,
+        "diagnostics_retained": true,
+        "pipefail": true,
+        "producer_exit": 23,
+        "shell_exit": 23
+      },
+      {
+        "continued": true,
+        "diagnostics_retained": true,
+        "pipefail": false,
+        "producer_exit": 23,
+        "shell_exit": 0
+      }
+    ]
+  },
+  "source_sha256": {
+    ".github/workflows/aethron-passports.yml": "f2e52752fcda9ff25b5792b2639d45704cb8568f8cdb8eee5fe0cb4cc2051e72",
+    "docs/decisions/p16-packaging-retention-v3.json": "00bc2b6edc6fd2c266796f96888e8522453e7331227e92a0e78f082b23d6311e",
+    "docs/engineering/reviews/p16-packaging-retention-v3.md": "745f1102cfa702f71abfdde07c9e652aeb5a60c20b5c47e28167a8fcaeb48df2",
+    "aethron/passports.py": "25da50ec716fed54c0bb947643c1499c9aff948fbb2392b325badf1d0f8c9cdb",
+    "tests/test_passport_lexical.py": "0272780452980ec03e9b180a84e35db7e2aefd04f7bc6cf0ac21cfd9288b1887",
+    "tests/test_passport_policy.py": "2ff348136a8b174c53d72e96318462c35d7c4163f3dcfc1f0836a138d6f55acd",
+    "tests/test_passports.py": "20bdc75b84aa566867197604e2462053e366016638828bb0ba59e990ffd56c3d",
+    "tests/test_passport_schemas.py": "494e0b7345892bb2cfea3109f8c05735e8328f0cbf4de5b5319913a585ee0cb7"
+  },
+  "runtime_log_sha256": {
+    "retention-actionlint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retention-focused.log": "5d5241bb47a7cf9509c424a07b01b0b413bb17f54435955d623b45141a726417",
+    "retention-shell.json": "69a069e00aa717d244b2fbedf21d8bcc38734ce2f7d0ceda08b139d12dae53d0",
+    "retention_shell_probe.py": "d93a3349676867fbb7966f5d94dc919854b717b5b5a249e5e715f879b8cfabb0"
+  },
+  "limits": [
+    "Local shell probe and existing focused tests do not prove hosted archive installation or upload.",
+    "Artifact and digest are unauthenticated diagnostics, can be partial and are not permanent release storage.",
+    "No source archive/wheel retained by this bundle and no signed provenance, customer acceptance or phase completion."
+  ]
+}

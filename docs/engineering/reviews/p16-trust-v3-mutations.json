@@ -1,0 +1,28 @@
+{
+  "review_order_version": 3,
+  "python": "3.13.5",
+  "source_sha256": {
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "tests/test_passports.py": "ec0c935252333fb4ee522969a428851dd363fdb5ad5ae5c5b8f384d4780a62ff",
+    "scripts/passport_trust_review.py": "c0ce3459dcce3645b25f49fcd4066486a4b6e1bf2eb66d68e5593e674f4b309f"
+  },
+  "mutations": [
+    {
+      "guard": "unselected_metadata",
+      "expected_assertion_failures": 5
+    },
+    {
+      "guard": "effective_expiry",
+      "expected_assertion_failures": 1
+    },
+    {
+      "guard": "evidence_revocation",
+      "expected_assertion_failures": 1
+    },
+    {
+      "guard": "rejection_metadata",
+      "expected_assertion_failures": 1
+    }
+  ],
+  "limit": "In-memory guard-removal tests; not a cryptographic validation or hardware qualification."
+}

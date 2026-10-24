@@ -1,0 +1,55 @@
+{
+  "review_order_version": 3,
+  "baseline_commit": "3c2f9786c4fe904b30acc2166b0873dd881a5d1d",
+  "decision": "KEEP direct Python API execution; FIX installed fixture coverage",
+  "runtime_admission_changed": false,
+  "verification": {
+    "red_methods": 1,
+    "red_assertion_failures": 6,
+    "red_errors": 0,
+    "related_methods": 91,
+    "final_runner_methods": 5,
+    "changed_corpus_cases": 24,
+    "skips": 0,
+    "installed_vectors": 40,
+    "installed_source_modules": 7,
+    "optimized_modes_rejected": [
+      "-O",
+      "-OO"
+    ],
+    "ruff": "PASS after import-order correction",
+    "format": "PASS",
+    "bandit": "PASS; B101 excluded for guarded assertions",
+    "actionlint": "PASS",
+    "diff": "PASS"
+  },
+  "source_sha256": {
+    "scripts/passport_installed_vectors.py": "9aa1ef9b26abc68003c9f88ff79bdba44c8aab49b4125336f72ae082dec851c7",
+    "scripts/passport_install_check.py": "3076a99f15db9b7d2065ef998c4bd09a553f2bda830c412ed96eb17075a03cc2",
+    "tests/test_passport_installed_vectors.py": "1e54e7d7bcd7d93b6fdf945e440f80886910e8dfc5c5cde98e6459a9a077fd51",
+    ".github/workflows/aethron-passports.yml": "9fbc4116f98e50172d669b749f0df25daa2d064e72244ec37debd130819d0e35",
+    "aethron/passports.py": "49a1ad48ba3c21a9a7bf67f46be7b5cf9b7968613ca863529be9df0b9eda2735",
+    "aethron/passport_evidence.py": "0abb1cf7896f659f43f41fd77b6a7a83825b088b9519a729a7d8463937dcce62",
+    "aethron/interop_tasks.py": "d4591a4f50c4e5278a18088d1406a0e54c927b783d3b5e7e2bebf812f5e829c6",
+    "aethron/interop_bundles.py": "a8d2dad6ce5c207373580ba2192a5a97c814d7ed07733933e8a9a642a440590e",
+    "aethron/interop_federation.py": "b5b0167397ce6995f7e52d53c284e8c37d4622bf1eef9736711b80c329275460",
+    "aethron/interop_inbox.py": "b07f3ea703fd56103e1939a232b5a8198e5a8da0aa14cefd79ae041eb230b14e",
+    "aethron/_json_bounds.py": "bceae3be82d3b11499b829370bd467abfb5014e825479d44d53243e794a4e35e"
+  },
+  "runtime_evidence_sha256": {
+    "installed-vector-red.log": "f22f10cb76749bc5b4f8b4f6826a1302c0ebf4ed9bb774c61ab568c42a9235b4",
+    "installed-vector-green.log": "f16e5a0fa9a67bd15ab0765b81b07f3332828834b7ce5a8275234f2920514699",
+    "installed-vector-final.log": "b7b7fa4d2545f760c59456720940121d13bb665fdf48aacf97d006fcbb1b53e7",
+    "installed-vector-live.json": "0db08497416d5186b025a965c7a76fc3c89c13c1c9acafd71f9647ffce0713dc",
+    "installed-vector-source.json": "bc6d5dd2de83f883613ffabe9572d7daa0c2a11dac6126b762603b223d5a8c1b",
+    "installed-vector-modes.json": "f615f85861a72d5b235a9b4e62f2854d7aa0000c3bfb378eddb0300165a43968",
+    "installed-vector-baseline.py": "5e78cc58c66569f6c6ef2975d100430b88504e17cbef1face7c7308c9fe7f02e"
+  },
+  "limitations": [
+    "Existing installed copy, no new wheel or full clean-clone qualification.",
+    "Local source and installed fixture checks, not hosted CI or customer acceptance.",
+    "Direct file identities, not dependency closure, signatures or loaded-code attestation.",
+    "Whole trusted fixture files read before hashing; not hostile file-ingest boundary.",
+    "P17-P19 and hardware qualification remain incomplete."
+  ]
+}

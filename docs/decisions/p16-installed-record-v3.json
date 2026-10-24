@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "id": "p16-installed-record-v3",
+  "component": "Installed P16 source-to-distribution consistency evidence",
+  "decision": "KEEP",
+  "constraints": [
+    "Developer-built regular wheel installation checked within the interpreter that imports the selected seven files; Linux/macOS/Windows matrix declares Python 3.9 and 3.13.",
+    "Offline comparison of selected import locations, source bytes and installed RECORD metadata. No runtime, native ABI, device or throughput requirement."
+  ],
+  "alternatives": [
+    "Python standard-library importlib.metadata inside the tested interpreter.",
+    "pip inspect JSON environment report.",
+    "Rust uv pip show/files inspection.",
+    "Node child_process or Java ProcessBuilder driving Python metadata inspection."
+  ],
+  "rationale": [
+    "KEEP direct Python metadata inspection because Distribution.files and locate_file connect the selected distribution records to the actual imported paths in the same interpreter. Six methods with real temporary dist-info files check unique membership, location, hash and size.",
+    "pip inspect provides an environment report, while uv can inspect installed packages/files. Neither report alone performs this selected source-byte and actual-import association. Using another executable requires proving it selected the same interpreter/environment.",
+    "Node and Java can supervise Python processes, but the import-location evidence must still come from the tested Python interpreter. No independent process-orchestration requirement or measured performance constraint justifies another runtime for this check.",
+    "The existing byte comparison intentionally accepts identical external copies. The new RECORD check rejects a copy not at the path resolved for its selected distribution entry. Five negative methods produce nine assertion failures when only the new check is replaced with a no-op."
+  ],
+  "limits": [
+    "RECORD, metadata and checkout are local trusted-build inputs, not signatures or artifact authentication. Imported package code executes before checking.",
+    "Only seven selected files are associated with the distribution returned by the interpreter. No global uniqueness scan, dependency closure, bytecode attestation or whole-wheel authentication.",
+    "The distribution version is not compared with project metadata. This slice checks selected member association, not release-version identity.",
+    "The SHA-256/size requirement is specific to this regular wheel CI profile; broader installed-project formats may legally omit fields.",
+    "Existing Linux Python 3.13 installation reused; no new wheel/build/clean environment or remote matrix success. Files are reread without an atomic snapshot."
+  ],
+  "evidence": [
+    "https://docs.python.org/3.9/library/importlib.metadata.html",
+    "https://packaging.python.org/en/latest/specifications/recording-installed-packages/",
+    "https://pip.pypa.io/en/stable/cli/pip_inspect/",
+    "https://docs.astral.sh/uv/reference/cli/",
+    "https://nodejs.org/api/child_process.html",
+    "https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/lang/ProcessBuilder.html"
+  ]
+}
