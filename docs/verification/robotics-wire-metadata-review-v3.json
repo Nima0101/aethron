@@ -1,0 +1,92 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "053c8677cdd720f67e56935f3b9ff4160d41d9a6",
+  "component": "passive_wire comparison evidence",
+  "decision": "FIX C benchmark summary consistency",
+  "runtime_decision": "PENDING",
+  "production_receiver_changed": false,
+  "candidate_implementation_changed": false,
+  "red": {
+    "methods": 11,
+    "assertion_failures": 12,
+    "errors": 0,
+    "elapsed_s": 12.2
+  },
+  "green": {
+    "methods": 27,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_s": 5.708
+  },
+  "positive_controls": [
+    "Zero timing intervals with the correct probe/acceptance counts remain accepted",
+    "Unchanged normal/sanitized C experiment:17 cases",
+    "Two retained candidate outputs independently rechecked for packet parity and benchmark consistency"
+  ],
+  "static": {
+    "ruff": "PASS",
+    "format": "PASS after two mechanical formatting corrections",
+    "bandit": "PASS"
+  },
+  "source_sha256": {
+    "scripts/robotics_wire_audit_v2.py": "d1ea25941908856fd72dda60836d4bf193de0e9f319eb2bfc52b8dc692edd02a",
+    "tests/mavlink/test_wire_audit_v2.py": "cbc8bbb9ca8361623ae04159600dfbf3a99ddd318bfb0675bfe935d5d92fccdf",
+    "tests/mavlink/audit_v2/reference.c": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483"
+  },
+  "retained_local_logs": {
+    "wire-metadata-red.log": "bd0db7672298c30214cea34c8159d67700973a863c27474a07d0e1185101cae7",
+    "wire-metadata-green.log": "061567e54e070e8daa0546cf786aca92d5b964bf61eacbe9f9b5707d93d7c5df",
+    "wire-metadata-comparison.log": "3d667dfa440b879eec5b2e85fd1f11fd41835f2a037a4817cf82e795b716dcd6"
+  },
+  "comparison_receipt_sha256": "3d667dfa440b879eec5b2e85fd1f11fd41835f2a037a4817cf82e795b716dcd6",
+  "comparison_receipt": {
+    "audit_policy_version": 2,
+    "state": "compared",
+    "decision": "PENDING",
+    "scope": "fresh unsigned packet admission only; not lifecycle/signing parity",
+    "corpus_cases": 17,
+    "parity": true,
+    "sanitized_parity": true,
+    "python": {
+      "samples": 512,
+      "accepted": 92,
+      "p50_ns": 15174,
+      "p95_ns": 104690,
+      "max_ns": 262301
+    },
+    "c": {
+      "samples": 512,
+      "accepted": 92,
+      "p50_ns": 81,
+      "p95_ns": 822,
+      "max_ns": 1675
+    },
+    "python_version": "3.13.5",
+    "machine": "x86_64",
+    "system": "Linux",
+    "compiler": "cc (Debian 14.2.0-19) 14.2.0",
+    "xml_sha256": "fbac92d0689c9b1bc03b49ebc5cdf989f3fc23026c3c856f7224e4b9af1b5f53",
+    "driver_sha256": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483",
+    "harness_sha256": "d1ea25941908856fd72dda60836d4bf193de0e9f319eb2bfc52b8dc692edd02a",
+    "corpus_sha256": "d51999b7a2011a0615f9ead65d0080db8733d5c99cb42225d80e7f2c9b7aebdb",
+    "pymavlink": "2.4.50",
+    "limitations": [
+      "512 mixed valid/invalid probes; no hard-real-time claim",
+      "Python constructor excluded; C stack setup included",
+      "C omits state, provenance objects and persistent replay",
+      "No memory, cold-start, signed, UDP or SITL comparison"
+    ]
+  },
+  "candidate_logs_sha256": {
+    "candidate-stdout.log": "caa67c92c05da9f74126d79ec6b5d9d88c34511c4bd9c50095bd51ac94c19b20",
+    "sanitized-candidate-stdout.log": "ba8dafd728a916800410d6086de3f77a24bbc5757e79c5c2b9548cdc8f959e55"
+  },
+  "reference_sha256": "7a5d2989484c3069e7547235a7b9f9751a1431d51d7f4e536086cc0cdbaeeb89",
+  "limits": [
+    "Coherence checks do not authenticate timing measurements or the host clock",
+    "Individual timing samples are not recovered by summary validation",
+    "Historical reports remain unchanged and do not gain retrospective qualification",
+    "No corpus, sample schedule, tolerance, timeout, candidate implementation or production receiver change",
+    "No performance threshold or runtime winner introduced; V3 remains incomplete"
+  ]
+}

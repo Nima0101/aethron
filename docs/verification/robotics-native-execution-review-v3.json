@@ -1,0 +1,89 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "91060fe1a1426d2e292867d9b9697f7868d7b2db",
+  "component": "P3.1 offline native comparison execution receipt",
+  "decision": "FIX ambiguous non-execution claim",
+  "production_changed": false,
+  "candidate_changed": false,
+  "runtime_decision": "PENDING",
+  "source_sha256": {
+    "scripts/robotics_native_audit_v2.py": "2a327603388d1c59d255311752b9c5a5daa42e769b2ad1a453b76362584f2e5d",
+    "tests/mavlink/test_native_audit_v2.py": "9732c5a010cfa1d2f0c289c87603858bf13268f56525031fbc6b5f86ba338f06",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "503b317e0fa21e92fe563e3ddfc333fee5426a6d271fe33a7eab98dd5512f094",
+    "tests/mavlink/audit_v2/native.rs": "a694176e7110765d8c19242953fd8d9fb9a41140e5c071cb9cbd5037be96ab88",
+    "docs/architecture/robotics-review-v3.md": "dcf42dfee97c9dac6f9cefc6e5b38ac29320e1dca446b2b37a738a3d2ab29609"
+  },
+  "initial_error": "One ModuleNotFoundError: aethron_edge; corrected invocation supplies PYTHONPATH=integrations/edge; not counted as RED",
+  "red": {
+    "methods": 1,
+    "assertion_failures": 8,
+    "errors": 0
+  },
+  "first_green": {
+    "methods": 25,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 2.096
+  },
+  "green": {
+    "methods": 26,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 4.394
+  },
+  "checks": {
+    "ruff": "PASS after binding two loop variables in fixture defaults (B023)",
+    "format": "PASS",
+    "bandit": "PASS"
+  },
+  "regression_cases": [
+    "reference fails before native attempt",
+    "malformed output",
+    "nonzero exit",
+    "timeout",
+    "finishing clock failure",
+    "candidate launch failure",
+    "later failure preserves earlier confirmation",
+    "all four calls return"
+  ],
+  "process_fixture": "Fixed Python executable returns malformed stdout through actual child/JSON wrapper; compiler mocked; no Rust execution",
+  "actual_native_attempt": {
+    "audit_policy_version": 3,
+    "report_schema_version": 2,
+    "state": "failed",
+    "decision": "PENDING",
+    "native_executed": false,
+    "native_attempts": 0,
+    "platform": "Linux-6.6.143-09589-gf9e106250941-x86_64-with-glibc2.41",
+    "driver_sha256": "a694176e7110765d8c19242953fd8d9fb9a41140e5c071cb9cbd5037be96ab88",
+    "harness_sha256": "2a327603388d1c59d255311752b9c5a5daa42e769b2ad1a453b76362584f2e5d",
+    "source_sha256": {
+      "scripts/robotics_native_audit_v2.py": "2a327603388d1c59d255311752b9c5a5daa42e769b2ad1a453b76362584f2e5d",
+      "integrations/edge/aethron_edge/telemetry/mavlink.py": "503b317e0fa21e92fe563e3ddfc333fee5426a6d271fe33a7eab98dd5512f094",
+      "tests/mavlink/audit_v2/native.rs": "a694176e7110765d8c19242953fd8d9fb9a41140e5c071cb9cbd5037be96ab88",
+      "scripts/robotics_lifecycle_audit_v2.py": "e71775e02aca061a1bbd7272ae53ba0128b720fbaf9271ee40262f971e6cb8c4",
+      "scripts/robotics_wire_audit_v2.py": "2fda4dff55357c524523d8bbbd88f861b61b5293d5b9ac5998908b95eec05183"
+    },
+    "fixture_sha256": "a7d1cd7f23634529a824bf18c555dbddbc3743c2ac9ed078353fdf34a7d33f61",
+    "corpus_sha256": "13948512b478984a35bb8ab2afb0eae6b32d5a41836ea17d75b6003478e082c3",
+    "failure_type": "FileNotFoundError"
+  },
+  "retained_local_logs": {
+    "native-execution-initial-import-error.log": "a401246c483954e10d9354adaf0b936e221ccd84023a64faf936758cfcabb66e",
+    "native-execution-red.log": "a1624bff117358ec55bc9d1614d00e5ff1cd31d482aa2d889c31bf67fda1159f",
+    "native-execution-first-green.log": "748c37c8ab88a8527834bdd8d7e1ab789b18828d869f8799897a3b17b92d6d03",
+    "native-execution-green.log": "bf49dde2c455bd127899b0cee41aeae135f6c04079856cc70279a4a47a426dd4",
+    "native-execution-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "native-execution-native.log": "d408ea790f01ad42d8a0d45b25ea53ec5ecfdea2d79ae59f65d9077fe944241b",
+    "native-execution-attempt/result.json": "ba41d12a2a7f8146b508ced82d39a79bc77f743f52705415a2423bf4334a223e"
+  },
+  "sources": [
+    "https://docs.python.org/3/library/subprocess.html#subprocess.run"
+  ],
+  "limits": [
+    "Report schema 2 native_executed is nullable; consumers must not coerce unknown to false",
+    "native_attempts counts wrapper calls, not proven process starts",
+    "No production timing fix or technology decision",
+    "No hardware or full audit completion claim"
+  ]
+}

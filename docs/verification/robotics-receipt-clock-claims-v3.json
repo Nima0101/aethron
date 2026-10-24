@@ -1,0 +1,59 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "4cf5e0fcc749df4ae6f61d83cb8daf7568e96855",
+  "component": "P3.1 passive receipt-clock claims",
+  "decision": "CLARIFY clock-domain, rate and suspend limits",
+  "runtime_decision": "PENDING",
+  "production_changed": false,
+  "test_sources_changed": false,
+  "source_sha256": {
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "503b317e0fa21e92fe563e3ddfc333fee5426a6d271fe33a7eab98dd5512f094",
+    "tests/mavlink/test_telemetry.py": "1018f1b532d10ab8a9759304533cb48e4460c350a679cefa04f7e917c94f5b1a",
+    "integrations/edge/aethron_edge/telemetry/README.md": "fbbef6c89cc8e4ecc7144871d1fd1e746c0ab5f6511d7df53c256d99644f372e"
+  },
+  "focused_tests": {
+    "methods": 3,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_s": 0.039,
+    "names": [
+      "test_real_sdk_packet_units_and_unverified_provenance",
+      "test_latest_slots_expire_independently_without_new_packets",
+      "test_local_clock_rollback_latches_and_close_erases"
+    ]
+  },
+  "local_clock_info": {
+    "implementation": "clock_gettime(CLOCK_MONOTONIC)",
+    "monotonic": true,
+    "adjustable": false,
+    "resolution": 1e-09
+  },
+  "retained_local_logs": {
+    "receipt-clock-claims-tests.log": "b65a7790923a2e98717ceab92c0f09f7a69ef58393b73e04c62ab15124b03d09",
+    "receipt-clock-host-info.json": "56ab90b1f7969a2088f5cd24359015756418772903bd1cdf26aa0250b0859d61"
+  },
+  "sources": [
+    {
+      "url": "https://www.kernel.org/doc/html/latest/core-api/timekeeping.html",
+      "supports": "CLOCK_MONOTONIC stops during suspend; CLOCK_BOOTTIME includes it"
+    },
+    {
+      "url": "https://docs.python.org/3/library/time.html#time.get_clock_info",
+      "supports": "Implementation/resolution/monotonic/adjustable metadata; adjustable does not describe gradual rate changes"
+    },
+    {
+      "url": "https://docs.python.org/3/library/time.html#time.CLOCK_BOOTTIME",
+      "supports": "Linux suspend-aware clock is distinct from CLOCK_MONOTONIC"
+    }
+  ],
+  "limits": [
+    "Clock description is not an accuracy or scheduling measurement",
+    "Three synthetic tests do not exercise physical suspension or elapsed-age qualification",
+    "No host suspend, clock change, real transport or hardware experiment",
+    "No clock source, frozen threshold, runtime selection or production behavior change",
+    "No first-component or lane completion claim"
+  ],
+  "retained_negative_evidence": [
+    "Initial code-mode host spawn failed EAGAIN before policy read; identical bounded retry succeeded"
+  ]
+}

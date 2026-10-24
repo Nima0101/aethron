@@ -1,0 +1,92 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "3c0d13a7f5c7686c703c06488ac1c71bc0aeaca7",
+  "component": "P3.1 passive supplied-clock exception claims",
+  "decision": "RETRACT/CLARIFY general clock-fault latching claim",
+  "runtime_decision": "PENDING",
+  "production_changed": false,
+  "test_sources_changed": false,
+  "failure_handling_gap_resolved": false,
+  "source_sha256": {
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "503b317e0fa21e92fe563e3ddfc333fee5426a6d271fe33a7eab98dd5512f094",
+    "tests/mavlink/test_telemetry.py": "1018f1b532d10ab8a9759304533cb48e4460c350a679cefa04f7e917c94f5b1a",
+    "integrations/edge/aethron_edge/telemetry/README.md": "da711bb190cb8c2b23682e8c569fc3828fe4de3f3dec3a0523a6b499c513b254",
+    "docs/architecture/robotics-review-v3.md": "9608ca67660309a5224f3381e2e71e385f4a01bd8054b444325121b19615876d"
+  },
+  "probe": {
+    "scope": "synthetic in-process clock fault; no transport",
+    "results": [
+      {
+        "operation": "snapshot",
+        "clock_exception_propagated": true,
+        "before_state": "OBSERVED_UNVERIFIED",
+        "after_recovery_state": "OBSERVED_UNVERIFIED",
+        "retained_sample_count": 1,
+        "after_close_state": "UNKNOWN",
+        "after_close_reason": "closed",
+        "perception_eligible": false
+      },
+      {
+        "operation": "ingest",
+        "clock_exception_propagated": true,
+        "before_state": "OBSERVED_UNVERIFIED",
+        "after_recovery_state": "OBSERVED_UNVERIFIED",
+        "retained_sample_count": 1,
+        "after_close_state": "UNKNOWN",
+        "after_close_reason": "closed",
+        "perception_eligible": false
+      }
+    ],
+    "general_clock_exception_latch_established": false
+  },
+  "probe_exit_code": 1,
+  "synthetic_conditions": {
+    "instances": 2,
+    "sender": [
+      1,
+      1
+    ],
+    "message": "MAVLink_attitude_message",
+    "message_arguments": [
+      10,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "receipt_clock_ns": 1000000000,
+    "failing_clock": "raises RuntimeError",
+    "snapshot_case": "ingest valid packet; snapshot; raising-clock snapshot; restore identical clock; snapshot; close; snapshot",
+    "ingest_case": "ingest valid packet; snapshot; raising-clock ingest empty bytes; restore identical clock; snapshot; close; snapshot"
+  },
+  "focused_baseline": {
+    "methods": 3,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_s": 0.021,
+    "names": [
+      "test_real_sdk_packet_units_and_unverified_provenance",
+      "test_latest_slots_expire_independently_without_new_packets",
+      "test_local_clock_rollback_latches_and_close_erases"
+    ]
+  },
+  "retained_local_logs": {
+    "clock-exception-probe.json": "dd585e71f69a37b9b8f825527862355f538f8e1172ebe3c9d5c694a1e5484864",
+    "clock-exception-baseline.log": "1e82e1435a8e420af22a53241ded489d283926f473d023d96033d3a7806f2d05"
+  },
+  "sources": [
+    "https://docs.python.org/3/tutorial/errors.html#handling-exceptions"
+  ],
+  "limits": [
+    "Two synthetic in-process cases only; no OS clock, socket or hardware experiment",
+    "Baseline successes do not establish behavior under raised clock exceptions",
+    "Documentation correction only; runtime failure handling remains unresolved",
+    "No technology KEEP/MIGRATE or component/lane completion claim"
+  ],
+  "environment_failures": [
+    "Initial code-mode host EAGAIN before policy read; identical retry succeeded",
+    "Earlier turns failed with SIGTRAP or closed stdout before verification; intervening read was user-aborted"
+  ]
+}

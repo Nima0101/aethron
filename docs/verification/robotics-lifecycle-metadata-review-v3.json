@@ -1,0 +1,131 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "7a0c8545b87b50ac53d6e7b627dd795343cd0e6f",
+  "component": "passive_wire comparison evidence",
+  "decision": "FIX lifecycle measurement metadata admission",
+  "runtime_decision": "PENDING",
+  "production_receiver_changed": false,
+  "candidate_implementation_changed": false,
+  "red": {
+    "methods": 30,
+    "assertion_failures": 25,
+    "errors": 0,
+    "elapsed_s": 5.712
+  },
+  "green": {
+    "methods": 30,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_s": 4.404
+  },
+  "final_native_tests_after_lint_fix": {
+    "methods": 10,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_s": 1.293
+  },
+  "static": {
+    "ruff": "PASS after binding test loop variable",
+    "format": "PASS after formatting two test files",
+    "bandit": "PASS"
+  },
+  "source_sha256": {
+    "scripts/robotics_lifecycle_audit_v2.py": "b7f78f2ee857b9cf199b3377d64cf8a4b6302bc94891872fab2266c84584be76",
+    "scripts/robotics_native_audit_v2.py": "54f4d960d1a1c4a7be9fe56febfeb8184e25f180b621eb83734ffd23a30cc7a1",
+    "tests/mavlink/test_lifecycle_audit_v2.py": "cbb90f8a54b877bc73637cc392695f08d41adba4389ed6aba884dc6cdf620725",
+    "tests/mavlink/test_native_audit_v2.py": "1563fe7073726929c6f44eabbe34c40a2fa9a833b8561d1c8733d8734fd31151",
+    "tests/mavlink/audit_v2/managed.mjs": "b7c89cdf7ada50ed38ce9563adf699d8c5d41bb95f6327fabe416ba3f42ed0cd",
+    "tests/mavlink/audit_v2/native.rs": "a694176e7110765d8c19242953fd8d9fb9a41140e5c071cb9cbd5037be96ab88"
+  },
+  "retained_local_logs": {
+    "lifecycle-metadata-red.log": "79867751005d49a12e3e1f30b41f7f7f4c6d70c4f573582501faf1e34eccd6fa",
+    "lifecycle-metadata-green.log": "3f2a5dca95eb5f8a86425f07b5f7e028f3d996407f0475baa9636d5dbc8f9101",
+    "lifecycle-metadata-native-final.log": "7f46a22e910ac806ce38be653d822ca8f5fcd489d384d1e0a70d3f6b3c9af7cc",
+    "lifecycle-metadata-comparison.log": "30a3b231bb53e5aaffd75a1359bb5ae5aea13b36d13ff51ec854c3c7fb96e4b3"
+  },
+  "comparison_receipt": {
+    "audit_policy_version": 2,
+    "state": "compared",
+    "decision": "PENDING",
+    "parity": true,
+    "cases": 16,
+    "steps": 48,
+    "runs": [
+      {
+        "python": {
+          "runtime": "3.13.5",
+          "peak_rss_kib": 29112,
+          "whole_process_ns": 997147481
+        },
+        "javascript": {
+          "peak_rss_kib": 46044,
+          "runtime": "v22.23.2",
+          "whole_process_ns": 725542084
+        }
+      },
+      {
+        "python": {
+          "runtime": "3.13.5",
+          "peak_rss_kib": 29112,
+          "whole_process_ns": 695033406
+        },
+        "javascript": {
+          "peak_rss_kib": 46208,
+          "runtime": "v22.23.2",
+          "whole_process_ns": 284850770
+        }
+      },
+      {
+        "python": {
+          "runtime": "3.13.5",
+          "peak_rss_kib": 29112,
+          "whole_process_ns": 990630060
+        },
+        "javascript": {
+          "peak_rss_kib": 46452,
+          "runtime": "v22.23.2",
+          "whole_process_ns": 208091896
+        }
+      }
+    ],
+    "driver_sha256": "b7c89cdf7ada50ed38ce9563adf699d8c5d41bb95f6327fabe416ba3f42ed0cd",
+    "harness_sha256": "b7f78f2ee857b9cf199b3377d64cf8a4b6302bc94891872fab2266c84584be76",
+    "fixture_sha256": "7870b95b978b86a62abd45749453f1549329c3a456643aeb28c26cb043269125",
+    "limitations": [
+      "Whole-process time includes startup, corpus and child JSON output",
+      "Parent JSON parsing and evidence writes excluded; older timings included parsing",
+      "Three sequential repetitions; warm filesystem cache possible",
+      "Original JS subset, not node-mavlink or NextGen SDK qualification",
+      "No signed replay, UDP, installed packaging or real-time proof"
+    ]
+  },
+  "comparison_receipt_sha256": "30a3b231bb53e5aaffd75a1359bb5ae5aea13b36d13ff51ec854c3c7fb96e4b3",
+  "current_output_rechecks": {
+    "count": 6,
+    "metadata": "PASS",
+    "parity": "PASS",
+    "stdout_sha256": {
+      "javascript-0-stdout.log": "18dfcd2cd36071e62cf7f6184ebbce9e3e4e0ff312c9995eae2b42b6eab3b650",
+      "javascript-1-stdout.log": "a6fca14e0f2733f90bbdcb40d5421a062acc55c36a75d82f2abe321cfe27f5c9",
+      "javascript-2-stdout.log": "d460730e8bf835c0ceda40b9950015e3def3e46c7a8e2d70d9538886722c79fa",
+      "python-0-stdout.log": "6034125e60f33bb94aa08a4c845b8e481a09a7940574653d3eac68478a91ebd8",
+      "python-1-stdout.log": "6034125e60f33bb94aa08a4c845b8e481a09a7940574653d3eac68478a91ebd8",
+      "python-2-stdout.log": "6034125e60f33bb94aa08a4c845b8e481a09a7940574653d3eac68478a91ebd8"
+    }
+  },
+  "historical_native_output_recheck": {
+    "head": "52509c751b58f732776e6a812668ee9385f95775",
+    "archive_sha256": "26a7cfd767b92cd0989c81f3c3b3e32b09fd7d980584c98d9d99ea0b4c316571",
+    "outputs": 8,
+    "metadata": "PASS",
+    "new_native_execution": false
+  },
+  "limits": [
+    "Declared shape checks do not authenticate RSS, runtime labels or measurements",
+    "Native orchestration regression tests use controlled process results, not native compilation",
+    "Historical hosted outputs are not current-head native qualification",
+    "No corpus, timeout, production receiver or candidate implementation change",
+    "Linux measurements do not establish portable RSS units or a runtime winner",
+    "First-component V3 review remains incomplete"
+  ]
+}

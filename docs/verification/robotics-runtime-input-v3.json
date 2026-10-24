@@ -1,0 +1,58 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "5481a767be5a2484f6bf3e54ccee70bad8025890",
+  "component": "P3.1 passive-wire native comparison input",
+  "decision": "Correct compiled-input asymmetry with identical runtime bytes; production runtime selection PENDING",
+  "production_adapter_changed": false,
+  "source_sha256": {
+    ".github/workflows/aethron-robotics.yml": "e391f6253b8fb478f5fc5cedb0bdda22be265010d9d98b6c312e868257a1de4b",
+    "docs/architecture/robotics-review-v3.md": "14e6f87f9b920ee3db362bdc4c3920ebf4457ddf4096a0c0afa90c0b0e3f797b",
+    "scripts/robotics_native_audit_v2.py": "e46dc8d0c73400ee43210d5fcedb205a8c03ebf6c3f54cb83f667c5e69eb5c7a",
+    "scripts/robotics_runtime_input_v3.py": "14f5727f525ba9017830b6cdf3102e9acc14891297e7d0607beb27bae455a63c",
+    "tests/mavlink/audit_v2/native.rs": "3c3feb05199618d1c53637868529d8a6b7c7a418b2dc2f6337cd04d52610994e",
+    "tests/mavlink/audit_v2/runtime_input_v3.rs": "197e2e9748b58543c6b0161501724480d13055e1fa0f31b36c29657cd6eae940",
+    "tests/mavlink/test_runtime_input_v3.py": "c4694fb9de0bc694682a2da470f0c659ab157f810f904313e084f913041869ec"
+  },
+  "checks": {
+    "red": {
+      "methods": 8,
+      "errors": 8,
+      "reason": "New required codec module absent"
+    },
+    "green": {
+      "command": "PYTHONPATH=integrations/edge:tests/mavlink .venv/bin/python -m unittest test_wire_audit_v2 test_lifecycle_audit_v2 test_native_audit_v2 test_runtime_input_v3 -v",
+      "methods": 69,
+      "skips": 0,
+      "seconds": 28.011
+    },
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS",
+    "rust_parser_tests": "NOT RUN locally: rustc unavailable; four tests wired into hosted comparison",
+    "native_compiled": false,
+    "native_measured": false
+  },
+  "input_contract": {
+    "format": "aethron-audit-v3",
+    "maximum_bytes": 65536,
+    "maximum_cases": 64,
+    "maximum_steps_per_case": 64,
+    "maximum_packet_bytes": 320,
+    "clock": "u128 little-endian or invalid sentinel",
+    "complete_admission_before_execution": true
+  },
+  "retained_file_sha256": {
+    "runtime-input-v3-red.log": "70c5d1a4a95d26210f8c88eb69d5078b0ba2de0340e625e9984ea9b20dd05f7d",
+    "runtime-input-v3-green.log": "6aeb309a3b295259e14d902c83d5b189b831892116955ee800efeaee96d4b702",
+    "runtime-input-v3-native.log": "c96e7e772fc5eb7fd862e54dbd82057056bf85545522db8d6b68c94e907944ff",
+    "runtime-input-v3-native-attempt/result.json": "bed53856faf24a5d595f4ff4f17327f4e590f108321393121ba34cc44dbd4ec6",
+    "runtime-input-v3-native-attempt/runtime-input.bin": "3c601aa12647e5c6ff233b6ea27ee77ba06a304e65ff267c1cecb9a69fbbafe7"
+  },
+  "limits": [
+    "Python subprocess contract tested; mocked harness tests are not native execution evidence",
+    "Native compilation, parser tests and parity remain a hosted gate",
+    "Full SDK versus strict two-layout native subset and representation allocation remain comparison asymmetries",
+    "No signed replay, hardware, hard real-time or production runtime qualification",
+    "Audit cursor remains passive_wire; next later unreviewed component signing/replay"
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "bed2a3ecb5366c5a02e624bcb38cb9f844135c39",
+  "component": "P3.1 passive receiver decoder exception boundary",
+  "decision": "FIX retained observations after unexpected decoder failure; runtime selection PENDING",
+  "production_adapter_changed": true,
+  "source_sha256": {
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "d2679bb27997220b8e4cae5817bc9ee2c9b37e1ad2ddd40d2de26fa45a603eb9",
+    "tests/mavlink/test_telemetry.py": "63107ea937476b61db044ebe565d507e29307eb5a692c8c285a373e858bf8ea2",
+    "integrations/edge/aethron_edge/telemetry/README.md": "2ab7c29e432cbeb6d71d7c5461399d23c227212d5c0177bf95105c3355955da7",
+    "docs/architecture/robotics-review-v3.md": "cf49345661504bbff4bc8b3aed39456b2994a98c5529076fedc44e792a775293"
+  },
+  "checks": {
+    "red": {
+      "methods": 2,
+      "failures": 5,
+      "errors": 0
+    },
+    "green": {
+      "command": "PYTHONPATH=integrations/edge:tests/mavlink .venv/bin/python -m unittest test_telemetry test_signing test_datagram_v1 test_lifecycle_audit_v2",
+      "methods": 79,
+      "skips": 0,
+      "seconds": 21.49
+    },
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS",
+    "native_compiled": false
+  },
+  "retained_file_sha256": {
+    "decoder-fault-v3-red.log": "7c73f677a54b63dae951dc9160c78d2cbe6aad8fe8cf1c1b43fdd940ab763636",
+    "decoder-fault-v3-green.log": "9246dbb74ba22194943ac6ab579d2fb5f7b5fe0257632155970f0dbe11ad697c"
+  },
+  "contract": {
+    "unexpected_decoder_exception": "withdraw both samples, latch decoder_fault, re-raise identical exception",
+    "expected_sdk_error": "recoverable invalid_packet withdrawal",
+    "perception_eligible": false,
+    "caller_owned_snapshots": "unchanged immutable values"
+  },
+  "limits": [
+    "No claim of atomicity across all ingest operations or interrupted cleanup",
+    "Injected SDK exceptions do not represent hardware qualification",
+    "Native and managed prototype parity does not cover Python SDK exception injection",
+    "No unconditional runtime winner or completed retrospective review"
+  ]
+}

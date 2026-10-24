@@ -97,7 +97,13 @@ class PassiveTelemetry:
     def _now(self):
         if self._latched:
             return None
-        now = self._clock()
+        try:
+            now = self._clock()
+        except BaseException:
+            # Withdraw before propagating, including operator interruption/exit.
+            # A recovered clock must not revive samples from the failed session.
+            self._withdraw("local_clock_invalid", latch=True)
+            raise
         if type(now) is not int or now < 0 or (self._last_now is not None and now < self._last_now):
             self._withdraw("local_clock_invalid", latch=True)
             return None
@@ -144,44 +150,61 @@ class PassiveTelemetry:
         except self._decode_error:
             self._withdraw("invalid_packet")
             return
+        except BaseException:
+            # Unexpected SDK failure or interruption invalidates this session.
+            # Withdraw before propagating; later calls must not revive old data.
+            self._withdraw("decoder_fault", latch=True)
+            raise
         if message is None:
             return
         name, frame, fields, units = _LAYOUTS[message_id]
-        values = tuple(float(getattr(message, field)) for field in fields)
-        if not all(math.isfinite(value) for value in values):
-            self._withdraw("invalid_values")
-            return
-        sequence = packet[4]
-        if self._sequence is not None and not 1 <= (sequence - self._sequence) % 256 <= 127:
-            self._withdraw("packet_order")
-            return
-        boot = message.time_boot_ms
-        if message_id in self._boot and boot <= self._boot[message_id]:
-            # Identical acquisition timestamps are replay/duplicates, not a new
-            # observation; reset/wrap needs explicit fresh session provisioning.
-            self._withdraw("source_clock_reset", latch=True)
-            return
-        if not self._commit_packet(packet):
-            return
-        self._sequence = sequence
-        self._boot[message_id] = boot
-        self._samples[message_id] = Observation(
-            self._system,
-            self._component,
-            name,
-            frame,
-            fields,
-            values,
-            units,
-            boot,
-            now,
-            authenticated=bool(self._signature_bytes),
-            link_id=packet[-13] if self._signature_bytes else None,
-            signature_timestamp=int.from_bytes(packet[-12:-6], "little")
-            if self._signature_bytes
-            else None,
-        )
-        self._reason = "unmapped_source_clock"
+        try:
+            values = tuple(float(getattr(message, field)) for field in fields)
+            if not all(math.isfinite(value) for value in values):
+                self._withdraw("invalid_values")
+                return
+            boot = message.time_boot_ms
+        except BaseException:
+            # SDK field access/conversion is part of decoding too. A failure
+            # must not leave observations from before this failed attempt live.
+            self._withdraw("decoder_fault", latch=True)
+            raise
+        try:
+            sequence = packet[4]
+            if self._sequence is not None and not 1 <= (sequence - self._sequence) % 256 <= 127:
+                self._withdraw("packet_order")
+                return
+            if message_id in self._boot and boot <= self._boot[message_id]:
+                # Identical acquisition timestamps are replay/duplicates, not a new
+                # observation; reset/wrap needs explicit fresh session provisioning.
+                self._withdraw("source_clock_reset", latch=True)
+                return
+            if not self._commit_packet(packet):
+                return
+            self._sequence = sequence
+            self._boot[message_id] = boot
+            self._samples[message_id] = Observation(
+                self._system,
+                self._component,
+                name,
+                frame,
+                fields,
+                values,
+                units,
+                boot,
+                now,
+                authenticated=bool(self._signature_bytes),
+                link_id=packet[-13] if self._signature_bytes else None,
+                signature_timestamp=int.from_bytes(packet[-12:-6], "little")
+                if self._signature_bytes
+                else None,
+            )
+            self._reason = "unmapped_source_clock"
+        except BaseException:
+            # Publication may fail after replay state or local counters advance.
+            # Withdraw and require a fresh session; never roll durable state back.
+            self._withdraw("state_commit_fault", latch=True)
+            raise
 
     def snapshot(self) -> TelemetryStatus:
         now = self._now()

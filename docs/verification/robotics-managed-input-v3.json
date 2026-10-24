@@ -1,0 +1,48 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "17b8ca0bb6e189259e94d5fd56795c793f14867e",
+  "component": "passive lifecycle managed CLI byte admission",
+  "decision": "FIX unbounded stdin read and implicit UTF-8 replacement; production technology PENDING",
+  "production_adapter_changed": false,
+  "source_sha256": {
+    "tests/mavlink/audit_v2/managed.mjs": "2ce30b0190de9d910e1f23d0c9f05f72dff85a883d54f0c1d0a7749e2f19071f",
+    "tests/mavlink/test_lifecycle_audit_v2.py": "d68f10641fc72f358fcf3046e9a066ba923eff620d8f0710663390f998762c4c",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "99d4cf98137cf2f1556076ec3bd4a8cc0a4ccf7c7cbb1be580fb4b4bfc616db1",
+    "docs/architecture/robotics-review-v3.md": "a8864514bbfa559a67ce82d70a60b311909305a50da354ce441e72f7f3a8a630",
+    "docs/verification/robotics-comparator-coverage-v3.md": "3b35ed22abe9bace127d648e72948534a25acf18d7141f39a2970c3498e5f010"
+  },
+  "checks": {
+    "red": {
+      "methods": 4,
+      "failures": 2,
+      "errors": 0
+    },
+    "green": {
+      "methods": 59,
+      "skips": 0,
+      "seconds": 26.525
+    },
+    "final_input_recheck": {
+      "methods": 4,
+      "skips": 0,
+      "seconds": 2.756
+    },
+    "node": "v22.23.2",
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS after resolving four initial B607 warnings in the new test launcher",
+    "node_syntax": "PASS",
+    "native_compiled": false
+  },
+  "retained_file_sha256": {
+    "managed-input-v3-red.log": "4a1159113a3b9f378daf0457443f3239d854956f9ec0aa622ceec7e90c37a066",
+    "managed-input-v3-green.log": "3ee44b25dfd542133c9831417d17d4cddf5dcee3649401a589712ab44716e46d",
+    "managed-input-v3-recheck.log": "b47e187bd5db8f9e68d7a58c624120062ec97d139b3c2b90459ba7519e99262e"
+  },
+  "limits": [
+    "One 65537-byte raw input buffer, not a whole-process memory bound",
+    "No independent stdin deadline; parent subprocess timeout remains",
+    "JavaScript duplicate-member rejection unresolved",
+    "No production runtime selection, hardware timing or deployment qualification"
+  ]
+}

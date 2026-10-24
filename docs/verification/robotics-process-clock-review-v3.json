@@ -1,0 +1,144 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "24ff88470b27600947f4c6c9104efa51358bb70d",
+  "component": "P3.1 offline lifecycle comparison process timing",
+  "decision": "FIX captured-output retention and duration admission",
+  "production_changed": false,
+  "candidate_changed": false,
+  "runtime_decision": "PENDING",
+  "source_sha256": {
+    "scripts/robotics_lifecycle_audit_v2.py": "e71775e02aca061a1bbd7272ae53ba0128b720fbaf9271ee40262f971e6cb8c4",
+    "scripts/robotics_native_audit_v2.py": "922c192115b85b51504e4cce161093c81465726659f5234aea5bdcaad6152b7b",
+    "tests/mavlink/test_lifecycle_audit_v2.py": "3a0bf0a9c00df1c36197a72461813a0bbeaccdcc4821890080ebe591b9fae066",
+    "tests/mavlink/test_native_audit_v2.py": "4d562b0d8f6f16cfd893b686d708528cb19bc7be03b14fad739072fedac6ad61",
+    "integrations/edge/aethron_edge/telemetry/mavlink.py": "503b317e0fa21e92fe563e3ddfc333fee5426a6d271fe33a7eab98dd5512f094",
+    "tests/mavlink/audit_v2/managed.mjs": "b7c89cdf7ada50ed38ce9563adf699d8c5d41bb95f6327fabe416ba3f42ed0cd",
+    "tests/mavlink/audit_v2/native.rs": "a694176e7110765d8c19242953fd8d9fb9a41140e5c071cb9cbd5037be96ab88",
+    "docs/architecture/robotics-review-v3.md": "964dd24e69a3ae2b2a98b1d5c1f4c44a2cb3e71a7cf07ef6f5605d1b160dae39"
+  },
+  "initial_red": {
+    "methods": 2,
+    "assertion_failures": 4,
+    "missing_output_file_errors": 2
+  },
+  "corrected_red": {
+    "methods": 2,
+    "assertion_failures": 6,
+    "errors": 0,
+    "test_change": "Assert output-file existence before reading; original negative log preserved"
+  },
+  "green": {
+    "methods": 24,
+    "failures": 0,
+    "errors": 0,
+    "seconds": 2.412
+  },
+  "checks": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS after narrow fixed-fixture import annotation",
+    "initial_bandit": "B404 Low/High on existing native test subprocess import; inspected fixed fixture argv and mocked results"
+  },
+  "local_comparisons": {
+    "managed": {
+      "audit_policy_version": 3,
+      "state": "compared",
+      "decision": "PENDING",
+      "source_sha256": {
+        "scripts/robotics_lifecycle_audit_v2.py": "e71775e02aca061a1bbd7272ae53ba0128b720fbaf9271ee40262f971e6cb8c4",
+        "integrations/edge/aethron_edge/telemetry/mavlink.py": "503b317e0fa21e92fe563e3ddfc333fee5426a6d271fe33a7eab98dd5512f094",
+        "tests/mavlink/audit_v2/managed.mjs": "b7c89cdf7ada50ed38ce9563adf699d8c5d41bb95f6327fabe416ba3f42ed0cd"
+      },
+      "parity": true,
+      "cases": 16,
+      "steps": 48,
+      "runs": [
+        {
+          "python": {
+            "runtime": "3.13.5",
+            "peak_rss_kib": 29140,
+            "whole_process_ns": 1084540789
+          },
+          "javascript": {
+            "peak_rss_kib": 46200,
+            "runtime": "v22.23.2",
+            "whole_process_ns": 486810960
+          }
+        },
+        {
+          "python": {
+            "runtime": "3.13.5",
+            "peak_rss_kib": 29140,
+            "whole_process_ns": 1724271081
+          },
+          "javascript": {
+            "peak_rss_kib": 46072,
+            "runtime": "v22.23.2",
+            "whole_process_ns": 196016632
+          }
+        },
+        {
+          "python": {
+            "runtime": "3.13.5",
+            "peak_rss_kib": 29140,
+            "whole_process_ns": 706166007
+          },
+          "javascript": {
+            "peak_rss_kib": 46072,
+            "runtime": "v22.23.2",
+            "whole_process_ns": 180212571
+          }
+        }
+      ],
+      "driver_sha256": "b7c89cdf7ada50ed38ce9563adf699d8c5d41bb95f6327fabe416ba3f42ed0cd",
+      "harness_sha256": "e71775e02aca061a1bbd7272ae53ba0128b720fbaf9271ee40262f971e6cb8c4",
+      "fixture_sha256": "7870b95b978b86a62abd45749453f1549329c3a456643aeb28c26cb043269125",
+      "limitations": [
+        "Whole-process time includes startup, corpus and child JSON output",
+        "Parent JSON parsing and evidence writes excluded; older timings included parsing",
+        "Three sequential repetitions; warm filesystem cache possible",
+        "Original JS subset, not node-mavlink or NextGen SDK qualification",
+        "No signed replay, UDP, installed packaging or real-time proof"
+      ]
+    },
+    "native": {
+      "audit_policy_version": 3,
+      "state": "failed",
+      "decision": "PENDING",
+      "native_executed": false,
+      "platform": "Linux-6.6.143-09589-gf9e106250941-x86_64-with-glibc2.41",
+      "driver_sha256": "a694176e7110765d8c19242953fd8d9fb9a41140e5c071cb9cbd5037be96ab88",
+      "harness_sha256": "922c192115b85b51504e4cce161093c81465726659f5234aea5bdcaad6152b7b",
+      "source_sha256": {
+        "scripts/robotics_native_audit_v2.py": "922c192115b85b51504e4cce161093c81465726659f5234aea5bdcaad6152b7b",
+        "integrations/edge/aethron_edge/telemetry/mavlink.py": "503b317e0fa21e92fe563e3ddfc333fee5426a6d271fe33a7eab98dd5512f094",
+        "tests/mavlink/audit_v2/native.rs": "a694176e7110765d8c19242953fd8d9fb9a41140e5c071cb9cbd5037be96ab88",
+        "scripts/robotics_lifecycle_audit_v2.py": "e71775e02aca061a1bbd7272ae53ba0128b720fbaf9271ee40262f971e6cb8c4",
+        "scripts/robotics_wire_audit_v2.py": "2fda4dff55357c524523d8bbbd88f861b61b5293d5b9ac5998908b95eec05183"
+      },
+      "fixture_sha256": "a7d1cd7f23634529a824bf18c555dbddbc3743c2ac9ed078353fdf34a7d33f61",
+      "corpus_sha256": "13948512b478984a35bb8ab2afb0eae6b32d5a41836ea17d75b6003478e082c3",
+      "failure_type": "FileNotFoundError"
+    }
+  },
+  "retained_local_logs": {
+    "process-clock-initial-red.log": "6aa6e596bdb1816041c55bf7c9762c4245f63c7ae03ccbbfc918a276ac9630d4",
+    "process-clock-red.log": "9cea4e9d46c2cc66f5eda898b2ce559222bc31e6f6229e84a60813e759cd4fda",
+    "process-clock-green.log": "b552e5fe44ec4c27a0f3d66f4dee7242a45aecdab46151005c9659bb46db37d8",
+    "process-clock-bandit.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "process-clock-managed.log": "86bbeadc62f31e5946446c9f905a4c822e3cd2f44f475c2becd389862e1de236",
+    "process-clock-native.log": "b4a6dec54d12d14e6b385b928ebb9d9e983cb3c0d7729f101d0cd163e2db44c4",
+    "process-clock-managed/result.json": "86bbeadc62f31e5946446c9f905a4c822e3cd2f44f475c2becd389862e1de236",
+    "process-clock-native/result.json": "e260334ee9db6001f4ac1e3cb2e4a4401baa63a985dc79c6b198deecf661218e"
+  },
+  "sources": [
+    "https://docs.python.org/3/tutorial/errors.html#defining-clean-up-actions",
+    "https://docs.python.org/3/library/time.html#time.monotonic_ns"
+  ],
+  "limits": [
+    "Synthetic clock faults; no OS timing fault demonstrated",
+    "Rust compiler unavailable locally; no new native execution",
+    "Filesystem log write failures are not repaired",
+    "No production runtime selection, clock-exception fix or hardware/completion claim"
+  ]
+}

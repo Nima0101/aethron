@@ -1,0 +1,85 @@
+{
+  "review_order_version": 3,
+  "reviewed_head": "6845d98701eb6656689682d1192e6b6a8d3b5593",
+  "component": "passive_wire comparison evidence",
+  "decision": "FIX C comparison type fidelity; CLARIFY historical status",
+  "production_receiver_changed": false,
+  "runtime_decision": "PENDING",
+  "red": {
+    "methods": 5,
+    "assertion_failures": 7,
+    "errors": 0,
+    "reason": "Numeric boolean substitution and floating-point integer metadata accepted"
+  },
+  "green": {
+    "methods": 21,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_s": 2.234
+  },
+  "static": {
+    "ruff": "PASS",
+    "format": "PASS",
+    "bandit": "PASS"
+  },
+  "source_sha256": {
+    "scripts/robotics_wire_audit_v2.py": "62ed7e3197e279f14d689f79785501b9375753e4f024556dfdac8252e9f54158",
+    "tests/mavlink/test_wire_audit_v2.py": "fa77df03ac9b49ff9a6d3d34a8f610571432a4b143365e84bdd7ac25613d690c"
+  },
+  "retained_local_logs": {
+    "wire-types-red.log": "97b2a70423d077770bc63655d288e8e66590886ae9fa0d3405d37546b3490ee4",
+    "wire-types-green.log": "916edf9581697e2d1e041551eaaed1429ac62f062e7ba9b366d61f7f94fde652",
+    "wire-types-comparison.log": "c632529103b002895fa73d42bb869fa8a0132a813bf4ef04aa515ebacd01447f"
+  },
+  "comparison_receipt_sha256": "c632529103b002895fa73d42bb869fa8a0132a813bf4ef04aa515ebacd01447f",
+  "comparison_receipt": {
+    "audit_policy_version": 2,
+    "state": "compared",
+    "decision": "PENDING",
+    "scope": "fresh unsigned packet admission only; not lifecycle/signing parity",
+    "corpus_cases": 17,
+    "parity": true,
+    "sanitized_parity": true,
+    "python": {
+      "samples": 512,
+      "accepted": 92,
+      "p50_ns": 27608,
+      "p95_ns": 142883,
+      "max_ns": 763730
+    },
+    "c": {
+      "samples": 512,
+      "accepted": 92,
+      "p50_ns": 33,
+      "p95_ns": 325,
+      "max_ns": 745
+    },
+    "python_version": "3.13.5",
+    "machine": "x86_64",
+    "system": "Linux",
+    "compiler": "cc (Debian 14.2.0-19) 14.2.0",
+    "xml_sha256": "fbac92d0689c9b1bc03b49ebc5cdf989f3fc23026c3c856f7224e4b9af1b5f53",
+    "driver_sha256": "2c54f93c5b8cacc00fb0bb10d2ab636774ec276613eeece0daa239f3e0cce483",
+    "harness_sha256": "62ed7e3197e279f14d689f79785501b9375753e4f024556dfdac8252e9f54158",
+    "corpus_sha256": "d51999b7a2011a0615f9ead65d0080db8733d5c99cb42225d80e7f2c9b7aebdb",
+    "pymavlink": "2.4.50",
+    "limitations": [
+      "512 mixed valid/invalid probes; no hard-real-time claim",
+      "Python constructor excluded; C stack setup included",
+      "C omits state, provenance objects and persistent replay",
+      "No memory, cold-start, signed, UDP or SITL comparison"
+    ]
+  },
+  "sources": [
+    "https://docs.python.org/3/library/stdtypes.html#numeric-types-int-float-complex",
+    "https://docs.python.org/3/library/math.html#math.isclose"
+  ],
+  "limits": [
+    "No production adapter, candidate implementation, corpus or numeric tolerance change",
+    "No historical result rewritten and no production runtime winner selected",
+    "Header mutations retain obsolete CRC; rejection does not isolate each named guard",
+    "C JSON admission and diagnostic-retention review remain open",
+    "Hosted native execution belongs to historical head 52509c7, not current head",
+    "No hardware, real-time, installed-package or complete V3 qualification"
+  ]
+}
