@@ -13,7 +13,7 @@ dependencies = []
 readme = "README.md"
 
 [project.optional-dependencies]
-vision = ["numpy==2.3.5", "opencv-python-headless==4.13.0.92"]
+vision = ["numpy==2.3.5", "opencv-python-headless==5.0.0.93"]
 
 [project.scripts]
 aethron = "aethron.__main__:main"
