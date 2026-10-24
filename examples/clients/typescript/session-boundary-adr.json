@@ -1,0 +1,49 @@
+{
+  "id": "P33-SESSION-BOUNDARY-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "KEEP TypeScript with native byte/stream primitives and explicit runtime admission; FIX missing session byte-boundary regression evidence. No production defect demonstrated in this review.",
+  "constraints": [
+    "Node SDK receiving untrusted API-v1 bytes, with web-standard streams and a P12 consumer; no native mobile deployment or hardware control in this component.",
+    "Fixed 65536-byte session accumulation, strict UTF-8, exact profile binding, duplicate/depth rejection and generated schema validation before returning a handle. Cancel/release the reader and avoid transport-detail disclosure on failure.",
+    "TypeScript declarations cannot authorize inputs. Keep all admission in executable code. No normalization, changed frozen limits, network fallback or extra deployment runtime.",
+    "This bounded transport adapter has no measured native throughput bottleneck or identified hard-real-time host requirement; no language-performance ranking is claimed."
+  ],
+  "alternatives": [
+    {
+      "technology": "TypeScript plus standard TextDecoder/ReadableStream and AJV standalone validation",
+      "assessment": "Selected: direct typed host API use with JavaScript runtime semantics; static declarations add no runtime safety. Explicit fatal decoding, bounded accumulation, lexical checks and schema checks are observable in the executed corpus. No conversion of the host stream into a second runtime heap is required."
+    },
+    {
+      "technology": "Plain ECMAScript plus runtime validation",
+      "assessment": "Same host execution and mandatory security checks; no demonstrated runtime benefit. TypeScript additionally checks SessionHandle and stream contracts during package compilation and emits the public declarations. Plain JavaScript remains appropriate for the focused test/mutation driver."
+    },
+    {
+      "technology": "ReScript compiled JavaScript with JSON/host bindings",
+      "assessment": "Credible typed JavaScript-domain alternative beyond this component language. Its official JSON binding example explicitly does not guarantee input shape; custom lexical and byte/stream admission would still be required. No demonstrated removal of a boundary or correctness defect compared with the tested TypeScript implementation; migration is not justified by type syntax alone."
+    },
+    {
+      "technology": "Rust/WebAssembly with wasm-bindgen and web-sys",
+      "assessment": "Credible memory-safe parser option. web-sys imports browser APIs through bindings, so host stream and cancellation boundaries remain. A module artifact and host-memory interface would need parity validation; no measured parsing bottleneck or native shared-core requirement establishes a material win for this small bounded adapter. Reassess if those constraints change."
+    }
+  ],
+  "sources": [
+    "https://encoding.spec.whatwg.org/",
+    "https://streams.spec.whatwg.org/",
+    "https://www.typescriptlang.org/docs/handbook/typescript-from-scratch",
+    "https://rescript-lang.org/docs/manual/json/",
+    "https://wasm-bindgen.github.io/wasm-bindgen/web-sys/index.html"
+  ],
+  "limits": [
+    "Nine new tests pass on the baseline: this is missing independent negative coverage, not a newly fixed production failure. Two copied-module mutations produce six expected failures; sources and dist are not modified by the mutation runner.",
+    "The complete SSE-event cap versus producer payload-only cap remains an explicitly rejected interoperability fixture and a producing-lane handoff. No silent bound relaxation.",
+    "The 65536-byte accumulator is not a total network/heap bound or deadline. Host fetch and stream allocation, never-ending responses and scheduler delays are not qualified by these tests.",
+    "No alternative compiler benchmark, browser/device/Windows validation, complete lane audit, P19 acceptance, cryptographic/MLS certification, availability or tactical-deployment claim."
+  ],
+  "c4": {
+    "context": "flowchart LR\nService[Authorized API-v1 service] --> SDK[Read-only SDK]\nSDK --> UI[P12 delayed observation display]",
+    "containers": "flowchart LR\nFetch[Host fetch] --> Session[Session byte admission]\nFetch --> Wire[Bounded event decoder]\nSession --> Viewer[Ephemeral viewer lifecycle]\nWire --> Observation[UNKNOWN current state]",
+    "components": "flowchart LR\nBytes --> Cap[65536-byte buffer]\nCap --> UTF8[Fatal UTF-8 decode]\nUTF8 --> Lexical[Duplicate and depth guard]\nLexical --> Schema[Standalone schema validation]\nSchema --> Profile[Exact source profile]\nProfile --> Handle[Validated handle]\nFailure --> Fixed[Fixed invalid_session and reader cleanup]",
+    "code": "classDiagram\nclass SessionReader {\n readSession(response, profile) Promise~string~\n}\nclass WireDecoder {\n feed(bytes) events\n clear() void\n finish() void\n}\nSessionReader --> StrictObject\nWireDecoder --> StrictObject\nSessionReader --> StandaloneValidators"
+  }
+}

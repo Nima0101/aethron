@@ -1,0 +1,55 @@
+{
+  "id": "P12-CONNECTION-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "KEEP TypeScript and native HTML buttons/details for explicit bounded host-session controls after source-based reassessment; block Start during synchronous source withdrawal as well as while a session is pending.",
+  "constraints": [
+    "Offline browser ESM component with English/Swedish control and state guidance, native buttons and no credential fields or persistent state.",
+    "One host operation at a time; start returns only after cleanup. Stop, permission withdrawal and page suspension synchronously invoke source withdrawal and abort the owned signal. No queued start or automatic reconnect.",
+    "Default disabled; host grants UI availability while server and host remain responsible for actual authorization. No new service contract, peer module or native iOS work.",
+    "A reentrant host callback cannot start a session while disconnect is executing. Such Start actions are ignored, never queued; a later explicit Start remains available after successful withdrawal and host enablement."
+  ],
+  "alternatives": [
+    {
+      "technology": "TypeScript and native HTML",
+      "assessment": "Selected: two native buttons, one status region and local details guidance need synchronous state/withdrawal ordering and direct host AbortSignal interoperation. No reactive graph, custom-element registry or extra runtime is needed. Public types expose the required host lifetime contract."
+    },
+    {
+      "technology": "Checked ECMAScript",
+      "assessment": "Equivalent runtime behavior is possible. Checked annotations and declarations would still be needed for consumers, with no demonstrated semantic or performance advantage over typed source."
+    },
+    {
+      "technology": "Lit custom elements",
+      "assessment": "Official lifecycle documentation provides connection/disconnection hooks and asynchronous reactive updates. Reusable custom elements are credible for a larger component system, but this scope needs an explicitly owned root and synchronous withdrawal independent of render scheduling. No custom-element integration requirement establishes a material win."
+    },
+    {
+      "technology": "Elm",
+      "assessment": "Ports, flags and custom elements support JavaScript integration while isolating application state. An Elm application could govern a larger UI; this component must interoperate with the existing native AbortSignal and synchronous source-clear contract through JavaScript regardless. No separate application state model is required here."
+    },
+    {
+      "technology": "ReScript",
+      "assessment": "Typed external bindings support native JavaScript functions and DOM integration. A viable alternative, but the present two-action lifetime contract has no cross-module representation or sharing requirement that materially benefits from another compiler boundary."
+    }
+  ],
+  "sources": [
+    "https://html.spec.whatwg.org/multipage/form-elements.html#the-button-element",
+    "https://lit.dev/docs/components/lifecycle/",
+    "https://guide.elm-lang.org/interop/",
+    "https://rescript-lang.org/docs/manual/latest/bind-to-js-function",
+    "https://dom.spec.whatwg.org/#interface-abortcontroller"
+  ],
+  "limits": [
+    "Host callbacks are trusted application code: disconnect must synchronously clear the source and refresh its display; start must cover the entire session and cleanup, honoring the provided abort signal. A nonsettling callback keeps the start gate closed.",
+    "setEnabled is a UI availability hint, not an authorization mechanism. The containing application and backend must enforce permissions. UI text intentionally says requested, never authenticated or connected.",
+    "The containing application synchronizes locales across components and owns account workflows. Seven contextual topics cover only these controls, not the full P19 Help Center or release-SHA coverage inventory.",
+    "Native HTML and structural DOM tests do not prove actual browser keyboard, screen-reader, contrast or installed-product acceptance. No native performance or cross-language speed benchmark claimed.",
+    "No tactical, actuation, targeting, identity history, cryptographic, availability or production qualification.",
+    "Reentrancy guards prevent overlapping callback work in the component; they do not contain arbitrary host code or prevent it from starting independent operations outside this interface."
+  ],
+  "c4": {
+    "context": "flowchart LR\nOperator --> Controls[Connection controls]\nControls --> Host[Authorized host session adapter]\nHost --> SDK[Existing SDK source]\nHost --> Display[Existing observation display]",
+    "containers": "flowchart LR\nBrowser --> Controls[TypeScript DOM component]\nControls --> DOM[Buttons status and local help]\nControls --> Signal[Owned AbortSignal]\nSignal --> Host[Host session operation]",
+    "components": "flowchart LR\nStart --> Gate{Enabled visible idle and not clearing?}\nGate -->|yes| Run[One pending operation]\nStop --> Withdraw[Clear source and refresh display]\nSuspend --> Withdraw\nRevoke --> Withdraw\nWithdraw --> Abort[Abort signal]\nAbort --> Pending[Keep gate until settlement]\nRun --> Outcome[Stopped or fixed failure]\nOutcome --> Help[Versioned contextual topic]",
+    "code": "classDiagram\nclass ConnectionOperation {\n start(signal) Promise\n disconnect() void\n}\nclass ConnectionControls {\n setEnabled(boolean)\n setLocale(Locale)\n dispose()\n}\nConnectionControls --> ConnectionOperation\nConnectionControls --> AbortController"
+  }
+}

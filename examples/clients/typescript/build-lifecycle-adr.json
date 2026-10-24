@@ -1,0 +1,48 @@
+{
+  "id": "P33-BUILD-LIFECYCLE-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "KEEP Node/ECMAScript build tooling; FIX distribution lifecycle with one shell-free stage wrapper and failure cleanup, plus noEmitOnError.",
+  "constraints": [
+    "Linux/Windows Node SDK package builds must invalidate prior output before contract checking and withdraw partial output on handled stage failures.",
+    "Retain existing versioned generator and AJV standalone output, pinned TypeScript, explicit npm pack allowlist, offline execution and source boundaries.",
+    "No full clone, container, privileged installation or new runtime dependency. Child stages run sequentially with a 30000 ms timeout each; one writer per package directory."
+  ],
+  "alternatives": [
+    {
+      "technology": "Node ECMAScript wrapper using child_process and fs",
+      "assessment": "Selected: launch the current Node executable with fixed argument arrays and absolute working directory; avoids shell quoting and platform-specific tsc shims. A single failure boundary owns generated dist cleanup and leaves source untouched. Executable regressions reproduce stale output before the correction and verify recovery bytes."
+    },
+    {
+      "technology": "Shell/npm command chaining alone",
+      "assessment": "Rejected: the observed && chain stopped after failure but retained prior or partially emitted output. Reliable cleanup traps and process invocation would require platform-specific shell handling across Windows and Linux."
+    },
+    {
+      "technology": "Python subprocess orchestration",
+      "assessment": "Credible timeout and cleanup primitives, but this independently usable Node package would gain a Python runtime requirement without eliminating any Node compiler stage. No Python build-host contract is required by this package."
+    },
+    {
+      "technology": "Rust std::process orchestration",
+      "assessment": "Credible typed native process handling, but a binary per host platform still launches Node and needs explicit cleanup logic. This small build-only sequential workflow has no native throughput requirement; no measured correctness or deployment benefit justifies migration."
+    }
+  ],
+  "sources": [
+    "https://nodejs.org/api/child_process.html",
+    "https://nodejs.org/api/fs.html",
+    "https://www.typescriptlang.org/tsconfig/noEmitOnError.html",
+    "https://docs.python.org/3/library/subprocess.html",
+    "https://doc.rust-lang.org/std/process/struct.Command.html"
+  ],
+  "limits": [
+    "A successful build is not a signed release, customer installation or real-time qualification. Only the generated dist directory is owned by the wrapper.",
+    "Handled failures withdraw output when the filesystem permits cleanup. Parent termination, power loss, concurrent writers and hostile filesystem changes are outside this check; consumers must still require successful build/package gates.",
+    "Direct validator invocation removes only its validators.cjs output after dependencies load. Whole-package build also clears dist before launching any dependency-bearing stage.",
+    "No alternative runtime performance benchmark or browser/Windows local acceptance is claimed. Stages have requested process timeouts, not real-time guarantees."
+  ],
+  "c4": {
+    "context": "flowchart LR\nMaintainer --> Build[SDK package build]\nBuild --> Package[Read-only client distribution]",
+    "containers": "flowchart LR\nNpm[npm build] --> Node[Node lifecycle wrapper]\nNode --> Generator[Contract and validator generators]\nNode --> Compiler[Pinned TypeScript]\nCompiler --> Dist[Generated dist]",
+    "components": "flowchart LR\nStart --> Clear[Remove prior dist]\nClear --> Check[Contract drift check]\nCheck --> Generate[Standalone validators]\nGenerate --> Compile[TypeScript noEmitOnError]\nFailure --> Withdraw[Remove partial dist]\nCompile --> Success[Successful build]",
+    "code": "classDiagram\nclass BuildWrapper {\n spawnSync(node, args) result\n rmSync(dist) void\n}\nBuildWrapper --> ContractCheck\nBuildWrapper --> ValidatorGenerator\nBuildWrapper --> TypeScriptCompiler"
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "audit_policy_version": 3,
+  "component": "P3.3 endpoint origin admission",
+  "baseline": "66ff8a2650f3499d2fdaf1a605556989ec8c5031",
+  "source_binding": "Hashes name reviewed post-change bytes delivered with this evidence; baseline names the pre-change commit. Edge usage is a read-only deployment requirement input.",
+  "decision": "KEEP TypeScript/host WHATWG URL; FIX canonical-origin and plaintext-loopback admission before fetch",
+  "source_sha256": {
+    "examples/clients/typescript/src/client.ts": "ec90f3c96d5195c6ffc033566ea5a17f5cf64ccc0864f279d9cbb7292a73b220",
+    "examples/clients/typescript/src/scene.schema.json": "57547fac9399c84cd7db554faf14055c8a7bad9a8efa3232ccc6f62da0f2c417",
+    "examples/clients/typescript/src/types.ts": "79c889063624704f04a14b0dac3c46f3da653cb09cd3e5e372e628f4e891ef9d",
+    "examples/clients/typescript/src/validators.d.cts": "7ade1e5425d23c2707f4fdd7cda0108d9e57ad007181c7aa0fb322ce90f964b4",
+    "examples/clients/typescript/src/wire.ts": "a48da9c2746819b10a72c09054787711d282a6c29bf5cc64ad588c41639309ba",
+    "examples/clients/typescript/src/session.ts": "17cabbb49e597f78aa0b41ddd00fad91391e5b108de14652f91129429da56155",
+    "examples/clients/typescript/generate-validators.mjs": "1db7c830977d035bf069cddb25581fcb6073f33ddd80f4b75e42c33a7c47faef",
+    "examples/clients/typescript/package.json": "123e8ed118b6c9957ce548e0c57bf62d0a40dad8715ae8e4eca532507d4ccec9",
+    "examples/clients/typescript/package-lock.json": "e9851168f26e274480aa106a84f447bbd5429cf9c3e8462ec44c58c2158666c1",
+    "examples/clients/typescript/tsconfig.json": "f0a2fb4639eab2cb4c22884c54ddd948f0a8f5c1bc0d6b61f1698ea61fc955cf",
+    "examples/clients/typescript/test.mjs": "80947c49fd6dcc4628383cf6b0ef788a93d192acfef03e4453b077d8ce28fb22",
+    "examples/clients/typescript/validation.test.mjs": "88ac29f1ea09498530b9edf7ec0fdde523cdbd890aae67cb054842fba536f8f3",
+    "examples/clients/typescript/transport.test.mjs": "9e3a1089d907904ac2af575e454a33924546fe87968d4de140f345cbc4b1cd15",
+    "examples/clients/typescript/wire.test.mjs": "001e55f149ea79574d474d945a35b9bad591f6c796d77da09bdfb96956390b67",
+    "examples/clients/typescript/session.test.mjs": "448c00e8e65b70e17ee6f14a02bbeb0436da8e3ec2c217b41f6a1de94d9d2776",
+    "examples/clients/typescript/redirect.test.mjs": "4f67dc638e1b56501913e7eb423d26d448b8ee8fecc16f2ae37e985ca6b58e41",
+    "examples/clients/typescript/disposal.test.mjs": "7285c4501b8dd12bfd5b5bb64269dc68eca7d47174bec26c6f3a3f254d46cecb",
+    "examples/clients/typescript/README.md": "cd435222b7ef1939b4a87967019bad9ba796372adbfa9dd260e36a2ad16b2678",
+    "contracts/fixtures/v3/blackout-output.json": "39cce631744143dd5e8114e791098dfd308ab95de33f0cafeb4b77e38027bbfb",
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "e4239cb21b4ae5fdd7468723cf444226e84b609111479bfd29f2bd7c50421c53",
+    "examples/clients/typescript/errors.test.mjs": "0fe085746feca67003d7d5f16bf7ad9dff75efacc3b5223d1d00a294a032ca33",
+    "examples/clients/typescript/endpoint.test.mjs": "d12a4efc5e97e817e21dc2d26bbe1e0b8f2e59062cce8331156019a19d4e968f",
+    "docs/usage-edge.md": "71772ac917aadf327309b61fe8ce81116abe37b65e3b30bacd3e2467915c2ba5"
+  },
+  "reports": {
+    "endpoint-red-v3.tap": {
+      "sha256": "bd7b85e9b9b063ae93e512352a57a28128c66b3ec3d732f59ec66d98ffb7416b",
+      "pass": 3,
+      "fail": 45
+    },
+    "endpoint-source-v3.tap": {
+      "sha256": "3020c904df74ccf0026f56e1a2cd73774d8c8767bdcbb077cf1fb1a913b743a9",
+      "pass": 190,
+      "fail": 0
+    },
+    "endpoint-validation-v3.tap": {
+      "sha256": "c2dda0ce8e06bd8307d95d2e44d2d544545070314ed7e7c58821c47cfb5983f5",
+      "pass": 3,
+      "fail": 1
+    },
+    "endpoint-validation-retry-v3.tap": {
+      "sha256": "e0032511eb830e5acefb7ea9df19d28773378ef97bd2ec799810b77a1332e512",
+      "pass": 4,
+      "fail": 0
+    },
+    "endpoint-installed-v3.tap": {
+      "sha256": "10f9e2642ad579249a3c3a4fc28f21ef189f8cfd1b0b724541d5a34be790ad21",
+      "pass": 186,
+      "fail": 0
+    }
+  },
+  "green": {
+    "focused_tests": 194,
+    "installed_public_tests": 186,
+    "typescript_build": "PASS",
+    "installed_artifact_bytes": "All ten dist implementation/schema/declaration files equal tested build",
+    "strict_typescript_consumer": "PASS",
+    "test_syntax": "PASS"
+  },
+  "package": {
+    "id": "aethron-edge-client-example@0.1.0",
+    "size": 21864,
+    "unpacked_size": 134523,
+    "sha256": "32fd50afb62351e4f14c9524f137eed86d359d9df8df783ebebc2eb56dbd01bc"
+  },
+  "sources": [
+    "https://nodejs.org/api/url.html#the-whatwg-url-api",
+    "https://docs.rs/url/latest/url/struct.Url.html",
+    "https://learn.microsoft.com/en-us/dotnet/api/system.uri.isloopback?view=net-9.0"
+  ],
+  "environment": {
+    "node": "v22.23.2",
+    "platform": "linux",
+    "network": "synthetic IPv4 loopback only; HTTPS/IPv6 URL controls use mocked fetch"
+  },
+  "negative_evidence": [
+    "Baseline: 45 assertion failures and three passes across 48 controls; no execution errors/skips/cancellations.",
+    "Initial validation run: three passes and one EAGAIN spawn assertion failure; preserved. Sequential retry: all four pass.",
+    "Packaging exited zero with pthread_create and CA-certificate thread resource warnings; offline installed artifact and all dist bytes independently verified.",
+    "One shell execution could not spawn due to EAGAIN; no result inferred from that call.",
+    "Main fetch again failed read-only FETCH_HEAD; origin/main a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46 is not asserted current.",
+    "Node 22 documentation URL was inaccessible through research tool; current Node URL documentation used with explicit local Node 22 executable controls.",
+    "HTTPS and IPv6 sockets were not exercised; no TLS, server authority, DNS/proxy, production or hardware qualification is claimed."
+  ],
+  "security_review": "Reject noncanonical or unsupported endpoints before credential construction or fetch. Permit HTTPS or literal IPv4/IPv6 loopback HTTP. All API routes use the admitted origin. Rejected inputs and parse causes are absent from fixed errors. No new dependency or peer code changes. Caller must select a trusted endpoint; this is not an SSRF/host-process sandbox.",
+  "audit_complete": false
+}

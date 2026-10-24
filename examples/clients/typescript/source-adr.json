@@ -1,0 +1,52 @@
+{
+  "id": "P33-LIVE-SOURCE-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "SELECT TypeScript closure ownership over the shared native Fetch admission path for a single-session fresh revocable display source.",
+  "constraints": [
+    "Node and browser ESM consumers need a fresh read/disconnect boundary compatible with the P12 lifecycle host; callback snapshots cannot establish freshness.",
+    "One active session per source, no queued starts, no credential persistence, no direct admission API and no extra display timer.",
+    "Reuse the versioned bounded decoder/session/schema path and frozen observation lease; no peer server changes or application authorization claims."
+  ],
+  "alternatives": [
+    {
+      "technology": "TypeScript/native closures and AbortSignal",
+      "assessment": "Selected: private per-run Observation plus an explicit busy gate shares the already executable wire boundary. Native abort state and fresh view reads fit the existing synchronous host interface without a second queue, scheduler or parser. Static exported source types preserve consumer checks."
+    },
+    {
+      "technology": "Plain ECMAScript with checked annotations",
+      "assessment": "Can express the identical runtime ownership. No stronger cancellation behavior follows from removing TypeScript; typed declarations or checked annotations remain needed for consumer integration. No runtime performance difference is claimed."
+    },
+    {
+      "technology": "RxJS Subscription and observable composition",
+      "assessment": "The tagged Subscription implementation supports grouped teardown and closed-state ownership. This API requires one owner and explicit fresh pull reads, not subscriber fan-out or replay. A reactive graph still needs the same admission, expiry and restart rules; its additional ownership model does not materially improve this boundary."
+    },
+    {
+      "technology": "Kotlin/JS",
+      "assessment": "Official documentation supports JavaScript runtimes, module interoperation and shared JVM/mobile logic. A shared client business layer could justify this later, but no present JVM deployment or common implementation contract exists. Host Fetch and explicit cancellation remain necessary; no material interoperability win is demonstrated."
+    },
+    {
+      "technology": "ReScript typed JavaScript bindings",
+      "assessment": "Typed external bindings can model host functions and provide a credible compile-to-JavaScript client. They still require the same native async/session ownership and emitted JavaScript module boundary. No source-sharing or representation requirement establishes an advantage over the direct typed host API here."
+    }
+  ],
+  "sources": [
+    "https://dom.spec.whatwg.org/#dom-abortsignal-aborted",
+    "https://raw.githubusercontent.com/ReactiveX/rxjs/7.8.2/src/internal/Subscription.ts",
+    "https://kotlinlang.org/docs/js-overview.html",
+    "https://rescript-lang.org/docs/manual/bind-to-js-function/"
+  ],
+  "limits": [
+    "No cross-language runtime benchmark was executed; selection follows deployment interoperability and explicit one-session resource ownership.",
+    "Disconnect masks subsequent reads synchronously, but cannot erase previously copied views or guarantee remote deletion. Host Fetch must honor abort; otherwise the busy gate can remain held until settlement.",
+    "The containing product owns source authorization, initial start and any explicit restart after visibility/permission checks. No automatic authentication or reconnect.",
+    "Structural DOM and Node bundle tests are not actual browser accessibility, CORS, timing or installed-product acceptance.",
+    "No complete operator application, release-bound role-aware Help Center, physical actuation, targeting, tactical or security/availability qualification."
+  ],
+  "c4": {
+    "context": "flowchart LR\nAuthorizedHost[Containing product] -->|explicit start| Source[Read-only live source]\nSource --> Service[Existing API-v1 service]\nHost[P12 display lifecycle] -->|fresh read and disconnect| Source",
+    "containers": "flowchart LR\nSDK[TypeScript SDK] --> Transport[Native Fetch]\nSDK --> UI[P12 lifecycle and panel]\nUI --> DOM[Browser DOM]\nCaller[Caller AbortSignal] --> SDK",
+    "components": "flowchart LR\nStart[Explicit start] --> Busy{Existing run settling?}\nBusy -->|yes| Reject[observer_busy]\nBusy -->|no| Run[Private run and controller]\nRun --> Shared[Shared bounded admission]\nShared --> Observation[Private aggregate lease]\nRead[Fresh view] --> Observation\nDisconnect --> Revoke[Detach current run]\nRevoke --> Abort[Abort owned controller]\nFinally --> Release[Clear state and release gate]",
+    "code": "classDiagram\nclass LiveObservationSource {\n view() ObservationView\n disconnect() void\n start(base, token, profile, signal) Promise\n}\nclass PrivateRun {\n Observation value\n AbortController stop\n AbortSignal signal\n}\nLiveObservationSource --> PrivateRun\nPrivateRun --> observeInto"
+  }
+}

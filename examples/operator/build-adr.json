@@ -1,0 +1,50 @@
+{
+  "id": "P12-BUILD-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "KEEP TypeScript compilation on Node; replace direct compiler invocation with an explicit Node cleanup wrapper. Withdraw dist before compilation and after any reported child failure, and suppress compiler output on diagnostics.",
+  "constraints": [
+    "Offline development build for browser-compatible ESM and declarations; no browser runtime dependency from the build wrapper.",
+    "Invoke the pinned sibling TypeScript compiler with the same absolute Node executable, separate arguments and no shell. Retain compiler diagnostics; reject spawn error, signal or nonzero exit.",
+    "One owner per output directory. Remove only the operator dist directory; do not mutate SDK output or separately generated browser artifacts.",
+    "A 30000 ms compiler subprocess timeout with SIGKILL bounds the requested compiler execution budget; filesystem cleanup and host scheduling are not hard real-time guarantees."
+  ],
+  "alternatives": [
+    {
+      "technology": "Node ECMAScript and TypeScript compiler",
+      "assessment": "Selected: child_process supplies argv, status, timeout and signal controls, while fs supplies cross-platform cleanup. Node is the compiler host required by this distribution format; the wrapper needs no additional interpreter or executable and emits no runtime library."
+    },
+    {
+      "technology": "POSIX shell",
+      "assessment": "Can sequence cleanup and compiler exit handling on Linux, but portable timeout and Windows behavior need external tools or separate platform scripts. Does not improve compilation or artifact admission over explicit Node APIs."
+    },
+    {
+      "technology": "PowerShell 7",
+      "assessment": "Credible cross-platform process and filesystem orchestration. Start-Process supports wait and process objects, but this single compiler requires Node regardless; adding a PowerShell runtime does not strengthen the required cleanup/exit gate."
+    },
+    {
+      "technology": "Dart",
+      "assessment": "dart:io supports explicit executable/arguments and working directory without a shell; compiled distribution is possible. A second toolchain or binary would still invoke the Node compiler and offers no demonstrated capability improvement for this filesystem/process gate."
+    }
+  ],
+  "sources": [
+    "https://nodejs.org/api/child_process.html#child_processspawnsynccommand-args-options",
+    "https://www.typescriptlang.org/tsconfig/noEmitOnError.html",
+    "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-process?view=powershell-7.5",
+    "https://api.dart.dev/dart-io/Process/run.html",
+    "https://dart.dev/tools/dart-compile"
+  ],
+  "limits": [
+    "Only normal wrapper execution and caught failures withdraw dist. Killing the wrapper, host crash, hostile compiler, concurrent writer or filesystem failure can prevent cleanup; this is not atomic publication or a sandbox.",
+    "Directly invoking tsc skips wrapper cleanup. noEmitOnError prevents new output on compiler diagnostics but does not delete old files.",
+    "Tests use the real installed compiler with a small isolated fixture and actual operator source compilation; no alternate-language benchmark or additional platform qualification is claimed.",
+    "Browser distribution cleanup remains owned by build-browser.mjs. A standalone dist build does not publish or retire an earlier browser bundle.",
+    "No customer installation, hard real-time, availability, security certification or tactical deployment claim."
+  ],
+  "c4": {
+    "context": "flowchart LR\nDeveloper --> Build[Offline operator build]\nBuild --> Modules[ESM and declarations]",
+    "containers": "flowchart LR\nNpm[npm build script] --> Wrapper[Node wrapper]\nWrapper --> Compiler[Pinned TypeScript compiler]\nCompiler --> Dist[Owned dist directory]",
+    "components": "flowchart LR\nStart --> Clear[Clear old dist]\nClear --> Compile[Compiler with noEmitOnError]\nCompile -->|zero exit| Success\nCompile -->|error signal or nonzero exit| Withdraw[Remove dist and fail]",
+    "code": "sequenceDiagram\nparticipant N as npm\nparticipant W as build.mjs\nparticipant T as TypeScript\nN->>W: build\nW->>W: remove dist\nW->>T: spawnSync argv timeout\nT-->>W: result\nalt failure\nW->>W: remove dist and throw\nend"
+  }
+}

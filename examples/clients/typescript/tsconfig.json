@@ -10,7 +10,8 @@
       "ES2022",
       "DOM"
     ],
-    "declaration": true
+    "declaration": true,
+    "noEmitOnError": true
   },
   "include": [
     "src/**/*.ts",

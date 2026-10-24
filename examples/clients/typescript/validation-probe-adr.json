@@ -1,0 +1,46 @@
+{
+  "id": "P33-VALIDATION-PROBE-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "KEEP Node/ECMAScript comparison harness and build-time AJV; FIX unequal validator coverage and separate correctness from timing.",
+  "constraints": [
+    "Compare the same scene, health and session validators in fresh Node processes using the shipped JSON schema and compiler. No network, unbounded corpus or runtime change.",
+    "Provide a one-round correctness-only CI path with no benchmark samples; retain a separate three-round shared-host measurement mode. Pin probe, fixture, schema, generated code and dependency lock bytes."
+  ],
+  "alternatives": [
+    {
+      "technology": "Node ECMAScript and AJV standalone",
+      "assessment": "KEEP: measures the actual JavaScript runtime and generated AJV exports directly; source-based comparison checks all three validator contracts. Build-time standalone compilation avoids runtime Function compilation."
+    },
+    {
+      "technology": "ReScript with JavaScript bindings",
+      "assessment": "Credible typed host integration and explicit JSON access, but would still call the same Node/AJV APIs. No independent oracle or measured runtime advantage follows from a compiler change for this small process harness."
+    },
+    {
+      "technology": "Kotlin/JS",
+      "assessment": "Exports JavaScript-callable APIs and maps selected types to JavaScript. Static interop does not validate the authoritative JSON Schema at runtime or replace actual Node cold-load evidence."
+    },
+    {
+      "technology": "Dart JavaScript interop",
+      "assessment": "A credible cross-language client boundary; compiling a harness adds a generated boundary while it must still launch the actual Node workload. No Dart target or shared implementation requirement materially improves this measurement component."
+    }
+  ],
+  "sources": [
+    "https://ajv.js.org/standalone.html",
+    "https://rescript-lang.org/docs/manual/latest/json",
+    "https://kotlinlang.org/docs/js-to-kotlin-interop.html",
+    "https://dart.dev/interop/js-interop"
+  ],
+  "limits": [
+    "Both branches use AJV: agreement is migration parity, not independent schema correctness. Independent negative admission tests remain required.",
+    "ready_ms includes module loading and, for runtime mode, schema parsing/compilation; warm_ms measures scene validation only. RSS delta is process RSS change, not peak memory. Shared-host measurements are not hard real-time or hardware qualification.",
+    "Correctness-only mode publishes no timing samples. This review does not refresh historical benchmark results or compare alternative source compilers.",
+    "A controlled altered generated validator tests report rejection; no production service, sensor, actuation, MLS/CNSA, uptime or customer-install claim."
+  ],
+  "c4": {
+    "context": "flowchart LR\nMaintainer --> Probe[Validation comparison]\nProbe --> Evidence[Scoped report]",
+    "containers": "flowchart LR\nParent[Node parent] --> Runtime[Fresh Node runtime compiler]\nParent --> Generated[Fresh Node standalone module]",
+    "components": "flowchart LR\nSchema --> Compiler[AJV runtime]\nSchema --> Built[Generated validators]\nFixture --> Checks[Positive and negative checks]\nCompiler --> Checks\nBuilt --> Checks\nChecks --> Report[Report only after both branches pass]",
+    "code": "classDiagram\nclass Probe {\n checks\n measurements\n sha256\n}\nProbe --> RuntimeValidators\nProbe --> StandaloneValidators"
+  }
+}

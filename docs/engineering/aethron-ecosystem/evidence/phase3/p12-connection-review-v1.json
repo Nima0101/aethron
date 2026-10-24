@@ -1,0 +1,122 @@
+{
+  "baseline": "4c658ce7c1b865a2b55d280f0cc7638c52a5603e",
+  "component": "P12 connection controls and synchronous withdrawal gate",
+  "review_order_version": 3,
+  "audit_complete": false,
+  "decision": "KEEP TypeScript/native HTML; FIX reentrant Start during synchronous source withdrawal.",
+  "adr": "examples/operator/connection-adr.json",
+  "source_sha256": {
+    "examples/operator/src/connection.ts": "d9f969d9090fcaade3db0d4f7c7a922ac27c009811c23013430eeeaef1b16c12",
+    "examples/operator/src/client.ts": "908dcf68b11baa4bd833f791e8e8d8c3d31ad123fdb40fcacca4e48c94a5ea10",
+    "examples/operator/src/lifecycle.ts": "1da3e5a95b92d2db6cd372faf482173f3a0e6947da2760e4cfc96d7c5206ae7d",
+    "examples/operator/connection.test.mjs": "dbb9b1d733163dc11b473a27267cc568811586b2525a38f6f89bd43b211d06dd",
+    "examples/operator/browser.test.mjs": "121006ceef63886b519d95921e81512a3f67d549f3780c7eab35d3f72da62b5e",
+    "examples/operator/client.test.mjs": "4728333dc40f017e57dcde7461a357cafaff4b9b04a782a165b53ab0ed0efce4",
+    "examples/operator/connection-adr.json": "0c34f5c0ff761629b99f4687e81e9c5d80d9cb287ea403715bfb96548827f59b",
+    "examples/operator/connection-adr.schema.json": "de1e94d4105994a9d81410d46f6a5fd9dd4258b15deb8ceda0d2a26e763a0a68",
+    "examples/operator/README.md": "e5d531939374cfcd1c0c846385be36eb6e19b23f366636e20b65f702dfc9f038",
+    "examples/operator/package.json": "2f948de72a201880f4c291161e98fb3730100e111433250a1d9a0c22bf89478d",
+    "examples/operator/build-browser.mjs": "ff5faf12a6cd8d1e28bc2854d783dcaed74a3d509eacef2e212c6e053d6f1e6a",
+    "examples/operator/help-inventory.mjs": "ab6ac6ea2d474f59c31425f2c50223176fb4a5121cf4b1dad3c5b9b7c731d170",
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "1b1aef528a9acd5231bc282868c55ef747a221d1468f8e6924678bcc4314dceb"
+  },
+  "log_directory": "build/p33-sdk-linux",
+  "report_sha256": {
+    "connection-withdrawal-red.log": "a91dc6933fb3de915946c3a0d20f6ec8e7daf0ef321203a6717b0abfa181efaa",
+    "connection-review-compile.log": "b192ed48ecce46d1a378ce760e64ada6114e3afe9def98b8ab7fbc0a19f2150e",
+    "connection-review-green.log": "9e12e16eaeff5aa9a21b8e5b0f0ce18df64113420efd7bcdae885ef3af26c763",
+    "connection-review-browser-build.log": "a56a633c92dc2f0605491e31c645ab7dca44bceb75171e8a7495fd4269d35244",
+    "connection-review-browser.log": "e83a1e30e06921fdf4d5727ef330b50d906ac6af1369b59910f0654f453d5e77",
+    "connection-review-pr44.json": "6fda52a88ecbe86a498b1aeec6aadd7ebe9f471c29d1fe58d667346ec35eec98"
+  },
+  "distribution_sha256": {
+    "examples/operator/browser-dist/ACTION-HELP.json": "6142b2ae729dbbdd8693554ad95028e3ddd3a36f7d0078c98ce2b689fd37fcde",
+    "examples/operator/browser-dist/AJV-LICENSE": "a05350a88e318e4f5f2c2a1ff1e2e88daa4dd38e6e78b71cccae422bdc762cc3",
+    "examples/operator/browser-dist/ESBUILD-LICENSE": "b40ec5baec7bb34fa5b1c09521fa3cd52d5fad7adafed74932a2010d3612a681",
+    "examples/operator/browser-dist/LICENSE": "fb981668c18a279e285fc4d83fba1e836cc84dd4daa73c9697d3cfd2d8aca6e0",
+    "examples/operator/browser-dist/STATE-HELP.json": "e2de41047846cb5d28aaf87d6f116ce70229fc4ce982bdc1106e072b09c48008",
+    "examples/operator/browser-dist/aethron-observation.mjs": "e7f9633129da85bc399c6651a456384333ef7b23e9c7e5285cf3211cd65f10ab",
+    "examples/operator/browser-dist/manifest.json": "3e7f16c17cc0bfabe2b4bc2b5eca2e63e65315b29fca879a34d2632f4a0d7a06",
+    "examples/operator/dist/action-help.d.ts": "ac620671b9053ee53d3e5b2d1a5602987f9c059f95136a4de53b12b10fd00780",
+    "examples/operator/dist/action-help.js": "ace36b50ae250363215d9fdbf3c343b3d1763a62ada5037dddf90ac0d21e0c61",
+    "examples/operator/dist/browser.d.ts": "f2f37b0d20f20828032de474a92586b4595a4e1b4695f328d75d576eea89c4b7",
+    "examples/operator/dist/browser.js": "f2f37b0d20f20828032de474a92586b4595a4e1b4695f328d75d576eea89c4b7",
+    "examples/operator/dist/client.d.ts": "100d5412387f0a62e7226382459776ca206f4ca005c68d66ce32293fcbb63266",
+    "examples/operator/dist/client.js": "d664a760a610ae61e44cc78ad4fa0c5567d1baa695e6395463e53825db2041e4",
+    "examples/operator/dist/connection.d.ts": "3795a0fefa3a29663b5ac4fe419e26348da23be00619b6a1714152de4cbd2878",
+    "examples/operator/dist/connection.js": "984139522c778883bf9719274f861fe46b953117c659a83103473006a93d8218",
+    "examples/operator/dist/lifecycle.d.ts": "5d82f6ed79dff918f3456c565e2381c534a6491c05761d202e91ea7009bb2013",
+    "examples/operator/dist/lifecycle.js": "21acce417c6eca107c2a17a71c62089ae41e91d23dcf335ce66d69548e21bbc6",
+    "examples/operator/dist/panel.d.ts": "48473f57f5d1607c7887cd5eea5e555d512b82dc3577eb35d2ba31bac94e18fe",
+    "examples/operator/dist/panel.js": "c6a1b7d8cec3386c842a7d7919b43fde8817cd73a52550e5752167111a8191d4",
+    "examples/operator/dist/presenter.d.ts": "8282396e83b722d3684e3b5bb623be356536d2676a519634b3e6b46425b7f92d",
+    "examples/operator/dist/presenter.js": "3d84b3f1d06229e56bff834057a440b071c2a5b306deb769d67588fb62f2a51f"
+  },
+  "red": {
+    "command": "node --test --test-name-pattern='cannot start a session from inside source withdrawal' connection.test.mjs",
+    "methods": 2,
+    "failures": 2,
+    "reason": "Permission withdrawal and page reactivation each started an operation inside disconnect before withdrawal returned."
+  },
+  "checks": {
+    "focused_methods": 70,
+    "standalone_bundle_methods": 8,
+    "failures": 0,
+    "skips": 0,
+    "cancelled": 0,
+    "typescript_build": "PASS",
+    "browser_bundle_build": "PASS",
+    "closed_adr": "PASS included in focused suite",
+    "syntax_diff": "PASS",
+    "new_source_regressions": 2,
+    "new_bundle_regressions": 2,
+    "unchanged_operator_outputs": 13,
+    "changed_operator_output": "examples/operator/dist/connection.js",
+    "bundle_bytes": 148327,
+    "bundle_input_count": 12,
+    "external_imports": 0,
+    "previous_source_hashes_verified": 11,
+    "previous_report_hashes_verified": 7,
+    "previous_operator_output_hashes_verified": 14
+  },
+  "research": {
+    "checked_on": "2026-10-10",
+    "candidates": [
+      "TypeScript/native HTML",
+      "Checked ECMAScript",
+      "Lit",
+      "Elm",
+      "ReScript"
+    ],
+    "basis": "Source-bound official ecosystem and platform comparison, executed reentrancy regressions and compiled distribution checks; no alternate-language performance claim.",
+    "sources": [
+      "https://html.spec.whatwg.org/multipage/form-elements.html#the-button-element",
+      "https://lit.dev/docs/components/lifecycle/",
+      "https://guide.elm-lang.org/interop/",
+      "https://rescript-lang.org/docs/manual/latest/bind-to-js-function",
+      "https://dom.spec.whatwg.org/#interface-abortcontroller"
+    ]
+  },
+  "security_review": [
+    "The actual begin guard and Start disabled state both account for clearing. Reentrant attempts are ignored, not queued; a later explicit Start can proceed after successful withdrawal and host enablement.",
+    "Existing seven-state vocabulary, en/sv-SE text and help IDs unchanged. Default unavailable, pending-run gate, cancellation, fixed failure text and disposal tests still pass.",
+    "setEnabled remains UI availability only. Host callbacks are trusted integration code; this fix neither authenticates them nor prevents independent operations outside the component.",
+    "Standalone artifact tests run in Node with data-URL import and string code generation disabled. Manifest and state/action help bindings checked against rebuilt output; no browser-device qualification."
+  ],
+  "publication": {
+    "pr": "https://github.com/Nima0101/aethron/pull/44",
+    "published_head": "4c658ce7c1b865a2b55d280f0cc7638c52a5603e",
+    "observed_ci": {
+      "QUEUED": 40,
+      "SKIPPED": 1
+    },
+    "merge": "Not attempted; pending checks not polled. Seven-path current correction awaits bridge commit."
+  },
+  "previous_evidence": "docs/engineering/aethron-ecosystem/evidence/phase3/p12-lifecycle-review-v1.json",
+  "next_earliest_unreviewed": "P12 containing client/browser build, then remaining help inventory",
+  "limits": [
+    "Controlled structural DOM and mocked transport around actual SDK; no production service, actual browser, keyboard/screen-reader or installed-customer acceptance.",
+    "No request/expiry timing bound, native platform or peer contract changed. Full lane/P19 incomplete.",
+    "No tactical, weapons, cryptographic, availability or hardware qualification. Insufficient information for tactical deployment."
+  ]
+}

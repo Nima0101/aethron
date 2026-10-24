@@ -1,0 +1,17 @@
+{
+  "name": "aethron-operator-client-example",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "npm run test:build && npm run build:browser && node --test browser-build.test.mjs presenter.test.mjs panel.test.mjs lifecycle.test.mjs connection.test.mjs client.test.mjs help-inventory.test.mjs action-help.test.mjs browser-adr.test.mjs && node --disallow-code-generation-from-strings --test browser.test.mjs",
+    "build:browser": "node build-browser.mjs",
+    "test:build": "node --test build.test.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "linkedom": "0.18.13"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "id": "P33-LOOPBACK-EVIDENCE-001",
+  "version": 1,
+  "status": "accepted-component-only",
+  "decision": "KEEP Python stdlib controlled HTTP fixture; FIX optimization-sensitive evidence gates.",
+  "constraints": [
+    "Reuse the packed-consumer Python driver through its existing fixture lifecycle without changing the SDK or production service. No server dependency download or platform claim.",
+    "Check exact synthetic POST/GET/DELETE path, bearer marker, body and order. Report only integer callback counts at least three, UNKNOWN and installed_client true. Checks and thread-exit validation must survive optimized Python.",
+    "Remove old controlled reports before execution and the temporary service-style report on exit. Distinguish this fixture from the production service in every successful report."
+  ],
+  "alternatives": [
+    {
+      "technology": "Python stdlib HTTPServer and explicit condition gates",
+      "assessment": "KEEP: directly supplies the existing Python driver fixture lifecycle and standard handler interface. Explicit branches survive optimization. Low-volume synthetic HTTP has no measured throughput requirement; http.server is a test fixture, not a production server."
+    },
+    {
+      "technology": "Node native HTTP server",
+      "assessment": "Credible event-driven loopback server with direct SDK-language integration, but replacing the Python fixture requires a new interprocess lifecycle protocol or a different driver boundary. It does not by itself validate report truth or require request assertions."
+    },
+    {
+      "technology": "Dart dart:io HttpServer",
+      "assessment": "Provides asynchronous server request streams outside the incumbent languages. The fixture still needs Node for the installed consumer and the existing Python harness; no Dart product-runtime or target constraint removes a boundary here."
+    },
+    {
+      "technology": "Go net/http Server",
+      "assessment": "A native HTTP server with explicit shutdown is credible for standalone fixtures. A compiled helper would require lifecycle/readiness transport to the Python driver; no measured concurrency or native deployment requirement establishes a benefit for this small synthetic fixture."
+    }
+  ],
+  "sources": [
+    "https://docs.python.org/3/using/cmdline.html#cmdoption-O",
+    "https://docs.python.org/3/library/http.server.html",
+    "https://nodejs.org/api/http.html",
+    "https://api.dart.dev/dart-io/HttpServer-class.html",
+    "https://pkg.go.dev/net/http#Server"
+  ],
+  "limits": [
+    "Evidence gates are not production authentication or hostile-server hardening. The synthetic bearer value is public test data; the fixture is local and source controlled.",
+    "Controlled tests substitute the packed consumer and invoke actual fixture handlers without sockets or npm. Positive controls verify labeling and cleanup, not a fresh production-service or installed customer run.",
+    "Explicit thread-exit checks reject a reported live thread; they do not guarantee thread termination or process isolation.",
+    "No comparative performance benchmark, hard real-time, MLS/CNSA, physical, uptime or customer acceptance claim."
+  ],
+  "c4": {
+    "context": "flowchart LR\nMaintainer --> Fixture[Controlled HTTP fixture]\nFixture --> Driver[Existing packed-consumer driver]\nFixture --> Report[Labeled controlled evidence]",
+    "containers": "flowchart LR\nPython[Python fixture] --> Driver[Python driver]\nDriver --> Node[Installed Node SDK]\nNode --> HTTP[Loopback HTTPServer]",
+    "components": "flowchart LR\nRequests[Synthetic requests] --> Gate[Explicit request checks]\nGate --> Sequence[POST GET DELETE order]\nResult[Driver result] --> Types[Exact field value checks]\nSequence --> Report[Controlled evidence]\nTypes --> Report\nCleanup --> Withdraw[Remove temporary service report]",
+    "code": "classDiagram\nclass LoopbackFixture {\n require_evidence(condition) void\n run() void\n}\nLoopbackFixture --> HTTPServer\nLoopbackFixture --> PackedConsumerDriver"
+  }
+}

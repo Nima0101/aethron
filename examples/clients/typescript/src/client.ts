@@ -1,71 +1,253 @@
-import {Ajv2020} from 'ajv/dist/2020.js';
-import schema from './scene.schema.json' with {type: 'json'};
-import type {SceneEnvelope} from './types.js';
+import validators from './validators.cjs';
+import {WireDecoder} from './wire.js';
+import {readSession} from './session.js';
+import type {HealthEvent, SceneEnvelope} from './types.js';
 
-const validate = new Ajv2020({strict: true}).compile(schema);
+const {validateScene: validate, validateHealth} = validators;
+
+export type ObservationView = {
+  label: 'expired';
+  current_state: 'UNKNOWN';
+  observed_state: 'UNKNOWN';
+  sources: [];
+  uncertainty: [];
+} | {
+  label: 'delayed_observation';
+  current_state: 'UNKNOWN';
+  observed_state: SceneEnvelope['result']['state'];
+  sources: SceneEnvelope['result']['tracks'][number]['sources'];
+  uncertainty: number[][];
+};
+
+function localNow(): number {
+  // A host clock failure must reach the same clearing path as an invalid sample.
+  try { return performance.now(); }
+  catch { return NaN; }
+}
+
+function discardResponse(response: Response): void {
+  // Do not drain untrusted bodies or wait for an underlying cleanup promise.
+  void response.body?.cancel().catch(() => {});
+}
+
+function endpointOrigin(base: string): string {
+  try {
+    // Match the host parser's canonical origin, with one optional trailing slash.
+    // This rejects userinfo, paths, queries, fragments and silently repaired input.
+    if (typeof base !== 'string') throw new Error();
+    const url = new URL(base);
+    if (base !== url.origin && base !== `${url.origin}/`) throw new Error();
+    if (url.protocol !== 'https:' && !(url.protocol === 'http:' &&
+        (url.hostname === '127.0.0.1' || url.hostname === '[::1]'))) throw new Error();
+    return url.origin;
+  } catch { throw new Error('invalid_endpoint'); }
+}
 
 export class Observation {
-  private scene: SceneEnvelope | null = null;
-  private received = 0;
+  // Retain only the displayed aggregate, never the transport handle or track IDs.
+  #projection: {
+    validForMs: number;
+    observedState: SceneEnvelope['result']['state'];
+    sources: SceneEnvelope['result']['tracks'][number]['sources'];
+    uncertainty: number[][];
+  } | null = null;
+  #received = 0;
+  #lastViewed = 0;
+  #admission: object | null = null;
 
-  accept(value: unknown, now = performance.now()): void {
+  accept(value: unknown, now = localNow()): void {
     this.disconnect();
-    if (!validate(value)) throw new Error('invalid_event');
-    this.scene = value as SceneEnvelope;
-    this.received = now;
+    if (!Number.isFinite(now) || now < 0) throw new Error('invalid_clock');
+    const admission = {};
+    this.#admission = admission;
+    // Validate an owned snapshot: callers must not mutate an admitted lease.
+    let snapshot: unknown;
+    try {
+      snapshot = structuredClone(value);
+      if (this.#admission !== admission || !validate(snapshot)) throw new Error('invalid_event');
+    } catch {
+      // structuredClone can invoke input getters, including reentrant callers.
+      this.disconnect();
+      throw new Error('invalid_event');
+    }
+    this.#admission = null;
+    const scene = snapshot as SceneEnvelope;
+    this.#projection = {
+      validForMs: scene.clock.valid_for_ms, observedState: scene.result.state,
+      sources: [...new Set(scene.result.tracks.flatMap(t => t.sources))],
+      uncertainty: scene.result.tracks.map(t => [...t.covariance]),
+    };
+    this.#received = now;
+    this.#lastViewed = now;
   }
 
-  disconnect(): void { this.scene = null; }
+  disconnect(): void {
+    this.#admission = null;
+    this.#projection = null; this.#received = 0; this.#lastViewed = 0;
+  }
 
-  view(now = performance.now()) {
-    if (!this.scene || now < this.received || now - this.received > this.scene.clock.valid_for_ms) {
+  view(now = localNow()): ObservationView {
+    if (!this.#projection || !Number.isFinite(now) || now < 0 || now < this.#lastViewed ||
+        now - this.#received > this.#projection.validForMs) {
       this.disconnect();
       return {label: 'expired', current_state: 'UNKNOWN', observed_state: 'UNKNOWN', sources: [], uncertainty: []};
     }
-    return {label: 'delayed_observation', current_state: 'UNKNOWN', observed_state: this.scene.result.state,
-      sources: [...new Set(this.scene.result.tracks.flatMap(t => t.sources))],
-      uncertainty: this.scene.result.tracks.map(t => t.covariance)};
+    this.#lastViewed = now;
+    return {label: 'delayed_observation', current_state: 'UNKNOWN', observed_state: this.#projection.observedState,
+      sources: [...this.#projection.sources],
+      uncertainty: this.#projection.uncertainty.map(covariance => [...covariance])};
   }
+}
+
+export interface LiveObservationSource {
+  view(): ObservationView;
+  disconnect(): void;
+  start(base: string, token: string, profile: string, signal: AbortSignal): Promise<void>;
+}
+
+/** One explicitly started session, with no callback snapshot cache or scheduler.
+ * The display host owns refreshes and must handle the start promise. */
+export function createObservationSource(): LiveObservationSource {
+  type Run = {value: Observation; stop: AbortController; signal: AbortSignal};
+  let current: Run | undefined;
+  let busy = false;
+  function disconnect(): void {
+    const previous = current;
+    current = undefined; // Revoke before abort can invoke host listeners.
+    previous?.value.disconnect();
+    previous?.stop.abort();
+  }
+  return {
+    view() {
+      const run = current;
+      const view = run && !run.signal.aborted ? run.value.view() : undefined;
+      // Host clock reads can reenter cancellation; publish only the same live run.
+      if (run && current === run && !run.signal.aborted && view) return view;
+      if (current === run) disconnect();
+      return {
+        label: 'expired', current_state: 'UNKNOWN', observed_state: 'UNKNOWN', sources: [], uncertainty: [],
+      };
+    },
+    disconnect,
+    async start(base, token, profile, signal) {
+      if (busy) throw new Error('observer_busy');
+      busy = true;
+      let run: Run | undefined;
+      try {
+        try {
+          const stop = new AbortController();
+          run = {value: new Observation(), stop, signal: AbortSignal.any([signal, stop.signal])};
+        } catch { throw new Error('stream_unavailable'); }
+        current = run;
+        await observeInto(base, token, profile, run.signal, run.value);
+      } finally {
+        if (current === run) current = undefined;
+        run?.value.disconnect();
+        run?.stop.abort();
+        busy = false;
+      }
+    },
+  };
 }
 
 /** Authenticated fetch streaming; credentials never enter URLs or persistent storage. */
 export async function observe(base: string, token: string, profile: string,
   display: (state: ReturnType<Observation['view']>) => void, signal: AbortSignal): Promise<void> {
+  return observeInto(base, token, profile, signal, new Observation(), display);
+}
+
+async function observeInto(base: string, token: string, profile: string, signal: AbortSignal,
+  value: Observation, display?: (state: ObservationView) => void): Promise<void> {
+  const origin = endpointOrigin(base);
   const headers = {Authorization: `Bearer ${token}`, 'Content-Type': 'application/json'};
-  const request = await fetch(`${base}/api/v1/sessions`, {method: 'POST', headers,
-    body: JSON.stringify({source_profile: profile, contract: 'warn'}), signal});
-  if (!request.ok) throw new Error('session_unavailable');
-  const handle: unknown = (await request.json()).session;
-  if (typeof handle !== 'string' || !/^[a-f0-9]{32}$/.test(handle)) throw new Error('invalid_session');
-  const value = new Observation();
-  // Independent render-time expiry, including a stalled response with no next frame.
-  const timer = setInterval(() => display(value.view()), 20);
+  const request = await fetch(`${origin}/api/v1/sessions`, {method: 'POST', headers, redirect: 'error',
+    body: JSON.stringify({source_profile: profile, contract: 'warn'}), signal})
+    .catch(() => { throw new Error('session_unavailable'); });
+  if (!request.ok) {
+    discardResponse(request);
+    throw new Error('session_unavailable');
+  }
+  const handle = await readSession(request, profile);
+  let stop: AbortController | undefined;
+  let timer: ReturnType<typeof setInterval> | undefined;
+  let rendering = true;
+  let renderFailed = false;
+  let renderError: unknown;
   try {
-    const response = await fetch(`${base}/api/v1/sessions/${handle}/events`, {headers, signal});
-    if (!response.ok || !response.body) throw new Error('stream_unavailable');
+    let eventSignal: AbortSignal;
+    function publish(): void {
+      if (!display || !rendering || renderFailed) return;
+      const view = value.view();
+      // Host clock access can synchronously cancel or retire this renderer.
+      if (!rendering || renderFailed) return;
+      if (eventSignal.aborted) {
+        value.disconnect();
+        display(value.view(0)); // Already empty; do not call the host clock again.
+      } else display(view);
+    }
+    try {
+      stop = new AbortController();
+      eventSignal = AbortSignal.any([signal, stop.signal]);
+      // Setup is inside the admitted handle's cleanup scope as well as reception.
+      // Independent render-time expiry, including a stalled response.
+      if (display) timer = setInterval(() => {
+        if (!rendering || renderFailed) return;
+        try { publish(); }
+        catch (error) {
+          renderFailed = true; renderError = error;
+          value.disconnect(); stop?.abort();
+        }
+      }, 20);
+    } catch { throw new Error('stream_unavailable'); }
+    const response = await fetch(`${origin}/api/v1/sessions/${handle}/events`, {headers, signal: eventSignal, redirect: 'error'})
+      .catch(() => { throw new Error('stream_unavailable'); });
+    if (!response.ok || !response.body) {
+      discardResponse(response);
+      throw new Error('stream_unavailable');
+    }
     const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8', {fatal: true});
-    let pending = '';
+    const decoder = new WireDecoder();
+    let lastSequence = -1;
     try {
       while (true) {
-        const chunk = await reader.read();
-        if (chunk.done) break;
-        pending += decoder.decode(chunk.value, {stream: true});
-        if (pending.length > 65536) throw new Error('event_limit');
-        let index: number;
-        while ((index = pending.indexOf('\n\n')) >= 0) {
-          const event = pending.slice(0, index); pending = pending.slice(index + 2);
-          const data = event.split('\n').find(line => line.startsWith('data: '));
-          if (!data) throw new Error('invalid_event');
-          const message: unknown = JSON.parse(data.slice(6));
-          if ((message as {kind?: string})?.kind === 'scene') value.accept(message);
+        const chunk = await reader.read().catch(() => { throw new Error('stream_unavailable'); });
+        if (eventSignal.aborted) throw new Error('stream_unavailable');
+        if (chunk.done) { decoder.finish(); break; }
+        for (const {name, value: message} of decoder.feed(chunk.value)) {
+          const incoming = message as SceneEnvelope | HealthEvent;
+          if ((!validate(message) && !validateHealth(message)) ||
+              incoming.session !== handle || incoming.sequence <= lastSequence ||
+              (name !== undefined && name !== incoming.kind)) {
+            value.disconnect();
+            throw new Error('invalid_event');
+          }
+          lastSequence = incoming.sequence;
+          if (incoming.kind === 'scene') value.accept(incoming);
           else value.disconnect();
-          display(value.view());
+          publish();
+          // A callback can abort while more events remain in this same chunk.
+          if (eventSignal.aborted) throw new Error('stream_unavailable');
         }
       }
-    } finally { await reader.cancel(); }
+    } finally {
+      value.disconnect(); decoder.clear(); stop.abort();
+      // Source cleanup can remain pending after the stream closes. Do not let
+      // it hold session deletion or replace the primary admission/render error.
+      void reader.cancel().catch(() => {});
+      reader.releaseLock();
+    }
+    if (renderFailed) throw renderError;
+  } catch (error) {
+    // Surface the renderer failure through the observer promise, not the timer.
+    throw renderFailed ? renderError : error;
   } finally {
-    clearInterval(timer); value.disconnect(); display(value.view());
-    await fetch(`${base}/api/v1/sessions/${handle}`, {method: 'DELETE', headers, signal: AbortSignal.timeout(2000)}).catch(() => {});
+    rendering = false;
+    if (timer !== undefined) clearInterval(timer);
+    stop?.abort(); value.disconnect();
+    try { if (!renderFailed) display?.(value.view()); }
+    finally {
+      await fetch(`${origin}/api/v1/sessions/${handle}`, {method: 'DELETE', headers, signal: AbortSignal.timeout(2000), redirect: 'error'})
+        .then(discardResponse).catch(() => {});
+    }
   }
 }

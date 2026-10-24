@@ -1,0 +1,168 @@
+{
+  "audit_policy_version": 3,
+  "component": "P3.3 declaration/schema generation and build drift admission",
+  "baseline": "08dae57139be0d84d3320d327205923f2927151c",
+  "decision": "MIGRATE independent Python generator to Node ESM; FIX four tuple widths and read-only drift gate; retain Python compatibility forwarder",
+  "source_binding": "Hashes bind reviewed working-copy inputs; baseline identifies the previous public commit. Runtime schema bytes equal baseline. Producer modules are read-only inputs.",
+  "source_sha256": {
+    "examples/clients/typescript/src/client.ts": "ec90f3c96d5195c6ffc033566ea5a17f5cf64ccc0864f279d9cbb7292a73b220",
+    "examples/clients/typescript/src/scene.schema.json": "57547fac9399c84cd7db554faf14055c8a7bad9a8efa3232ccc6f62da0f2c417",
+    "examples/clients/typescript/src/types.ts": "849fc85341150f634fba6f18e862175ad502b191c1a431a191f4471ca95b2c9b",
+    "examples/clients/typescript/src/validators.d.cts": "964ebda7e68dfb4c54af38364067e4298a114042fd1a933ac92f978d6ec81297",
+    "examples/clients/typescript/src/wire.ts": "47891df5be59e1df0537faae87020a98e31f52b5659e8d8ff481434a2faa6a26",
+    "examples/clients/typescript/src/session.ts": "17cabbb49e597f78aa0b41ddd00fad91391e5b108de14652f91129429da56155",
+    "examples/clients/typescript/generate-validators.mjs": "e438372169d9d34f312541922b2d98c3078a27fdcfcd0ada4afc4c69636d986e",
+    "examples/clients/typescript/package.json": "705f431f6d9f805a797ab7791d15fe68b6f5f6d96e5ee11ec894f4eb163eff70",
+    "examples/clients/typescript/package-lock.json": "e9851168f26e274480aa106a84f447bbd5429cf9c3e8462ec44c58c2158666c1",
+    "examples/clients/typescript/tsconfig.json": "f0a2fb4639eab2cb4c22884c54ddd948f0a8f5c1bc0d6b61f1698ea61fc955cf",
+    "examples/clients/typescript/test.mjs": "80947c49fd6dcc4628383cf6b0ef788a93d192acfef03e4453b077d8ce28fb22",
+    "examples/clients/typescript/validation.test.mjs": "529415dc7f4eb69dea567d57e4dc1c5a3ec19b3c47eec0cd96bb147ac682b084",
+    "examples/clients/typescript/transport.test.mjs": "9e3a1089d907904ac2af575e454a33924546fe87968d4de140f345cbc4b1cd15",
+    "examples/clients/typescript/wire.test.mjs": "001e55f149ea79574d474d945a35b9bad591f6c796d77da09bdfb96956390b67",
+    "examples/clients/typescript/session.test.mjs": "448c00e8e65b70e17ee6f14a02bbeb0436da8e3ec2c217b41f6a1de94d9d2776",
+    "examples/clients/typescript/redirect.test.mjs": "4f67dc638e1b56501913e7eb423d26d448b8ee8fecc16f2ae37e985ca6b58e41",
+    "examples/clients/typescript/disposal.test.mjs": "7285c4501b8dd12bfd5b5bb64269dc68eca7d47174bec26c6f3a3f254d46cecb",
+    "examples/clients/typescript/README.md": "f84c494fe197cb05f7e0b4c90e6aff2b4bb9e4ee259d6500eede4d85c7d682c8",
+    "contracts/fixtures/v3/blackout-output.json": "39cce631744143dd5e8114e791098dfd308ab95de33f0cafeb4b77e38027bbfb",
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "a3df7b7797877695b9a2ade80c82a8df8c63172fef6b155e1edad7fcde802975",
+    "examples/clients/typescript/errors.test.mjs": "0fe085746feca67003d7d5f16bf7ad9dff75efacc3b5223d1d00a294a032ca33",
+    "examples/clients/typescript/endpoint.test.mjs": "d12a4efc5e97e817e21dc2d26bbe1e0b8f2e59062cce8331156019a19d4e968f",
+    "docs/usage-edge.md": "71772ac917aadf327309b61fe8ce81116abe37b65e3b30bacd3e2467915c2ba5",
+    "examples/clients/typescript/numeric.test.mjs": "10a66171cc7ca49641e09b28b6ba52cc3ad42b05d3379c585928ac08df880895",
+    "examples/clients/typescript/audit-observation.mjs": "a0588404b59c22bb98fd8051dd2deb00b305a03da84cecf29f57a0470b39757b",
+    "integrations/edge/aethron_edge/contracts.py": "a783f857d3c459d40f3357d876ef9546794a167c71959503171131a1f917dc36",
+    "integrations/edge/aethron_edge/common_types.py": "5a10387000cb160918d558b7022790529461e9d944d6e02747a170ee4b1ea962",
+    "integrations/edge/aethron_edge/service/events.py": "a825db7da68a3a253c57bd0118c5bbfe04c72f19c562d63dcaadc5b2e93e94ca",
+    "examples/clients/typescript/package.test.mjs": "2afa719ca1ac8692612c91938ab1201bda4ece75e40b8a033847c3f56fb77059",
+    "examples/clients/typescript/LICENSE": "fb981668c18a279e285fc4d83fba1e836cc84dd4daa73c9697d3cfd2d8aca6e0",
+    "LICENSE": "fb981668c18a279e285fc4d83fba1e836cc84dd4daa73c9697d3cfd2d8aca6e0",
+    "examples/clients/typescript/generate-contract.mjs": "33a2c274d0101471c58161d6e54d96814d4ee8910d19292d5ec72e357d38359a",
+    "examples/clients/typescript/generation.test.mjs": "b8843e919b02786adce3751557f9fa751f3d11cda1dc3ad084abc992c7498c8b",
+    "examples/clients/typescript/contract-types.test.ts": "e7f08071f5bc0f3fc286b40583820319237c95d78a7ecfcaf23df8b9544384a3",
+    "scripts/edge_generate_types.py": "3ac876b39d6b46e84fbda5a1b682b0b5b82d098041b192d8785f74ab9042b2f6",
+    "contracts/openapi/aethron-edge-v1.json": "4d562382b803e59dac1ab24a7ead52cd2cdbbc9533aa6d9dc68fca9f6e9b0b83",
+    "contracts/README.md": "0dba23767667351a87fc2444cf06b28c6a7d208d878971ed8142769799846eed"
+  },
+  "reports": {
+    "generation-first-v3.tap": {
+      "sha256": "1e4901e0605b1a2c8d1071c7e24f5f7522843aed0323f5988aee633ba81e6f26",
+      "tests": 9,
+      "pass": 8,
+      "fail": 1,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "generation-source-v3.tap": {
+      "sha256": "97d3278b6ba4e7a06947f5e0e0fab58fedd1a4e1444aa238963dc0422bb25554",
+      "tests": 235,
+      "pass": 235,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "generation-validation-v3.tap": {
+      "sha256": "f6564a106ae6860db06cb4ac3db723f61fb7ec403e78a9a1fe32927155f9865a",
+      "tests": 5,
+      "pass": 5,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "generation-package-v3.tap": {
+      "sha256": "7faec78344d3c55f62dd0d72b758134ea13fdab1e05805daaf1bb1a8cad205bb",
+      "tests": 2,
+      "pass": 2,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "generation-installed-v3.tap": {
+      "sha256": "387479ee0eff92d1aa1a8b6b5f184cb5ce1cedc3efc26f13864f5663f502cf04",
+      "tests": 222,
+      "pass": 222,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "generation-types-red-v3.log": {
+      "sha256": "d15ba9ef0a6a532538ee757c2de9788325f4cb1f80d055d347450d083dd76ace"
+    },
+    "generation-types-red-final-v3.log": {
+      "sha256": "290ebd44dad17e5b400a538d7bc2e2efade60a6e9f8a403d58de9e182d9d911b"
+    },
+    "generation-build-v3.log": {
+      "sha256": "61dc5213e9f94cd6d9700cc19b377fcb1e103973520542ddaf922658fd853508"
+    },
+    "generation-build-confirmed-v3.log": {
+      "sha256": "61dc5213e9f94cd6d9700cc19b377fcb1e103973520542ddaf922658fd853508"
+    },
+    "generation-types-green-v3.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "generation-consumer-types-v3.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "generation-parity-v3.json": {
+      "sha256": "809af5f170be0519b17797ba54a70f829f9b9aba8015b69af42f78de106bc9f5"
+    },
+    "generation-compatibility-v3.json": {
+      "sha256": "f2fecf85959809c1d660000fa4f782cd0748f8444fda3eb567c9fcf91d040a37"
+    },
+    "generation-artifact-v3.json": {
+      "sha256": "d4ecff8d3fdec3d996fb6e9e151df1bc2c5a32a69266943c4ba59b3c53639032"
+    },
+    "generation-install-v3.log": {
+      "sha256": "8c497ac8067e1724cccec8dab491af614c94afe7ef160dbbc14f9479387b4b7a"
+    }
+  },
+  "green": {
+    "source_controls": 226,
+    "generation_controls": 9,
+    "validator_controls": 5,
+    "pack_controls": 2,
+    "focused_total": 242,
+    "installed_public_controls": 222,
+    "source_and_installed_type_fixtures": "Five positive assignments and four negative width assignments; strict compilation exits zero",
+    "compatibility": "Python --check and default write both exit zero, generated bytes unchanged",
+    "runtime_schema": "byte-identical to baseline",
+    "declarations": "equal except four fixed-width tuples and attribution",
+    "python_syntax": "ast.parse PASS",
+    "diff_check": "PASS"
+  },
+  "artifact": {
+    "entry_count": 13,
+    "archive_source_byte_equality": true,
+    "installed_allowed_file_equality": true,
+    "copied_public_test_equality": true,
+    "size": 34816,
+    "sha256": "dcf348972cf6b5b06380d7810343e4c9e2988ef2748808e6614a35eda6f86b19"
+  },
+  "environment": {
+    "node": "22.23.2",
+    "npm": "10.9.8",
+    "platform": "linux",
+    "free_disk": "180 GiB; no heavy jobs"
+  },
+  "sources": [
+    "https://openapi-ts.dev/advanced",
+    "https://openapi-generator.tech/docs/generators/typescript-fetch/",
+    "https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types",
+    "https://nodejs.org/api/fs.html#fsreadfilesyncpath-options"
+  ],
+  "negative_evidence": [
+    "Corrected baseline type fixture: four TS2578 failures demonstrate all four invalid-width assignments compiled before correction. Initial fixture incorrectly used four covariance entries; corrected to two before final RED. Both logs retained.",
+    "Initial generator tests: eight passes, one failure for inherited property lookup of constructor; replaced object lookup with Map and all nine pass.",
+    "Policy read and sandbox spawn EAGAIN/resource failures retried. Interrupted build had no recoverable process handle; fresh confirmed build exits zero.",
+    "System Python has no Ruff module and no ruff binary is on PATH. No installation attempted; Python syntax and actual forwarder execution pass.",
+    "No full repository matrix, clean clone, large fuzz, browser/native platform or hardware qualification claimed."
+  ],
+  "security_review": "Trusted repository build input only; no network fetch or generated transport. Fixed input/output locations; explicit write mode; check mode compares without rewriting. Unknown vocabulary and references outside local definitions reject. No eval in generator. Python forwarder uses executable-plus-arguments without a shell. Drift probes remove only their own unique directories. Tuple expansion capped at 32. Local process/input compromise and complete OpenAPI validity are outside these checks.",
+  "producer_contract_gate": {
+    "origin_main": "a7704008f0f59cbd7b4d56d3cefb5ff28bd9eb46",
+    "mismatch": "Producer JSON payload bound versus client full SSE bound",
+    "negative_control": "examples/clients/typescript/transport.test.mjs: producer payload-only boundary remains an explicit rejected interoperability case",
+    "action": "Producing-lane handoff retained; no peer code or frozen bound change"
+  },
+  "remaining": "Authenticity of producer OpenAPI export and release provenance; remaining platform/P12 fresh inventory",
+  "audit_complete": false
+}

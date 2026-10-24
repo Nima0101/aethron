@@ -1,0 +1,129 @@
+{
+  "baseline": "b356d7c6b53865235b95cfe08c3c420da85dfea3",
+  "component": "P12 aggregate presenter, native DOM panel and direct operator compilation",
+  "review_order_version": 3,
+  "audit_complete": false,
+  "decisions": {
+    "presenter": "KEEP TypeScript fixed projection with runtime guards",
+    "panel": "KEEP TypeScript/native DOM with explicit host lifecycle",
+    "build": "KEEP Node compiler host; FIX output withdrawal and diagnostic emission"
+  },
+  "adrs": [
+    "examples/operator/adr.json",
+    "examples/operator/panel-adr.json",
+    "examples/operator/build-adr.json"
+  ],
+  "source_sha256": {
+    "examples/operator/src/presenter.ts": "ca6048627c403caf55038d46118b4246e656fd95900a1af509593c4fd53be286",
+    "examples/operator/src/panel.ts": "bb7ff47719a81fff9643fd6d62be217b2c2319ec73d699ee0b7af8eebdec086f",
+    "examples/operator/presenter.test.mjs": "3cc52c5037bca321dbc86d1779c193386321c7db8dd6c7f450c1457e608f81fe",
+    "examples/operator/panel.test.mjs": "69c9fa65bcdd33fd6b42d0328f1d3e9767fdae9ff0579873c398cf1296576db3",
+    "examples/operator/adr.json": "b1606fea39c53dfa4455fac212e7e07601062bfe4c714b79bdbf4a858785fcb8",
+    "examples/operator/adr.schema.json": "dfc4f2db9adeb84cb3963a4cf192ac81482caca25feeb9a211b14c7244bccaf6",
+    "examples/operator/panel-adr.json": "a818e0d7929dcafe74c7dc2d05a942d4486bf09c4008d918741410257ee6fcf6",
+    "examples/operator/panel-adr.schema.json": "774fa69d1feb39971d7cb1cbed3a92e9544cbab1a6eb7ea37ed36697e6553848",
+    "examples/operator/README.md": "acb8ad5f8f1bcf24396ffda2b09204573b66cfd7a3fb8f9488ea5ec6b7bdfe8a",
+    "examples/operator/package.json": "2f948de72a201880f4c291161e98fb3730100e111433250a1d9a0c22bf89478d",
+    "examples/operator/package-lock.json": "f1d6402b9aaeb16efd25bcf4cef728abcc76077d633f0c2e30447134d25464da",
+    "examples/operator/tsconfig.json": "861762865a2d56efd4b3400ba541b9a1606f363f67845e632a718384a6971513",
+    "examples/operator/build.mjs": "95deaea2807dc388a39001393444370408131d9c62477b3763c1d6464834e4c9",
+    "examples/operator/build.test.mjs": "894b73389f7556d93aa55c9126c1932a088c0622e2ac80e2df91165fb483c06c",
+    "examples/operator/build-adr.json": "d70d6a4464d1e3b0ef4783b9b97cf16471842f772ed9b7145ad53a240886d423",
+    "examples/operator/build-adr.schema.json": "8a11dd7fcb11abec7145212a51268ead33c722db4af3aa3237dc7025071036c4",
+    "examples/operator/build-browser.mjs": "ff5faf12a6cd8d1e28bc2854d783dcaed74a3d509eacef2e212c6e053d6f1e6a",
+    "docs/engineering/aethron-ecosystem/P33-REVIEW-V3.md": "2fb2def9a96d049fb89c535393dd3a34bda5e9f87cbbe432efaafe0a76684316"
+  },
+  "log_directory": "build/p33-sdk-linux",
+  "report_sha256": {
+    "operator-build-red.log": "c84bb36bc210ff7958d6f4b91f01c122e9c5440902387fb1f7b3f3999ead3065",
+    "operator-build-green.log": "3929d3d3d1415700205469529c90d4aa7c4b6d2362f95b05bb1034a6ff5a26cd",
+    "operator-build-final.log": "45f0084dfbfa7415aadf257f7d987f0e5ab86971a52da78fa44c8a6642a2f549",
+    "operator-compile.log": "cb40c64fecb9d0ea7b09dafffe4fd90b4d2cf431105c4ae31272918a144ac429",
+    "operator-compile-retry.log": "b192ed48ecce46d1a378ce760e64ada6114e3afe9def98b8ab7fbc0a19f2150e",
+    "operator-display-review.log": "fa647753424327a271137e319705f044079e3f6f8bd378280d5469ed3fdc09fe",
+    "operator-build-pr44.json": "49975b59f7e16b2d44004073e1198819b689367ce206e74d2df367cc2d98359d",
+    "operator-build-environment.json": "7970a0971049913393702b9d44b0865b36fd9eebd5f84963019ecc2fb58648d9",
+    "operator-dist-before.json": "c9de8bf85dd7770954de870e64a0d8cc9912578e5658fb68c6d356a3d136c207",
+    "operator-dist-parity.json": "56d318f06d39196fddb96e5b5358ca7b61c9669861418378b43cea08b3f4f43e"
+  },
+  "distribution_sha256": {
+    "examples/operator/dist/action-help.d.ts": "ac620671b9053ee53d3e5b2d1a5602987f9c059f95136a4de53b12b10fd00780",
+    "examples/operator/dist/action-help.js": "ace36b50ae250363215d9fdbf3c343b3d1763a62ada5037dddf90ac0d21e0c61",
+    "examples/operator/dist/browser.d.ts": "f2f37b0d20f20828032de474a92586b4595a4e1b4695f328d75d576eea89c4b7",
+    "examples/operator/dist/browser.js": "f2f37b0d20f20828032de474a92586b4595a4e1b4695f328d75d576eea89c4b7",
+    "examples/operator/dist/client.d.ts": "100d5412387f0a62e7226382459776ca206f4ca005c68d66ce32293fcbb63266",
+    "examples/operator/dist/client.js": "d664a760a610ae61e44cc78ad4fa0c5567d1baa695e6395463e53825db2041e4",
+    "examples/operator/dist/connection.d.ts": "3795a0fefa3a29663b5ac4fe419e26348da23be00619b6a1714152de4cbd2878",
+    "examples/operator/dist/connection.js": "4a07537c4f2984a515530760ccfb45e11eeeb9faa42a60c214ae7b299d591dc7",
+    "examples/operator/dist/lifecycle.d.ts": "5d82f6ed79dff918f3456c565e2381c534a6491c05761d202e91ea7009bb2013",
+    "examples/operator/dist/lifecycle.js": "21acce417c6eca107c2a17a71c62089ae41e91d23dcf335ce66d69548e21bbc6",
+    "examples/operator/dist/panel.d.ts": "48473f57f5d1607c7887cd5eea5e555d512b82dc3577eb35d2ba31bac94e18fe",
+    "examples/operator/dist/panel.js": "c6a1b7d8cec3386c842a7d7919b43fde8817cd73a52550e5752167111a8191d4",
+    "examples/operator/dist/presenter.d.ts": "8282396e83b722d3684e3b5bb623be356536d2676a519634b3e6b46425b7f92d",
+    "examples/operator/dist/presenter.js": "3d84b3f1d06229e56bff834057a440b071c2a5b306deb769d67588fb62f2a51f"
+  },
+  "checks": {
+    "presenter_panel_methods": 31,
+    "build_adr_methods": 3,
+    "failures": 0,
+    "skips": 0,
+    "cancelled": 0,
+    "syntax_diff": "PASS",
+    "unchanged_operator_distribution_files": 14,
+    "previous_source_hashes_verified": 13,
+    "previous_report_hashes_verified": 6,
+    "previous_sdk_distribution_hashes_verified": 10
+  },
+  "negative_evidence": {
+    "regression": {
+      "methods": 1,
+      "failures": 1,
+      "reason": "Real TypeScript compiler reported TS2322 but failed build retained dist."
+    },
+    "initial_full_compile": {
+      "exit_code": 1,
+      "distribution_removed": true,
+      "reason": "Initial generic error did not retain exact child cause; do not infer timeout from absence of TypeScript diagnostics.",
+      "rerun": "One unchanged-timeout retry passed; all 14 generated files matched pre-change bytes."
+    },
+    "previous_evidence": "docs/engineering/aethron-ecosystem/evidence/phase3/p33-service-harness-review-v1.json"
+  },
+  "research": {
+    "checked_on": "2026-10-10",
+    "basis": "Official ecosystem/process/compiler/DOM sources, current source inspection and bounded executable regression; no alternate-language benchmark.",
+    "sources": [
+      "https://www.typescriptlang.org/docs/handbook/2/narrowing.html",
+      "https://dom.spec.whatwg.org/#dom-node-textcontent",
+      "https://html.spec.whatwg.org/multipage/interactive-elements.html#the-details-element",
+      "https://guide.elm-lang.org/interop/",
+      "https://rescript-lang.org/docs/manual/latest/json",
+      "https://lit.dev/docs/components/lifecycle/",
+      "https://nodejs.org/api/child_process.html",
+      "https://www.typescriptlang.org/tsconfig/noEmitOnError.html",
+      "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-process?view=powershell-7.5",
+      "https://api.dart.dev/dart-io/Process/run.html"
+    ],
+    "constraints": "Browser/Node ESM; synchronous three-state projection; fixed bilingual text; explicit host ownership; compiler process and filesystem cleanup without adding a deployed runtime."
+  },
+  "security_review": [
+    "Runtime projection guards, UNKNOWN current state and literal textContent remain unchanged. No biometric identity, raw scene retention or actuation.",
+    "Build command invokes the same absolute Node executable and a pinned local compiler path with separate fixed arguments, no shell and a 30000 ms timeout. Captured test subprocess output is capped at 1 MiB.",
+    "Cleanup is scoped to owned dist. Concurrent writers, forced wrapper termination, crashes, filesystem failure and hostile compiler/toolchain are outside this guarantee.",
+    "No credentials/private configuration or peer worktree modified. No source-language migration won for these bounded components."
+  ],
+  "publication": {
+    "pr": "https://github.com/Nima0101/aethron/pull/44",
+    "published_head": "b356d7c6b53865235b95cfe08c3c420da85dfea3",
+    "observed_ci": {
+      "QUEUED": 40,
+      "SKIPPED": 1
+    },
+    "merge": "Not attempted; pending checks not polled. Current correction requires its own bridge commit."
+  },
+  "next_earliest_unreviewed": "P12 lifecycle scheduling/suspension, then remaining connection/browser/help inventory",
+  "limits": [
+    "Structural DOM checks do not establish actual-browser or assistive-technology behavior; preserve earlier browser probe failures.",
+    "No full repository, clean-clone, customer-install or current service qualification was run.",
+    "Full lane/P19 incomplete. No hard real-time, MLS/CNSA, uptime or hardware claim. Insufficient information for tactical deployment."
+  ]
+}
