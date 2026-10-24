@@ -155,20 +155,30 @@ def decode_cloud(layout: dict, data: bytes) -> Cloud:
     samples = []
     invalid = 0
     endian = ">" if spec.is_bigendian else "<"
+    # Compile the bounded record layout once; preserve explicit offsets and
+    # standard byte order, including mixed-width and unaligned scalar fields.
+    fields = sorted(spec.fields, key=lambda f: f.offset)
+    format_parts = [endian]
+    end = 0
+    for entry in fields:
+        format_parts.extend(("x" * (entry.offset - end), "f" if entry.datatype == 7 else "d"))
+        end = entry.offset + (4 if entry.datatype == 7 else 8)
+    unpack = struct.Struct("".join(format_parts)).unpack_from
+    positions = {entry.name: index for index, entry in enumerate(fields)}
+    ix, iy, iz = (positions[name] for name in ("x", "y", "z"))
+    radial = positions.get("radial_velocity")
     for y in range(spec.height):
         for x in range(spec.width):
             start = y * spec.row_step + x * spec.point_step
-            values = {
-                f.name: struct.unpack_from(
-                    endian + ("f" if f.datatype == 7 else "d"), data, start + f.offset
-                )[0]
-                for f in spec.fields
-            }
-            if not all(math.isfinite(v) for v in values.values()):
+            values = unpack(data, start)
+            if not all(math.isfinite(v) for v in values):
                 invalid += 1
                 samples.append(None)
                 continue
-            point = Point((values["x"], values["y"], values["z"]), values.get("radial_velocity"))
+            point = Point(
+                (values[ix], values[iy], values[iz]),
+                values[radial] if radial is not None else None,
+            )
             points.append(point)
             samples.append(point)
     return Cloud(tuple(points), invalid, tuple(samples))
